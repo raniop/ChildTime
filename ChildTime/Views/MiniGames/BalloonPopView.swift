@@ -11,6 +11,11 @@ import Combine
 /// is one of the world's questions and the balloons carry its answers — pop
 /// the right one and the next question comes.
 ///
+/// 👶 גן plays it with no words at all: the rule is a picture in the gold cue
+/// card (one object, one colour, or a row of objects that shows a quantity),
+/// read aloud on entry and again on every 🔊. Bigger balloons, fewer of them,
+/// no clock — the round ends after six good pops. See `PreReaderGames`.
+///
 /// In a ⚡ surprise round it pays ⭐/💎 only; from a world's chooser every
 /// right pop earns screen time like a regular answer.
 struct BalloonPopView: View {
@@ -62,6 +67,11 @@ struct BalloonPopView: View {
     @State private var burst = 0
     @State private var confetti = 0
     @State private var grant: MiniGameReward.Grant?
+    /// 👶 גן: the spoken rule and the pictures that show it (nil for a reader).
+    @State private var cue: PreReaderCue?
+    /// 👶 A גן round is dealt before its intro card, so the card shows and
+    /// speaks the rule the child is about to play; ▶️ then consumes it.
+    @State private var preDealt = false
     /// Question mode — the world's questions, the one on screen, and whether
     /// it already took a miss (one answer per question in the reports).
     @State private var questions: [GameItem] = []
@@ -80,7 +90,13 @@ struct BalloonPopView: View {
     private var remaining: TimeInterval { max(0, roundSeconds - now.timeIntervalSince(startedAt)) }
     private var timeFrac: Double { remaining / roundSeconds }
     private var grade: Int { max(1, profiles.active?.effectiveGrade ?? 2) }
-    private var balloonSize: CGSize { isCompact ? CGSize(width: 96, height: 114) : CGSize(width: 124, height: 146) }
+    /// 👶 A pre-reader (גן): no words on screen, and no clock to lose to.
+    private var preReader: Bool { PreReaderGames.isPreReader(profiles.active?.effectiveGrade ?? 1) }
+    /// 👶 Bigger balloons — a five-year-old's finger, not a ten-year-old's.
+    private var balloonSize: CGSize {
+        if preReader { return isCompact ? CGSize(width: 126, height: 150) : CGSize(width: 158, height: 186) }
+        return isCompact ? CGSize(width: 96, height: 114) : CGSize(width: 124, height: 146)
+    }
 
     var body: some View {
         ZStack {
@@ -88,25 +104,38 @@ struct BalloonPopView: View {
 
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
                 MiniGameTopBar(onClose: onClose, earn: surprise ? nil : earn) {
-                    MiniGameChipLabel(text: "🎈 \(popped)", surprise: surprise)
+                    MiniGameChipLabel(text: preReader
+                                      ? "🎈 " + PreReaderChrome.dots(done: popped, total: PreReaderGames.roundItems)
+                                      : "🎈 \(popped)",
+                                      surprise: surprise)
                 }
                 switch phase {
                 case .intro:
                     Spacer()
-                    MiniGameIntroCard(kind: .balloon) { start() }
+                    if preReader {
+                        PreReaderIntroCard(kind: .balloon,
+                                           cue: cue ?? PreReaderCue(spoken: PreReaderGames.startCue)) { start() }
+                    } else {
+                        MiniGameIntroCard(kind: .balloon) { start() }
+                    }
                     Spacer()
                 case .playing:
                     playing
                 case .done:
                     Spacer()
-                    MiniGameEndCard(
-                        title: popped >= 12 ? tr("וָואוּ, מְצֻיָּן! 🏆") : tr("כָּל הַכָּבוֹד! 🎉"),
-                        detail: summaryLine,
-                        grant: grant,
-                        surprise: surprise,
-                        againLabel: tr("עוֹד סִבּוּב 🔁"),
-                        onAgain: { start() },
-                        onDone: onClose)
+                    if preReader {
+                        PreReaderEndCard(tally: "🎈", tallyCount: popped, grant: grant, surprise: surprise,
+                                         onAgain: { start() }, onDone: onClose)
+                    } else {
+                        MiniGameEndCard(
+                            title: popped >= 12 ? tr("וָואוּ, מְצֻיָּן! 🏆") : tr("כָּל הַכָּבוֹד! 🎉"),
+                            detail: summaryLine,
+                            grant: grant,
+                            surprise: surprise,
+                            againLabel: tr("עוֹד סִבּוּב 🔁"),
+                            onAgain: { start() },
+                            onDone: onClose)
+                    }
                     Spacer()
                 }
             }
@@ -115,7 +144,10 @@ struct BalloonPopView: View {
             FancyConfetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .app)
-        .onAppear { if (surprise || earn != nil) && phase == .intro { start() } }
+        .onAppear {
+            if preReader, !preDealt { dealPreReader() }
+            if (surprise || earn != nil) && phase == .intro { start() }
+        }
         .onReceive(ticker) { t in tick(t) }
     }
 
@@ -134,6 +166,11 @@ struct BalloonPopView: View {
 
     private var playing: some View {
         VStack(spacing: AppSpacing.sm) {
+            // 👶 גן: the rule as pictures and a 🔊 — nothing to read, no clock.
+            if preReader, let cue {
+                PreReaderCueCard(cue: cue, compact: isCompact)
+                    .padding(.horizontal, AppSpacing.md)
+            } else {
             // The prompt, in the runner's question card.
             VStack(spacing: 10) {
                 if let q = currentQuestion {
@@ -164,8 +201,10 @@ struct BalloonPopView: View {
             .padding(.horizontal, 14).padding(.vertical, 12)
             .glassPane(radius: 22)
             .padding(.horizontal, AppSpacing.md)
+            }
 
-            Text(streak >= 2 ? tr("🔥 \(streak) בְּרֶצֶף") : " ")
+            Text(preReader ? PreReaderChrome.streak(streak)
+                           : (streak >= 2 ? tr("🔥 \(streak) בְּרֶצֶף") : " "))
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(AppColor.starGold)
                 .contentTransition(.numericText())
@@ -234,7 +273,8 @@ struct BalloonPopView: View {
                 .glow(AppColor.successMint, radius: 10)
                 .opacity(max(0, 1 - popT / 0.35))
             } else {
-                BalloonShape(item: b.item, color: b.color, size: size, tried: b.wobbledAt != nil)
+                BalloonShape(item: b.item, color: b.item.colorHex.map { Color(hex: $0) } ?? b.color,
+                             size: size, tried: b.wobbledAt != nil)
                     .rotationEffect(.degrees(wobble), anchor: .bottom)
                     .contentShape(Ellipse())
                     .onTapGesture { tap(b.id) }
@@ -247,6 +287,18 @@ struct BalloonPopView: View {
     // MARK: - Logic
 
     private func start() {
+        // 👶 גן never plays the world's bank: its board is pictures only.
+        if preReader {
+            if !preDealt { dealPreReader() }
+            preDealt = false
+            targetQueue = []; otherQueue = []
+            balloons = []
+            popped = 0; misses = 0; streak = 0; bestStreak = 0; grant = nil
+            startedAt = Date(); now = Date(); nextSpawnAt = Date()
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { phase = .playing }
+            return
+        }
+        cue = nil
         // A world with a category of its own pops that; any other world pops
         // the answers to its own questions.
         if let topic, !BalloonSets.hasCategory(topic, grade: grade) {
@@ -262,6 +314,16 @@ struct BalloonPopView: View {
         popped = 0; misses = 0; streak = 0; bestStreak = 0; grant = nil
         startedAt = Date(); now = Date(); nextSpawnAt = Date()
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { phase = .playing }
+    }
+
+    /// 👶 One גן round's rule and balloons, from `PreReaderGames`.
+    private func dealPreReader() {
+        let round = PreReaderGames.balloons()
+        questions = []
+        qIndex = 0; qMissed = false; qQueue = []; sinceCorrect = 0; qShownAt = Date()
+        set = round.set
+        cue = round.cue
+        preDealt = true
     }
 
     private func nextItem() -> BalloonItem? {
@@ -281,8 +343,9 @@ struct BalloonPopView: View {
         // 🎚️ The younger the child, the more of the balloons are the right
         // ones; by ז׳–ח׳ most of what floats up is a distractor.
         let share: Double
-        switch MiniGameBand.of(grade) {
-        case .preReader, .lower: share = 0.65
+        switch MiniGameBand.of(preReader ? 0 : grade) {
+        case .preReader:         share = 0.70
+        case .lower:             share = 0.65
         case .middle:            share = 0.55
         case .upper:             share = 0.48
         case .top:               share = 0.42
@@ -304,19 +367,29 @@ struct BalloonPopView: View {
             if let p = b.poppedAt { return t.timeIntervalSince(p) > 0.4 }
             return t.timeIntervalSince(b.spawnedAt) > b.duration
         }
-        if remaining <= 0 {
+        // 👶 גן has no clock on screen and nothing to lose to: the round ends
+        // on six good pops. A long backstop still closes it, so a child who
+        // never finds the right balloon isn't left in an endless sky — and it
+        // ends the same celebrating way, with whatever they did pop.
+        if preReader {
+            if popped >= PreReaderGames.roundItems || t.timeIntervalSince(startedAt) > 120 {
+                finish()
+                return
+            }
+        } else if remaining <= 0 {
             finish()
             return
         }
-        if t >= nextSpawnAt, balloons.count < 9, let item = nextItem() {
+        if t >= nextSpawnAt, balloons.count < (preReader ? 4 : 9), let item = nextItem() {
             // A lane away from the last one, so two balloons never stack.
             var lane = CGFloat.random(in: 0...1)
             if abs(lane - lastLane) < 0.25 { lane = lane > 0.5 ? lane - 0.35 : lane + 0.35 }
             lastLane = lane
             // 🎚️ And they rise faster: a ח׳ child has less time to decide.
             let slow: Double
-            switch MiniGameBand.of(grade) {
-            case .preReader, .lower: slow = grade <= 1 ? 1.25 : 1.1
+            switch MiniGameBand.of(preReader ? 0 : grade) {
+            case .preReader:         slow = 1.9
+            case .lower:             slow = grade <= 1 ? 1.25 : 1.1
             case .middle:            slow = 1.0
             case .upper:             slow = 0.88
             case .top:               slow = 0.78
@@ -398,6 +471,17 @@ private struct BalloonShape: View {
     let size: CGSize
     let tried: Bool
 
+    /// One picture fills the balloon; a row of them shrinks to fit.
+    private var pictureScale: CGFloat {
+        switch item.emoji.count {
+        case ...1: return 0.52
+        case 2:    return 0.34
+        case 3:    return 0.26
+        case 4:    return 0.21
+        default:   return 0.17
+        }
+    }
+
     var body: some View {
         let body = CGSize(width: size.width, height: size.height * 0.82)
         VStack(spacing: 0) {
@@ -412,17 +496,25 @@ private struct BalloonShape: View {
                 Ellipse().strokeBorder(.white.opacity(0.45), lineWidth: 1.2)
                 VStack(spacing: 1) {
                     if !item.emoji.isEmpty {
-                        Text(item.emoji).font(.system(size: body.width * 0.3))
+                        // 👶 A גן balloon carries ONLY pictures — so when there
+                        // is no word under them they get the whole balloon, and
+                        // a row of three apples still has to fit inside it.
+                        Text(item.emoji)
+                            .font(.system(size: body.width * (item.label.isEmpty ? pictureScale : 0.3)))
+                            .lineLimit(1).minimumScaleFactor(0.4)
+                            .padding(.horizontal, body.width * 0.1)
                     }
-                    Text(MiniGameText.show(item.label))
-                        .font(.system(size: item.emoji.isEmpty ? body.width * (item.label.count > 6 ? 0.2 : 0.26) : body.width * 0.15,
-                                      weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
-                        .lineLimit(2).minimumScaleFactor(0.45)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 8)
-                        .mathLTR(MiniGameText.isMath(item.label))
+                    if !item.label.isEmpty {
+                        Text(MiniGameText.show(item.label))
+                            .font(.system(size: item.emoji.isEmpty ? body.width * (item.label.count > 6 ? 0.2 : 0.26) : body.width * 0.15,
+                                          weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
+                            .lineLimit(2).minimumScaleFactor(0.45)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 8)
+                            .mathLTR(MiniGameText.isMath(item.label))
+                    }
                 }
             }
             .frame(width: body.width, height: body.height)

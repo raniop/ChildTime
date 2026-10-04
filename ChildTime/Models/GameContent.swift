@@ -235,6 +235,12 @@ enum WorldGameFit {
 
     static func games(topic: Topic?, grade: Int) -> [MiniGameKind] {
         guard MiniGameKind.availableForActiveChild else { return [] }
+        // 👶 גן plays the same five games in every world, because its boards
+        // are not dealt from the world's bank at all — they come from
+        // `PreReaderGames` (pictures, colours, shapes, quantities). So the
+        // bank counts below would only ever say "no" to a child who in fact
+        // has five playable games.
+        guard !PreReaderGames.isPreReader(grade) else { return MiniGameGradeFit.preReaderRoster }
         // 💫 The arena mixes every topic: the three games that mix too.
         guard let topic else {
             return [.lightning, .pairs, .balloon].filter {

@@ -9,6 +9,11 @@ import Combine
 /// A world with no baskets of its own sorts its questions: "שְׁאֵלָה · תְּשׁוּבָה"
 /// into ✓ נָכוֹן / ✗ לֹא נָכוֹן.
 ///
+/// 👶 גן plays it with no words at all: each basket wears PICTURES instead of
+/// a label (🐶🐱 against 🍎🍌, 🐘 against 🐭, 🌊 against 🌳, 🔴 against 🔵),
+/// six pictures to place, baskets a size up and no clock. The sentence that
+/// names the rule is read aloud on entry and on every 🔊. See `PreReaderGames`.
+///
 /// In a ⚡ surprise round it pays ⭐/💎 only; from a world's chooser every item
 /// placed first time earns screen time like a regular answer.
 struct SortBasketsView: View {
@@ -51,6 +56,12 @@ struct SortBasketsView: View {
     @State private var burst = 0
     @State private var confetti = 0
     @State private var grant: MiniGameReward.Grant?
+    /// 👶 גן: the spoken rule (nil for a reader), and the round's own length.
+    @State private var cue: PreReaderCue?
+    @State private var roundTotal = SortSets.roundItems
+    /// 👶 Dealt before the intro card, so the card speaks the rule of the
+    /// baskets the child is about to see; ▶️ then consumes it.
+    @State private var preDealt = false
 
     private let ticker = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
 
@@ -59,7 +70,9 @@ struct SortBasketsView: View {
     private var roundSeconds: TimeInterval { TimeInterval(MiniGameKind.sort.seconds(surprise: surprise)) }
     private var remaining: TimeInterval { max(0, roundSeconds - now.timeIntervalSince(startedAt)) }
     private var current: SortItem? { queue.first }
-    private var total: Int { (set?.items.count).map { min($0, SortSets.roundItems) } ?? SortSets.roundItems }
+    private var total: Int { roundTotal }
+    /// 👶 A pre-reader (גן): pictures only, and no clock to lose to.
+    private var preReader: Bool { PreReaderGames.isPreReader(profiles.active?.effectiveGrade ?? 1) }
     private var placedCount: Int { sorted.values.map(\.count).reduce(0, +) }
     /// Baskets in reading order — the first on the right in Hebrew / Arabic.
     private var basketOrder: [Int] {
@@ -73,25 +86,37 @@ struct SortBasketsView: View {
 
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
                 MiniGameTopBar(onClose: onClose, earn: surprise ? nil : earn) {
-                    MiniGameChipLabel(text: "🧺 \(placedCount)/\(total)", surprise: surprise)
+                    MiniGameChipLabel(text: preReader
+                                      ? "🧺 " + PreReaderChrome.dots(done: placedCount, total: total)
+                                      : "🧺 \(placedCount)/\(total)",
+                                      surprise: surprise)
                 }
                 switch phase {
                 case .intro:
                     Spacer()
-                    MiniGameIntroCard(kind: .sort) { start() }
+                    if preReader {
+                        PreReaderIntroCard(kind: .sort, cue: cue ?? PreReaderCue(spoken: PreReaderGames.startCue)) { start() }
+                    } else {
+                        MiniGameIntroCard(kind: .sort) { start() }
+                    }
                     Spacer()
                 case .playing:
                     playing
                 case .done:
                     Spacer()
-                    MiniGameEndCard(
-                        title: cleanCount == total ? tr("מֻשְׁלָם! 🌟") : tr("כָּל הַכָּבוֹד! 🎉"),
-                        detail: summaryLine,
-                        grant: grant,
-                        surprise: surprise,
-                        againLabel: tr("עוֹד סִבּוּב 🔁"),
-                        onAgain: { start() },
-                        onDone: onClose)
+                    if preReader {
+                        PreReaderEndCard(tally: "🧺", tallyCount: placedCount, grant: grant, surprise: surprise,
+                                         onAgain: { start() }, onDone: onClose)
+                    } else {
+                        MiniGameEndCard(
+                            title: cleanCount == total ? tr("מֻשְׁלָם! 🌟") : tr("כָּל הַכָּבוֹד! 🎉"),
+                            detail: summaryLine,
+                            grant: grant,
+                            surprise: surprise,
+                            againLabel: tr("עוֹד סִבּוּב 🔁"),
+                            onAgain: { start() },
+                            onDone: onClose)
+                    }
                     Spacer()
                 }
             }
@@ -100,9 +125,13 @@ struct SortBasketsView: View {
             FancyConfetti(trigger: confetti)
         }
         .environment(\.layoutDirection, .app)
-        .onAppear { if (surprise || earn != nil) && phase == .intro { start() } }
+        .onAppear {
+            if preReader, !preDealt { dealPreReader() }
+            if (surprise || earn != nil) && phase == .intro { start() }
+        }
         .onReceive(ticker) { t in
-            guard phase == .playing else { return }
+            // 👶 גן has no clock: the round ends when the last basket is filled.
+            guard phase == .playing, !preReader else { return }
             now = t
             if remaining <= 0 { finish() }
         }
@@ -123,17 +152,23 @@ struct SortBasketsView: View {
 
     private var playing: some View {
         VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
-            VStack(spacing: 10) {
-                Text(isTrueFalse ? tr("נָכוֹן אוֹ לֹא נָכוֹן? גִּרְרוּ לַסַּל") : tr("גִּרְרוּ כָּל פְּרִיט לַסַּל הַמַּתְאִים"))
-                    .font(.system(size: isCompact ? 16 : 20, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
-                MiniGameTimerBar(remaining: remaining, total: roundSeconds)
+            if preReader, let cue {
+                // 👶 The baskets themselves ARE the rule on screen; the
+                // sentence that names it lives behind the 🔊.
+                PreReaderCueCard(cue: cue, compact: isCompact)
+            } else {
+                VStack(spacing: 10) {
+                    Text(isTrueFalse ? tr("נָכוֹן אוֹ לֹא נָכוֹן? גִּרְרוּ לַסַּל") : tr("גִּרְרוּ כָּל פְּרִיט לַסַּל הַמַּתְאִים"))
+                        .font(.system(size: isCompact ? 16 : 20, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                    MiniGameTimerBar(remaining: remaining, total: roundSeconds)
+                }
+                .padding(.horizontal, 14).padding(.vertical, 12)
+                .glassPane(radius: 22)
             }
-            .padding(.horizontal, 14).padding(.vertical, 12)
-            .glassPane(radius: 22)
 
-            Text(streak >= 2 ? tr("🔥 \(streak) בְּרֶצֶף") : " ")
+            Text(preReader ? PreReaderChrome.streak(streak) : (streak >= 2 ? tr("🔥 \(streak) בְּרֶצֶף") : " "))
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(AppColor.starGold)
                 .contentTransition(.numericText())
@@ -189,15 +224,17 @@ struct SortBasketsView: View {
     private func itemChip(_ item: SortItem) -> some View {
         VStack(spacing: 6) {
             if !item.emoji.isEmpty {
-                Text(item.emoji).font(.system(size: isCompact ? 44 : 60))
+                Text(item.emoji).font(.system(size: preReader ? (isCompact ? 76 : 100) : (isCompact ? 44 : 60)))
             }
-            Text(MiniGameText.show(item.label))
-                .font(.system(size: item.detail != nil ? (isCompact ? 19 : 24) : (isCompact ? 26 : 34),
-                              weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-                .lineLimit(3).minimumScaleFactor(0.6)
-                .mathLTR(MiniGameText.isMath(item.label))
+            if !item.label.isEmpty {
+                Text(MiniGameText.show(item.label))
+                    .font(.system(size: item.detail != nil ? (isCompact ? 19 : 24) : (isCompact ? 26 : 34),
+                                  weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3).minimumScaleFactor(0.6)
+                    .mathLTR(MiniGameText.isMath(item.label))
+            }
             if let d = item.detail {
                 Text(MiniGameText.show(d))
                     .font(.system(size: isCompact ? 24 : 30, weight: .black, design: .rounded))
@@ -227,15 +264,19 @@ struct SortBasketsView: View {
                     }
                 }
                 .frame(height: isCompact ? 22 : 30)
-                Text(basket.emoji).font(.system(size: isCompact ? 28 : 38))
-                Text(basket.label)
-                    .font(.system(size: isCompact ? 15 : 19, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2).minimumScaleFactor(0.6)
+                Text(basket.emoji)
+                    .font(.system(size: preReader ? (isCompact ? 46 : 60) : (isCompact ? 28 : 38)))
+                    .lineLimit(1).minimumScaleFactor(0.5)
+                if !basket.label.isEmpty {
+                    Text(basket.label)
+                        .font(.system(size: isCompact ? 15 : 19, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2).minimumScaleFactor(0.6)
+                }
             }
             .padding(.vertical, 12).padding(.horizontal, 6)
-            .frame(maxWidth: .infinity, minHeight: isCompact ? 140 : 190)
+            .frame(maxWidth: .infinity, minHeight: preReader ? (isCompact ? 180 : 230) : (isCompact ? 140 : 190))
             .miniGameTile(state, tint: tint, radius: 24)
             .overlay(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
@@ -250,12 +291,23 @@ struct SortBasketsView: View {
         .background(GeometryReader { g in
             Color.clear.preference(key: FramesKey.self, value: [b: g.frame(in: .named(Self.space))])
         })
-        .accessibilityLabel(basket.label)
+        .accessibilityLabel(basket.label.isEmpty ? basket.emoji : basket.label)
     }
 
     // MARK: - Logic
 
     private func start() {
+        // 👶 גן: picture baskets, six pictures, no words.
+        if preReader {
+            if !preDealt { dealPreReader() }
+            preDealt = false
+            sorted = [:]; missedCurrent = false; cleanCount = 0; streak = 0; bestStreak = 0; grant = nil
+            drag = .zero; dropping = nil; glow = nil
+            startedAt = Date(); now = Date(); shownAt = Date()
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { phase = .playing }
+            return
+        }
+        cue = nil
         let source = topic
         var made: SortSet?
         if let source { made = SortSets.make(topic: source, grade: grade) ?? SortSets.trueFalse(topic: source, grade: grade) }
@@ -263,10 +315,21 @@ struct SortBasketsView: View {
         guard let s = made else { onClose(); return }
         set = s
         queue = s.items.first?.detail != nil ? s.items : SortSets.round(s)
+        roundTotal = min(queue.count, SortSets.roundItems)
         sorted = [:]; missedCurrent = false; cleanCount = 0; streak = 0; bestStreak = 0; grant = nil
         drag = .zero; dropping = nil; glow = nil
         startedAt = Date(); now = Date(); shownAt = Date()
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { phase = .playing }
+    }
+
+    /// 👶 One גן round's baskets, pictures and spoken rule.
+    private func dealPreReader() {
+        let round = PreReaderGames.baskets()
+        set = round.set
+        cue = round.cue
+        queue = PreReaderGames.basketRound(round.set)
+        roundTotal = queue.count
+        preDealt = true
     }
 
     private func drop(into b: Int) {
@@ -313,6 +376,7 @@ struct SortBasketsView: View {
             }
             SoundPlayer.shared.play(.wrongSoft)
             Haptic.light()
+            if preReader { SpeechReader.shared.speak(PreReaderGames.almost) }
             withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
                 drag = .zero
                 glow = (b, false)
@@ -326,7 +390,7 @@ struct SortBasketsView: View {
     private func finish() {
         guard phase == .playing else { return }
         grant = MiniGameReward.grant(game: "sort", correct: cleanCount, starsPer: 1, diamondsPer: 1,
-                                     cap: SortSets.roundItems, surprise: surprise)
+                                     cap: total, surprise: surprise)
         withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { phase = .done }
         SoundPlayer.shared.play(.chestOpen)
         Haptic.success()

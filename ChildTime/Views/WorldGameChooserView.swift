@@ -41,6 +41,9 @@ struct WorldGameChooserView: View {
     @State private var appeared = false
 
     private var isCompact: Bool { hsc == .compact }
+    /// 👶 A גן child can't read a game's name or the mission lines — so this
+    /// screen hands them pictures and says the rest out loud.
+    private var preReader: Bool { PreReaderGames.isPreReader(profiles.active?.effectiveGrade ?? 1) }
     private var currentRoom: Int { progress.progress(in: world.id) }
     /// The boss waits in the world's final room (WorldDetailView's rule).
     private var bossUnlocked: Bool { currentRoom >= world.rooms - 1 }
@@ -89,6 +92,10 @@ struct WorldGameChooserView: View {
         .onAppear {
             games = WorldGameFit.games(for: world, grade: profiles.active?.effectiveGrade ?? 1)
             lastPick = UserDefaults.standard.string(forKey: lastKey)
+            // 👶 A גן child can't read "אֵיךְ בָּא לְךָ לְשַׂחֵק?", so they hear it.
+            if preReader {
+                SpeechReader.shared.speak(Gendered.g(tr("אֵיךְ בָּא לְךָ לְשַׂחֵק?"), tr("אֵיךְ בָּא לָךְ לְשַׂחֵק?")))
+            }
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) { appeared = true }
         }
         .fullScreenCover(item: $launch) { pick in
@@ -155,11 +162,17 @@ struct WorldGameChooserView: View {
                 Spacer(minLength: 0)
             }
 
-            Text(Gendered.g(tr("אֵיךְ בָּא לְךָ לְשַׂחֵק?"), tr("אֵיךְ בָּא לָךְ לְשַׂחֵק?")))
-                .font(.system(size: isCompact ? 22 : 30, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.top, 2)
+            if preReader {
+                PreReaderSpeakButton(spoken: Gendered.g(tr("אֵיךְ בָּא לְךָ לְשַׂחֵק?"), tr("אֵיךְ בָּא לָךְ לְשַׂחֵק?")),
+                                     side: isCompact ? 56 : 66)
+                    .padding(.top, 2)
+            } else {
+                Text(Gendered.g(tr("אֵיךְ בָּא לְךָ לְשַׂחֵק?"), tr("אֵיךְ בָּא לָךְ לְשַׂחֵק?")))
+                    .font(.system(size: isCompact ? 22 : 30, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 2)
+            }
         }
         .padding(isCompact ? 14 : 20)
         .glassPane(radius: 26)
@@ -169,6 +182,7 @@ struct WorldGameChooserView: View {
     private var minutesText: String {
         let cap = progress.dailyCap
         let earned = progress.minutesEarnedToday
+        if preReader { return "⏱ " + (cap.enabled ? "\(earned)/\(cap.max)" : "\(earned)") }
         return "⏱ " + (cap.enabled ? tr("\(earned)/\(cap.max) דַּק' הַיּוֹם") : tr("\(earned) דַּקּוֹת"))
     }
 
@@ -186,9 +200,11 @@ struct WorldGameChooserView: View {
             }
             .frame(width: isCompact ? 150 : 220, height: 7)
             .environment(\.layoutDirection, .app)
-            Text(tr("חֶדֶר \(min(currentRoom + 1, world.rooms)) מִתּוֹךְ \(world.rooms)"))
-                .font(.system(size: isCompact ? 13 : 15, weight: .semibold, design: .rounded))
-                .foregroundStyle(GlassInk.secondary)
+            if !preReader {
+                Text(tr("חֶדֶר \(min(currentRoom + 1, world.rooms)) מִתּוֹךְ \(world.rooms)"))
+                    .font(.system(size: isCompact ? 13 : 15, weight: .semibold, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
+            }
         }
     }
 
@@ -199,7 +215,9 @@ struct WorldGameChooserView: View {
         return RoundedRectangle(cornerRadius: 24, style: .continuous)
             .strokeBorder(last ? AppColor.starGold : .clear, lineWidth: 2.5)
             .overlay(alignment: .topLeading) {
-                if last {
+                // 👶 The gold edge says "last played" on its own; a גן child
+                // can't read the badge, so it isn't drawn for them.
+                if last, !preReader {
                     Text(Gendered.g(tr("שִׂחַקְתָּ לָאַחֲרוֹנָה"), tr("שִׂחַקְתְּ לָאַחֲרוֹנָה")))
                         .font(.system(size: 10.5, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3FBF"))
@@ -216,15 +234,21 @@ struct WorldGameChooserView: View {
         Button { pick(.questions) } label: {
             HStack(spacing: isCompact ? 12 : 20) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(tr("📝 שְׁאֵלוֹת רְגִילוֹת"))
-                        .font(.system(size: isCompact ? 21 : 27, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .lineLimit(1).minimumScaleFactor(0.7)
-                    ForEach(missionLines, id: \.self) { line in
-                        Text(line)
-                            .font(.system(size: isCompact ? 13 : 16, weight: .semibold, design: .rounded))
-                            .foregroundStyle(GlassInk.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
+                    if preReader {
+                        Text("📝")
+                            .font(.system(size: isCompact ? 54 : 70))
+                            .frame(maxWidth: .infinity)
+                    } else {
+                        Text(tr("📝 שְׁאֵלוֹת רְגִילוֹת"))
+                            .font(.system(size: isCompact ? 21 : 27, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .lineLimit(1).minimumScaleFactor(0.7)
+                        ForEach(missionLines, id: \.self) { line in
+                            Text(line)
+                                .font(.system(size: isCompact ? 13 : 16, weight: .semibold, design: .rounded))
+                                .foregroundStyle(GlassInk.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -260,16 +284,23 @@ struct WorldGameChooserView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 6)
                     .glassInset(radius: 16)
-                Text(kind.emoji + " " + kind.shortName)
-                    .font(.system(size: isCompact ? 16 : 20, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .lineLimit(1).minimumScaleFactor(0.6)
-                Text(kind.blurb)
-                    .font(.system(size: isCompact ? 12 : 14, weight: .semibold, design: .rounded))
-                    .foregroundStyle(GlassInk.secondary)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2).minimumScaleFactor(0.8)
-                    .frame(minHeight: isCompact ? 30 : 36, alignment: .top)
+                if preReader {
+                    // 👶 The game's own picture, big — no name, no blurb.
+                    Text(kind.emoji)
+                        .font(.system(size: isCompact ? 44 : 56))
+                        .frame(minHeight: isCompact ? 52 : 66)
+                } else {
+                    Text(kind.emoji + " " + kind.shortName)
+                        .font(.system(size: isCompact ? 16 : 20, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .lineLimit(1).minimumScaleFactor(0.6)
+                    Text(kind.blurb)
+                        .font(.system(size: isCompact ? 12 : 14, weight: .semibold, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2).minimumScaleFactor(0.8)
+                        .frame(minHeight: isCompact ? 30 : 36, alignment: .top)
+                }
             }
             .padding(10)
             .frame(maxWidth: .infinity)
@@ -287,16 +318,22 @@ struct WorldGameChooserView: View {
                           action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 14) {
-                Text(emoji).font(.system(size: isCompact ? 40 : 52))
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.system(size: isCompact ? 20 : 26, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                    Text(subtitle)
-                        .font(.system(size: isCompact ? 13 : 16, weight: .semibold, design: .rounded))
-                        .foregroundStyle(GlassInk.secondary)
+                // 👶 With no words beside it the picture takes the whole card.
+                let wordless = title.isEmpty && subtitle.isEmpty
+                Text(emoji)
+                    .font(.system(size: wordless ? (isCompact ? 50 : 64) : (isCompact ? 40 : 52)))
+                    .frame(maxWidth: wordless ? .infinity : nil)
+                if !wordless {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(title)
+                            .font(.system(size: isCompact ? 20 : 26, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                        Text(subtitle)
+                            .font(.system(size: isCompact ? 13 : 16, weight: .semibold, design: .rounded))
+                            .foregroundStyle(GlassInk.secondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(isCompact ? 14 : 18)
             .frame(maxWidth: .infinity)
@@ -309,13 +346,15 @@ struct WorldGameChooserView: View {
 
     /// 🐉 The world's finale — only once its last room is reached.
     private var bossCard: some View {
-        wideCard(emoji: "🐉", title: tr("קְרַב בּוֹס"), subtitle: tr("הָאֶתְגָּר הַגָּדוֹל שֶׁל הָעוֹלָם הַזֶּה"),
+        wideCard(emoji: "🐉", title: preReader ? "" : tr("קְרַב בּוֹס"),
+                 subtitle: preReader ? "" : tr("הָאֶתְגָּר הַגָּדוֹל שֶׁל הָעוֹלָם הַזֶּה"),
                  tint: Color(hex: "EF476F"), pickID: "boss") { pick(.boss) }
     }
 
     /// 🎲 One of this world's games, picked for the child.
     private var surpriseCard: some View {
-        wideCard(emoji: "🎲", title: tr("תַּפְתִּיעוּ אוֹתִי!"), subtitle: tr("מִשְׂחָק אַקְרָאִי מֵהָעוֹלָם הַזֶּה"),
+        wideCard(emoji: "🎲", title: preReader ? "" : tr("תַּפְתִּיעוּ אוֹתִי!"),
+                 subtitle: preReader ? "" : tr("מִשְׂחָק אַקְרָאִי מֵהָעוֹלָם הַזֶּה"),
                  tint: Color(hex: "9B5DE5"), pickID: "surprise") {
             var pool = games
             if pool.count > 1, let last = lastPick { pool.removeAll { $0.rawValue == last } }

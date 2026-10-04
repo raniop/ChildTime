@@ -494,6 +494,12 @@ enum PatternGen {
     }
 
     static func make(topic: Topic?, grade: Int) -> PatternRound {
+        // 👶 גן: always pictures, from a pre-reader's own sets (shapes,
+        // colours, animals, fruit). A letter or a number here would be a
+        // row the child cannot read at all. See `PreReaderGames`.
+        if MiniGameBand.of(grade) == .preReader {
+            return picture(PreReaderGames.patternSets.randomElement()!, grade: 0, topic: .logic)
+        }
         let g = max(1, grade)
         switch topic {
         case .english?: return letters(Array("ABCDEFGHIJKLMNOPQRSTUVWXYZ").map(String.init), grade: g, dir: .leftToRight, topic: .english)
@@ -656,20 +662,26 @@ enum PatternGen {
     }
 
     private static func picture(_ set: [String], grade g: Int, topic: Topic) -> PatternRound {
-        let shapes = Array(set.shuffled().prefix(3))
+        let preReader = MiniGameBand.of(g) == .preReader
+        // 👶 Two pictures, not three: 🔴 🔵 🔴 🔵 🔴 ❓ is a גן pattern.
+        let shapes = Array(set.shuffled().prefix(preReader ? 2 : 3))
         let units: [[Int]]
         switch MiniGameBand.of(g) {
-        case .preReader, .lower: units = [[0, 1], [0, 0, 1]]
+        case .preReader:         units = [[0, 1]]
+        case .lower:             units = [[0, 1], [0, 0, 1]]
         case .middle:            units = [[0, 1], [0, 0, 1], [0, 1, 2], [0, 1, 1], [0, 1, 2, 1]]
         default:                 units = [[0, 1, 2], [0, 1, 1, 2], [0, 1, 2, 1], [0, 1, 2, 2, 1], [0, 0, 1, 2, 1]]
         }
         let unit = units.randomElement()!
-        let length = min(8, max(6, unit.count * 2 + 1))
+        let length = preReader ? 5 : min(8, max(6, unit.count * 2 + 1))
         let seq = (0..<length).map { shapes[unit[$0 % unit.count]] }
         let hole = length - 1
         var cells = seq
         cells[hole] = "?"
-        let opts = Array(Set(shapes + [set.first { !shapes.contains($0) } ?? shapes[0]])).shuffled()
+        // 👶 Three choices for גן (the two in the row plus one outsider); four
+        // for everyone else (three plus one).
+        let outsider = set.first { !shapes.contains($0) } ?? shapes[0]
+        let opts = Array(Set(shapes + [outsider])).shuffled()
         return PatternRound(cells: cells, answer: seq[hole], options: opts, direction: .leftToRight, topic: topic)
     }
 }
