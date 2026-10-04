@@ -250,9 +250,13 @@ struct RemoteCommandStatusSheet: View {
                 .font(.title3)
                 .frame(width: 28)
             VStack(alignment: .leading, spacing: 2) {
+                // A long note ("ביקשתם 30 — זה המקסימום…") must wrap, not end
+                // in an ellipsis: the cut-off half is the part that explains.
                 Text(title).font(.subheadline.weight(.semibold))
+                    .fixedSize(horizontal: false, vertical: true)
                 if let detail {
                     Text(detail).font(.footnote).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             Spacer(minLength: 0)

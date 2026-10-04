@@ -993,6 +993,9 @@ struct ParentDashboardView: View {
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.primary)
                     .multilineTextAlignment(.trailing)
+                    // Step 1 is the longest line and was ending in "…" — the
+                    // half that says WHICH device is the half that matters.
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(14)
                     .frame(maxWidth: .infinity)
                     .glassInset(radius: 16)
