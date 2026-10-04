@@ -55,7 +55,7 @@ enum WhatsNewContent {
     /// notes were dated — the first release, as one entry.
     static let releases: [Release] = [
 
-        Release(build: 187, version: "2026.10.3", headline: tr("12 משחקים חדשים — הילד בוחר איך לשחק"), items: [
+        Release(build: 188, version: "2026.10.3", headline: tr("12 משחקים חדשים — הילד בוחר איך לשחק"), items: [
             Item(emoji: "🎮", title: tr("בוחרים עולם, ואז בוחרים משחק"),
                  line: tr("אחרי בחירת עולם נפתח מסך \"איך בא לך לשחק?\" — שאלות רגילות או אחד המשחקים, ובלחיצה אחת נכנסים ישר לשחק"),
                  key: "chooser"),

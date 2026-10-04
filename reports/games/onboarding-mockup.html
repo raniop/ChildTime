@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>שיפורי ההרשמה — מוקאפ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@500;700;900&display=swap');
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:Heebo, system-ui, sans-serif; background:#120f33; padding:44px 30px 30px; }
+  h1 { color:#fff; font-size:27px; font-weight:900; text-align:center; }
+  .sub { color:#a79fe0; font-size:15px; text-align:center; margin:6px 0 26px; }
+  .band { margin-bottom:34px; }
+  .bandTitle { color:#FFD23F; font-size:19px; font-weight:900; text-align:center; margin-bottom:4px; }
+  .bandSub { color:#b9b2e8; font-size:14px; font-weight:700; text-align:center; margin-bottom:18px; }
+  .row { display:flex; gap:22px; justify-content:center; align-items:flex-start; }
+  .cap { color:#cfc8ff; font-size:13px; font-weight:700; text-align:center; margin-top:9px; max-width:270px; }
+  .cap b { color:#FFD23F; }
+
+  .phone { width:270px; height:566px; border-radius:38px; padding:9px; background:#000; box-shadow:0 16px 40px rgba(0,0,0,.5); position:relative; }
+  .screen { width:100%; height:100%; border-radius:30px; overflow:hidden; position:relative;
+    background: radial-gradient(130% 80% at 82% 4%, #FF7AD9 0%, rgba(255,122,217,0) 44%),
+                radial-gradient(120% 70% at 6% 98%, #35E7E0 0%, rgba(53,231,224,0) 50%),
+                linear-gradient(170deg,#7B5BFF 0%, #6A5BFF 44%, #3E8BFF 100%); }
+  .notch { position:absolute; top:9px; left:50%; transform:translateX(-50%); width:84px; height:22px; border-radius:12px; background:#000; z-index:9; }
+
+  /* story bars */
+  .bars { position:absolute; top:46px; left:12px; right:12px; display:flex; gap:4px; z-index:8; }
+  .bar { flex:1; height:3.5px; border-radius:3px; background:rgba(255,255,255,.28); }
+  .bar.on { background:#FFD23F; }
+  .skip { position:absolute; top:62px; left:14px; color:rgba(255,255,255,.92); font-size:12px; font-weight:800;
+          background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.3); padding:4px 11px; border-radius:999px; z-index:8; }
+
+  .kicker { color:#FFD23F; font-size:12.5px; font-weight:900; text-align:center; }
+  .title { color:#fff; font-size:24px; font-weight:900; line-height:1.2; text-align:center; text-shadow:0 4px 12px rgba(0,0,0,.28); }
+  .lead { color:rgba(255,255,255,.93); font-size:14px; font-weight:700; text-align:center; line-height:1.45; }
+  .stage { border-radius:20px; background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.26);
+           display:grid; place-items:center; overflow:hidden; position:relative; }
+  .glow { position:absolute; width:150px; height:150px; border-radius:50%; filter:blur(28px); opacity:.5; }
+  .col { position:absolute; top:94px; left:16px; right:16px; bottom:22px; display:flex; flex-direction:column; gap:9px; }
+
+  .q { width:86%; display:flex; flex-direction:column; gap:7px; }
+  .qp { color:#fff; font-size:17px; font-weight:900; text-align:center; }
+  .opt { border-radius:12px; padding:8px; text-align:center; color:#fff; font-size:13.5px; font-weight:800;
+         background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.3); }
+  .opt.ok { background:linear-gradient(160deg,#8CFFC4,#2FD08A); color:#14563a; border-color:#fff; }
+  .secs { color:#8CFFC4; font-size:15px; font-weight:900; text-align:center; }
+
+  .apps { display:grid; grid-template-columns:repeat(3,44px); gap:9px; }
+  .app { height:44px; border-radius:11px; display:grid; place-items:center; font-size:21px;
+         background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.32); position:relative; }
+  .app.lock::after { content:"🔒"; position:absolute; bottom:-5px; left:-5px; font-size:12px; }
+
+  .kidrow { width:88%; border-radius:14px; padding:9px 11px; background:rgba(255,255,255,.17);
+            border:1px solid rgba(255,255,255,.26); color:#fff; font-size:12.5px; font-weight:800;
+            display:flex; align-items:center; gap:8px; }
+  .kidrow .pct { margin-right:auto; color:#8CFFC4; font-weight:900; font-size:15px; }
+
+  .cta { height:48px; border-radius:16px; display:grid; place-items:center;
+         background:linear-gradient(160deg,#FFE08A,#FFB03A); color:#4B3FBF; font-size:16px; font-weight:900;
+         box-shadow:0 8px 18px rgba(255,170,40,.34); }
+  .ghost { text-align:center; color:rgba(255,255,255,.8); font-size:12.5px; font-weight:700; }
+
+  /* choice screen */
+  .choice { border-radius:18px; padding:14px; background:rgba(255,255,255,.15);
+            border:1px solid rgba(255,255,255,.3); color:#fff; display:flex; gap:11px; align-items:center; }
+  .choice .em { font-size:30px; }
+  .choice h4 { font-size:15px; font-weight:900; }
+  .choice p { font-size:12px; font-weight:600; color:rgba(255,255,255,.85); margin-top:2px; }
+
+  /* checklist */
+  .check { border-radius:16px; padding:12px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.28); }
+  .check h4 { color:#fff; font-size:14px; font-weight:900; display:flex; gap:6px; align-items:center; }
+  .check h4 span { margin-right:auto; color:#FFD23F; font-size:12.5px; }
+  .citem { display:flex; gap:7px; align-items:center; color:#fff; font-size:12.5px; font-weight:700; padding:5px 0; }
+  .citem .m { width:18px; height:18px; border-radius:50%; display:grid; place-items:center; font-size:11px;
+              background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4); }
+  .citem.done .m { background:linear-gradient(160deg,#8CFFC4,#2FD08A); color:#14563a; border-color:#fff; }
+  .citem.done { color:rgba(255,255,255,.62); }
+
+  /* coach mark */
+  .dash { position:absolute; border:2.5px dashed #FFD23F; border-radius:14px; box-shadow:0 0 0 999px rgba(10,6,40,.62); }
+  .tip { position:absolute; border-radius:14px; padding:10px 12px; background:#fff; color:#2A2160;
+         font-size:12.5px; font-weight:800; line-height:1.4; box-shadow:0 10px 22px rgba(0,0,0,.3); }
+  .tip b { color:#6A4BFF; }
+  .tipfoot { display:flex; align-items:center; gap:8px; margin-top:8px; }
+  .pill { background:#6A4BFF; color:#fff; border-radius:999px; padding:5px 12px; font-size:12px; font-weight:900; }
+  .count { color:#8d86b8; font-size:11.5px; font-weight:800; margin-right:auto; }
+  .mini { position:absolute; left:12px; right:12px; border-radius:14px; background:rgba(255,255,255,.14);
+          border:1px solid rgba(255,255,255,.3); }
+</style>
+</head>
+<body>
+<h1>🚀 שיפורי ההרשמה — מוקאפ</h1>
+<p class="sub">סטורי פתיחה לפני ההרשמה · שאלת המכשיר · רשימת השלמה · שלוש נקודות הדרכה אחרי ההגדרה</p>
+
+<!-- ============ BAND A: pre-signup story ============ -->
+<div class="band">
+  <div class="bandTitle">א · סטורי פתיחה — לפני ההרשמה</div>
+  <div class="bandSub">4 כרטיסים · ~20 שניות · לא נוצר חשבון, לא נוצרת משפחה, לא נשמר כלום</div>
+  <div class="row">
+
+    <div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="bars"><span class="bar on"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+        <div class="skip">דלג</div>
+        <div class="col">
+          <div class="kicker">ככה זה עובד</div>
+          <div class="title">הילד לומד —<br>ומרוויח דקות</div>
+          <div class="stage" style="flex:1">
+            <div class="glow" style="background:#8CFFC4"></div>
+            <div class="q">
+              <div class="qp">7 × 8 = ?</div>
+              <div class="opt">54</div>
+              <div class="opt ok">56</div>
+              <div class="secs">+24 שניות משחק</div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+      <p class="cap">שאלה אמיתית ושניות שנצברות — <b>מבינים בעשר שניות</b></p>
+    </div>
+
+    <div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="bars"><span class="bar on"></span><span class="bar on"></span><span class="bar"></span><span class="bar"></span></div>
+        <div class="skip">דלג</div>
+        <div class="col">
+          <div class="kicker">בשליטה שלכם</div>
+          <div class="title">אתם בוחרים<br>מה נפתח</div>
+          <div class="stage" style="flex:1">
+            <div class="glow" style="background:#FF7AD9"></div>
+            <div class="apps">
+              <div class="app lock">🎮</div><div class="app lock">📺</div><div class="app lock">🎵</div>
+              <div class="app">📚</div><div class="app lock">🕹️</div><div class="app">🎨</div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+      <p class="cap">האפליקציות הנעולות נפתחות <b>רק עם זמן שהורווח</b></p>
+    </div>
+
+    <div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="bars"><span class="bar on"></span><span class="bar on"></span><span class="bar on"></span><span class="bar"></span></div>
+        <div class="skip">דלג</div>
+        <div class="col">
+          <div class="kicker">מהטלפון שלכם</div>
+          <div class="title">רואים הכול,<br>מכל מקום</div>
+          <div class="stage" style="flex:1; flex-direction:column; gap:8px; padding:12px">
+            <div class="glow" style="background:#FFD23F"></div>
+            <div class="kidrow">🐵 נועה · כיתה ג׳ <span class="pct">92%</span></div>
+            <div class="kidrow">🦊 דן · כיתה א׳ <span class="pct">68%</span></div>
+            <div class="kidrow">⏱ 31 דקות היום</div>
+          </div>
+        </div>
+      </div></div>
+      <p class="cap">כרטיס ילד אמיתי — <b>מה למד ומה הרוויח</b></p>
+    </div>
+
+    <div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="bars"><span class="bar on"></span><span class="bar on"></span><span class="bar on"></span><span class="bar on"></span></div>
+        <div class="col">
+          <div class="kicker">מוכנים?</div>
+          <div class="title">בואו נתחיל 🦁</div>
+          <div class="lead">דקה אחת להגדרה, והילד כבר משחק</div>
+          <div class="stage" style="flex:1">
+            <div class="glow" style="background:#FFD23F"></div>
+            <div style="font-size:72px">🦁</div>
+          </div>
+          <div class="cta">יוצרים משפחה</div>
+          <div class="ghost">כבר יש לי חשבון</div>
+        </div>
+      </div></div>
+      <p class="cap">סיום · <b>מוביל להרשמה</b></p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============ BAND B: device question + checklist ============ -->
+<div class="band">
+  <div class="bandTitle">ב · שאלת המכשיר ורשימת ההשלמה</div>
+  <div class="bandSub">השאלה הראשונה מפצלת את כל ההמשך · והרשימה מחזירה מי שנקטע באמצע</div>
+  <div class="row">
+
+    <div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="col" style="top:74px">
+          <div class="kicker">שאלה אחת</div>
+          <div class="title">לנועה יש<br>מכשיר משלה?</div>
+          <div class="lead">זה קובע איך מגדירים את טופי</div>
+          <div style="height:6px"></div>
+          <div class="choice">
+            <span class="em">📱</span>
+            <div><h4>כן, יש לה מכשיר</h4><p>נחבר אותו עכשיו בסריקת קוד</p></div>
+          </div>
+          <div class="choice">
+            <span class="em">🧒</span>
+            <div><h4>לא, היא תשחק אצלי</h4><p>מעבירים לה את הטלפון ומקבלים בחזרה</p></div>
+          </div>
+          <div style="flex:1"></div>
+          <div class="ghost">אפשר לשנות בכל רגע</div>
+        </div>
+      </div></div>
+      <p class="cap">הבלבול הכי גדול שלנו — <b>נפתר בשאלה אחת</b></p>
+    </div>
+
+    <div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="col" style="top:70px">
+          <div class="title" style="font-size:20px; text-align:right">👋 שלום רני</div>
+          <div class="check">
+            <h4>🚀 עוד קצת וסיימנו <span>3 מתוך 5</span></h4>
+            <div class="citem done"><span class="m">✓</span> נוצר חשבון הורה</div>
+            <div class="citem done"><span class="m">✓</span> נוספה נועה, כיתה ג׳</div>
+            <div class="citem done"><span class="m">✓</span> נקבע זמן מסך יומי</div>
+            <div class="citem"><span class="m">3</span> לחבר מכשיר לנועה</div>
+            <div class="citem"><span class="m">4</span> לבחור אילו אפליקציות יינעלו</div>
+          </div>
+          <div class="kidrow" style="width:100%">🐵 נועה · כיתה ג׳ <span class="pct">0%</span></div>
+          <div style="flex:1"></div>
+          <div class="cta">ממשיכים — לחבר מכשיר</div>
+        </div>
+      </div></div>
+      <p class="cap">הורה שנקטע <b>רואה בדיוק מה נשאר</b></p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============ BAND C: coach marks ============ -->
+<div class="band">
+  <div class="bandTitle">ג · שלוש נקודות הדרכה — אחרי ההגדרה</div>
+  <div class="bandSub">על המסך האמיתי, עם הילד האמיתי · לא לפני ההרשמה, כשאין על מה להצביע</div>
+  <div class="row">
+
+    <div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="mini" style="top:78px; height:104px"></div>
+        <div class="mini" style="top:196px; height:52px"></div>
+        <div class="dash" style="top:78px; left:12px; right:12px; height:104px"></div>
+        <div class="tip" style="top:198px; left:16px; right:16px">
+          כאן רואים <b>כמה נועה למדה והרוויחה היום</b> — מתעדכן בזמן אמת.
+          <div class="tipfoot"><span class="pill">הבא</span><span class="count">1 מתוך 3</span></div>
+        </div>
+      </div></div>
+      <p class="cap">1 · כרטיס הילד</p>
+    </div>
+
+    <div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="mini" style="top:78px; height:104px"></div>
+        <div class="mini" style="top:196px; height:52px"></div>
+        <div class="dash" style="top:196px; left:12px; width:92px; height:52px"></div>
+        <div class="tip" style="top:264px; left:16px; right:16px">
+          <b>⚡ פעולות</b> — מתנת דקות, נעילה מרחוק ומטלות, בלי להיכנס לשום מסך.
+          <div class="tipfoot"><span class="pill">הבא</span><span class="count">2 מתוך 3</span></div>
+        </div>
+      </div></div>
+      <p class="cap">2 · פעולות מהירות</p>
+    </div>
+
+    <div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="mini" style="top:78px; height:104px"></div>
+        <div class="mini" style="top:196px; height:52px"></div>
+        <div class="dash" style="top:196px; right:12px; width:132px; height:52px"></div>
+        <div class="tip" style="top:264px; left:16px; right:16px">
+          רוצים לתת לה לשחק <b>על הטלפון שלכם</b>? לחיצה אחת כאן ומעבירים לה אותו.
+          <div class="tipfoot"><span class="pill">סיימתי</span><span class="count">3 מתוך 3</span></div>
+        </div>
+      </div></div>
+      <p class="cap">3 · <b>בדיוק התלונה שקיבלנו</b></p>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

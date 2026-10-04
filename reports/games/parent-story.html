@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>סטורי מה חדש — הורה</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@500;700;900&display=swap');
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:Heebo, system-ui, sans-serif; background:#120f33; padding:46px 34px 34px; }
+  h1 { color:#fff; font-size:27px; font-weight:900; text-align:center; }
+  .sub { color:#a79fe0; font-size:15px; text-align:center; margin:6px 0 30px; }
+  .row { display:flex; gap:26px; justify-content:center; align-items:flex-start; }
+  .caption { color:#cfc8ff; font-size:13.5px; font-weight:700; text-align:center; margin-top:10px; }
+  .caption b { color:#FFD23F; }
+
+  .phone { width:300px; height:630px; border-radius:42px; padding:10px; background:#000; box-shadow:0 20px 50px rgba(0,0,0,.5); position:relative; }
+  .screen { width:100%; height:100%; border-radius:33px; overflow:hidden; position:relative;
+    background: radial-gradient(130% 80% at 82% 4%, #FF7AD9 0%, rgba(255,122,217,0) 44%),
+                radial-gradient(120% 70% at 6% 98%, #35E7E0 0%, rgba(53,231,224,0) 50%),
+                linear-gradient(170deg,#7B5BFF 0%, #6A5BFF 44%, #3E8BFF 100%); }
+  .notch { position:absolute; top:10px; left:50%; transform:translateX(-50%); width:96px; height:26px; border-radius:14px; background:#000; z-index:9; }
+
+  .bars { position:absolute; top:52px; left:14px; right:14px; display:flex; gap:4px; z-index:8; }
+  .bar { flex:1; height:3.5px; border-radius:3px; background:rgba(255,255,255,.28); }
+  .bar.on { background:#FFD23F; }
+  .skip { position:absolute; top:70px; left:16px; color:rgba(255,255,255,.9); font-size:13px; font-weight:800;
+          background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.3); padding:5px 12px; border-radius:999px; z-index:8; }
+  .brand { position:absolute; top:70px; right:16px; color:rgba(255,255,255,.95); font-size:13px; font-weight:900; z-index:8; }
+
+  .kicker { position:absolute; top:122px; left:20px; right:20px; text-align:center; color:#FFD23F; font-size:13.5px; font-weight:900; letter-spacing:.3px; }
+  .title { position:absolute; top:146px; left:20px; right:20px; text-align:center; color:#fff; font-size:29px; font-weight:900; line-height:1.2; text-shadow:0 4px 14px rgba(0,0,0,.28); }
+  .lead { position:absolute; top:218px; left:24px; right:24px; text-align:center; color:rgba(255,255,255,.94); font-size:15.5px; font-weight:700; line-height:1.5; }
+
+  .stage { position:absolute; top:272px; left:18px; right:18px; bottom:96px; border-radius:24px;
+           background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.26);
+           display:grid; place-items:center; overflow:hidden; }
+  .glow { position:absolute; width:210px; height:210px; border-radius:50%; filter:blur(32px); opacity:.5; }
+  .hero { font-size:96px; filter:drop-shadow(0 14px 22px rgba(0,0,0,.3)); }
+
+  .grid { display:grid; grid-template-columns:repeat(4,52px); gap:9px; }
+  .g { height:52px; border-radius:14px; display:grid; place-items:center; font-size:25px;
+       background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.32); }
+
+  .rows { width:84%; display:flex; flex-direction:column; gap:9px; }
+  .r { display:flex; align-items:center; gap:9px; background:rgba(255,255,255,.17); border:1px solid rgba(255,255,255,.26);
+       border-radius:14px; padding:9px 11px; color:#fff; font-size:13.5px; font-weight:800; }
+  .r .tick { color:#8CFFC4; font-size:15px; }
+  .r .gold { color:#FFD23F; }
+
+  .toggle { width:52px; height:30px; border-radius:999px; background:linear-gradient(160deg,#8CFFC4,#2FD08A); position:relative; }
+  .toggle i { position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:#fff; }
+
+  .foot { position:absolute; bottom:34px; left:20px; right:20px; text-align:center; color:rgba(255,255,255,.82); font-size:13.5px; font-weight:700; }
+  .dotsHint { position:absolute; bottom:60px; left:20px; right:20px; text-align:center; color:rgba(255,255,255,.95); font-size:14px; font-weight:800; }
+</style>
+</head>
+<body>
+<h1>📖 סטורי "מה חדש" — הצד של ההורה</h1>
+<p class="sub">נפתח לבד בכניסה הראשונה אחרי עדכון · מתחלף לבד · "דלג" סוגר ועובר למסך הבית · בלי ניקוד</p>
+
+<div class="row">
+
+  <!-- 1 -->
+  <div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="bars"><span class="bar on"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+      <div class="skip">דלג</div><div class="brand">טופי · 2026.10.3</div>
+      <div class="kicker">מה חדש</div>
+      <div class="title">12 משחקים חדשים</div>
+      <div class="lead">הילד בוחר איך לענות: שאלות רגילות או משחק — והתוכן נשאר אותו תוכן</div>
+      <div class="stage">
+        <div class="glow" style="background:#FFD23F"></div>
+        <div class="grid">
+          <div class="g">🔗</div><div class="g">🎈</div><div class="g">🧩</div><div class="g">🧱</div>
+          <div class="g">🔤</div><div class="g">⚡</div><div class="g">🧺</div><div class="g">🧠</div>
+          <div class="g">🔢</div><div class="g">🔐</div><div class="g">🛒</div><div class="g">⚖️</div>
+        </div>
+      </div>
+      <div class="foot">מתחלף לבד · אפשר להחליק</div>
+    </div></div>
+    <p class="caption">כרטיס פותח · <b>מה קיבלתם</b> במשפט אחד</p>
+  </div>
+
+  <!-- 2 -->
+  <div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="bars"><span class="bar on"></span><span class="bar on"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+      <div class="skip">דלג</div><div class="brand">טופי · 2026.10.3</div>
+      <div class="kicker">מותאם לגיל</div>
+      <div class="title">כל משחק לפי<br>הכיתה של הילד</div>
+      <div class="lead">בעברית הרמה עולה חזק עם הגיל. באנגלית, שהיא שפה שנייה, היא נשארת נגישה</div>
+      <div class="stage">
+        <div class="glow" style="background:#35E7E0; left:20px; top:20px"></div>
+        <div class="rows">
+          <div class="r"><span class="tick">●</span>כיתה ג׳ · עברית<span style="margin-right:auto" class="gold">מכונית · אונייה</span></div>
+          <div class="r"><span class="tick">●</span>כיתה ו׳ · עברית<span style="margin-right:auto" class="gold">מיקרופון · גלגיליות</span></div>
+          <div class="r"><span class="tick">●</span>כיתה ו׳ · אנגלית<span style="margin-right:auto" class="gold">bicycle · teacher</span></div>
+        </div>
+      </div>
+      <div class="foot">מתחלף לבד · אפשר להחליק</div>
+    </div></div>
+    <p class="caption">כרטיס תוכן · <b>דוגמה אמיתית</b> במקום הסבר</p>
+  </div>
+
+  <!-- 3 -->
+  <div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="bars"><span class="bar on"></span><span class="bar on"></span><span class="bar on"></span><span class="bar"></span><span class="bar"></span></div>
+      <div class="skip">דלג</div><div class="brand">טופי · 2026.10.3</div>
+      <div class="kicker">בשליטה שלכם</div>
+      <div class="title">רק שאלות רגילות</div>
+      <div class="lead">מתג חדש בעמוד הילד מכבה את המשחקים — והילד נכנס ישר לשאלות</div>
+      <div class="stage">
+        <div class="glow" style="background:#FF7AD9; right:10px; bottom:10px"></div>
+        <div class="rows">
+          <div class="r">רק שאלות רגילות<span style="margin-right:auto"></span><span class="toggle"><i></i></span></div>
+          <div class="r">זמן מסך ליום<span style="margin-right:auto" class="gold">60 דקות</span></div>
+          <div class="r">כיתה<span style="margin-right:auto" class="gold">ד׳</span></div>
+        </div>
+      </div>
+      <div class="foot">מתחלף לבד · אפשר להחליק</div>
+    </div></div>
+    <p class="caption">כרטיס הגדרה · <b>איפה זה יושב</b> אצלכם</p>
+  </div>
+
+  <!-- 4 -->
+  <div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="bars"><span class="bar on"></span><span class="bar on"></span><span class="bar on"></span><span class="bar on"></span><span class="bar on"></span></div>
+      <div class="brand">טופי · 2026.10.3</div>
+      <div class="kicker">זה הכל</div>
+      <div class="title">נתראה בפנים 👋</div>
+      <div class="lead">אפשר לראות את זה שוב בכל רגע: הגדרות ← מה חדש</div>
+      <div class="stage" style="bottom:120px">
+        <div class="glow" style="background:#FFD23F"></div>
+        <div class="hero">🦁</div>
+      </div>
+      <div class="dotsHint">עוברים למסך הבית…</div>
+      <div class="foot">בלי כפתורים · נסגר לבד</div>
+    </div></div>
+    <p class="caption">סיום · <b>חוזר למסך הבית לבד</b></p>
+  </div>
+
+</div>
+</body>
+</html>
