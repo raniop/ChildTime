@@ -2355,13 +2355,17 @@ final class ProgressStore: ObservableObject {
         s.revision            = revision
         s.lastModifiedAt      = lastModifiedAt
         s.deviceID            = ProgressSnapshot.thisDeviceID
-        s.syncWalletMirrors()
         s.earnedSecondsIn     = earnedSecondsIn
         s.earnedSecondsOut    = earnedSecondsOut
         s.giftSecondsIn       = giftSecondsIn
         s.giftSecondsOut      = giftSecondsOut
         s.secondsCarry        = pendingSecondsCarry
         s.carryIsGift         = carryIsGift
+        // The legacy minute fields are DERIVED from the counters, so they have to
+        // be derived AFTER the counters are in. Called before them (the old
+        // order), this wrote `pendingMinutes: 0` into every snapshot we publish —
+        // exactly the zero-beside-a-full-pocket the counters exist to prevent.
+        s.syncWalletMirrors()
         return s
     }
 

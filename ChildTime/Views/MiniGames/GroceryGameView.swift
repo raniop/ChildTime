@@ -37,6 +37,9 @@ struct GroceryGameView: View {
     @State private var bounce: UUID?
     @State private var shake: CGFloat = 0
     @State private var clean = 0
+    /// Tasks the child actually SOLVED this trip-set — the price of the round.
+    /// `clean` (right the first time) is only the "מֻשְׁלָם!" headline.
+    @State private var solvedCount = 0
     @State private var answered = 0
     @State private var shownAt = Date()
     @State private var burst = 0
@@ -420,7 +423,7 @@ struct GroceryGameView: View {
     // MARK: - Logic
 
     private func start() {
-        tripIndex = 0; clean = 0; answered = 0; grant = nil
+        tripIndex = 0; clean = 0; solvedCount = 0; answered = 0; grant = nil
         newTrip()
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { phase = .shopping }
     }
@@ -462,9 +465,11 @@ struct GroceryGameView: View {
 
     private func checkout() {
         guard listDone, !overBudget else { return }
-        if mode != .pictures && !readingMissed {
+        if mode != .pictures {
+            solvedCount += 1
             MiniGameLedger.record(correct: true, topic: topic ?? .english,
-                                  responseMs: Date().timeIntervalSince(shownAt) * 1000, earn: earn, surprise: surprise)
+                                  responseMs: Date().timeIntervalSince(shownAt) * 1000,
+                                  earn: earn, surprise: surprise, retry: readingMissed)
         }
         SoundPlayer.shared.play(.correctSmall)
         typed = ""; tries = 0; wellState = .normal; note = nil; shownAt = Date()
@@ -485,11 +490,12 @@ struct GroceryGameView: View {
         guard let trip, let value = GroceryGen.cents(typed) else { return }
         let target = phase == .total ? cartTotal : trip.budget - cartTotal
         if value == target {
-            if tries == 0 {
-                clean += 1
-                MiniGameLedger.record(correct: true, topic: mathTopic, responseMs: Date().timeIntervalSince(shownAt) * 1000,
-                                      earn: earn, surprise: surprise)
-            }
+            if tries == 0 { clean += 1 }
+            // An amount the child got right on the second try still pays — the
+            // runner pays a re-asked question in full too.
+            solvedCount += 1
+            MiniGameLedger.record(correct: true, topic: mathTopic, responseMs: Date().timeIntervalSince(shownAt) * 1000,
+                                  earn: earn, surprise: surprise, retry: tries > 0)
             answered += 1
             withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { wellState = .correct; note = nil }
             burst += 1
@@ -541,13 +547,14 @@ struct GroceryGameView: View {
     }
 
     private func finish() {
-        grant = MiniGameReward.grant(game: "grocery", correct: clean, starsPer: 2, diamondsPer: 1,
+        grant = MiniGameReward.grant(game: "grocery", correct: solvedCount, starsPer: 2, diamondsPer: 1,
                                      cap: 6, surprise: surprise)
         withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { phase = .done }
         SoundPlayer.shared.play(.chestOpen)
         Haptic.success()
         confetti += 1
-        AppAnalytics.log("grocery_done", ["clean": "\(clean)/\(answered)", "surprise": surprise ? "1" : "0"])
+        AppAnalytics.log("grocery_done", ["clean": "\(clean)/\(answered)", "solved": "\(solvedCount)",
+                                          "surprise": surprise ? "1" : "0"])
     }
 }
 

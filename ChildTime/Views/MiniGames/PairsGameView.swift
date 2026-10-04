@@ -298,14 +298,12 @@ struct PairsGameView: View {
     private func check() {
         guard let l = pickedLeft, let r = pickedRight else { return }
         if l == r {
-            // One answer per pair in the parent's reports: right the first time,
-            // or a miss if it took more than one try. No minutes.
-            // A pair that took a miss was already recorded as one (below).
-            if !missed.contains(l) {
-                MiniGameLedger.record(correct: true, topic: source.topic,
-                                      responseMs: Date().timeIntervalSince(boardShownAt) * 1000 / Double(pairCount),
-                                      earn: earn, surprise: surprise)
-            }
+            // Every matched pair is a correct answer — a pair found on the
+            // second try pays too (its miss was recorded once, below), because
+            // the ⭐ at the end of the round already count it.
+            MiniGameLedger.record(correct: true, topic: source.topic,
+                                  responseMs: Date().timeIntervalSince(boardShownAt) * 1000 / Double(pairCount),
+                                  earn: earn, surprise: surprise, retry: missed.contains(l))
             SoundPlayer.shared.play(.correctSmall)
             Haptic.success()
             burst += 1

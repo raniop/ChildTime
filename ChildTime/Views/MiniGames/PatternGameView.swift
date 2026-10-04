@@ -227,11 +227,11 @@ struct PatternGameView: View {
         guard phase == .playing, !solved, let r = round else { return }
         if opt == r.answer {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { picked = opt }
-            if !missed {
-                clean += 1
-                MiniGameLedger.record(correct: true, topic: r.topic, responseMs: Date().timeIntervalSince(shownAt) * 1000,
-                                      streak: clean, earn: earn, surprise: surprise)
-            }
+            if !missed { clean += 1 }
+            // A round solved on the second try still pays — exactly what the
+            // runner does when it re-asks a question the child first missed.
+            MiniGameLedger.record(correct: true, topic: r.topic, responseMs: Date().timeIntervalSince(shownAt) * 1000,
+                                  streak: clean, earn: earn, surprise: surprise, retry: missed)
             burst += 1
             SoundPlayer.shared.play(.correctBig)
             Haptic.success()
@@ -258,7 +258,9 @@ struct PatternGameView: View {
 
     private func finish() {
         guard phase == .playing else { return }
-        grant = MiniGameReward.grant(game: "pattern", correct: clean, starsPer: 2, diamondsPer: 1,
+        // Every round the child SOLVED pays (the board only moves on when it is
+        // solved, so that is all of them) — `clean` is the headline, not the price.
+        grant = MiniGameReward.grant(game: "pattern", correct: count, starsPer: 2, diamondsPer: 1,
                                      cap: count, surprise: surprise)
         withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { phase = .done }
         SoundPlayer.shared.play(.chestOpen)

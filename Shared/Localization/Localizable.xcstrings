@@ -14686,6 +14686,28 @@
         }
       }
     },
+    "אָסַפְתֶּם אֶת כָּל הַזְּמַן לְהַיּוֹם! מַמְשִׁיכִים לֶאֱסֹף כּוֹכָבִים ⭐" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جمعتم كل الوقت لليوم! نكمل بجمع النجوم ⭐"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You've collected all of today's time! Keep collecting stars ⭐"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Всё время на сегодня собрано! Продолжаем собирать звёзды ⭐"
+          }
+        }
+      }
+    },
     "אָתוּנָה" : {
       "localizations" : {
         "ar" : {

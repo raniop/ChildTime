@@ -242,7 +242,12 @@ struct BuildWordView: View {
             }
             if filled.count == letters.count { wordFinished() }
         } else {
-            // A gentle bounce — the letter stays where it is.
+            // A gentle bounce — the letter stays where it is. The first bounce
+            // of a word is its one recorded miss; the word still pays when the
+            // child finishes it (below).
+            if mistakesThisWord == 0 {
+                MiniGameLedger.record(correct: false, topic: wordTopic, earn: earn, surprise: surprise)
+            }
             mistakesThisWord += 1
             SoundPlayer.shared.play(.wrongSoft)
             Haptic.light()
@@ -257,11 +262,11 @@ struct BuildWordView: View {
     private func wordFinished() {
         let clean = mistakesThisWord == 0
         if clean { cleanWords += 1 }
-        // One answer per word in the parent's reports — right the first time,
-        // or a miss if a letter bounced.
-        MiniGameLedger.record(correct: clean, topic: wordTopic,
+        // A finished word is a correct answer, bounce or no bounce — the ⭐ at
+        // the end count every word, so the minutes must too.
+        MiniGameLedger.record(correct: true, topic: wordTopic,
                               responseMs: Date().timeIntervalSince(shownAt) * 1000,
-                              earn: earn, surprise: surprise)
+                              earn: earn, surprise: surprise, retry: !clean)
         withAnimation(.spring(response: 0.3, dampingFraction: 0.55)) { wordDone = true; pop = true }
         burst += 1
         SoundPlayer.shared.play(.correctBig)

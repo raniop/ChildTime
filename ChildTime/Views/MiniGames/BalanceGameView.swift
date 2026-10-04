@@ -273,11 +273,11 @@ struct BalanceGameView: View {
         withAnimation(.spring(response: 0.6, dampingFraction: 0.55)) { trial = opt }
         if right {
             solved = true
-            if !missed {
-                clean += 1
-                MiniGameLedger.record(correct: true, topic: p.topic, responseMs: Date().timeIntervalSince(shownAt) * 1000,
-                                      streak: clean, earn: earn, surprise: surprise)
-            }
+            if !missed { clean += 1 }
+            // Solved on the second try still pays — exactly what the runner does
+            // when it re-asks a question the child first missed.
+            MiniGameLedger.record(correct: true, topic: p.topic, responseMs: Date().timeIntervalSince(shownAt) * 1000,
+                                  streak: clean, earn: earn, surprise: surprise, retry: missed)
             burst += 1
             SoundPlayer.shared.play(.correctBig)
             Haptic.success()
@@ -303,7 +303,9 @@ struct BalanceGameView: View {
 
     private func finish() {
         guard phase == .playing else { return }
-        grant = MiniGameReward.grant(game: "balance", correct: clean, starsPer: 2, diamondsPer: 1,
+        // Every puzzle the child SOLVED pays (the scales only move on when the
+        // puzzle is solved) — `clean` is the headline, not the price.
+        grant = MiniGameReward.grant(game: "balance", correct: count, starsPer: 2, diamondsPer: 1,
                                      cap: BalanceGen.roundCount, surprise: surprise)
         withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { phase = .done }
         SoundPlayer.shared.play(.chestOpen)
