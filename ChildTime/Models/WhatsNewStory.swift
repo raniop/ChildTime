@@ -35,7 +35,7 @@ enum WhatsNewStories {
     /// "בָּא לָךְ", so a brother and a sister on one iPad must not share a cache
     /// entry the way two screens in one language can.
     static var byBuild: [Int: [StoryItem]] {
-        LocalizedCache.value("whatsNewStories.byBuild." + (Gendered.isGirl ? "f" : "m")) { [188: build187] }
+        LocalizedCache.value("whatsNewStories.byBuild." + (Gendered.isGirl ? "f" : "m")) { [189: build187] }
     }
 
     /// 🎮 Build 187 — the twelve mini-games, the chooser in front of them, the
