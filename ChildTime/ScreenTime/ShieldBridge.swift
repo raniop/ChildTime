@@ -20,6 +20,7 @@ enum ShieldBridge {
         state.girl = profile?.gender == .girl
         state.availableMinutes = max(0, p.pendingMinutes)
         state.minutesPerCorrect = max(1, s.minutesPerCorrectAnswer)
+        state.batchAnswers = max(1, s.batchAnswers)
         state.updatedAt = Date().timeIntervalSince1970
 
         // Order matters: the daily cap outranks everything (there is nothing the

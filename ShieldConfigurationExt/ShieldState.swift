@@ -14,10 +14,13 @@ struct ShieldState: Codable {
     var girl: Bool = false
     /// Minutes already earned and not yet opened (`hasMinutes`).
     var availableMinutes: Int = 0
-    /// Minutes a single correct answer is worth — the ONE number that is true
-    /// about earning in Tofy. There is no "N questions to unlock": every correct
-    /// answer banks minutes, and a window opens with whatever is in the wallet.
+    /// 🧮 The real rule, and the one the rest of the app states: `batchAnswers`
+    /// correct answers are worth `minutesPerCorrect` minutes. The lock screen
+    /// used to promise `minutesPerCorrect` for EVERY answer, which is what the
+    /// parent home calls "כל 10 נכונות = 4 דקות משחק" — a child reading the
+    /// shield was told they earn ten times what they earn (Rani, build 189).
     var minutesPerCorrect: Int = 2
+    var batchAnswers: Int = 10
     var updatedAt: Double = 0
 
     static let key = "shield.state"

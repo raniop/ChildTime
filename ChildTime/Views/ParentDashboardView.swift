@@ -1175,6 +1175,7 @@ struct ParentDashboardView: View {
                 // connect a device) plus the slot the ⚡ menu is overlaid into.
                 HStack(spacing: 8) {
                     Color.clear.frame(maxWidth: .infinity).frame(height: 38)
+                    Color.clear.frame(width: Self.playButtonWidth, height: 1)
                     Color.clear.frame(width: Self.actionsMenuWidth, height: 1)
                 }
             }
@@ -1827,7 +1828,10 @@ struct ParentDashboardView: View {
                     // that they could not find Kid Mode at all when it lived only
                     // inside the ⚡ menu.
                     .overlay(alignment: .bottomTrailing) {
-                        if isRoot, childHasDevice(row.profile) {
+                        // 🧒 Also for a child with no device of their own — that
+                        // is exactly the family that hands over the parent's
+                        // phone, so the button matters most there (Rani).
+                        if isRoot {
                             Button {
                                 Haptic.light()
                                 kidModeStart = row.profile

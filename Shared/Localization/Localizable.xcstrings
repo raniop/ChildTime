@@ -45745,6 +45745,28 @@
         }
       }
     },
+    "כָּל %1$lld תְּשׁוּבוֹת נְכוֹנוֹת בְּטוֹפִי = %2$@ מִשְׂחָק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل %1$lld إجابات صحيحة في توفي = %2$@ لعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every %1$lld correct answers in Tofy = %2$@ of play"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждые %1$lld правильных ответа в Tofy = %2$@ игры"
+          }
+        }
+      }
+    },
     "כָּל %lld הָעוֹלָמוֹת, מִשְׂחָקִים, זִירָה וּמַטְלוֹת · לְכָל הַיְלָדִים" : {
       "localizations" : {
         "ar" : {
@@ -56505,6 +56527,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Круги"
+          }
+        }
+      }
+    },
+    "מַעֲבִירִים אֶת הַמַּכְשִׁיר…" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نسلّم الجهاز…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Handing the device over…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Передаём устройство…"
           }
         }
       }

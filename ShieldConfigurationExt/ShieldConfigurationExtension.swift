@@ -78,6 +78,7 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
             // The honest rule, and the only one Tofy actually has: a correct
             // answer banks minutes. There is no question quota to reach.
             let m = max(1, s.minutesPerCorrect)
+            let n = max(1, s.batchAnswers)
             let worth = m == 1 ? tr("דַּקָּה אַחַת") : tr("\(m) דַּקּוֹת")
             let noMinutes: String = {
                 switch (name.isEmpty, s.girl) {
@@ -92,7 +93,7 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
                 backgroundColor: Self.indigo,
                 icon: icon,
                 title: .init(text: noMinutes, color: .white),
-                subtitle: .init(text: tr("כָּל תְּשׁוּבָה נְכוֹנָה בְּטוֹפִי = \(worth) מִשְׂחָק"),
+                subtitle: .init(text: tr("כָּל \(n) תְּשׁוּבוֹת נְכוֹנוֹת בְּטוֹפִי = \(worth) מִשְׂחָק"),
                                 color: UIColor.white.withAlphaComponent(0.85)),
                 primaryButtonLabel: .init(text: tr("בּוֹאוּ נַרְוִיחַ דַּקּוֹת"), color: Self.indigo),
                 primaryButtonBackgroundColor: .white

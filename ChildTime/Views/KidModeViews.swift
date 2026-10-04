@@ -34,6 +34,17 @@ struct KidModeEntryView: View {
             GlassBackdrop()
             SparkleField(count: 12, size: 11)
 
+            // 🧒 Straight from a child's card: the picker must never flash. It
+            // is the same view, so it used to draw the whole chooser for a frame
+            // before the auto-start took hold (Rani). A quiet hand-over instead.
+            if autoStart && !authFailed {
+                VStack(spacing: AppSpacing.md) {
+                    ProgressView().tint(.white).scaleEffect(1.3)
+                    Text(tr("מַעֲבִירִים אֶת הַמַּכְשִׁיר…"))
+                        .font(.system(size: 16, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.9))
+                }
+            } else {
             VStack(spacing: 0) {
                 header
                 ScrollView {
@@ -53,6 +64,7 @@ struct KidModeEntryView: View {
                     // column above it stayed 480pt wide.
                     .frame(maxWidth: 480 + AppSpacing.lg * 2)
                     .frame(maxWidth: .infinity)
+            }
             }
         }
         .environment(\.layoutDirection, .app)
