@@ -892,7 +892,7 @@ struct WorldMapView: View {
         // respectSession:false so this gate itself always authenticates.
         .sheet(isPresented: $showKidExit) {
             ParentGateView(allowClose: true,
-                           gateTitle: tr("יְצִיאָה מִמַּצַּב יֶלֶד"),
+                           gateTitle: tr("יְצִיאָה מִמַּצַּב יֶלֶד וְשִׁחְרוּר נְעִילַת הַמַּכְשִׁיר"),
                            gateReason: tr("אַמְּתוּ זֶהוּת כְּדֵי לָצֵאת מִמַּצַּב יֶלֶד"),
                            useFaceID: true,
                            respectSession: false,
@@ -1074,12 +1074,18 @@ struct WorldMapView: View {
             Haptic.light()
             showKidExit = true
         } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "lock.fill").font(.system(size: 14, weight: .bold))
-                Text(tr("יְצִיאָה מִמַּצַּב יֶלֶד")).font(.system(size: 15, weight: .heavy, design: .rounded))
+            // 🔓 Bigger, and it says what it actually does — a parent taking the
+            // phone back also wants the device unlocked, and "יציאה ממצב ילד"
+            // alone did not say that (Rani).
+            HStack(spacing: 9) {
+                Image(systemName: "lock.open.fill").font(.system(size: 16, weight: .bold))
+                Text(tr("יְצִיאָה מִמַּצַּב יֶלֶד וְשִׁחְרוּר נְעִילַת הַמַּכְשִׁיר"))
+                    .font(.system(size: 17, weight: .heavy, design: .rounded))
+                    .lineLimit(2).minimumScaleFactor(0.75)
+                    .multilineTextAlignment(.center)
             }
             .foregroundStyle(.white)
-            .padding(.horizontal, 28).padding(.vertical, 12)
+            .padding(.horizontal, 22).padding(.vertical, 15)
             .background(Capsule().fill(Color(hex: "EF4655")))
             .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
             .shadow(color: Color(hex: "EF4655").opacity(0.4), radius: 10, y: 4)

@@ -42123,6 +42123,28 @@
         }
       }
     },
+    "יְצִיאָה מִמַּצַּב יֶלֶד וְשִׁחְרוּר נְעִילַת הַמַּכְשִׁיר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخروج من وضع الطفل وفتح قفل الجهاز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exit Kid Mode and unlock the device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выйти из детского режима и разблокировать устройство"
+          }
+        }
+      }
+    },
     "יְרִידָה קַלָּה בְּ%@" : {
       "localizations" : {
         "ar" : {
