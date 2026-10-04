@@ -280,13 +280,21 @@ enum WhatsNewStories {
 
     // MARK: - Which stories, for whom
 
+    /// ⚠️ A run is never longer than this. Rani, build 189: "סטוריז להורה וגם
+    /// לילד שיהיה מקסימום 5 שקפים!" — nobody reaches the end of sixteen cards.
+    /// It is enforced here, not by counting entries in `byBuild`, so a future
+    /// release cannot ship a fifteen-card run by accident. Put the cards that
+    /// matter first; the rest are cut.
+    static let maxCards = 5
+
     /// Every story for an audience, oldest build first, for the builds this
     /// reader has not seen. One release is one story run.
     static func items(for audience: StoryAudience, unseenBuilds: [Int]) -> [StoryItem] {
         let table = byBuild
-        return unseenBuilds.sorted()
+        return Array(unseenBuilds.sorted()
             .flatMap { table[$0] ?? [] }
             .filter { $0.audience.includes(audience) && offered($0) }
+            .prefix(maxCards))
     }
 
     /// The current build's stories — what a demo screen and a re-open show.
@@ -296,7 +304,9 @@ enum WhatsNewStories {
         // The newest entry at or below this build; a story is never shown on a
         // build that predates it.
         guard let newest = table.keys.filter({ $0 <= build }).max() ?? table.keys.max() else { return [] }
-        return (table[newest] ?? []).filter { $0.audience.includes(audience) && offered($0) }
+        return Array((table[newest] ?? [])
+            .filter { $0.audience.includes(audience) && offered($0) }
+            .prefix(maxCards))
     }
 
     /// 👶 A גן child is shown the five games they will actually be dealt, and

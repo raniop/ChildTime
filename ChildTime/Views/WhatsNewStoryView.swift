@@ -333,11 +333,12 @@ struct WhatsNewStoryView: View {
                 }
                 roundButton("✕", label: tr("סְגִירָה")) { finish() }
             } else {
-                // The version AND the build, in the corner — a parent reporting
-                // something should be able to read out exactly which Tofy this is.
-                Text(verbatim: "\(tr("טופי")) · \(AppInfo.version) (\(AppInfo.build))")
+                // Just the name. The version and build used to sit here so a
+                // parent could quote them — but it made the card read like a
+                // changelog, and the version is on the home screen anyway
+                // (Rani, build 189).
+                Text(tr("טופי"))
                     .font(.system(size: 12.5, weight: .heavy, design: .rounded))
-                    .monospacedDigit()
                     .foregroundStyle(.white.opacity(0.9))
                 Spacer(minLength: 0)
                 Button { finish() } label: {
