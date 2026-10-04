@@ -52,6 +52,12 @@ final class LanguageLeakUITests: XCTestCase {
     @MainActor
     private func sweep(_ lang: String) throws {
         var leaks: [String] = []
+        // 🖤 A screen with NO words on it is not a clean screen — it is a screen
+        // that never drew. The English kid home froze its own first frame for
+        // seconds (ContentAvailability, per pack, per tile, per render) and this
+        // sweep walked straight past it: no text, no Hebrew, "clean". A blank
+        // screen now fails as loudly as a leak.
+        var blank: [String] = []
         for screen in Self.screens {
             let app = XCUIApplication()
             app.launchEnvironment["DEMO_SCREEN"] = screen
@@ -71,7 +77,12 @@ final class LanguageLeakUITests: XCTestCase {
                 print("SKIP \(lang) \(screen): the app was not in the foreground")
                 app.terminate(); Thread.sleep(forTimeInterval: 0.5); continue
             }
-            for label in visibleText(app) where label.rangeOfCharacter(from: hebrew) != nil {
+            let text = visibleText(app)
+            if text.isEmpty {
+                blank.append(screen)
+                print("BLANK \(lang) \(screen): nothing was on the screen")
+            }
+            for label in text where label.rangeOfCharacter(from: hebrew) != nil {
                 if Self.allowed.contains(where: { label.contains($0) }) { continue }
                 let line = "\(screen): \(label.replacingOccurrences(of: "\n", with: " ⏎ "))"
                 leaks.append(line)
@@ -81,7 +92,8 @@ final class LanguageLeakUITests: XCTestCase {
             app.terminate()
             Thread.sleep(forTimeInterval: 0.3)
         }
-        print("LEAKS[\(lang)] \(leaks.count)")
+        print("LEAKS[\(lang)] \(leaks.count)  BLANK[\(lang)] \(blank.count)")
+        XCTAssertTrue(blank.isEmpty, "מסכים ריקים ב-\(lang) — לא צויר כלום: \(blank.joined(separator: ", "))")
         XCTAssertTrue(leaks.isEmpty, "עברית דלפה ל-\(lang): \(leaks.prefix(10).joined(separator: " | "))")
     }
 
