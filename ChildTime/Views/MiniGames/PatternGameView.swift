@@ -137,7 +137,9 @@ struct PatternGameView: View {
         let cells = round?.cells ?? []
         return GeometryReader { geo in
             let gap: CGFloat = isCompact ? 6 : 10
-            let maxSide: CGFloat = preReader ? (isCompact ? 86 : 120) : (isCompact ? 70 : 104)
+            let maxSide: CGFloat = preReader
+                ? (display.isShort ? 62 : (isCompact ? 86 : 120))
+                : (isCompact ? 70 : 104)
             let side = min(maxSide, (geo.size.width - gap * CGFloat(max(0, cells.count - 1))) / CGFloat(max(1, cells.count)))
             HStack(spacing: gap) {
                 ForEach(Array(cells.enumerated()), id: \.offset) { _, cell in
@@ -163,7 +165,9 @@ struct PatternGameView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(height: preReader ? (isCompact ? 90 : 124) : (isCompact ? 74 : 108))
+        .frame(height: preReader
+               ? (display.isShort ? 66 : (isCompact ? 90 : 124))
+               : (isCompact ? 74 : 108))
         // Numbers and pictures read left-to-right; Hebrew letters from the right.
         .environment(\.layoutDirection, round?.direction ?? .leftToRight)
     }
@@ -177,13 +181,17 @@ struct PatternGameView: View {
                 let state: MiniGameTileState = opt == picked && solved ? .correct : (wrongPicks.contains(opt) ? .wrong : .normal)
                 Button { pick(opt) } label: {
                     Text(opt)
-                        .font(.system(size: preReader ? (isCompact ? 46 : 58) : (isCompact ? 32 : 42),
+                        .font(.system(size: preReader
+                                      ? (display.isShort ? 34 : (isCompact ? 46 : 58))
+                                      : (isCompact ? 32 : 42),
                                       weight: .black, design: .rounded))
                         .foregroundStyle(.white)
                         .monospacedDigit()
                         .lineLimit(1).minimumScaleFactor(0.5)
                         .frame(maxWidth: .infinity,
-                               minHeight: preReader ? (isCompact ? 100 : 130) : (isCompact ? 76 : 110))
+                               minHeight: preReader
+                               ? (display.isShort ? 70 : (isCompact ? 100 : 130))
+                               : (isCompact ? 76 : 110))
                         .miniGameTile(state, tint: OptionCard.tints[i % OptionCard.tints.count], radius: 22)
                         .mathLTR(round?.direction == .leftToRight)
                         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: state)

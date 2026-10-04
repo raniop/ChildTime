@@ -224,7 +224,10 @@ struct SortBasketsView: View {
     private func itemChip(_ item: SortItem) -> some View {
         VStack(spacing: 6) {
             if !item.emoji.isEmpty {
-                Text(item.emoji).font(.system(size: preReader ? (isCompact ? 76 : 100) : (isCompact ? 44 : 60)))
+                Text(item.emoji)
+                    .font(.system(size: preReader
+                                  ? (display.isShort ? 52 : (isCompact ? 76 : 100))
+                                  : (isCompact ? 44 : 60)))
             }
             if !item.label.isEmpty {
                 Text(MiniGameText.show(item.label))
@@ -265,7 +268,9 @@ struct SortBasketsView: View {
                 }
                 .frame(height: isCompact ? 22 : 30)
                 Text(basket.emoji)
-                    .font(.system(size: preReader ? (isCompact ? 46 : 60) : (isCompact ? 28 : 38)))
+                    .font(.system(size: preReader
+                                  ? (display.isShort ? 34 : (isCompact ? 46 : 60))
+                                  : (isCompact ? 28 : 38)))
                     .lineLimit(1).minimumScaleFactor(0.5)
                 if !basket.label.isEmpty {
                     Text(basket.label)
@@ -276,7 +281,10 @@ struct SortBasketsView: View {
                 }
             }
             .padding(.vertical, 12).padding(.horizontal, 6)
-            .frame(maxWidth: .infinity, minHeight: preReader ? (isCompact ? 180 : 230) : (isCompact ? 140 : 190))
+            .frame(maxWidth: .infinity,
+                   minHeight: preReader
+                   ? (display.isShort ? 108 : (isCompact ? 180 : 230))
+                   : (isCompact ? 140 : 190))
             .miniGameTile(state, tint: tint, radius: 24)
             .overlay(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)

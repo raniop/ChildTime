@@ -432,10 +432,14 @@ struct PreReaderSpeakButton: View {
 struct PreReaderCueCard: View {
     let cue: PreReaderCue
     var compact: Bool = true
+    /// 🔄 A short, wide screen (an iPhone on its side) — one rung down, so the
+    /// card never eats the board below it.
+    @ObservedObject private var display = DisplayGeometry.shared
+    private var short: Bool { display.isShort }
 
     var body: some View {
         HStack(spacing: compact ? 12 : 18) {
-            PreReaderSpeakButton(spoken: cue.spoken, side: compact ? 54 : 68)
+            PreReaderSpeakButton(spoken: cue.spoken, side: short ? 44 : (compact ? 54 : 68))
             if !cue.icons.isEmpty {
                 // Up to six objects in a row; a count never becomes a numeral.
                 HStack(spacing: compact ? 2 : 5) {
@@ -452,7 +456,7 @@ struct PreReaderCueCard: View {
             }
         }
         .padding(.horizontal, compact ? 14 : 20)
-        .padding(.vertical, compact ? 10 : 14)
+        .padding(.vertical, short ? 7 : (compact ? 10 : 14))
         .frame(maxWidth: .infinity)
         .glassPane(radius: 24)
         .onAppear { SpeechReader.shared.speak(cue.spoken) }
@@ -462,7 +466,7 @@ struct PreReaderCueCard: View {
     /// Six apples in a row still have to fit a phone, so the more there are
     /// the smaller each one gets.
     private var iconSize: CGFloat {
-        let base: CGFloat = compact ? 46 : 60
+        let base: CGFloat = short ? 34 : (compact ? 46 : 60)
         switch cue.icons.count {
         case 1:    return base
         case 2, 3: return base * 0.82
@@ -479,27 +483,33 @@ struct PreReaderIntroCard: View {
     let cue: PreReaderCue
     var onStart: () -> Void
     @Environment(\.horizontalSizeClass) private var hsc
+    @ObservedObject private var display = DisplayGeometry.shared
     private var big: Bool { hsc == .regular }
+    /// 🔄 On its side there is no room for a 96pt emoji above everything else.
+    private var short: Bool { display.isShort }
 
     var body: some View {
-        VStack(spacing: big ? 22 : 18) {
+        VStack(spacing: short ? 12 : (big ? 22 : 18)) {
             Text(kind.emoji)
-                .font(.system(size: big ? 130 : 96))
+                .font(.system(size: short ? 62 : (big ? 130 : 96)))
                 .float(amplitude: 6)
                 .glow(AppColor.starGold, radius: 14)
             if !cue.icons.isEmpty {
                 HStack(spacing: 4) {
                     ForEach(Array(cue.icons.prefix(6).enumerated()), id: \.offset) { _, icon in
-                        Text(icon).font(.system(size: big ? 56 : 42)).minimumScaleFactor(0.5)
+                        Text(icon)
+                            .font(.system(size: short ? 32 : (big ? 56 : 42)))
+                            .minimumScaleFactor(0.5)
                     }
                 }
+                .lineLimit(1)
                 .glow(AppColor.starGold, radius: 8)
             }
-            PreReaderSpeakButton(spoken: cue.spoken, side: big ? 76 : 64)
+            PreReaderSpeakButton(spoken: cue.spoken, side: short ? 50 : (big ? 76 : 64))
             MiniGameGoldButton(title: "▶️", action: onStart)
                 .padding(.top, 2)
         }
-        .padding(big ? 36 : 26)
+        .padding(short ? 18 : (big ? 36 : 26))
         .frame(maxWidth: big ? 520 : 400)
         .glassPane(radius: 28)
         .padding(.horizontal, AppSpacing.lg)
@@ -525,23 +535,28 @@ struct PreReaderEndCard: View {
 
     @ObservedObject private var profiles = ProfileStore.shared
     @Environment(\.horizontalSizeClass) private var hsc
+    @ObservedObject private var display = DisplayGeometry.shared
     @State private var reveal = 0
     private var big: Bool { hsc == .regular }
+    /// 🔄 Short and wide: the buddy and the tally come down a rung so the two
+    /// buttons at the bottom stay on screen.
+    private var short: Bool { display.isShort }
 
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: short ? 9 : 14) {
             CharacterView(character: profiles.active?.character ?? Character3DCatalog.find(nil))
-                .frame(width: big ? 160 : 120, height: big ? 160 : 120)
+                .frame(width: short ? 82 : (big ? 160 : 120), height: short ? 82 : (big ? 160 : 120))
                 .float(amplitude: 8)
             if tallyCount > 0 {
                 HStack(spacing: 2) {
                     ForEach(0..<min(tallyCount, 8), id: \.self) { _ in
-                        Text(tally).font(.system(size: big ? 36 : 28))
+                        Text(tally).font(.system(size: short ? 22 : (big ? 36 : 28)))
                     }
                     if tallyCount > 8 {
-                        Text("✨").font(.system(size: big ? 36 : 28))
+                        Text("✨").font(.system(size: short ? 22 : (big ? 36 : 28)))
                     }
                 }
+                .lineLimit(1).minimumScaleFactor(0.6)
                 .glow(AppColor.starGold, radius: 10)
             }
             if let grant {
@@ -553,8 +568,8 @@ struct PreReaderEndCard: View {
                 }
                 .padding(.top, 2)
             }
-            PreReaderSpeakButton(spoken: PreReaderGames.wellDone, side: big ? 66 : 56)
-            VStack(spacing: 10) {
+            PreReaderSpeakButton(spoken: PreReaderGames.wellDone, side: short ? 46 : (big ? 66 : 56))
+            VStack(spacing: short ? 7 : 10) {
                 if surprise {
                     MiniGameGoldButton(title: "▶️", action: onDone)
                 } else {
@@ -564,7 +579,7 @@ struct PreReaderEndCard: View {
             }
             .padding(.top, 4)
         }
-        .padding(big ? 36 : 24)
+        .padding(short ? 16 : (big ? 36 : 24))
         .frame(maxWidth: big ? 520 : 400)
         .glassPane(radius: 28)
         .padding(.horizontal, AppSpacing.lg)

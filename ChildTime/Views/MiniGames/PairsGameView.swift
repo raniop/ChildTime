@@ -246,7 +246,7 @@ struct PairsGameView: View {
 
     private func fontSize(_ text: String, side: Side) -> CGFloat {
         // 👶 A גן tile carries one picture and nothing else — so it fills it.
-        if preReader { return isCompact ? 52 : 68 }
+        if preReader { return display.isShort ? 40 : (isCompact ? 52 : 68) }
         let longest = text.split(whereSeparator: { $0 == " " || $0 == "\n" }).map(\.count).max() ?? text.count
         let base: CGFloat = isCompact ? 20 : 28
         if longest >= 11 || text.count > 30 { return base - 4 }

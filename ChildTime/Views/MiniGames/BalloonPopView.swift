@@ -94,7 +94,12 @@ struct BalloonPopView: View {
     private var preReader: Bool { PreReaderGames.isPreReader(profiles.active?.effectiveGrade ?? 1) }
     /// 👶 Bigger balloons — a five-year-old's finger, not a ten-year-old's.
     private var balloonSize: CGSize {
-        if preReader { return isCompact ? CGSize(width: 126, height: 150) : CGSize(width: 158, height: 186) }
+        if preReader {
+            // 🔄 On its side the field is only ~230pt tall: a 150pt balloon
+            // would fill it, so a short screen gets the smaller one.
+            if display.isShort { return CGSize(width: 100, height: 120) }
+            return isCompact ? CGSize(width: 126, height: 150) : CGSize(width: 158, height: 186)
+        }
         return isCompact ? CGSize(width: 96, height: 114) : CGSize(width: 124, height: 146)
     }
 
