@@ -12537,6 +12537,28 @@
         }
       }
     },
+    "אִם הִגְדַּרְתֶּם אוֹתוֹ בֶּעָבָר בַּטֶּלֶפוֹן הַזֶּה — בְּהַגְדָּרוֹת ← זְמַן מָסָךְ:" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إن أعددتموها سابقًا في هذا الهاتف — في الإعدادات ← مدة استخدام الجهاز:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If you set it up on this phone before — in Settings → Screen Time:"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если вы настраивали его на этом телефоне — в Настройки → Экранное время:"
+          }
+        }
+      }
+    },
     "אִם הִגְדַּרְתֶּם לַיֶּלֶד מַגְבָּלוֹת זְמַן מָסָךְ בְּ\"מִשְׁפָּחָה\" / Screen Time שֶׁל אַפְּל — כַּבּוּ אוֹתָן. מֵעַכְשָׁו טוֹפִּי מְנַהֵל אֶת זְמַן הַמָּסָךְ; שְׁתֵּי מַעֲרָכוֹת בְּמַקְבִּיל יִתְנַגְּשׁוּ." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -13598,6 +13620,28 @@
         }
       }
     },
+    "אֶפְשָׁר לִמְצֹא אֶת זֶה תָּמִיד בְּהַגְדָּרוֹת הַהוֹרִים שֶׁל טוֹפִי בַּטֶּלֶפוֹן הַזֶּה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمكنكم دائمًا إيجاد هذا في إعدادات الأهل في Tofy على هذا الهاتف."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can always find this in Tofy's parent settings on this phone."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это всегда можно найти в родительских настройках Tofy на этом телефоне."
+          }
+        }
+      }
+    },
     "אֶפְשָׁר לִסְפּוֹר עַל הָאֶצְבָּעוֹת אוֹ לְצַיֵּר נְקוּדּוֹת וְאָז לִסְפּוֹר אֶת הַכֹּל." : {
       "localizations" : {
         "ar" : {
@@ -14655,6 +14699,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отдельное приложение открыто"
+          }
+        }
+      }
+    },
+    "אַפְּלִיקַצְיָה שֶׁנִּמְצֵאת שָׁם, טוֹפִי לֹא יָכוֹל לִנְעֹל." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التطبيق الموجود هناك لا يستطيع Tofy قفله."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An app on that list is one Tofy cannot lock."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложение из этого списка Tofy заблокировать не может."
           }
         }
       }
@@ -17953,6 +18019,28 @@
         }
       }
     },
+    "בְּ\"אִשּׁוּר קָבוּעַ\" — רַק מָה שֶׁחַיָּב לִהְיוֹת פָּתוּחַ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في «مسموح دائمًا» — فقط ما يجب أن يبقى مفتوحًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In \"Always Allowed\" — only what must stay open"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В «Разрешённых всегда» — только то, что должно быть открыто"
+          }
+        }
+      }
+    },
     "בְּ־%lld נִסְיוֹנוֹת" : {
       "localizations" : {
         "ar" : {
@@ -18413,6 +18501,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "в "
+          }
+        }
+      }
+    },
+    "בְּלִי קוֹד, אֶפְשָׁר לְכַבּוֹת לְטוֹפִי אֶת הַגִּישָׁה בַּהַגְדָּרוֹת — וְהַכֹּל נִפְתָּח." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بدون رمز يمكن إيقاف وصول Tofy في الإعدادات — فيُفتح كل شيء."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Without one, Tofy's access can be switched off in Settings — and everything opens."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Без кода доступ Tofy можно отключить в настройках — и всё откроется."
           }
         }
       }
@@ -23566,6 +23676,28 @@
         }
       }
     },
+    "גּוֹלְלִים עַד לְמַטָּה ← \"יִשּׁוּמִים עִם גִּישָׁה לִזְמַן מָסָךְ\"" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مرّروا للأسفل ← «التطبيقات التي لديها وصول إلى مدة استخدام الجهاز»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scroll to the bottom → \"Apps with Screen Time Access\""
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прокрутите вниз → «Приложения с доступом к Экранному времени»"
+          }
+        }
+      }
+    },
     "גּוֹלְף" : {
       "localizations" : {
         "ar" : {
@@ -25946,6 +26078,28 @@
         }
       }
     },
+    "הִגְדַּרְתֶּם בֶּעָבָר זְמַן מָסָךְ שֶׁל אַפֶּל בַּטֶּלֶפוֹן הַזֶּה?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هل أعددتم سابقًا مدة استخدام الجهاز من Apple في هذا الهاتف؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Did you set up Apple's Screen Time on this phone before?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы раньше настраивали «Экранное время» Apple на этом телефоне?"
+          }
+        }
+      }
+    },
     "הִגַּעְתָּ לְכָל הַדַּקּוֹת שֶׁל הַיּוֹם.\nנִתְרָאֶה מָחָר בַּבֹּקֶר" : {
       "localizations" : {
         "ar" : {
@@ -27796,6 +27950,28 @@
         }
       }
     },
+    "הַגְדִּירוּ קוֹד לִזְמַן מָסָךְ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عيّنوا رمزًا لمدة استخدام الجهاز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set a Screen Time passcode"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Задайте код «Экранного времени»"
+          }
+        }
+      }
+    },
     "הַגְדָּרוֹת" : {
       "localizations" : {
         "ar" : {
@@ -27858,6 +28034,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Настройки: %@"
+          }
+        }
+      }
+    },
+    "הַגְדָּרוֹת ← זְמַן מָסָךְ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإعدادات ← مدة استخدام الجهاز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings → Screen Time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройки → Экранное время"
           }
         }
       }
@@ -37521,6 +37719,28 @@
         }
       }
     },
+    "וְאָז מוֹחֲקִים אֶת טוֹפִי מִמָּסַךְ הַבַּיִת כָּרָגִיל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ثم احذفوا Tofy من الشاشة الرئيسية كالمعتاد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Then delete Tofy from the Home Screen as usual"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Затем удалите Tofy с экрана «Домой» как обычно"
+          }
+        }
+      }
+    },
     "וְהִנֵּה מַתָּנָה קְטַנָּה בִּשְׁבִילְכֶם" : {
       "localizations" : {
         "ar" : {
@@ -38223,6 +38443,28 @@
         }
       }
     },
+    "זְמַן מָסָךְ שֶׁל אַפֶּל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مدة استخدام الجهاز من Apple"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple's Screen Time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Экранное время» Apple"
+          }
+        }
+      }
+    },
     "זְמַן שֶׁהִרְוִיחַ" : {
       "localizations" : {
         "ar" : {
@@ -38483,6 +38725,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Этого нет в списке — прочитайте ещё раз 📝"
+          }
+        }
+      }
+    },
+    "זֶה מְבַטֵּל אֶת כָּל הַנְּעִילוֹת בַּטֶּלֶפוֹן." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا يلغي كل الأقفال في الهاتف."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This removes every lock on the phone."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это снимает все блокировки на телефоне."
           }
         }
       }
@@ -42690,6 +42954,50 @@
         }
       }
     },
+    "טוֹפִי מְנַהֵל עַכְשָׁו אֶת הַנְּעִילָה. כְּדֵי שֶׁשּׁוּם דָּבָר לֹא יִתְנַגֵּשׁ, בְּהַגְדָּרוֹת ← זְמַן מָסָךְ:" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy يدير القفل الآن. كي لا يتعارض شيء، في الإعدادات ← مدة استخدام الجهاز:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy runs the lock now. So nothing clashes, in Settings → Screen Time:"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Теперь блокировкой управляет Tofy. Чтобы ничего не конфликтовало, в Настройки → Экранное время:"
+          }
+        }
+      }
+    },
+    "טוֹפִי עוֹשֶׂה אֶת זֶה עַכְשָׁו — שְׁתֵּי נְעִילוֹת מִתְנַגְּשׁוֹת." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy يقوم بذلك الآن — قفلان يتعارضان."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy does this now — two locks clash."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Теперь это делает Tofy — две блокировки мешают друг другу."
+          }
+        }
+      }
+    },
     "טוֹפִי תָּמִיד פָּתוּחַ. סַמְּנוּ רַק מָה שֶׁצָּרִיךְ לַעֲבֹד גַּם בְּלִי דַּקּוֹת — לְמָשָׁל וָוטְסְאַפּ, מַפּוֹת אוֹ שָׁעוֹן." : {
       "localizations" : {
         "ar" : {
@@ -42708,6 +43016,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tofy всегда открыт. Отметьте только то, что должно работать и без минут, — например WhatsApp, карты или часы."
+          }
+        }
+      }
+    },
+    "טוֹפִי ← כִּבּוּי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy ← إيقاف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy → Off"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy → выключить"
           }
         }
       }
@@ -45600,6 +45930,28 @@
         }
       }
     },
+    "כְּדֵי לִמְחֹק אֶת טוֹפִי מֵהַטֶּלֶפוֹן הַזֶּה:" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لحذف Tofy من هذا الهاتف:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To delete Tofy from this phone:"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чтобы удалить Tofy с этого телефона:"
+          }
+        }
+      }
+    },
     "כְּדֵי לִנְעַל אֶת הַטֶּלֶפוֹן בְּמַצַּב יֶלֶד צָרִיךְ לְאַשֵּׁר Screen Time בִּשְׁבִיל טוֹפִי." : {
       "localizations" : {
         "ar" : {
@@ -46787,6 +47139,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Золотая корона!"
+          }
+        }
+      }
+    },
+    "כַּבּוּ \"זְמַן הַשְׁבָּתָה\" וּ\"מִגְבְּלוֹת יִשּׁוּמִים\"" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أوقفوا «وقت التوقف» و«حدود التطبيقات»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn off \"Downtime\" and \"App Limits\""
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выключите «В покое» и «Лимиты приложений»"
           }
         }
       }
@@ -63155,6 +63529,28 @@
         }
       }
     },
+    "נִפְתַּח הַדַּף שֶׁל טוֹפִי בַּהַגְדָּרוֹת — חִזְרוּ צַעַד אֶחָד אֲחוֹרָה וּבַחֲרוּ \"זְמַן מָסָךְ\"." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تُفتح صفحة Tofy في الإعدادات — ارجعوا خطوة واحدة واختاروا «مدة استخدام الجهاز»."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy's page in Settings opens — go back one step and choose \"Screen Time\"."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Откроется страница Tofy в настройках — вернитесь на шаг назад и выберите «Экранное время»."
+          }
+        }
+      }
+    },
     "נִפְתַּח חַלּוֹן שֶׁל 5 דַּקּוֹת.\nצְאוּ לְמָסַךְ הַבַּיִת ← לְחִיצָה אֲרוּכָּה עַל טוֹפִי ← “הָסֵר אַפְּלִיקַצְיָה”. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד." : {
       "localizations" : {
         "ar" : {
@@ -72026,6 +72422,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "פִּתְחוּ אֶת הַהַגְדָּרוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "افتحوا الإعدادات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть настройки"
           }
         }
       }

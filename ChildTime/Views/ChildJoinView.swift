@@ -322,6 +322,9 @@ struct ChildJoinView: View {
             RemoteSyncManager.shared.resubscribeAll()
             await RemoteSyncManager.shared.consumePendingCommandsNow(for: cid)
             AppAnalytics.deviceJoined(kind: DeviceIdentity.kind)
+            // 🍏 The parent is holding this phone right now — the child's home
+            // shows the "Apple's own Screen Time" tips once (AppleScreenTimeTips).
+            UserDefaults.standard.set(true, forKey: AppleScreenTimeTips.pendingKey)
             message = tr("הִתְחַבַּרְתֶּם! 🎉")
             working = false
         }

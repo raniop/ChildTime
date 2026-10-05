@@ -677,6 +677,7 @@ struct ChildTimeApp: App {
                     if let id = ProfileStore.shared.activeID { ChoreStore.shared.seedDemo(childID: id) }
                 }
         case "devicecontrols": ChildDeviceControlsView()   // parent controls on child device
+        case "appletips": AppleScreenTimeTipsSheet {}        // DEMO_SCREEN=appletips — once, after a child device joins
         case "joinguard":                                  // parent-scans-child-code block dialog
             JoinConfirmView().environmentObject(ParentSettings.shared)
                 .onAppear { ParentSettings.shared.deviceRole = .parent; JoinCoordinator.shared.seedDemo(childCode: true) }

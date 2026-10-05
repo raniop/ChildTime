@@ -16,9 +16,9 @@ struct ChildDeviceControlsView: View {
     @ObservedObject private var profiles = ProfileStore.shared
     @ObservedObject private var kidMode = KidModeManager.shared
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
 
     @State private var showAppPicker = false
-    @State private var removalNote: String?
     @State private var showDisconnect = false
     @State private var selection = SelectionStorage.empty()
     @State private var showAllowPicker = false
@@ -61,6 +61,7 @@ struct ChildDeviceControlsView: View {
                     statusBanner
                     quickOpenCard
                     appsCard
+                    appleScreenTimeCard
                     if teamDiagnostics { lockDiagnosticsCard }
                     allowDeleteCard
                     disconnectButton
@@ -525,40 +526,63 @@ struct ChildDeviceControlsView: View {
         .frame(maxWidth: .infinity)
     }
 
-    // MARK: - Allow deleting the app (parent only, temporary window)
+    // MARK: - 🍏 Apple's own Screen Time
 
-    /// A child device blocks app deletion (so the kid can't uninstall to escape
-    /// the lock). This lets the PARENT — who's already past the code gate — open a
-    /// short window to legitimately uninstall Tofy. It auto-re-locks after 5 min.
+    /// The same three tips the parent saw right after joining, kept here —
+    /// behind the parent code, so this one may open Settings.
+    private var appleScreenTimeCard: some View {
+        controlCard(tint: AppColor.companionGlow) {
+            sectionHead(tr("זְמַן מָסָךְ שֶׁל אַפֶּל"),
+                        tr("אִם הִגְדַּרְתֶּם אוֹתוֹ בֶּעָבָר בַּטֶּלֶפוֹן הַזֶּה — בְּהַגְדָּרוֹת ← זְמַן מָסָךְ:"),
+                        icon: "hourglass", tint: AppColor.companionGlow)
+            AppleScreenTimeStepsList(steps: AppleScreenTimeTips.steps)
+            openSettingsButton
+        }
+    }
+
+    /// Apple publishes no link to the Screen Time page itself (a private
+    /// "prefs:" URL is a rejection), so: Settings, and where to go from there.
+    private var openSettingsButton: some View {
+        VStack(spacing: 6) {
+            Button {
+                Haptic.light()
+                if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+            } label: {
+                Label(tr("פִּתְחוּ אֶת הַהַגְדָּרוֹת"), systemImage: "gearshape.fill")
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+                    .foregroundStyle(Color(hex: "4B3FBF"))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 13)
+                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.92)))
+            }
+            .buttonStyle(.juicy)
+            Text(tr("נִפְתַּח הַדַּף שֶׁל טוֹפִי בַּהַגְדָּרוֹת — חִזְרוּ צַעַד אֶחָד אֲחוֹרָה וּבַחֲרוּ \"זְמַן מָסָךְ\"."))
+                .font(.system(size: 12.5, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.75))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    // MARK: - Deleting Tofy (parent only)
+
+    /// Rani: "חייבים איכשהו להסביר להורה שאם הוא רוצה למחוק את טופי אז הוא חייב
+    /// להיכנס להגדרות זמן מסך לגלול עד למטה לישומים עם גישה לזמן מסך ולסגור את
+    /// טופי". The short "allow deletion for 5 minutes" window this replaces left
+    /// parents stuck; switching off Tofy's Screen Time access is what actually
+    /// releases the device, so the card says exactly that, step by step.
     private var allowDeleteCard: some View {
         controlCard(tint: AppColor.flameOrange) {
             sectionHead(tr("מְחִיקַת הָאַפְּלִיקַצְיָה"),
-                        tr("בְּמַכְשִׁיר יֶלֶד הַמְּחִיקָה חֲסוּמָה. לִמְחִיקָה אֲמִתִּית — פִּתְחוּ חַלּוֹן קָצָר וְהָסִירוּ אֶת טוֹפִי מִמָּסַךְ הַבַּיִת."),
+                        tr("כְּדֵי לִמְחֹק אֶת טוֹפִי מֵהַטֶּלֶפוֹן הַזֶּה:"),
                         icon: "trash", tint: AppColor.flameOrange)
-            Button {
-                Haptic.medium()
-                settings.appRemovalUnlockedUntil = Date().addingTimeInterval(5 * 60)
-                // Disarm any armed background monitor — its re-lock used to
-                // instantly re-block the deletion this button just allowed.
-                shields.cancelScheduledReshield()
-                shields.setAppRemovalLocked(false)
-                removalNote = tr("נִפְתַּח חַלּוֹן שֶׁל 5 דַּקּוֹת. צְאוּ לְמָסַךְ הַבַּיִת ← לְחִיצָה אֲרוּכָּה עַל טוֹפִי ← \u{201C}הָסֵר אַפְּלִיקַצְיָה\u{201D}. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד.")
-            } label: {
-                Label(tr("אַפְשְׁרוּ מְחִיקָה לְ-5 דַּקּוֹת"), systemImage: "trash")
-                    .font(.system(size: 16, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity).padding(.vertical, 13)
-                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(AppColor.flameOrange.opacity(0.55)))
-                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.4), lineWidth: 1))
-            }
-            .buttonStyle(.juicy)
-            if let removalNote {
-                Text(removalNote)
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.9))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            AppleScreenTimeStepsList(steps: [
+                .init(id: 1, title: tr("הַגְדָּרוֹת ← זְמַן מָסָךְ"), detail: ""),
+                .init(id: 2, title: tr("גּוֹלְלִים עַד לְמַטָּה ← \"יִשּׁוּמִים עִם גִּישָׁה לִזְמַן מָסָךְ\""), detail: ""),
+                .init(id: 3, title: tr("טוֹפִי ← כִּבּוּי"), detail: tr("זֶה מְבַטֵּל אֶת כָּל הַנְּעִילוֹת בַּטֶּלֶפוֹן.")),
+                .init(id: 4, title: tr("וְאָז מוֹחֲקִים אֶת טוֹפִי מִמָּסַךְ הַבַּיִת כָּרָגִיל"), detail: ""),
+            ])
+            openSettingsButton
         }
     }
 

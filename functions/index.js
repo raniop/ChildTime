@@ -1098,6 +1098,15 @@ async function notifyParentsAckApplied(householdID, build) {
 }
 
 // Late command acks (parents). `found` is the child's name, or null when unknown.
+// The lock was switched off on a child's device (see wakeOnDeviceCommand).
+function shieldLostMessage(found, lang) {
+  if (lang === "en") { const n = found || "your child"; return { title: `🔓 Tofy's lock was turned off on ${n}'s phone`, body: `Tofy's Screen Time access was switched off there, so every app is open. To fix it: open Tofy on ${n}'s phone and allow Screen Time. A Screen Time passcode keeps this from happening again.` }; }
+  if (lang === "ru") { const n = found || "ребёнка"; return { title: `🔓 Блокировка Tofy выключена на телефоне: ${n}`, body: `Там отключили доступ Tofy к «Экранному времени», и все приложения открыты. Чтобы вернуть: откройте Tofy на этом телефоне и разрешите «Экранное время». Код «Экранного времени» не даст отключить его снова.` }; }
+  if (lang === "ar") { const n = found || "الطفل"; return { title: `🔓 أُوقف قفل Tofy في هاتف ${n}`, body: `أُوقف وصول Tofy إلى «مدة استخدام الجهاز»، فكل التطبيقات مفتوحة. للإصلاح: افتحوا Tofy في هاتف ${n} ووافقوا على «مدة استخدام الجهاز». رمز «مدة استخدام الجهاز» يمنع تكرار ذلك.` }; }
+  const n = found || "הילד/ה";
+  return { title: `🔓 הנעילה של טופי כובתה בטלפון של ${n}`, body: `כיבו לטופי את הגישה לזמן מסך, ועכשיו כל האפליקציות שם פתוחות. כדי להחזיר: פותחים את טופי בטלפון של ${n} ומאשרים זמן מסך. קוד לזמן מסך ימנע את זה בפעם הבאה.` };
+}
+
 function ackMessage(kind, found, deviceName, lang) {
   if (lang === "en") {
     const whose = found ? `${found}'s` : "Your child's";
@@ -1174,6 +1183,15 @@ exports.wakeOnDeviceCommand = onDocumentWritten("childDevices/{id}", async (even
         await wakeChildDevices(after.householdID, "device-command");
       }
     }
+  }
+  // 🔓 The lock was switched OFF on this device — Screen Time access for Tofy
+  // revoked (Settings → Screen Time → apps with access), which drops every
+  // shield. Tell the parents, once per drop. Honest limit: the device reports
+  // this from Tofy itself, so the push comes the next time Tofy runs there.
+  if (before && before.shieldAuthorized === true && after.shieldAuthorized === false
+      && await claimOnce(`shieldlost_${event.params.id}_${Math.floor(Date.now() / 3600000)}`)) {
+    const found = await childNameFor(after.childID, null);
+    await notifyParentsAckApplied(after.householdID, (lang) => shieldLostMessage(found, lang));
   }
   // Lock ACK from the device → close the loop for a parent who already left.
   // Late-only (instant acks show live in the sheet), sender's devices excluded.

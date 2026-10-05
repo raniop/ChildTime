@@ -43,6 +43,8 @@ struct WorldMapView: View {
     @State private var showWhatsNewStory = false
     /// 🧭 The child's one-time tour of this screen (band ג).
     @State private var kidTourActive = false
+    /// 🍏 Once, right after this device joined: Apple's own Screen Time tips.
+    @State private var showAppleTips = false
     /// Captured before the build is marked seen; reading it afterwards is empty.
     @State private var whatsNewStory: [StoryItem] = []
     /// Limited-time event SPLASH (💎×2 etc.) — a full pop-up like the lucky
@@ -707,6 +709,12 @@ struct WorldMapView: View {
                 heroAppeared = true
             }
             checkWorldUnlocks()
+            // 🍏 Just joined: the parent is holding the phone — say what Apple's
+            // own Screen Time may be doing, before anything else.
+            if settings.deviceRole == .child, !storyPending,
+               UserDefaults.standard.bool(forKey: AppleScreenTimeTips.pendingKey) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { showAppleTips = true }
+            }
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { maybeStartKidTour() }
             // Event splash: once a day — see `maybeShowEventSplash`.
             maybeShowEventSplash()
@@ -1002,6 +1010,12 @@ struct WorldMapView: View {
         // 📖 "מה חדש" as a story. It closes itself to this screen when the last
         // one ends, and ✕ does exactly the same thing — never a button that
         // moves the child somewhere else (Rani).
+        .sheet(isPresented: $showAppleTips, onDismiss: {
+            UserDefaults.standard.set(false, forKey: AppleScreenTimeTips.pendingKey)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { maybeStartKidTour() }
+        }) {
+            AppleScreenTimeTipsSheet { showAppleTips = false }
+        }
         // 📖 The story went first; now the pop-ups that waited for it.
         .onChangeCompat(of: showWhatsNewStory) { _, shown in
             guard !shown else { return }
@@ -2333,7 +2347,9 @@ struct WorldMapView: View {
               !storyPending, !showEventSplash, !showingWheel, packReveal == nil, packOffer == nil,
               !showChildGradePicker, !showSchoolYearParty, !showingAppLockSetup,
               selectedWorld == nil, !showingSmartFeed, campaignTracker.popup == nil,
-              !showUpdateNotice, !showDailyChest else { return }
+              !showUpdateNotice, !showDailyChest, !showAppleTips,
+              !UserDefaults.standard.bool(forKey: AppleScreenTimeTips.pendingKey) || AppInfo.isDemoRun
+        else { return }
         kidTourActive = true
     }
 
