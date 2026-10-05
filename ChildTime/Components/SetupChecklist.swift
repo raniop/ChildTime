@@ -133,7 +133,9 @@ struct DeviceQuestionView: View {
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(tr("זה קובע איך מגדירים את טופי"))
+                // Rani: the line says what the answer DOES — which device this child plays on.
+                Text(girl ? tr("זה מגדיר באיזה מכשיר \(name) משחקת") : tr("זה מגדיר באיזה מכשיר \(name) משחק"))
+                    .multilineTextAlignment(.center)
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
 

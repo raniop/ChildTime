@@ -678,6 +678,11 @@ struct ChildTimeApp: App {
                 }
         case "devicecontrols": ChildDeviceControlsView()   // parent controls on child device
         case "appletips": AppleScreenTimeTipsSheet {}        // DEMO_SCREEN=appletips — once, after a child device joins
+        case "devicequestion":                             // DEMO_SCREEN=devicequestion — asked right after a child is added
+            DeviceQuestionView(child: ProcessInfo.processInfo.environment["DEMO_BOY"] == "1"
+                               ? Profile(name: tr("יוֹאָב"), gender: .boy, age: .grade1, grade: 1)
+                               : Profile(name: tr("דָּנָה"), gender: .girl, age: .grade1, grade: 3),
+                               onOwnDevice: {}, onPlaysHere: {})
         case "giftwelcome": GiftWelcomeView(until: Date().addingTimeInterval(30 * 86_400 - 60)) {}   // DEMO_SCREEN=giftwelcome
         case "joinguard":                                  // parent-scans-child-code block dialog
             JoinConfirmView().environmentObject(ParentSettings.shared)

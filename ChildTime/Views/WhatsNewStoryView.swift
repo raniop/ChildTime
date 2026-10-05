@@ -62,6 +62,26 @@ struct WhatsNewStoryView: View {
     /// How far a dismiss drag has pulled the card down, in points.
     @State private var dragY: CGFloat = 0
 
+    // ⏸ The clock can stop. Rani: "אם שמתי את האצבע על המסך באמצע שזה יעצור
+    // את הסטורי כדי שיהיה לי זמן לקרוא, וגם פליי פאוז ליד הרמקול". Two ways,
+    // as in every story app: a finger held down stops it until it lifts, and
+    // ⏸ stops it until ▶ — across cards too, so a slow reader stays in charge.
+    /// ⏸ was pressed. Survives moving between cards; ▶ clears it.
+    @State private var userPaused = false
+    /// A finger is held on the card right now.
+    @State private var holding = false
+    /// Seconds of the current card already shown, not counting the run now going.
+    @State private var shownBefore: Double = 0
+    /// When the run now going started; nil while the clock is stopped.
+    @State private var runStartedAt: Date?
+    /// Bumped on every stop, so the gold bar is redrawn AT the stopped point
+    /// instead of a tween running on to the end underneath it (see `segments`).
+    @State private var stopCount = 0
+    /// The touch now down on the card, if any — when it landed, and the timer
+    /// that turns it from a tap into a hold.
+    @State private var touchDownAt: Date?
+    @State private var holdTimer: Task<Void, Never>?
+
     private var isCompact: Bool { hsc == .compact }
     /// A short screen — the open foldable, an SE — read off our own canvas.
     private var short: Bool { canvas.height > 0 && canvas.height < DisplayGeometry.shortHeight }
@@ -164,9 +184,8 @@ struct WhatsNewStoryView: View {
                 begin()
             }
         }
-        .onDisappear { ticker?.cancel(); SpeechReader.shared.stop() }
+        .onDisappear { ticker?.cancel(); holdTimer?.cancel(); SpeechReader.shared.stop() }
         .onChangeCompat(of: index) { _, _ in begin() }
-        .gesture(swipe)
     }
 
     // MARK: - 👧 The child's story: art first, name under it
@@ -355,7 +374,7 @@ struct WhatsNewStoryView: View {
     /// Read it as state, not as a timeline: before = done, current = running,
     /// after = not started.
     private func segmentPhase(_ i: Int) -> String {
-        "\(i)." + (i < index ? "done" : i == index ? "now" : "next")
+        "\(i)." + (i < index ? "done" : i == index ? "now.\(stopCount)" : "next")
     }
 
     private func segmentFill(_ i: Int) -> CGFloat {
@@ -384,6 +403,7 @@ struct WhatsNewStoryView: View {
                 Spacer(minLength: 0)
                 // 🔊 reads the story out loud. A child who cannot read yet hears
                 // it automatically (below) and can always ask again here.
+                pauseButton
                 roundButton("🔊", label: tr("הַקְשִׁיבוּ שׁוּב")) {
                     if let item { SpeechReader.shared.speak(item.spokenText) }
                 }
@@ -397,6 +417,7 @@ struct WhatsNewStoryView: View {
                     .font(.system(size: 12.5, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white.opacity(0.9))
                 Spacer(minLength: 0)
+                pauseButton
                 Button { finish() } label: {
                     Text(tr("דלג"))
                         .font(.system(size: 13, weight: .heavy, design: .rounded))
@@ -408,6 +429,26 @@ struct WhatsNewStoryView: View {
                 .buttonStyle(.juicy)
             }
         }
+    }
+
+    /// ⏸ / ▶ — beside 🔊 for a child, beside "דלג" for a parent.
+    private var pauseButton: some View {
+        Button {
+            Haptic.light()
+            userPaused.toggle()
+            userPaused ? stopClock() : startClock()
+        } label: {
+            Image(systemName: userPaused ? "play.fill" : "pause.fill")
+                .font(.system(size: 14, weight: .heavy))
+                .foregroundStyle(.white)
+                .frame(width: 34, height: 34)
+                .background(Circle().fill(.white.opacity(userPaused ? 0.34 : 0.2)))
+                .overlay(Circle().strokeBorder(.white.opacity(0.42), lineWidth: 1))
+        }
+        .buttonStyle(.juicy)
+        .accessibilityLabel(userPaused
+                            ? (isKid ? tr("הַמְשֵׁךְ") : tr("המשך"))
+                            : (isKid ? tr("עֲצִירָה") : tr("עצירה")))
     }
 
     private func roundButton(_ glyph: String, label: String, action: @escaping () -> Void) -> some View {
@@ -489,16 +530,87 @@ struct WhatsNewStoryView: View {
     /// This layer sits under the chrome in the ZStack, so 🔊, ✕ / "דלג" and the
     /// last card's button keep their own taps; the card's content is
     /// `allowsHitTesting(false)` so it cannot swallow a tap meant for a side.
+    ///
+    /// ⏸ It is also where a finger is HELD. One touch, read three ways: lifted
+    /// quickly in place → a tap on a side; held in place → the clock stops
+    /// until it lifts (and lifting moves nowhere); moved → a swipe. They are
+    /// one gesture rather than three because a tap, a hold and a swipe on the
+    /// same layer would otherwise fight over the same finger.
     private var tapZones: some View {
         GeometryReader { g in
             Color.clear
                 .contentShape(Rectangle())
-                .gesture(SpatialTapGesture(coordinateSpace: .global).onEnded { tap in
-                    let frame = g.frame(in: .global)
-                    sideTap(fromLeft: (tap.location.x - frame.minX) / max(1, frame.width))
-                })
+                .gesture(touch(in: g))
         }
         .ignoresSafeArea()
+    }
+
+    /// Held this long without moving, a touch is reading, not tapping.
+    private static let holdAfter: Double = 0.22
+    /// Moved further than this, a touch is a swipe.
+    private static let tapSlop: CGFloat = 12
+
+    private func touch(in g: GeometryProxy) -> some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .global)
+            .onChanged { value in
+                guard !finished else { return }
+                if touchDownAt == nil {
+                    touchDownAt = Date()
+                    holdTimer?.cancel()
+                    holdTimer = Task { @MainActor in
+                        try? await Task.sleep(nanoseconds: UInt64(Self.holdAfter * 1_000_000_000))
+                        guard !Task.isCancelled, touchDownAt != nil, dragY == 0 else { return }
+                        holding = true
+                        stopClock()
+                    }
+                }
+                let dx = value.translation.width, dy = value.translation.height
+                if hypot(dx, dy) > Self.tapSlop, !holding { holdTimer?.cancel() }
+                // 👇 Pulling down drags the whole card towards dismissal.
+                if dragY > 0 || (dy > Self.tapSlop && dy > abs(dx)) {
+                    holdTimer?.cancel()
+                    if dragY == 0 { stopClock() }   // nothing advances under the finger
+                    dragY = max(0, dy)
+                }
+            }
+            .onEnded { value in
+                holdTimer?.cancel()
+                let wasHolding = holding
+                holding = false
+                touchDownAt = nil
+                guard !finished else { return }
+                let dx = value.translation.width, dy = value.translation.height
+
+                // A drag that was going down — finish the dismiss or spring back.
+                if dragY > 0 {
+                    let projected = dy + value.predictedEndTranslation.height * 0.25
+                    if dy > Self.dismissDistance || projected > Self.dismissDistance * 2 {
+                        Haptic.light()
+                        finish()
+                    } else {
+                        withAnimation(.spring(response: 0.34, dampingFraction: 0.86)) { dragY = 0 }
+                        startClock()   // carries on from where it stopped
+                    }
+                    return
+                }
+
+                // Sideways — between stories.
+                if abs(dx) > Self.tapSlop, abs(dx) > abs(dy) {
+                    let towardsStart = dx > 0
+                    let forward = LayoutDirection.app == .rightToLeft ? towardsStart : !towardsStart
+                    forward ? advance() : back()
+                    startClock()   // a held finger that swiped lets go of the clock too
+                    return
+                }
+
+                // Held to read — letting go carries on, and moves nowhere.
+                if wasHolding { startClock(); return }
+
+                // A tap.
+                guard hypot(dx, dy) <= Self.tapSlop else { startClock(); return }
+                let frame = g.frame(in: .global)
+                sideTap(fromLeft: (value.location.x - frame.minX) / max(1, frame.width))
+            }
     }
 
     /// `fromLeft` is 0 at the physical left edge and 1 at the right.
@@ -506,51 +618,6 @@ struct WhatsNewStoryView: View {
         let rtl = LayoutDirection.app == .rightToLeft
         let onStartSide = rtl ? fromLeft > 0.68 : fromLeft < 0.32
         onStartSide ? back() : advance()
-    }
-
-    /// One gesture for both axes, so they cannot fight each other.
-    ///
-    /// Sideways moves between stories. **Downwards dismisses**, the way every
-    /// story app does it (Rani: "וסלייד למטה שמעיף"): the card follows the
-    /// finger, and past the threshold it closes to the home screen — exactly
-    /// what ✕ / "דלג" do. Short of the threshold it springs back and the story
-    /// starts its clock again.
-    ///
-    /// No `scaleEffect` while dragging: this screen is mostly text, and a
-    /// scaled text layer is a blurred text layer for the whole drag. The card
-    /// takes a corner radius and lifts instead.
-    private var swipe: some Gesture {
-        DragGesture(minimumDistance: 14)
-            .onChanged { value in
-                guard !finished else { return }
-                let dy = value.translation.height
-                guard dy > 0, dy > abs(value.translation.width) else { return }
-                if dragY == 0 { ticker?.cancel() }   // nothing advances under the finger
-                dragY = dy
-            }
-            .onEnded { value in
-                guard !finished else { return }
-                let dy = value.translation.height
-                let dx = value.translation.width
-
-                // A drag that was going down — finish the dismiss or spring back.
-                if dragY > 0 || (dy > 0 && dy > abs(dx)) {
-                    let projected = dy + value.predictedEndTranslation.height * 0.25
-                    if dy > Self.dismissDistance || projected > Self.dismissDistance * 2 {
-                        Haptic.light()
-                        finish()
-                    } else {
-                        withAnimation(.spring(response: 0.34, dampingFraction: 0.86)) { dragY = 0 }
-                        begin()   // the story it interrupted starts over
-                    }
-                    return
-                }
-
-                guard abs(dx) > abs(dy) else { return }
-                let towardsStart = dx > 0
-                let forward = LayoutDirection.app == .rightToLeft ? towardsStart : !towardsStart
-                forward ? advance() : back()
-            }
     }
 
     /// How far down a drag has to go to let go of the story.
@@ -566,14 +633,40 @@ struct WhatsNewStoryView: View {
         // 📸 A screenshot run holds the story still — the segment is drawn
         // part-filled so the bar still reads as "mid-story".
         guard !AppInfo.isDemoRun || liveInDemo else { snap { risen = true; fill = 0.45 }; return }
-        let seconds = demoSeconds ?? item?.seconds ?? 5
-        withAnimation(.linear(duration: seconds)) { fill = 1 }
+        shownBefore = 0
+        runStartedAt = nil
         speakIfPreReader()
+        startClock()
+    }
+
+    /// This card's whole time on screen.
+    private var cardSeconds: Double { demoSeconds ?? item?.seconds ?? 5 }
+
+    /// Runs the clock from wherever it stopped — unless something is still
+    /// holding it: ⏸, a finger, a dismiss drag, or a screenshot run.
+    private func startClock() {
+        guard !finished, runStartedAt == nil, !userPaused, !holding, dragY == 0,
+              !AppInfo.isDemoRun || liveInDemo else { return }
+        let seconds = cardSeconds
+        let left = max(0.05, seconds - shownBefore)
+        runStartedAt = Date()
+        withAnimation(.linear(duration: left)) { fill = 1 }
+        ticker?.cancel()
         ticker = Task { @MainActor in
-            try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+            try? await Task.sleep(nanoseconds: UInt64(left * 1_000_000_000))
             guard !Task.isCancelled else { return }
             advance()
         }
+    }
+
+    /// Stops the clock and the gold bar exactly where they are.
+    private func stopClock() {
+        ticker?.cancel()
+        guard let started = runStartedAt else { return }
+        shownBefore = min(cardSeconds, shownBefore + Date().timeIntervalSince(started))
+        runStartedAt = nil
+        let at = CGFloat(shownBefore / max(0.05, cardSeconds))
+        snap { stopCount += 1; fill = at }
     }
 
     /// 👶 A child who cannot read yet gets the story spoken without asking —

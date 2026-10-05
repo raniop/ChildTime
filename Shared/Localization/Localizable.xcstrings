@@ -39521,6 +39521,50 @@
         }
       }
     },
+    "זה מגדיר באיזה מכשיר %@ משחק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا يحدد على أي جهاز يلعب %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This sets which device %@ plays on"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это определяет, на каком устройстве играет %@"
+          }
+        }
+      }
+    },
+    "זה מגדיר באיזה מכשיר %@ משחקת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا يحدد على أي جهاز تلعب %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This sets which device %@ plays on"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это определяет, на каком устройстве играет %@"
+          }
+        }
+      }
+    },
     "זה מה ש-iOS קיבל מאיתנו ברגע זה — לא מה שסומן במסכים למעלה." : {
       "localizations" : {
         "ar" : {
@@ -39539,28 +39583,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Это то, что iOS получила от нас сейчас, — а не то, что отмечено на экранах выше."
-          }
-        }
-      }
-    },
-    "זה קובע איך מגדירים את טופי" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "هذا يحدد كيف نُعدّ Tofy"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This decides how Tofy is set up"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "От этого зависит, как настроить Tofy"
           }
         }
       }
@@ -69394,6 +69416,28 @@
         }
       }
     },
+    "עֲצִירָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إيقاف مؤقت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пауза"
+          }
+        }
+      }
+    },
     "עֲצָמוֹת, לֵב, נְשִׁימָה וּבְרִיאוּת" : {
       "localizations" : {
         "ar" : {
@@ -72465,6 +72509,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Новый уровень"
+          }
+        }
+      }
+    },
+    "עצירה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إيقاف مؤقت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пауза"
           }
         }
       }
