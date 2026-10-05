@@ -678,6 +678,21 @@ struct ChildTimeApp: App {
                 }
         case "devicecontrols": ChildDeviceControlsView()   // parent controls on child device
         case "appletips": AppleScreenTimeTipsSheet {}        // DEMO_SCREEN=appletips — once, after a child device joins
+        // 🧭 The new-parent flow — DEMO_SCREEN=onbfamily | onbconnect [DEMO_LINKED=1]
+        // | onbdone [DEMO_HERE=1] | childlock [DEMO_APPROVED=1 | DEMO_FAILED=1] | playoffer
+        case "onbfamily":
+            FamilyChoiceView().onAppear { ParentOnboarding.begin() }
+        case "onbconnect":
+            OnboardingConnectView(child: ProfileStore.shared.active ?? Profile(name: tr("נועה"), gender: .girl),
+                                  onLocked: {}, onLater: {})
+        case "onbdone":
+            OnboardingDoneView(child: ProfileStore.shared.active ?? Profile(name: tr("נועה"), gender: .girl),
+                               playsHere: ProcessInfo.processInfo.environment["DEMO_HERE"] == "1") {}
+        case "childlock":
+            ChildLockSetupView {}
+        case "playoffer":
+            PlayNowOfferView(child: ProfileStore.shared.active ?? Profile(name: tr("נועה"), gender: .girl),
+                             onPlay: {}, onLater: {})
         case "devicequestion":                             // DEMO_SCREEN=devicequestion — asked right after a child is added
             DeviceQuestionView(child: ProcessInfo.processInfo.environment["DEMO_BOY"] == "1"
                                ? Profile(name: tr("יוֹאָב"), gender: .boy, age: .grade1, grade: 1)

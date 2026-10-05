@@ -10,6 +10,7 @@ struct ContentView: View {
     @StateObject private var kidMode = KidModeManager.shared
     @StateObject private var joinCoord = JoinCoordinator.shared
     @StateObject private var liveGame = LiveGameManager.shared
+    @AppStorage(ChildLockSetup.pendingKey) private var lockSetupPending = false
 
     /// Guests (no account) can answer this many questions before registration
     /// is required.
@@ -126,8 +127,6 @@ struct ContentView: View {
     private var parentFlow: some View {
         if !auth.isRealAccount {
             LoginGateView(limitBanner: auth.isGuest)
-        } else if !settings.hasConsented {
-            ConsentView()
         } else if settings.pendingJoinFamily && auth.isSignedIn {
             // Co-parent who chose "join an existing family" → a focused, guided
             // join screen BEFORE the dashboard (clears the flag on join/skip).
@@ -136,9 +135,14 @@ struct ContentView: View {
             // This email was pre-invited by the family owner — one-tap join.
             EmailInviteWelcomeView()
         } else if household.household == nil, household.needsFamilyChoice {
-            // Signed-in account with NO family: explicit new-vs-join fork —
-            // nobody gets a silently-created empty household (Rani).
+            // 🧭 A new account: step ① of the new-parent flow — the family's
+            // name, with the parental consent on the same screen (it used to be
+            // a separate privacy screen in front of this one).
             FamilyChoiceView()
+        } else if !settings.hasConsented, household.household != nil {
+            // A parent who reached a family another way (co-parent join, email
+            // invite) still gives the parental consent once.
+            ConsentView()
         } else {
             // The control center is locked behind the parent code + Face ID.
             ParentGateView(allowClose: false) {
@@ -197,6 +201,12 @@ struct ContentView: View {
             } else {
                 WorldMapView()
             }
+        }
+        // 🧭 Step ④ — just joined: approve Screen Time (and its passcode)
+        // before the child's home, with the parent still holding the phone.
+        .fullScreenCover(isPresented: Binding(get: { lockSetupPending && !kidMode.active },
+                                              set: { if !$0 { lockSetupPending = false } })) {
+            ChildLockSetupView { lockSetupPending = false }
         }
         .onAppear {
             if profiles.activeID != cid { profiles.setActiveID(cid) }

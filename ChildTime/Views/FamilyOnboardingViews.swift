@@ -8,175 +8,137 @@ struct FamilyChoiceView: View {
     @EnvironmentObject var settings: ParentSettings
     @StateObject private var household = HouseholdManager.shared
     @State private var creating = false
-    /// Naming the family was only ever reachable from the parent home title —
-    /// the sign-up flow never asked (OnboardingView, which had the field, is not
-    /// part of the real flow). Ask here, once, while creating the family.
-    @State private var namingNewFamily = false
     @State private var familyName = ""
+    @State private var prefilled = false
+
+    /// 🧭 Step ① of the new-parent flow (`ParentOnboarding`), and the first
+    /// screen after sign-up. It used to be a fork — "new to Tofy / the other
+    /// parent already set up" — then a naming screen, then a separate privacy
+    /// screen. Now it is one screen: the family's name, already filled in from
+    /// the parent's own name, with the consent line under it; joining an
+    /// existing family is a link at the bottom (Rani, 2026-10-05).
+    private var parentName: String {
+        #if DEBUG
+        // 🧪 DEMO_PARENT_NAME — the name Apple/Google would hand over at sign-up
+        // (the DEMO_NEWPARENT walk-through signs in without one).
+        if let n = ProcessInfo.processInfo.environment["DEMO_PARENT_NAME"] { return n }
+        #endif
+        return AuthManager.shared.displayName ?? ""
+    }
+    private var firstName: String {
+        parentName.split(separator: " ").first.map(String.init) ?? ""
+    }
 
     var body: some View {
         ZStack {
             GlassBackdrop()
             SparkleField(count: 12, size: 11)
-            if namingNewFamily { namingView } else { choiceView }
-        }
-        .environment(\.layoutDirection, .app)
-    }
-
-    // MARK: - 👪 Name the family (new families only)
-
-    private var namingView: some View {
-        VStack(spacing: AppSpacing.xl) {
-            VStack(spacing: AppSpacing.sm) {
-                Text("👪").font(.system(size: 54))
-                Text(tr("אֵיךְ נִקְרָא לַמִּשְׁפָּחָה?"))
+            VStack(spacing: AppSpacing.lg) {
+                OnboardingStepsBar(current: 1)
+                    .padding(.top, 8)
+                Spacer(minLength: 8)
+                Text("👪").font(.system(size: 60))
+                Text(firstName.isEmpty ? tr("איך קוראים למשפחה?")
+                                       : tr("ברוכים הבאים, \(firstName)! 👋\nאיך קוראים למשפחה?"))
                     .font(.system(size: 26, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
-                Text(tr("הַשֵּׁם מוֹפִיעַ בַּמָּסָךְ הָרָאשִׁי וּבַהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה."))
-                    .font(.system(size: 14.5, weight: .medium, design: .rounded))
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(tr("השם יופיע במסך הבית ובעדכונים"))
+                    .font(.system(size: 15, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, AppSpacing.lg)
-            }
-
-            // The field arrives PRE-FILLED with a guess from the parent's own
-            // name, so it holds a value, not a placeholder. Tapping in the middle
-            // of it spliced what you typed into the guess ("משפחת QA-TESTגולן"),
-            // and a centred field gives iOS nowhere to put a clear button — so
-            // here is an explicit one.
-            HStack(spacing: 8) {
-                if !familyName.isEmpty {
-                    Button {
-                        Haptic.light()
-                        familyName = ""
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 18))
-                            .foregroundStyle(.white.opacity(0.6))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(tr("נַקּוּ אֶת הַשֵּׁם"))
-                }
-                TextField("", text: $familyName,
-                          prompt: Text(tr("לְמָשָׁל: מִשְׁפַּחַת גּוֹלָן")).foregroundColor(.white.opacity(0.55)))
-                    .font(.system(size: 20, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
-                    .submitLabel(.done)
-                    .frame(maxWidth: .infinity)
-            }
-            .padding(.horizontal, 16).padding(.vertical, 14)
-            .glassPane(radius: AppRadius.large)
-            .frame(maxWidth: 460)
-
-            VStack(spacing: AppSpacing.sm) {
-                JuicyButton(gradient: AppGradient.success, glowColor: AppColor.successMint) {
+                nameField
+                Spacer(minLength: 8)
+                consentLine
+                OnboardingFooter(title: tr("המשך"), busy: creating,
+                                 link: tr("הוזמנתם על ידי הורה אחר? הצטרפו למשפחה"),
+                                 onLink: { settings.pendingJoinFamily = true }) {
                     createFamily(named: familyName)
-                } label: {
-                    if creating { ProgressView().tint(.white) } else { Text(tr("צְרוּ אֶת הַמִּשְׁפָּחָה")) }
                 }
-                .disabled(creating)
-                Button(tr("אֶקְבַּע אֶת הַשֵּׁם אַחַר כָּךְ")) { createFamily(named: "") }
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.75))
-                    .disabled(creating)
             }
-            .frame(maxWidth: 460)
+            .padding(.horizontal, OnboardingFooter.sidePadding)
+            .frame(maxWidth: 520)
+            .frame(maxWidth: .infinity)
         }
-        .padding(.horizontal, AppSpacing.lg)
+        .dismissKeyboardOnTap()
+        .environment(\.layoutDirection, .app)
+        .onAppear {
+            guard !prefilled else { return }
+            prefilled = true
+            familyName = household.suggestedFamilyName ?? ""
+            #if DEBUG
+            let words = parentName.split(separator: " ")
+            if familyName.isEmpty, words.count >= 2, let last = words.last { familyName = tr("משפחת \(String(last))") }
+            #endif
+        }
+    }
+
+    // The field arrives PRE-FILLED with a guess from the parent's own name, so
+    // it holds a value, not a placeholder — with an explicit clear button, since
+    // a centred field gives iOS nowhere to put one.
+    private var nameField: some View {
+        HStack(spacing: 8) {
+            if !familyName.isEmpty {
+                Button {
+                    Haptic.light()
+                    familyName = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundStyle(.white.opacity(0.6))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(tr("ניקוי השם"))
+            }
+            TextField("", text: $familyName,
+                      prompt: Text(tr("למשל: משפחת גולן")).foregroundColor(.white.opacity(0.55)))
+                .font(.system(size: 21, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+                .submitLabel(.done)
+                .frame(maxWidth: .infinity)
+            Image(systemName: "pencil")
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(.white.opacity(0.6))
+        }
+        .padding(.horizontal, 16).padding(.vertical, 14)
+        .glassPane(radius: AppRadius.large)
+    }
+
+    /// The parental consent the separate privacy screen used to take — the
+    /// same record (`consentVersionAccepted` + the account's consent stamp),
+    /// given by continuing (Rani: "לאחד עם ההרשמה").
+    private var consentLine: some View {
+        VStack(spacing: 4) {
+            Text(tr("בהמשך אתם מאשרים כהורים את תנאי השימוש ואת מדיניות הפרטיות"))
+                .font(.system(size: 12.5, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.8))
+                .multilineTextAlignment(.center)
+            HStack(spacing: 14) {
+                Link(tr("תנאי שימוש"), destination: URL(string: "https://tofyapp.com/terms")!)
+                Text("•").foregroundStyle(.white.opacity(0.4))
+                Link(tr("מדיניות פרטיות"), destination: URL(string: "https://tofyapp.com/privacy")!)
+            }
+            .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+            .foregroundStyle(AppColor.starGold)
+        }
     }
 
     private func createFamily(named name: String) {
         guard !creating else { return }
         creating = true
         Haptic.medium()
+        settings.consentVersionAccepted = Consent.currentVersion
+        ParentOnboarding.begin()
         Task {
             await household.createOwnHousehold()
+            household.recordConsent(version: Consent.currentVersion)
             let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty { household.setFamilyName(trimmed) }
             creating = false
         }
     }
 
-    private var choiceView: some View {
-        VStack(spacing: AppSpacing.xl) {
-                VStack(spacing: AppSpacing.sm) {
-                    Text("👋").font(.system(size: 54))
-                    Text(tr("עוֹד אֵין לַחֶשְׁבּוֹן הַזֶּה מִשְׁפָּחָה"))
-                        .font(.system(size: 26, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .multilineTextAlignment(.center)
-                    Text(tr("רַק שְׁאֵלָה אַחַת כְּדֵי שֶׁנֵּדַע לְאָן לְהַמְשִׁיךְ:"))
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.85))
-                }
-
-                VStack(spacing: AppSpacing.lg) {
-                    choiceCard(
-                        emoji: "🏠",
-                        title: tr("אֲנַחְנוּ חֲדָשִׁים בְּטוֹפִי"),
-                        subtitle: tr("צְרוּ מִשְׁפָּחָה חֲדָשָׁה וְהַתְחִילוּ לְהַגְדִּיר"),
-                        glow: AppColor.starGold,
-                        busy: creating
-                    ) {
-                        guard !creating else { return }
-                        Haptic.light()
-                        familyName = household.suggestedFamilyName ?? ""
-                        namingNewFamily = true
-                    }
-                    choiceCard(
-                        emoji: "👨‍👩‍👧",
-                        title: tr("הַהוֹרֶה הַשֵּׁנִי כְּבָר הִגְדִּיר"),
-                        subtitle: tr("הִצְטָרְפוּ לַמִּשְׁפָּחָה הַקַּיֶּמֶת — סוֹרְקִים קוֹד מֵהַמַּכְשִׁיר שֶׁלּוֹ"),
-                        glow: AppColor.companionGlow,
-                        busy: false
-                    ) {
-                        Haptic.light()
-                        settings.pendingJoinFamily = true
-                    }
-                }
-                .frame(maxWidth: 460)
-
-                Text(tr("טִיפּ: הַהוֹרֶה שֶׁכְּבָר בִּפְנִים יָכוֹל לְהַזְמִין אֶתְכֶם בְּאִימֵיל — וְאָז הַמָּסָךְ הַזֶּה נֶעֱלָם לְגַמְרֵי 😊"))
-                    .font(.system(size: 12.5, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.7))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, AppSpacing.xl)
-            }
-        .padding(.horizontal, AppSpacing.lg)
-    }
-
-    private func choiceCard(emoji: String, title: String, subtitle: String,
-                            glow: Color, busy: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: AppSpacing.md) {
-                Text(emoji)
-                    .font(.system(size: 36))
-                    .frame(width: 60, height: 60)
-                    .background(Circle().fill(glow.opacity(0.3)))
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(title)
-                        .font(.system(size: 19, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                    Text(subtitle)
-                        .font(.system(size: 13.5, weight: .medium, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.8))
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                if busy { ProgressView().tint(.white) }
-                else {
-                    Image(systemName: "chevron.forward")
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundStyle(.white.opacity(0.55))
-                }
-            }
-            .padding(AppSpacing.lg)
-            .glassPane(radius: AppRadius.large)
-        }
-        .buttonStyle(.juicy)
-    }
 }
 
 /// "משפחת X מחכה לך" — the account's email was pre-invited by the family

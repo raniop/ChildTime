@@ -84,6 +84,11 @@ struct ParentDashboardView: View {
     @State private var showGiftWelcome = false
     /// 🚀 Band ב: "does this child have a device of their own?"
     @State private var deviceQuestionChild: Profile? = nil
+    // 🧭 The new-parent flow (`ParentOnboarding`): ③ the QR that waits for the
+    // lock, the "הכל מוכן" moment, and the "play now?" offer after the tour.
+    @State private var onbConnectChild: Profile? = nil
+    @State private var onbDone: OnboardingFinish? = nil
+    @State private var playOfferChild: Profile? = nil
     /// The checklist reads its answers from local defaults; this nudges a re-read.
     @State private var setupTick = 0
 
@@ -481,6 +486,14 @@ struct ParentDashboardView: View {
             // mark themselves with `.coachMark`.
             .coachTour(parentTourSteps, forKid: false, isActive: $parentTourActive) {
                 CoachTours.markDone(Self.parentTourKey)
+                // 🧒 A child who plays on THIS phone: the tour ends with the offer
+                // to hand it over right now.
+                if let id = ParentOnboarding.offerPlayChildID {
+                    ParentOnboarding.offerPlayChildID = nil
+                    if let p = profiles.profiles.first(where: { $0.id == id }) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { playOfferChild = p }
+                    }
+                }
             }
             .navigationBarTitleDisplayMode(.inline)
             // Keep the title floating over the app gradient. Without this, iOS pops
@@ -677,15 +690,56 @@ struct ParentDashboardView: View {
                     setupTick &+= 1
                     deviceQuestionChild = nil
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
-                        qrCode = nil
-                        qrChild = p
+                        if ParentOnboarding.isActive {
+                            onbConnectChild = p
+                        } else {
+                            qrCode = nil
+                            qrChild = p
+                        }
                     }
                 }, onPlaysHere: {
                     SetupProgress.setPlan(.here, p.id)
                     setupTick &+= 1
                     deviceQuestionChild = nil
+                    if ParentOnboarding.isActive {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                            onbDone = OnboardingFinish(child: p, playsHere: true)
+                        }
+                    }
                 })
                 .presentationDetents([.large])
+            }
+            .fullScreenCover(item: $onbConnectChild) { p in
+                OnboardingConnectView(child: p, onLocked: {
+                    onbConnectChild = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                        onbDone = OnboardingFinish(child: p, playsHere: false)
+                    }
+                }, onLater: {
+                    // "Later" ends the guided flow; the home's "עוד קצת וסיימנו"
+                    // card keeps the unfinished device step, and the gift and
+                    // the tour come in their usual order.
+                    onbConnectChild = nil
+                    ParentOnboarding.finish()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                        if GiftWelcome.isDue(household.household) { showGiftWelcome = true }
+                        else { startParentTour() }
+                    }
+                })
+            }
+            .fullScreenCover(item: $onbDone) { done in
+                OnboardingDoneView(child: done.child, playsHere: done.playsHere) {
+                    ParentOnboarding.finish()
+                    if done.playsHere { ParentOnboarding.offerPlayChildID = done.child.id }
+                    onbDone = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { startParentTour() }
+                }
+            }
+            .fullScreenCover(item: $playOfferChild) { p in
+                PlayNowOfferView(child: p, onPlay: {
+                    playOfferChild = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { kidModeStart = p }
+                }, onLater: { playOfferChild = nil })
             }
 
             .sheet(item: $parentHelp.promptedRequest) { req in
@@ -701,6 +755,20 @@ struct ParentDashboardView: View {
                 // parent side too (Rani) — once per school year.
                 if AppInfo.isDemoRun {
                     // screenshots / review: nothing pops over the screen
+                } else if isRoot, ParentOnboarding.isActive, let first = rows.first?.profile,
+                          onbConnectChild == nil, onbDone == nil, deviceQuestionChild == nil, !showingCreateChild {
+                    // 🧭 The app closed mid-flow — pick it up where it stopped.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                        switch SetupProgress.plan(first.id) {
+                        case .here?: onbDone = OnboardingFinish(child: first, playsHere: true)
+                        case .own?:
+                            let devs = (household.devicesByChild[first.id.uuidString] ?? []).filter { $0.role != "parent" }
+                            if devs.contains(where: { $0.shieldAuthorized == true }) {
+                                onbDone = OnboardingFinish(child: first, playsHere: false)
+                            } else { onbConnectChild = first }
+                        case nil: deviceQuestionChild = first
+                        }
+                    }
                 } else if isRoot, SchoolYearCelebration.shouldGreetParent, !rows.isEmpty {
                     // Mark on SHOW, not on dismiss: force-quitting (or any exit
                     // that skipped the dismiss closure) left it unmarked and it
@@ -753,7 +821,7 @@ struct ParentDashboardView: View {
                     // the empty dashboard stays prompt-free). iOS shows this
                     // dialog once ever; decliners keep the red banner as the
                     // manual path.
-                    if !rows.isEmpty {
+                    if !rows.isEmpty, !ParentOnboarding.isActive {
                         await PushManager.shared.requestAuthorizationIfNotDetermined()
                     }
                     await push.refreshAuthorizationStatus()
@@ -813,11 +881,16 @@ struct ParentDashboardView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, AppSpacing.xl)
             linkButton
-            if !push.authorized {
+            if !push.authorized, !ParentOnboarding.isActive {
                 notificationsBanner.frame(maxWidth: 460)
             }
         }
         .padding(AppSpacing.lg)
+        .onAppear {
+            // 🧭 Step ② straight after the parent code — no empty home between.
+            guard isRoot, ParentOnboarding.isActive, profiles.profiles.isEmpty else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { showingCreateChild = true }
+        }
     }
 
     /// Shown on the parent control screen when notifications are off — taps
@@ -1805,7 +1878,8 @@ struct ParentDashboardView: View {
 
     private func startParentTour() {
         guard isRoot, !rows.isEmpty, !showWhatsNewStory, !showWhatsNew, !showSchoolYearParty,
-              !parentTourActive, !showGiftWelcome, !GiftWelcome.isDue(household.household) else { return }
+              !parentTourActive, !showGiftWelcome, !GiftWelcome.isDue(household.household),
+              !ParentOnboarding.isActive, onbConnectChild == nil, onbDone == nil else { return }
         parentTourActive = true
     }
 
@@ -2523,4 +2597,12 @@ struct LivePulseDot: View {
         .environmentObject(ParentSettings.shared)
         .environmentObject(AuthManager.shared)
         .environment(\.layoutDirection, .app)
+}
+
+/// 🧭 "הכל מוכן" at the end of the new-parent flow — which child, and whether
+/// they play on this phone (then the home tour follows, and the offer to play).
+struct OnboardingFinish: Identifiable {
+    let id = UUID()
+    let child: Profile
+    let playsHere: Bool
 }

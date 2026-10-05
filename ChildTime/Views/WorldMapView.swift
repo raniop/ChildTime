@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct WorldMapView: View {
+    @AppStorage(ChildLockSetup.pendingKey) private var lockSetupPending = false
     @EnvironmentObject var progress: ProgressStore
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var shields: ShieldManager
@@ -1010,6 +1011,10 @@ struct WorldMapView: View {
         // 📖 "מה חדש" as a story. It closes itself to this screen when the last
         // one ends, and ✕ does exactly the same thing — never a button that
         // moves the child somewhere else (Rani).
+        // 🧭 The lock step (ChildLockSetupView) just closed — the tour can run.
+        .onChangeCompat(of: lockSetupPending) { _, pending in
+            if !pending { DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { maybeStartKidTour() } }
+        }
         .sheet(isPresented: $showAppleTips, onDismiss: {
             UserDefaults.standard.set(false, forKey: AppleScreenTimeTips.pendingKey)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { maybeStartKidTour() }
@@ -2348,7 +2353,8 @@ struct WorldMapView: View {
               !showChildGradePicker, !showSchoolYearParty, !showingAppLockSetup,
               selectedWorld == nil, !showingSmartFeed, campaignTracker.popup == nil,
               !showUpdateNotice, !showDailyChest, !showAppleTips,
-              !UserDefaults.standard.bool(forKey: AppleScreenTimeTips.pendingKey) || AppInfo.isDemoRun
+              !UserDefaults.standard.bool(forKey: AppleScreenTimeTips.pendingKey) || AppInfo.isDemoRun,
+              !ChildLockSetup.isPending || AppInfo.isDemoRun
         else { return }
         kidTourActive = true
     }

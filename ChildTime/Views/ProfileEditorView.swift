@@ -61,7 +61,16 @@ struct ProfileEditorView: View {
     /// A NEW child created by the parent gets one more step — the daily
     /// screen-time ceiling. Editing an existing child (or a child device
     /// creating its own profile) never shows it.
-    private var hasCapStep: Bool { !isEdit && canEditLearning }
+    private var hasCapStep: Bool { false }
+
+    /// 🧭 A parent adding a child: ONE screen — name, girl/boy, grade and the
+    /// daily maximum, with level and interests folded under "עוד הגדרות" and the
+    /// way on fixed at the bottom (Rani, 2026-10-05). It replaced a long form
+    /// (avatar, age AND grade, level, interests) plus a separate ⏱ step, whose
+    /// only way on was a small "המשך" in the corner. Parent side: no niqqud.
+    private var compactCreate: Bool { !isEdit && canEditLearning }
+    @State private var showMore = false
+    @State private var customCap = false
 
     /// The child being created, as the step shows them (avatar + name).
     private var draftProfile: Profile {
@@ -82,7 +91,9 @@ struct ProfileEditorView: View {
                 GlassBackdrop()
                 SparkleField(count: 12, size: 11)
 
-                if showCapStep {
+                if compactCreate {
+                    compactCreateForm
+                } else if showCapStep {
                     DailyCapStepView(profile: draftProfile, minutes: $capMinutes) { save() }
                         .transition(.move(edge: .trailing).combined(with: .opacity))
                 } else {
@@ -153,7 +164,7 @@ struct ProfileEditorView: View {
                 }
             }
             .dismissKeyboardOnTap()
-            .navigationTitle(isEdit ? tr("עֲרוֹךְ פְּרוֹפִיל") : tr("פְּרוֹפִיל חָדָשׁ"))
+            .navigationTitle(compactCreate ? "" : (isEdit ? tr("עֲרוֹךְ פְּרוֹפִיל") : tr("פְּרוֹפִיל חָדָשׁ")))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -162,12 +173,13 @@ struct ProfileEditorView: View {
                             withAnimation(.easeInOut(duration: 0.25)) { showCapStep = false }
                         }
                     } else {
-                        Button(tr("בַּטֵּל")) { dismiss() }
+                        Button(compactCreate ? tr("ביטול") : tr("בַּטֵּל")) { dismiss() }
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    // On the ⏱ step the gold "המשך" in the page is the way on.
-                    if !showCapStep {
+                    // On the ⏱ step the gold "המשך" in the page is the way on —
+                    // and in the one-screen create it is fixed at the bottom.
+                    if !showCapStep && !compactCreate {
                         Button(hasCapStep ? tr("המשך") : tr("שְׁמוֹר")) {
                             if hasCapStep {
                                 guard canSave else { return }
@@ -192,6 +204,161 @@ struct ProfileEditorView: View {
                 #endif
             }
         }
+    }
+
+    // MARK: - 🧭 One-screen create (parent)
+
+    private var girl: Bool { gender == .girl }
+    private var shownName: String { name.trimmingCharacters(in: .whitespaces) }
+
+    private var compactCreateForm: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                if ParentOnboarding.isActive {
+                    OnboardingStepsBar(current: 2)
+                        .frame(maxWidth: .infinity)
+                }
+                Text(tr("מי הילד?"))
+                    .font(.system(size: 26, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    compactLabel(tr("שם"))
+                    RTLTextField(placeholder: tr("השם של הילד"), text: $name, textColor: .white)
+                        .frame(height: 28)
+                        .padding(.horizontal, AppSpacing.md)
+                        .padding(.vertical, AppSpacing.sm)
+                        .glassPane(radius: AppRadius.medium, shadow: false)
+                }
+
+                HStack(spacing: AppSpacing.md) {
+                    ForEach(ChildGender.allCases) { g in genderOption(g) }
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    compactLabel(tr("כיתה"))
+                    let grades: [(Int, String)] = [(-1, tr("טרום")), (0, tr("גן")), (1, tr("א׳")), (2, tr("ב׳")), (3, tr("ג׳")),
+                                                   (4, tr("ד׳")), (5, tr("ה׳")), (6, tr("ו׳")), (7, tr("ז׳")), (8, tr("ח׳"))]
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 5), spacing: 6) {
+                        ForEach(grades, id: \.0) { g in gradeOption(g.0, label: g.1, emoji: nil) }
+                    }
+                    Text(tr("השאלות לפי תוכנית משרד החינוך, וטופי מתאים את הרמה לבד. ב-1 בספטמבר עולים כיתה אוטומטית."))
+                        .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.75))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                capSection
+
+                Button {
+                    Haptic.light()
+                    withAnimation(.easeInOut(duration: 0.25)) { showMore.toggle() }
+                } label: {
+                    HStack {
+                        Text(tr("עוד הגדרות (לא חובה) — רמה ותחומי עניין"))
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                        Spacer()
+                        Image(systemName: showMore ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 13, weight: .bold))
+                    }
+                    .foregroundStyle(.white.opacity(0.9))
+                    .padding(.horizontal, 14).padding(.vertical, 11)
+                    .glassPane(radius: AppRadius.medium, strength: 0.1, shadow: false)
+                }
+                .buttonStyle(.plain)
+                if showMore {
+                    learningLevelRow
+                    interestsSection
+                }
+            }
+            .padding(.horizontal, OnboardingFooter.sidePadding)
+            .padding(.top, 4)
+            .padding(.bottom, 24)
+            .frame(maxWidth: 520)
+            .frame(maxWidth: .infinity)
+        }
+        .safeAreaInset(edge: .bottom) {
+            OnboardingFooter(title: tr("המשך"), enabled: canSave) { save() }
+                .padding(.horizontal, OnboardingFooter.sidePadding)
+                .frame(maxWidth: 520)
+        }
+    }
+
+    private func compactLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 14, weight: .heavy, design: .rounded))
+            .foregroundStyle(.white.opacity(0.85))
+    }
+
+    /// ⏱ The daily maximum, on the same screen — and asked the way a parent
+    /// reads it (Rani: "כמה זמן מסך ביום נועה יכולה להרוויח" sounded like a
+    /// question about the child, not a ceiling the parent sets).
+    private var capSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Rani: said from the parent's side ("what do YOU allow"), and with
+            // no verb about the child — so it never shows the wrong gender
+            // before girl/boy is picked.
+            compactLabel(shownName.isEmpty ? tr("כמה זמן מסך מקסימום אתם מאפשרים ביום?")
+                         : tr("כמה זמן מסך מקסימום אתם מאפשרים ל\(shownName) ביום?"))
+            HStack(spacing: 6) {
+                ForEach([30, 60, 120], id: \.self) { m in
+                    capPill(DailyCapChoice.label(m), selected: !customCap && capMinutes == m) {
+                        customCap = false; capMinutes = m
+                    }
+                }
+                capPill(tr("✏️ אחר"), selected: customCap) {
+                    customCap = true
+                    if [30, 60, 120].contains(capMinutes) { capMinutes = 45 }
+                }
+            }
+            if customCap {
+                HStack(spacing: 14) {
+                    capStep("minus") { capMinutes = DailyCapChoice.clampCustom(capMinutes - 15) }
+                    Text(DailyCapChoice.label(capMinutes))
+                        .font(.system(size: 20, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .monospacedDigit()
+                        .frame(minWidth: 110)
+                    capStep("plus") { capMinutes = DailyCapChoice.clampCustom(capMinutes + 15) }
+                }
+                .frame(maxWidth: .infinity)
+            }
+            Text(tr("💡 הזמן נצבר בתשובות נכונות, עד המקסימום שבחרתם."))
+                .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.75))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func capPill(_ label: String, selected: Bool, _ action: @escaping () -> Void) -> some View {
+        Button {
+            Haptic.light()
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { action() }
+        } label: {
+            Text(label)
+                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .lineLimit(1).minimumScaleFactor(0.7)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 11)
+                .glassPane(radius: AppRadius.medium, strength: selected ? 0.30 : 0.12, shadow: false)
+                .overlay(RoundedRectangle(cornerRadius: AppRadius.medium)
+                    .stroke(selected ? AppColor.successMint : .white.opacity(0.18), lineWidth: selected ? 2.2 : 1))
+        }
+        .buttonStyle(.juicy)
+    }
+
+    private func capStep(_ icon: String, _ action: @escaping () -> Void) -> some View {
+        Button { Haptic.light(); action() } label: {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .heavy))
+                .foregroundStyle(.white)
+                .frame(width: 40, height: 40)
+                .background(Circle().fill(.white.opacity(0.2)))
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Sub-views
@@ -254,7 +421,7 @@ struct ProfileEditorView: View {
         } label: {
             HStack(spacing: 8) {
                 Text(g.emoji).font(.system(size: 22))
-                Text(g.displayName)
+                Text(compactCreate ? (g == .girl ? tr("ילדה") : tr("ילד")) : g.displayName)
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
             }
@@ -572,7 +739,7 @@ struct ProfileEditorView: View {
             // A parent-side save is a confirmation — clears the "child picked
             // this" flag the dashboard warns about. (Fresh Profile defaults it
             // to false, so nothing to do — noted for clarity.)
-        } else if hasCapStep {
+        } else if hasCapStep || compactCreate {
             // ⏱ The ceiling picked on the last step — the same per-child field
             // ChildScreenTimeView edits (0 = no limit). It rides the new child's
             // first upload (ProfileStore.add → upsertChild) to their device.

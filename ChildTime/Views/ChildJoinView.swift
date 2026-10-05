@@ -9,6 +9,7 @@ struct ChildJoinView: View {
     @EnvironmentObject var settings: ParentSettings
     @StateObject private var companion = CompanionController()
     @State private var code = ""
+    @FocusState private var codeFocused: Bool
     @State private var showScanner = false
     @State private var showRemovalGate = false
     @State private var working = false
@@ -46,8 +47,14 @@ struct ChildJoinView: View {
                 .zIndex(2)
             }
 
+            ScrollViewReader { scroller in
             ScrollView {
                 VStack(spacing: AppSpacing.lg) {
+                    // 🧭 Step ③ of the new-parent flow, seen from the child's phone.
+                    if !settings.justDisconnected {
+                        OnboardingStepsBar(current: 3, note: tr("בטלפון של הילד"))
+                            .padding(.top, 44)
+                    }
                     CompanionView(controller: companion, size: 120)
                     if settings.justDisconnected {
                         Text(tr("הַמַּכְשִׁיר נוּתַּק"))
@@ -64,10 +71,11 @@ struct ChildJoinView: View {
                             .foregroundStyle(.white.opacity(0.85))
                             .multilineTextAlignment(.center)
                     } else {
-                        Text(tr("הֵיי! בּוֹאוּ נִתְחַבֵּר"))
+                        Text(tr("מְחַבְּרִים אֶת הַטֶּלֶפוֹן הַזֶּה"))
                             .font(.system(size: 30, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
-                        Text(tr("בְּמַכְשִׁיר הַהוֹרֶה מוֹפִיעַ קוֹד QR לַיֶּלֶד.\nסִרְקוּ אוֹתוֹ כָּאן וְהַמַּכְשִׁיר יִתְחַבֵּר."))
+                            .multilineTextAlignment(.center)
+                        Text(tr("סוֹרְקִים אֶת הַקּוֹד שֶׁמּוֹפִיעַ בַּטֶּלֶפוֹן שֶׁל הַהוֹרֶה"))
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.9))
                             .multilineTextAlignment(.center)
@@ -83,9 +91,11 @@ struct ChildJoinView: View {
                     }
                     .buttonStyle(.juicy)
 
-                    VStack(spacing: 8) {
+                    // A real button beside the field (it was faint text under it,
+                    // half hidden by the keyboard — the walk-through missed it).
+                    HStack(spacing: 8) {
                         TextField("", text: $code,
-                                  prompt: Text(tr("אוֹ הַקְלִידוּ אֶת הַקּוֹד")).foregroundColor(.white.opacity(0.75)))   // visible on glass
+                                  prompt: Text(tr("אוֹ מַקְלִידִים אֶת הַקּוֹד")).foregroundColor(.white.opacity(0.75)))   // visible on glass
                             .textInputAutocapitalization(.characters)
                             .autocorrectionDisabled()
                             // The code is Latin letters + digits. Without this, a phone
@@ -100,13 +110,29 @@ struct ChildJoinView: View {
                             .multilineTextAlignment(.center)
                             .padding(.vertical, 12)
                             .glassPane(radius: 14, shadow: false)
+                            .submitLabel(.go)
+                            .focused($codeFocused)
+                            .onSubmit { if code.count >= 6 { JoinCoordinator.shared.present(code) } }
                         Button { JoinCoordinator.shared.present(code) } label: {
-                            Text(tr("הִתְחַבְּרוּ"))
-                                .font(.system(size: 16, weight: .heavy, design: .rounded))
-                                .foregroundStyle(.white)
+                            Text(tr("חִבּוּר"))
+                                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                                .foregroundStyle(Color(hex: "2A1E5C"))
+                                .padding(.horizontal, 18)
+                                .padding(.vertical, 14)
+                                .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         }
+                        .buttonStyle(.juicy)
                         .disabled(working || code.count < 6)
-                        .opacity(code.count < 6 ? 0.5 : 1)
+                        .opacity(code.count < 6 ? 0.55 : 1)
+                    }
+                    .id("codeRow")
+                    // The keyboard rose over the field, so the code was typed blind
+                    // (seen in the new-parent walk-through). Bring it into view.
+                    .onChangeCompat(of: codeFocused) { _, focused in
+                        guard focused else { return }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                            withAnimation(.easeOut(duration: 0.25)) { scroller.scrollTo("codeRow", anchor: .center) }
+                        }
                     }
 
                     if let message {
@@ -171,6 +197,7 @@ struct ChildJoinView: View {
                 // box (Rani: "הכפתורים תתאים לגודל התאים למטה").
                 .frame(maxWidth: 340)
                 .frame(maxWidth: .infinity)
+            }
             }
         }
         .sheet(isPresented: $showScanner) {
@@ -322,9 +349,11 @@ struct ChildJoinView: View {
             RemoteSyncManager.shared.resubscribeAll()
             await RemoteSyncManager.shared.consumePendingCommandsNow(for: cid)
             AppAnalytics.deviceJoined(kind: DeviceIdentity.kind)
-            // 🍏 The parent is holding this phone right now — the child's home
-            // shows the "Apple's own Screen Time" tips once (AppleScreenTimeTips).
-            UserDefaults.standard.set(true, forKey: AppleScreenTimeTips.pendingKey)
+            // 🍏 The parent is holding this phone right now.
+            // 🧭 …and step ④, before the child's home: approve Screen Time,
+            // then its passcode (ChildLockSetupView). The tips sheet is folded
+            // into that step, so it is not shown again on top of it.
+            ChildLockSetup.markPending()
             message = tr("הִתְחַבַּרְתֶּם! 🎉")
             working = false
         }

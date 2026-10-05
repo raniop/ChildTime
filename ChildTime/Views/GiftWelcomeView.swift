@@ -112,6 +112,9 @@ enum GiftWelcome {
         "giftWelcome.shown.\(hh.id).\(Int(hh.giftStartedAt?.timeIntervalSince1970 ?? 0))"
     }
     static func isDue(_ hh: Household?) -> Bool {
+        // 🧭 A new family hears about the gift at the END of its first-time
+        // flow ("הכל מוכן"), not before it has even added a child.
+        guard !ParentOnboarding.isActive else { return false }
         guard let hh, hh.premiumSource == "gift", hh.giftStartedAt != nil,
               let until = hh.giftUntil ?? hh.premiumUntil, until > Date() else { return false }
         return !UserDefaults.standard.bool(forKey: key(hh))

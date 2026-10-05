@@ -88,6 +88,11 @@ struct ParentGateView<Content: View>: View {
             && household.household == nil && AuthManager.shared.isSignedIn
     }
 
+    /// 🧭 The parent code as step ① of the new-parent flow (`ParentOnboarding`):
+    /// the steps bar instead of "חזרה", plain parent-side wording, and a line
+    /// saying WHY there is a code and that the child's phone will ask for it.
+    private var onboardingSetup: Bool { isSetupMode && !allowClose && ParentOnboarding.isActive }
+
     private var canUseFaceID: Bool {
         useFaceID && settings.faceIDForParentGate && PINManager.shared.biometryAvailable
             && !isSetupMode
@@ -279,6 +284,9 @@ struct ParentGateView<Content: View>: View {
                                 .frame(width: 40, height: 40)
                                 .background(.white.opacity(0.22), in: Circle()).overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
                         }
+                    } else if onboardingSetup {
+                        OnboardingStepsBar(current: 1)
+                            .frame(maxWidth: .infinity)
                     } else if isSetupMode {
                         // Root gate during FIRST-TIME setup (no parent code exists
                         // yet, anywhere in the family) — "parent" may have been
@@ -346,10 +354,22 @@ struct ParentGateView<Content: View>: View {
                         .foregroundStyle(.white)
                         .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
 
-                    Text(isSetupMode ? tr("בַּחֲרוּ קוֹד הוֹרֶה") : (gateTitle ?? tr("הַגְדָּרוֹת הוֹרֶה")))
+                    Text(onboardingSetup ? tr("בוחרים קוד הורה")
+                         : isSetupMode ? tr("בַּחֲרוּ קוֹד הוֹרֶה") : (gateTitle ?? tr("הַגְדָּרוֹת הוֹרֶה")))
                         .font(.system(size: display.isShort ? 22 : 30, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
+
+                    if onboardingSetup {
+                        Text(tr("קוד שרק אתם יודעים — כך הילדים לא ישנו הגדרות ולא יפתחו לעצמם זמן מסך. תצטרכו אותו גם בטלפון של הילד."))
+                            .font(.system(size: display.isShort ? 13 : 14.5, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.92))
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(12)
+                            .frame(maxWidth: 460)
+                            .glassPane(radius: 16)
+                    }
 
                     Text(gateSubtitle)
                         .font(.system(size: display.isShort ? 14 : 17, weight: .medium, design: .rounded))
@@ -371,16 +391,21 @@ struct ParentGateView<Content: View>: View {
                     .animation(shake ? .default.repeatCount(3, autoreverses: true).speed(6) : .default, value: shake)
 
                     // The weak-code warning offers "לחזור ולבחור אחר" — this is that.
-                    if isSetupMode, setupFirst != nil {
+                    // In setup mode the row is ALWAYS laid out (hidden until the
+                    // confirm step): appearing mid-flow pushed the whole keypad down
+                    // a line, under the parent's thumb, as they typed the code again.
+                    if isSetupMode {
                         Button {
                             Haptic.light()
                             entered = ""; setupFirst = nil; weakCodeChosen = false; setupMismatch = false
                         } label: {
-                            Label(tr("בְּחִירַת קוֹד אַחֵר"), systemImage: "arrow.uturn.backward")
+                            Label(onboardingSetup ? tr("בחירת קוד אחר") : tr("בְּחִירַת קוֹד אַחֵר"), systemImage: "arrow.uturn.backward")
                                 .font(.system(size: 15, weight: .semibold, design: .rounded))
                                 .foregroundStyle(.white.opacity(0.9))
                         }
                         .buttonStyle(.plain)
+                        .opacity(setupFirst != nil ? 1 : 0)
+                        .disabled(setupFirst == nil)
                     }
 
                     if canUseFaceID {
@@ -487,6 +512,13 @@ struct ParentGateView<Content: View>: View {
     }
 
     private var gateSubtitle: String {
+        if onboardingSetup {
+            if setupFirst == nil {
+                return setupMismatch ? tr("הקודים לא תאמו — בוחרים קוד שוב") : tr("4 ספרות")
+            }
+            if weakCodeChosen { return tr("⚠️ קוד קל לניחוש — הילד רואה אתכם מקלידים אותו. אפשר לאשר בכל זאת, או לחזור ולבחור אחר.") }
+            return tr("מקלידים שוב, לאישור")
+        }
         if isSetupMode {
             if setupFirst == nil {
                 return setupMismatch

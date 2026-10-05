@@ -381,6 +381,15 @@ final class JoinCoordinator: ObservableObject {
             let inv = await HouseholdManager.shared.inspectInvite(code: code)
             invite = (inv?.isExpired == true) ? nil : inv
             resolving = false; resolved = true
+            // 🧭 A CHILD code typed or scanned on a device that already chose
+            // "המכשיר של הילד": the question "לחבר את המכשיר הזה כמכשיר של ילד?"
+            // only repeated that choice (seen in the new-parent walk-through).
+            // Join straight away. The guard against a PARENT device turning
+            // into a child is untouched — that one still asks.
+            if invite?.childID != nil, ParentSettings.shared.deviceRole == .child {
+                ParentSettings.shared.pendingJoinPayload = rawPayload
+                dismiss()
+            }
         }
     }
 

@@ -124,10 +124,16 @@ struct DeviceQuestionView: View {
         ZStack {
             GlassBackdrop().ignoresSafeArea()
             VStack(spacing: 18) {
+                if ParentOnboarding.isActive {
+                    OnboardingStepsBar(current: 3)
+                        .padding(.top, 8)
+                }
                 Spacer(minLength: 12)
-                Text(tr("שאלה אחת"))
-                    .font(.system(size: 14, weight: .heavy, design: .rounded))
-                    .foregroundStyle(AppColor.starGold)
+                if !ParentOnboarding.isActive {
+                    Text(tr("שאלה אחת"))
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                        .foregroundStyle(AppColor.starGold)
+                }
                 Text(girl ? tr("ל\(name) יש מכשיר משלה?") : tr("ל\(name) יש מכשיר משלו?"))
                     .font(.system(size: 30, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
@@ -141,13 +147,12 @@ struct DeviceQuestionView: View {
 
                 VStack(spacing: 12) {
                     option("📱",
-                           title: girl ? tr("כן, יש לה מכשיר") : tr("כן, יש לו מכשיר"),
+                           title: girl ? tr("כן, יש לה טלפון או אייפד") : tr("כן, יש לו טלפון או אייפד"),
                            subtitle: tr("נחבר אותו עכשיו בסריקת קוד"),
                            action: onOwnDevice)
                     option("🧒",
                            title: girl ? tr("לא, היא תשחק בטלפון שלי") : tr("לא, הוא ישחק בטלפון שלי"),
-                           subtitle: girl ? tr("בכפתור \"תנו ל\(name) לשחק כאן\" שבכרטיס שלה")
-                                          : tr("בכפתור \"תנו ל\(name) לשחק כאן\" שבכרטיס שלו"),
+                           subtitle: girl ? tr("\(name) תשחק כאן, במצב ילד") : tr("\(name) ישחק כאן, במצב ילד"),
                            action: onPlaysHere)
                 }
                 .padding(.top, 6)
