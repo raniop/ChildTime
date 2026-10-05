@@ -54128,6 +54128,28 @@
         }
       }
     },
+    "לחיצה על השם של הילד במסך הבית פותחת את ההגדרות שלו — וגם מתפריט הפעולות ומהכותרת של הדף שלו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اضغطوا على اسم الطفل في الشاشة الرئيسية لفتح إعداداته — وأيضًا من قائمة الإجراءات ومن أعلى صفحته"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap your child's name on the home screen to open their settings — or from the actions menu and the top of their page"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите на имя ребёнка на главном экране — откроются его настройки; также из меню действий и вверху его страницы"
+          }
+        }
+      }
+    },
     "לחיצה על עדכון מראה מה השתנה בו" : {
       "localizations" : {
         "ar" : {
@@ -71124,6 +71146,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Изменить: %@"
+          }
+        }
+      }
+    },
+    "עריכת ילד בלחיצה אחת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعديل الطفل بلمسة واحدة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit a child in one tap"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Редактирование ребёнка в одно касание"
           }
         }
       }

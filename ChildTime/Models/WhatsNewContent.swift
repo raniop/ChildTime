@@ -55,7 +55,7 @@ enum WhatsNewContent {
     /// notes were dated — the first release, as one entry.
     static let releases: [Release] = [
 
-        Release(build: 193, version: "2026.10.3", headline: tr("נעילה שבאמת נועלת — ממקום אחד"), items: [
+        Release(build: 194, version: "2026.10.3", headline: tr("נעילה שבאמת נועלת — ממקום אחד"), items: [
             Item(emoji: "🔒", title: tr("נעילה שבאמת נועלת"),
                  line: tr("מהרגע שמאשרים זמן מסך בטלפון של הילד, הכל נעול חוץ מטופי עד שמרוויחים זמן — גם אפליקציה שיתקין מחר. בלי לבחור או לסמן כלום"),
                  key: "lock"),
@@ -74,6 +74,9 @@ enum WhatsNewContent {
             Item(emoji: "🚀", title: tr("התחלה קלה יותר"),
                  line: tr("אחרי שמוסיפים ילד שואלים אם יש לו מכשיר משלו, ורשימה קצרה במסך הבית מראה מה נשאר כדי לסיים"),
                  key: "setup"),
+            Item(emoji: "✏️", title: tr("עריכת ילד בלחיצה אחת"),
+                 line: tr("לחיצה על השם של הילד במסך הבית פותחת את ההגדרות שלו — וגם מתפריט הפעולות ומהכותרת של הדף שלו"),
+                 key: "editChild"),
         ]),
 
         Release(build: 190, version: "2026.10.3", headline: tr("12 משחקים חדשים — הילד בוחר איך לשחק"), items: [
