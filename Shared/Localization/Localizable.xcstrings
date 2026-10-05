@@ -38796,6 +38796,28 @@
         }
       }
     },
+    "התחלה נכונה גם במכשיר הראשון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بداية صحيحة على الجهاز الأول أيضًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A right start on the first device too"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Правильное начало и на первом устройстве"
+          }
+        }
+      }
+    },
     "התחלה פשוטה ב-4 צעדים" : {
       "localizations" : {
         "ar" : {
@@ -64635,6 +64657,28 @@
         }
       }
     },
+    "מסך הפתיחה אומר להורה איפה להתחיל, ומי שפותח טופי במכשיר של הילד בלי קוד חיבור מקבל שלוש דרכים להמשיך במקום מסך סריקה סתום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شاشة البداية تخبر الوالد من أين يبدأ، ومن يفتح توفي على جهاز الطفل بلا رمز اتصال يحصل على ثلاث طرق للمتابعة بدل شاشة مسح مسدودة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The opening screen tells the parent where to begin, and anyone who opens Tofy on a child's device without a join code gets three ways forward instead of a dead-end scan screen"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начальный экран подсказывает родителю, с чего начать, а тот, кто открывает Tofy на устройстве ребёнка без кода подключения, получает три пути вперёд вместо тупикового экрана сканирования"
+          }
+        }
+      }
+    },
     "מסך חדש" : {
       "localizations" : {
         "ar" : {
@@ -65270,6 +65314,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Продлевается %@"
+          }
+        }
+      }
+    },
+    "מתחילים כאן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ابدأوا هنا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start here"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начните здесь"
           }
         }
       }

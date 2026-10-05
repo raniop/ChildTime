@@ -55,6 +55,12 @@ enum WhatsNewContent {
     /// notes were dated — the first release, as one entry.
     static let releases: [Release] = [
 
+        Release(build: 199, version: "2026.10.5", headline: tr("התחלה נכונה גם במכשיר הראשון"), items: [
+            Item(emoji: "🧭", title: tr("מתחילים כאן"),
+                 line: tr("מסך הפתיחה אומר להורה איפה להתחיל, ומי שפותח טופי במכשיר של הילד בלי קוד חיבור מקבל שלוש דרכים להמשיך במקום מסך סריקה סתום"),
+                 key: "startHere"),
+        ]),
+
         Release(build: 198, version: "2026.10.5", headline: tr("פרס בכל סוף סיבוב, וזמן מדויק לשנייה"), items: [
             Item(emoji: "🏅", title: tr("פרס בכל סוף סיבוב"),
                  line: tr("בסוף כל סיבוב רואים כוכבים, יהלומים וכמה זמן מסך הרווחתם — וגם סיבוב פחות מוצלח נגמר בפרס"),
