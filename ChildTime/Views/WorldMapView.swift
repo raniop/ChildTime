@@ -355,7 +355,7 @@ struct WorldMapView: View {
     /// 🎁 The first open after a parent bought a pack: one reveal, on the
     /// child's own device, before anything else pops (wheel, chest, events).
     private func maybeRevealPack() {
-        guard packReveal == nil, selectedWorld == nil, !showingSmartFeed,
+        guard packReveal == nil, selectedWorld == nil, !showingSmartFeed, !storyPending,
               let p = profiles.active, let pack = PackKidState.pendingReveal(for: p) else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             // Re-read the profile: a demo/cloud change in the meantime must win.
@@ -694,25 +694,8 @@ struct WorldMapView: View {
                 heroAppeared = true
             }
             checkWorldUnlocks()
-            // Event splash: announce today's event ONCE a day as a full pop-up
-            // (like the lucky wheel) — it used to be a permanent row eating map
-            // space. Never on top of the grade picker / school-year party.
-            // Not for a child who has barely played: a brand-new child's first
-            // screen was "סוף שבוע כפול! היהלומים כפולים" — before the map, with
-            // zero diamonds and no idea what one is. Same threshold the campaign
-            // pop-ups use (CampaignTracker.childPopupMinAnswers).
-            if GameEvent.current() != nil, !showChildGradePicker, !showSchoolYearParty,
-               progress.totalAnswered >= CampaignTracker.childPopupMinAnswers {
-                let day = Calendar.current.component(.year, from: Date()) * 1000
-                    + (Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0)
-                let key = "eventSplash.lastShownDay"
-                if UserDefaults.standard.integer(forKey: key) != day {
-                    UserDefaults.standard.set(day, forKey: key)
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-                        if !AppInfo.isDemoRun { showEventSplash = true }
-                    }
-                }
-            }
+            // Event splash: once a day — see `maybeShowEventSplash`.
+            maybeShowEventSplash()
             // Returning after being away earns a "welcome back" spin.
             progress.grantComebackWheelIfReturning()
             // Wheel pops when we return to the map after earning a free spin.
@@ -800,7 +783,7 @@ struct WorldMapView: View {
         .onAppear {
             // One sheet at a time: a campaign pop-up outranks this.
             if case .recommended = AppUpdateConfig.shared.state,
-               campaignTracker.popup == nil { showUpdateNotice = true }
+               campaignTracker.popup == nil, !storyPending { showUpdateNotice = true }
         }
         .onChangeCompat(of: CampaignTracker.shared.pendingPackID) { _, _ in consumeCampaignLanding() }
         .onChangeCompat(of: profiles.active?.ownedPacks.count ?? 0) { _, _ in maybeRevealPack() }
@@ -1005,6 +988,11 @@ struct WorldMapView: View {
         // 📖 "מה חדש" as a story. It closes itself to this screen when the last
         // one ends, and ✕ does exactly the same thing — never a button that
         // moves the child somewhere else (Rani).
+        // 📖 The story went first; now the pop-ups that waited for it.
+        .onChangeCompat(of: showWhatsNewStory) { _, shown in
+            guard !shown else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { presentDeferredPopups() }
+        }
         .fullScreenCover(isPresented: $showWhatsNewStory) {
             WhatsNewStoryView(audience: .child, items: whatsNewStory) {
                 // ⭐/💎 for having watched — the chips the last story shows.
@@ -2283,6 +2271,58 @@ struct WorldMapView: View {
         }
     }
 
+    /// 📖 After an update, the story is the FIRST thing the child sees — Rani:
+    /// "סטוריז צריך להיות מעל הכל בפעם הראשונה שעולים אחרי עדכון". Every pop-up
+    /// that presents itself on this screen asks this first and waits.
+    ///
+    /// It is true from before the story's cover is even up (the check runs in
+    /// whichever `onAppear` SwiftUI happens to call first), until it closes.
+    /// `kidShouldShow` turns false the moment the story is marked shown, so a
+    /// story that never opens cannot hold the others back for good.
+    private var storyPending: Bool {
+        if showWhatsNewStory { return true }
+        guard !AppInfo.isDemoRun, let p = profiles.active, p.grade != nil,
+              !SchoolYearCelebration.shouldCelebrate(p) else { return false }
+        return WhatsNewStories.kidShouldShow(for: p)
+    }
+
+    /// Everything that would have popped on arrival but waited for the story,
+    /// in the order it would have come: a parent's new pack first, then the
+    /// event of the day, the wheel, and the one-time lock setup.
+    private func presentDeferredPopups() {
+        guard !storyPending else { return }
+        maybeRevealPack()
+        maybeShowEventSplash()
+        maybeAutoPresentWheel()
+        maybePromptAppLockSetup()
+        CampaignTracker.shared.checkPopup(role: "child", profiles: profiles.active.map { [$0] } ?? [],
+                                          premium: subs.isPremium)
+        if case .recommended = AppUpdateConfig.shared.state, campaignTracker.popup == nil {
+            showUpdateNotice = true
+        }
+    }
+
+    /// Event splash: announce today's event ONCE a day as a full pop-up (like the
+    /// lucky wheel) — it used to be a permanent row eating map space. Never on
+    /// top of the grade picker / school-year party / the update story, and the
+    /// day is only marked when it really shows, so one that waited still comes.
+    /// Not for a child who has barely played: a brand-new child's first screen
+    /// was "סוף שבוע כפול! היהלומים כפולים" — before the map, with zero diamonds
+    /// and no idea what one is (CampaignTracker.childPopupMinAnswers).
+    private func maybeShowEventSplash() {
+        guard GameEvent.current() != nil, !showChildGradePicker, !showSchoolYearParty, !storyPending,
+              progress.totalAnswered >= CampaignTracker.childPopupMinAnswers else { return }
+        let day = Calendar.current.component(.year, from: Date()) * 1000
+            + (Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0)
+        let key = "eventSplash.lastShownDay"
+        guard UserDefaults.standard.integer(forKey: key) != day else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+            guard !AppInfo.isDemoRun, !storyPending, !showEventSplash else { return }
+            UserDefaults.standard.set(day, forKey: key)
+            showEventSplash = true
+        }
+    }
+
     private func greetIfNeeded() {
         if progress.dayStreak == 0 {
             companion.cheer(tr("הֵיי! יַאלְלָה לְהַרְפַּתְקָה 🌟"))
@@ -2297,7 +2337,7 @@ struct WorldMapView: View {
     /// (after `questionsPerWheel` answers), then resets the counter so it
     /// won't pop again until the next batch. Replaces the old top-bar button.
     private func maybeAutoPresentWheel() {
-        guard progress.freeWheelAvailable, !showingWheel, !showingSmartFeed else { return }
+        guard progress.freeWheelAvailable, !showingWheel, !showingSmartFeed, !storyPending else { return }
         progress.resetWheelProgress()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             showingWheel = true
@@ -2318,7 +2358,7 @@ struct WorldMapView: View {
               !settings.hasPromptedChildAppLock,
               settings.openByDesignApps.isEmpty,
               SelectionStorage.isEmpty(settings.activitySelectionData),
-              !showingWheel, !showingSmartFeed
+              !showingWheel, !showingSmartFeed, !storyPending
         else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             showingAppLockSetup = true
