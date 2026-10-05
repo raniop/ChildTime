@@ -3319,9 +3319,13 @@ exports.dispatchCampaigns = onSchedule(
 // ============================================================================
 
 const CONVERSION_DEFAULTS = {
-  activationDays: 3, activationQuestions: 40, giftDays: 14,
+  activationDays: 3, activationQuestions: 40, giftDays: 30,
+  // 🎁 Rani, 2026-10-05: every family gets Tofy+ as a gift for 30 days the
+  // moment it is created — no activation threshold first. Off → the old
+  // "activation, then gift" journey.
+  giftOnSignup: true,
   guestWorlds: 0, guestRotateDays: 7, lockedShown: 5, lockedRotateDays: 3,
-  giftPushDays: [4, 9, 12, 13, 14], giftPushHour: 17,
+  giftPushDays: [7, 21, 28, 29, 30], giftPushHour: 17,
   oneTimeAfterGiftOnly: true, paywall: "personal", storeKitTrial: false,
   guestTopics: [],
   copyActivation: "🎁 פתחנו ל{שם} את טופי+ במתנה · {שם} עבר/ה {שאלות} שאלות, אז ל־{ימים} הימים הקרובים כל העולמות פתוחים. בלי כרטיס, לא מתחדש. מסתיים ב־{תאריך}.",
@@ -3329,7 +3333,13 @@ const CONVERSION_DEFAULTS = {
 };
 async function conversionConfig() {
   const d = await db.collection("config").doc("conversion").get();
-  return { ...CONVERSION_DEFAULTS, ...(d.exists ? d.data() : {}) };
+  const stored = d.exists ? { ...d.data() } : {};
+  // 🎁 The 30-day sign-up gift (2026-10-05) must not be silently undone by a
+  // config the admin saved BEFORE it existed: that form saves every field, so
+  // an old "giftDays: 14" would win. Until the admin is saved again (which
+  // stamps `giftPolicy2`), the gift's length and push days come from here.
+  if (!stored.giftPolicy2) { delete stored.giftDays; delete stored.giftPushDays; delete stored.giftOnSignup; }
+  return { ...CONVERSION_DEFAULTS, ...stored };
 }
 
 const TOPIC_LABEL = { math: "🧮 מתמטיקה", english: "🇬🇧 אנגלית", hebrew: "✍️ עברית", logic: "🧩 לוגיקה", science: "🔬 מדעים", history: "🏛️ היסטוריה",
@@ -3756,7 +3766,7 @@ exports.adminSetConfig = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async 
     else if (Array.isArray(def)) { if (!Array.isArray(patch[k])) throw new HttpsError("invalid-argument", k); clean[k] = patch[k].map((x) => typeof def[0] === "number" ? Number(x) : String(x)).filter((x) => typeof x === "number" ? Number.isFinite(x) : x); }
     else clean[k] = String(patch[k]).slice(0, 400);
   }
-  await db.collection("config").doc("conversion").set({ ...clean, updatedAt: Date.now(), updatedBy: request.auth.uid }, { merge: true });
+  await db.collection("config").doc("conversion").set({ ...clean, giftPolicy2: true, updatedAt: Date.now(), updatedBy: request.auth.uid }, { merge: true });
   return { ok: true, config: await conversionConfig() };
 });
 
@@ -4215,6 +4225,16 @@ function giftStartMessage(ctx, until, lang) {
   return { title: `🎁 פתחנו ל${name} את טופי+ במתנה`, body: fill(ctx.cfg.copyActivation, { ...vars, "תאריך": ilDate(until, ctx.tz) }).replace(/^🎁[^·]*·\s*/, "") };
 }
 
+// Gift opened at SIGN-UP (no activation behind it, so nothing to quote about
+// the child yet): what the family got, and until when.
+function signupGiftMessage(ctx, until, lang) {
+  const days = ctx.cfg.giftDays;
+  if (lang === "en") return { title: `🎁 Tofy+ is yours as a gift for ${days} days`, body: `Every world is open for your children — no card needed, and it doesn't renew. The gift ends ${enDate(until, ctx.tz)}.` };
+  if (lang === "ru") return { title: `🎁 Tofy+ в подарок на ${days} дней`, body: `Все миры открыты для ваших детей — без карты, без продления. Подарок заканчивается ${ruDate(until, ctx.tz)}.` };
+  if (lang === "ar") return { title: `🎁 Tofy+ هدية لكم لمدة ${days} يومًا`, body: `كل العوالم مفتوحة لأطفالكم — دون بطاقة ولا تجديد تلقائي. تنتهي الهدية في ${arDate(until, ctx.tz)}.` };
+  return { title: `🎁 טופי+ פתוח לכם במתנה ל־${days} יום`, body: `כל העולמות פתוחים לילדים — בלי כרטיס, ולא מתחדש. המתנה מסתיימת ב־${ilDate(until, ctx.tz)}.` };
+}
+
 // One of the gift-day pushes, or null (a no-favourite family on days ≤ 9 hears nothing).
 function giftDayMessage(ctx, day, daysLeft, premiumUntil, lang) {
   const { star, kids, totalQ, fav, cfg } = ctx;
@@ -4305,16 +4325,29 @@ async function runConversionEngine() {
       const cur = hh.activation || {};
       if (["days", "questions", "needDays", "needQuestions"].some((k) => cur[k] !== a[k])) await ref.set({ activation: a }, { merge: true });
     }
-    // 1. activation → gift (only families that never had a gift and are not paying)
-    if (h.activated && premiumUntil <= now && !hh.giftStartedAt && !hh.giftEndedAt && !hh.purchasedAt && hh.premiumSource !== "paid") {
+    // 1. the gift — at sign-up (`giftOnSignup`, the default since 2026-10-05)
+    //    or after activation. Only families that never had a gift and are not
+    //    paying: a gift that already ended is not handed out again.
+    if ((h.activated || cfg.giftOnSignup) && premiumUntil <= now && !hh.giftStartedAt && !hh.giftEndedAt && !hh.purchasedAt && hh.premiumSource !== "paid") {
       const until = now + cfg.giftDays * 86400;
       await ref.set({ premiumUntil: until, premiumSource: "gift", giftUntil: until, giftStartedAt: now, giftDays: cfg.giftDays }, { merge: true });
       gifted += 1;
       if (await onceKey(`gift_start_${hhID}`)) {
         const tokens = await tokensForHousehold(hhID);
-        if (tokens.length) { await sendLocalized(tokens, (lang) => giftStartMessage(ctx, until, lang), { type: "gift-start", householdID: hhID }); pushed += 1; }
+        const msg = h.activated ? (lang) => giftStartMessage(ctx, until, lang) : (lang) => signupGiftMessage(ctx, until, lang);
+        if (tokens.length) { await sendLocalized(tokens, msg, { type: "gift-start", householdID: hhID }); pushed += 1; }
       }
       continue;
+    }
+    // 1b. a gift that started SHORTER than today's length is stretched to it,
+    //     once (Rani: the families mid-way through 14 days get the 30 too).
+    //     Counted from the day it started, so nobody gets more than giftDays.
+    if (hh.premiumSource === "gift" && premiumUntil > now && hh.giftStartedAt && Number(hh.giftDays || 14) < cfg.giftDays) {
+      const until = Number(hh.giftStartedAt) + cfg.giftDays * 86400;
+      if (until > premiumUntil) {
+        await ref.set({ premiumUntil: until, giftUntil: until, giftDays: cfg.giftDays, giftExtendedAt: now }, { merge: true });
+        gifted += 1;
+      }
     }
     // 2. during a gift: the day-based pushes (parents only), at the configured hour
     if (hh.premiumSource === "gift" && premiumUntil > now && hh.giftStartedAt && hourIn(ctx.tz) >= Number(cfg.giftPushHour || 17)) {
@@ -4335,6 +4368,26 @@ async function runConversionEngine() {
   console.log("[conversionEngine] gifted", gifted, "pushed", pushed, "ended", ended);
   return { gifted, pushed, ended };
 }
+// 🎁 The gift the moment a family exists — the hourly engine above would get
+// there within the hour; this makes it instant. Silent: the parent is in the
+// app right now, which shows the gift itself. The engine stays the backstop
+// (and the path for families created before this).
+exports.giftOnHouseholdCreated = onDocumentCreated("households/{hid}", async (event) => {
+  const cfg = await conversionConfig();
+  if (!cfg.giftOnSignup) return;
+  const ref = event.data.ref;
+  const now = Date.now() / 1000;
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref); if (!snap.exists) return;
+    const hh = snap.data() || {};
+    if (Number(hh.premiumUntil || 0) > now || hh.giftStartedAt || hh.giftEndedAt || hh.purchasedAt || hh.premiumSource === "paid") return;
+    const until = now + cfg.giftDays * 86400;
+    tx.set(ref, { premiumUntil: until, premiumSource: "gift", giftUntil: until, giftStartedAt: now, giftDays: cfg.giftDays }, { merge: true });
+  });
+  await onceKey(`gift_start_${event.params.hid}`);   // no "we opened it" push later
+  console.log("[giftOnHouseholdCreated]", event.params.hid);
+});
+
 exports.conversionEngine = onSchedule({ schedule: "0 * * * *", timeZone: "Asia/Jerusalem", timeoutSeconds: 540, memory: "1GiB" }, async () => { await computeJourney(); await runConversionEngine(); });
 exports.adminRunConversionEngine = onCall({ timeoutSeconds: 300, memory: "1GiB" }, async (request) => { requireAdmin(request); await computeJourney(); return await runConversionEngine(); });
 
