@@ -20643,28 +20643,6 @@
         }
       }
     },
-    "בַּשָּׁלָב הַבָּא בּוֹחֲרִים מָה נִשְׁאָר פָּתוּחַ — וְהוּא נִשְׁאָר פָּתוּחַ גַּם אִם הוּא מְסֻמָּן כָּאן." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "بعد ذلك تختارون ما يبقى مفتوحًا — ويبقى مفتوحًا حتى لو كان محددًا هنا."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Next you'll choose what stays open — and it stays open even if it's ticked here."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Дальше вы выберете, что остаётся открытым, — и оно останется открытым, даже если отмечено здесь."
-          }
-        }
-      }
-    },
     "בָּאֲוִיר" : {
       "localizations" : {
         "ar" : {
@@ -21691,28 +21669,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Один раз выберите, что остаётся открытым, а всё остальное блокируется, пока не заработано время, — даже приложение, которое ребёнок установит завтра"
-          }
-        }
-      }
-    },
-    "בוחרים פעם אחת מה נשאר פתוח, וכל השאר ננעל עד שמרוויחים זמן — גם ספארי, תמונות והודעות, וגם אפליקציה שהילד יתקין מחר" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "اختاروا مرة واحدة ما يبقى مفتوحًا، وكل ما عدا ذلك يُقفَل حتى يُكسَب الوقت — Safari والصور والرسائل أيضًا، وحتى تطبيق يثبّته الطفل غدًا"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose once what stays open, and everything else locks until time is earned — Safari, Photos and Messages too, and even an app your child installs tomorrow"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Один раз выберите, что остаётся открытым, а всё остальное блокируется, пока не заработано время, — и Safari, «Фото», «Сообщения», и даже приложение, которое ребёнок установит завтра"
           }
         }
       }
@@ -30625,6 +30581,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Твоё место во всём мире"
+          }
+        }
+      }
+    },
+    "הַנְּעִילָה בָּאַיְפוֹן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "القفل على iPhone"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The lock on the iPhone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Блокировка на iPhone"
           }
         }
       }
@@ -44899,6 +44877,28 @@
         }
       }
     },
+    "כְּבוּיָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "متوقف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выключена"
+          }
+        }
+      }
+    },
     "כְּבוּיוֹת" : {
       "localizations" : {
         "ar" : {
@@ -47237,28 +47237,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Все игроки"
-          }
-        }
-      }
-    },
-    "כָּל הָאַפְּלִיקַצְיוֹת בַּמַּכְשִׁיר" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "كل التطبيقات على الجهاز"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Every app on the device"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Все приложения на устройстве"
           }
         }
       }
@@ -61584,28 +61562,6 @@
         }
       }
     },
-    "נְעוּלוֹת בְּפֹעַל" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مقفلة فعليًا"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Actually locked"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Заблокировано по факту"
-          }
-        }
-      }
-    },
     "נְקֵבָה" : {
       "localizations" : {
         "ar" : {
@@ -65605,28 +65561,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "лосось"
-          }
-        }
-      }
-    },
-    "סַמְּנוּ אֶת כָּל הַקָּטֵגוֹרְיוֹת — כָּךְ נִנְעָלוֹת גַּם הָאַפְּלִיקַצְיוֹת שֶׁל אַפֶּל: סָפָארִי, תְּמוּנוֹת, הוֹדָעוֹת." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "حدّدوا كل الفئات — هكذا تُقفَل تطبيقات Apple أيضًا: Safari والصور والرسائل."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tick every category — that's how Apple's own apps get locked too: Safari, Photos, Messages."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Отметьте все категории — так блокируются и приложения Apple: Safari, «Фото», «Сообщения»."
           }
         }
       }
@@ -69873,6 +69807,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "фламинго"
+          }
+        }
+      }
+    },
+    "פְּעִילָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مفعّل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Active"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Активна"
           }
         }
       }

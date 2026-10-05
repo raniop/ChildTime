@@ -98,6 +98,41 @@ struct NewAppShieldTests {
         #expect(!plan.shieldedApps.contains(7))       // …never the one kept open
         #expect(plan.shieldedWebDomains == [9])
     }
+
+    @Test("Build 191 regression: over 50 tokens is never sent — iOS would drop the whole set")
+    func overLimitSetsAreLeftOut() {
+        // Nuni's phone: 119 apps ticked, Tofy kept open, 194 web domains. iOS
+        // shields nothing from a set over 50 and reads it back as nil.
+        var i = Inputs()
+        i.lockNewApps = true
+        i.openByDesignApps = [1000]
+        i.blockedApps = Set(1...119)
+        i.blockedWebDomains = Set(1...194)
+        let plan = i.plan()
+
+        #expect(plan.kind == .lockEverythingNew)
+        #expect(plan.lockEverything == true)          // the lock itself is intact
+        #expect(plan.shieldedApps.isEmpty)            // …the doomed list is not sent
+        #expect(plan.shieldedWebDomains.isEmpty)
+        #expect(plan.droppedOverLimit == true)
+        #expect(plan.exemptApps == [1000])            // and Tofy stays open
+
+        // Exactly at the limit it is still sent.
+        var fits = Inputs()
+        fits.lockNewApps = true
+        fits.openByDesignApps = [1000]
+        fits.blockedApps = Set(1...50)
+        #expect(fits.plan().shieldedApps.count == shieldTokenLimit)
+        #expect(fits.plan().droppedOverLimit == false)
+
+        // The block-list fallback obeys the same rule; its categories carry it.
+        var leaky = Inputs()
+        leaky.lockNewApps = false
+        leaky.blockedApps = Set(1...119)
+        leaky.blockedCategories = ["games", "social"]
+        #expect(leaky.plan().shieldedApps.isEmpty)
+        #expect(leaky.plan().shieldedCategories == ["games", "social"])
+    }
 }
 
 // MARK: - The things that must not break

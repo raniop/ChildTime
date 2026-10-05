@@ -26,8 +26,6 @@ struct ChildDeviceControlsView: View {
     @State private var showOpenPicker = false
     @State private var openSelection = SelectionStorage.empty()
     @State private var diagnostic: String?
-    /// The main button runs the one-time "every app" step first, then this.
-    @State private var openAfterAllApps = false
     /// 🧪 "מה נעול בפועל" is a tool for US, not something to show a family —
     /// Rani: "אי אפשר להציג דבר כזה במכשיר אמיתי של אנשים! תשאיר את זה אולי
     /// רק על המשפחה שלי בשביל הבדיקות". A child device has no account to
@@ -47,10 +45,7 @@ struct ChildDeviceControlsView: View {
     private var newAppsLocked: Bool { settings.lockNewApps && openCount > 0 }
     /// Apps the block-list names individually. A list of CATEGORIES with zero
     /// apps cannot reach Safari, Photos or Messages — see SelectionStorage.
-    private var blockedAppCount: Int { selection.applicationTokens.count }
     private var isUnlocked: Bool { progress.isUnlocked }
-    /// Apps the shield names right now, from the same plan every process writes.
-    private var shieldedNow: Int { TofyShield.inputs().plan().shieldedApps.count }
 
     var body: some View {
         ZStack {
@@ -314,17 +309,12 @@ struct ChildDeviceControlsView: View {
                         icon: newAppsLocked ? "lock.shield.fill" : "exclamationmark.triangle.fill",
                         tint: newAppsLocked ? AppColor.successMint : AppColor.flameOrange)
 
-            // 1️⃣ The one button. The first time, it runs the one-time "every
-            // app on the device" step and goes straight on to "what stays
-            // open" — so there is a single place, not two buttons to
-            // understand (Rani: "רק מקום אחד שפותח ונועל").
+            // 1️⃣ The one button, straight to "what stays open" (Rani: "רק מקום
+            // אחד שפותח ונועל"). It used to run a "tick every app on the
+            // device" step first; that list was 119 apps, iOS drops any set
+            // over 50 (`shieldTokenLimit`), so the step did nothing at all.
             Button {
-                if blockedAppCount == 0 {
-                    openAfterAllApps = true
-                    openPicker { showAppPicker = true }
-                } else {
-                    openPicker { showOpenPicker = true }
-                }
+                openPicker { showOpenPicker = true }
             } label: {
                 Label(openCount > 0
                       ? tr("פְּתוּחוֹת תָּמִיד: \(openCount) · עֲרִיכָה")
@@ -390,13 +380,6 @@ struct ChildDeviceControlsView: View {
         .onChangeCompat(of: selection) { _, new in
             settings.activitySelectionData = SelectionStorage.encode(new)
             if !isUnlocked { shields.applyDefaultLock() }
-        }
-        // Step 1 closed → step 2. A sheet cannot be presented while the last
-        // one is still sliding away, hence the short wait.
-        .onChangeCompat(of: showAppPicker) { _, shown in
-            guard !shown, openAfterAllApps else { return }
-            openAfterAllApps = false
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { showOpenPicker = true }
         }
     }
 
@@ -465,11 +448,12 @@ struct ChildDeviceControlsView: View {
             diagnosticRow(tr("הַרְשָׁאַת זְמַן מָסָךְ"),
                           shields.isAuthorized ? tr("יֵשׁ") : tr("אֵין — שׁוּם נְעִילָה לֹא תַּעֲבֹד"),
                           ok: shields.isAuthorized)
-            diagnosticRow(tr("אַפְּלִיקַצְיוֹת בַּמַּכְשִׁיר"), "\(blockedAppCount)", ok: blockedAppCount > 0)
             diagnosticRow(tr("פְּתוּחוֹת תָּמִיד"), "\(openCount)", ok: openCount > 0)
-            // What was actually WRITTEN by name — the number that read 0 on
-            // build 190 while 119 sat in the list.
-            diagnosticRow(tr("נְעוּלוֹת בְּפֹעַל"), "\(shieldedNow)", ok: shieldedNow > 0)
+            // Read BACK from iOS, not what we think we sent — the lesson of
+            // builds 190–191, where everything we "sent" by name was dropped.
+            diagnosticRow(tr("הַנְּעִילָה בָּאַיְפוֹן"),
+                          TofyShield.categoryLockHeld ? tr("פְּעִילָה") : tr("כְּבוּיָה"),
+                          ok: TofyShield.categoryLockHeld || isUnlocked)
             diagnosticRow(tr("אַפְּלִיקַצְיָה חֲדָשָׁה"),
                           newAppsLocked ? tr("נְעוּלָה") : tr("פְּתוּחָה"),
                           ok: newAppsLocked)

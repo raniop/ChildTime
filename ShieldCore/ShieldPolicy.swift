@@ -48,6 +48,19 @@ enum ShieldPlanKind: String, Equatable, Sendable {
     case blockList
 }
 
+/// 🧱 iOS shields at most this many tokens per enumerated set, summed over
+/// every store on the device — and above it, it does not shield the first 50:
+/// it drops the WHOLE set, silently, and reads it back as `nil`
+/// (developer.apple.com/forums/thread/733361 — "50 or less works perfectly,
+/// 51+ tokens doesn't block any apps").
+///
+/// Build 191 sent 118 apps and 194 web domains — both dropped. What actually
+/// locked the children's phones was `.all(except:)` alone, which is why the
+/// "tick every app on the device" step changed nothing. So an enumerated set
+/// is only ever written when it fits; otherwise the category policy carries
+/// the lock on its own, which is what it was doing anyway.
+let shieldTokenLimit = 50
+
 /// The shield to write, as plain sets — no `ManagedSettings` types, so the whole
 /// decision can be exercised in tests with stand-in tokens.
 struct ShieldPlan<App: Hashable, Cat: Hashable, Web: Hashable>: Equatable {
@@ -63,6 +76,9 @@ struct ShieldPlan<App: Hashable, Cat: Hashable, Web: Hashable>: Equatable {
     var exemptApps: Set<App>
     var exemptWebDomains: Set<Web>
     var kind: ShieldPlanKind
+    /// An enumerated set was larger than `shieldTokenLimit` and was left out
+    /// rather than sent to be thrown away.
+    var droppedOverLimit = false
 
     /// True when a newly installed app is covered without anyone picking it.
     var coversUnknownApps: Bool { lockEverything }
@@ -85,6 +101,7 @@ struct ShieldPlan<App: Hashable, Cat: Hashable, Web: Hashable>: Equatable {
             + "apps=\(shieldedApps.count) categories=\(cats) "
             + "web=\(shieldedWebDomains.count) exemptApps=\(exemptApps.count) "
             + "exemptWeb=\(exemptWebDomains.count) "
+            + "droppedOverLimit=\(droppedOverLimit) "
             + "CATEGORY_ONLY_WEAK=\(categoryOnlyAndWeak)"
     }
 }
@@ -154,6 +171,12 @@ struct ShieldInputs<App: Hashable, Cat: Hashable, Web: Hashable> {
         }
         let exemptApps = self.exemptApps
         let exemptWebDomains = self.exemptWebDomains
+        // Only what iOS will accept — see `shieldTokenLimit`.
+        let namedApps = blockedApps.subtracting(exemptApps)
+        let namedWeb = blockedWebDomains.subtracting(exemptWebDomains)
+        let appsFit = namedApps.count <= shieldTokenLimit
+        let webFit = namedWeb.count <= shieldTokenLimit
+        let dropped = !appsFit || !webFit
         if newAppLockArmed {
             // 🐛 THE ONE THAT SHIPPED AND DID NOTHING (Rani, build 190: "לא
             // השתנה כלום! מה שהיה פתוח נשאר פתוח"). This used to hand back an
@@ -172,21 +195,28 @@ struct ShieldInputs<App: Hashable, Cat: Hashable, Web: Hashable> {
             // The two shapes are a UNION, not a choice. Name every app we hold
             // a token for AS WELL, and `.all(except:)` goes on covering the
             // ones nobody has ever picked.
+            //
+            // ⚠️ …but only up to `shieldTokenLimit`. Past it iOS drops the
+            // whole set, so a long list is left out and `.all(except:)` does
+            // the work alone.
             return ShieldPlan(lockEverything: true,
-                              shieldedApps: blockedApps.subtracting(exemptApps),
+                              shieldedApps: appsFit ? namedApps : [],
                               shieldedCategories: [],
-                              shieldedWebDomains: blockedWebDomains.subtracting(exemptWebDomains),
+                              shieldedWebDomains: webFit ? namedWeb : [],
                               exemptApps: exemptApps,
                               exemptWebDomains: exemptWebDomains,
-                              kind: .lockEverythingNew)
+                              kind: .lockEverythingNew,
+                              droppedOverLimit: dropped)
         }
+        // The block-list's categories carry a long list the same way.
         return ShieldPlan(lockEverything: false,
-                          shieldedApps: blockedApps.subtracting(exemptApps),
+                          shieldedApps: appsFit ? namedApps : [],
                           shieldedCategories: blockedCategories,
-                          shieldedWebDomains: blockedWebDomains.subtracting(exemptWebDomains),
+                          shieldedWebDomains: webFit ? namedWeb : [],
                           exemptApps: exemptApps,
                           exemptWebDomains: exemptWebDomains,
-                          kind: .blockList)
+                          kind: .blockList,
+                          droppedOverLimit: dropped)
     }
 }
 
@@ -254,8 +284,36 @@ enum TofyShield {
             "shieldedApps=\(plan.shieldedApps.count)",
             "exemptApps=\(plan.exemptApps.count)",
             "lastWrite=\(defaults.string(forKey: Key.lastPlan) ?? "never")",
+            // What iOS HOLDS, read back from the store — not what we sent. A
+            // set iOS refused reads back as nil (-1 here).
+            "ios=" + readBack(),
             "lastReason=\(defaults.string(forKey: Key.lastPlanReason) ?? "-")",
         ].joined(separator: " ")
+    }
+
+    /// What the store actually holds right now, in one short token:
+    /// `apps=N cats=all|N|none web=N webCats=all|none`. -1 = nil.
+    static func readBack(_ store: ManagedSettingsStore = TofyShield.store) -> String {
+        let shield = store.shield
+        func cats<A>(_ p: ShieldSettings.ActivityCategoryPolicy<A>?) -> String {
+            switch p {
+            case .none?, nil: return "none"
+            case .all(let except)?: return "all-\(except.count)"
+            case .specific(let c, _)?: return "\(c.count)"
+            @unknown default: return "?"
+            }
+        }
+        return "apps=\(shield.applications?.count ?? -1) cats=\(cats(shield.applicationCategories)) "
+            + "web=\(shield.webDomains?.count ?? -1) webCats=\(cats(shield.webDomainCategories))"
+    }
+
+    /// Whether iOS holds a category lock right now (`.all` or `.specific`) —
+    /// the part that actually locks the device. Read back, not remembered.
+    static var categoryLockHeld: Bool {
+        switch TofyShield.store.shield.applicationCategories {
+        case .all?, .specific?: return true
+        default: return false
+        }
     }
 
     /// Read the whole policy out of the app group. Used by the app AND both
