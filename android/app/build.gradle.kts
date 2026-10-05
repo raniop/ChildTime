@@ -35,6 +35,14 @@ android {
     buildFeatures { compose = true; buildConfig = true }
 }
 
+// The kid screens pass the live, mutable ProgressEngine into composables. With
+// strong skipping (on by default since Kotlin 2.0.20) an unchanged INSTANCE is
+// skipped, so the home kept showing the old daily cap after the child doc
+// arrived. Off = unstable params always recompose, which is what that code expects.
+composeCompiler {
+    featureFlags = setOf(org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag.StrongSkipping.disabled())
+}
+
 dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
     implementation(composeBom)
@@ -61,6 +69,7 @@ dependencies {
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
     implementation("com.google.zxing:core:3.5.3")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     testImplementation("junit:junit:4.13.2")

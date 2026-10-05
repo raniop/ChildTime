@@ -16,7 +16,11 @@ class TofyApp : Application() {
         if (BuildConfig.DEBUG && BuildConfig.USE_EMULATORS) useLocalEmulators()
         else if (FirebaseApp.getApps(this).isEmpty()) FirebaseApp.initializeApp(this)
         I18n.init(this)
+        DeviceRole.init(this)
         createChannels()
+        // Kid side: content assets/cache + the progress session (both idempotent).
+        com.rani.tofy.kid.content.QuestionSource.init(this)
+        com.rani.tofy.kid.core.KidSession.init(this)
     }
 
     /**

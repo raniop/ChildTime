@@ -238,21 +238,25 @@ class KidSync internal constructor(
         val seqAtCapture = e.localEditSeq
         val ref = stateRef(cid)
         val myID = me
-        val landed = try {
+        // The transaction returns what is now in the cloud. Adopting only its
+        // REVISION was a bug: the merge folds the cloud's data (stars, wallet…)
+        // into the write, and our listener skips its own echo — so a freshly
+        // bound device kept showing zeros while the cloud held the real numbers.
+        val landed: ProgressSnapshot? = try {
             db.runTransaction { txn ->
                 val cloudRaw = txn.get(ref).data
                 if (cloudRaw == null) {
                     txn.set(ref, local.toFirestore(), SetOptions.merge())
-                    return@runTransaction local.revision
+                    return@runTransaction local
                 }
                 val cloud = ProgressSnapshot.fromFirestore(cloudRaw)
                 val merged = ProgressSnapshot.ratchetMerged(local, cloud)
-                if (ProgressSnapshot.sameProgressData(merged, cloud)) return@runTransaction cloud.revision
+                if (ProgressSnapshot.sameProgressData(merged, cloud)) return@runTransaction cloud
                 merged.revision = maxOf(local.revision, cloud.revision) + 1
                 merged.lastModifiedAt = AppleTime.now()
                 merged.deviceID = myID
                 txn.set(ref, merged.toFirestore(), SetOptions.merge())
-                merged.revision
+                merged
             }.await()
         } catch (ex: Exception) {
             lastError = ex.message
@@ -261,7 +265,11 @@ class KidSync internal constructor(
         lastUploadAt = AppleTime.nowUnix()
         lastError = null
         if (landed != null) session.engineFor(cid)?.let { eng ->
-            session.adoptUploaded(cid, landed, eng.localEditSeq != seqAtCapture)
+            val editedSince = eng.localEditSeq != seqAtCapture
+            // Fold the cloud result in (ratchet = idempotent; local edits made
+            // meanwhile survive), then take its generation.
+            session.mergeRemote(cid, landed)
+            session.adoptUploaded(cid, landed.revision, editedSince)
         }
     }
 

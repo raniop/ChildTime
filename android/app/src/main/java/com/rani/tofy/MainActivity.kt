@@ -34,6 +34,24 @@ class MainActivity : ComponentActivity() {
 /** ContentView.parentFlow: signed out → login; no family → choice; else home. */
 @Composable
 private fun Root() {
+    // Kid Mode and a child device come BEFORE any parent sign-in routing.
+    DeviceRole.kidModeChildID?.let { cid ->
+        com.rani.tofy.kid.ui.KidRoot(cid, kidMode = true, onExitKidMode = { DeviceRole.endKidMode() }); return
+    }
+    when (DeviceRole.role) {
+        null -> { com.rani.tofy.kid.ui.RolePickerScreen(onParent = { DeviceRole.choose(DeviceRole.Role.PARENT) }, onChild = { DeviceRole.choose(DeviceRole.Role.CHILD) }); return }
+        DeviceRole.Role.CHILD -> {
+            val cid = DeviceRole.joinedChildID
+            if (cid == null) com.rani.tofy.kid.ui.ChildJoinScreen(onJoined = { DeviceRole.join(it) }, onBack = { DeviceRole.choose(null) })
+            else com.rani.tofy.kid.ui.KidRoot(cid, kidMode = false, onExitKidMode = {})
+            return
+        }
+        DeviceRole.Role.PARENT -> ParentRoot()
+    }
+}
+
+@Composable
+private fun ParentRoot() {
     val user by AuthRepository.user.collectAsState(initial = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser)
     val boot by AccountRepository.boot.collectAsState()
     var joining by remember { mutableStateOf(false) }

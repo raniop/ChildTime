@@ -139,12 +139,15 @@ private fun ChildCard(state: FamilyState, child: Child, s: Progress, onOpen: () 
                 WhiteButton(tr("מֵידָע נוֹסָף ←"), Modifier.weight(2f)) { onOpen() }
                 GlassButton(tr("⚡ פְּעֻלּוֹת"), Modifier.weight(1f)) { onActions() }
             }
+            // 🧒 Kid Mode: this phone becomes the child's for a while (screen-pinned).
+            GlassButton(tr("תְּנוּ לְ%@ לְשַׂחֵק כָּאן 🧒", child.name), Modifier.fillMaxWidth()) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
         } else {
             P(tr("%@ · אֵין עֲדַיִן מַכְשִׁיר מְחֻבָּר.", gradeName(child.effectiveGrade)), 13f)
             RowSpaced {
                 WhiteButton(tr("📱 חִבּוּר מַכְשִׁיר"), Modifier.weight(2f)) { onConnect() }
                 GlassButton(tr("⚡ פְּעֻלּוֹת"), Modifier.weight(1f)) { onActions() }
             }
+            GlassButton(tr("תְּנוּ לְ%@ לְשַׂחֵק כָּאן 🧒", child.name), Modifier.fillMaxWidth()) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
         }
     }
 }

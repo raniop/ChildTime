@@ -1,0 +1,424 @@
+package com.rani.tofy.kid.ui.home
+
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.CompositionLocalProvider
+import com.rani.tofy.data.Child
+import com.rani.tofy.i18n.tr
+import com.rani.tofy.kid.core.KidState
+import com.rani.tofy.kid.core.ProgressEngine
+import com.rani.tofy.kid.core.RewardEngine
+import com.rani.tofy.kid.ui.BottomHint
+import com.rani.tofy.kid.ui.BuddyBubble
+import com.rani.tofy.kid.ui.CharacterImage
+import com.rani.tofy.kid.ui.KidCta
+import com.rani.tofy.kid.ui.timeLabel
+import com.rani.tofy.ui.home.gradeName
+import com.rani.tofy.ui.theme.GlassBackdrop
+import com.rani.tofy.ui.theme.Ink
+import com.rani.tofy.ui.theme.Rounded
+import com.rani.tofy.ui.theme.glassInset
+import com.rani.tofy.ui.theme.glassPane
+
+/** What the bottom panel shows — decided by KidExperience from the engine + lease. */
+data class HomeCtaModel(
+    /** 💝 openable gift seconds (0 → no gift button). */
+    val giftSeconds: Int,
+    val opening: Boolean,
+    val openingGift: Boolean,
+    /** The window is open on another of this child's devices (kind, seconds left) — the transfer card. */
+    val peer: Pair<String, Int>?,
+    val transferring: Boolean,
+    val transferTimedOut: Boolean,
+    val canRedeem: Boolean,
+    val redeemableSeconds: Int,
+    val maxedOut: Boolean,
+    val minutesPlayedToday: Int,
+    val capMax: Int,
+    val pendingMinutes: Int,
+    val redeemableMinutes: Int,
+)
+
+/** The approved kid home (WorldMapView): brand row, the glass header, the world grid, the floating minutes panel. */
+@Composable
+internal fun KidHome(
+    childID: String,
+    child: Child?,
+    state: KidState,
+    engine: ProgressEngine?,
+    premium: Boolean,
+    kidMode: Boolean,
+    tiles: List<HomeTile>,
+    cta: HomeCtaModel,
+    buddyLine: String?,
+    onSettings: () -> Unit,
+    onKidExit: () -> Unit,
+    onTile: (HomeTile) -> Unit,
+    onChallenge: () -> Unit,
+    onLevelInfo: () -> Unit,
+    onOpenEarned: () -> Unit,
+    onOpenGift: () -> Unit,
+    onTransfer: () -> Unit,
+) {
+    val snap = state.snapshot
+    var panelPx by remember { mutableIntStateOf(0) }
+    val density = LocalDensity.current
+    val girl = child?.isGirl == true
+
+    GlassBackdrop {
+        BoxWithConstraints(Modifier.fillMaxSize()) {
+            val cols = if (maxWidth >= 600.dp) 3 else 2
+            val hPad = if (cols == 2) 10.dp else 22.dp
+            LazyVerticalGrid(
+                GridCells.Fixed(cols),
+                Modifier.fillMaxSize().statusBarsPadding(),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                    start = hPad, end = hPad, bottom = with(density) { panelPx.toDp() } + 16.dp,
+                ),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                item(span = { GridItemSpan(maxLineSpan) }) { BrandRow(premium, onSettings) }
+                if (kidMode) item(span = { GridItemSpan(maxLineSpan) }) { KidExitBar(onKidExit) }
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    HeaderPane(child, snap.stars, snap.diamonds, snap.dayStreak, snap.xp, engine, cta, onLevelInfo, onChallenge)
+                }
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Text(tr("בּוֹחֲרִים עוֹלָם וְיוֹצְאִים לְהַרְפַּתְקָה ✨"), Modifier.fillMaxWidth().padding(top = 6.dp),
+                        color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, textAlign = TextAlign.Center, maxLines = 1)
+                }
+                items(tiles, key = { it.key }) { t ->
+                    when (t) {
+                        HomeTile.TofyTime -> FeatureTile("🎲", tr("טוֹפִי טַיים"), tr("שְׁאֵלוֹת בִּמְיוּחָד בִּשְׁבִילְךָ"),
+                            Color(0xFF8C7BFF), badge = tr("✨ חינם"), badgeTint = Color(0xFF8CFFC4)) { onTile(t) }
+                        is HomeTile.WorldTile -> {
+                            val w = t.world
+                            val room = snap.worldProgress[w.id] ?: 0
+                            val roomLabel = maxOf(1, minOf(room + 1, w.rooms))
+                            val foot = if (!t.open && room > 0)
+                                tr("חֶדֶר %lld/%lld · %@ לְהַמְשִׁיךְ?", roomLabel, w.rooms, if (girl) tr("רוֹצָה") else tr("רוֹצֶה"))
+                            else tr("חֶדֶר %lld/%lld", roomLabel, w.rooms)
+                            val badge = when { t.guest -> tr("🌟 אוֹרֵחַ הַשָּׁבוּעַ"); !t.open -> tr("👑 טוֹפִי+"); else -> null }
+                            val subtitle = if (w.isArena) tr("כָּל הַנּוֹשְׂאִים · דַּקּוֹת כְּפוּלוֹת") else w.topic?.displayName ?: ""
+                            FeatureTile(w.emoji, w.name, subtitle, w.glow, badge = badge, foot = foot,
+                                footFrac = room / maxOf(1, w.rooms).toFloat()) { onTile(t) }
+                        }
+                    }
+                }
+            }
+
+            // The floating minutes panel over a soft scrim — tiles fade out under it.
+            Column(
+                Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                    .background(Brush.verticalGradient(0f to Color.Transparent, 0.35f to Ink.deep.copy(alpha = 0.72f), 1f to Ink.deep.copy(alpha = 0.9f)))
+                    .navigationBarsPadding().padding(start = 20.dp, end = 20.dp, top = 40.dp, bottom = 14.dp)
+                    .onSizeChanged { panelPx = it.height },
+                horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                BuddyBubble(buddyLine, Modifier.fillMaxWidth())
+                BottomCtas(cta, onOpenEarned, onOpenGift, onTransfer)
+            }
+        }
+    }
+}
+
+// ── brand row + header ──────────────────────────────────────────────────────
+
+@Composable
+private fun BrandRow(premium: Boolean, onSettings: () -> Unit) {
+    Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            if (premium) tr("טופי+") else tr("טופי"),
+            style = TextStyle(
+                brush = Brush.verticalGradient(listOf(Color(0xFFFFF6C4), Color(0xFFFFD23F), Color(0xFFFFB347))),
+                fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 34.sp,
+            ),
+        )
+        Spacer(Modifier.width(8.dp))
+        // Our own lion, head and waving paw only — the top of the full-body PNG.
+        Box(Modifier.size(width = 32.dp, height = 39.dp).clip(RoundedCornerShape(6.dp))) {
+            CharacterImage("lion", Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alignment = Alignment.TopCenter)
+        }
+        Spacer(Modifier.weight(1f))
+        // 🛍️ shop and 🏆 friends join here once they're ported; ⚙️ is the parent's corner.
+        Box(
+            Modifier.size(44.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.24f))
+                .border(1.dp, Color.White.copy(alpha = 0.32f), CircleShape).clickable(onClick = onSettings),
+            contentAlignment = Alignment.Center,
+        ) { Text("⚙️", fontSize = 19.sp) }
+    }
+}
+
+@Composable
+private fun KidExitBar(onClick: () -> Unit) {
+    Box(Modifier.fillMaxWidth().padding(top = 4.dp), contentAlignment = Alignment.Center) {
+        Row(
+            Modifier.clip(RoundedCornerShape(50)).background(Color(0xFFEF4655)).border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50))
+                .clickable(onClick = onClick).padding(horizontal = 22.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp),
+        ) {
+            Text("🔓", fontSize = 16.sp)
+            Text(tr("יְצִיאָה מִמַּצַּב יֶלֶד וְשִׁחְרוּר נְעִילַת הַמַּכְשִׁיר"), color = Color.White, fontFamily = Rounded,
+                fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, textAlign = TextAlign.Center)
+        }
+    }
+}
+
+/** StarCounter.currencyShort — 1,284 → "1.2K". */
+private fun currencyShort(v: Int): String {
+    val a = kotlin.math.abs(v)
+    if (a < 1_000) return "$v"
+    val sign = if (v < 0) "-" else ""
+    fun fmt(x: Double, suf: String): String {
+        if (x < 10) { val t = kotlin.math.floor(x * 10) / 10; val s = "%.1f".format(java.util.Locale.US, t); return sign + s.removeSuffix(".0") + suf }
+        return sign + x.toInt() + suf
+    }
+    return if (a < 1_000_000) fmt(a / 1_000.0, "K") else fmt(a / 1_000_000.0, "M")
+}
+
+/** ONE glass pane: identity + wallet, the stat strip, then the daily challenge (topBar). */
+@Composable
+private fun HeaderPane(
+    child: Child?, stars: Int, diamonds: Int, dayStreak: Int, xp: Int, engine: ProgressEngine?,
+    cta: HomeCtaModel, onLevelInfo: () -> Unit, onChallenge: () -> Unit,
+) {
+    Column(Modifier.fillMaxWidth().padding(top = 6.dp).glassPane(24.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            // The ring says the level tier: bronze from 5, silver from 10, gold from 20.
+            val tier = RewardEngine.levelTier(RewardEngine.level(xp))
+            val ring = listOf(Color.White.copy(alpha = 0.5f), Color(0xFFCD7F32), Color(0xFFD9D9E3), Color(0xFFFFD23F))[tier]
+            CharacterImage(child?.character3DID ?: "fox",
+                Modifier.size(52.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.22f))
+                    .border(if (tier == 0) 1.dp else 2.5.dp, ring, CircleShape),
+                contentScale = ContentScale.Crop)
+            Column(Modifier.weight(1f).clickable(onClick = onLevelInfo), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                val first = (child?.name?.takeIf { it.isNotBlank() } ?: tr("טוֹפִי")).split(" ").first()
+                Text(first, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 17.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                val line = gradeName(child?.effectiveGrade ?: 1) + if (dayStreak > 0) tr(" · 🔥 %lld יָמִים", dayStreak) else ""
+                Text(line, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
+            }
+            WalletStat("⭐ " + currencyShort(stars), tr("כּוֹכָבִים"))
+            WalletStat("💎 " + currencyShort(diamonds), tr("יַהֲלוֹמִים"))
+        }
+        // 🎮 earned and 💝 gift wallets, to the second (build 198 "זמן מדויק לשנייה").
+        Row(Modifier.fillMaxWidth().glassInset(16.dp).padding(vertical = 10.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
+            WalletStat("🎮 " + timeLabel(engine?.openableSeconds(false) ?: 0), tr("דַּקּ׳ שֶׁהִרְוִיחַ"))
+            WalletStat("💝 " + timeLabel(cta.giftSeconds), tr("דַּקּ׳ מַתָּנָה"))
+        }
+        StatsPanel(engine, onLevelInfo)
+        ChallengeCard(engine, onChallenge)
+    }
+}
+
+@Composable
+private fun WalletStat(value: String, label: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Text(value, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 14.5.sp, maxLines = 1)
+        }
+        Text(label, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1)
+    }
+}
+
+/** ⏱ minutes today (of the cap) · ✅ correct today · ⭐ level. */
+@Composable
+private fun StatsPanel(engine: ProgressEngine?, onLevelInfo: () -> Unit) {
+    val snap = engine?.snapshot
+    val cap = engine?.settings?.dailyCap
+    val minutes = if (cap?.enabled == true) "${snap?.minutesEarnedToday ?: 0}" else "${engine?.pendingMinutes ?: 0}"
+    val suffix = if (cap?.enabled == true) "/${cap.max}" else null
+    Row(Modifier.fillMaxWidth().glassInset(18.dp).padding(vertical = 13.dp, horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        StatColumn(minutes, suffix, tr("⏱ הִרְוַחְתָּ הַיּוֹם"), null)
+        StatDivider()
+        StatColumn("${snap?.correctToday ?: 0}", null, tr("✅ נְכוֹנוֹת הַיּוֹם"), null)
+        StatDivider()
+        StatColumn("${engine?.companionLevel ?: 1}", null, tr("⭐ רָמָה"), onLevelInfo)
+    }
+}
+
+@Composable
+private fun androidx.compose.foundation.layout.RowScope.StatColumn(value: String, suffix: String?, label: String, onClick: (() -> Unit)?) {
+    Column(
+        Modifier.weight(1f).then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(value, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 20.sp)
+                if (suffix != null) Text(suffix, color = Ink.tertiary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp,
+                    modifier = Modifier.padding(bottom = 2.dp))
+            }
+        }
+        Text(label, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
+    }
+}
+
+@Composable
+private fun StatDivider() = Box(Modifier.width(1.dp).height(36.dp).background(Color.White.copy(alpha = 0.16f)))
+
+/** The daily challenge twin card: 🔥 ring → title → status → track. */
+@Composable
+private fun ChallengeCard(engine: ProgressEngine?, onClick: () -> Unit) {
+    val target = ProgressEngine.DAILY_CHALLENGE_TARGET
+    val done = engine?.dailyChallengeProgress ?: 0
+    val ready = engine?.dailyChallengeRewardReady == true
+    val claimed = engine?.dailyChallengeClaimed == true
+    val frac = if (ready || claimed) 1f else minOf(done, target) / target.toFloat()
+    val t = rememberInfiniteTransition(label = "pulse")
+    val pulse by t.animateFloat(0.95f, 1.12f, infiniteRepeatable(tween(900), RepeatMode.Reverse), label = "pulse")
+    Row(
+        Modifier.fillMaxWidth().glassInset(16.dp).clickable(onClick = onClick).padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Box(
+            Modifier.size(40.dp).clip(CircleShape).background(Brush.linearGradient(listOf(Color(0xFFFFB347), Color(0xFFFF5E3A))))
+                .border(1.5.dp, Color.White.copy(alpha = 0.55f), CircleShape),
+            contentAlignment = Alignment.Center,
+        ) { Text("🔥", fontSize = 21.sp, modifier = Modifier.graphicsLayer { scaleX = pulse; scaleY = pulse }) }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(tr("אֶתְגָּר יוֹמִי"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 13.5.sp)
+            when {
+                claimed -> Text(tr("כָּל הַכָּבוֹד! נִפְגָּשִׁים מָחָר 🌙"), color = Color.White.copy(alpha = 0.88f), fontFamily = Rounded,
+                    fontWeight = FontWeight.Bold, fontSize = 11.5.sp, maxLines = 1)
+                ready -> Text("🎁 " + tr("פִּתְחוּ!"), Modifier.clip(RoundedCornerShape(50)).background(Brush.horizontalGradient(listOf(Ink.gold1, Ink.gold2)))
+                    .padding(horizontal = 10.dp, vertical = 3.dp), color = Ink.deep, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 12.sp)
+                else -> Text(tr("%lld מִתּוֹךְ %lld", done, target), color = Color.White.copy(alpha = 0.88f), fontFamily = Rounded,
+                    fontWeight = FontWeight.Bold, fontSize = 11.5.sp, maxLines = 1)
+            }
+            Track(frac, Modifier.padding(top = 4.dp))
+        }
+    }
+}
+
+@Composable
+fun Track(frac: Float, modifier: Modifier = Modifier, fill: Color = Color.White) {
+    Box(modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))) {
+        if (frac > 0f) Box(Modifier.fillMaxWidth(frac.coerceIn(0.06f, 1f)).height(10.dp).clip(RoundedCornerShape(50)).background(fill))
+    }
+}
+
+// ── tiles ───────────────────────────────────────────────────────────────────
+
+/** WorldCard / FeatureCard: a glass tile with a whisper of the world's own colour. */
+@Composable
+private fun FeatureTile(
+    emoji: String, title: String, subtitle: String, tint: Color,
+    badge: String? = null, badgeTint: Color? = null, foot: String? = null, footFrac: Float = 0f, onClick: () -> Unit,
+) {
+    Column(
+        Modifier.fillMaxWidth().heightIn(min = 158.dp).clip(RoundedCornerShape(22.dp))
+            .drawBehind { drawCircle(tint.copy(alpha = 0.38f), radius = size.width * 0.75f, center = Offset(size.width * 0.15f, 0f)) }
+            .glassPane(22.dp, 0.13f).clickable(onClick = onClick).padding(14.dp),
+    ) {
+        Row(verticalAlignment = Alignment.Top) {
+            Text(emoji, fontSize = 32.sp)
+            Spacer(Modifier.weight(1f))
+            if (badge != null) Text(
+                badge,
+                Modifier.clip(RoundedCornerShape(50)).background(badgeTint?.copy(alpha = 0.9f) ?: Color.White.copy(alpha = 0.22f))
+                    .padding(horizontal = 8.dp, vertical = 3.dp),
+                color = if (badgeTint != null) Ink.deep else Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 10.5.sp, maxLines = 1,
+            )
+        }
+        Spacer(Modifier.height(6.dp))
+        Text(title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.5.sp, maxLines = 2, lineHeight = 19.sp)
+        Text(subtitle, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.sp, maxLines = 2, lineHeight = 16.sp)
+        if (foot != null) {
+            Spacer(Modifier.height(8.dp))
+            Text(foot, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1)
+            Track(footFrac, Modifier.padding(top = 4.dp).height(6.dp))
+        }
+    }
+}
+
+// ── the bottom CTAs ─────────────────────────────────────────────────────────
+
+@Composable
+private fun ColumnScope.BottomCtas(c: HomeCtaModel, onOpenEarned: () -> Unit, onOpenGift: () -> Unit, onTransfer: () -> Unit) {
+    // 💝 ONE button for everything the PARENTS gave — never blurred with earned minutes.
+    if (c.giftSeconds > 0 && c.peer == null) {
+        if (c.opening && c.openingGift) KidCta(tr("פּוֹתְחִים לְךָ… ✨"), Color(0xFFFF5FA8), Color(0xFFFFA53A), busy = true) {}
+        else KidCta(tr("מַתָּנָה מֵהַהוֹרִים · ") + minutesText(c.giftSeconds),
+            Color(0xFFFF5FA8), Color(0xFFFFA53A), emoji = "💝", enabled = !c.opening, size = 19, onClick = onOpenGift)
+    }
+    val peer = c.peer
+    when {
+        peer != null -> {
+            val where = when (peer.first) { "ipad" -> tr("בָּאַיְפֵּד"); "iphone" -> tr("בָּאַיְפוֹן"); else -> tr("בְּמַכְשִׁיר אַחֵר") }
+            val left = maxOf(0, peer.second)
+            BottomHint(tr("🎮 הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו %@ — נִשְׁאֲרוּ %lld:%@", where, left / 60, "%02d".format(left % 60)))
+            if (c.transferTimedOut) BottomHint(tr("לֹא הִצְלַחְנוּ לִנְעֹל %@ עַכְשָׁיו — אוּלַי הוּא כָּבוּי. אֶפְשָׁר לְנַסּוֹת שׁוּב 😊", where))
+            if (c.transferring) KidCta(tr("מַעֲבִירִים לְכָאן… ✨"), Color(0xFF5B6CFF), Color(0xFF9B5DE5), busy = true, size = 19) {}
+            else KidCta(tr("נַעֲלוּ %@ וּפִתְחוּ כָּאן", where), Color(0xFF5B6CFF), Color(0xFF9B5DE5), emoji = "🔁", size = 19, onClick = onTransfer)
+        }
+        c.canRedeem -> {
+            if (c.opening && !c.openingGift) KidCta(tr("פּוֹתְחִים לְךָ… ✨"), Color(0xFF5E60CE), Color(0xFF3E8BF0), busy = true) {}
+            else KidCta(
+                if (c.redeemableSeconds % 60 == 0) tr("פִּתְחוּ לִי %lld דַּקּוֹת לְשַׂחֵק", c.redeemableSeconds / 60)
+                else tr("פִּתְחוּ לִי %@ דַּקּוֹת לְשַׂחֵק", timeLabel(c.redeemableSeconds)),
+                Color(0xFF5E60CE), Color(0xFF3E8BF0),
+                emoji = "🎮", enabled = !c.opening, onClick = onOpenEarned)
+        }
+        c.maxedOut -> BottomHint(tr("שִׂחַקְתָּ הַיּוֹם %lld מִתּוֹךְ %lld דַּקּוֹת 🌙 — %lld שְׁמוּרוֹת לְמָחָר", c.minutesPlayedToday, c.capMax, c.pendingMinutes))
+        c.redeemableMinutes > 0 -> BottomHint(tr("עוֹד %lld דַּקּוֹת וְאֶפְשָׁר לִפְתּוֹחַ זְמַן מִשְׂחָק 🎮",
+            maxOf(0, ProgressEngine.MINIMUM_UNLOCK_MINUTES - c.redeemableMinutes)))
+        else -> BottomHint(tr("עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק 🎮"))
+    }
+}
+
+/** "16 דַּקּוֹת" / "16:45 דַּקּוֹת" — the gift pocket to the second, never quietly rounded. */
+private fun minutesText(seconds: Int): String =
+    if (seconds % 60 == 0) tr("%lld דַּקּוֹת", seconds / 60) else tr("%lld:%@ דַּקּוֹת", seconds / 60, "%02d".format(seconds % 60))
