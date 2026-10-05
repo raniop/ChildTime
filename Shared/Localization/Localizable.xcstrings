@@ -1155,6 +1155,28 @@
         }
       }
     },
+    "\"הגדרות\" ← \"זמן מסך\"" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«الإعدادات» ← «مدة استخدام الجهاز»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\"Settings\" → \"Screen Time\""
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Настройки» → «Экранное время»"
+          }
+        }
+      }
+    },
     "\"הרפתקה חכמה\" נקראת עכשיו טופי טיים" : {
       "localizations" : {
         "ar" : {
@@ -12537,6 +12559,28 @@
         }
       }
     },
+    "אִם הִגְדַּרְתֶּם אוֹתוֹ בֶּעָבָר בַּטֶּלֶפוֹן הַזֶּה — בְּ\"הגדרות\" ← \"זמן מסך\":" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إن أعددتموها سابقًا في هذا الهاتف — في «الإعدادات» ← «مدة استخدام الجهاز»:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If you set it up on this phone before — in \"Settings\" → \"Screen Time\":"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если вы настраивали его на этом телефоне — в «Настройки» → «Экранное время»:"
+          }
+        }
+      }
+    },
     "אִם הִגְדַּרְתֶּם אוֹתוֹ בֶּעָבָר בַּטֶּלֶפוֹן הַזֶּה — בְּהַגְדָּרוֹת ← זְמַן מָסָךְ:" : {
       "localizations" : {
         "ar" : {
@@ -12864,6 +12908,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Как хочешь играть?"
+          }
+        }
+      }
+    },
+    "אֵיךְ זֶה נִרְאֶה בָּאַיְפוֹן?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كيف يبدو هذا على الآيفون؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How does it look on the iPhone?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Как это выглядит на iPhone?"
           }
         }
       }
@@ -17103,6 +17169,28 @@
         }
       }
     },
+    "אישור קבוע" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مسموح دائمًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Always Allowed"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешённые всегда"
+          }
+        }
+      }
+    },
     "אישרתם מטלה" : {
       "localizations" : {
         "ar" : {
@@ -18020,6 +18108,28 @@
       }
     },
     "בְּ\"אִשּׁוּר קָבוּעַ\" — רַק מָה שֶׁחַיָּב לִהְיוֹת פָּתוּחַ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في «مسموح دائمًا» — فقط ما يجب أن يبقى مفتوحًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In \"Always Allowed\" — only what must stay open"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В «Разрешённых всегда» — только то, что должно быть открыто"
+          }
+        }
+      }
+    },
+    "בְּ\"אישור קבוע\" — רַק מָה שֶׁחַיָּב לִהְיוֹת פָּתוּחַ" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -21982,6 +22092,28 @@
         }
       }
     },
+    "בחירת יישומים שיאושרו תמיד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختيار تطبيقات مسموحة دائمًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose apps to allow at all times"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите приложения, разрешённые всегда"
+          }
+        }
+      }
+    },
     "בחר" : {
       "localizations" : {
         "ar" : {
@@ -23677,6 +23809,28 @@
       }
     },
     "גּוֹלְלִים עַד לְמַטָּה ← \"יִשּׁוּמִים עִם גִּישָׁה לִזְמַן מָסָךְ\"" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مرّروا للأسفل ← «التطبيقات التي لديها وصول إلى مدة استخدام الجهاز»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scroll to the bottom → \"Apps with Screen Time Access\""
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прокрутите вниз → «Приложения с доступом к Экранному времени»"
+          }
+        }
+      }
+    },
+    "גּוֹלְלִים עַד לְמַטָּה ← \"יישומים עם גישה לזמן מסך\"" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -33788,6 +33942,50 @@
         }
       }
     },
+    "הגבלות יישומים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حدود التطبيقات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Limits"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лимиты приложений"
+          }
+        }
+      }
+    },
+    "הגבלות שימוש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تقييد الاستخدام"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limit Usage"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ограничения"
+          }
+        }
+      }
+    },
     "הגדירו לכל ילד כמה זמן הוא יכול להרוויח ביום" : {
       "localizations" : {
         "ar" : {
@@ -36571,6 +36769,28 @@
         }
       }
     },
+    "הפחתת מאמץ העיניים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تقليل إجهاد العين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reduce eye strain"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Снижение нагрузки на глаза"
+          }
+        }
+      }
+    },
     "הפעולה לא נשלחה" : {
       "localizations" : {
         "ar" : {
@@ -37164,6 +37384,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "На этой неделе общие результаты снизились на %lld%%. Стоит немного потренироваться вместе."
+          }
+        }
+      }
+    },
+    "השבתה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت التوقف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downtime"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В покое"
           }
         }
       }
@@ -42954,6 +43196,28 @@
         }
       }
     },
+    "טוֹפִי מְנַהֵל עַכְשָׁו אֶת הַנְּעִילָה. כְּדֵי שֶׁשּׁוּם דָּבָר לֹא יִתְנַגֵּשׁ, בְּ\"הגדרות\" ← \"זמן מסך\":" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy يدير القفل الآن. كي لا يتعارض شيء، في «الإعدادات» ← «مدة استخدام الجهاز»:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy runs the lock now. So nothing clashes, in \"Settings\" → \"Screen Time\":"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Теперь блокировкой управляет Tofy. Чтобы ничего не конфликтовало, в «Настройки» → «Экранное время»:"
+          }
+        }
+      }
+    },
     "טוֹפִי מְנַהֵל עַכְשָׁו אֶת הַנְּעִילָה. כְּדֵי שֶׁשּׁוּם דָּבָר לֹא יִתְנַגֵּשׁ, בְּהַגְדָּרוֹת ← זְמַן מָסָךְ:" : {
       "localizations" : {
         "ar" : {
@@ -47143,6 +47407,28 @@
         }
       }
     },
+    "כַּבּוּ \"השבתה\" וְ\"הגבלות יישומים\"" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أوقفوا «وقت التوقف» و«حدود التطبيقات»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn off \"Downtime\" and \"App Limits\""
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выключите «В покое» и «Лимиты приложений»"
+          }
+        }
+      }
+    },
     "כַּבּוּ \"זְמַן הַשְׁבָּתָה\" וּ\"מִגְבְּלוֹת יִשּׁוּמִים\"" : {
       "localizations" : {
         "ar" : {
@@ -47733,6 +48019,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "синий"
+          }
+        }
+      }
+    },
+    "כָּךְ זֶה נִרְאֶה בְּ\"הגדרות\" ← \"זמן מסך\"" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هكذا يبدو في «الإعدادات» ← «مدة استخدام الجهاز»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is how it looks in \"Settings\" → \"Screen Time\""
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Так это выглядит в «Настройки» → «Экранное время»"
           }
         }
       }
@@ -49512,6 +49820,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выключено. Ребёнок не потеряет время, даже если ошибётся много раз."
+          }
+        }
+      }
+    },
+    "כבויה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "متوقف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выкл."
           }
         }
       }
@@ -51541,6 +51871,28 @@
         }
       }
     },
+    "לְהַשְׁאִיר רַק מָה שֶׁחַיָּב לִהְיוֹת פָּתוּחַ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أبقوا فقط ما يجب أن يبقى مفتوحًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep only what must stay open"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оставьте только то, что должно быть открыто"
+          }
+        }
+      }
+    },
     "לְהַשְׁקוֹת אֶת הָעֲצִיצִים" : {
       "localizations" : {
         "ar" : {
@@ -51871,6 +52223,28 @@
         }
       }
     },
+    "לְמַחֹק כָּל הַגְבָּלָה שֶׁיֵּשׁ שָׁם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "احذفوا أي حدّ موجود هناك"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete any limit you find there"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалите все лимиты там"
+          }
+        }
+      }
+    },
     "לְמָשָׁל: מִשְׁפַּחַת גּוֹלָן" : {
       "localizations" : {
         "ar" : {
@@ -52087,6 +52461,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Навсегда"
+          }
+        }
+      }
+    },
+    "לִבְדֹּק שֶׁכָּתוּב \"כבויה\"" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تحقّقوا أنه مكتوب «متوقف»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check that it says \"Off\""
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проверьте, что написано «Выкл.»"
           }
         }
       }
@@ -62409,6 +62805,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удалённо, не трогая его телефон: подарить минуты, заблокировать, задания."
+          }
+        }
+      }
+    },
+    "מרחק מהמסך" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مسافة الشاشة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screen Distance"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Расстояние до экрана"
           }
         }
       }
@@ -76883,6 +77301,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Кубики, которые дают ровно цель"
+          }
+        }
+      }
+    },
+    "קביעת הגבלת זמן ליישומים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعيين حدود زمنية للتطبيقات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set time limits for apps"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Установите лимиты времени для приложений"
           }
         }
       }

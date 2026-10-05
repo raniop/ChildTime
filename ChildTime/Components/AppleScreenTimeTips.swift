@@ -28,13 +28,41 @@ enum AppleScreenTimeTips {
 
     static var steps: [Step] {
         [
-            Step(id: 1, title: tr("כַּבּוּ \"זְמַן הַשְׁבָּתָה\" וּ\"מִגְבְּלוֹת יִשּׁוּמִים\""),
+            // The labels in quotes are Apple's OWN, letter for letter as the iPhone
+            // shows them (Rani's screenshot of Settings → זמן מסך) — no niqqud,
+            // so a parent can find them by eye.
+            Step(id: 1, title: tr("כַּבּוּ \"השבתה\" וְ\"הגבלות יישומים\""),
                  detail: tr("טוֹפִי עוֹשֶׂה אֶת זֶה עַכְשָׁו — שְׁתֵּי נְעִילוֹת מִתְנַגְּשׁוֹת.")),
-            Step(id: 2, title: tr("בְּ\"אִשּׁוּר קָבוּעַ\" — רַק מָה שֶׁחַיָּב לִהְיוֹת פָּתוּחַ"),
+            Step(id: 2, title: tr("בְּ\"אישור קבוע\" — רַק מָה שֶׁחַיָּב לִהְיוֹת פָּתוּחַ"),
                  detail: tr("אַפְּלִיקַצְיָה שֶׁנִּמְצֵאת שָׁם, טוֹפִי לֹא יָכוֹל לִנְעֹל.")),
             Step(id: 3, title: tr("הַגְדִּירוּ קוֹד לִזְמַן מָסָךְ"),
                  detail: tr("בְּלִי קוֹד, אֶפְשָׁר לְכַבּוֹת לְטוֹפִי אֶת הַגִּישָׁה בַּהַגְדָּרוֹת — וְהַכֹּל נִפְתָּח.")),
         ]
+    }
+}
+
+/// 👀 "איך זה נראה באייפון?" — opens the drawing of Apple's page.
+struct ScreenTimeShowMeButton: View {
+    @State private var showing = false
+
+    var body: some View {
+        Button {
+            Haptic.light()
+            showing = true
+        } label: {
+            Label(tr("אֵיךְ זֶה נִרְאֶה בָּאַיְפוֹן?"), systemImage: "eye.fill")
+                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 11)
+                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.16)))
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.35), lineWidth: 1))
+        }
+        .buttonStyle(.juicy)
+        .sheet(isPresented: $showing) {
+            ScreenTimeLookalikeView(title: tr("כָּךְ זֶה נִרְאֶה בְּ\"הגדרות\" ← \"זמן מסך\""),
+                                    sections: ScreenTimeLookalikes.usageLimits) { showing = false }
+        }
     }
 }
 
@@ -87,7 +115,7 @@ struct AppleScreenTimeTipsSheet: View {
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text(tr("טוֹפִי מְנַהֵל עַכְשָׁו אֶת הַנְּעִילָה. כְּדֵי שֶׁשּׁוּם דָּבָר לֹא יִתְנַגֵּשׁ, בְּהַגְדָּרוֹת ← זְמַן מָסָךְ:"))
+                    Text(tr("טוֹפִי מְנַהֵל עַכְשָׁו אֶת הַנְּעִילָה. כְּדֵי שֶׁשּׁוּם דָּבָר לֹא יִתְנַגֵּשׁ, בְּ\"הגדרות\" ← \"זמן מסך\":"))
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.88))
                         .multilineTextAlignment(.center)
@@ -97,6 +125,9 @@ struct AppleScreenTimeTipsSheet: View {
                     AppleScreenTimeStepsList(steps: AppleScreenTimeTips.steps)
                         .padding(16)
                         .glassPane(radius: 20)
+
+                    // A picture of Apple's page — in-app, so allowed on a child's device.
+                    ScreenTimeShowMeButton()
 
                     Text(tr("אֶפְשָׁר לִמְצֹא אֶת זֶה תָּמִיד בְּהַגְדָּרוֹת הַהוֹרִים שֶׁל טוֹפִי בַּטֶּלֶפוֹן הַזֶּה."))
                         .font(.system(size: 13, weight: .medium, design: .rounded))
