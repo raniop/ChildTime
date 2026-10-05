@@ -70,6 +70,17 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
             return tr("כִּתָּה \(letters[Swift.min(g, 12) - 1])")
         }
     }
+    /// The same grade in the PARENT's spelling — no niqqud, and plene, which
+    /// stripping the marks off `gradeDisplayName` does not give ("כתה").
+    static func gradeNameForParent(_ g: Int) -> String {
+        switch g {
+        case ..<0: return tr("גן טרום־חובה")
+        case 0:    return tr("גן חובה")
+        default:
+            let letters = [tr("א׳"), tr("ב׳"), tr("ג׳"), tr("ד׳"), tr("ה׳"), tr("ו׳"), tr("ז׳"), tr("ח׳"), tr("ט׳"), tr("י׳"), tr("יא׳"), tr("יב׳")]
+            return tr("כיתה \(letters[Swift.min(g, 12) - 1])")
+        }
+    }
     /// Interest tags the parent picked at setup (see `InterestCatalog`). Seed
     /// the Smart Feed's topic affinity toward what the child already likes.
     var interests: [String]

@@ -76,6 +76,11 @@ struct ParentDashboardView: View {
     @State private var showWhatsNewStory = false
     /// 🧭 The first-run tour of this screen (band ג of the onboarding mockup).
     @State private var parentTourActive = false
+    /// 🚀 Band ב: "does this child have a device of their own?"
+    @State private var deviceQuestionChild: Profile? = nil
+    /// The checklist reads its answers from local defaults; this nudges a re-read.
+    @State private var setupTick = 0
+
     @State private var showingPaywall = false
     /// Apple's own "manage subscription" sheet — where an existing subscriber
     /// belongs, instead of being shown the purchase page again.
@@ -357,6 +362,9 @@ struct ParentDashboardView: View {
                                 homeHeader
                                 // ⚙️ / ＋ / 🧹 moved into the rail on the Duo.
                                 if !useRail { homeActionsRow }
+                                // 🚀 "עוד קצת וסיימנו" — only while a child's setup
+                                // is unfinished (band ב).
+                                setupChecklist
                                 // Rani: "אני לא רוצה יותר להציג את זה שם" — nothing
                                 // promotional or merely informational stacks above the
                                 // children any more. Tofy+, the gift journey, a child's
@@ -612,10 +620,10 @@ struct ParentDashboardView: View {
             }
             .sheet(isPresented: $showingCreateChild, onDismiss: {
                 // Next step after creating: connect that child's device (skippable).
+                // 🚀 …the ONE question first: own device, or the parent's phone?
                 if let p = pendingQRChild {
                     pendingQRChild = nil
-                    qrCode = nil
-                    qrChild = p
+                    deviceQuestionChild = p
                 }
             }) {
                 ProfileEditorView(mode: .create) { newProfile in
@@ -629,6 +637,23 @@ struct ParentDashboardView: View {
             .sheet(item: $qrChild) { child in
                 childQRSheet(for: child)
             }
+            .sheet(item: $deviceQuestionChild) { p in
+                DeviceQuestionView(child: p, onOwnDevice: {
+                    SetupProgress.setPlan(.own, p.id)
+                    setupTick &+= 1
+                    deviceQuestionChild = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                        qrCode = nil
+                        qrChild = p
+                    }
+                }, onPlaysHere: {
+                    SetupProgress.setPlan(.here, p.id)
+                    setupTick &+= 1
+                    deviceQuestionChild = nil
+                })
+                .presentationDetents([.large])
+            }
+
             .sheet(item: $parentHelp.promptedRequest) { req in
                 ParentHelpAnswerView(request: req)
             }
@@ -1668,6 +1693,63 @@ struct ParentDashboardView: View {
     /// and the premium watcher never land on `body` or `rootAlertsHost`, both of
     /// which already sit at the type-checker's limit.
     // MARK: - 💬 Support chat
+
+    // MARK: - 🚀 Setup checklist (band ב)
+
+    /// The first child whose setup is not finished and not hidden.
+    private var setupChild: Profile? {
+        _ = setupTick
+        return rows.map(\.profile).first { p in
+            !SetupProgress.isHidden(p.id) && !setupSteps(for: p).allSatisfy(\.done)
+        }
+    }
+
+    /// Parent copy — no niqqud. The device half of the list depends on the one
+    /// question: a phone of their own (connect it, then the lock is on), or the
+    /// parent's (try "תנו ל… לשחק כאן" once). A device connected later wins.
+    private func setupSteps(for p: Profile) -> [SetupStep] {
+        let name = Question.stripNiqqud(p.name)
+        let grade = Profile.gradeNameForParent(p.effectiveGrade)
+        var steps = [
+            SetupStep(id: "account", title: tr("נוצר חשבון הורה"), done: true),
+            SetupStep(id: "child", title: p.gender == .girl ? tr("נוספה \(name), \(grade)") : tr("נוסף \(name), \(grade)"), done: true),
+            SetupStep(id: "cap", title: tr("נקבע זמן מסך יומי"), done: true),
+        ]
+        let devices = household.devicesByChild[p.id.uuidString] ?? []
+        // "Plays on my phone" IS a finished setup — nothing left to configure,
+        // and the card's own "תנו ל… לשחק כאן" is right there (Rani: "למה צריך
+        // להכריח את השלב").
+        if SetupProgress.plan(p.id) != .here || !devices.isEmpty {
+            // No separate "the lock is on" step (Rani: "לא חושב שצריך את השלב
+            // הזה"): connecting asks for Screen Time, and from that moment the
+            // device is fully locked with no setup — see `newAppLockArmed`.
+            steps.append(SetupStep(id: "connect", title: tr("לחבר מכשיר ל\(name)"), done: !devices.isEmpty))
+        }
+        return steps
+    }
+
+    @ViewBuilder private var setupChecklist: some View {
+        if let p = setupChild {
+            let steps = setupSteps(for: p)
+            let next = steps.first { !$0.done }?.id
+            SetupChecklistCard(
+                steps: steps,
+                continueTitle: tr("ממשיכים — לחבר מכשיר"),
+                onContinue: {
+                    switch next {
+                    case "connect":
+                        // No answer yet → the question; "own device" → the code.
+                        if SetupProgress.plan(p.id) == nil { deviceQuestionChild = p }
+                        else { qrCode = nil; qrChild = p }
+                    default: break
+                    }
+                },
+                onHide: {
+                    SetupProgress.hide(p.id)
+                    withAnimation { setupTick &+= 1 }
+                })
+        }
+    }
 
     // MARK: - 🧭 The tour
 

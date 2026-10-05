@@ -22048,6 +22048,28 @@
         }
       }
     },
+    "בטלפון של %@: פותחים את טופי, ומאשרים \"זמן מסך\" כשהאייפון שואל. מאותו רגע הכל נעול חוץ מטופי." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في هاتف %@: افتحوا Tofy ووافقوا على «مدة استخدام الجهاز» عندما يسأل الآيفون. من تلك اللحظة كل شيء مقفل ما عدا Tofy."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On %@'s phone: open Tofy and allow \"Screen Time\" when the iPhone asks. From then on, everything but Tofy is locked."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На телефоне (%@): откройте Tofy и разрешите «Экранное время», когда iPhone спросит. С этого момента всё, кроме Tofy, заблокировано."
+          }
+        }
+      }
+    },
     "ביטול" : {
       "localizations" : {
         "ar" : {
@@ -22170,6 +22192,50 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "בכפתור \"תנו ל%@ לשחק כאן\" שבכרטיס שלה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بزر «دعوا %@ يلعب هنا» في بطاقتها"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "With the \"Let %@ play here\" button on her card"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кнопкой «Пусть %@ поиграет здесь» в её карточке"
+          }
+        }
+      }
+    },
+    "בכפתור \"תנו ל%@ לשחק כאן\" שבכרטיס שלו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بزر «دعوا %@ يلعب هنا» في بطاقته"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "With the \"Let %@ play here\" button on his card"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кнопкой «Пусть %@ поиграет здесь» в его карточке"
           }
         }
       }
@@ -23754,6 +23820,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Детсад"
+          }
+        }
+      }
+    },
+    "גן חובה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الروضة الإلزامية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kindergarten"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подготовительная группа"
+          }
+        }
+      }
+    },
+    "גן טרום־חובה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الروضة التمهيدية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pre-K"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Старшая группа"
           }
         }
       }
@@ -36175,6 +36285,28 @@
         }
       }
     },
+    "הסתרה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إخفاء"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скрыть"
+          }
+        }
+      }
+    },
     "הפעולה לא נשלחה" : {
       "localizations" : {
         "ar" : {
@@ -38505,6 +38637,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Это то, что iOS получила от нас сейчас, — а не то, что отмечено на экранах выше."
+          }
+        }
+      }
+    },
+    "זה קובע איך מגדירים את טופי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا يحدد كيف نُعدّ Tofy"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This decides how Tofy is set up"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "От этого зависит, как настроить Tofy"
           }
         }
       }
@@ -49167,6 +49321,28 @@
         }
       }
     },
+    "כיתה %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الصف %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grade %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ класс"
+          }
+        }
+      }
+    },
     "כיתה ג׳ · עברית" : {
       "localizations" : {
         "ar" : {
@@ -50317,6 +50493,50 @@
         }
       }
     },
+    "כן, יש לה מכשיר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نعم، لديها جهاز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yes, she has a device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Да, у неё есть устройство"
+          }
+        }
+      }
+    },
+    "כן, יש לו מכשיר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نعم، لديه جهاز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yes, he has a device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Да, у него есть устройство"
+          }
+        }
+      }
+    },
     "כניסה" : {
       "localizations" : {
         "ar" : {
@@ -50533,6 +50753,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Адрес почты некорректный — проверьте его ещё раз"
+          }
+        }
+      }
+    },
+    "ל%@ יש מכשיר משלה?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هل لدى %@ جهاز خاص بها؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Does %@ have her own device?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У %@ есть своё устройство?"
+          }
+        }
+      }
+    },
+    "ל%@ יש מכשיר משלו?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هل لدى %@ جهاز خاص به؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Does %@ have his own device?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У %@ есть своё устройство?"
           }
         }
       }
@@ -52984,6 +53248,50 @@
         }
       }
     },
+    "לא, הוא ישחק בטלפון שלי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا، سيلعب على هاتفي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No, he'll play on my phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет, он будет играть на моём телефоне"
+          }
+        }
+      }
+    },
+    "לא, היא תשחק בטלפון שלי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا، ستلعب على هاتفي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No, she'll play on my phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет, она будет играть на моём телефоне"
+          }
+        }
+      }
+    },
     "לא, להשאיר" : {
       "localizations" : {
         "ar" : {
@@ -53684,6 +53992,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Учимся и зарабатываем"
+          }
+        }
+      }
+    },
+    "לחבר מכשיר ל%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ربط جهاز %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connect %@'s device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключить устройство: %@"
           }
         }
       }
@@ -61115,6 +61445,28 @@
         }
       }
     },
+    "ממשיכים — לחבר מכשיר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "متابعة — ربط جهاز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue — connect a device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дальше — подключить устройство"
+          }
+        }
+      }
+    },
     "ממתין למכשיר של %@…" : {
       "localizations" : {
         "ar" : {
@@ -64466,6 +64818,50 @@
         }
       }
     },
+    "נוסף %@, %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تمت إضافة %@، %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ added, %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ добавлен, %@"
+          }
+        }
+      }
+    },
+    "נוספה %@, %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تمت إضافة %@، %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ added, %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ добавлена, %@"
+          }
+        }
+      }
+    },
     "נועה" : {
       "localizations" : {
         "ar" : {
@@ -64484,6 +64880,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ноа"
+          }
+        }
+      }
+    },
+    "נוצר חשבון הורה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تم إنشاء حساب الوالد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parent account created"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создан аккаунт родителя"
+          }
+        }
+      }
+    },
+    "נחבר אותו עכשיו בסריקת קוד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سنربطه الآن بمسح رمز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We'll connect it now with a code scan"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключим его сейчас по коду"
           }
         }
       }
@@ -64550,6 +64990,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Бесплатный период до %@"
+          }
+        }
+      }
+    },
+    "ניתן לחבר מכשיר של ילד במועד מאוחר יותר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمكن ربط جهاز الطفل لاحقًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can connect a child's device later"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Устройство ребёнка можно подключить позже"
           }
         }
       }
@@ -64925,6 +65387,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Накоплено сегодня: %lld / %lld мин"
+          }
+        }
+      }
+    },
+    "נקבע זמן מסך יומי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تم تحديد وقت الشاشة اليومي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily screen time set"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Задано экранное время на день"
           }
         }
       }
@@ -81736,6 +82220,28 @@
         }
       }
     },
+    "שאלה אחת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سؤال واحد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One question"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Один вопрос"
+          }
+        }
+      }
+    },
     "שאלה רגילה" : {
       "localizations" : {
         "ar" : {
@@ -90031,6 +90537,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🚀 Продолжу сам"
+          }
+        }
+      }
+    },
+    "🚀 עוד קצת וסיימנו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🚀 اقتربنا من النهاية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🚀 Almost done"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🚀 Ещё чуть-чуть"
           }
         }
       }
