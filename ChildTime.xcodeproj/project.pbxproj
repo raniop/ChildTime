@@ -7,9 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C0DE5H1E1DC0RE0000000003 /* ShieldPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */; };
-		C0DE5H1E1DC0RE0000000004 /* ShieldPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */; };
-		C0DE5H1E1DC0RE0000000005 /* ShieldPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */; };
 		0AD12B6CBB301CB2D63C2196 /* DeviceActivityMonitorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE5B1972704D3335DBFF6B3 /* DeviceActivityMonitorExtension.swift */; };
 		4F8401CC2FCD64020076E20B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F8401CB2FCD64020076E20B /* WidgetKit.framework */; };
 		4F8401CE2FCD64020076E20B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F8401CD2FCD64020076E20B /* SwiftUI.framework */; };
@@ -33,6 +30,9 @@
 		AA0000000000000000001004 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000002004 /* GoogleSignIn */; };
 		AA0000000000000000001005 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000002005 /* GoogleSignInSwift */; };
 		AA00000000000000000010F1 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000000000000000020F1 /* FirebaseMessaging */; };
+		C0DE5H1E1DC0RE0000000003 /* ShieldPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */; };
+		C0DE5H1E1DC0RE0000000004 /* ShieldPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */; };
+		C0DE5H1E1DC0RE0000000005 /* ShieldPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */; };
 		E20C1E12CDDF39D6B9F10786 /* ShieldConfigurationExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F3B5ED0AA76C9A122C43D7 /* ShieldConfigurationExtension.swift */; };
 /* End PBXBuildFile section */
 
@@ -141,9 +141,9 @@
 		51F3B5ED0AA76C9A122C43D7 /* ShieldConfigurationExtension.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShieldConfigurationExtension.swift; sourceTree = "<group>"; };
 		7A110C4E00000000000000A1 /* LockPushService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LockPushService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B110C4E00000000000000B2 /* TofyWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TofyWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShieldPolicy.swift; sourceTree = "<group>"; };
 		873C358DCB5A2C2F44C51CDB /* ShieldState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShieldState.swift; sourceTree = "<group>"; };
 		AF85E1C4DBB972D75EDDF8BB /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShieldPolicy.swift; sourceTree = "<group>"; };
 		CBA173C4588B868B8087E73A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		D54D97703A325955B8A1C24F /* ShieldConfigurationExt.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShieldConfigurationExt.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3AD695EC33940A27756C3CF /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -336,14 +336,6 @@
 			path = ShieldConfigurationExt;
 			sourceTree = "<group>";
 		};
-		C0DE5H1E1DC0RE0000000002 /* ShieldCore */ = {
-			isa = PBXGroup;
-			children = (
-				C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */,
-			);
-			path = ShieldCore;
-			sourceTree = "<group>";
-		};
 		3AE5479DF6FCC1ACB0E2F2D2 /* DeviceActivityMonitorExt */ = {
 			isa = PBXGroup;
 			children = (
@@ -407,6 +399,14 @@
 				CBA173C4588B868B8087E73A /* Foundation.framework */,
 			);
 			name = iOS;
+			sourceTree = "<group>";
+		};
+		C0DE5H1E1DC0RE0000000002 /* ShieldCore */ = {
+			isa = PBXGroup;
+			children = (
+				C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */,
+			);
+			path = ShieldCore;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -870,7 +870,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = PlayTimeWidget/PlayTimeWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PlayTimeWidget/Info.plist;
@@ -902,7 +902,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = PlayTimeWidget/PlayTimeWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PlayTimeWidget/Info.plist;
@@ -931,7 +931,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HelpContentExtension/Info.plist;
@@ -959,7 +959,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HelpContentExtension/Info.plist;
@@ -1111,7 +1111,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ChildTime/ChildTime.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -1142,7 +1142,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ChildTime/ChildTime.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -1171,7 +1171,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
@@ -1193,7 +1193,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
@@ -1214,7 +1214,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 2026.10.3;
@@ -1234,7 +1234,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 2026.10.3;
@@ -1256,7 +1256,7 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = DeviceActivityMonitorExt/DeviceActivityMonitorExt.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DeviceActivityMonitorExt/Info.plist;
@@ -1281,7 +1281,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = LockPushService/LockPushService.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LockPushService/Info.plist;
@@ -1310,7 +1310,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = LockPushService/LockPushService.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LockPushService/Info.plist;
@@ -1339,7 +1339,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1367,7 +1367,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1396,7 +1396,7 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = DeviceActivityMonitorExt/DeviceActivityMonitorExt.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DeviceActivityMonitorExt/Info.plist;
@@ -1423,7 +1423,7 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = ShieldConfigurationExt/ShieldConfigurationExt.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ShieldConfigurationExt/Info.plist;
@@ -1445,7 +1445,7 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = ShieldConfigurationExt/ShieldConfigurationExt.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 192;
+				CURRENT_PROJECT_VERSION = 193;
 				DEVELOPMENT_TEAM = TFG2H9C76N;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ShieldConfigurationExt/Info.plist;

@@ -16442,6 +16442,28 @@
         }
       }
     },
+    "אחרי שמוסיפים ילד שואלים אם יש לו מכשיר משלו, ורשימה קצרה במסך הבית מראה מה נשאר כדי לסיים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بعد إضافة طفل نسأل إن كان لديه جهاز خاص به، وقائمة قصيرة في الشاشة الرئيسية تُظهر ما تبقّى للإنهاء"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After you add a child we ask whether they have their own device, and a short list on the home screen shows what is left to finish"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "После добавления ребёнка мы спрашиваем, есть ли у него своё устройство, а короткий список на главном экране показывает, что осталось"
+          }
+        }
+      }
+    },
     "אחר…" : {
       "localizations" : {
         "ar" : {
@@ -22478,6 +22500,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Новый переключатель на странице ребёнка отключает игры, и ребёнок сразу переходит к вопросам."
+          }
+        }
+      }
+    },
+    "בפעם הראשונה, נקודה על כל כפתור במסך הבית — אצלכם ואצל הילד. אפשר להציג שוב מההגדרות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في المرة الأولى، إشارة على كل زر في الشاشة الرئيسية — عندكم وعند الطفل. يمكن عرضها مجددًا من الإعدادات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The first time, a pointer on every button of the home screen — yours and your child's. You can show it again from Settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В первый раз — подсказка на каждой кнопке главного экрана, у вас и у ребёнка. Показать снова можно в настройках"
           }
         }
       }
@@ -33746,6 +33790,28 @@
         }
       }
     },
+    "הדרכה על המסך" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جولة على الشاشة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A tour on the screen"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подсказки на экране"
+          }
+        }
+      }
+    },
     "ההדרכה תוצג שוב במסך הבית ✓" : {
       "localizations" : {
         "ar" : {
@@ -37120,6 +37186,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Начать бесплатные 7 дней"
+          }
+        }
+      }
+    },
+    "התחלה קלה יותר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بداية أسهل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An easier start"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Более простой старт"
           }
         }
       }
