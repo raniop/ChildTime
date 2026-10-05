@@ -71106,6 +71106,28 @@
         }
       }
     },
+    "עריכת %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعديل %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменить: %@"
+          }
+        }
+      }
+    },
     "עריכת מטלה" : {
       "localizations" : {
         "ar" : {

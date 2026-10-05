@@ -51,6 +51,10 @@ struct ParentDashboardView: View {
     @State private var gridDeleteProfile: Profile? = nil   // long-press delete from the grid
     /// ⚙️ The child's settings list (page 2), opened from the bottom of their page.
     @State private var settingsChild: Profile? = nil
+    /// ✏️ The same child settings, opened straight from the HOME (the card's
+    /// name, or ⚡ → עריכה). Its own state: the detail page binds `settingsChild`,
+    /// and on the Duo both can be on screen at once.
+    @State private var homeSettingsChild: Profile? = nil
     @State private var showFamilyNameEditor = false
     @State private var familyNameDraft = ""
     @State private var showingReorder = false               // manual child order sheet
@@ -637,6 +641,17 @@ struct ParentDashboardView: View {
             .sheet(item: $qrChild) { child in
                 childQRSheet(for: child)
             }
+            .sheet(item: $homeSettingsChild) { p in
+                ChildSettingsView(profileID: p.id,
+                                  snapshot: rows.first(where: { $0.profile.id == p.id })?.snapshot ?? ProgressSnapshot(),
+                                  onResetProgress: { resetProgress(for: $0) },
+                                  onDelete: { removed in
+                                      homeSettingsChild = nil
+                                      profiles.remove(removed)
+                                  })
+                    .environmentObject(profiles)
+                    .environmentObject(settings)
+            }
             .sheet(item: $deviceQuestionChild) { p in
                 DeviceQuestionView(child: p, onOwnDevice: {
                     SetupProgress.setPlan(.own, p.id)
@@ -1153,9 +1168,14 @@ struct ParentDashboardView: View {
             HStack(spacing: 12) {
                 ProfileAvatarView(profile: profile, size: 52)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(profile.name)
-                        .font(.system(size: 17, weight: .heavy, design: .rounded))
-                        .lineLimit(1).minimumScaleFactor(0.7)
+                    HStack(spacing: 6) {
+                        Text(profile.name)
+                            .font(.system(size: 17, weight: .heavy, design: .rounded))
+                            .lineLimit(1).minimumScaleFactor(0.7)
+                        // ✏️ The name and avatar open this child's settings —
+                        // the same pencil the family name already wears.
+                        if isRoot { Text("✏️").font(.system(size: 13)).opacity(0.75) }
+                    }
                     HStack(spacing: 6) {
                         Circle().fill(playing || isChildPlayingNow(profile) ? Color(hex: "5CFF9D") : Color.white.opacity(0.35))
                             .frame(width: 8, height: 8)
@@ -1433,6 +1453,11 @@ struct ParentDashboardView: View {
     private func gridCardMenu(_ profile: Profile) -> some View {
         let hasDevice = childHasDevice(profile)
         return Menu {
+            // ✏️ First: the thing parents came to this menu looking for.
+            Button {
+                homeSettingsChild = profile
+            } label: { Label(tr("עריכת \(Question.stripNiqqud(profile.name))"), systemImage: "pencil") }
+            Divider()
             if !hasDevice {
                 Button {
                     Haptic.light(); qrCode = nil; qrChild = profile
@@ -1962,6 +1987,23 @@ struct ParentDashboardView: View {
                 ForEach(rows, id: \.profile.id) { row in
                     childCardTap(row)
                         .coachMark("p.card", if: row.profile.id == rows.first?.profile.id)
+                        // ✏️ Avatar + name → this child's settings, in one tap
+                        // (Rani: "מאוד מסובך להגיע למצב של עריכת ילד"). The grid
+                        // is RTL, so `.topLeading` is the top-RIGHT, where they sit.
+                        .overlay(alignment: .topLeading) {
+                            if isRoot {
+                                Button {
+                                    Haptic.light()
+                                    homeSettingsChild = row.profile
+                                } label: {
+                                    Color.clear
+                                        .frame(width: 230, height: 84)
+                                        .contentShape(Rectangle())
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel(tr("עריכת \(Question.stripNiqqud(row.profile.name))"))
+                            }
+                        }
                     // ⋯ quick actions right on the card — the two
                     // remote controls (open / lock now) without
                     // opening the child's page. Overlaid on the link
@@ -2104,30 +2146,6 @@ struct ParentDashboardView: View {
 
     /// "⚙️ הגדרות של X ›" — the one door to everything that is SET about the
     /// child (page 2). It used to unfold the whole legacy card under the report.
-    private func detailSettingsRow(_ profile: Profile) -> some View {
-        Button {
-            Haptic.light()
-            settingsChild = profile
-        } label: {
-            HStack(spacing: 10) {
-                Text(tr("⚙️ הַגְדָּרוֹת שֶׁל \(profile.name)"))
-                    .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    .lineLimit(1).minimumScaleFactor(0.8)
-                Spacer(minLength: 0)
-                Image(systemName: AppSymbol.forwardChevron)
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(GlassInk.tertiary)
-            }
-            .foregroundStyle(GlassInk.primary)
-            .padding(.horizontal, 14).padding(.vertical, 14)
-            .frame(maxWidth: .infinity)
-            .glassPane(radius: 22)
-            .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        }
-        .buttonStyle(.plain)
-        .environment(\.layoutDirection, .app)
-    }
-
     @ViewBuilder
     private func childDetailScreen(for id: UUID) -> some View {
         if let row = rows.first(where: { $0.profile.id == id }) {
@@ -2150,10 +2168,6 @@ struct ParentDashboardView: View {
                         onAddDevice: { qrCode = nil; qrChild = row.profile },
                         onRemoveDevice: { deviceToRemove = $0 }
                     )
-                    // Everything that is SET rather than read (name, grade,
-                    // difficulty, worlds, cap, PIN, friends, reset, delete…)
-                    // lives one tap away on the child's settings list.
-                    detailSettingsRow(row.profile)
                 }
                 .padding(AppSpacing.lg)
                 .frame(maxWidth: 720)
@@ -2175,6 +2189,22 @@ struct ParentDashboardView: View {
             .environment(\.layoutDirection, .appMirrored)
             .background(GlassBackdrop())
             .navigationTitle("")
+            // ⚙️ Everything that is SET rather than read (name, grade,
+            // difficulty, worlds, cap, PIN, friends, reset, delete…) — in the
+            // page's header now, not a row at the very bottom of a long report.
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        Haptic.light()
+                        settingsChild = row.profile
+                    } label: {
+                        Label(tr("הגדרות"), systemImage: "gearshape.fill")
+                            .labelStyle(.titleAndIcon)
+                            .font(.system(size: 15, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                    }
+                }
+            }
             .toolbar(.visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
     }
