@@ -18173,6 +18173,28 @@
         }
       }
     },
+    "ב\"מה חדש\" מחזיקים אצבע על המסך או לוחצים ⏸ — והסטורי מחכה עד שממשיכים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في \"ما الجديد\" اضغط مطوّلًا على الشاشة أو اضغط ⏸ — وتنتظر القصة حتى تتابع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In \"What's new\", hold a finger on the screen or tap ⏸ — the story waits until you continue"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В «Что нового» задержите палец на экране или нажмите ⏸ — история подождёт, пока вы не продолжите"
+          }
+        }
+      }
+    },
     "ב%@ המערכת הורידה מעט את הקושי כדי לבנות ביטחון והצלחה." : {
       "localizations" : {
         "ar" : {
@@ -72421,6 +72443,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Активные миры"
+          }
+        }
+      }
+    },
+    "עוצרים כדי לקרוא" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "توقّف للقراءة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause to read"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пауза, чтобы дочитать"
           }
         }
       }
