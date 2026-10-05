@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <application android:networkSecurityConfig="@xml/network_security_config" tools:ignore="UnusedAttribute" />
+    <application android:networkSecurityConfig="@xml/network_security_config" tools:ignore="UnusedAttribute">
+        <!-- Debug: TofyApp initialises Firebase itself, so a -Pemu=true build can
+             start it as "demo-tofy" BEFORE any Firebase component runs (deleting
+             an auto-initialised app crashed Installations on a fresh install). -->
+        <provider android:name="com.google.firebase.provider.FirebaseInitProvider"
+            android:authorities="${applicationId}.firebaseinitprovider" tools:node="remove" />
+    </application>
 </manifest>

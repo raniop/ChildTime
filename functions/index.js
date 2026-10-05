@@ -540,6 +540,37 @@ async function recordPushOnce(data) {
   await recordParentActivity(data);
 }
 
+// 🤖 The Android parent app's notification channels (TofyApp.createChannels):
+// "requests" = something waiting for the parent's yes, "reports" = reports and
+// nudges a parent may mute, "family" = everything else (live events included).
+// iOS never reads the `android` block, so adding it leaves iPhones untouched.
+const ANDROID_REQUEST_TYPES = new Set([
+  "choreApproval", "parentHelp", "assistRequest", "premium-request", "pack-request",
+  "childLinkRequest", "timeTransferParent",
+]);
+const ANDROID_REPORT_TYPES = new Set([
+  "weeklyReport", "retention-notice", "campaign", "gift-start", "gift-day", "pass-ending",
+]);
+
+function androidChannelFor(data) {
+  const t = String((data && (data.type || data.kind)) || "");
+  if (ANDROID_REQUEST_TYPES.has(t)) return "requests";
+  if (ANDROID_REPORT_TYPES.has(t)) return "reports";
+  return "family";
+}
+
+// androidFor("requests") / androidFor("family", { tag: threadID }) → the FCM
+// `android` block that sits next to an `apns` block. `tag` mirrors the apns
+// thread-id so a thread collapses into one notification on Android too.
+function androidFor(channel, extra) {
+  const notification = { channelId: channel, icon: "ic_notification" };
+  if (extra && extra.tag) notification.tag = String(extra.tag);
+  if (extra && extra.imageURL) notification.imageUrl = String(extra.imageURL);
+  const out = { notification };
+  if (channel !== "reports") out.priority = "high";
+  return out;
+}
+
 async function send(tokens, notification, data) {
   if (!tokens.length) return;
   await recordPushOnce(data);        // 🔔 the parent's activity centre
@@ -548,6 +579,7 @@ async function send(tokens, notification, data) {
     notification,
     data: data || {},
     apns: { payload: { aps: { sound: "default" } } },
+    android: androidFor(androidChannelFor(data)),
   });
 }
 
@@ -1092,6 +1124,7 @@ async function notifyParentsAckApplied(householdID, build) {
       return {
         notification: { title, body },
         apns: { payload: { aps: { sound: "default" } } },
+        android: androidFor("family"),
       };
     });
   } catch (e) { console.error("[ack-push] failed", e && e.message); }
@@ -1416,6 +1449,7 @@ exports.onChoreWritten = onDocumentWritten("households/{householdID}/chores/{cho
       apns: { payload: { aps: { "sound": "default",
                                 "category": "CHORE_APPROVAL",
                                 "mutable-content": 1 } } },
+      android: androidFor("requests"),
     }));
     return;
   }
@@ -1429,6 +1463,7 @@ exports.onChoreWritten = onDocumentWritten("households/{householdID}/chores/{cho
     await sendEachLocalized(tokens, (lang) => ({
       notification: choreApprovedMessage(before, after, lang),
       apns: { payload: { aps: { sound: "default" } } },
+      android: androidFor("family"),
     }));
   }
 });
@@ -1541,6 +1576,7 @@ exports.onHelpRequest = onDocumentCreated("helpRequests/{id}", async (event) => 
           },
         },
       },
+      android: androidFor("requests"),
     };
   });
 });
@@ -1694,6 +1730,7 @@ exports.sendTestPush = onDocumentCreated("pushTests/{id}", async (event) => {
             ? { title: "Tofy — اختبار الإشعارات ✅", body: "ممتاز! الإشعارات تعمل." }
             : { title: "טופי — בדיקת התראות ✅", body: "מעולה! ההתראות עובדות." },
       apns: { payload: { aps: { sound: "default" } } },
+      android: androidFor("family"),
     }));
     console.log(`[testPush] sent: success=${res.successCount} failure=${res.failureCount}`);
     res.results.forEach(({ token, response: r }) => {
@@ -1807,6 +1844,7 @@ exports.onHouseholdCreated = onDocumentCreated(
         notification: { title, body },
         data: { kind: "adminNewFamily", householdID: hid },
         apns: { payload: { aps: { sound: "default" } } },
+        android: androidFor("family"),
       });
       console.log("[newFamily]", hid, "push", res.successCount, "/", uniq.length);
     } else {
@@ -3050,7 +3088,8 @@ function campaignPayload(c, forChild, lang) {
   const data = { type: "campaign", campaignID: c.id, action: c.action.type, packID: c.action.packID || "", role: forChild ? "child" : "parent" };
   const apns = { payload: { aps: { sound: "default", "mutable-content": 1 } } };
   if (c.imageURL) { data.imageURL = c.imageURL; apns.fcmOptions = { imageURL: c.imageURL }; }
-  return { notification, data, apns };
+  const android = androidFor("reports", { imageURL: c.imageURL });
+  return { notification, data, apns, android };
 }
 
 // Per device language: Hebrew devices get the authored copy; English devices get
@@ -5406,6 +5445,7 @@ exports.onSupportMessage = onDocumentCreated(
         notification: { title, body: text.slice(0, 900) },
         data: { type: "support-chat", audience: "team", householdID: hid },
         apns: { payload: { aps: { "sound": "default", "category": "SUPPORT_CHAT", "thread-id": `support-${hid}` } } },
+        android: androidFor("family", { tag: `support-${hid}` }),
       });
       console.log("[support] parent message", hid, "→ team push", res.successCount, "/", tokens.length);
       return;
@@ -5434,6 +5474,7 @@ exports.onSupportMessage = onDocumentCreated(
         notification: supportReplyMessage(text, lang),
         data: { type: "support-chat", audience: "parent", householdID: hid },
         apns: { payload: { aps: { "sound": "default", "thread-id": "support" } } },
+        android: androidFor("family", { tag: "support" }),
       }));
       console.log("[support] team reply", hid, "→ parent push", out.successCount, "/", tokens.length);
     }

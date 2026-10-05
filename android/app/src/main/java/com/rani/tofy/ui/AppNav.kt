@@ -31,7 +31,11 @@ fun AppNav() {
     val hh = state.household
     if (hh == null) return
     if (hh.parentPinHash == null) { ParentPinSetupScreen(onDone = {}); return }
-    if (!state.loading && state.children.isEmpty()) { AddChildFlow(firstChild = true, onDone = {}, onCancel = {}); return }
+    // Stays in the flow after step 2 writes the child (the flag is set before the
+    // save), so steps 3–4 — device + lock — still show for the first child.
+    val onboarding = com.rani.tofy.ui.onboarding.rememberOnboardingActive()
+    if (!state.childrenLoaded) return
+    if (state.children.isEmpty() || onboarding) { AddChildFlow(firstChild = true, onDone = {}, onCancel = {}); return }
 
     val nav = rememberNavController()
     var actionsFor by remember { mutableStateOf<Child?>(null) }
@@ -70,7 +74,7 @@ fun AppNav() {
 
     actionsFor?.let { c ->
         ActionsSheet(c, state, onDismiss = { actionsFor = null },
-            onChores = { actionsFor = null; nav.navigate("chores") },
+            onChores = { com.rani.tofy.data.ChoresRepository.focusChildID = c.id; actionsFor = null; nav.navigate("chores") },
             onConnect = { actionsFor = null; connectFor = c.id },
             onSettings = { actionsFor = null; nav.navigate("childSettings/${c.id}") })
     }

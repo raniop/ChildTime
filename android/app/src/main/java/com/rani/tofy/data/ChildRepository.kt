@@ -27,7 +27,7 @@ object ChildRepository {
             "id" to id, "householdID" to h, "name" to name.trim(), "age" to age,
             "avatarPresetID" to "fox", "character3DID" to character, "characterUpdatedAt" to nowSecs(),
             "grade" to grade, "gradeSchoolYear" to schoolYear(),
-            "interests" to emptyList<String>(), "learningLevel" to "medium", "createdAt" to nowSecs(),
+            "interests" to emptyList<String>(), "learningLevel" to "developing", "createdAt" to nowSecs(),
             "topicsVersion" to 2, "onlyRegularQuestions" to false,
         )
         gender?.let { rec["gender"] = it }

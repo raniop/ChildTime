@@ -14,6 +14,7 @@ class TofyApp : Application() {
     override fun onCreate() {
         super.onCreate()
         if (BuildConfig.DEBUG && BuildConfig.USE_EMULATORS) useLocalEmulators()
+        else if (FirebaseApp.getApps(this).isEmpty()) FirebaseApp.initializeApp(this)
         I18n.init(this)
         createChannels()
     }
@@ -25,7 +26,6 @@ class TofyApp : Application() {
      */
     private fun useLocalEmulators() {
         val opts = FirebaseOptions.fromResource(this) ?: return
-        FirebaseApp.getApps(this).forEach { it.delete() }
         FirebaseApp.initializeApp(this, FirebaseOptions.Builder(opts).setProjectId("demo-tofy").build())
         FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099)
         FirebaseFirestore.getInstance().useEmulator("10.0.2.2", 8080)

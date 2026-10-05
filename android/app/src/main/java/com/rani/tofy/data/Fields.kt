@@ -29,3 +29,18 @@ fun Doc.strList(k: String): List<String>? = (this[k] as? List<*>)?.filterIsInsta
 fun Doc.map(k: String): Doc? = this[k] as? Map<String, Any?>
 
 fun nowSecs(): Double = System.currentTimeMillis() / 1000.0
+
+/**
+ * children/{id}/state/current is the ONE document iOS encodes with a plain
+ * JSONEncoder (ProgressSnapshot.toFirestore) — so its Dates are seconds since
+ * 2001-01-01 (Apple's reference date), NOT unix. Read and write them through
+ * these, or an Android write lands decades in the future and wins every
+ * last-write-wins merge on every iOS device.
+ */
+const val APPLE_EPOCH_OFFSET = 978307200.0
+
+/** A state/current Date field, as unix seconds. */
+fun Doc.appleSecs(k: String): Double? = dbl(k)?.plus(APPLE_EPOCH_OFFSET)
+
+/** "Now" in state/current's own Date encoding. */
+fun nowAppleSecs(): Double = nowSecs() - APPLE_EPOCH_OFFSET

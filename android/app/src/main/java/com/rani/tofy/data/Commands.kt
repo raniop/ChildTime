@@ -198,7 +198,7 @@ object Commands {
                 upd["pendingMinutes"] = maxOf(0, eIn - eOut) / 60
                 upd["parentGiftMinutes"] = maxOf(0, gIn - gOut) / 60
                 upd["revision"] = (s.int("revision") ?: 0) + 1
-                upd["lastModifiedAt"] = nowSecs()
+                upd["lastModifiedAt"] = nowAppleSecs()   // state/current Dates are Apple-reference, not unix
                 txn.set(sRef, upd, SetOptions.merge())
                 txn.set(wRef, mapOf(
                     "state" to "idle",

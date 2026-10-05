@@ -95,7 +95,7 @@ data class Child(
     }
 }
 
-/** children/{id}/state/current — the subset of ProgressSnapshot the parent shows. */
+/** children/{id}/state/current — the subset of ProgressSnapshot the parent shows. Dates here are Apple-reference (see Fields.kt). */
 data class Progress(
     val answeredToday: Int,
     val correctToday: Int,
@@ -118,7 +118,7 @@ data class Progress(
         fun from(d: Doc): Progress {
             // "Today" counters only mean today if the child's device rolled them
             // today — a child who didn't open Tofy keeps yesterday's numbers.
-            val day = d.secs("dailyEarnedDate")
+            val day = d.appleSecs("dailyEarnedDate")   // Apple reference date — see Fields.kt
             val today = day != null && isToday(day)
             fun ti(k: String) = if (today) d.int(k) ?: 0 else 0
             return Progress(
@@ -135,7 +135,7 @@ data class Progress(
                 giftSecondsAvailable = maxOf(0, (d.int("giftSecondsIn") ?: 0) - (d.int("giftSecondsOut") ?: 0)),
                 topicAccuracy = d.map("topicAccuracy")?.mapNotNull { (k, v) -> (v as? Number)?.let { k to it.toDouble() } }?.toMap() ?: emptyMap(),
                 topicAnswered = d.map("topicAnswered")?.mapNotNull { (k, v) -> (v as? Number)?.let { k to it.toInt() } }?.toMap() ?: emptyMap(),
-                lastModifiedAt = d.secs("lastModifiedAt"),
+                lastModifiedAt = d.appleSecs("lastModifiedAt"),
             )
         }
     }

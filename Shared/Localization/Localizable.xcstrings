@@ -2306,6 +2306,28 @@
         }
       }
     },
+    "%@ · מְחַכָּה לְאִשּׁוּר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · بانتظار الموافقة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · waiting for approval"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · ждёт подтверждения"
+          }
+        }
+      }
+    },
     "%@ · תּוֹבָנוֹת %@ בְּיוֹם" : {
       "localizations" : {
         "ar" : {
@@ -3684,6 +3706,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ подключена!"
+          }
+        }
+      }
+    },
+    "%@ סִיְּמָה מְטַלָּה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ أنهت مهمة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ finished a chore"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ выполнила задание"
+          }
+        }
+      }
+    },
+    "%@ סִיֵּם מְטַלָּה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ أنهى مهمة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ finished a chore"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ выполнил задание"
           }
         }
       }
@@ -19584,7 +19650,26 @@
       }
     },
     "בִּחֲרוּ בְּאֵיזוֹ שָׂפָה טוֹפִי יוֹפִיעַ בַּמַּכְשִׁיר שֶׁל %@. הַשִּׁנּוּי מַגִּיעַ לַמַּכְשִׁיר בַּסִּנְכְרוּן הַבָּא." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختاروا اللغة التي يظهر بها Tofy على جهاز %@. يصل التغيير إلى الجهاز عند المزامنة التالية."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose the language Tofy shows on %@'s device. The change reaches the device at the next sync."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите, на каком языке Tofy будет на устройстве %@. Изменение дойдёт до устройства при следующей синхронизации."
+          }
+        }
+      }
     },
     "בִּחֲרוּ כַּמָּה דַּקּוֹת מָסָךְ בְּיוֹם עֲבוּר %@. הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד." : {
       "localizations" : {
@@ -22642,6 +22727,28 @@
         }
       }
     },
+    "בחירת קוד אחר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختيار رمز آخر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a different code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрать другой код"
+          }
+        }
+      }
+    },
     "בחר" : {
       "localizations" : {
         "ar" : {
@@ -23622,6 +23729,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Запрос на Tofy+"
+          }
+        }
+      }
+    },
+    "בקשות לאישור" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "طلبات بانتظار الموافقة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requests to approve"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запросы на одобрение"
           }
         }
       }
@@ -26253,6 +26382,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Еженедельные отчёты для родителей"
+          }
+        }
+      }
+    },
+    "דוחות ותובנות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تقارير ورؤى"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reports and insights"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отчёты и выводы"
           }
         }
       }
@@ -31087,6 +31238,28 @@
         }
       }
     },
+    "הַמְּחִיקָה לֹא הִצְלִיחָה. בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט וְנַסּוּ שׁוּב." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم ينجح الحذف. تحقّقوا من اتّصال الإنترنت وحاولوا مرّة أخرى."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleting didn't work. Check your internet connection and try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить не удалось. Проверьте интернет-соединение и попробуйте снова."
+          }
+        }
+      }
+    },
     "הַמְּכוֹנִית" : {
       "localizations" : {
         "ar" : {
@@ -33317,6 +33490,50 @@
         }
       }
     },
+    "הַשִּׁנּוּי לֹא נִשְׁמַר — אֵין כָּרֶגַע הַרְשָׁאָה לַמִּשְׁפָּחָה הַזּוֹ. נַסּוּ שׁוּב בְּעוֹד רֶגַע." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يُحفَظ التغيير — لا توجد صلاحية لهذه العائلة حاليًا. حاولوا مرّة أخرى بعد لحظة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The change wasn't saved — there's no permission for this family right now. Try again in a moment."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменение не сохранилось — сейчас нет доступа к этой семье. Попробуйте ещё раз через минуту."
+          }
+        }
+      }
+    },
+    "הַשִּׁנּוּי לֹא נִשְׁמַר. בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט וְנַסּוּ שׁוּב." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يُحفَظ التغيير. تحقّقوا من اتّصال الإنترنت وحاولوا مرّة أخرى."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The change wasn't saved. Check your internet connection and try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменение не сохранилось. Проверьте интернет-соединение и попробуйте снова."
+          }
+        }
+      }
+    },
     "הַשִּׁפּוּר הַגָּדוֹל" : {
       "localizations" : {
         "ar" : {
@@ -33428,7 +33645,26 @@
       }
     },
     "הַשָּׂפָה מְשַׁנָּה גַּם אֶת הַשְּׁאֵלוֹת, לֹא רַק אֶת הַטֶּקְסְטִים. אִם תְּשַׁנּוּ אוֹתָהּ בַּמַּכְשִׁיר שֶׁל הַיֶּלֶד עַצְמוֹ — הַבְּחִירָה הָאַחֲרוֹנָה קוֹבַעַת." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اللغة تغيّر الأسئلة أيضًا، لا النصوص فقط. إذا غيّرتموها على جهاز الطفل نفسه، فالاختيار الأخير هو الذي يُعتمد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The language changes the questions too, not just the text. If you change it on your child's device itself, the latest choice wins."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Язык меняет и вопросы, а не только тексты. Если поменять его на самом устройстве ребёнка, действует последний выбор."
+          }
+        }
+      }
     },
     "הַשָּׂפָה מִשְׁתַּנָּה מִיָּד בְּכָל הָאַפְּלִיקַצְיָה: טֶקְסְטִים, כִּוּוּן, הַקְרָאָה וּשְׁאֵלוֹת." : {
       "localizations" : {
@@ -37269,6 +37505,28 @@
         }
       }
     },
+    "המשפחה, הילדים וההתקדמות שמורים בענן — כשתתחברו שוב, הכול יחזור." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "العائلة والأطفال والتقدّم محفوظة في السحابة — سجّلوا الدخول مجددًا وسيعود كل شيء."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your family, kids and progress are saved in the cloud — sign in again and it's all back."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Семья, дети и прогресс сохранены в облаке — войдите снова, и всё вернётся."
+          }
+        }
+      }
+    },
     "המתנה הגיעה למכשיר של %@ ✓" : {
       "localizations" : {
         "ar" : {
@@ -38200,6 +38458,28 @@
         }
       }
     },
+    "הקוד הנוכחי לא נכון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرمز الحالي غير صحيح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The current code isn't right"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Текущий код неверный"
+          }
+        }
+      }
+    },
     "הקוד חייב להיות בדיוק 4 ספרות" : {
       "localizations" : {
         "ar" : {
@@ -38396,6 +38676,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "заработала"
+          }
+        }
+      }
+    },
+    "הרכישה נעשית במכשיר של הילד, עם קוד ההורים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يتم الشراء على جهاز الطفل باستخدام رمز الوالدين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buying is done on the child's device, with the parent code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Покупка делается на устройстве ребёнка, с родительским кодом"
           }
         }
       }
@@ -38968,6 +39270,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выйти и стереть с устройства"
+          }
+        }
+      }
+    },
+    "התנתקות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تسجيل الخروج"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign out"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выйти"
           }
         }
       }
@@ -44890,6 +45214,28 @@
         }
       }
     },
+    "טופי להורים — עכשיו גם באנדרואיד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy للأهل — الآن على أندرويد أيضًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy for parents — now on Android too"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy для родителей — теперь и на Android"
+          }
+        }
+      }
+    },
     "טופי מדבר בשפה של האייפון" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -47356,6 +47702,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ребёнок"
+          }
+        }
+      }
+    },
+    "ילדה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بنت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Girl"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Девочка"
           }
         }
       }
@@ -51538,6 +51906,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Стоит подтянуть:"
+          }
+        }
+      }
+    },
+    "כדי לאשר, הקלידו: %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "للتأكيد، اكتبوا: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To confirm, type: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для подтверждения введите: %@"
           }
         }
       }
@@ -56522,6 +56912,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выйти и удалить всё с этого устройства?"
+          }
+        }
+      }
+    },
+    "להתנתק מהחשבון בטלפון הזה?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تسجيل الخروج من الحساب على هذا الهاتف؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign out of your account on this phone?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выйти из аккаунта на этом телефоне?"
           }
         }
       }
@@ -63797,6 +64209,28 @@
         }
       }
     },
+    "מחיקה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حذف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "delete"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "удалить"
+          }
+        }
+      }
+    },
     "מחיקת דקות המתנה ממתינה למכשיר" : {
       "localizations" : {
         "ar" : {
@@ -64194,6 +64628,28 @@
         }
       }
     },
+    "מטעמי אבטחה, לפני מחיקת החשבון צריך להתחבר שוב." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لدواعٍ أمنية، يجب تسجيل الدخول مجددًا قبل حذف الحساب."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For your security, please sign in again before deleting the account."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В целях безопасности перед удалением аккаунта нужно войти ещё раз."
+          }
+        }
+      }
+    },
     "מי הילד?" : {
       "localizations" : {
         "ar" : {
@@ -64587,6 +65043,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ждём устройство %@…"
+          }
+        }
+      }
+    },
+    "מנהלים את הילדים, את זמן המסך, את המטלות ואת ההתראות ישירות מטלפון האנדרואיד שלכם." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أديروا الأطفال ووقت الشاشة والمهام والإشعارات مباشرةً من هاتف أندرويد الخاص بكم."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage your kids, screen time, chores and notifications right from your Android phone."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Управляйте детьми, экранным временем, делами и уведомлениями прямо со своего Android-телефона."
           }
         }
       }
@@ -68712,6 +69190,28 @@
         }
       }
     },
+    "נעילת האפליקציות, הצלילים והתגמול על תשובות נכונות מוגדרים במכשיר של כל ילד: פותחים שם את טופי ונכנסים להגדרות עם קוד ההורה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قفل التطبيقات والأصوات والمكافأة على الإجابات الصحيحة تُضبط على جهاز كل طفل: افتحوا Tofy هناك وادخلوا إلى الإعدادات برمز الأهل."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App locking, sounds and the reward for correct answers are set on each child's device: open Tofy there and go to Settings with the parent code."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Блокировка приложений, звуки и награда за правильные ответы настраиваются на устройстве каждого ребёнка: откройте там Tofy и зайдите в настройки с родительским кодом."
+          }
+        }
+      }
+    },
     "נעלתם את המכשיר מרחוק" : {
       "localizations" : {
         "ar" : {
@@ -70762,6 +71262,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Готово — %@ может начинать"
+          }
+        }
+      }
+    },
+    "סיסמה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كلمة المرور"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пароль"
           }
         }
       }
@@ -74423,6 +74945,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Пауза, чтобы дочитать"
+          }
+        }
+      }
+    },
+    "עזרה ותמיכה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المساعدة والدعم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Help & support"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помощь и поддержка"
           }
         }
       }
@@ -80937,6 +81481,28 @@
         }
       }
     },
+    "קוד נוכחי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرمز الحالي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Текущий код"
+          }
+        }
+      }
+    },
     "קוד שרק אתם יודעים — כך הילדים לא ישנו הגדרות ולא יפתחו לעצמם זמן מסך. תצטרכו אותו גם בטלפון של הילד." : {
       "localizations" : {
         "ar" : {
@@ -85889,10 +86455,48 @@
       }
     },
     "שָׂפַת הָאַפְּלִיקַצְיָה אֵצֶל הַיֶּלֶד" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لغة التطبيق لدى الطفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App language on your child's device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Язык приложения у ребёнка"
+          }
+        }
+      }
     },
     "שָׂפָה" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اللغة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Language"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Язык"
+          }
+        }
+      }
     },
     "שָׂפָה בַּמַּכְשִׁיר שֶׁלָּהּ" : {
       "localizations" : {

@@ -9,6 +9,8 @@ const admin = require('../../functions/node_modules/firebase-admin');
 admin.initializeApp({ projectId: 'demo-tofy' });
 const db = admin.firestore();
 const now = Date.now() / 1000;
+// state/current Dates are Apple-reference seconds (since 2001), like iOS's plain JSONEncoder.
+const apple = (unix) => unix - 978307200;
 // Family parent code 1234 in PINManager's "salt:sha256hex(salt+pin)" format.
 const crypto = require('crypto');
 const salt = crypto.randomBytes(16).toString('hex');
@@ -36,11 +38,11 @@ const parentPinHash = `${salt}:${crypto.createHash('sha256').update(salt + '1234
   await db.doc(`children/${dana}`).set(child(dana, 'דָּנָה', 'girl', 3, 'fox', 90));
   await db.doc(`children/${yoav}`).set(child(yoav, 'יוֹאָב', 'boy', 1, 'bear', 60));
   const state = (ans, cor, mins, extra = {}) => ({
-    answeredToday: ans, correctToday: cor, minutesEarnedToday: mins, dailyEarnedDate: now - 60,
+    answeredToday: ans, correctToday: cor, minutesEarnedToday: mins, dailyEarnedDate: apple(now - 60),
     stars: 340, diamonds: 55, dayStreak: 6, totalAnswered: ans * 12, totalCorrect: cor * 12,
     earnedSecondsIn: 5400, earnedSecondsOut: 4200, giftSecondsIn: 1800, giftSecondsOut: 0,
     topicAccuracy: { math: 0.92, hebrew: 0.81, english: 0.7 }, topicAnswered: { math: 120, hebrew: 80, english: 40 },
-    revision: 42, lastModifiedAt: now - 60, ...extra,
+    revision: 42, lastModifiedAt: apple(now - 60), ...extra,
   });
   await db.doc(`children/${dana}/state/current`).set(state(35, 34, 16));
   await db.doc(`children/${yoav}/state/current`).set(state(50, 41, 42));
@@ -48,7 +50,7 @@ const parentPinHash = `${salt}:${crypto.createHash('sha256').update(salt + '1234
   const dev = (child, id, name, seen) => ({ id: `${child}_${id}`, childID: child, householdID: hid, deviceID: id, name, kind: 'ipad', systemVersion: '26.1', joinedAt: now - 86400 * 18, lastSeenAt: seen, shieldAuthorized: true, appVersion: '2026.10.5 (199)', ownerUID: `anon-${id}` });
   await db.doc(`childDevices/${dana}_dana-ipad`).set(dev(dana, 'dana-ipad', 'iPad של דנה', now - 5));
   await db.doc(`childDevices/${yoav}_yoav-ipad`).set(dev(yoav, 'yoav-ipad', 'iPad של יואב', now - 3600));
-  await db.doc(`households/${hid}/chores/room`).set({ id: 'room', childID: yoav, title: 'סידור החדר', emoji: '🛏️', rewardKind: 'minutes', rewardMinutes: 15, doneAt: now - 600, createdAt: now - 86400 * 5 });
+  await db.doc(`households/${hid}/chores/room`).set({ id: 'room', childID: yoav, title: 'סידור החדר', emoji: '🛏️', rewardMinutes: 15, rewardCoins: 0, isDaily: true, timesPerDay: 1, markedDoneAt: now - 600, chosenReward: 'minutes', createdAt: now - 86400 * 5 });
   console.log('seeded', { uid, hid });
   process.exit(0);
 })().catch(e => { console.error(e); process.exit(1); });

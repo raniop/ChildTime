@@ -17,6 +17,8 @@ data class FamilyState(
     val leases: Map<String, Lease> = emptyMap(),
     val devices: List<ChildDevice> = emptyList(),
     val error: String? = null,
+    /** The first SERVER children snapshot has arrived — before it, "no children" means "not loaded yet". */
+    val childrenLoaded: Boolean = false,
 ) {
     /** The family's order (households.childOrder), then oldest first — same as iOS. */
     val orderedChildren: List<Child>
@@ -85,7 +87,7 @@ object FamilyRepository {
         regs += db.collection("children").whereEqualTo("householdID", hid).addSnapshotListener { snap, _ ->
             snap ?: return@addSnapshotListener
             val kids = snap.documents.mapNotNull { doc -> doc.data?.let { Child.from(doc.id, it) } }
-            _state.update { it.copy(children = kids) }
+            _state.update { it.copy(children = kids, childrenLoaded = it.childrenLoaded || !snap.metadata.isFromCache || kids.isNotEmpty()) }
             syncChildListeners(kids.map { it.id }.toSet())
         }
         regs += db.collection("childDevices").whereEqualTo("householdID", hid).addSnapshotListener { snap, _ ->
