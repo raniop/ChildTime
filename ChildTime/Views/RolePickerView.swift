@@ -10,6 +10,12 @@ struct RolePickerView: View {
     @State private var appeared = false
     /// iPad only: "רגע, האייפד הזה של מי?" before it becomes a parent device.
     @State private var confirmParentOnPad = false
+    /// "המכשיר של הילד" on a device that has no family at all — the old dead
+    /// end (Rani, 2026-10-05): the child's phone went straight to a QR screen
+    /// while no code existed anywhere in the world, and the only way out was
+    /// deleting the app. Now it asks first, with three ways forward.
+    @State private var childNeedsCode = false
+    @ObservedObject private var profiles = ProfileStore.shared
 
     private var isCompact: Bool { hsc == .compact }
     /// 📱 The DEVICE, not the size class — an iPad in Split View is still the
@@ -32,39 +38,23 @@ struct RolePickerView: View {
                             .font(.system(size: isCompact ? 26 : 34, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
+                        // The line a first-time parent actually needs, instead
+                        // of "you can change this later in settings".
                         Text(isPad ? tr("אֶת הַמִּשְׁפָּחָה מְנַהֲלִים בְּדֶרֶךְ כְּלָל מֵהָאַיְפוֹן שֶׁלָּכֶם")
-                                   : tr("אֶפְשָׁר לְשַׁנּוֹת מְאוּחָר יוֹתֵר בְּהַגְדָּרוֹת."))
-                            .font(.system(size: 15, weight: .medium, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.8))
+                                   : tr("פַּעַם רִאשׁוֹנָה בַּמִּשְׁפָּחָה? מַתְחִילִים כָּאן — בַּמַּכְשִׁיר שֶׁלָּכֶם"))
+                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.9))
                             .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                     .padding(.top, AppSpacing.lg)
 
+                    // 📱 On a phone the PARENT goes first and wears the gold
+                    // badge — whatever sits on top reads as the default, and a
+                    // family that starts on the kid's phone has nothing to scan.
+                    // 🖥️ On an iPad it stays the other way round (see `isPad`).
                     VStack(spacing: AppSpacing.lg) {
-                        roleCard(
-                            emoji: "🧒",
-                            title: tr("הַמַּכְשִׁיר שֶׁל הַיֶּלֶד"),
-                            // First-install guidance (Rani): families who start
-                            // on the KID's device hit a scan screen with no code
-                            // to scan — say up front that the parent goes first.
-                            subtitle: tr("לְשַׂחֵק וְלִלְמוֹד · מַתְחִילִים קֹדֶם בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה"),
-                            glow: AppColor.companionGlow,
-                            badge: isPad ? tr("מֻמְלָץ לְאַיְפֵּד") : nil
-                        ) { choose(.child) }
-
-                        roleCard(
-                            emoji: "👨‍👩‍👧",
-                            title: tr("הַמַּכְשִׁיר שֶׁלִּי (הוֹרֶה)"),
-                            subtitle: tr("מַעֲקָב, דּוּחוֹת וְנִיהוּל"),
-                            glow: AppColor.starGold
-                        ) {
-                            if isPad {
-                                Haptic.light()
-                                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { confirmParentOnPad = true }
-                            } else {
-                                choose(.parent)
-                            }
-                        }
+                        if isPad { childCard; parentCard } else { parentCard; childCard }
                     }
                     .frame(maxWidth: 460)
                 }
@@ -75,11 +65,142 @@ struct RolePickerView: View {
         }
         .overlay {
             if confirmParentOnPad { padParentConfirm }
+            if childNeedsCode { childCodeSheet }
         }
         .opacity(appeared ? 1 : 0)
         .onAppear {
             withAnimation(.easeOut(duration: 0.4)) { appeared = true }
         }
+    }
+
+    private var childCard: some View {
+        roleCard(
+            emoji: "🧒",
+            title: tr("הַמַּכְשִׁיר שֶׁל הַיֶּלֶד"),
+            // Says what this device needs, instead of the old line that told
+            // you to start somewhere else from the card asking to be tapped.
+            subtitle: tr("לְשַׂחֵק וְלִלְמוֹד · צָרִיךְ קוֹד חִבּוּר מֵהַמַּכְשִׁיר שֶׁל הַהוֹרֶה"),
+            glow: AppColor.companionGlow,
+            badge: isPad ? tr("מֻמְלָץ לְאַיְפֵּד") : nil
+        ) {
+            if hasNoFamilyHere {
+                Haptic.light()
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { childNeedsCode = true }
+            } else {
+                choose(.child)
+            }
+        }
+    }
+
+    private var parentCard: some View {
+        roleCard(
+            emoji: "👨‍👩‍👧",
+            title: tr("הַמַּכְשִׁיר שֶׁלִּי (הוֹרֶה)"),
+            subtitle: tr("מַעֲקָב, דּוּחוֹת וְנִיהוּל"),
+            glow: AppColor.starGold,
+            badge: isPad ? nil : tr("מַתְחִילִים כָּאן")
+        ) {
+            if isPad {
+                Haptic.light()
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { confirmParentOnPad = true }
+            } else {
+                choose(.parent)
+            }
+        }
+    }
+
+    /// Nothing on this device points at a family: no bound child, no profile.
+    /// (A device that WAS bound is restored by `healLostChildRoleIfNeeded`
+    /// before this screen is ever shown, so it never sees the sheet.)
+    private var hasNoFamilyHere: Bool {
+        // DEMO_SCREEN=rolepicker shows the sheet; DEMO_HASFAMILY=1 hides it,
+        // so both sides are reachable on a simulator that already has a child.
+        if AppInfo.isDemoRun { return ProcessInfo.processInfo.environment["DEMO_HASFAMILY"] != "1" }
+        return settings.joinedChildID == nil && profiles.profiles.isEmpty
+    }
+
+    /// 🔗 The dead end, replaced by three ways forward. Nothing is blocked:
+    /// a child who HAS a code pays one extra tap and reaches the very same
+    /// scan screen.
+    private var childCodeSheet: some View {
+        ZStack(alignment: .bottom) {
+            Color.black.opacity(0.45)
+                .ignoresSafeArea()
+                .onTapGesture { dismissChildSheet() }
+            VStack(spacing: 9) {
+                HStack {
+                    Spacer()
+                    Button { dismissChildSheet() } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(.white.opacity(0.7))
+                    }
+                    .buttonStyle(.plain)
+                }
+                Text("🔗").font(.system(size: 42))
+                Text(tr("צָרִיךְ קוֹד חִבּוּר מֵהַהוֹרֶה"))
+                    .font(.system(size: 23, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                Text(tr("הַמַּכְשִׁיר שֶׁל הַיֶּלֶד מִתְחַבֵּר לְקוֹד שֶׁנּוֹצָר בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה. יֵשׁ לָכֶם כְּבָר קוֹד?"))
+                    .font(.system(size: 15, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.88))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button {
+                    childNeedsCode = false
+                    choose(.child)
+                } label: {
+                    Text(tr("יֵשׁ לִי קוֹד — לְהַמְשִׁיךְ"))
+                        .font(.system(size: 18, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "2A1E5C"))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 15)
+                        .glassFill(AppGradient.gold, radius: 16)
+                }
+                .buttonStyle(.juicy)
+                .padding(.top, 4)
+                Button {
+                    childNeedsCode = false
+                    choose(.parent)
+                } label: {
+                    Text(tr("עוֹד לֹא — נַתְחִיל כָּאן כְּהוֹרֶה"))
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                        .background(Capsule().fill(.white.opacity(0.14)))
+                        .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                }
+                .buttonStyle(.juicy)
+                ShareLink(item: URL(string: "https://apps.apple.com/app/id6773805449")!) {
+                    Text(tr("לִשְׁלֹחַ קִשּׁוּר לַהוֹרֶה"))
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .underline()
+                }
+                .padding(.top, 2)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 18)
+            .frame(maxWidth: 440)
+            .background(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(Color(hex: "4A3AB0").opacity(0.97))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .strokeBorder(.white.opacity(0.3), lineWidth: 1)
+            )
+            .shadow(color: .black.opacity(0.45), radius: 20, y: -10)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
+            .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+    }
+
+    private func dismissChildSheet() {
+        withAnimation(.easeOut(duration: 0.2)) { childNeedsCode = false }
     }
 
     /// Glass confirmation shown on an iPad before it becomes a PARENT device.

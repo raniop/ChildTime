@@ -31705,6 +31705,28 @@
         }
       }
     },
+    "הַמַּכְשִׁיר שֶׁל הַיֶּלֶד מִתְחַבֵּר לְקוֹד שֶׁנּוֹצָר בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה. יֵשׁ לָכֶם כְּבָר קוֹד?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جهاز الطفل يتصل برمز يُنشأ على جهاز الوالد. هل لديكم رمز بالفعل؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The child's device joins with a code created on the parent's device. Do you already have one?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Устройство ребёнка подключается по коду, созданному на устройстве родителя. Он у вас уже есть?"
+          }
+        }
+      }
+    },
     "הַמַּכְשִׁיר שֶׁלִּי (הוֹרֶה)" : {
       "localizations" : {
         "ar" : {
@@ -45637,6 +45659,28 @@
         }
       }
     },
+    "יֵשׁ לִי קוֹד — לְהַמְשִׁיךְ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لديّ رمز — متابعة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I have a code — continue"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У меня есть код — продолжить"
+          }
+        }
+      }
+    },
     "יֵשׁ לָךְ %lld דַּקּוֹת" : {
       "localizations" : {
         "ar" : {
@@ -54225,6 +54269,28 @@
         }
       }
     },
+    "לְשַׂחֵק וְלִלְמוֹד · צָרִיךְ קוֹד חִבּוּר מֵהַמַּכְשִׁיר שֶׁל הַהוֹרֶה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "للعب والتعلّم · يحتاج رمز اتصال من جهاز الوالد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play and learn · needs a join code from the parent's device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Играть и учиться · нужен код подключения с устройства родителя"
+          }
+        }
+      }
+    },
     "לְשָׁנָה מֻצְלַחַת! 💛" : {
       "localizations" : {
         "ar" : {
@@ -54717,6 +54783,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отправить без фото"
+          }
+        }
+      }
+    },
+    "לִשְׁלֹחַ קִשּׁוּר לַהוֹרֶה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إرسال رابط إلى الوالد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send a link to the parent"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отправить ссылку родителю"
           }
         }
       }
@@ -61731,6 +61819,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Начинающий"
+          }
+        }
+      }
+    },
+    "מַתְחִילִים כָּאן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ابدأوا هنا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start here"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начните здесь"
           }
         }
       }
@@ -73002,6 +73112,28 @@
         }
       }
     },
+    "עוֹד לֹא — נַתְחִיל כָּאן כְּהוֹרֶה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ليس بعد — لنبدأ هنا كوالد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not yet — let's start here as a parent"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё нет — начнём здесь как родитель"
+          }
+        }
+      }
+    },
     "עוֹד לוּחַ 🔁" : {
       "localizations" : {
         "ar" : {
@@ -75796,6 +75928,28 @@
         }
       }
     },
+    "פַּעַם רִאשׁוֹנָה בַּמִּשְׁפָּחָה? מַתְחִילִים כָּאן — בַּמַּכְשִׁיר שֶׁלָּכֶם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أول مرة في عائلتكم؟ ابدأوا من هنا — على جهازكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First time in your family? Start here — on your own device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Впервые в вашей семье? Начните здесь — на своём устройстве"
+          }
+        }
+      }
+    },
     "פַּעַר גָּדוֹל בֵּין נוֹשְׂאִים" : {
       "localizations" : {
         "ar" : {
@@ -78265,6 +78419,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "צָרִיךְ קוֹד חִבּוּר מֵהַהוֹרֶה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تحتاجون رمز اتصال من الوالد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You need a join code from the parent"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нужен код подключения от родителя"
           }
         }
       }
