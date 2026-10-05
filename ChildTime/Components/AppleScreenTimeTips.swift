@@ -26,23 +26,31 @@ enum AppleScreenTimeTips {
         let detail: String
     }
 
+    /// The passcode FIRST — Rani: "אנחנו חייבים להסביר להורה שהוא חייב לשים
+    /// סיסמא". Without it, the same Settings page that a parent uses to remove
+    /// Tofy lets a child switch Tofy off and open everything.
+    ///
+    /// Two paths, because there are two kinds of family: a child managed from
+    /// the parent's own iPhone (Family Sharing — Dan, on Rani's phone), and a
+    /// child whose iPhone manages itself. Labels in ” ” are Apple's own, from
+    /// Rani's screenshots of a Hebrew iPhone.
     static var steps: [Step] {
         [
-            // The labels in quotes are Apple's OWN, letter for letter as the iPhone
-            // shows them (Rani's screenshot of Settings → זמן מסך) — no niqqud,
-            // so a parent can find them by eye.
-            Step(id: 1, title: tr("כַּבּוּ \"השבתה\" וְ\"הגבלות יישומים\""),
+            Step(id: 1, title: tr("הַכִּי חָשׁוּב: קוֹד לְ”זמן מסך”"),
+                 detail: tr("בְּלִי קוֹד, הַיֶּלֶד יָכוֹל לְכַבּוֹת אֶת טוֹפִי בַּהַגְדָּרוֹת — וְהַכֹּל נִפְתָּח. אֵיפֹה מַגְדִּירִים? בַּכַּפְתּוֹר \"אֵיךְ זֶה נִרְאֶה בָּאַיְפוֹן?\" לְמַטָּה, צַעַד אַחַר צַעַד.")),
+            // The labels in quotes are Apple's OWN, letter for letter as the
+            // iPhone shows them — no niqqud, so a parent can find them by eye.
+            Step(id: 2, title: tr("כַּבּוּ \"השבתה\" וְ\"הגבלות יישומים\""),
                  detail: tr("טוֹפִי עוֹשֶׂה אֶת זֶה עַכְשָׁו — שְׁתֵּי נְעִילוֹת מִתְנַגְּשׁוֹת.")),
-            Step(id: 2, title: tr("בְּ\"אישור קבוע\" — רַק מָה שֶׁחַיָּב לִהְיוֹת פָּתוּחַ"),
+            Step(id: 3, title: tr("בְּ\"אישור קבוע\" — רַק מָה שֶׁחַיָּב לִהְיוֹת פָּתוּחַ"),
                  detail: tr("אַפְּלִיקַצְיָה שֶׁנִּמְצֵאת שָׁם, טוֹפִי לֹא יָכוֹל לִנְעֹל.")),
-            Step(id: 3, title: tr("הַגְדִּירוּ קוֹד לִזְמַן מָסָךְ"),
-                 detail: tr("בְּלִי קוֹד, אֶפְשָׁר לְכַבּוֹת לְטוֹפִי אֶת הַגִּישָׁה בַּהַגְדָּרוֹת — וְהַכֹּל נִפְתָּח.")),
         ]
     }
 }
 
 /// 👀 "איך זה נראה באייפון?" — opens the drawing of Apple's page.
 struct ScreenTimeShowMeButton: View {
+    var pages: [ScreenTimeLookalikePage] = ScreenTimeLookalikes.setup
     @State private var showing = false
 
     var body: some View {
@@ -60,8 +68,7 @@ struct ScreenTimeShowMeButton: View {
         }
         .buttonStyle(.juicy)
         .sheet(isPresented: $showing) {
-            ScreenTimeLookalikeView(title: tr("כָּךְ זֶה נִרְאֶה בְּ\"הגדרות\" ← \"זמן מסך\""),
-                                    sections: ScreenTimeLookalikes.usageLimits) { showing = false }
+            ScreenTimeLookalikeView(pages: pages) { showing = false }
         }
     }
 }
@@ -115,7 +122,7 @@ struct AppleScreenTimeTipsSheet: View {
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text(tr("טוֹפִי מְנַהֵל עַכְשָׁו אֶת הַנְּעִילָה. כְּדֵי שֶׁשּׁוּם דָּבָר לֹא יִתְנַגֵּשׁ, בְּ\"הגדרות\" ← \"זמן מסך\":"))
+                    Text(tr("טוֹפִי מְנַהֵל עַכְשָׁו אֶת הַנְּעִילָה. שְׁלוֹשָׁה דְּבָרִים בְּ\"זמן מסך\" שֶׁל אַפֶּל:"))
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.88))
                         .multilineTextAlignment(.center)

@@ -533,7 +533,7 @@ struct ChildDeviceControlsView: View {
     private var appleScreenTimeCard: some View {
         controlCard(tint: AppColor.companionGlow) {
             sectionHead(tr("זְמַן מָסָךְ שֶׁל אַפֶּל"),
-                        tr("אִם הִגְדַּרְתֶּם אוֹתוֹ בֶּעָבָר בַּטֶּלֶפוֹן הַזֶּה — בְּ\"הגדרות\" ← \"זמן מסך\":"),
+                        tr("שְׁלוֹשָׁה דְּבָרִים בְּ\"זמן מסך\" שֶׁל אַפֶּל — הָרִאשׁוֹן הוּא הֶחָשׁוּב:"),
                         icon: "hourglass", tint: AppColor.companionGlow)
             AppleScreenTimeStepsList(steps: AppleScreenTimeTips.steps)
             ScreenTimeShowMeButton()
@@ -578,11 +578,13 @@ struct ChildDeviceControlsView: View {
                         tr("כְּדֵי לִמְחֹק אֶת טוֹפִי מֵהַטֶּלֶפוֹן הַזֶּה:"),
                         icon: "trash", tint: AppColor.flameOrange)
             AppleScreenTimeStepsList(steps: [
-                .init(id: 1, title: tr("\"הגדרות\" ← \"זמן מסך\""), detail: ""),
-                .init(id: 2, title: tr("גּוֹלְלִים עַד לְמַטָּה ← \"יישומים עם גישה לזמן מסך\""), detail: ""),
+                .init(id: 1, title: tr("\"הגדרות\" ← \"זמן מסך\""),
+                      detail: tr("אִם אַתֶּם מְנַהֲלִים אֶת הַיֶּלֶד מֵהַטֶּלֶפוֹן שֶׁלָּכֶם — בַּטֶּלֶפוֹן שֶׁלָּכֶם, וְאָז הַשֵּׁם שֶׁל הַיֶּלֶד.")),
+                .init(id: 2, title: tr("גּוֹלְלִים עַד לְמַטָּה ← \"יישומים עם גישה אל ”זמן מסך”\""), detail: ""),
                 .init(id: 3, title: tr("טוֹפִי ← כִּבּוּי"), detail: tr("זֶה מְבַטֵּל אֶת כָּל הַנְּעִילוֹת בַּטֶּלֶפוֹן.")),
                 .init(id: 4, title: tr("וְאָז מוֹחֲקִים אֶת טוֹפִי מִמָּסַךְ הַבַּיִת כָּרָגִיל"), detail: ""),
             ])
+            ScreenTimeShowMeButton(pages: ScreenTimeLookalikes.deletion)
             openSettingsButton
         }
     }

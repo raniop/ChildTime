@@ -10783,6 +10783,28 @@
         }
       }
     },
+    "1 · בַּטֶּלֶפוֹן שֶׁמְּנַהֵל אֶת הַיֶּלֶד (בְּדֶרֶךְ כְּלָל שֶׁלָּכֶם): הגדרות ← זמן מסך ← %@, וְגוֹלְלִים לְמַטָּה:" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 · في الهاتف الذي يدير الطفل (عادةً هاتفكم): الإعدادات ← مدة استخدام الجهاز ← %@، ومرّروا للأسفل:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 · On the phone that manages your child (usually yours): Settings → Screen Time → %@, and scroll down:"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 · На телефоне, который управляет ребёнком (обычно вашем): Настройки → Экранное время → %@, и прокрутите вниз:"
+          }
+        }
+      }
+    },
     "10" : {
 
     },
@@ -10962,6 +10984,28 @@
         }
       }
     },
+    "2 · בְּתוֹךְ ניהול ”זמן מסך”:" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 · داخل إدارة مدة استخدام الجهاز:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 · Inside Manage Screen Time:"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 · Внутри «Управление Экранным временем»:"
+          }
+        }
+      }
+    },
     "2 קְנִיּוֹת — קוֹנִים לְפִי הָרְשִׁימָה וּמְחַשְּׁבִים עֹדֶף" : {
       "localizations" : {
         "ar" : {
@@ -11068,6 +11112,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "2️⃣  Откройте там Tofy и выберите «Детское устройство»"
+          }
+        }
+      }
+    },
+    "3 · וּבְאוֹתוֹ דַּף שֶׁל %@, לְמַעְלָה:" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 · وفي صفحة %@ نفسها، في الأعلى:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 · And on the same page of %@, at the top:"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 · И на той же странице (%@), вверху:"
           }
         }
       }
@@ -12555,6 +12621,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Итай"
+          }
+        }
+      }
+    },
+    "אִם אַתֶּם מְנַהֲלִים אֶת הַיֶּלֶד מֵהַטֶּלֶפוֹן שֶׁלָּכֶם — בַּטֶּלֶפוֹן שֶׁלָּכֶם, וְאָז הַשֵּׁם שֶׁל הַיֶּלֶד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إن كنتم تديرون الطفل من هاتفكم — في هاتفكم، ثم اسم الطفل."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If you manage your child from your phone — on your phone, then your child's name."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если вы управляете ребёнком со своего телефона — на вашем телефоне, затем имя ребёнка."
           }
         }
       }
@@ -18637,6 +18725,28 @@
         }
       }
     },
+    "בְּלִי קוֹד, הַיֶּלֶד יָכוֹל לְכַבּוֹת אֶת טוֹפִי בַּהַגְדָּרוֹת — וְהַכֹּל נִפְתָּח. אֵיפֹה מַגְדִּירִים? בַּכַּפְתּוֹר \"אֵיךְ זֶה נִרְאֶה בָּאַיְפוֹן?\" לְמַטָּה, צַעַד אַחַר צַעַד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بدون رمز يستطيع الطفل إيقاف Tofy في الإعدادات — فيُفتح كل شيء. أين تعيّنونه؟ اضغطوا «كيف يبدو هذا على الآيفون؟» أدناه، خطوة بخطوة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Without one, your child can switch Tofy off in Settings — and everything opens. Where to set it? Tap \"How does it look on the iPhone?\" below, step by step."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Без кода ребёнок может отключить Tofy в настройках — и всё откроется. Где задать? Нажмите «Как это выглядит на iPhone?» ниже — шаг за шагом."
+          }
+        }
+      }
+    },
     "בְּמַכְשִׁיר אַחֵר" : {
       "localizations" : {
         "ar" : {
@@ -20028,6 +20138,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отменить"
+          }
+        }
+      }
+    },
+    "בַּטֶּלֶפוֹן שֶׁמְּנַהֵל אֶת הַיֶּלֶד: הגדרות ← זמן מסך ← %@, וְגוֹלְלִים עַד לְמַטָּה:" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الهاتف الذي يدير الطفل: الإعدادات ← مدة استخدام الجهاز ← %@، ومرّروا للأسفل:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On the phone that manages your child: Settings → Screen Time → %@, and scroll to the bottom:"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На телефоне, который управляет ребёнком: Настройки → Экранное время → %@, и прокрутите вниз:"
           }
         }
       }
@@ -23820,6 +23952,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Scroll to the bottom → \"Apps with Screen Time Access\""
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прокрутите вниз → «Приложения с доступом к Экранному времени»"
+          }
+        }
+      }
+    },
+    "גּוֹלְלִים עַד לְמַטָּה ← \"יישומים עם גישה אל ”זמן מסך”\"" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مرّروا للأسفل ← «التطبيقات التي لديها وصول إلى مدة استخدام الجهاز»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scroll to the bottom → \"Apps With Screen Time Access\""
           }
         },
         "ru" : {
@@ -29475,6 +29629,28 @@
         }
       }
     },
+    "הַיֶּלֶד לֹא מְנֻהָל מֵהַטֶּלֶפוֹן שֶׁלָּכֶם? אוֹתָם דְּבָרִים, בַּטֶּלֶפוֹן שֶׁלּוֹ: הגדרות ← זמן מסך — וְאֶת הַקּוֹד מַגְדִּירִים בְּתַחְתִּית אוֹתוֹ דַּף." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الطفل لا يُدار من هاتفكم؟ الأمور نفسها في هاتفه: الإعدادات ← مدة استخدام الجهاز — ويُعيَّن الرمز في أسفل تلك الصفحة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your child isn't managed from your phone? The same things, on their phone: Settings → Screen Time — and the passcode is set at the bottom of that page."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ребёнок не управляется с вашего телефона? То же самое на его телефоне: Настройки → Экранное время — код задаётся внизу этой страницы."
+          }
+        }
+      }
+    },
     "הַיֶּלֶד לוֹמֵד וּמְשַׂחֵק" : {
       "localizations" : {
         "ar" : {
@@ -29961,6 +30137,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Доход"
+          }
+        }
+      }
+    },
+    "הַכִּי חָשׁוּב: קוֹד לְ”זמן מסך”" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأهم: رمز لمدة استخدام الجهاز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most important: a Screen Time passcode"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Самое важное: код «Экранного времени»"
           }
         }
       }
@@ -33942,6 +34140,28 @@
         }
       }
     },
+    "הגבלות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "القيود"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restrictions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ограничения"
+          }
+        }
+      }
+    },
     "הגבלות יישומים" : {
       "localizations" : {
         "ar" : {
@@ -33982,6 +34202,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ограничения"
+          }
+        }
+      }
+    },
+    "הגבלת תוכן ופרטיות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قيود المحتوى والخصوصية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Content & Privacy Restrictions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Контент и конфиденциальность"
           }
         }
       }
@@ -35703,6 +35945,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Накройте вместе праздничный стол и дайте %@ объяснить, что символизирует каждое блюдо."
+          }
+        }
+      }
+    },
+    "הכללת נתוני אתרים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تضمين بيانات المواقع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Include Website Data"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включить данные о сайтах"
           }
         }
       }
@@ -43240,6 +43504,28 @@
         }
       }
     },
+    "טוֹפִי מְנַהֵל עַכְשָׁו אֶת הַנְּעִילָה. שְׁלוֹשָׁה דְּבָרִים בְּ\"זמן מסך\" שֶׁל אַפֶּל:" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy يدير القفل الآن. ثلاثة أمور في «مدة استخدام الجهاز» من Apple:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy runs the lock now. Three things in Apple's \"Screen Time\":"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Теперь блокировкой управляет Tofy. Три вещи в «Экранном времени» Apple:"
+          }
+        }
+      }
+    },
     "טוֹפִי עוֹשֶׂה אֶת זֶה עַכְשָׁו — שְׁתֵּי נְעִילוֹת מִתְנַגְּשׁוֹת." : {
       "localizations" : {
         "ar" : {
@@ -45709,6 +45995,28 @@
         }
       }
     },
+    "יישומים עם גישה אל ”זמן מסך”" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التطبيقات التي لديها وصول إلى مدة استخدام الجهاز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apps With Screen Time Access"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложения с доступом к Экранному времени"
+          }
+        }
+      }
+    },
     "ילד נוסף" : {
       "localizations" : {
         "ar" : {
@@ -47935,6 +48243,28 @@
         }
       }
     },
+    "כָּאן מַגְדִּירִים קוֹד — וְשׁוֹמְרִים אוֹתוֹ רַק לָכֶם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هنا تعيّنون الرمز — واحتفظوا به لأنفسكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set the passcode here — and keep it to yourselves"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Здесь задаётся код — держите его при себе"
+          }
+        }
+      }
+    },
     "כָּאן פּוֹתְחִים אֶת הַדַּקּוֹת שֶׁהִרְוַחְתְּ, וְהַטֶּלֶפוֹן נִפְתָּח." : {
       "localizations" : {
         "ar" : {
@@ -50091,6 +50421,28 @@
         }
       }
     },
+    "כיבוי ”פעילות ביישומים ואתרים”" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إيقاف «نشاط التطبيقات والمواقع»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn off App & Website Activity"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выключить «Активность в приложениях и на сайтах»"
+          }
+        }
+      }
+    },
     "כיתה" : {
       "localizations" : {
         "ar" : {
@@ -52065,6 +52417,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Для 1 ребёнка · один раз"
+          }
+        }
+      }
+    },
+    "לְכַבּוֹת — וְאָז מוֹחֲקִים אֶת טוֹפִי כָּרָגִיל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أوقفوه — ثم احذفوا Tofy كالمعتاد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch off — then delete Tofy as usual"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выключите — затем удалите Tofy как обычно"
           }
         }
       }
@@ -63903,6 +64277,28 @@
         }
       }
     },
+    "נִכְנָסִים לְכָאן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ادخلوا هنا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go in here"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зайдите сюда"
+          }
+        }
+      }
+    },
     "נִסִּינוּ:" : {
       "localizations" : {
         "ar" : {
@@ -65870,6 +66266,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Мы скоро вам ответим"
+          }
+        }
+      }
+    },
+    "ניהול תכנים, יישומים והגדרות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إدارة المحتوى والتطبيقات والإعدادات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage content, apps, and settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Управление контентом, приложениями и настройками"
+          }
+        }
+      }
+    },
+    "ניהול ”זמן מסך”" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إدارة مدة استخدام الجهاز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage Screen Time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Управление Экранным временем"
           }
         }
       }
@@ -74609,6 +75049,28 @@
         }
       }
     },
+    "פעיל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مفعّل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вкл."
+          }
+        }
+      }
+    },
     "פעיל עד %@" : {
       "localizations" : {
         "ar" : {
@@ -80983,6 +81445,28 @@
         }
       }
     },
+    "שְׁלוֹשָׁה דְּבָרִים בְּ\"זמן מסך\" שֶׁל אַפֶּל — הָרִאשׁוֹן הוּא הֶחָשׁוּב:" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ثلاثة أمور في «مدة استخدام الجهاز» من Apple — الأول هو الأهم:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Three things in Apple's \"Screen Time\" — the first is the one that matters:"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Три вещи в «Экранном времени» Apple — первая самая важная:"
+          }
+        }
+      }
+    },
     "שְׁלוֹשָׁה יְלָדִים" : {
       "localizations" : {
         "ar" : {
@@ -83861,6 +84345,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1 изменение"
+          }
+        }
+      }
+    },
+    "שינוי קוד הגישה עבור ”זמן מסך”" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تغيير رمز مدة استخدام الجهاز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change Screen Time Passcode"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменить код-пароль Экранного времени"
           }
         }
       }
