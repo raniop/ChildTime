@@ -42,7 +42,9 @@ struct ChildDeviceControlsView: View {
     /// "new apps are locked too" model — only apps count, not categories
     /// (see `ShieldPolicy.swift`).
     private var openCount: Int { openSelection.applicationTokens.count }
-    private var newAppsLocked: Bool { settings.lockNewApps && openCount > 0 }
+    /// Every child device is fully locked with no setup (see
+    /// `ShieldInputs.newAppLockArmed`) — "what stays open" is optional.
+    private var newAppsLocked: Bool { settings.newAppLockArmed }
     /// Apps the block-list names individually. A list of CATEGORIES with zero
     /// apps cannot reach Safari, Photos or Messages — see SelectionStorage.
     private var isUnlocked: Bool { progress.isUnlocked }
@@ -304,7 +306,7 @@ struct ChildDeviceControlsView: View {
         controlCard(tint: newAppsLocked ? AppColor.successMint : AppColor.flameOrange) {
             sectionHead(tr("מָה פָּתוּחַ וּמָה נָעוּל"),
                         newAppsLocked
-                            ? tr("הַכֹּל נָעוּל עַד שֶׁמַּרְוִיחִים זְמַן — גַּם אַפְּלִיקַצְיָה שֶׁתֻּתְקַן מָחָר. פְּתוּחוֹת רַק אֵלֶּה שֶׁבְּחַרְתֶּם.")
+                            ? tr("הַכֹּל נָעוּל עַד שֶׁמַּרְוִיחִים זְמַן — גַּם אַפְּלִיקַצְיָה שֶׁתֻּתְקַן מָחָר. טוֹפִי תָּמִיד פָּתוּחַ. רוֹצִים שֶׁעוֹד מַשֶּׁהוּ יִשָּׁאֵר פָּתוּחַ? בַּחֲרוּ אוֹתוֹ כָּאן.")
                             : tr("בַּחֲרוּ מָה נִשְׁאָר פָּתוּחַ וְסַמְּנוּ גַּם אֶת טוֹפִי. כָּל הַשְּׁאָר יִנָּעֵל — גַּם אַפְּלִיקַצְיָה שֶׁתֻּתְקַן מָחָר."),
                         icon: newAppsLocked ? "lock.shield.fill" : "exclamationmark.triangle.fill",
                         tint: newAppsLocked ? AppColor.successMint : AppColor.flameOrange)
@@ -403,8 +405,13 @@ struct ChildDeviceControlsView: View {
         var merged = openSelection
         merged.applicationTokens.formUnion(always.applicationTokens)
         merged.webDomainTokens.formUnion(always.webDomainTokens)
+        // Saved HERE, before the old list is emptied — not left to an onChange
+        // that may or may not fire for a change made inside onAppear. An app a
+        // parent had kept open must land somewhere they can see and edit it.
+        settings.allowedAppsData = SelectionStorage.encode(merged)
         settings.alwaysAllowedAppsData = SelectionStorage.encode(SelectionStorage.empty())
-        openSelection = merged   // saved + applied by the onChange above
+        openSelection = merged
+        if !isUnlocked { shields.applyDefaultLock() }
     }
 
     private func allowDurationPill(_ title: String, minutes: Int) -> some View {
@@ -448,7 +455,7 @@ struct ChildDeviceControlsView: View {
             diagnosticRow(tr("הַרְשָׁאַת זְמַן מָסָךְ"),
                           shields.isAuthorized ? tr("יֵשׁ") : tr("אֵין — שׁוּם נְעִילָה לֹא תַּעֲבֹד"),
                           ok: shields.isAuthorized)
-            diagnosticRow(tr("פְּתוּחוֹת תָּמִיד"), "\(openCount)", ok: openCount > 0)
+            diagnosticRow(tr("פְּתוּחוֹת תָּמִיד"), "\(openCount)", ok: true)
             // Read BACK from iOS, not what we think we sent — the lesson of
             // builds 190–191, where everything we "sent" by name was dropped.
             diagnosticRow(tr("הַנְּעִילָה בָּאַיְפוֹן"),

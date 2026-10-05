@@ -117,6 +117,12 @@ struct ShieldInputs<App: Hashable, Cat: Hashable, Web: Hashable> {
     /// The parent's switch: "lock newly installed apps too" (default ON).
     var lockNewApps = true
 
+    /// Only a CHILD's device is ever locked by the baseline. A parent's own
+    /// phone must never arm `.all(except:)` — it would lock the parent out of
+    /// their own apps. Defaults to false, so a caller that forgets locks less,
+    /// not the wrong phone.
+    var isChildDevice = false
+
     /// The classic block-list the parent picked.
     var blockedApps: Set<App> = []
     var blockedCategories: Set<Cat> = []
@@ -145,17 +151,22 @@ struct ShieldInputs<App: Hashable, Cat: Hashable, Web: Hashable> {
         alwaysAllowedWebDomains.union(openByDesignWebDomains).union(temporaryAllowedWebDomains)
     }
 
-    /// `lockNewApps` is only SAFE once the parent has named at least one app that
-    /// stays open — otherwise `.all(except: [])` would shield Tofy itself, whose
-    /// token we cannot add programmatically, and the child could never earn a
-    /// minute again. Categories in that list do not count: a category token in
-    /// `except:` is not a thing `ManagedSettings` accepts, so a parent who picked
-    /// only "Education" would still get `.all(except: [])`.
-    var newAppLockArmed: Bool { lockNewApps && !openByDesignApps.isEmpty }
-
-    /// `lockNewApps` is on but inert — a new app is NOT locked and the parent
-    /// has to finish the setup. Surfaces as a warning in the UI.
-    var newAppLockNeedsSetup: Bool { lockNewApps && openByDesignApps.isEmpty }
+    /// The whole lock, armed on every child device — no setup.
+    ///
+    /// This used to wait until the parent had named at least one app that
+    /// stays open, on the theory that `.all(except: [])` would shield Tofy
+    /// itself (we cannot mint our own token) and lock the child out of the app
+    /// that earns their minutes. Dan's phone disproved it (2026-10-05): every
+    /// category shielded, Tofy in no list at all — not ours, not Apple's
+    /// "Always Allowed" — and Tofy opened normally. iOS does not shield the app
+    /// that owns the store.
+    ///
+    /// The wait was the whole problem. Until a parent found the right button,
+    /// the device sat on the leaky block-list — new apps open, whatever the
+    /// old list happened to miss open — and Rani: "אין מצב שאנשים יוכלו לסדר
+    /// את זה לבד". Now Screen Time permission is the only step; "what stays
+    /// open" is optional (WhatsApp, maps), never a precondition.
+    var newAppLockArmed: Bool { lockNewApps && isChildDevice }
 
     func plan() -> ShieldPlan<App, Cat, Web> {
         // Kid Mode first. A background re-lock that fell through to the parent's
@@ -249,6 +260,8 @@ enum TofyShield {
         static let temporaryAllowed = "allowExceptionData"
         static let temporaryAllowedEndsAt = "allowExceptionEndsAt"
         static let kidModeActive = "kidModeActive"
+        /// `ParentSettings.deviceRole` — "child" | "parent" | "unset".
+        static let deviceRole = "deviceRole"
         static let kidModeAllowed = "kidModeAllowedData"
         static let appRemovalUnlockedUntil = "appRemovalUnlockedUntil"
         /// Breadcrumb of the last policy actually written — the only way to check
@@ -328,6 +341,7 @@ enum TofyShield {
 
         // Default ON: an install that never touched the switch locks new apps.
         i.lockNewApps = (defaults.object(forKey: Key.lockNewApps) as? Bool) ?? true
+        i.isChildDevice = defaults.string(forKey: Key.deviceRole) == "child"
 
         let blocked = selection(defaults, Key.blocked)
         i.blockedApps = blocked.applicationTokens

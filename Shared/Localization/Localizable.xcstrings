@@ -29437,24 +29437,24 @@
         }
       }
     },
-    "הַכֹּל נָעוּל עַד שֶׁמַּרְוִיחִים זְמַן — גַּם אַפְּלִיקַצְיָה שֶׁתֻּתְקַן מָחָר. פְּתוּחוֹת רַק אֵלֶּה שֶׁבְּחַרְתֶּם." : {
+    "הַכֹּל נָעוּל עַד שֶׁמַּרְוִיחִים זְמַן — גַּם אַפְּלִיקַצְיָה שֶׁתֻּתְקַן מָחָר. טוֹפִי תָּמִיד פָּתוּחַ. רוֹצִים שֶׁעוֹד מַשֶּׁהוּ יִשָּׁאֵר פָּתוּחַ? בַּחֲרוּ אוֹתוֹ כָּאן." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "كل شيء مقفل حتى يُكسَب الوقت — حتى تطبيق يُثبَّت غدًا. تبقى مفتوحة فقط التطبيقات التي اخترتموها."
+            "value" : "كل شيء مقفل حتى يُكسَب الوقت — حتى تطبيق يُثبَّت غدًا. Tofy مفتوح دائمًا. تريدون أن يبقى شيء آخر مفتوحًا؟ اختاروه هنا."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Everything is locked until time is earned — even an app installed tomorrow. Only the ones you chose stay open."
+            "value" : "Everything is locked until time is earned — even an app installed tomorrow. Tofy always stays open. Want something else to stay open? Choose it here."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Всё заблокировано, пока не заработано время, — даже приложение, установленное завтра. Открыты только выбранные вами."
+            "value" : "Всё заблокировано, пока не заработано время, — даже приложение, установленное завтра. Tofy всегда открыт. Хотите, чтобы ещё что-то оставалось открытым? Выберите здесь."
           }
         }
       }
@@ -40676,28 +40676,6 @@
         }
       }
     },
-    "חָשׁוּב לְסַמֵּן אֶת טוֹפִי עַצְמָהּ, אַחֶרֶת הַיֶּלֶד לֹא יוּכַל לְהַרְוִיחַ זְמַן. כְּדַאי גַּם טֶלֶפוֹן, הוֹדָעוֹת, מַצְלֵמָה וְשָׁעוֹן." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "من المهم تعليم توفي نفسها، وإلا لن يستطيع طفلكم كسب وقت. ويُستحسن إضافة الهاتف والرسائل والكاميرا والساعة أيضًا."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Be sure to tick Tofy itself, or your child could not earn time. Phone, messages, camera and clock are worth adding too."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Обязательно отметьте саму Tofy, иначе ребёнок не сможет заработать время. Телефон, сообщения, камеру и часы тоже стоит добавить."
-          }
-        }
-      }
-    },
     "חָתוּל" : {
       "localizations" : {
         "ar" : {
@@ -42073,6 +42051,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tofy Time — вперёд! 🧠"
+          }
+        }
+      }
+    },
+    "טוֹפִי תָּמִיד פָּתוּחַ. סַמְּנוּ רַק מָה שֶׁצָּרִיךְ לַעֲבֹד גַּם בְּלִי דַּקּוֹת — לְמָשָׁל וָוטְסְאַפּ, מַפּוֹת אוֹ שָׁעוֹן." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy مفتوح دائمًا. حدّدوا فقط ما يجب أن يعمل حتى بدون دقائق — مثل واتساب أو الخرائط أو الساعة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy always stays open. Tick only what must work even without minutes — WhatsApp, maps or a clock, for example."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy всегда открыт. Отметьте только то, что должно работать и без минут, — например WhatsApp, карты или часы."
           }
         }
       }

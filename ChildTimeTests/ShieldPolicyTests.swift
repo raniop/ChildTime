@@ -33,8 +33,9 @@ struct NewAppShieldTests {
     @Test("REPRODUCES THE BUG: the classic block-list cannot cover a new app")
     func blockListLeaksNewApp() {
         var i = Inputs()
-        i.lockNewApps = true            // the parent WANTS new apps locked…
-        i.openByDesignApps = []         // …but never said what stays open
+        i.lockNewApps = true            // the switch is on…
+        i.isChildDevice = false         // …but this is not a child's device, so
+        i.openByDesignApps = []         // the block-list is all there is
         i.blockedApps = [1, 2, 3]       // they picked three apps by hand
         let plan = i.plan()
 
@@ -67,6 +68,7 @@ struct NewAppShieldTests {
     func allowListCoversNewApp() {
         var i = Inputs()
         i.lockNewApps = true
+        i.isChildDevice = true
         i.openByDesignApps = [7]        // 7 == Tofy, picked by the parent
         i.blockedApps = [1, 2, 3]
         let plan = i.plan()
@@ -87,6 +89,7 @@ struct NewAppShieldTests {
         // Safari, Photos or Messages, and nothing on the device changed.
         var i = Inputs()
         i.lockNewApps = true
+        i.isChildDevice = true
         i.openByDesignApps = [7]
         i.blockedApps = [1, 2, 3, 7]     // the parent ticked everything, Tofy included
         i.blockedWebDomains = [9]
@@ -105,6 +108,7 @@ struct NewAppShieldTests {
         // shields nothing from a set over 50 and reads it back as nil.
         var i = Inputs()
         i.lockNewApps = true
+        i.isChildDevice = true
         i.openByDesignApps = [1000]
         i.blockedApps = Set(1...119)
         i.blockedWebDomains = Set(1...194)
@@ -120,6 +124,7 @@ struct NewAppShieldTests {
         // Exactly at the limit it is still sent.
         var fits = Inputs()
         fits.lockNewApps = true
+        fits.isChildDevice = true
         fits.openByDesignApps = [1000]
         fits.blockedApps = Set(1...50)
         #expect(fits.plan().shieldedApps.count == shieldTokenLimit)
@@ -158,6 +163,7 @@ struct ShieldExemptionTests {
         // allowed was shielded again the moment the strong model armed.
         var strong = Inputs()
         strong.lockNewApps = true
+        strong.isChildDevice = true
         strong.openByDesignApps = [7]
         strong.alwaysAllowedApps = [2]
         let strongPlan = strong.plan()
@@ -178,6 +184,7 @@ struct ShieldExemptionTests {
         // minutes and block-all mode shielded it anyway.
         var strong = Inputs()
         strong.lockNewApps = true
+        strong.isChildDevice = true
         strong.openByDesignApps = [7]
         strong.temporaryAllowedApps = [1]
         let plan = strong.plan()
@@ -189,6 +196,7 @@ struct ShieldExemptionTests {
     func noAllowanceExemptsNothing() {
         var i = Inputs()
         i.lockNewApps = true
+        i.isChildDevice = true
         i.openByDesignApps = [7]
         i.temporaryAllowedApps = []     // the window passed; the caller clears it
         #expect(i.plan().exemptApps == [7])
@@ -200,6 +208,7 @@ struct ShieldExemptionTests {
         i.kidModeActive = true
         i.kidModeAllowedApps = [5]
         i.lockNewApps = true
+        i.isChildDevice = true
         i.openByDesignApps = [7]
         i.blockedApps = [1]
         let plan = i.plan()
@@ -218,32 +227,34 @@ struct ShieldExemptionTests {
 @Suite("Shield policy — safety gates")
 struct ShieldSafetyTests {
 
-    @Test("An empty allow-list must NOT arm `.all(except:)`")
-    func emptyAllowListNeverArms() {
+    @Test("A child device is fully locked with NO setup — the allow-list is optional")
+    func childDeviceArmsWithoutSetup() {
+        // This used to refuse to arm until the parent named what stays open,
+        // fearing `.all(except: [])` would shield Tofy. Dan's phone showed iOS
+        // never shields the app that owns the store — and the wait left every
+        // new family on the leaky block-list ("אין מצב שאנשים יוכלו לסדר את
+        // זה לבד").
         var i = Inputs()
         i.lockNewApps = true
+        i.isChildDevice = true
         i.openByDesignApps = []
         let plan = i.plan()
-        // `.all(except: [])` shields Tofy itself, and an app cannot mint its own
-        // token — the child could never earn another minute. Failing to the
-        // leaky model is bad; locking a child out of the app that unlocks their
-        // phone is worse.
-        #expect(plan.kind == .blockList)
-        #expect(i.newAppLockArmed == false)
-        #expect(i.newAppLockNeedsSetup == true)
+        #expect(plan.kind == .lockEverythingNew)
+        #expect(plan.coversUnknownApps == true)
+        #expect(plan.exemptApps.isEmpty)
+        #expect(!plan.exemptApps.contains(newlyInstalledApp))
     }
 
-    @Test("A categories-only allow-list must NOT arm either")
-    func categoriesOnlyAllowListNeverArms() {
+    @Test("A parent's own phone is NEVER armed, whatever its switches say")
+    func parentPhoneNeverArms() {
         var i = Inputs()
         i.lockNewApps = true
-        i.openByDesignApps = []          // no APP tokens…
-        i.openByDesignWebDomains = [4]   // …only other kinds of token
-        // `.all(except:)` takes application tokens only, so this would still be
-        // `.all(except: [])`. The old `SelectionStorage.isEmpty` check counted
-        // categories and would have armed it — and bricked the device.
+        i.isChildDevice = false
+        i.openByDesignApps = [7]
+        let plan = i.plan()
         #expect(i.newAppLockArmed == false)
-        #expect(i.plan().kind == .blockList)
+        #expect(plan.kind == .blockList)
+        #expect(plan.lockEverything == false)
     }
 
     @Test("The switch off keeps today's behaviour exactly")
@@ -255,7 +266,6 @@ struct ShieldSafetyTests {
         let plan = i.plan()
         #expect(plan.kind == .blockList)
         #expect(plan.coversUnknownApps == false)
-        #expect(i.newAppLockNeedsSetup == false)
     }
 
     @Test("Defaults are the safe ones: the switch is ON out of the box")
@@ -314,6 +324,17 @@ struct ShieldInputsFromDefaultsTests {
         #expect(TofyShield.inputs(from: d).temporaryAllowedApps.isEmpty)
     }
 
+    @Test("The device role is read from the app group: only a CHILD device arms")
+    func deviceRoleRoundTrips() {
+        let d = scratch("shield.role")
+        #expect(TofyShield.inputs(from: d).newAppLockArmed == false)      // unset
+        d.set("parent", forKey: TofyShield.Key.deviceRole)
+        #expect(TofyShield.inputs(from: d).newAppLockArmed == false)
+        d.set("child", forKey: TofyShield.Key.deviceRole)
+        #expect(TofyShield.inputs(from: d).newAppLockArmed == true)
+        #expect(TofyShield.inputs(from: d).plan().kind == .lockEverythingNew)
+    }
+
     @Test("Kid Mode is read from the app group, so a background re-lock sees it")
     func kidModeRoundTrips() {
         let d = scratch("shield.kidmode")
@@ -344,6 +365,7 @@ struct ShieldInputsFromDefaultsTests {
 
         var strong = TofyShieldInputs()
         strong.lockNewApps = true
+        strong.isChildDevice = false      // not a child's device → block-list
         strong.openByDesignApps = []
         TofyShield.apply(strong.plan(), to: store, reason: "test-leaky", defaults: d)
         #expect(d.string(forKey: TofyShield.Key.lastPlan)?.contains("kind=blockList") == true)
@@ -433,6 +455,7 @@ struct WeakShieldTests {
     func allowListIsNeverWeak() {
         var i = Inputs()
         i.lockNewApps = true
+        i.isChildDevice = true
         i.openByDesignApps = [7]
         let plan = i.plan()
         #expect(plan.coversUnknownApps == true)

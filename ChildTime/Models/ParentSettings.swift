@@ -163,10 +163,11 @@ final class ParentSettings: ObservableObject {
     /// installed app IS shielded. Note it needs APPS, not categories: a category
     /// token is not something `.all(except:)` accepts, so an allow-list holding
     /// only "Education" would still shield Tofy.
-    var newAppLockArmed: Bool { lockNewApps && !openByDesignApps.isEmpty }
-    /// The parent wants new apps locked but hasn't named what stays open, so the
-    /// device is still on the leaky block-list. The one thing to nag about.
-    var allowListNeedsSetup: Bool { lockNewApps && openByDesignApps.isEmpty }
+    /// Mirrors `ShieldInputs.newAppLockArmed`: every CHILD device is fully
+    /// locked, with no setup — see the note there.
+    var newAppLockArmed: Bool { lockNewApps && deviceRole == .child }
+    /// Kept for the old settings footer; there is no setup left to nag about.
+    var allowListNeedsSetup: Bool { false }
     /// A temporary per-app allowance: which apps are open right now even though
     /// they're in the blocked list, and until when. Lets a parent open just one
     /// app (e.g. YouTube) for a while while the rest stay locked.

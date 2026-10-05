@@ -629,14 +629,15 @@ struct ParentSettingsView: View {
                         Image(systemName: AppSymbol.forwardChevron).foregroundStyle(.secondary)
                     }
                 }
-                if allowedSelection.applicationTokens.isEmpty {
-                    Text(tr("⚠️ עד שתבחרו מה נשאר פתוח, אפליקציה חדשה שהילד מתקין לא תיחסם. בחרו את טופי עצמה ואת מה שחייב לעבוד תמיד — טלפון, הודעות, מצלמה ושעון."))
-                        .font(.caption)
-                        .foregroundStyle(.orange)
-                } else {
+                // No setup to warn about any more: a child device is fully
+                // locked from the start (`newAppLockArmed`), and this list only
+                // ADDS what stays open.
+                if settings.newAppLockArmed {
                     Text(tr("✅ כל אפליקציה אחרת נעולה — כולל אפליקציה שתותקן מחר."))
                         .font(.caption)
                         .foregroundStyle(.green)
+                }
+                if !allowedSelection.applicationTokens.isEmpty {
                     Button(role: .destructive) {
                         allowedSelection = SelectionStorage.empty()
                     } label: {
