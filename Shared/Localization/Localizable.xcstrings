@@ -17655,6 +17655,28 @@
         }
       }
     },
+    "ארבע רשימות הפכו לכפתור אחד: מה נשאר פתוח. ולידו פתיחה זמנית של אפליקציה לזמן קצוב" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أربع قوائم صارت زرًا واحدًا: ما يبقى مفتوحًا. وبجانبه فتح تطبيق لوقت محدد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Four lists became one button: what stays open. Next to it, opening an app for a set time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Четыре списка стали одной кнопкой: что остаётся открытым. Рядом — открыть приложение на время"
+          }
+        }
+      }
+    },
     "אשר Family Controls" : {
       "localizations" : {
         "ar" : {
@@ -21673,6 +21695,28 @@
         }
       }
     },
+    "בוחרים פעם אחת מה נשאר פתוח, וכל השאר ננעל עד שמרוויחים זמן — גם ספארי, תמונות והודעות, וגם אפליקציה שהילד יתקין מחר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختاروا مرة واحدة ما يبقى مفتوحًا، وكل ما عدا ذلك يُقفَل حتى يُكسَب الوقت — Safari والصور والرسائل أيضًا، وحتى تطبيق يثبّته الطفل غدًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose once what stays open, and everything else locks until time is earned — Safari, Photos and Messages too, and even an app your child installs tomorrow"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Один раз выберите, что остаётся открытым, а всё остальное блокируется, пока не заработано время, — и Safari, «Фото», «Сообщения», и даже приложение, которое ребёнок установит завтра"
+          }
+        }
+      }
+    },
     "בונה ביטחון" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -22104,6 +22148,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "На карточке каждого ребёнка в родительском экране можно выбрать, на каком языке у него будет приложение, — и его устройство переключится сразу, без вашего вмешательства"
+          }
+        }
+      }
+    },
+    "בכרטיס של כל ילד יש כפתור בשורה משלו, עם השם שלו, שמוסר לו את הטלפון שלכם — והיציאה חזרה מוגנת בקוד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في بطاقة كل طفل زر خاص باسمه يسلّمه هاتفكم — والخروج محمي برمز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every child's card has its own button, with their name, that hands them your phone — and getting back out is protected by your code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На карточке каждого ребёнка есть своя кнопка с его именем, которая передаёт ему ваш телефон, — а выход защищён кодом"
           }
         }
       }
@@ -60458,6 +60524,28 @@
         }
       }
     },
+    "מסך הנעילה מראה כמה דקות באמת מרוויחים, ו\"מה חדש\" עובר מימין לשמאל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شاشة القفل تُظهر كم دقيقة تُكسَب فعلًا، و«ما الجديد» يتحرك من اليمين إلى اليسار"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The lock screen shows how many minutes are really earned, and \"What's new\" runs in the right direction"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экран блокировки показывает, сколько минут на самом деле зарабатывается, а «Что нового» листается в правильную сторону"
+          }
+        }
+      }
+    },
     "מסך חדש" : {
       "localizations" : {
         "ar" : {
@@ -60718,6 +60806,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "отлично справляется"
+          }
+        }
+      }
+    },
+    "מקום אחד במכשיר הילד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مكان واحد على جهاز الطفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One place on your child's device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Одно место на устройстве ребёнка"
           }
         }
       }
@@ -63981,6 +64091,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удалённая блокировка, которая всегда работает"
+          }
+        }
+      }
+    },
+    "נעילה שבאמת נועלת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قفل يقفل فعلًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A lock that really locks"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Блокировка, которая правда блокирует"
+          }
+        }
+      }
+    },
+    "נעילה שבאמת נועלת — ממקום אחד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قفل يقفل فعلًا — من مكان واحد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A lock that really locks — from one place"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Блокировка, которая правда блокирует, — из одного места"
           }
         }
       }
@@ -83275,6 +83429,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Пусть %@ поиграет здесь 🧒"
+          }
+        }
+      }
+    },
+    "תנו לילד לשחק בטלפון שלכם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دعوا طفلكم يلعب على هاتفكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Let your child play on your phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пусть ребёнок поиграет на вашем телефоне"
           }
         }
       }
