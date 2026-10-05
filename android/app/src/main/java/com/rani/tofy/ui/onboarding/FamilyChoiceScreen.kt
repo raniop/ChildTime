@@ -73,39 +73,41 @@ fun OnboardingProgress(step: Int, total: Int = 4) {
     }
 }
 
-/** Join a co-parent's family with the 6-character code. */
+/** JoinFamilyFlowView (CoParentLinkingViews.swift): type the co-parent's code. */
 @Composable
 fun JoinFamilyScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     var code by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    androidx.activity.compose.BackHandler(onBack = onBack)
     GlassBackdrop {
         Column(
-            Modifier.fillMaxSize().systemBarsPadding().imePadding().padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+            Modifier.fillMaxSize().systemBarsPadding().imePadding().verticalScroll(rememberScrollState()).padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            H(tr("הצטרפות למשפחה"), 25, align = TextAlign.Center)
-            P(tr("הקלידו את הקוד שקיבלתם מההורה השני"), 15f, align = TextAlign.Center)
-            OutlinedTextField(code, { code = it.uppercase().filter { c -> c.isLetterOrDigit() }.take(6) }, Modifier.fillMaxWidth(), singleLine = true,
-                textStyle = MaterialTheme.typography.headlineMedium.copy(textAlign = TextAlign.Center))
-            error?.let { P(it, 13f, color = Ink.weak, align = TextAlign.Center) }
-            GoldButton(tr("הצטרפות"), enabled = code.length == 6, busy = busy) {
-                busy = true; error = null
-                scope.launch {
-                    AccountRepository.redeemInvite(code).onFailure {
-                        busy = false
-                        error = when (it.message) { "expired" -> tr("הקוד פג תוקף — בקשו קוד חדש"); else -> tr("הקוד לא נמצא — בדקו שוב") }
-                    }
-                }
+            H(tr("הִצְטָרְפוּת לְמִשְׁפָּחָה"), 25, align = TextAlign.Center)
+            Column(Modifier.fillMaxWidth().glassPane().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                P(tr("בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה שֶׁכְּבָר רָשׁוּם:"), 15f, color = Ink.primary, weight = FontWeight.Bold)
+                P("1. " + tr("פִּתְחוּ אֶת טוֹפִי → הַגְדָּרוֹת ⚙️"), 14.5f)
+                P("2. " + tr("הַקִּישׁוּ “הוֹסִיפוּ הוֹרֶה”"), 14.5f)
+                P("3. " + tr("יוֹפִיעַ קוֹד / QR — סִרְקוּ אוֹתוֹ כָּאן אוֹ הַקְלִידוּ:"), 14.5f)
             }
-            TextButton(onBack) { Text(tr("חזרה"), fontFamily = Rounded) }
+            OutlinedTextField(code, { code = it.uppercase().filter { c -> c.isLetterOrDigit() }.take(6); error = null }, Modifier.fillMaxWidth(), singleLine = true,
+                placeholder = { Text(tr("6 תָּוִים"), fontFamily = Rounded, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
+                textStyle = MaterialTheme.typography.headlineMedium.copy(textAlign = TextAlign.Center, letterSpacing = androidx.compose.ui.unit.TextUnit(6f, androidx.compose.ui.unit.TextUnitType.Sp)))
+            error?.let { P(it, 13f, color = Ink.weak, align = TextAlign.Center) }
+            GoldButton(tr("הִצְטָרְפוּ"), enabled = code.length == 6, busy = busy) {
+                busy = true; error = null
+                scope.launch { AccountRepository.redeemInvite(code).onFailure { busy = false; error = tr("קוֹד לֹא תָּקִין") } }
+            }
+            TextButton(onBack) { Text(tr("בִּטּוּל"), fontFamily = Rounded, color = Ink.secondary) }
         }
     }
 }
 
-/** EmailInviteWelcomeView: "משפחת X מחכה לך" — one tap. */
+/** EmailInviteWelcomeView: "משפחת X מחכה לכם!" — one tap. */
 @Composable
 fun EmailInviteScreen(invite: com.rani.tofy.data.Bootstrap.EmailInvite) {
     val scope = rememberCoroutineScope()
@@ -116,12 +118,14 @@ fun EmailInviteScreen(invite: com.rani.tofy.data.Bootstrap.EmailInvite) {
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            H(invite.familyName?.let { tr("%@ מחכה לך", it) } ?: tr("המשפחה מחכה לך"), 26, align = TextAlign.Center)
-            P(tr("ההורה השני כבר הזמין אתכם — הצטרפו בלחיצה אחת"), 15f, align = TextAlign.Center)
-            GoldButton(tr("הצטרפות"), busy = busy) {
+            Text("👨‍👩‍👧", fontSize = androidx.compose.ui.unit.TextUnit(56f, androidx.compose.ui.unit.TextUnitType.Sp))
+            H(tr("%@ מְחַכָּה לָכֶם!", invite.familyName ?: tr("הַמִּשְׁפָּחָה שֶׁלָּכֶם")), 26, align = TextAlign.Center)
+            P(tr("הֻזְמַנְתֶּם לְהִצְטָרֵף כְּהוֹרֶה — תִּרְאוּ אֶת הַיְלָדִים, הַהִתְקַדְּמוּת וְהַשְּׁלִיטָה, בְּדִיּוּק כְּמוֹ הַהוֹרֶה שֶׁהִזְמִין אֶתְכֶם."), 15f, align = TextAlign.Center)
+            GoldButton(tr("הִצְטָרְפוּ לַמִּשְׁפָּחָה"), busy = busy) {
                 busy = true
                 scope.launch { runCatching { AccountRepository.acceptEmailInvite(invite.householdID) }.onFailure { busy = false } }
             }
+            TextButton({ AccountRepository.declineEmailInvite() }) { Text(tr("לֹא הַמִּשְׁפָּחָה שֶׁלִּי — הַתְחִילוּ מֵהַתְחָלָה"), fontFamily = Rounded, color = Ink.secondary) }
         }
     }
 }

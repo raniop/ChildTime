@@ -52,6 +52,9 @@ object AccountRepository {
         }
     }
 
+    /** "לא המשפחה שלי" — go to the explicit new-vs-join choice instead. */
+    fun declineEmailInvite() { _boot.value = Bootstrap.NeedsFamilyChoice }
+
     private suspend fun ensureParentDoc(uid: String, email: String?, displayName: String?) {
         val snap = parentRef(uid).get().await()
         if (snap.exists()) return

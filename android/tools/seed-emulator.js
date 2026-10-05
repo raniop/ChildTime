@@ -2,13 +2,17 @@
 // for the Android parent app. Never touches production: the env vars below
 // pin firebase-admin to the emulators, and a demo- project id has no backend.
 //   node android/tools/seed-emulator.js
-// Test parent (emulator only): parent@demo.tofy / demo-parent-1234
+// Test parent (emulator only): parent@demo.tofy / demo-parent-1234 · family parent code 1234
 process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080';
 process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9099';
 const admin = require('../../functions/node_modules/firebase-admin');
 admin.initializeApp({ projectId: 'demo-tofy' });
 const db = admin.firestore();
 const now = Date.now() / 1000;
+// Family parent code 1234 in PINManager's "salt:sha256hex(salt+pin)" format.
+const crypto = require('crypto');
+const salt = crypto.randomBytes(16).toString('hex');
+const parentPinHash = `${salt}:${crypto.createHash('sha256').update(salt + '1234').digest('hex')}`;
 
 (async () => {
   let user;
@@ -22,7 +26,7 @@ const now = Date.now() / 1000;
   await db.doc(`parents/${uid}`).set({ id: uid, email: 'parent@demo.tofy', displayName: 'רני אופיר', householdIDs: [hid], fcmTokens: [], twoFactorEnabled: false, consentVersion: 1, consentAt: now - 86400 * 20 });
   await db.doc(`households/${hid}`).set({
     id: hid, parentUIDs: [uid, 'anon-dana-ipad', 'anon-yoav-ipad'], childIDs: [dana, yoav], createdBy: uid, createdAt: now - 86400 * 20,
-    familyName: 'משפחת אופיר', parentNames: { [uid]: 'רני אופיר' }, timeZone: 'Asia/Jerusalem',
+    familyName: 'משפחת אופיר', parentPinHash, parentNames: { [uid]: 'רני אופיר' }, timeZone: 'Asia/Jerusalem',
     premiumUntil: now + 86400 * 9, premiumSource: 'gift', giftUntil: now + 86400 * 9,
   });
   const child = (id, name, gender, grade, character, cap) => ({

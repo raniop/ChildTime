@@ -36,6 +36,7 @@ fun HomeScreen(
     onSettings: () -> Unit,
     onBell: () -> Unit,
     onConnectDevice: (Child) -> Unit,
+    bellBadge: Int = 0,
     banners: @Composable ColumnScope.() -> Unit = {},
 ) {
     // The dashboard's 5 s tick: live countdowns and "in Tofy now" dots.
@@ -48,7 +49,7 @@ fun HomeScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item { Header(state, onSettings, onBell, tick) }
+            item { Header(state, onSettings, onBell, bellBadge) }
             item { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { banners() } }
             item {
                 RowSpaced {
@@ -73,7 +74,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun Header(state: FamilyState, onSettings: () -> Unit, onBell: () -> Unit, tick: Int) {
+private fun Header(state: FamilyState, onSettings: () -> Unit, onBell: () -> Unit, badge: Int) {
     val user = FirebaseAuth.getInstance().currentUser
     val first = (user?.displayName ?: "").trim().split(" ").firstOrNull().orEmpty()
     val kids = state.children.size
@@ -89,7 +90,7 @@ private fun Header(state: FamilyState, onSettings: () -> Unit, onBell: () -> Uni
             P(parts.joinToString(" · "), 13.5f, color = Ink.secondary, weight = FontWeight.SemiBold)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            CircleIconButton("🔔", onClick = onBell)
+            CircleIconButton("🔔", badge = badge, onClick = onBell)
             CircleIconButton("⚙️", onClick = onSettings)
         }
     }
