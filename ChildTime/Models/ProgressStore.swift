@@ -1692,6 +1692,19 @@ final class ProgressStore: ObservableObject {
     /// clamped to what's left of today's screen-time allowance (daily cap minus
     /// what's already been unlocked today). Wallet beyond the daily cap stays put
     /// for future days. When the cap is disabled, the whole wallet is available.
+    /// The earned pocket the button may open RIGHT NOW, to the second.
+    ///
+    /// Rani (2026-10-05): the gift button says "0:24" while the earned one said a
+    /// rounded "16 דקות" — two pockets, two truths, and the leftover seconds were
+    /// never openable at all. Both now read from here and spend every second.
+    var redeemableSecondsNow: Int {
+        let wallet = openableSeconds(gift: false)
+        let cap = dailyCap
+        guard cap.enabled else { return wallet }
+        let roomToday = max(0, cap.max - minutesUnlockedTodayResolved)
+        return min(wallet, roomToday * 60)
+    }
+
     var redeemableMinutesNow: Int {
         // From the COUNTERS, not `pendingMinutes`: this value both labels the button
         // and decides the debit, so it must come from the one ledger that is the

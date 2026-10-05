@@ -89,6 +89,18 @@ final class MiniGameEarnSession: ObservableObject {
 
 /// The one place a game reports an answer.
 enum MiniGameLedger {
+    /// ⏱ Screen time this round has paid, in SECONDS — the same seconds the child
+    /// watches rise in the top bar ("+24 שְׁנִ׳"). The end card says what THIS round
+    /// was worth (Rani, 2026-10-05: "תציג כמה דק הרוויחו בכל סיבוב"), and seconds
+    /// are what a round actually pays: five answers are usually under two minutes,
+    /// so counting whole minutes would have shown nothing at all.
+    /// `MiniGameReward.grant` takes it once, at the round's end.
+    private(set) static var roundSeconds = 0
+    static func takeRoundSeconds() -> Int {
+        defer { roundSeconds = 0 }
+        return roundSeconds
+    }
+
     /// One answer: a right one (`correct`) or a miss, in `topic`.
     ///
     /// - From a chooser (`earn` set, not a surprise): the runner's own path —
@@ -141,6 +153,7 @@ enum MiniGameLedger {
             // Answering right is NEVER silent: seconds when seconds were earned,
             // the stars themselves when they weren't.
             if paysMinutes && !cappedBefore {
+                roundSeconds += progress.secondsPerCorrect
                 earn.flash(tr("+\(progress.secondsPerCorrect) שְׁנִיּוֹת"), positive: true)
             } else {
                 earn.flash("⭐ +\(stars)", positive: true)
@@ -152,7 +165,10 @@ enum MiniGameLedger {
                                             grantsScreenTime: true)
             LearningHistoryStore.shared.recordAnswer(topic: topic, correct: false, responseMs: 0,
                                                      earnedMinutes: 0, streak: 0)
-            if lost > 0 { earn.flash(tr("−\(lost) שְׁנִיּוֹת · כִּמְעַט!"), positive: false) }
+            if lost > 0 {
+                roundSeconds = max(0, roundSeconds - lost)
+                earn.flash(tr("−\(lost) שְׁנִיּוֹת · כִּמְעַט!"), positive: false)
+            }
         }
     }
 }

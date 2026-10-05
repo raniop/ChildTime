@@ -1927,7 +1927,7 @@ struct WorldMapView: View {
                         } else {
                             Image(systemName: "gamecontroller.fill")
                                 .font(.system(size: isShort ? 21 : 24))
-                            Text(tr("פִּתְחוּ לִי \(progress.redeemableMinutesNow) דַּקּוֹת לְשַׂחֵק"))
+                            Text(tr("פִּתְחוּ לִי \(Self.timeLabel(progress.redeemableSecondsNow)) דַּקּוֹת לְשַׂחֵק"))
                                 .font(.system(size: isShort ? 18 : 20, weight: .heavy, design: .rounded))
                                 .minimumScaleFactor(0.7).lineLimit(1)
                         }
@@ -2474,25 +2474,27 @@ struct WorldMapView: View {
         guard PlayWindowLeaseManager.isEnabled, let cid = profiles.activeID else {
             legacyRedeemMinutes(); return
         }
-        let want = progress.redeemableMinutesNow
+        // To the second (see `redeemableSecondsNow`): the leftover under a minute
+        // is the child's too, and asking for whole minutes stranded it.
+        let want = progress.redeemableSecondsNow
         guard want > 0, !isOpening else { return }
         progress.beginOpeningWindow(gift: false)
         Task { @MainActor in
             let outcome = await PlayWindowLeaseManager.shared.claim(
-                childID: cid, kind: .earned, requestedSeconds: want * 60)
+                childID: cid, kind: .earned, requestedSeconds: want)
             switch outcome {
             case .granted(let leaseID, let seconds, let wallet):
-                let mins = seconds / 60
-                guard mins > 0 else {
+                guard seconds > 0 else {
                     progress.endOpeningWindow(message: tr("רֶגַע, לֹא הִצְלַחְנוּ לִפְתֹּחַ עַכְשָׁיו — נְנַסֶּה שׁוּב 😊"))
                     return
                 }
+                let mins = seconds / 60
                 if let wallet { progress.applyClaimedWallet(wallet) }
                 shields.unlock(minutes: max(1, (seconds + 59) / 60))
                 progress.startUnlock(minutes: mins, leaseID: leaseID, leaseKind: "earned",
                                      extraSeconds: seconds % 60)
                 LearningHistoryStore.shared.recordMinutesUsed(mins)
-                LiveEventReporter.report(.screenTimeStart, extra: ["minutes": mins])
+                LiveEventReporter.report(.screenTimeStart, extra: ["minutes": max(1, mins)])
                 progress.endOpeningWindow()          // the play screen takes over
             case .heldElsewhere:
                 // The lease listener drives the "open on your iPad" card + transfer.
@@ -2543,15 +2545,24 @@ struct WorldMapView: View {
         return progress.openableSeconds(gift: true)
     }
 
+    /// "16" when it is whole minutes, "16:45" when there are odd seconds — the
+    /// one format BOTH buttons use, so a child is never quietly rounded.
+    /// Always "m:ss" — for a chip whose own label is the unit ("זְמַן מָסָךְ"),
+    /// where a bare "2" would not say what it counts.
+    static func clockLabel(_ seconds: Int) -> String {
+        "\(seconds / 60):" + String(format: "%02d", seconds % 60)
+    }
+
+    static func timeLabel(_ seconds: Int) -> String {
+        seconds % 60 == 0 ? "\(seconds / 60)"
+                          : "\(seconds / 60):" + String(format: "%02d", seconds % 60)
+    }
+
     private var giftButtonTitle: String {
         let seconds = giftOpenableSeconds
         let frozen = progress.pausedManualMinutes
         var parts: [String] = []
-        if seconds > 0 {
-            parts.append(seconds % 60 == 0
-                         ? tr("\(seconds / 60) דַּקּוֹת")
-                         : tr("\(seconds / 60):\(String(format: "%02d", seconds % 60)) דַּקּוֹת"))
-        }
+        if seconds > 0 { parts.append(tr("\(Self.timeLabel(seconds)) דַּקּוֹת")) }
         if frozen > 0 { parts.append(tr("❄️ \(frozen) שְׁמוּרוֹת")) }
         return tr("מַתָּנָה מֵהַהוֹרִים · ") + parts.joined(separator: " + ")
     }
@@ -2574,13 +2585,20 @@ struct WorldMapView: View {
                 childID: cid, kind: .gift, requestedSeconds: want)
             switch outcome {
             case .granted(let leaseID, let seconds, let wallet):
+                // Every second counts, including a pocket under a minute. Requiring
+                // a whole minute here left Noa's last 0:24 unopenable FOREVER: the
+                // button showed it, the tap failed, and after two tries we even
+                // told her parents something was wrong (Rani, 2026-10-05). The
+                // window is exactly what the lease granted — never less, and never
+                // rounded up either (a bigger window than we debited would refund
+                // seconds that never existed).
+                guard seconds > 0 else { giftOpenFailed("grantTooSmall"); return }
                 let mins = seconds / 60
-                guard mins > 0 else { giftOpenFailed("grantTooSmall"); return }
                 if let wallet { progress.applyClaimedWallet(wallet) }
                 shields.unlock(minutes: max(1, (seconds + 59) / 60))
                 progress.startUnlock(minutes: mins, manual: true, leaseID: leaseID, leaseKind: "gift",
                                      extraSeconds: seconds % 60)
-                LiveEventReporter.report(.screenTimeStart, extra: ["minutes": mins, "gift": true])
+                LiveEventReporter.report(.screenTimeStart, extra: ["minutes": max(1, mins), "gift": true])
                 progress.giftOpenFailureStreak = 0
                 progress.endOpeningWindow()
             case .heldElsewhere:

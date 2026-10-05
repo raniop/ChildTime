@@ -39746,19 +39746,19 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "وقت الشاشة"
+            "value" : "وقت شاشة"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Screen time"
+            "value" : "screen time"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Экранное время"
+            "value" : "экранное время"
           }
         }
       }

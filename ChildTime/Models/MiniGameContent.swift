@@ -353,7 +353,12 @@ enum MatchPairsSource: Equatable {
 // MARK: - 🎁 Mini-game rewards (⭐ + 💎 only — never minutes)
 
 enum MiniGameReward {
-    struct Grant { let stars: Int; let diamonds: Int; let full: Bool; var doubled: Bool = false }
+    struct Grant { let stars: Int; let diamonds: Int; let full: Bool; var doubled: Bool = false
+                   /// ⏱ Screen-time SECONDS this round paid, for the end card.
+                   var seconds: Int = 0 }
+
+    /// How much bigger the day's FIRST round of a game is than a replay.
+    private static let fullMultiplier = 3
 
     private static func dayKey(_ game: String) -> String {
         "minigame.full.\(game).\(ProfileStore.shared.activeID?.uuidString ?? "none")"
@@ -370,23 +375,32 @@ enum MiniGameReward {
     static func grant(game: String, correct: Int, starsPer: Int, diamondsPer: Int, cap: Int,
                       surprise: Bool = false) -> Grant {
         let n = max(0, min(correct, cap))
+        // ⏱ What this round paid in screen time, taken once (see MiniGameLedger).
+        let seconds = MiniGameLedger.takeRoundSeconds()
         let grant: Grant
         if surprise {
             let m = SurpriseRound.rewardMultiplier
-            grant = Grant(stars: n * starsPer * m, diamonds: n * diamondsPer * m, full: true, doubled: true)
+            grant = Grant(stars: n * starsPer * m, diamonds: n * diamondsPer * m, full: true,
+                          doubled: true, seconds: seconds)
         } else {
             let key = dayKey(game)
             let usedToday = DayGate.usedToday(UserDefaults.standard.object(forKey: key) as? Date)
             if n == 0 {
-                // Nothing solved: nothing paid — and today's big prize is still
-                // waiting, so the card must not say it has been used up.
-                grant = Grant(stars: 0, diamonds: 0, full: !usedToday)
+                // Rani, 2026-10-05: EVERY finished round pays ⭐ AND 💎. Finishing
+                // without solving still ends on a prize, never on an empty card —
+                // and today's big prize stays unspent, so the next round can win it.
+                grant = Grant(stars: 3, diamonds: 2, full: !usedToday, seconds: seconds)
             } else if !usedToday {
-                grant = Grant(stars: n * starsPer, diamonds: n * diamondsPer, full: true)
+                // The day's first round of this game is the big one (Rani: the end
+                // card was paying less than a single answer inside the round).
+                grant = Grant(stars: n * starsPer * fullMultiplier,
+                              diamonds: n * diamondsPer * fullMultiplier, full: true, seconds: seconds)
                 UserDefaults.standard.set(Date(), forKey: key)
             } else {
-                // A replay: the practice reward, capped at 5 ⭐ — capped, never zeroed.
-                grant = Grant(stars: min(n, 5), diamonds: 0, full: false)
+                // A replay pays what the first round used to — still a real prize,
+                // still worth less than today's big one, so the shop can't be
+                // farmed in 60-second loops.
+                grant = Grant(stars: n * starsPer, diamonds: n * diamondsPer, full: false, seconds: seconds)
             }
         }
         if grant.stars > 0 || grant.diamonds > 0 {

@@ -640,12 +640,19 @@ struct PreReaderEndCard: View {
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            // 👶 No "+0" here either: a round that paid nothing shows no chip.
-            if let grant, grant.stars > 0 || grant.diamonds > 0 {
-                HStack(spacing: 12) {
-                    MiniGameRewardChip(emoji: "⭐", value: grant.stars, color: AppColor.starGold, shown: reveal >= 1)
+            // 👶 Same three chips as the big card, same size (Rani) — a "+0" one
+            // is still left out.
+            if let grant, grant.stars > 0 || grant.diamonds > 0 || grant.seconds > 0 {
+                HStack(spacing: 10) {
+                    if grant.stars > 0 {
+                        MiniGameRewardChip(emoji: "⭐", value: grant.stars, color: AppColor.starGold, shown: reveal >= 1)
+                    }
                     if grant.diamonds > 0 {
                         MiniGameRewardChip(emoji: "💎", value: grant.diamonds, color: AppColor.diamondBlue, shown: reveal >= 2)
+                    }
+                    if grant.seconds > 0 {
+                        MiniGameRewardChip(emoji: "⏱", text: WorldMapView.clockLabel(grant.seconds),
+                                           color: AppColor.successMint, shown: reveal >= 3)
                     }
                 }
                 .padding(.top, 2)
@@ -667,7 +674,7 @@ struct PreReaderEndCard: View {
         .padding(.horizontal, AppSpacing.lg)
         .onAppear {
             SpeechReader.shared.speak(spokenPraise)
-            for s in 1...2 {
+            for s in 1...3 {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.25 * Double(s)) {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.55)) { reveal = s }
                     SoundPlayer.shared.play(.correctSmall)
@@ -747,16 +754,39 @@ struct MiniGameIntroCard: View {
 /// "+12 ⭐" / "+12 💎" — the runner's chips, a size up.
 struct MiniGameRewardChip: View {
     let emoji: String
-    let value: Int
+    /// What follows the "+": a count (⭐/💎) or a time ("1:36" for ⏱).
+    let text: String
     let color: Color
     let shown: Bool
+    /// Said under the number when the unit isn't obvious — "דַּקּוֹת מָסָךְ" for ⏱.
+    var unit: String? = nil
+
+    init(emoji: String, value: Int, color: Color, shown: Bool, unit: String? = nil) {
+        self.init(emoji: emoji, text: "\(value)", color: color, shown: shown, unit: unit)
+    }
+
+    init(emoji: String, text: String, color: Color, shown: Bool, unit: String? = nil) {
+        self.emoji = emoji; self.text = text; self.color = color; self.shown = shown; self.unit = unit
+    }
 
     var body: some View {
-        Text("\(emoji) +\(value)")
-            .font(.system(size: 22, weight: .heavy, design: .rounded))
+        // ⭐ 💎 ⏱ are one row of EQUAL chips (Rani, 2026-10-05): same width, same
+        // height, whatever each one's number happens to be. The unit line is
+        // always laid out — hidden when there is none — so a chip with a label
+        // can never be taller than its neighbours.
+        VStack(spacing: 1) {
+            Text("\(emoji) +\(text)")
+                .font(.system(size: 21, weight: .heavy, design: .rounded))
+                .monospacedDigit()
+                .lineLimit(1).minimumScaleFactor(0.6)
+            Text(unit ?? " ")
+                .font(.system(size: 10.5, weight: .heavy, design: .rounded))
+                .opacity(unit == nil ? 0 : 0.85)
+                .lineLimit(1).minimumScaleFactor(0.6)
+        }
             .foregroundStyle(color)
-            .monospacedDigit()
-            .padding(.horizontal, 18).padding(.vertical, 10)
+            .padding(.horizontal, 12)
+            .frame(minWidth: 104, minHeight: 54)
             .background(Capsule().fill(.white.opacity(0.14)))
             .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
             .scaleEffect(shown ? 1 : 0.4)
@@ -797,13 +827,23 @@ struct MiniGameEndCard: View {
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
             if let grant {
-                // ⭐ +0 is not a prize and not a message — a round that paid
-                // nothing shows no chip at all (Rani saw "⭐ +0" on an end card).
-                if grant.stars > 0 || grant.diamonds > 0 {
-                    HStack(spacing: 12) {
-                        MiniGameRewardChip(emoji: "⭐", value: grant.stars, color: AppColor.starGold, shown: reveal >= 1)
+                // Every finished round pays ⭐ AND 💎, and says what it was worth
+                // in screen time (Rani, 2026-10-05). A chip is still skipped when
+                // its own number is 0 — "⭐ +0" is not a prize.
+                if grant.stars > 0 || grant.diamonds > 0 || grant.seconds > 0 {
+                    HStack(spacing: 10) {
+                        if grant.stars > 0 {
+                            MiniGameRewardChip(emoji: "⭐", value: grant.stars, color: AppColor.starGold,
+                                               shown: reveal >= 1, unit: tr("כּוֹכָבִים"))
+                        }
                         if grant.diamonds > 0 {
-                            MiniGameRewardChip(emoji: "💎", value: grant.diamonds, color: AppColor.diamondBlue, shown: reveal >= 2)
+                            MiniGameRewardChip(emoji: "💎", value: grant.diamonds, color: AppColor.diamondBlue,
+                                               shown: reveal >= 2, unit: tr("יַהֲלוֹמִים"))
+                        }
+                        if grant.seconds > 0 {
+                            MiniGameRewardChip(emoji: "⏱", text: WorldMapView.clockLabel(grant.seconds),
+                                               color: AppColor.successMint,
+                                               shown: reveal >= 3, unit: tr("זְמַן מָסָךְ"))
                         }
                     }
                     .padding(.top, 2)
@@ -833,7 +873,7 @@ struct MiniGameEndCard: View {
         .glassPane(radius: 28)
         .padding(.horizontal, AppSpacing.lg)
         .onAppear {
-            for s in 1...2 {
+            for s in 1...3 {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.25 * Double(s)) {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.55)) { reveal = s }
                     SoundPlayer.shared.play(.correctSmall)
