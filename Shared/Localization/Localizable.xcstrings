@@ -3358,6 +3358,50 @@
         }
       }
     },
+    "%@ מְשַׂחֵק עַכְשָׁיו 🎮" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ يلعب الآن 🎮"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is playing now 🎮"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ сейчас играет 🎮"
+          }
+        }
+      }
+    },
+    "%@ מְשַׂחֶקֶת עַכְשָׁיו 🎮" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ تلعب الآن 🎮"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is playing now 🎮"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ сейчас играет 🎮"
+          }
+        }
+      }
+    },
     "%@ מִתְחַלֶּקֶת בְּ־%lld בְּלִי שְׁאֵרִית" : {
       "localizations" : {
         "ar" : {
@@ -72892,6 +72936,50 @@
         }
       }
     },
+    "עוֹד אֵין יְלָדִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد أطفال بعد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No kids yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока нет детей"
+          }
+        }
+      }
+    },
+    "עוֹד אֵין יְלָדִים בַּמִּשְׁפָּחָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد أطفال في العائلة بعد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No kids in the family yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В семье пока нет детей"
+          }
+        }
+      }
+    },
     "עוֹד אֵין יְלָדִים בַּמִּשְׁפָּחָה. הוֹסִיפוּ יֶלֶד קֹדֶם, וְאָז חִזְרוּ לְכָאן." : {
       "localizations" : {
         "ar" : {
@@ -93680,6 +93768,28 @@
     },
     "📭" : {
 
+    },
+    "📱 חִבּוּר מַכְשִׁיר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📱 ربط جهاز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📱 Connect a device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📱 Подключить устройство"
+          }
+        }
+      }
     },
     "📱 → 🧒" : {
 

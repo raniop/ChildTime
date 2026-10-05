@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "870781732446",
+    "project_id": "childtime-86e98",
+    "storage_bucket": "childtime-86e98.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:870781732446:android:80db6848c1e177907d96cf",
+        "android_client_info": {
+          "package_name": "com.rani.tofy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "870781732446-bp80jbd3ja94jqofkaq6hqsrl6u2skn3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkjztvJLNaOBuUgCOBG2Q8m9b2xt9368A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "870781732446-bp80jbd3ja94jqofkaq6hqsrl6u2skn3.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "870781732446-ho1dv5ksn0g7jtcchd7rumfctoq720ik.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.rani.ChildTime"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
