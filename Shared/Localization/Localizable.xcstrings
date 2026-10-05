@@ -23076,6 +23076,28 @@
         }
       }
     },
+    "בכרטיס של כל ילד, \"פעולות\" ו\"מידע נוסף\" באותו גובה ובאותו קו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في بطاقة كل طفل، \"إجراءات\" و\"معلومات إضافية\" بنفس الارتفاع وعلى خط واحد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On every child's card, \"Actions\" and \"More info\" are the same height, in one line"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В карточке каждого ребёнка «Действия» и «Подробнее» одной высоты и на одной линии"
+          }
+        }
+      }
+    },
     "בלונים" : {
       "localizations" : {
         "ar" : {
@@ -38686,6 +38708,28 @@
         }
       }
     },
+    "התחלה פשוטה ב-4 צעדים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بداية بسيطة في 4 خطوات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A simple start in 4 steps"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Простой старт за 4 шага"
+          }
+        }
+      }
+    },
     "התחלה קלה יותר" : {
       "localizations" : {
         "ar" : {
@@ -53023,6 +53067,28 @@
         }
       }
     },
+    "כפתורים מיושרים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أزرار مصطفّة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aligned buttons"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ровные кнопки"
+          }
+        }
+      }
+    },
     "כרגע נעולות רק האפליקציות שבחרתם ברשימה למטה. אפליקציה חדשה שהילד מתקין נשארת פתוחה — בחרו מה נשאר פתוח כדי לסגור את הפרצה." : {
       "localizations" : {
         "ar" : {
@@ -64895,6 +64961,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Семья без названия"
+          }
+        }
+      }
+    },
+    "משפחה, ילד, מכשיר ונעילה — עם פס התקדמות למעלה, ובטלפון של הילד אישור זמן מסך כבר בהתחלה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "العائلة، الطفل، الجهاز والقفل — مع شريط تقدّم في الأعلى، والموافقة على مدة استخدام الجهاز في هاتف الطفل منذ البداية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Family, child, device and lock — with a progress bar on top, and Screen Time approved on the child's phone right at the start"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Семья, ребёнок, устройство и блокировка — с полосой прогресса сверху, а «Экранное время» разрешается на телефоне ребёнка сразу"
           }
         }
       }

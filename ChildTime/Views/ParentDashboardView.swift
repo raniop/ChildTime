@@ -1260,7 +1260,7 @@ struct ParentDashboardView: View {
             if !hasDevice { return tr("עוֹד לֹא \(girl ? tr("הִתְחִילָה") : tr("הִתְחִיל"))") }
             return s.answeredToday > 0 ? tr("\(girl ? tr("לָמְדָה") : tr("לָמַד")) הַיּוֹם") : tr("לֹא בְּטוֹפִי הַיּוֹם")
         }()
-        return VStack(spacing: 12) {
+        return VStack(spacing: Self.homeRowGap) {
             HStack(spacing: 12) {
                 ProfileAvatarView(profile: profile, size: 52)
                 VStack(alignment: .leading, spacing: 3) {
@@ -1336,7 +1336,7 @@ struct ParentDashboardView: View {
                 // Same shape as a connected card: the primary control (here:
                 // connect a device) plus the slot the ⚡ menu is overlaid into.
                 HStack(spacing: 8) {
-                    Color.clear.frame(maxWidth: .infinity).frame(height: 38)
+                    Color.clear.frame(maxWidth: .infinity).frame(height: Self.homeControlHeight)
                     Color.clear.frame(width: Self.actionsMenuWidth, height: 1)
                 }
                 Color.clear.frame(maxWidth: .infinity).frame(height: Self.homeControlHeight)
@@ -1370,6 +1370,12 @@ struct ParentDashboardView: View {
     /// Every control in a child card's action rows is this tall, so "מידע נוסף"
     /// and "פעולות" can never end up different heights (Rani).
     static let homeControlHeight: CGFloat = 42
+    /// The gap between a card's rows. The ⚡ menu and "+ חברו מכשיר" are laid
+    /// OVER the card (a Menu inside the NavigationLink swallows taps), so they
+    /// are placed by arithmetic — with 8 here while the card stacked its rows
+    /// 12 apart, "פעולות" sat 4pt below "מידע נוסף" and read as a different
+    /// size (Rani: "חשבתי שסידרנו את הגדלים של הכפתורים"). One number now.
+    static let homeRowGap: CGFloat = 12
 
     private func homeGhostLabel(_ text: String, width: CGFloat? = nil) -> some View {
         Text(text)
@@ -2114,7 +2120,7 @@ struct ParentDashboardView: View {
                         gridCardMenu(row.profile)
                             .coachMark("p.actions", if: row.profile.id == rows.first?.profile.id)
                             .padding(14)
-                            .padding(.bottom, Self.homeControlHeight + 8)
+                            .padding(.bottom, Self.homeControlHeight + Self.homeRowGap)
                     }
                     // 🧒 One tap hands THIS device to THIS child. Parents wrote in
                     // that they could not find Kid Mode at all when it lived only
@@ -2149,7 +2155,7 @@ struct ParentDashboardView: View {
                             .buttonStyle(.borderless)
                             .coachMark("p.connect", if: row.profile.id == rows.first(where: { !childHasDevice($0.profile) })?.profile.id)
                             .padding(.horizontal, 14)
-                            .padding(.bottom, 14 + Self.homeControlHeight + 8)
+                            .padding(.bottom, 14 + Self.homeControlHeight + Self.homeRowGap)
                             .padding(.trailing, Self.actionsMenuWidth + 8)
                             .environment(\.layoutDirection, .app)
                         }
