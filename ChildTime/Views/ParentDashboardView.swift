@@ -74,6 +74,8 @@ struct ParentDashboardView: View {
     /// seen — reading the list again afterwards would come back empty.
     @State private var whatsNewStory: [StoryItem] = []
     @State private var showWhatsNewStory = false
+    /// 🧭 The first-run tour of this screen (band ג of the onboarding mockup).
+    @State private var parentTourActive = false
     @State private var showingPaywall = false
     /// Apple's own "manage subscription" sheet — where an existing subscriber
     /// belongs, instead of being shown the purchase page again.
@@ -461,6 +463,11 @@ struct ParentDashboardView: View {
                 // 📣 The in-app campaign pop-up — a sheet over the dimmed home.
                 if isRoot, let c = campaigns.popup { campaignPopupHost(c) }
             }
+            // 🧭 One point per button, once — over the real controls, which
+            // mark themselves with `.coachMark`.
+            .coachTour(parentTourSteps, forKid: false, isActive: $parentTourActive) {
+                CoachTours.markDone(Self.parentTourKey)
+            }
             .navigationBarTitleDisplayMode(.inline)
             // Keep the title floating over the app gradient. Without this, iOS pops
             // a translucent system material strip behind the inline title the moment
@@ -579,6 +586,10 @@ struct ParentDashboardView: View {
             // 📖 …and the story version, which is what opens BY ITSELF on the
             // first launch after an update. No button leaves it: the last story
             // ends, the cover closes, and the parent is on the home screen.
+            .onChangeCompat(of: showWhatsNewStory) { _, shown in
+                guard !shown, isRoot, !CoachTours.isDone(Self.parentTourKey) else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { startParentTour() }
+            }
             .fullScreenCover(isPresented: $showWhatsNewStory) {
                 WhatsNewStoryView(audience: .parent, items: whatsNewStory) {
                     WhatsNewStories.markParentShown()
@@ -660,6 +671,14 @@ struct ParentDashboardView: View {
                     UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "family.namePromptAt")
                     familyNameDraft = household.suggestedFamilyName ?? ""
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { showFamilyNameEditor = true }
+                } else if isRoot, !rows.isEmpty,
+                          !CoachTours.isDone(Self.parentTourKey) || CoachTours.forcedInDemo {
+                    // 🧭 Nothing else wanted this launch: the tour of the home.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { startParentTour() }
+                }
+                // 📸 Screenshot runs force the tour, whatever else this launch chose.
+                if CoachTours.forcedInDemo, isRoot {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { parentTourActive = true }
                 }
                 rescheduleInsights()
                 WidgetBridge.writeFamily(rows)   // keep the family home-screen widget fresh
@@ -1230,6 +1249,7 @@ struct ParentDashboardView: View {
         HStack(spacing: 8) {
             Button { Haptic.light(); showingCreateChild = true } label: { homeGhostLabel(tr("＋ צְרוּ יֶלֶד/ה")).frame(maxWidth: .infinity) }
                 .buttonStyle(.plain)
+                .coachMark("p.newChild")
             // "תנו לילד לשחק" moved into each child's ⚡ menu (Rani, 2026-09-07):
             // it opens Kid Mode for THAT child, no picker.
             Button {
@@ -1241,11 +1261,10 @@ struct ParentDashboardView: View {
                 if let target { choresProfile = target }
             } label: { homeGhostLabel(tr("🧹 מַטְלוֹת")).frame(maxWidth: .infinity) }
                 .buttonStyle(.plain)
-            // 📱 Parents wrote in that they could not find how to hand their own
-            // phone to the child. It had been moved into each child's ⚡ menu,
-            // where nobody looked; this row is where they go looking.
-            Button { Haptic.light(); showingKidMode = true } label: { homeGhostLabel(tr("🧒 מצב ילד")).frame(maxWidth: .infinity) }
-                .buttonStyle(.plain)
+                .coachMark("p.chores")
+            // 📱 "🧒 מצב ילד" lived here until every child's card got its own
+            // "תנו ל… לשחק כאן" — the same thing, already aimed at the right
+            // child. Rani: "הכפתור מצב ילד למעלה אפשר להסיר, לא צריך אותו יותר".
         }
         .environment(\.layoutDirection, .app)
     }
@@ -1275,7 +1294,9 @@ struct ParentDashboardView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(tr("הגדרות"))
+                .coachMark("p.gear")
                 ActivityBellButton(unread: activity.unread) { showingActivity = true }
+                    .coachMark("p.bell")
             }
             VStack(alignment: .trailing, spacing: 4) {
                 // The family's name IS the title (Rani); tap to name / rename.
@@ -1648,6 +1669,45 @@ struct ParentDashboardView: View {
     /// which already sit at the type-checker's limit.
     // MARK: - 💬 Support chat
 
+    // MARK: - 🧭 The tour
+
+    static let parentTourKey = "parentHome.v1"
+
+    private func startParentTour() {
+        guard isRoot, !rows.isEmpty, !showWhatsNewStory, !showWhatsNew, !showSchoolYearParty,
+              !parentTourActive else { return }
+        parentTourActive = true
+    }
+
+    /// Every control on the home, in the order the eye meets it. A stop whose
+    /// control is not on screen (no device yet, no chat on this account) is
+    /// skipped by the tour itself. Parent copy — no niqqud.
+    private var parentTourSteps: [CoachStep] {
+        let name = Question.stripNiqqud(rows.first?.profile.name ?? tr("הילד"))
+        return [
+            // "מידע נוסף" lives inside the card's link, which keeps its anchor
+            // from the tour — so the card's own stop says where it leads.
+            CoachStep(id: "p.card", title: tr("הכרטיס של \(name)"),
+                      text: tr("כמה דקות הרוויח היום, כמה שאלות ענה ובכמה צדק. לחיצה על הכרטיס או על \"מידע נוסף\" פותחת את הדוח המלא וההגדרות של הילד.")),
+            CoachStep(id: "p.actions", title: tr("פעולות"),
+                      text: tr("מרחוק, בלי לגעת בטלפון שלו: מתנת דקות, נעילה ומטלות.")),
+            CoachStep(id: "p.playHere", title: tr("תנו ל\(name) לשחק כאן"),
+                      text: tr("הילד משחק בטלפון שלכם: הכל ננעל חוץ מטופי, והיציאה מוגנת בקוד.")),
+            CoachStep(id: "p.connect", title: tr("חיבור מכשיר"),
+                      text: tr("מחברים את הטלפון או האייפד של הילד בסריקת קוד אחת.")),
+            CoachStep(id: "p.newChild", title: tr("ילד נוסף"),
+                      text: tr("מוסיפים עוד ילד למשפחה — לכל אחד כיתה וזמן מסך משלו.")),
+            CoachStep(id: "p.chores", title: tr("מטלות"),
+                      text: tr("הילד בוחר מטלה בבית, אתם מאשרים, והוא מקבל דקות או כסף.")),
+            CoachStep(id: "p.bell", title: tr("עדכונים"),
+                      text: tr("כל מה שקורה אצל הילדים: מה עשו, בקשות שמחכות לכם והודעות שנשלחו.")),
+            CoachStep(id: "p.gear", title: tr("הגדרות"),
+                      text: tr("זמן מסך ליום, תגמולים, שפה, ושוב את ההדרכה הזאת.")),
+            CoachStep(id: "p.chat", title: tr("צוות טופי"),
+                      text: tr("שאלה? כתבו לנו כאן, והתשובה תגיע לטלפון שלכם.")),
+        ]
+    }
+
     /// Parents only — a real (non-anonymous) account on a parent device. Never
     /// on a child's device or inside Kid Mode (a sheet over this screen).
     private var showsSupport: Bool {
@@ -1665,6 +1725,7 @@ struct ParentDashboardView: View {
             onChat: { openSupportChat() },
             onInbox: { support.route = .inbox }
         )
+        .coachMark("p.chat")
         .padding(.horizontal, AppSpacing.lg)
         .padding(.bottom, AppSpacing.md)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
@@ -1818,6 +1879,7 @@ struct ParentDashboardView: View {
             ) {
                 ForEach(rows, id: \.profile.id) { row in
                     childCardTap(row)
+                        .coachMark("p.card", if: row.profile.id == rows.first?.profile.id)
                     // ⋯ quick actions right on the card — the two
                     // remote controls (open / lock now) without
                     // opening the child's page. Overlaid on the link
@@ -1829,6 +1891,7 @@ struct ParentDashboardView: View {
                     // The grid is RTL, so `.bottomTrailing` is the bottom-LEFT.
                     .overlay(alignment: .bottomTrailing) {
                         gridCardMenu(row.profile)
+                            .coachMark("p.actions", if: row.profile.id == rows.first?.profile.id)
                             .padding(14)
                             .padding(.bottom, Self.homeControlHeight + 8)
                     }
@@ -1847,6 +1910,7 @@ struct ParentDashboardView: View {
                                 homePrimaryLabel(tr("תְּנוּ לְ\(row.profile.name) לְשַׂחֵק כָּאן 🧒"))
                             }
                             .buttonStyle(.plain)
+                            .coachMark("p.playHere", if: row.profile.id == rows.first?.profile.id)
                             .padding(14)
                             .environment(\.layoutDirection, .app)
                         }
@@ -1862,6 +1926,7 @@ struct ParentDashboardView: View {
                                 homePrimaryLabel(tr("+ חַבְּרוּ מַכְשִׁיר"))
                             }
                             .buttonStyle(.borderless)
+                            .coachMark("p.connect", if: row.profile.id == rows.first(where: { !childHasDevice($0.profile) })?.profile.id)
                             .padding(.horizontal, 14)
                             .padding(.bottom, 14 + Self.homeControlHeight + 8)
                             .padding(.trailing, Self.actionsMenuWidth + 8)

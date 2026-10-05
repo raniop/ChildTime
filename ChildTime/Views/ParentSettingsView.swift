@@ -20,6 +20,7 @@ struct ParentSettingsView: View {
     @State private var showWhatsNew = false
     /// 📖 The story version — what the closing card points back to.
     @State private var showWhatsNewStory = false
+    @State private var tourResetDone = false
     @State private var showSignIn = false
     @State private var showPaywall = false
     @State private var showDashboard = false
@@ -853,6 +854,20 @@ struct ParentSettingsView: View {
                     .font(.system(size: 16, weight: .bold, design: .rounded))
             }
             .disabled(WhatsNewContent.releases.isEmpty)
+
+            // 🧭 The home tour's last stop promises this: every tour on this
+            // device (the parent's home, and the child's home on a shared
+            // device) runs again the next time its screen opens.
+            Button {
+                Haptic.success()
+                CoachTours.reset()
+                tourResetDone = true
+            } label: {
+                Label(tourResetDone ? tr("ההדרכה תוצג שוב במסך הבית ✓") : tr("הצגת ההדרכה שוב"),
+                      systemImage: "hand.point.up.left.fill")
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+            }
+            .disabled(tourResetDone)
 
             VStack(spacing: 3) {
                 Text(tr("טופי"))

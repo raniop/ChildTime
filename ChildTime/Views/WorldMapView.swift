@@ -41,6 +41,8 @@ struct WorldMapView: View {
     /// 📖 The "מה חדש" STORY, once per update per child. Rani: it has to open
     /// by itself — "מבלי שהוא צריך לעשות פעולה" — so there is nothing to tap.
     @State private var showWhatsNewStory = false
+    /// 🧭 The child's one-time tour of this screen (band ג).
+    @State private var kidTourActive = false
     /// Captured before the build is marked seen; reading it afterwards is empty.
     @State private var whatsNewStory: [StoryItem] = []
     /// Limited-time event SPLASH (💎×2 etc.) — a full pop-up like the lucky
@@ -418,6 +420,10 @@ struct WorldMapView: View {
                         // padding — the gap above טופי should match the gap
                         // between the subtitle and the cards below.
                         heroTitle
+                            // 🧭 The worlds' stop: on a phone the first world sits
+                            // under the floating minutes panel, so the tour points
+                            // at the line that heads them, which is always in view.
+                            .coachMark("k.world")
                         // 🌟 The guest worlds, worked out ONCE for the whole grid.
                         // Each tile used to ask `freeTier` for itself, and every
                         // one of those rebuilt the free tier from the full world
@@ -447,6 +453,7 @@ struct WorldMapView: View {
                                         showingSmartFeed = true
                                     }
                                     .frame(maxWidth: .infinity)
+                                    .coachMark("k.tofyTime")
                                 case .packOffer(let pack):
                                     offerTile(pack)
                                 case .world(let world):
@@ -537,6 +544,7 @@ struct WorldMapView: View {
                                 }
                             }
                             .frame(maxWidth: .infinity)
+                            .coachMark("k.games")
                         }
                     }
                     .frame(maxWidth: worldGridMaxWidth)
@@ -562,6 +570,7 @@ struct WorldMapView: View {
             VStack {
                 Spacer()
                 bottomCTAs
+                    .coachMark("k.minutes")
                     .padding(.horizontal, AppSpacing.lg)
                     .padding(.top, isShort ? 26 : 48)
                     .padding(.bottom, isShort ? AppSpacing.sm : AppSpacing.md)
@@ -605,6 +614,10 @@ struct WorldMapView: View {
                 horizontalInset: AppSpacing.lg
             )
             }
+        }
+        // 🧭 Once per child: one point per thing on this screen.
+        .coachTour(kidTourSteps, forKid: true, isActive: $kidTourActive) {
+            if let id = profiles.activeID { CoachTours.markDone(Self.kidTourKey(id)) }
         }
         // 💬 What the rail's buddy says — over the bottom scrim, where it can
         // cover nothing that matters, instead of over a world card.
@@ -694,6 +707,7 @@ struct WorldMapView: View {
                 heroAppeared = true
             }
             checkWorldUnlocks()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { maybeStartKidTour() }
             // Event splash: once a day — see `maybeShowEventSplash`.
             maybeShowEventSplash()
             // Returning after being away earns a "welcome back" spin.
@@ -1098,12 +1112,12 @@ struct WorldMapView: View {
             HStack(alignment: .center, spacing: 10) {
                 identityBlock(avatar: avatarSize)
                 Spacer(minLength: 6)
-                walletStats
+                walletStats.coachMark("k.wallet")
             }
             statsPanel
             HStack(spacing: 10) {
-                dailyChallengeCard
-                choresTopCard
+                dailyChallengeCard.coachMark("k.challenge")
+                choresTopCard.coachMark("k.chores")
             }
             .fixedSize(horizontal: false, vertical: true)   // twins: same height, from content
         }
@@ -1439,12 +1453,15 @@ struct WorldMapView: View {
             navButton("🛍️", badge: false, size: size) {
                 Haptic.light(); showingShop = true
             }
+            .coachMark("k.shop")
             navButton("🏆", badge: !liveGame.invites.isEmpty, size: size) {
                 Haptic.light(); showingLeaderboard = true
             }
+            .coachMark("k.friends")
             navButton("⚙️", badge: false, size: size, longPress: { showingDemo = true }) {
                 showingParentGate = true
             }
+            .coachMark("k.settings")
         }
         .eraseToAnyView()
     }
@@ -2300,6 +2317,52 @@ struct WorldMapView: View {
         if case .recommended = AppUpdateConfig.shared.state, campaignTracker.popup == nil {
             showUpdateNotice = true
         }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { maybeStartKidTour() }
+    }
+
+    // MARK: - 🧭 The tour
+
+    static func kidTourKey(_ childID: UUID) -> String { "kidHome.v1.\(childID.uuidString)" }
+
+    /// After the story and every pop-up that waited for it — never on top of
+    /// anything. Once per child (two siblings on one iPad each get theirs).
+    private func maybeStartKidTour() {
+        guard let id = profiles.activeID, !kidTourActive,
+              !CoachTours.isDone(Self.kidTourKey(id)) || CoachTours.forcedInDemo,
+              !AppInfo.isDemoRun || CoachTours.forcedInDemo,
+              !storyPending, !showEventSplash, !showingWheel, packReveal == nil, packOffer == nil,
+              !showChildGradePicker, !showSchoolYearParty, !showingAppLockSetup,
+              selectedWorld == nil, !showingSmartFeed, campaignTracker.popup == nil,
+              !showUpdateNotice, !showDailyChest else { return }
+        kidTourActive = true
+    }
+
+    /// The child's side — niqqud, and the right form for a boy or a girl.
+    private var kidTourSteps: [CoachStep] {
+        [
+            CoachStep(id: "k.world", title: tr("עוֹלָמוֹת"),
+                      text: tr("בּוֹחֲרִים עוֹלָם, וְעוֹנִים בּוֹ עַל שְׁאֵלוֹת אוֹ מְשַׂחֲקִים. כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחָה דַּקּוֹת.")),
+            CoachStep(id: "k.tofyTime", title: tr("טוֹפִי טַיים"),
+                      text: Gendered.g(tr("שְׁאֵלוֹת שֶׁטּוֹפִי בּוֹחֵר בִּשְׁבִילְךָ, מִכָּל הָעוֹלָמוֹת."),
+                                       tr("שְׁאֵלוֹת שֶׁטּוֹפִי בּוֹחֵר בִּשְׁבִילֵךְ, מִכָּל הָעוֹלָמוֹת."))),
+            CoachStep(id: "k.games", title: tr("מִשְׂחָקִים"),
+                      text: tr("מִשְׂחָקִים קְצָרִים — נִפְתָּחִים אַחֲרֵי כַּמָּה תְּשׁוּבוֹת נְכוֹנוֹת בַּיּוֹם.")),
+            CoachStep(id: "k.minutes", title: tr("הַדַּקּוֹת"),
+                      text: Gendered.g(tr("כָּאן פּוֹתְחִים אֶת הַדַּקּוֹת שֶׁהִרְוַחְתָּ, וְהַטֶּלֶפוֹן נִפְתָּח."),
+                                       tr("כָּאן פּוֹתְחִים אֶת הַדַּקּוֹת שֶׁהִרְוַחְתְּ, וְהַטֶּלֶפוֹן נִפְתָּח."))),
+            CoachStep(id: "k.wallet", title: tr("כּוֹכָבִים וִיהַלוֹמִים"),
+                      text: tr("כּוֹכָבִים עַל כָּל הַצְלָחָה, וִיהַלוֹמִים לִקְנִיּוֹת בַּחֲנוּת.")),
+            CoachStep(id: "k.challenge", title: tr("אֶתְגַּר יוֹמִי"),
+                      text: tr("מְשִׂימָה קְטַנָּה כָּל יוֹם — וּפְרָס כְּשֶׁמְּסַיְּמִים.")),
+            CoachStep(id: "k.chores", title: tr("מְטָלוֹת"),
+                      text: tr("עוֹזְרִים בַּבַּיִת וּמַרְוִיחִים — אַבָּא אוֹ אִמָּא מְאַשְּׁרִים.")),
+            CoachStep(id: "k.shop", title: tr("חֲנוּת"),
+                      text: tr("קוֹנִים דְּמֻיּוֹת וּבְגָדִים עִם הַיַּהֲלוֹמִים.")),
+            CoachStep(id: "k.friends", title: tr("חֲבֵרִים"),
+                      text: tr("טַבְלַת הַחֲבֵרִים, וּמִשְׂחָק חַי בְּיַחַד.")),
+            CoachStep(id: "k.settings", title: tr("לַהוֹרִים"),
+                      text: tr("הַהַגְדָּרוֹת שֶׁל אַבָּא וְאִמָּא — נִפְתָּחוֹת רַק עִם קוֹד.")),
+        ]
     }
 
     /// Event splash: announce today's event ONCE a day as a full pop-up (like the
@@ -2354,6 +2417,13 @@ struct WorldMapView: View {
     /// setup are nudged from the PARENT's device instead (the device row in the
     /// child's report), and the picker itself lives behind the gear + code.
     private func maybePromptAppLockSetup() {
+        // 🔒 Retired (2026-10-05). The lock no longer needs this choice: a
+        // child device is fully locked from the start (`newAppLockArmed`), and
+        // "what stays open" is optional, behind the gear. This screen told a
+        // new parent to "pick Tofy itself" or new apps would stay open — no
+        // longer true, and one more step Rani wanted gone ("זה יותר מידי
+        // התעסקות ואין מצב שאנשים יוכלו לסדר את זה לבד").
+        return
         guard settings.deviceRole == .child,
               !settings.hasPromptedChildAppLock,
               settings.openByDesignApps.isEmpty,
