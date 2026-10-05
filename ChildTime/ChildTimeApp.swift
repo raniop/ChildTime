@@ -678,6 +678,7 @@ struct ChildTimeApp: App {
                 }
         case "devicecontrols": ChildDeviceControlsView()   // parent controls on child device
         case "appletips": AppleScreenTimeTipsSheet {}        // DEMO_SCREEN=appletips — once, after a child device joins
+        case "giftwelcome": GiftWelcomeView(until: Date().addingTimeInterval(30 * 86_400 - 60)) {}   // DEMO_SCREEN=giftwelcome
         case "joinguard":                                  // parent-scans-child-code block dialog
             JoinConfirmView().environmentObject(ParentSettings.shared)
                 .onAppear { ParentSettings.shared.deviceRole = .parent; JoinCoordinator.shared.seedDemo(childCode: true) }

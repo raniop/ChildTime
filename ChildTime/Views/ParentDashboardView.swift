@@ -80,6 +80,8 @@ struct ParentDashboardView: View {
     @State private var showWhatsNewStory = false
     /// 🧭 The first-run tour of this screen (band ג of the onboarding mockup).
     @State private var parentTourActive = false
+    /// 🎁 "קיבלתם את טופי+ במתנה" — once, when the family's gift opens.
+    @State private var showGiftWelcome = false
     /// 🚀 Band ב: "does this child have a device of their own?"
     @State private var deviceQuestionChild: Profile? = nil
     /// The checklist reads its answers from local defaults; this nudges a re-read.
@@ -598,6 +600,23 @@ struct ParentDashboardView: View {
             // 📖 …and the story version, which is what opens BY ITSELF on the
             // first launch after an update. No button leaves it: the last story
             // ends, the cover closes, and the parent is on the home screen.
+            .fullScreenCover(isPresented: $showGiftWelcome) {
+                GiftWelcomeView(until: household.household?.giftUntil ?? household.household?.premiumUntil ?? Date()) {
+                    GiftWelcome.markShown(household.household)
+                    showGiftWelcome = false
+                }
+            }
+            // The gift can land while the parent is already here (the hourly
+            // engine, or the sign-up trigger a moment after the family exists).
+            .onChangeCompat(of: household.household?.giftStartedAt) { _, _ in
+                guard isRoot, GiftWelcome.isDue(household.household), !showWhatsNewStory,
+                      !showSchoolYearParty, !parentTourActive, !showGiftWelcome else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { showGiftWelcome = true }
+            }
+            .onChangeCompat(of: showGiftWelcome) { _, shown in
+                guard !shown, isRoot, !CoachTours.isDone(Self.parentTourKey) else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { startParentTour() }
+            }
             .onChangeCompat(of: showWhatsNewStory) { _, shown in
                 guard !shown, isRoot, !CoachTours.isDone(Self.parentTourKey) else { return }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { startParentTour() }
@@ -697,6 +716,10 @@ struct ParentDashboardView: View {
                     whatsNewStory = WhatsNewStories.parentItems
                     WhatsNewStories.markParentShown()
                     showWhatsNewStory = true
+                } else if isRoot, GiftWelcome.isDue(household.household) {
+                    // 🎁 The family's gift just opened (or was stretched to 30
+                    // days) — the parent hears it as a moment, once.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { showGiftWelcome = true }
                 } else if isRoot, WhatsNewContent.shouldShow {
                     // A build with notes but no story of its own still gets the
                     // old sheet, so nothing a parent should read can go missing.
@@ -1782,7 +1805,7 @@ struct ParentDashboardView: View {
 
     private func startParentTour() {
         guard isRoot, !rows.isEmpty, !showWhatsNewStory, !showWhatsNew, !showSchoolYearParty,
-              !parentTourActive else { return }
+              !parentTourActive, !showGiftWelcome, !GiftWelcome.isDue(household.household) else { return }
         parentTourActive = true
     }
 

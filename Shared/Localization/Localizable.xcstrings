@@ -22746,6 +22746,28 @@
         }
       }
     },
+    "בלי כרטיס אשראי, ולא מתחדש אוטומטית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دون بطاقة ائتمان، ولا يتجدد تلقائيًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No credit card, and it doesn't renew"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Без карты и без автопродления"
+          }
+        }
+      }
+    },
     "בלי מסך המשחקים: בחירת עולם מובילה ישר לשאלות" : {
       "localizations" : {
         "ar" : {
@@ -36791,6 +36813,28 @@
         }
       }
     },
+    "הסבר צעד אחר צעד, עם ציור של מסכי האייפון, איך מגדירים קוד לזמן מסך ואיך מוחקים את טופי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خطوة بخطوة، مع رسوم لشاشات الآيفون: كيف تعيّنون رمزًا لمدة استخدام الجهاز وكيف تحذفون Tofy"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Step by step, with drawings of the iPhone screens: how to set a Screen Time passcode and how to delete Tofy"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Шаг за шагом, с рисунками экранов iPhone: как задать код «Экранного времени» и как удалить Tofy"
+          }
+        }
+      }
+    },
     "הסיסמה קצרה מדי — לפחות 6 תווים" : {
       "localizations" : {
         "ar" : {
@@ -43989,6 +44033,28 @@
         }
       }
     },
+    "טופי+ במתנה ל-30 יום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy+ هدية لمدة 30 يومًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy+ as a gift for 30 days"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy+ в подарок на 30 дней"
+          }
+        }
+      }
+    },
     "טופי+ במתנה — עוד %lld ימים" : {
       "localizations" : {
         "ar" : {
@@ -45530,6 +45596,28 @@
         }
       }
     },
+    "יאללה, מתחילים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هيا نبدأ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Let's go"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поехали"
+          }
+        }
+      }
+    },
     "יא׳" : {
       "localizations" : {
         "ar" : {
@@ -46190,6 +46278,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Дни активности"
+          }
+        }
+      }
+    },
+    "ימים נשארו במתנה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يومًا متبقيًا من الهدية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "days left in the gift"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "дней подарка осталось"
+          }
+        }
+      }
+    },
+    "ימים של כל העולמות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يومًا من كل العوالم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "days of every world"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "дней со всеми мирами"
           }
         }
       }
@@ -50939,6 +51071,28 @@
         }
       }
     },
+    "כל העולמות פתוחים לכל הילדים במשפחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل العوالم مفتوحة لكل أطفال العائلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every world open for every child in the family"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все миры открыты для всех детей в семье"
+          }
+        }
+      }
+    },
     "כל העולמות פתוחים עד %@. בלי כרטיס, לא מתחדש." : {
       "localizations" : {
         "ar" : {
@@ -51237,6 +51391,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Каждая игра — по классу ребёнка"
+          }
+        }
+      }
+    },
+    "כל משפחה מקבלת את טופי+ במתנה ל-30 יום, מהרגע שהיא נפתחת — בלי כרטיס אשראי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل عائلة تحصل على Tofy+ هدية لمدة 30 يومًا منذ لحظة إنشائها — دون بطاقة ائتمان"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every family gets Tofy+ as a gift for 30 days from the moment it is created — no credit card"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждая семья получает Tofy+ в подарок на 30 дней с момента создания — без карты"
           }
         }
       }
@@ -78539,6 +78715,28 @@
         }
       }
     },
+    "קוד לזמן מסך, ומחיקה פשוטה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رمز لمدة استخدام الجهاز، وحذف بسيط"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Screen Time passcode, and simple deletion"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код «Экранного времени» и простое удаление"
+          }
+        }
+      }
+    },
     "קודם המסך הזה הראה את כל מה שנוסף אי פעם, בכל פעם מחדש. עכשיו הוא מראה רק את מה שהגיע מאז העדכון האחרון שראיתם" : {
       "localizations" : {
         "ar" : {
@@ -78623,6 +78821,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Тексты на понимание прочитанного для всех классов, по школьной программе — и с гораздо меньшим числом повторов"
+          }
+        }
+      }
+    },
+    "קיבלתם את טופי+ במתנה!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حصلتم على Tofy+ هدية!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy+ is yours, as a gift!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy+ — вам в подарок!"
           }
         }
       }
