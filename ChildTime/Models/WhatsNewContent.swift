@@ -55,6 +55,18 @@ enum WhatsNewContent {
     /// notes were dated — the first release, as one entry.
     static let releases: [Release] = [
 
+        Release(build: 198, version: "2026.10.5", headline: tr("פרס בכל סוף סיבוב, וזמן מדויק לשנייה"), items: [
+            Item(emoji: "🏅", title: tr("פרס בכל סוף סיבוב"),
+                 line: tr("בסוף כל סיבוב רואים כוכבים, יהלומים וכמה זמן מסך הרווחתם — וגם סיבוב פחות מוצלח נגמר בפרס"),
+                 key: "roundReward"),
+            Item(emoji: "⏱", title: tr("זמן מדויק לשנייה"),
+                 line: tr("הזמן שהילד הרוויח מוצג בדיוק כמו זמן מתנה — בלי עיגול שמעלים שניות"),
+                 key: "exactTime"),
+            Item(emoji: "🎁", title: tr("מתנה קטנה נפתחת"),
+                 line: tr("גם שארית של פחות מדקה שנתתם במתנה נפתחת עכשיו, במקום להיתקע"),
+                 key: "smallGift"),
+        ]),
+
         Release(build: 197, version: "2026.10.4", headline: tr("התחלה פשוטה ב-4 צעדים"), items: [
             Item(emoji: "🧭", title: tr("התחלה פשוטה ב-4 צעדים"),
                  line: tr("משפחה, ילד, מכשיר ונעילה — עם פס התקדמות למעלה, ובטלפון של הילד אישור זמן מסך כבר בהתחלה"),

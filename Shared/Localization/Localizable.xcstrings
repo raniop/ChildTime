@@ -23340,6 +23340,28 @@
         }
       }
     },
+    "בסוף כל סיבוב רואים כוכבים, יהלומים וכמה זמן מסך הרווחתם — וגם סיבוב פחות מוצלח נגמר בפרס" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل جولة تنتهي بنجوم وألماسات ووقت الشاشة الذي ربحتموه — وحتى الجولة الأقل نجاحًا تنتهي بمكافأة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every round ends with stars, diamonds and the screen time you earned — even a round that did not go well ends with a reward"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждый раунд заканчивается звёздами, алмазами и заработанным экранным временем — даже не самый удачный раунд приносит награду"
+          }
+        }
+      }
+    },
     "בעברית הרמה עולה חזק עם הגיל. באנגלית, שהיא שפה שנייה, היא נשארת נגישה" : {
       "localizations" : {
         "ar" : {
@@ -24810,6 +24832,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "В играх тоже зарабатывают минуты"
+          }
+        }
+      }
+    },
+    "גם שארית של פחות מדקה שנתתם במתנה נפתחת עכשיו, במקום להיתקע" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الهدية التي تقل عن دقيقة تُفتح الآن بدل أن تعلق"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A gift of less than a minute now opens instead of getting stuck"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подарок меньше минуты теперь открывается, а не застревает"
           }
         }
       }
@@ -35958,6 +36002,28 @@
         }
       }
     },
+    "הזמן שהילד הרוויח מוצג בדיוק כמו זמן מתנה — בלי עיגול שמעלים שניות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوقت الذي ربحه الطفل يظهر تمامًا مثل الوقت الممنوح — بلا تقريب يُخفي الثواني"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time your child earned is shown exactly like gift time — no rounding that hides seconds"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заработанное ребёнком время показывается так же точно, как подаренное — без округления, которое скрывает секунды"
+          }
+        }
+      }
+    },
     "החודש" : {
       "localizations" : {
         "ar" : {
@@ -40617,6 +40683,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Игровое время перешло на другое устройство"
+          }
+        }
+      }
+    },
+    "זמן מדויק לשנייה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت دقيق بالثانية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time to the second"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Время с точностью до секунды"
           }
         }
       }
@@ -65142,6 +65230,28 @@
         }
       }
     },
+    "מתנה קטנה נפתחת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الهدية الصغيرة تُفتح أيضًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A small gift opens too"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Небольшой подарок тоже открывается"
+          }
+        }
+      }
+    },
     "מתנה ראשונה מגיעה מיד" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -77158,6 +77268,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Приватность и данные"
+          }
+        }
+      }
+    },
+    "פרס בכל סוף סיבוב" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مكافأة في نهاية كل جولة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A reward every round"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Награда за каждый раунд"
+          }
+        }
+      }
+    },
+    "פרס בכל סוף סיבוב, וזמן מדויק לשנייה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مكافأة في نهاية كل جولة، ووقت دقيق بالثانية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A reward every round, and time to the second"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Награда за каждый раунд и точное время до секунды"
           }
         }
       }
