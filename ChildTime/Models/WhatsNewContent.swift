@@ -55,9 +55,9 @@ enum WhatsNewContent {
     /// notes were dated — the first release, as one entry.
     static let releases: [Release] = [
 
-        Release(build: 191, version: "2026.10.3", headline: tr("נעילה שבאמת נועלת — ממקום אחד"), items: [
+        Release(build: 192, version: "2026.10.3", headline: tr("נעילה שבאמת נועלת — ממקום אחד"), items: [
             Item(emoji: "🔒", title: tr("נעילה שבאמת נועלת"),
-                 line: tr("בוחרים פעם אחת מה נשאר פתוח, וכל השאר ננעל עד שמרוויחים זמן — גם אפליקציה שהילד יתקין מחר"),
+                 line: tr("מהרגע שמאשרים זמן מסך בטלפון של הילד, הכל נעול חוץ מטופי עד שמרוויחים זמן — גם אפליקציה שיתקין מחר. בלי לבחור או לסמן כלום"),
                  key: "lock"),
             Item(emoji: "📱", title: tr("מקום אחד במכשיר הילד"),
                  line: tr("ארבע רשימות הפכו לכפתור אחד: מה נשאר פתוח. ולידו פתיחה זמנית של אפליקציה לזמן קצוב"),

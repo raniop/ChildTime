@@ -42275,24 +42275,24 @@
         }
       }
     },
-    "טופי · טלפון · מצלמה" : {
+    "טופי · טלפון" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tofy · الهاتف · الكاميرا"
+            "value" : "Tofy · الهاتف"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tofy · Phone · Camera"
+            "value" : "Tofy · Phone"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tofy · Телефон · Камера"
+            "value" : "Tofy · Телефон"
           }
         }
       }
@@ -59374,6 +59374,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Что открыто и что заблокировано — в одном месте"
+          }
+        }
+      }
+    },
+    "מהרגע שמאשרים זמן מסך בטלפון של הילד, הכל נעול חוץ מטופי עד שמרוויחים זמן — גם אפליקציה שיתקין מחר. בלי לבחור או לסמן כלום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "منذ لحظة الموافقة على «مدة استخدام الجهاز» في هاتف الطفل، كل شيء ما عدا Tofy مقفل حتى يُكسَب الوقت — حتى تطبيق يثبّته غدًا. دون اختيار أو تحديد أي شيء"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From the moment Screen Time is approved on your child's phone, everything except Tofy is locked until time is earned — even an app they install tomorrow. Nothing to choose or tick"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Как только на телефоне ребёнка разрешено «Экранное время», всё, кроме Tofy, заблокировано, пока не заработано время, — даже приложение, которое он установит завтра. Ничего не нужно выбирать"
           }
         }
       }

@@ -39,7 +39,7 @@ enum WhatsNewStories {
     /// "בָּא לָךְ", so a brother and a sister on one iPad must not share a cache
     /// entry the way two screens in one language can.
     static var byBuild: [Int: [StoryItem]] {
-        LocalizedCache.value("whatsNewStories.byBuild." + (Gendered.isGirl ? "f" : "m")) { [191: build187] }
+        LocalizedCache.value("whatsNewStories.byBuild." + (Gendered.isGirl ? "f" : "m")) { [192: build187] }
     }
 
     /// 🎮 Build 187 — the twelve mini-games, the chooser in front of them, the
@@ -91,13 +91,13 @@ enum WhatsNewStories {
         items.append(StoryItem(
             id: "191.lock.parent",
             art: .rows([
-                StoryRow(label: tr("פתוחות תמיד"), value: tr("טופי · טלפון · מצלמה")),
+                StoryRow(label: tr("פתוחות תמיד"), value: tr("טופי · טלפון")),
                 StoryRow(label: tr("כל השאר"), value: tr("נעול")),
                 StoryRow(label: tr("אפליקציה חדשה"), value: tr("נעולה גם היא")),
             ]),
             kicker: tr("נעילה"),
             title: tr("מה פתוח ומה נעול — במקום אחד"),
-            line: tr("בוחרים פעם אחת מה נשאר פתוח, וכל השאר ננעל עד שמרוויחים זמן — גם אפליקציה שהילד יתקין מחר"),
+            line: tr("מהרגע שמאשרים זמן מסך בטלפון של הילד, הכל נעול חוץ מטופי עד שמרוויחים זמן — גם אפליקציה שיתקין מחר. בלי לבחור או לסמן כלום"),
             audience: .parent,
             seconds: 7,
             priority: 2))
