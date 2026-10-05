@@ -182,7 +182,15 @@ struct ProfileEditorView: View {
                     }
                 }
             }
-            .onAppear { hydrateFromMode() }
+            .onAppear {
+                hydrateFromMode()
+                #if DEBUG
+                // 🧪 DEMO_CHILD_NAME — the simulator cannot always type Hebrew into
+                // a field from outside, so an onboarding walk-through names the
+                // new child this way (create mode only, Debug builds only).
+                if name.isEmpty, let n = ProcessInfo.processInfo.environment["DEMO_CHILD_NAME"] { name = n }
+                #endif
+            }
         }
     }
 

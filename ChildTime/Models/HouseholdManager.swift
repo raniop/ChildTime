@@ -229,7 +229,10 @@ final class HouseholdManager: ObservableObject {
             //  • real account + a pending EMAIL INVITE → "המשפחה מחכה לך" screen.
             //  • real account, nothing found → explicit new-vs-join choice screen.
             //  • anonymous (child device / pre-signup) → nothing, joins later.
-            let realAccount = (email?.isEmpty == false) || (displayName?.isEmpty == false)
+            var realAccount = (email?.isEmpty == false) || (displayName?.isEmpty == false)
+            #if DEBUG
+            if AuthManager.testNewParent { realAccount = true }   // 🧪 see AuthManager.testNewParent
+            #endif
             if let hh = try await ensureHousehold(uid: uid, canCreate: false) {
                 TofyLink("bootstrap: household \(hh.id.prefix(8)) loaded — pin=\(hh.parentPinHash != nil) kids=\(hh.childIDs.count)")
                 finishBootstrap(hh)

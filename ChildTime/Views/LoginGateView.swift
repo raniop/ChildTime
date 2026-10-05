@@ -34,6 +34,9 @@ struct LoginGateView: View {
         ZStack {
             // Magical background
             AppGradient.dreamy.ignoresSafeArea()
+                #if DEBUG
+                .task { if AuthManager.testNewParent { auth.signInAnonymouslyIfNeeded() } }
+                #endif
             FloatingOrbs(
                 colors: [AppColor.starGold, AppColor.companionGlow,
                          AppColor.gemPurple, AppColor.dreamyTeal],

@@ -126,7 +126,22 @@ final class AuthManager: ObservableObject {
     /// session. Anonymous sign-in sets userID but leaves `provider` nil, so an
     /// anonymous session used to pass `isSignedIn` and strand a would-be parent
     /// on the endless "loading family" screen with no way to actually log in.
-    var isRealAccount: Bool { userID != nil && provider != nil }
+    var isRealAccount: Bool {
+        #if DEBUG
+        if Self.testNewParent { return userID != nil }
+        #endif
+        return userID != nil && provider != nil
+    }
+
+    #if DEBUG
+    /// 🧪 DEMO_NEWPARENT=1 (Debug builds only): a brand-new parent who has just
+    /// signed up — without typing an email and password into the real backend.
+    /// The login gate signs in anonymously and counts that as the account, so
+    /// everything AFTER sign-up (consent, a new family, the first child, the
+    /// device, the first minutes) runs for real. Used to walk the onboarding
+    /// end to end on a fresh simulator.
+    static let testNewParent = ProcessInfo.processInfo.environment["DEMO_NEWPARENT"] == "1"
+    #endif
 
     /// Apple sign-in nonce (used to verify the ID token).
     private var currentNonce: String?
