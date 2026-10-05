@@ -1,8 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- 🛡 Child-device guard (kid/enforce): usage access is the guard's fallback
+         for "which app is in front" right after it (re)connects. Granted by a
+         parent in Settings → Usage access; never requested from a child. -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- kid/enforce/AllowList: the launcher(s), Settings, the uninstall dialog,
+         keyboards, and the launchable apps for "what stays open" (no QUERY_ALL_PACKAGES). -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.HOME" />
+        </intent>
+        <intent><action android:name="android.settings.SETTINGS" /></intent>
+        <intent><action android:name="android.settings.ACCESSIBILITY_SETTINGS" /></intent>
+        <intent><action android:name="android.settings.USAGE_ACCESS_SETTINGS" /></intent>
+        <intent>
+            <action android:name="android.intent.action.DELETE" />
+            <data android:scheme="package" />
+        </intent>
+        <intent><action android:name="android.view.InputMethod" /></intent>
+    </queries>
 
     <application
         android:name=".TofyApp"
@@ -26,5 +54,20 @@
         </service>
         <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="family" />
         <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/ic_notification" />
+        <!-- 🛡 Tofy's guard on a child device (kid/enforce/TofyGuardService):
+             locks other apps until the child earns time. Window changes only;
+             never reads screen content. -->
+        <service
+            android:name=".kid.enforce.TofyGuardService"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/tofy_guard_service" />
+        </service>
     </application>
 </manifest>

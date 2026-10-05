@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tofy_guard_summary">Locks other apps until your child earns time in Tofy</string>
+    <string name="tofy_guard_description">Tofy uses this service only to know which app is opening on your child\'s device. If no screen time is open right now and the app isn\'t on the \"what stays open\" list, Tofy shows its lock screen over it. Tofy doesn\'t read what\'s on the screen, doesn\'t see messages or passwords, never types or taps for you, and the app\'s name is not stored or sent anywhere. Parents are only told whether the lock is on or was turned off. A parent can turn this service off at any time here, in Accessibility settings.</string>
+</resources>

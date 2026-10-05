@@ -14348,6 +14348,28 @@
         }
       }
     },
+    "אַבָּא אוֹ אִמָּא יְכוֹלִים לִפְתּוֹחַ אוֹתָן מִטּוֹפִי, עִם קוֹד הַהוֹרֶה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمكن لأمك أو أبيك فتحها من Tofy برمز الوالدين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mom or Dad can open them from Tofy with the parent code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мама или папа могут открыть их из Tofy с родительским кодом"
+          }
+        }
+      }
+    },
     "אַבָּא אוֹ אִמָּא יוֹרִידוּ תְּשׁוּבָה אַחַת לֹא נְכוֹנָה — וְאַתְּ עוֹנָה 😉" : {
       "localizations" : {
         "ar" : {
@@ -18249,6 +18271,28 @@
         }
       }
     },
+    "אפשר לכבות את זה בכל רגע בהגדרות ← נגישות ← טופי. הגדרות המכשיר נפתחות לילד רק עם קוד ההורה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمكن إيقاف ذلك في أي وقت من الإعدادات ← إمكانية الوصول ← Tofy. على جهاز الطفل تُفتح الإعدادات برمز الوالدين فقط."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can turn this off at any time in Settings → Accessibility → Tofy. On the child's device, Settings opens only with the parent code."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это можно выключить в любой момент: Настройки → Специальные возможности → Tofy. На устройстве ребёнка настройки открываются только с родительским кодом."
+          }
+        }
+      }
+    },
     "אפשר לסגור — אם האישור יגיע אחר כך, תקבלו התראה ברגע שהמכשיר יינעל." : {
       "localizations" : {
         "ar" : {
@@ -19425,6 +19469,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Текстовые задачи в два шага"
+          }
+        }
+      }
+    },
+    "בְּקָרוֹב בְּאַנְדְּרוֹאִיד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قريبًا على أندرويد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coming soon on Android"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скоро на Android"
           }
         }
       }
@@ -22414,6 +22480,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "В детском саду игры — это картинки, цвета и количества, а правило проговаривается вслух, а не пишется"
+          }
+        }
+      }
+    },
+    "בהגדרות שייפתחו: מקישים על ״טופי״ ומפעילים את הגישה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الإعدادات التي ستُفتح: انقروا على «Tofy» واسمحوا بالوصول"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In the settings that open: tap \"Tofy\" and allow access"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В открывшихся настройках нажмите «Tofy» и разрешите доступ"
           }
         }
       }
@@ -28020,7 +28108,26 @@
       }
     },
     "הִרְוַחְתְּ אוֹתָן — הֵן מְחַכּוֹת בְּטוֹפִי" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ربحتِها — وهي بانتظارك في Tofy"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You earned them — they're waiting in Tofy"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ты заработала их — они ждут в Tofy"
+          }
+        }
+      }
     },
     "הִרְוַחְתָּ" : {
       "localizations" : {
@@ -29454,6 +29561,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Настройки мамы и папы — открываются только с кодом."
+          }
+        }
+      }
+    },
+    "הַהַגְדָּרוֹת שֶׁל הַמַּכְשִׁיר שְׁמוּרוֹת לַהוֹרִים 🔐" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إعدادات الجهاز للوالدين فقط 🔐"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Device settings are just for parents 🔐"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройки устройства — только для родителей 🔐"
           }
         }
       }
@@ -35278,6 +35407,28 @@
         }
       }
     },
+    "הגדרות המכשיר נעולות לילד, כדי שלא יוכל לכבות את טופי. צריכים אותן? פותחים לכמה דקות:" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إعدادات الجهاز مقفلة أمام الطفل كي لا يُوقَف Tofy. تحتاجونها؟ افتحوها لبضع دقائق:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Device settings are locked for the child so Tofy can't be turned off. Need them? Open them for a few minutes:"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройки устройства заблокированы для ребёнка, чтобы Tofy нельзя было выключить. Нужны они вам? Откройте на несколько минут:"
+          }
+        }
+      }
+    },
     "הגדרתם בטעות את האייפד של הילד כמכשיר הורה? בהגדרות יש עכשיו \"להפוך את האייפד הזה למכשיר של ילד\" — בלחיצה אחת, בלי למחוק כלום. והתקנה חדשה באייפד ממליצה מראש על מכשיר ילד" : {
       "localizations" : {
         "ar" : {
@@ -35342,6 +35493,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Достигла"
+          }
+        }
+      }
+    },
+    "הגישה לנתוני שימוש כבויה — מומלץ להפעיל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوصول إلى بيانات الاستخدام متوقف — يُنصح بتفعيله"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usage access is off — turning it on is recommended"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доступ к истории использования выключен — рекомендуем включить"
           }
         }
       }
@@ -37925,6 +38098,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вот что мы добавили в последнем обновлении"
+          }
+        }
+      }
+    },
+    "הנעילה כבויה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "القفل متوقف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The lock is off"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Блокировка выключена"
+          }
+        }
+      }
+    },
+    "הנעילה עוד לא פועלת — פתחו שוב את ההגדרות והפעילו את טופי." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "القفل لا يعمل بعد — افتحوا الإعدادات مرة أخرى وشغّلوا Tofy."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The lock isn't on yet — open the settings again and turn on Tofy."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Блокировка ещё не работает — снова откройте настройки и включите Tofy."
           }
         }
       }
@@ -43858,6 +44075,28 @@
         }
       }
     },
+    "חוזרים לכאן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عودوا إلى هنا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Come back here"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вернитесь сюда"
+          }
+        }
+      }
+    },
     "חושב" : {
       "localizations" : {
         "ar" : {
@@ -45629,6 +45868,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tofy+ активен"
+          }
+        }
+      }
+    },
+    "טופי, הטלפון ומסך הבית תמיד פתוחים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy والهاتف والشاشة الرئيسية مفتوحة دائمًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy, the phone and the home screen are always open"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy, телефон и главный экран открыты всегда"
           }
         }
       }
@@ -47591,6 +47852,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Слишком много попыток — подождите минуту и попробуйте снова"
+          }
+        }
+      }
+    },
+    "ייפתחו הגדרות הנגישות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ستُفتح إعدادات إمكانية الوصول"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessibility settings will open"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Откроются настройки специальных возможностей"
           }
         }
       }
@@ -52086,6 +52369,28 @@
         }
       }
     },
+    "כדי לנעול את שאר האפליקציות עד שהילד מרוויח זמן, טופי משתמש בשירות הנגישות של אנדרואיד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لقفل التطبيقات الأخرى حتى يكسب طفلك وقتًا، يستخدم Tofy خدمة إمكانية الوصول في أندرويد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To lock the other apps until your child earns time, Tofy uses Android's Accessibility service."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чтобы блокировать другие приложения, пока ребёнок не заработает время, Tofy использует службу специальных возможностей Android."
+          }
+        }
+      }
+    },
     "כוכבים (דירוג)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -52557,6 +52862,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Все приложения на этом устройстве будут заблокированы, пока ребёнок не заработает время в Tofy, — включая приложение, установленное завтра. Выберите здесь, что остаётся открытым всегда: саму Tofy, а также телефон, сообщения, камеру и часы. Это можно изменить в любое время."
+          }
+        }
+      }
+    },
+    "כל האפליקציות במכשיר הזה יהיו נעולות עד שהילד מרוויח זמן מסך בטופי — גם אפליקציה שתותקן מחר. טופי, הטלפון ומסך הבית תמיד פתוחים. בחרו כאן מה עוד נשאר פתוח, למשל הודעות, מצלמה ושעון. אפשר לשנות בכל עת." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ستكون كل التطبيقات على هذا الجهاز مقفلة حتى يكسب طفلك وقت شاشة في Tofy — حتى تطبيق يُثبَّت غدًا. Tofy والهاتف والشاشة الرئيسية مفتوحة دائمًا. اختاروا هنا ما يبقى مفتوحًا أيضًا، مثل الرسائل والكاميرا والساعة. يمكن التغيير في أي وقت."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All apps on this device will be locked until your child earns screen time in Tofy — even an app installed tomorrow. Tofy, the phone and the home screen are always open. Choose here what else stays open, like messages, camera and clock. You can change it any time."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все приложения на этом устройстве будут заблокированы, пока ребёнок не заработает экранное время в Tofy, — даже приложение, установленное завтра. Tofy, телефон и главный экран открыты всегда. Выберите здесь, что ещё остаётся открытым, например сообщения, камеру и часы. Это можно изменить в любой момент."
           }
         }
       }
@@ -56564,6 +56891,28 @@
         }
       }
     },
+    "לא קורא את מה שכתוב על המסך, לא רואה הודעות או סיסמאות, ולא מקליד או לוחץ במקומכם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يقرأ محتوى الشاشة، ولا يرى الرسائل أو كلمات المرور، ولا يكتب أو ينقر نيابةً عنك"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doesn't read what's on the screen, doesn't see messages or passwords, and never types or taps for you"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не читает содержимое экрана, не видит сообщения и пароли и ничего не вводит и не нажимает за вас"
+          }
+        }
+      }
+    },
     "לא רוצים מנוי קבוע? כל עולם בסיסי נפתח לילד אחד ל־30 יום בתשלום חד־פעמי, בלי חידוש אוטומטי. במסך ההורים יש מדף \"העולמות של טופי\", ובכל עמוד עולם שתי דרכים: רק העולם הזה, או טופי+ לכל המשפחה. 3 ימים לפני הסיום תקבלו תזכורת, וההתקדמות של הילד נשמרת" : {
       "localizations" : {
         "ar" : {
@@ -56582,6 +56931,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Не хотите постоянную подписку? Любой базовый мир открывается для одного ребёнка на 30 дней за разовую оплату, без автопродления. На экране родителя есть полка «Миры Tofy», а на странице каждого мира — два пути: только этот мир или Tofy+ для всей семьи. За 3 дня до окончания вы получите напоминание, а прогресс ребёнка сохраняется"
+          }
+        }
+      }
+    },
+    "לא שומר ולא שולח לאף אחד את שמות האפליקציות — ההחלטה נעשית במכשיר עצמו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يحفظ أسماء التطبيقات ولا يرسلها إلى أحد — القرار يُتخذ على الجهاز نفسه"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doesn't store app names or send them to anyone — the decision is made on the device itself"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не сохраняет названия приложений и никому их не отправляет — решение принимается на самом устройстве"
           }
         }
       }
@@ -56846,6 +57217,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вынести мусор"
+          }
+        }
+      }
+    },
+    "להורים מדווחים רק אם הנעילה פועלת או כובתה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يُبلَّغ الوالدان فقط إن كان القفل يعمل أو تم إيقافه"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parents are only told whether the lock is on or was turned off"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Родителям сообщается только, работает ли блокировка или её выключили"
           }
         }
       }
@@ -58034,6 +58427,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Убрать свою тарелку со стола"
+          }
+        }
+      }
+    },
+    "לפני שמפעילים את הנעילה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قبل تشغيل القفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before turning on the lock"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перед включением блокировки"
           }
         }
       }
@@ -63437,6 +63852,28 @@
         }
       }
     },
+    "מאשרים וממשיכים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "موافقة ومتابعة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agree and continue"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Согласиться и продолжить"
+          }
+        }
+      }
+    },
     "מאשרים זמן מסך" : {
       "localizations" : {
         "ar" : {
@@ -63787,6 +64224,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Что нового в Tofy?"
+          }
+        }
+      }
+    },
+    "מה טופי לא עושה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما الذي لا يفعله Tofy"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What Tofy doesn't do"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чего Tofy не делает"
+          }
+        }
+      }
+    },
+    "מה טופי עושה עם זה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما الذي يفعله Tofy بها"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What Tofy does with it"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что Tofy с этим делает"
           }
         }
       }
@@ -65465,6 +65946,50 @@
         }
       }
     },
+    "מפעילים את המתג ומאשרים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شغّلوا المفتاح وأكّدوا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on the switch and confirm"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включите переключатель и подтвердите"
+          }
+        }
+      }
+    },
+    "מפעילים את הנעילה של טופי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شغّلوا قفل Tofy"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on Tofy's lock"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включите блокировку Tofy"
+          }
+        }
+      }
+    },
     "מפצחים" : {
       "localizations" : {
         "ar" : {
@@ -65619,6 +66144,28 @@
         }
       }
     },
+    "מציג את מסך הנעילה של טופי מעל אפליקציה נעולה, ומחזיר למסך הבית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يعرض شاشة قفل Tofy فوق التطبيق المقفل ويعود إلى الشاشة الرئيسية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows Tofy's lock screen over a locked app and goes back to the home screen"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показывает экран блокировки Tofy поверх заблокированного приложения и возвращает на главный экран"
+          }
+        }
+      }
+    },
     "מקום אחד במכשיר הילד" : {
       "localizations" : {
         "ar" : {
@@ -65637,6 +66184,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Одно место на устройстве ребёнка"
+          }
+        }
+      }
+    },
+    "מקישים על ״טופי״ (לפעמים תחת ״אפליקציות שהורדו״ או ״אפליקציות מותקנות״)" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انقروا على «Tofy» (أحيانًا ضمن «التطبيقات التي تم تنزيلها» أو «التطبيقات المثبتة»)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap \"Tofy\" (sometimes under \"Downloaded apps\" or \"Installed apps\")"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите «Tofy» (иногда в разделе «Скачанные приложения» или «Установленные приложения»)"
           }
         }
       }
@@ -69312,6 +69881,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "App locking"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Блокировка приложений"
+          }
+        }
+      }
+    },
+    "נעילת האפליקציות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قفل التطبيقات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App lock"
           }
         },
         "ru" : {
@@ -74904,6 +75495,28 @@
         }
       }
     },
+    "עוד הרשאה אחת (מומלץ)" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إذن واحد آخر (موصى به)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One more permission (recommended)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё одно разрешение (рекомендуется)"
+          }
+        }
+      }
+    },
     "עוד לא הושלמה" : {
       "localizations" : {
         "ar" : {
@@ -78609,6 +79222,72 @@
         }
       }
     },
+    "פתיחת הגדרות המכשיר ל-10 דקות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فتح إعدادات الجهاز لمدة 10 دقائق"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open device settings for 10 minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть настройки устройства на 10 минут"
+          }
+        }
+      }
+    },
+    "פתיחת הגדרות הנגישות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فتح إعدادات إمكانية الوصول"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Accessibility settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть специальные возможности"
+          }
+        }
+      }
+    },
+    "פתיחת ההגדרות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فتح الإعدادات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть настройки"
+          }
+        }
+      }
+    },
     "פתרו חידה או משחק חשיבה אחד ביחד היום." : {
       "localizations" : {
         "ar" : {
@@ -81965,6 +82644,28 @@
         }
       }
     },
+    "רְכִישַׁת יַהֲלוֹמִים תַּגִּיעַ לְאַנְדְּרוֹאִיד בְּקָרוֹב. עַד אָז מַרְוִיחִים יַהֲלוֹמִים בִּלְמִידָה 💎" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شراء الألماس سيصل إلى أندرويد قريبًا. حتى ذلك الحين يُكسب الألماس بالتعلّم 💎"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buying diamonds is coming to Android soon. Until then, diamonds are earned by learning 💎"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Покупка алмазов скоро появится на Android. А пока алмазы зарабатывают учёбой 💎"
+          }
+        }
+      }
+    },
     "רְמָזִים וְהַקְרָאָה לְמִי שֶׁעוֹד לֹא קוֹרֵא" : {
       "localizations" : {
         "ar" : {
@@ -83444,6 +84145,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Россия"
+          }
+        }
+      }
+    },
+    "רואה רק איזו אפליקציה נפתחת עכשיו — כדי לדעת אם היא פתוחה או נעולה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يرى فقط أي تطبيق يُفتح الآن — ليعرف إن كان مفتوحًا أم مقفلًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sees only which app is opening right now — to know whether it's open or locked"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видит только, какое приложение открывается сейчас, — чтобы понять, открыто оно или заблокировано"
           }
         }
       }
@@ -90030,6 +90753,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Это произойдёт, как только устройство %@ подключится."
+          }
+        }
+      }
+    },
+    "״גישה לנתוני שימוש״ עוזרת לטופי לנעול מיד גם אחרי שהמכשיר נכבה ונדלק. טופי לא שומר ולא שולח את הנתונים האלה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«الوصول إلى بيانات الاستخدام» يساعد Tofy على القفل فورًا حتى بعد إعادة تشغيل الجهاز. لا يحفظ Tofy هذه البيانات ولا يرسلها."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\"Usage access\" helps Tofy lock right away even after the device restarts. Tofy doesn't store or send this data."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Доступ к истории использования» помогает Tofy блокировать сразу, даже после перезагрузки устройства. Tofy не сохраняет и не отправляет эти данные."
           }
         }
       }
