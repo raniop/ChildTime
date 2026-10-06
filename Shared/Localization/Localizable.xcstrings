@@ -1392,16 +1392,6 @@
         }
       }
     },
-    "%@ %@ %@ %@ %@" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ %2$@ %3$@ %4$@ %5$@"
-          }
-        }
-      }
-    },
     "%@ %@ · הַטּוֹב מִ-%lld סִבּוּבִים" : {
       "localizations" : {
         "ar" : {
@@ -1459,6 +1449,7 @@
       }
     },
     "%@ %@ אֶת %@ %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1747,6 +1738,7 @@
       }
     },
     "%@ %@ הוּא הַמָּקוֹם שֶׁ%@ אֵלָיו הֲכִי הַרְבֵּה: %lld שְׁאֵלוֹת." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1988,12 +1980,12 @@
         }
       }
     },
-    "%@ +%lld" : {
+    "%@ +%@" : {
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "%1$@ +%2$lld"
+            "value" : "%1$@ +%2$@"
           }
         }
       }
@@ -2021,6 +2013,7 @@
       }
     },
     "%@ / חודש · מתחדש אוטומטית — ניתן לבטל בכל עת ב-Google Play" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2065,6 +2058,7 @@
       }
     },
     "%@ / שנה · מתחדש אוטומטית — ניתן לבטל בכל עת ב-Google Play" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2351,6 +2345,7 @@
       }
     },
     "%@ · מְחַכָּה לְאִשּׁוּר" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2648,6 +2643,9 @@
         }
       }
     },
+    "%@ דַּקּוֹת" : {
+
+    },
     "%@ הִיא %lld" : {
       "localizations" : {
         "ar" : {
@@ -2737,6 +2735,7 @@
       }
     },
     "%@ הַתְּחוּם הָאָהוּב: %@ · %lld שְׁאֵלוֹת" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -3425,6 +3424,7 @@
       }
     },
     "%@ מְשַׂחֵק עַכְשָׁיו 🎮" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -3447,6 +3447,7 @@
       }
     },
     "%@ מְשַׂחֶקֶת עַכְשָׁיו 🎮" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -3755,6 +3756,7 @@
       }
     },
     "%@ סִיְּמָה מְטַלָּה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -3777,6 +3779,7 @@
       }
     },
     "%@ סִיֵּם מְטַלָּה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -3975,6 +3978,7 @@
       }
     },
     "%@ רוצה טופי+ 👑" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -4019,6 +4023,7 @@
       }
     },
     "%@ רוצים טופי+ 👑" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -4462,6 +4467,16 @@
     "%lld" : {
 
     },
+    "%lld · %@" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld · %2$@"
+          }
+        }
+      }
+    },
     "%lld אַפְּלִיקַצְיוֹת + טוֹפִי" : {
       "localizations" : {
         "ar" : {
@@ -4545,6 +4560,7 @@
       }
     },
     "%lld אַפְּלִיקַצְיוֹת מוּתָּרוֹת · עֲרִיכָה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "variations" : {
@@ -4627,6 +4643,7 @@
       }
     },
     "%lld אַפְּלִיקַצְיוֹת נִבְחֲרוּ · הַקִּישׁוּ לַעֲרוֹךְ" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "variations" : {
@@ -4709,6 +4726,7 @@
       }
     },
     "%lld אַפְּלִיקַצְיוֹת נִבְחֲרוּ · עֲרִיכָה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "variations" : {
@@ -4791,6 +4809,7 @@
       }
     },
     "%lld אַפְּלִיקַצְיוֹת/קָטֵגוֹרְיוֹת נְעוּלוֹת עַד שֶׁמַּרְוִיחִים זְמַן." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "variations" : {
@@ -4873,6 +4892,7 @@
       }
     },
     "%lld אפליקציות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "variations" : {
@@ -4955,6 +4975,7 @@
       }
     },
     "%lld אפליקציות · %lld קטגוריות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -5141,6 +5162,7 @@
       }
     },
     "%lld אפליקציות נשארות פתוחות · עריכה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "variations" : {
@@ -6679,6 +6701,7 @@
       }
     },
     "%lld יָמִים פְּעִילִים" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "variations" : {
@@ -7642,6 +7665,7 @@
       }
     },
     "%lld מותרות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "variations" : {
@@ -9546,6 +9570,7 @@
       }
     },
     "%lld:%@ דַּקּוֹת" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -11161,6 +11186,7 @@
       }
     },
     "12 משחקים חדשים" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -11249,6 +11275,7 @@
       }
     },
     "1️⃣  הוֹרִידוּ אֶת טוֹפִי בַּמַּכְשִׁיר שֶׁל %@ — מֵה־App Store אוֹ מִ־Google Play" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -11910,6 +11937,9 @@
           }
         }
       }
+    },
+    "9+" : {
+
     },
     "90 כּוֹכָבִים!" : {
       "localizations" : {
@@ -12582,6 +12612,7 @@
       }
     },
     "אֲנַחְנוּ חֲדָשִׁים בְּטוֹפִי" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -12956,6 +12987,7 @@
       }
     },
     "אִם הִגְדַּרְתֶּם אוֹתוֹ בֶּעָבָר בַּטֶּלֶפוֹן הַזֶּה — בְּ\"הגדרות\" ← \"זמן מסך\":" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -12978,6 +13010,7 @@
       }
     },
     "אִם הִגְדַּרְתֶּם אוֹתוֹ בֶּעָבָר בַּטֶּלֶפוֹן הַזֶּה — בְּהַגְדָּרוֹת ← זְמַן מָסָךְ:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -13375,6 +13408,7 @@
       }
     },
     "אֵיךְ נִקְרָא לַמִּשְׁפָּחָה?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -13419,6 +13453,7 @@
       }
     },
     "אֵילוּ אַפְּלִיקַצְיוֹת לִנְעַל?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -13486,6 +13521,7 @@
       }
     },
     "אֵילוּ אַפְּלִיקַצְיוֹת נְעוּלוֹת" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -13929,6 +13965,7 @@
       }
     },
     "אֶבְחַר אַחַר כָּךְ" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14039,6 +14076,7 @@
       }
     },
     "אֶפְשָׁר לְשַׁנּוֹת מְאוּחָר יוֹתֵר בְּהַגְדָּרוֹת." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14261,6 +14299,7 @@
       }
     },
     "אֶקְבַּע אֶת הַשֵּׁם אַחַר כָּךְ" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14322,6 +14361,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Страна иврита"
+          }
+        }
+      }
+    },
+    "אֶת הַמִּשְׁפָּחָה מְנַהֲלִים בְּדֶרֶךְ כְּלָל מֵהַטֶּלֶפוֹן שֶׁלָּכֶם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عادةً تُدار العائلة من هاتف أحد الوالدين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Families usually manage Tofy from a parent's phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Семьёй обычно управляют с телефона родителя"
           }
         }
       }
@@ -14415,6 +14476,7 @@
       }
     },
     "אַבָּא אוֹ אִמָּא יְכוֹלִים לִפְתּוֹחַ אוֹתָן מִטּוֹפִי, עִם קוֹד הַהוֹרֶה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15100,6 +15162,7 @@
       }
     },
     "אַף פַּעַם לֹא נְעוּלוֹת — גַּם אִם הַקָּטֵגוֹרְיָה שֶׁלָּהֶן חֲסוּמָה. שִׁמּוּשִׁי כְּדֵי לְאַפְשֵׁר אַפְּלִיקַצְיָה חֲדָשָׁה לִצְמִיתוּת." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15210,6 +15273,7 @@
       }
     },
     "אַפְּלִיקַצְיוֹת בַּמַּכְשִׁיר" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15298,6 +15362,7 @@
       }
     },
     "אַפְּלִיקַצְיוֹת שֶׁתָּמִיד מוּתָּרוֹת" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15937,6 +16002,7 @@
       }
     },
     "אָסְפוּ בְּדִיּוּק %@!" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -16883,6 +16949,7 @@
       }
     },
     "אותו דבר כמו \"לשחק כאן\" — כשיש כמה ילדים, בוחרים מי משחק." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -17588,6 +17655,7 @@
       }
     },
     "אין — שום נעילה לא תעבוד" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -17720,6 +17788,7 @@
       }
     },
     "אם הילד מתקין אפליקציה חדשה היא לא נעולה. כדי לסגור את זה, בחרו מה נשאר פתוח — וכללו את טופי עצמה." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -18072,6 +18141,7 @@
       }
     },
     "אפליקציות חדשות לא נעולות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -18338,6 +18408,7 @@
       }
     },
     "אפשר לכבות את זה בכל רגע בהגדרות ← נגישות ← טופי. הגדרות המכשיר נפתחות לילד רק עם קוד ההורה." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -18702,6 +18773,7 @@
       }
     },
     "בְּ\"אִשּׁוּר קָבוּעַ\" — רַק מָה שֶׁחַיָּב לִהְיוֹת פָּתוּחַ" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -18746,6 +18818,7 @@
       }
     },
     "בְּ־%lld נִסְיוֹנוֹת" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -18922,6 +18995,7 @@
       }
     },
     "בְּחִירַת אַפְּלִיקַצְיוֹת" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19188,6 +19262,7 @@
       }
     },
     "בְּיוֹם " : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19210,6 +19285,7 @@
       }
     },
     "בְּלִי קוֹד, אֶפְשָׁר לְכַבּוֹת לְטוֹפִי אֶת הַגִּישָׁה בַּהַגְדָּרוֹת — וְהַכֹּל נִפְתָּח." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19276,6 +19352,7 @@
       }
     },
     "בְּמַכְשִׁיר הַהוֹרֶה מוֹפִיעַ קוֹד QR לַיֶּלֶד.\nסִרְקוּ אוֹתוֹ כָּאן וְהַמַּכְשִׁיר יִתְחַבֵּר." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19298,6 +19375,7 @@
       }
     },
     "בְּמַכְשִׁיר יֶלֶד הַמְּחִיקָה חֲסוּמָה. לִמְחִיקָה אֲמִתִּית — פִּתְחוּ חַלּוֹן קָצָר וְהָסִירוּ אֶת טוֹפִי מִמָּסַךְ הַבַּיִת." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19408,6 +19486,7 @@
       }
     },
     "בְּנִסָּיוֹן אֶחָד!" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19540,6 +19619,7 @@
       }
     },
     "בְּקָרוֹב בְּאַנְדְּרוֹאִיד" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -20359,6 +20439,7 @@
       }
     },
     "בַּחֲרוּ אֶת הָאַפְּלִיקַצְיוֹת שֶׁיִּהְיוּ נְעוּלוֹת בַּמַּכְשִׁיר הַזֶּה — עַד שֶׁהַיֶּלֶד מַרְוִיחַ זְמַן מָסָךְ בְּטוֹפִי. אֶפְשָׁר לְשַׁנּוֹת בְּכָל עֵת בְּהַגְדָּרוֹת הוֹרֶה." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -20403,6 +20484,7 @@
       }
     },
     "בַּחֲרוּ אַפְּלִיקַצְיוֹת" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -20557,6 +20639,7 @@
       }
     },
     "בַּחֲרוּ קֻבִּיּוֹת, עַד שֶׁיִּהְיוּ בַּסַּל בְּדִיּוּק %@!" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -21144,6 +21227,7 @@
       }
     },
     "בַּמַּצָּב הַזֶּה הַכֹּל נָעוּל חוּץ מִמָּה שֶׁתִּבְחֲרוּ כָּאן." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -21166,6 +21250,7 @@
       }
     },
     "בַּמָּקוֹם הַנָּכוֹן" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -21565,6 +21650,7 @@
       }
     },
     "בַּקּוֹד, בְּמָקוֹם אַחֵר" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -22551,6 +22637,7 @@
       }
     },
     "בהגדרות שייפתחו: מקישים על ״טופי״ ומפעילים את הגישה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -22727,6 +22814,7 @@
       }
     },
     "בוחרים פעם אחת מה נשאר פתוח, וכל השאר ננעל עד שמרוויחים זמן — גם אפליקציה שהילד יתקין מחר" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -22970,6 +23058,7 @@
       }
     },
     "בחר אפליקציות מותרות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -23058,6 +23147,7 @@
       }
     },
     "בחרתם קטגוריות בלבד, בלי אף אפליקציה. נעילה לפי קטגוריה לא מגיעה לאפליקציות של אפל — ספארי, תמונות, הודעות, מצלמה — ולכן נראה שכלום לא השתנה. פתחו שוב את הרשימה וסמנו אפליקציות, או עדיף: בחרו מה נשאר פתוח." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -23124,6 +23214,7 @@
       }
     },
     "בטלפון של %@: מורידים את טופי מה-App Store או מ-Google Play" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -23146,6 +23237,7 @@
       }
     },
     "בטלפון של %@: פותחים את טופי, ומאשרים \"זמן מסך\" כשהאייפון שואל. מאותו רגע הכל נעול חוץ מטופי." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -23316,6 +23408,7 @@
       }
     },
     "בכפתור \"תנו ל%@ לשחק כאן\" שבכרטיס שלה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -23338,6 +23431,7 @@
       }
     },
     "בכפתור \"תנו ל%@ לשחק כאן\" שבכרטיס שלו" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -23910,6 +24004,7 @@
       }
     },
     "בקשות לאישור" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -24042,6 +24137,7 @@
       }
     },
     "בתום הניסיון: %@ / שנה · מתחדש אוטומטית — ניתן לבטל בכל עת ב-Google Play" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -24086,6 +24182,7 @@
       }
     },
     "בתקופת המתנה %@ שם על %lld שאלות ב־%lld%%. ההתקדמות %@ שמורה." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -24296,6 +24393,7 @@
       }
     },
     "גִּרְרוּ אֶצְבַּע עַל כָּל מִלָּה שֶׁמְּצָאתֶם" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -24862,6 +24960,7 @@
       }
     },
     "גּוֹלְלִים עַד לְמַטָּה ← \"יִשּׁוּמִים עִם גִּישָׁה לִזְמַן מָסָךְ\"" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -24906,6 +25005,7 @@
       }
     },
     "גּוֹלְלִים עַד לְמַטָּה ← \"יישומים עם גישה לזמן מסך\"" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -26585,6 +26685,7 @@
       }
     },
     "דוחות ותובנות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -27810,6 +27911,7 @@
       }
     },
     "הִיא אוֹהֶבֶת" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -27854,6 +27956,7 @@
       }
     },
     "הִיא חוֹזֶרֶת" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -28086,6 +28189,7 @@
       }
     },
     "הִצְטָרְפוּ לַמִּשְׁפָּחָה הַקַּיֶּמֶת — סוֹרְקִים קוֹד מֵהַמַּכְשִׁיר שֶׁלּוֹ" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -28461,6 +28565,7 @@
       }
     },
     "הִתְחַבְּרוּ" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -28638,6 +28743,7 @@
       }
     },
     "הֵבַנְתִּי 👍" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -28705,6 +28811,7 @@
       }
     },
     "הֵיי! בּוֹאוּ נִתְחַבֵּר" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -28771,6 +28878,7 @@
       }
     },
     "הֵם אוֹהֲבִים" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -29265,6 +29373,7 @@
       }
     },
     "הַגְדִּירוּ קוֹד לִזְמַן מָסָךְ" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -29353,6 +29462,7 @@
       }
     },
     "הַגְדָּרוֹת ← זְמַן מָסָךְ" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -29698,6 +29808,7 @@
       }
     },
     "הַהַגְדָּרוֹת שֶׁל הַמַּכְשִׁיר שְׁמוּרוֹת לַהוֹרִים 🔐" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -29853,6 +29964,7 @@
       }
     },
     "הַהוֹרִים עָצְרוּ אֶת זְמַן הַמִּשְׂחָק — הַדַּקּוֹת שֶׁנִּשְׁאֲרוּ שְׁמוּרוֹת 😊" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -29875,6 +29987,7 @@
       }
     },
     "הַהוֹרִים פָּתְחוּ זְמַן מִשְׂחָק 🎉" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -29897,6 +30010,7 @@
       }
     },
     "הַהוֹרֶה הַשֵּׁנִי כְּבָר הִגְדִּיר" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -30007,6 +30121,7 @@
       }
     },
     "הַזְּמַן עָבַר לְמַכְשִׁיר אַחֵר — הַדַּקּוֹת שֶׁנִּשְׁאֲרוּ שְׁמוּרוֹת 😊" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -30790,6 +30905,7 @@
       }
     },
     "הַיֶּלֶד מַרְוִיחַ זְמַן כְּדֵי לִפְתּוֹחַ" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -31566,6 +31682,7 @@
       }
     },
     "הַמְּחִיקָה לֹא הִצְלִיחָה. בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט וְנַסּוּ שׁוּב." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -32074,6 +32191,7 @@
       }
     },
     "הַמַּכְשִׁיר הַזֶּה מְחֻבָּר לְ%@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -32604,6 +32722,7 @@
       }
     },
     "הַמָּסָךְ נִנְעָל עַל טוֹפִי — הַיֶּלֶד לוֹמֵד וּמְשַׂחֵק רַק בְּטוֹפִי. כְּדֵי לָצֵאת: קוֹד הוֹרֶה." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -32780,6 +32899,7 @@
       }
     },
     "הַסְּפָרָה הַשְּׁלִישִׁית" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -32802,6 +32922,7 @@
       }
     },
     "הַסְּפָרָה הַשְּׁנִיָּה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -32824,6 +32945,7 @@
       }
     },
     "הַסְּפָרָה הָרְבִיעִית" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -32846,6 +32968,7 @@
       }
     },
     "הַסְּפָרָה הָרִאשׁוֹנָה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -33796,6 +33919,7 @@
       }
     },
     "הַשְׁאִירוּ %@ אֶת כָּל הָעוֹלָמוֹת פְּתוּחִים" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -33862,6 +33986,7 @@
       }
     },
     "הַשִּׁנּוּי לֹא נִשְׁמַר — אֵין כָּרֶגַע הַרְשָׁאָה לַמִּשְׁפָּחָה הַזּוֹ. נַסּוּ שׁוּב בְּעוֹד רֶגַע." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -33884,6 +34009,7 @@
       }
     },
     "הַשִּׁנּוּי לֹא נִשְׁמַר. בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט וְנַסּוּ שׁוּב." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -33928,6 +34054,7 @@
       }
     },
     "הַשֵּׁם מוֹפִיעַ בַּמָּסָךְ הָרָאשִׁי וּבַהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -34941,6 +35068,7 @@
       }
     },
     "הָרְכִישָׁה דּוֹרֶשֶׁת אִישּׁוּר בְּחֶשְׁבּוֹן Google Play. הַיַּהֲלוֹמִים מְשַׁמְּשִׁים לִקְנִיַּת דְּמוּיוֹת בְּתוֹךְ הָאַפְּלִיקַצְיָה בִּלְבַד." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -34963,6 +35091,7 @@
       }
     },
     "הָרְכִישָׁה הִצְלִיחָה, וַאֲנַחְנוּ עוֹד מְאַמְּתִים אוֹתָהּ מוּל Google Play. הִיא תִּכָּנֵס לְתֹקֶף מֵעַצְמָהּ בְּעוֹד כַּמָּה רְגָעִים." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -35584,6 +35713,7 @@
       }
     },
     "הגדרות המכשיר נעולות לילד, כדי שלא יוכל לכבות את טופי. צריכים אותן? פותחים לכמה דקות:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -35674,6 +35804,7 @@
       }
     },
     "הגישה לנתוני שימוש כבויה — מומלץ להפעיל" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -36400,6 +36531,7 @@
       }
     },
     "הוּא אוֹהֵב" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -36444,6 +36576,7 @@
       }
     },
     "הוּא חוֹזֵר" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -36588,6 +36721,7 @@
       }
     },
     "הוא ענה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -36830,6 +36964,7 @@
       }
     },
     "החילו עכשיו ובדקו" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -36984,6 +37119,7 @@
       }
     },
     "היא ענתה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -37138,6 +37274,7 @@
       }
     },
     "הילד בוחר איך לענות: שאלות רגילות או משחק — והתוכן נשאר אותו תוכן" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -37305,6 +37442,7 @@
       }
     },
     "הילד רואה חברים שהוסיף בקוד, ובטבלה הכללית מופיעים שחקנים אחרים רק באות ראשונה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -37987,6 +38125,7 @@
       }
     },
     "המשפחה, הילדים וההתקדמות שמורים בענן — כשתתחברו שוב, הכול יחזור." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -38301,6 +38440,7 @@
       }
     },
     "הנעילה כבויה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -38323,6 +38463,7 @@
       }
     },
     "הנעילה עוד לא פועלת — פתחו שוב את ההגדרות והפעילו את טופי." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -38675,6 +38816,7 @@
       }
     },
     "הפחתת מאמץ העיניים" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -38984,6 +39126,7 @@
       }
     },
     "הקוד הנוכחי לא נכון" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -39206,6 +39349,7 @@
       }
     },
     "הרכישה נעשית במכשיר של הילד, עם קוד ההורים" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -39250,6 +39394,7 @@
       }
     },
     "הרשאת זמן מסך" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -39800,6 +39945,7 @@
       }
     },
     "התנתקות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -40087,6 +40233,7 @@
       }
     },
     "וְהִנֵּה מַתָּנָה קְטַנָּה בִּשְׁבִילְכֶם" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -41008,6 +41155,50 @@
         }
       }
     },
+    "זֶה הַטַּאבְּלֶט שֶׁל הַיֶּלֶד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا الجهاز اللوحي للطفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is the child's tablet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это планшет ребёнка"
+          }
+        }
+      }
+    },
+    "זֶה הַטַּאבְּלֶט שֶׁלִּי, לְהַמְשִׁיךְ כְּהוֹרֶה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا جهازي — المتابعة كوالد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It's my tablet — continue as a parent"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это мой планшет — продолжить как родитель"
+          }
+        }
+      }
+    },
     "זֶה הַקּוֹד שֶׁלְּךָ 🙂" : {
       "localizations" : {
         "ar" : {
@@ -41383,6 +41574,7 @@
       }
     },
     "זה מה ש-iOS קיבל מאיתנו ברגע זה — לא מה שסומן במסכים למעלה." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -42993,6 +43185,7 @@
       }
     },
     "חַבְּרוּ אֲרִיחִים זֵהִים — וְכָל 5 מַהֲלָכִים שְׁאֵלַת בּוֹנוּס" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -44032,6 +44225,7 @@
       }
     },
     "חברים וטבלת שחקנים" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -44296,6 +44490,7 @@
       }
     },
     "חוזרים לכאן" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -44630,6 +44825,7 @@
       }
     },
     "חסום הכל חוץ מהמותר" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -44652,6 +44848,7 @@
       }
     },
     "חסימת אפליקציות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -44904,6 +45101,7 @@
       }
     },
     "חשוב: סמנו את טופי, ואת מה שחייב לעבוד תמיד — טלפון, הודעות, מצלמה ושעון. בלי טופי ברשימה הילד לא יוכל להרוויח זמן, ולכן עד שתבחרו הנעילה נשארת כמו שהייתה." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -45080,6 +45278,7 @@
       }
     },
     "טִיפּ: הַהוֹרֶה שֶׁכְּבָר בִּפְנִים יָכוֹל לְהַזְמִין אֶתְכֶם בְּאִימֵיל — וְאָז הַמָּסָךְ הַזֶּה נֶעֱלָם לְגַמְרֵי 😊" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -45432,6 +45631,7 @@
       }
     },
     "טוֹפִי מְנַהֵל עַכְשָׁו אֶת הַנְּעִילָה. כְּדֵי שֶׁשּׁוּם דָּבָר לֹא יִתְנַגֵּשׁ, בְּ\"הגדרות\" ← \"זמן מסך\":" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -45454,6 +45654,7 @@
       }
     },
     "טוֹפִי מְנַהֵל עַכְשָׁו אֶת הַנְּעִילָה. כְּדֵי שֶׁשּׁוּם דָּבָר לֹא יִתְנַגֵּשׁ, בְּהַגְדָּרוֹת ← זְמַן מָסָךְ:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -45784,6 +45985,7 @@
       }
     },
     "טופי להורים — עכשיו גם באנדרואיד" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -46093,6 +46295,7 @@
       }
     },
     "טופי, הטלפון ומסך הבית תמיד פתוחים" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -46115,6 +46318,7 @@
       }
     },
     "טלפון + טאבלט, אותה התקדמות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -46313,6 +46517,7 @@
       }
     },
     "יְצִיאָה מִמַּצַּב יֶלֶד" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -47855,6 +48060,7 @@
       }
     },
     "יוֹם פָּעִיל אֶחָד" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -48099,6 +48305,7 @@
       }
     },
     "ייפתחו הגדרות הנגישות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -48518,6 +48725,7 @@
       }
     },
     "יש" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -48827,6 +49035,7 @@
       }
     },
     "כְּדֵי לִסְרֹק צָרִיךְ לְאַשֵּׁר לְטוֹפִי גִּישָׁה לַמַּצְלֵמָה — אוֹ מַקְלִידִים אֶת הַקּוֹד" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -48937,6 +49146,7 @@
       }
     },
     "כְּדַאי לִכְלֹל טֶלֶפוֹן, הוֹדָעוֹת וּמַצְלֵמָה — וְאֶת טוֹפִי עַצְמָהּ." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -49444,6 +49654,7 @@
       }
     },
     "כִּמְעַט! 💪" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -50017,6 +50228,7 @@
       }
     },
     "כַּבּוּ \"זְמַן הַשְׁבָּתָה\" וּ\"מִגְבְּלוֹת יִשּׁוּמִים\"" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -50303,6 +50515,7 @@
       }
     },
     "כַּמָּה עֹדֶף נְקַבֵּל מִ־%@?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -50633,6 +50846,7 @@
       }
     },
     "כָּךְ זֶה נִרְאֶה בְּ\"הגדרות\" ← \"זמן מסך\"" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -50677,6 +50891,7 @@
       }
     },
     "כָּל %1$lld תְּשׁוּבוֹת נְכוֹנוֹת בְּטוֹפִי = %2$@ מִשְׂחָק" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -50832,6 +51047,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "כָּל %lld תְּשׁוּבוֹת נְכוֹנוֹת בְּטוֹפִי = %@ מִשְׂחָק" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "כָּל %1$lld תְּשׁוּבוֹת נְכוֹנוֹת בְּטוֹפִי = %2$@ מִשְׂחָק"
           }
         }
       }
@@ -51234,6 +51459,7 @@
       }
     },
     "כָּל הָעוֹלָמוֹת פְּתוּחִים %@ עַד %@. בְּלִי כַּרְטִיס, לֹא מִתְחַדֵּשׁ. בֵּינְתַיִם תִּרְאוּ מָה %@." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -51278,6 +51504,7 @@
       }
     },
     "כָּל הָעוֹלָמוֹת — כּוֹלֵל כָּל עוֹלָם חָדָשׁ שֶׁנּוֹסִיף — הַמִּשְׂחָקִים וְהַמַּטְלוֹת, לְכָל הַיְלָדִים, בְּכָל הַמַּכְשִׁירִים. קוֹנִים פַּעַם אַחַת, כָּאן." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -51542,6 +51769,7 @@
       }
     },
     "כָּל תְּשׁוּבָה נְכוֹנָה בְּטוֹפִי = %@ מִשְׂחָק" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -52568,6 +52796,7 @@
       }
     },
     "כדי לאשר, הקלידו: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -52612,6 +52841,7 @@
       }
     },
     "כדי לנעול את שאר האפליקציות עד שהילד מרוויח זמן, טופי משתמש בשירות הנגישות של אנדרואיד." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -52679,6 +52909,7 @@
       }
     },
     "כולל אפליקציות חדשות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -53021,6 +53252,7 @@
       }
     },
     "כל אפליקציה נעולה עד שמרוויחים זמן — כולל אפליקציה שתותקן מחר. פתוחות רק אלה שבחרתם." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -53109,6 +53341,7 @@
       }
     },
     "כל האפליקציות במכשיר הזה יהיו נעולות עד שהילד מרוויח זמן מסך בטופי — גם אפליקציה שתותקן מחר. טופי, הטלפון ומסך הבית תמיד פתוחים. בחרו כאן מה עוד נשאר פתוח, למשל הודעות, מצלמה ושעון. אפשר לשנות בכל עת." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -53131,6 +53364,7 @@
       }
     },
     "כל האפליקציות ייחסמו עד שהילד מרוויח זמן — חוץ מהאפליקציות שתבחרו כ\"מותרות\". חובה לכלול את טופי ברשימה." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -54181,6 +54415,7 @@
       }
     },
     "כן, יש לה מכשיר" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -54225,6 +54460,7 @@
       }
     },
     "כן, יש לו מכשיר" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -54577,6 +54813,7 @@
       }
     },
     "לְ%@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -55075,6 +55312,7 @@
       }
     },
     "לְכָל הַמִּשְׁפָּחָה · נִהוּל" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -55405,6 +55643,7 @@
       }
     },
     "לְשַׂחֵק וְלִלְמוֹד · מַתְחִילִים קֹדֶם בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -56275,6 +56514,7 @@
       }
     },
     "לַיְלָדִים" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -56605,6 +56845,7 @@
       }
     },
     "לֹא בַּקּוֹד" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -56913,6 +57154,7 @@
       }
     },
     "לֹא מָצָאנוּ מִנּוּי פָּעִיל בְּחֶשְׁבּוֹן Google Play הַזֶּה." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -57156,6 +57398,7 @@
       }
     },
     "לא קורא את מה שכתוב על המסך, לא רואה הודעות או סיסמאות, ולא מקליד או לוחץ במקומכם" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -57200,6 +57443,7 @@
       }
     },
     "לא שומר ולא שולח לאף אחד את שמות האפליקציות — ההחלטה נעשית במכשיר עצמו" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -57486,6 +57730,7 @@
       }
     },
     "להורים מדווחים רק אם הנעילה פועלת או כובתה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -57574,6 +57819,7 @@
       }
     },
     "להמשיך" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -57706,6 +57952,7 @@
       }
     },
     "להתנתק מהחשבון בטלפון הזה?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -58234,6 +58481,7 @@
       }
     },
     "ללמוד" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -58388,6 +58636,7 @@
       }
     },
     "לנעול אפליקציות חדשות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -58696,6 +58945,7 @@
       }
     },
     "לפני שמפעילים את הנעילה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -58762,6 +59012,7 @@
       }
     },
     "לפתוח עכשיו" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -58916,6 +59167,7 @@
       }
     },
     "מְאַשְּׁרִים מוּל Google Play…" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -59004,6 +59256,7 @@
       }
     },
     "מְבַקֵּשׁ" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -59026,6 +59279,7 @@
       }
     },
     "מְבַקֶּשֶׁת" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -59862,6 +60116,7 @@
       }
     },
     "מְפַצְּחִים קוֹד סוֹדִי" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -60279,6 +60534,28 @@
         }
       }
     },
+    "מִי מִשְׁתַּמֵּשׁ בַּטַּאבְּלֶט הַזֶּה?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "من يستخدم هذا الجهاز اللوحي؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Who uses this tablet?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кто пользуется этим планшетом?"
+          }
+        }
+      }
+    },
     "מִי מִשְׁתַּמֵּשׁ בַּמַּכְשִׁיר הַזֶּה?" : {
       "localizations" : {
         "ar" : {
@@ -60610,6 +60887,7 @@
       }
     },
     "מִלֵּאתֶם אֶת הַסַּל %lld פְּעָמִים!" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -60632,6 +60910,7 @@
       }
     },
     "מִלֵּאתֶם אֶת הַסַּל פַּעַם אַחַת!" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -61705,6 +61984,7 @@
       }
     },
     "מֵאֲחוֹרֵי קוֹד הוֹרֶה · Google Play · הַשְּׁאֵלוֹן נִכְנָס לַיֶּלֶד מִיָּד" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -61727,6 +62007,7 @@
       }
     },
     "מֵאֲחוֹרֵי קוֹד הוֹרֶה · Google Play · הָעוֹלָם נִפְתָּח לַיֶּלֶד מִיָּד · בְּלִי חִדּוּשׁ אוֹטוֹמָטִי" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -61749,6 +62030,7 @@
       }
     },
     "מֵאֲחוֹרֵי קוֹד הוֹרֶה · Google Play · נִפְתָּח לְכָל הַיְלָדִים בְּכָל הַמַּכְשִׁירִים" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -61947,6 +62229,7 @@
       }
     },
     "מֵידָע ←" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -63711,6 +63994,7 @@
       }
     },
     "מָחָר" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -63799,6 +64083,7 @@
       }
     },
     "מָצְאָה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -63865,6 +64150,7 @@
       }
     },
     "מָצָא" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -64128,6 +64414,28 @@
         }
       }
     },
+    "מֻמְלָץ לְטַאבְּלֶט" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مُوصى به للأجهزة اللوحية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recommended for tablets"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Рекомендуется для планшета"
+          }
+        }
+      }
+    },
     "מֻמְלָץ: %@" : {
       "localizations" : {
         "ar" : {
@@ -64227,6 +64535,7 @@
       }
     },
     "מאשרים וממשיכים" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -64603,6 +64912,7 @@
       }
     },
     "מה טופי לא עושה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -64625,6 +64935,7 @@
       }
     },
     "מה טופי עושה עם זה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -64647,6 +64958,7 @@
       }
     },
     "מה נעול בפועל" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -64779,6 +65091,7 @@
       }
     },
     "מוֹסִיפִים רַק חֲבֵרִים שֶׁאַתֶּם מַכִּירִים בֶּאֱמֶת. אַף פַּעַם לֹא מְסַפְּרִים לְמִי שֶׁלֹּא מַכִּירִים כְּתֹבֶת, טֶלֶפוֹן אוֹ שֵׁם בֵּית סֵפֶר. מַשֶּׁהוּ מוּזָר? מְסַפְּרִים לְאַבָּא אוֹ לְאִמָּא." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -65065,6 +65378,7 @@
       }
     },
     "מונע מהילד למחוק אפליקציות (גם את טופי) או לשנות הגדרות בלי קוד ההורה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -65241,6 +65555,7 @@
       }
     },
     "מחיקה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -65660,6 +65975,7 @@
       }
     },
     "מטעמי אבטחה, לפני מחיקת החשבון צריך להתחבר שוב." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -66079,6 +66395,7 @@
       }
     },
     "מנהלים את הילדים, את זמן המסך, את המטלות ואת ההתראות ישירות מטלפון האנדרואיד שלכם." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -66365,6 +66682,7 @@
       }
     },
     "מפעילים את המתג ומאשרים" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -66387,6 +66705,7 @@
       }
     },
     "מפעילים את הנעילה של טופי" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -66475,6 +66794,7 @@
       }
     },
     "מצב ילד" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -66563,6 +66883,7 @@
       }
     },
     "מציג את מסך הנעילה של טופי מעל אפליקציה נעולה, ומחזיר למסך הבית" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -66607,6 +66928,7 @@
       }
     },
     "מקישים על ״טופי״ (לפעמים תחת ״אפליקציות שהורדו״ או ״אפליקציות מותקנות״)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -66673,6 +66995,7 @@
       }
     },
     "מרחק מהמסך" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -66739,6 +67062,7 @@
       }
     },
     "משחק" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -68901,6 +69225,7 @@
       }
     },
     "נַחֲשׁוּ אֶת הַקּוֹד! אַחֲרֵי כָּל נִסָּיוֹן הַצְּבָעִים מְגַלִּים כַּמָּה הִתְקָרַבְתֶּם" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -70112,6 +70437,7 @@
       }
     },
     "נעולה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -70156,6 +70482,7 @@
       }
     },
     "נעולות ברשימה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -70310,6 +70637,7 @@
       }
     },
     "נעילת האפליקציות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -70332,6 +70660,7 @@
       }
     },
     "נעילת האפליקציות, הצלילים והתגמול על תשובות נכונות מוגדרים במכשיר של כל ילד: פותחים שם את טופי ונכנסים להגדרות עם קוד ההורה." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -70421,6 +70750,7 @@
       }
     },
     "נקה בחירה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -70443,6 +70773,7 @@
       }
     },
     "נקה רשימת מותרות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -70575,6 +70906,7 @@
       }
     },
     "נשארות פתוחות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -70597,6 +70929,7 @@
       }
     },
     "נשארת פתוחה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -71537,6 +71870,7 @@
       }
     },
     "סִרְקוּ עִם הַמַּצְלֵמָה שֶׁל הַטֶּלֶפוֹן שֶׁל הַהוֹרֶה כְּדֵי לְהוֹרִיד אֶת טוֹפִי, צְרוּ מִשְׁפָּחָה וְחִזְרוּ לְכָאן" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -71735,6 +72069,7 @@
       }
     },
     "סַךְ הַכֹּל" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -72022,6 +72357,7 @@
       }
     },
     "סגור את הבקשה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -72430,6 +72766,7 @@
       }
     },
     "סיסמה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -72650,6 +72987,7 @@
       }
     },
     "עֲדַיִן לֹא נִבְחֲרוּ אַפְּלִיקַצְיוֹת לִנְעִילָה." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -73170,6 +73508,7 @@
       }
     },
     "עֲרִיכַת הָרְשִׁימָה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -73570,6 +73909,7 @@
       }
     },
     "עָנְתָה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -73636,6 +73976,7 @@
       }
     },
     "עָנָה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -73812,6 +74153,7 @@
       }
     },
     "עדיין לא בחרת אפליקציות לחסום. בלי בחירה - לא יקרה כלום כשהילד פותח את ה-iPad." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -73966,6 +74308,7 @@
       }
     },
     "עוֹד %@ וְנִפְתַּח לָכֶם טוֹפִי+ בְּמַתָּנָה 🎁" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -74182,6 +74525,7 @@
       }
     },
     "עוֹד %lld שְׁאֵלוֹת וְנִפְתַּח לָכֶם טוֹפִי+ בְּמַתָּנָה 🎁" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "variations" : {
@@ -74622,6 +74966,7 @@
       }
     },
     "עוֹד אֵין יְלָדִים" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -74644,6 +74989,7 @@
       }
     },
     "עוֹד אֵין יְלָדִים בַּמִּשְׁפָּחָה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -74710,6 +75056,7 @@
       }
     },
     "עוֹד אֵין לַחֶשְׁבּוֹן הַזֶּה מִשְׁפָּחָה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -74776,6 +75123,7 @@
       }
     },
     "עוֹד אֵין לָכֶם טוֹפִי בַּטֶּלֶפוֹן שֶׁל הַהוֹרֶה?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -75914,6 +76262,7 @@
       }
     },
     "עוד הרשאה אחת (מומלץ)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -76002,6 +76351,7 @@
       }
     },
     "עולם בודד ל־30 יום, או טופי+ לכל המשפחה — מכאן, בטלפון שלכם" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -76157,6 +76507,7 @@
       }
     },
     "עזרה ותמיכה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -76768,6 +77119,7 @@
       }
     },
     "פְּתִיחַת אַפְּלִיקַצְיָה מְסוּיֶּמֶת" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -77435,6 +77787,7 @@
       }
     },
     "פִּתְחוּ לִי %lld דַּקּוֹת לְשַׂחֵק" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "variations" : {
@@ -77900,6 +78253,7 @@
       }
     },
     "פַּצְּחוּ אֶת הַקּוֹד הַסּוֹדִי — 6 נִסְיוֹנוֹת, וּמַפְתְּחוֹת שֶׁפּוֹתְחִים סְפָרוֹת" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -79641,6 +79995,7 @@
       }
     },
     "פתיחת הגדרות המכשיר ל-10 דקות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -79663,6 +80018,7 @@
       }
     },
     "פתיחת הגדרות הנגישות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -79685,6 +80041,7 @@
       }
     },
     "פתיחת ההגדרות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -79861,6 +80218,7 @@
       }
     },
     "צְרוּ אֶת הַמִּשְׁפָּחָה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -79905,6 +80263,7 @@
       }
     },
     "צְרוּ מִשְׁפָּחָה חֲדָשָׁה וְהַתְחִילוּ לְהַגְדִּיר" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -80015,6 +80374,7 @@
       }
     },
     "צֵא מִמַּצַּב יֶלֶד" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -81277,6 +81637,7 @@
       }
     },
     "קִבַּלְתְּ %lld דַּקּוֹת מַתָּנָה מֵהַהוֹרִים 💝" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -81299,6 +81660,7 @@
       }
     },
     "קִבַּלְתָּ %lld דַּקּוֹת מַתָּנָה מֵהַהוֹרִים 💝" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -82821,6 +83183,7 @@
       }
     },
     "קוד נוכחי" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -83063,6 +83426,7 @@
       }
     },
     "רְכִישַׁת יַהֲלוֹמִים תַּגִּיעַ לְאַנְדְּרוֹאִיד בְּקָרוֹב. עַד אָז מַרְוִיחִים יַהֲלוֹמִים בִּלְמִידָה 💎" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -83528,6 +83892,28 @@
         }
       }
     },
+    "רֶגַע, הַטַּאבְּלֶט הַזֶּה שֶׁל מִי?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لحظة — لمن هذا الجهاز اللوحي؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wait — whose tablet is this?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подождите — чей это планшет?"
+          }
+        }
+      }
+    },
     "רֶגַע, הָאִינְטֶרְנֶט קְצָת אִטִּי — נְנַסֶּה שׁוּב? 😊" : {
       "localizations" : {
         "ar" : {
@@ -83750,6 +84136,7 @@
       }
     },
     "רַק אַפְּלִיקַצְיָה אַחַת אוֹ כַּמָּה (לְמָשָׁל יוּטְיוּבּ). הַשְּׁאָר נְעוּלוֹת." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -83882,6 +84269,7 @@
       }
     },
     "רַק שְׁאֵלָה אַחַת כְּדֵי שֶׁנֵּדַע לְאָן לְהַמְשִׁיךְ:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -84347,6 +84735,28 @@
         }
       }
     },
+    "רֹב הַמִּשְׁפָּחוֹת מְנַהֲלוֹת אֶת טוֹפִי מֵהַטֶּלֶפוֹן שֶׁל הַהוֹרֶה, וּמְחַבְּרוֹת אֶת הַטַּאבְּלֶט כְּמַכְשִׁיר שֶׁל הַיֶּלֶד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "معظم العائلات تدير توفي من هاتف أحد الوالدين، وتربط الجهاز اللوحي كجهاز للطفل."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most families run Tofy from a parent's phone and connect the tablet as the child's device."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Большинство семей управляют Тофи с телефона родителя, а планшет подключают как устройство ребёнка."
+          }
+        }
+      }
+    },
     "רֹב הַמִּשְׁפָּחוֹת מְנַהֲלוֹת אֶת טוֹפִי מֵהָאַיְפוֹן שֶׁל הַהוֹרֶה, וּמְחַבְּרוֹת אֶת הָאַיְפֵּד כְּמַכְשִׁיר שֶׁל הַיֶּלֶד." : {
       "localizations" : {
         "ar" : {
@@ -84568,6 +84978,7 @@
       }
     },
     "רואה רק איזו אפליקציה נפתחת עכשיו — כדי לדעת אם היא פתוחה או נעולה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -84612,6 +85023,7 @@
       }
     },
     "רוצה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -85042,6 +85454,7 @@
       }
     },
     "רק האפליקציות שתבחרו ייחסמו. כל השאר נשארות פתוחות." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -85418,6 +85831,7 @@
       }
     },
     "שְׁאֵלוֹן חָדָשׁ · תּוֹסֶפֶת · נִפְתָּח מִכָּאן, בַּטֶּלֶפוֹן שֶׁלָּכֶם" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -89000,6 +89414,7 @@
       }
     },
     "שלה" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -89022,6 +89437,7 @@
       }
     },
     "שלו" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -90764,6 +91180,7 @@
       }
     },
     "תמיד מותרות" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -90918,6 +91335,7 @@
       }
     },
     "תנו לילד לשחק כאן" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -91176,6 +91594,7 @@
       }
     },
     "״גישה לנתוני שימוש״ עוזרת לטופי לנעול מיד גם אחרי שהמכשיר נכבה ונדלק. טופי לא שומר ולא שולח את הנתונים האלה." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -91656,6 +92075,9 @@
         }
       }
     },
+    "●" : {
+
+    },
     "● %@ עַכְשָׁיו" : {
       "localizations" : {
         "ar" : {
@@ -91726,6 +92148,7 @@
 
     },
     "⚙️ הַגְדָּרוֹת שֶׁל %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -91774,6 +92197,7 @@
 
     },
     "⚠️ חשוב: בחרו אילו אפליקציות יישארו פתוחות — והקפידו לכלול את טופי (וכן אפליקציות חיוניות כמו טלפון). עד שתבחרו — לא ייחסם כלום, כדי לא לנעול את המכשיר בטעות." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -91796,6 +92220,7 @@
       }
     },
     "⚠️ עד שתבחרו מה נשאר פתוח, אפליקציה חדשה שהילד מתקין לא תיחסם. בחרו את טופי עצמה ואת מה שחייב לעבוד תמיד — טלפון, הודעות, מצלמה ושעון." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -92246,6 +92671,9 @@
     "✓" : {
 
     },
+    "✓ %@" : {
+
+    },
     "✓ %@ פָּתוּחַ לְ%@ לְ־%@" : {
       "localizations" : {
         "ar" : {
@@ -92688,6 +93116,7 @@
       }
     },
     "❤️ נִרְאֶה שֶׁ%@ %@ מַשֶּׁהוּ שֶׁ%@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -93057,6 +93486,12 @@
         }
       }
     },
+    "🍎" : {
+
+    },
+    "🍏" : {
+
+    },
     "🍕 חִלַּקְנוּ פִּיצָה לְ־%lld חֲלָקִים שָׁוִים וְאָכַלְנוּ %lld. אֵיזֶה שֶׁבֶר אָכַלְנוּ?" : {
       "localizations" : {
         "ar" : {
@@ -93229,6 +93664,7 @@
       }
     },
     "🎁 הַמַּתָּנָה מִסְתַּיֶּמֶת %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -93251,6 +93687,7 @@
       }
     },
     "🎁 טוֹפִי+ בְּמַתָּנָה · עוֹד %lld יָמִים" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "variations" : {
@@ -93369,6 +93806,7 @@
 
     },
     "🎉 %@ כְּבָר %@ עַל %lld שְׁאֵלוֹת" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -94479,9 +94917,6 @@
         }
       }
     },
-    "👋" : {
-
-    },
     "👋 בַּקְּשִׁי עֶזְרָה מ%@" : {
       "localizations" : {
         "ar" : {
@@ -94574,6 +95009,7 @@
       }
     },
     "👑 טוֹפִי+ פָּעִיל" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -95779,6 +96215,7 @@
 
     },
     "📱 חִבּוּר מַכְשִׁיר" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -96033,6 +96470,9 @@
         }
       }
     },
+    "🔊" : {
+
+    },
     "🔐" : {
 
     },
@@ -96058,6 +96498,9 @@
         }
       }
     },
+    "🔑" : {
+
+    },
     "🔑 לַשְּׁאֵלָה הָרִאשׁוֹנָה" : {
       "localizations" : {
         "ar" : {
@@ -96081,6 +96524,7 @@
       }
     },
     "🔑 מַפְתֵּחַ — פּוֹתְחִים סִפְרָה (%lld)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -96125,6 +96569,7 @@
       }
     },
     "🔑 תְּשׁוּבָה נְכוֹנָה פּוֹתַחַת סִפְרָה!" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -96803,6 +97248,7 @@
 
     },
     "🛡️ רֶגַע לִפְנֵי שֶׁמְּשַׂחֲקִים עִם חֲבֵרִים" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -96949,7 +97395,11 @@
         }
       }
     },
+    "🧒" : {
+
+    },
     "🧒 מצב ילד" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

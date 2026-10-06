@@ -33,7 +33,13 @@ fun TofyTheme(content: @Composable () -> Unit) {
         labelLarge = base.labelLarge.r(), labelMedium = base.labelMedium.r(), labelSmall = base.labelSmall.r(),
     )
     val dir = if (I18n.language.rtl) LayoutDirection.Rtl else LayoutDirection.Ltr
-    CompositionLocalProvider(LocalLayoutDirection provides dir) {
+    // Samsung phones often ship with the system font at 1.3–1.5×. iOS Tofy uses
+    // fixed point sizes (no Dynamic Type), so its cards, tiles and buttons are
+    // designed for one size — at 1.5× Hebrew wraps mid-card and fixed-height
+    // buttons clip. Allow a little growth, not a different layout.
+    val d = androidx.compose.ui.platform.LocalDensity.current
+    val capped = androidx.compose.ui.unit.Density(d.density, minOf(d.fontScale, 1.15f))
+    CompositionLocalProvider(LocalLayoutDirection provides dir, androidx.compose.ui.platform.LocalDensity provides capped) {
         MaterialTheme(colorScheme = scheme, typography = type, content = content)
     }
 }

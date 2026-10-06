@@ -62,6 +62,7 @@ import com.rani.tofy.data.SettingsRepository
 import com.rani.tofy.i18n.I18n
 import com.rani.tofy.i18n.tr
 import com.rani.tofy.push.PushRegistrar
+import com.rani.tofy.ui.common.CoachTours
 import com.rani.tofy.ui.common.P
 import com.rani.tofy.ui.theme.GlassBackdrop
 import com.rani.tofy.ui.theme.Ink
@@ -94,6 +95,8 @@ fun SettingsScreen(onBack: () -> Unit) {
     var confirmSignOut by remember { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
     var testPushMessage by remember { mutableStateOf<String?>(null) }
+    // 🧭 ParentSettingsView `tourResetDone`: the home tour's last stop promises this.
+    var tourResetDone by remember { mutableStateOf(false) }
 
     // PushManager.authorized — re-read whenever the parent comes back from the system settings.
     var pushOn by remember { mutableStateOf(NotificationManagerCompat.from(ctx).areNotificationsEnabled()) }
@@ -192,6 +195,14 @@ fun SettingsScreen(onBack: () -> Unit) {
                 item {
                     Section(tr("אוֹדוֹת וּפְרָטִיּוּת")) {
                         SettingsRow("✨", tr("מה חדש בטופי ✨"), chevron = true) { sheet = SettingsSheet.WHATS_NEW }
+                        RowDivider()
+                        // Every tour on this device (the parent's home, and a child's
+                        // home on a shared phone) runs again the next time its screen opens.
+                        SettingsRow(
+                            "👆",
+                            if (tourResetDone) tr("ההדרכה תוצג שוב במסך הבית ✓") else tr("הצגת ההדרכה שוב"),
+                            titleColor = if (tourResetDone) Ink.good else Ink.primary,
+                        ) { if (!tourResetDone) { CoachTours.reset(); tourResetDone = true } }
                         RowDivider()
                         SettingsRow("💬", tr("פִידְבֶּק וְהַצָּעוֹת"), chevron = true) { sheet = SettingsSheet.FEEDBACK }
                         RowDivider()

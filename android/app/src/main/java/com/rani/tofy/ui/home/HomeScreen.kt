@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -25,6 +26,7 @@ import com.rani.tofy.data.Progress
 import com.rani.tofy.i18n.tr
 import com.rani.tofy.ui.common.*
 import com.rani.tofy.ui.theme.*
+import com.rani.tofy.ui.onboarding.ParentOnboarding
 import kotlinx.coroutines.delay
 
 /** ParentDashboardView.swift — the family at a glance. */
@@ -45,33 +47,58 @@ fun HomeScreen(
     var tick by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) { while (true) { delay(1000); tick++ } }
 
-    GlassBackdrop {
-        LazyColumn(
-            Modifier.contentColumn().fillMaxSize().systemBarsPadding(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            item { Header(state, onSettings, onBell, bellBadge) }
-            item { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { banners() } }
-            item {
-                RowSpaced {
-                    GlassButton(tr("＋ צְרוּ יֶלֶד/ה"), Modifier.weight(1f)) { onAddChild() }
-                    GlassButton(tr("🧹 מַטְלוֹת"), Modifier.weight(1f)) { onChores() }
+    // 🧭 The first-run tour (CoachMarks.swift): once per device, button by
+    // button, as soon as the home really has a child on it — the new-parent
+    // flow still owns the screen until it ends, so there is nothing to clash
+    // with. Replayed from the settings (CoachTours.reset()).
+    val ctx = LocalContext.current
+    val firstChild = state.orderedChildren.firstOrNull()
+    val connectFirst = state.orderedChildren.firstOrNull { !state.hasDevice(it) }
+    var tour by remember { mutableStateOf(false) }
+    LaunchedEffect(firstChild?.id) {
+        if (firstChild == null || CoachTours.isDone(CoachTours.PARENT_HOME)) return@LaunchedEffect
+        if (ParentOnboarding.isActive(ctx)) return@LaunchedEffect
+        delay(900)
+        tour = true
+    }
+
+    Box(Modifier.fillMaxSize()) {
+        GlassBackdrop {
+            LazyColumn(
+                Modifier.contentColumn().fillMaxSize().systemBarsPadding(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                item { Header(state, onSettings, onBell, bellBadge) }
+                item { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { banners() } }
+                item {
+                    RowSpaced {
+                        GlassButton(tr("＋ צְרוּ יֶלֶד/ה"), Modifier.weight(1f).coachMark("p.newChild")) { onAddChild() }
+                        GlassButton(tr("🧹 מַטְלוֹת"), Modifier.weight(1f).coachMark("p.chores")) { onChores() }
+                    }
                 }
-            }
-            items(state.orderedChildren, key = { it.id }) { child ->
-                key(tick) {
-                    ChildCard(state, child, state.progress[child.id] ?: Progress.EMPTY,
-                        onOpen = { onOpenChild(child) }, onActions = { onActions(child) }, onConnect = { onConnectDevice(child) })
+                items(state.orderedChildren, key = { it.id }) { child ->
+                    key(tick) {
+                        ChildCard(state, child, state.progress[child.id] ?: Progress.EMPTY,
+                            // Like iOS: the tour marks the FIRST child's card only, and
+                            // the connect button of the first child without a device.
+                            marked = child.id == firstChild?.id, markConnect = child.id == connectFirst?.id,
+                            onOpen = { onOpenChild(child) }, onActions = { onActions(child) }, onConnect = { onConnectDevice(child) })
+                    }
                 }
-            }
-            if (!state.loading && state.children.isEmpty()) item {
-                Column(Modifier.fillMaxWidth().glassPane().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    H(tr("עוֹד אֵין יְלָדִים בַּמִּשְׁפָּחָה"), 19, align = TextAlign.Center)
-                    GoldButton(tr("＋ צְרוּ יֶלֶד/ה")) { onAddChild() }
+                if (!state.loading && state.children.isEmpty()) item {
+                    Column(Modifier.fillMaxWidth().glassPane().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        H(tr("עוֹד אֵין יְלָדִים בַּמִּשְׁפָּחָה"), 19, align = TextAlign.Center)
+                        GoldButton(tr("＋ צְרוּ יֶלֶד/ה")) { onAddChild() }
+                    }
                 }
             }
         }
+        CoachTour(
+            steps = parentTourSteps(stripNiqqud(firstChild?.name.orEmpty())),
+            active = tour,
+            onFinish = { tour = false; CoachTours.markDone(CoachTours.PARENT_HOME) },
+        )
     }
 }
 
@@ -92,14 +119,18 @@ private fun Header(state: FamilyState, onSettings: () -> Unit, onBell: () -> Uni
             P(parts.joinToString(" · "), 13.5f, color = Ink.secondary, weight = FontWeight.SemiBold)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            CircleIconButton("🔔", badge = badge, onClick = onBell)
-            CircleIconButton("⚙️", onClick = onSettings)
+            Box(Modifier.coachMark("p.bell")) { CircleIconButton("🔔", badge = badge, onClick = onBell) }
+            Box(Modifier.coachMark("p.gear")) { CircleIconButton("⚙️", onClick = onSettings) }
         }
     }
 }
 
 @Composable
-private fun ChildCard(state: FamilyState, child: Child, s: Progress, onOpen: () -> Unit, onActions: () -> Unit, onConnect: () -> Unit) {
+private fun ChildCard(
+    state: FamilyState, child: Child, s: Progress,
+    marked: Boolean, markConnect: Boolean,
+    onOpen: () -> Unit, onActions: () -> Unit, onConnect: () -> Unit,
+) {
     val live = state.liveWindow(child)
     val inApp = state.isInAppNow(child)
     val hasDevice = state.hasDevice(child)
@@ -118,7 +149,7 @@ private fun ChildCard(state: FamilyState, child: Child, s: Progress, onOpen: () 
         pct >= 60 -> Ink.warn
         else -> Ink.weak
     }
-    Column(Modifier.fillMaxWidth().glassPane(26.dp).clickable(onClick = onOpen).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(Modifier.fillMaxWidth().coachMark("p.card", marked).glassPane(26.dp).clickable(onClick = onOpen).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             ChildAvatar(child, 56.dp)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
@@ -139,17 +170,17 @@ private fun ChildCard(state: FamilyState, child: Child, s: Progress, onOpen: () 
             }
             RowSpaced {
                 WhiteButton(tr("מֵידָע נוֹסָף ←"), Modifier.weight(2f)) { onOpen() }
-                GlassButton(tr("⚡ פְּעֻלּוֹת"), Modifier.weight(1f)) { onActions() }
+                GlassButton(tr("⚡ פְּעֻלּוֹת"), Modifier.weight(1f).coachMark("p.actions", marked)) { onActions() }
             }
             // 🧒 Kid Mode: this phone becomes the child's for a while (screen-pinned).
-            GlassButton(tr("תְּנוּ לְ%@ לְשַׂחֵק כָּאן 🧒", child.name), Modifier.fillMaxWidth()) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
+            GlassButton(tr("תְּנוּ לְ%@ לְשַׂחֵק כָּאן 🧒", child.name), Modifier.fillMaxWidth().coachMark("p.playHere", marked)) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
         } else {
             P(tr("%@ · אֵין עֲדַיִן מַכְשִׁיר מְחֻבָּר.", gradeName(child.effectiveGrade)), 13f)
             RowSpaced {
-                WhiteButton(tr("📱 חִבּוּר מַכְשִׁיר"), Modifier.weight(2f)) { onConnect() }
-                GlassButton(tr("⚡ פְּעֻלּוֹת"), Modifier.weight(1f)) { onActions() }
+                WhiteButton(tr("📱 חִבּוּר מַכְשִׁיר"), Modifier.weight(2f).coachMark("p.connect", markConnect)) { onConnect() }
+                GlassButton(tr("⚡ פְּעֻלּוֹת"), Modifier.weight(1f).coachMark("p.actions", marked)) { onActions() }
             }
-            GlassButton(tr("תְּנוּ לְ%@ לְשַׂחֵק כָּאן 🧒", child.name), Modifier.fillMaxWidth()) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
+            GlassButton(tr("תְּנוּ לְ%@ לְשַׂחֵק כָּאן 🧒", child.name), Modifier.fillMaxWidth().coachMark("p.playHere", marked)) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
         }
     }
 }

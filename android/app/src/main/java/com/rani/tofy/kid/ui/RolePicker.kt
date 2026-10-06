@@ -89,23 +89,55 @@ private fun RolePicker(onParent: () -> Unit, onChild: () -> Unit) {
         if (role == "parent") onParent() else onChild()
     }
 
+    val isTablet = androidx.compose.ui.platform.LocalConfiguration.current.smallestScreenWidthDp >= 600
+    var confirmParentOnTablet by remember { mutableStateOf(false) }
+
     GlassBackdrop {
         Column(
             Modifier.fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             CharacterImage("fox", Modifier.size(124.dp).padding(top = 8.dp))
-            KidTitle(tr("מִי מִשְׁתַּמֵּשׁ בַּמַּכְשִׁיר הַזֶּה?"), 26)
-            KidBody(tr("פַּעַם רִאשׁוֹנָה בַּמִּשְׁפָּחָה? מַתְחִילִים כָּאן — בַּמַּכְשִׁיר שֶׁלָּכֶם"), 15f, alpha = 0.9f)
+            // 🖥️ A tablet is usually the CHILD's device (RolePickerView's isPad):
+            // child card first with the "recommended" badge, and the parent card
+            // asks once "whose tablet is this?" before going on as a parent.
+            KidTitle(if (isTablet) tr("מִי מִשְׁתַּמֵּשׁ בַּטַּאבְּלֶט הַזֶּה?") else tr("מִי מִשְׁתַּמֵּשׁ בַּמַּכְשִׁיר הַזֶּה?"), 26)
+            KidBody(if (isTablet) tr("אֶת הַמִּשְׁפָּחָה מְנַהֲלִים בְּדֶרֶךְ כְּלָל מֵהַטֶּלֶפוֹן שֶׁלָּכֶם")
+                    else tr("פַּעַם רִאשׁוֹנָה בַּמִּשְׁפָּחָה? מַתְחִילִים כָּאן — בַּמַּכְשִׁיר שֶׁלָּכֶם"), 15f, alpha = 0.9f)
             VSpace(14)
             Column(Modifier.widthIn(max = 460.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                RoleCard("👨‍👩‍👧", tr("הַמַּכְשִׁיר שֶׁלִּי (הוֹרֶה)"), tr("מַעֲקָב, דּוּחוֹת וְנִיהוּל"), Ink.gold2, tr("מַתְחִילִים כָּאן")) {
-                    choose("parent")
+                val parentCard = @Composable {
+                    RoleCard("👨‍👩‍👧", tr("הַמַּכְשִׁיר שֶׁלִּי (הוֹרֶה)"), tr("מַעֲקָב, דּוּחוֹת וְנִיהוּל"), Ink.gold2,
+                        if (isTablet) null else tr("מַתְחִילִים כָּאן")) {
+                        if (isTablet) confirmParentOnTablet = true else choose("parent")
+                    }
                 }
-                RoleCard("🧒", tr("הַמַּכְשִׁיר שֶׁל הַיֶּלֶד"), tr("לְשַׂחֵק וְלִלְמוֹד · צָרִיךְ קוֹד חִבּוּר מֵהַמַּכְשִׁיר שֶׁל הַהוֹרֶה"),
-                    Color(0xFF8C7BFF), null) {
+                val childCard = @Composable {
+                    RoleCard("🧒", tr("הַמַּכְשִׁיר שֶׁל הַיֶּלֶד"), tr("לְשַׂחֵק וְלִלְמוֹד · צָרִיךְ קוֹד חִבּוּר מֵהַמַּכְשִׁיר שֶׁל הַהוֹרֶה"),
+                        Color(0xFF8C7BFF), if (isTablet) tr("מֻמְלָץ לְטַאבְּלֶט") else null) {
+                        if (hasNoFamilyHere) childNeedsCode = true else choose("child")
+                    }
+                }
+                if (isTablet) { childCard(); parentCard() } else { parentCard(); childCard() }
+            }
+        }
+
+        AnimatedVisibility(confirmParentOnTablet, enter = fadeIn() + slideInVertically { it / 2 }, exit = fadeOut() + slideOutVertically { it / 2 }) {
+            KidBottomCard(onDismiss = { confirmParentOnTablet = false }) {
+                Box(Modifier.fillMaxWidth()) { Box(Modifier.align(Alignment.TopEnd)) { CloseCircle { confirmParentOnTablet = false } } }
+                Text("🤔", fontSize = 42.sp)
+                KidTitle(tr("רֶגַע, הַטַּאבְּלֶט הַזֶּה שֶׁל מִי?"), 23)
+                KidBody(tr("רֹב הַמִּשְׁפָּחוֹת מְנַהֲלוֹת אֶת טוֹפִי מֵהַטֶּלֶפוֹן שֶׁל הַהוֹרֶה, וּמְחַבְּרוֹת אֶת הַטַּאבְּלֶט כְּמַכְשִׁיר שֶׁל הַיֶּלֶד."), 15f)
+                GoldButton(tr("זֶה הַטַּאבְּלֶט שֶׁל הַיֶּלֶד"), Modifier.padding(top = 4.dp)) {
+                    confirmParentOnTablet = false
                     if (hasNoFamilyHere) childNeedsCode = true else choose("child")
                 }
+                Box(
+                    Modifier.fillMaxWidth().height(50.dp).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
+                        .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50))
+                        .clickable { confirmParentOnTablet = false; choose("parent") },
+                    contentAlignment = Alignment.Center,
+                ) { Text(tr("זֶה הַטַּאבְּלֶט שֶׁלִּי, לְהַמְשִׁיךְ כְּהוֹרֶה"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 15.sp) }
             }
         }
 

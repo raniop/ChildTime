@@ -31,6 +31,9 @@ import com.rani.tofy.data.Household
 import com.rani.tofy.i18n.AppLanguage
 import com.rani.tofy.i18n.I18n
 import com.rani.tofy.i18n.tr
+import com.rani.tofy.ui.common.CoachTour
+import com.rani.tofy.ui.common.CoachTours
+import com.rani.tofy.ui.common.kidTourSteps
 import com.rani.tofy.kid.content.ChildContentProfile
 import com.rani.tofy.kid.content.ContentMode
 import com.rani.tofy.kid.content.QuestionSource
@@ -468,6 +471,20 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 onChest = { screen = KidScreen.Chest },
                 inviteBanner = { LiveInviteBanner { id -> screen = KidScreen.LiveQuiz(id) } },
             )
+
+            // 🧭 WorldMapView.maybeStartKidTour: once per child on this device,
+            // and never on top of anything — the wheel, the chest and every
+            // pop-up are covers, and a cover means the tour waits for next time.
+            var kidTour by remember { mutableStateOf(false) }
+            LaunchedEffect(cid, cover == null) {
+                if (kidTour || cover != null || CoachTours.isDone(CoachTours.kidHome(cid))) return@LaunchedEffect
+                delay(1600)
+                if (cover == null) kidTour = true
+            }
+            CoachTour(kidTourSteps(isGirl), active = kidTour, forKid = true) {
+                kidTour = false
+                CoachTours.markDone(CoachTours.kidHome(cid))
+            }
 
             // WorldMapView.onAppear (and the return from a round / world, which iOS
             // watches separately): the comeback spin, then the wheel if a spin waits,

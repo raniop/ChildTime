@@ -69,6 +69,7 @@ import com.rani.tofy.kid.ui.BuddyBubble
 import com.rani.tofy.kid.ui.CharacterImage
 import com.rani.tofy.kid.ui.KidCta
 import com.rani.tofy.kid.ui.timeLabel
+import com.rani.tofy.ui.common.coachMark
 import com.rani.tofy.ui.home.gradeName
 import com.rani.tofy.ui.theme.GlassBackdrop
 import com.rani.tofy.ui.theme.Ink
@@ -166,13 +167,17 @@ internal fun KidHome(
                     HeaderPane(child, snap.stars, snap.diamonds, snap.dayStreak, snap.xp, engine, cta, extras, onLevelInfo, onChallenge, onAvatar, onChores)
                 }
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    Text(tr("בּוֹחֲרִים עוֹלָם וְיוֹצְאִים לְהַרְפַּתְקָה ✨"), Modifier.fillMaxWidth().padding(top = 6.dp),
+                    // 🧭 The worlds' stop: on a phone the first world sits under the
+                    // floating minutes panel, so the tour points at the line that heads
+                    // them, which is always in view (iOS marks the same heroTitle).
+                    Text(tr("בּוֹחֲרִים עוֹלָם וְיוֹצְאִים לְהַרְפַּתְקָה ✨"), Modifier.fillMaxWidth().padding(top = 6.dp).coachMark("k.world"),
                         color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, textAlign = TextAlign.Center, maxLines = 1)
                 }
                 items(tiles, key = { it.key }) { t ->
                     when (t) {
                         HomeTile.TofyTime -> FeatureTile("🎲", tr("טוֹפִי טַיים"), tr("שְׁאֵלוֹת בִּמְיוּחָד בִּשְׁבִילְךָ"),
-                            Color(0xFF8C7BFF), badge = tr("✨ חינם"), badgeTint = Color(0xFF8CFFC4)) { onTile(t) }
+                            Color(0xFF8C7BFF), Modifier.coachMark("k.tofyTime"),
+                            badge = tr("✨ חינם"), badgeTint = Color(0xFF8CFFC4)) { onTile(t) }
                         is HomeTile.WorldTile -> {
                             val w = t.world
                             val room = snap.worldProgress[w.id] ?: 0
@@ -196,7 +201,7 @@ internal fun KidHome(
                     FeatureTile(
                         "🎮", tr("מִשְׂחָקִים"),
                         if (open) tr("מֵרוֹץ נָכוֹן/לֹא · הַתְאָמַת זוּגוֹת") else tr("עוֹנִים %lld נְכוֹנוֹת — וְנִפְתָּח! 💪", target),
-                        Color(0xFFEF476F),
+                        Color(0xFFEF476F), Modifier.coachMark("k.games"),
                         badge = when { !premium -> tr("👑 טוֹפִי+"); open -> null; else -> "$done/$target ✅" },
                         foot = if (open) tr("🎮 פָּתוּחַ הַיּוֹם") else tr("חִמּוּם יוֹמִי"),
                         footFrac = if (open) null else done / maxOf(1, target).toFloat(),
@@ -209,8 +214,11 @@ internal fun KidHome(
             Column(
                 Modifier.align(Alignment.BottomCenter).fillMaxWidth()
                     .background(Brush.verticalGradient(0f to Color.Transparent, 0.35f to Ink.deep.copy(alpha = 0.72f), 1f to Ink.deep.copy(alpha = 0.9f)))
-                    .navigationBarsPadding().padding(start = 20.dp, end = 20.dp, top = 40.dp, bottom = 14.dp)
-                    .onSizeChanged { panelPx = it.height },
+                    .navigationBarsPadding()
+                    .padding(start = 20.dp, end = 20.dp, top = 40.dp, bottom = 14.dp)
+                    .onSizeChanged { panelPx = it.height }
+                    // 🧭 The hole goes around the bubble + the CTA, not the scrim's fade.
+                    .coachMark("k.minutes"),
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 BuddyBubble(buddyLine, Modifier.fillMaxWidth())
@@ -256,17 +264,17 @@ private fun BrandRow(premium: Boolean, friendsBadge: Boolean, onShop: () -> Unit
         // (the live tournament lives inside; a waiting invite lights the dot) · ⚙️ the
         // parent's corner. Shop and friends are NOT behind Tofy+.
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            NavButton("🛍️", false, onShop)
+            NavButton("🛍️", false, Modifier.coachMark("k.shop"), onShop)
             // The parent can switch friends + leaderboards off for this child (child doc friendsEnabled).
-            if (com.rani.tofy.kid.ui.social.SocialMe.friendsEnabled) NavButton("🏆", friendsBadge, onFriends)
-            NavButton("⚙️", false, onSettings)
+            if (com.rani.tofy.kid.ui.social.SocialMe.friendsEnabled) NavButton("🏆", friendsBadge, Modifier.coachMark("k.friends"), onFriends)
+            NavButton("⚙️", false, Modifier.coachMark("k.settings"), onSettings)
         }
     }
 }
 
 @Composable
-private fun NavButton(emoji: String, badge: Boolean, onClick: () -> Unit) {
-    Box(Modifier.size(44.dp)) {
+private fun NavButton(emoji: String, badge: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Box(modifier.size(44.dp)) {
         Box(
             Modifier.size(44.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.24f))
                 .border(1.dp, Color.White.copy(alpha = 0.32f), CircleShape).clickable(onClick = onClick),
@@ -328,8 +336,10 @@ private fun HeaderPane(
                 val line = gradeName(child?.effectiveGrade ?: 1) + if (dayStreak > 0) tr(" · 🔥 %lld יָמִים", dayStreak) else ""
                 Text(line, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
             }
-            WalletStat("⭐ " + currencyShort(stars), tr("כּוֹכָבִים"))
-            WalletStat("💎 " + currencyShort(diamonds), tr("יַהֲלוֹמִים"))
+            Row(Modifier.coachMark("k.wallet"), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                WalletStat("⭐ " + currencyShort(stars), tr("כּוֹכָבִים"))
+                WalletStat("💎 " + currencyShort(diamonds), tr("יַהֲלוֹמִים"))
+            }
         }
         // 🎮 earned and 💝 gift wallets, to the second (build 198 "זמן מדויק לשנייה").
         Row(Modifier.fillMaxWidth().glassInset(16.dp).padding(vertical = 10.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -339,8 +349,8 @@ private fun HeaderPane(
         StatsPanel(engine, onLevelInfo)
         // The twins: אתגר יומי · מטלות הבית — same size, side by side.
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            ChallengeCard(engine, onChallenge, Modifier.weight(1f).fillMaxHeight())
-            ChoresCard(extras, onChores, Modifier.weight(1f).fillMaxHeight())
+            ChallengeCard(engine, onChallenge, Modifier.weight(1f).fillMaxHeight().coachMark("k.challenge"))
+            ChoresCard(extras, onChores, Modifier.weight(1f).fillMaxHeight().coachMark("k.chores"))
         }
     }
 }
@@ -467,11 +477,11 @@ fun Track(frac: Float, modifier: Modifier = Modifier, fill: Color = Color.White)
 /** WorldCard / FeatureCard: a glass tile with a whisper of the world's own colour. */
 @Composable
 private fun FeatureTile(
-    emoji: String, title: String, subtitle: String, tint: Color,
+    emoji: String, title: String, subtitle: String, tint: Color, modifier: Modifier = Modifier,
     badge: String? = null, badgeTint: Color? = null, foot: String? = null, footFrac: Float? = 0f, onClick: () -> Unit,
 ) {
     Column(
-        Modifier.fillMaxWidth().heightIn(min = 158.dp).clip(RoundedCornerShape(22.dp))
+        modifier.fillMaxWidth().heightIn(min = 158.dp).clip(RoundedCornerShape(22.dp))
             .drawBehind { drawCircle(tint.copy(alpha = 0.38f), radius = size.width * 0.75f, center = Offset(size.width * 0.15f, 0f)) }
             .glassPane(22.dp, 0.13f).clickable(onClick = onClick).padding(14.dp),
     ) {
