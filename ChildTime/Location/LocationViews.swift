@@ -236,9 +236,10 @@ struct ParentLocationView: View {
                 ProfileAvatarView(profile: p, size: 48)
                 VStack(alignment: .leading, spacing: 3) {
                     // When the phone was last seen sits by the name (Rani).
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    HStack(alignment: .center, spacing: 7) {
                         Text(name).font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.primary)
                         if let f = current {
+                            Circle().fill(GlassInk.secondary).frame(width: 4, height: 4)
                             Text(Self.relative(f.at, now: now))
                                 .font(.system(size: 12.5, weight: .bold, design: .rounded))
                                 .foregroundStyle(now.timeIntervalSince1970 - f.at < 600 ? Color(hex: "9FF5DD") : GlassInk.secondary)
