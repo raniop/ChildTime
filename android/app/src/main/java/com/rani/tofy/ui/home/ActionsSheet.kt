@@ -25,7 +25,8 @@ import com.rani.tofy.ui.theme.*
 /** The ⚡ menu of a child card (ParentDashboardView's actions Menu), as an Android bottom sheet. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActionsSheet(child: Child, state: FamilyState, onDismiss: () -> Unit, onChores: () -> Unit, onConnect: () -> Unit, onSettings: () -> Unit) {
+fun ActionsSheet(child: Child, state: FamilyState, onDismiss: () -> Unit, onChores: () -> Unit, onConnect: () -> Unit, onSettings: () -> Unit,
+                 onLocation: () -> Unit = {}) {
     var giftPicker by remember { mutableStateOf(false) }
     var confirmRevoke by remember { mutableStateOf(false) }
     val hasDevice = state.hasDevice(child)
@@ -43,6 +44,13 @@ fun ActionsSheet(child: Child, state: FamilyState, onDismiss: () -> Unit, onChor
                     onDismiss()
                 }
             } else {
+                // 📍 Where is the child / 🔔 ring their phone — first, like iOS.
+                ActionRow("📍", tr("📍 איפה %@", stripNiqqud(child.name)).removePrefix("📍 "), onClick = onLocation)
+                com.rani.tofy.ui.location.LocationRepository.shownFix(child)?.let { f ->
+                    ActionRow("🔔", tr("🔔 צפצוף לטלפון של %@", stripNiqqud(child.name)).removePrefix("🔔 ")) {
+                        com.rani.tofy.ui.location.LocationRepository.beep(child.id, f.deviceID); onDismiss()
+                    }
+                }
                 ActionRow("💝", tr("תֵּן דַּקּוֹת מַתָּנָה 💝").removeSuffix(" 💝")) { giftPicker = true }
                 if (hasDevice) {
                     ActionRow("🔒", tr("נְעַל עַכְשָׁיו")) { Commands.lock(child.id); onDismiss() }

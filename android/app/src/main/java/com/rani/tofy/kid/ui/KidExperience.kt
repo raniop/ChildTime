@@ -231,6 +231,8 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     val childNow by rememberUpdatedState(child)
 
     var playing by remember { mutableStateOf<ContentMode?>(null) }
+    var locationStep by remember { mutableStateOf(false) }
+    var locationAsked by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     var cover by remember { mutableStateOf<Cover?>(null) }
     var pendingOpen by remember { mutableStateOf<(suspend () -> Unit)?>(null) }
     var buddy by remember { mutableStateOf<String?>(null) }
@@ -362,7 +364,26 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     }
 
     if (!lockSetupDone) {
-        ChildLockSetupScreen(onDone = { lockSetupDone = true; EnforcementStatus.refresh(ctx) }, fromOnboarding = true)
+        ChildLockSetupScreen(onDone = {
+            lockSetupDone = true; EnforcementStatus.refresh(ctx)
+            // 📍 Then the optional location step, while the parent still holds the phone.
+            if (!kidMode) locationStep = true
+        }, fromOnboarding = true)
+        return
+    }
+    if (locationStep) {
+        com.rani.tofy.kid.location.OnboardingLocationStep(cid, child?.householdID, child?.name.orEmpty(), child?.isGirl == true) {
+            locationStep = false
+        }
+        return
+    }
+    // 🔔 A parent is beeping this phone — "מָצָאתִי!" over everything.
+    val beeping by com.rani.tofy.kid.location.KidLocation.beeping.collectAsState()
+    if (beeping) { com.rani.tofy.kid.location.KidBeepScreen(); return }
+    // 📍 Sharing switched on by a parent, the phone not yet allowing it: the kid's words, once a launch.
+    val locationOn by com.rani.tofy.kid.location.KidLocation.enabled.collectAsState()
+    if (!kidMode && locationOn && !locationAsked && com.rani.tofy.kid.location.KidLocation.needsPermission) {
+        com.rani.tofy.kid.location.KidLocationPermissionScreen(child?.isGirl == true) { locationAsked = true }
         return
     }
 

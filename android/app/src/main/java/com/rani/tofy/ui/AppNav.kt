@@ -54,6 +54,7 @@ fun AppNav() {
                 onSettings = { nav.navigate("settings") },
                 onBell = { nav.navigate("activity") },
                 onConnectDevice = { connectFor = it.id },
+                onLocation = { c -> nav.navigate(if (c == null) "location" else "location?child=${c.id}") },
                 bellBadge = unreadActivityCount(),
                 sheetOpen = actionsFor != null || connectFor != null || status != null,
                 banners = { HomeBanners(state, onChores = { nav.navigate("chores") },
@@ -71,6 +72,9 @@ fun AppNav() {
         }
         composable("addChild") { AddChildFlow(firstChild = false, onDone = { nav.popBackStack() }, onCancel = { nav.popBackStack() }) }
         composable("chores") { ChoresScreen(onBack = { nav.popBackStack() }) }
+        composable("location?child={child}", arguments = listOf(androidx.navigation.navArgument("child") { nullable = true; defaultValue = null })) { e ->
+            com.rani.tofy.ui.location.ParentLocationScreen(e.arguments?.getString("child")) { nav.popBackStack() }
+        }
         composable("activity") { ActivityScreen(onBack = { nav.popBackStack() }) }
         composable("settings") { SettingsScreen(onBack = { nav.popBackStack() }) }
         composable("paywall") { com.rani.tofy.billing.GatedPaywall("request") { nav.popBackStack() } }
@@ -83,8 +87,14 @@ fun AppNav() {
         ActionsSheet(c, state, onDismiss = { actionsFor = null },
             onChores = { com.rani.tofy.data.ChoresRepository.focusChildID = c.id; actionsFor = null; nav.navigate("chores") },
             onConnect = { actionsFor = null; connectFor = c.id },
-            onSettings = { actionsFor = null; nav.navigate("childSettings/${c.id}") })
+            onSettings = { actionsFor = null; nav.navigate("childSettings/${c.id}") },
+            onLocation = { actionsFor = null; nav.navigate("location?child=${c.id}") })
     }
     connectFor?.let { ConnectDeviceSheet(it, onDismiss = { connectFor = null }) }
+    // 📍 Follow the children's fixes for the cards (no push to their phones), and
+    // open the map on a child when an arrival push was tapped.
+    LaunchedEffect(state.children.map { it.id }) { com.rani.tofy.ui.location.LocationRepository.follow(state.children.map { it.id }) }
+    val openFor by com.rani.tofy.ui.location.LocationRepository.openMapFor.collectAsState()
+    LaunchedEffect(openFor) { openFor?.let { nav.navigate("location?child=$it"); com.rani.tofy.ui.location.LocationRepository.openMapFor.value = null } }
     status?.let { CommandStatusSheet(it, state, onDismiss = { Commands.clearStatus() }) }
 }

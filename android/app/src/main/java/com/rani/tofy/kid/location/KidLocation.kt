@@ -96,8 +96,11 @@ object KidLocation {
         ContextCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
     fun hasBackground(ctx: Context = app) = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
         ContextCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED
-    /** The kid's one-time explanation is due (sharing on, the phone not yet allowing it). */
-    val needsPermission: Boolean get() = _enabled.value && (!hasFine() || !hasBackground())
+    /** The kid's one-time explanation is due (sharing on, the phone not yet allowing it) —
+     *  at most 3 times in all, so a child who declined is not nagged. */
+    val needsPermission: Boolean
+        get() = _enabled.value && (!hasFine() || !hasBackground()) && prefs.getInt("promptCount", 0) < 3
+    fun countPrompt() { prefs.edit().putInt("promptCount", prefs.getInt("promptCount", 0) + 1).apply() }
 
     // ── binding (KidSession) ────────────────────────────────────────────────
 

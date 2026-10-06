@@ -10,9 +10,20 @@ import android.app.NotificationManager
 import com.rani.tofy.i18n.I18n
 import com.rani.tofy.i18n.tr
 
+/** The application context for code without one (prefs read from a composable). */
+object TofyAppRef {
+    lateinit var app: android.content.Context
+    fun prefs(name: String): android.content.SharedPreferences = app.getSharedPreferences(name, android.content.Context.MODE_PRIVATE)
+}
+
 class TofyApp : Application() {
     override fun onCreate() {
         super.onCreate()
+        TofyAppRef.app = this
+        // 📍 The family map is OpenStreetMap (osmdroid): its tile requests must name the app.
+        org.osmdroid.config.Configuration.getInstance().apply {
+            load(this@TofyApp, getSharedPreferences("osmdroid", MODE_PRIVATE)); userAgentValue = packageName
+        }
         if (BuildConfig.DEBUG && BuildConfig.USE_EMULATORS) useLocalEmulators()
         else if (FirebaseApp.getApps(this).isEmpty()) FirebaseApp.initializeApp(this)
         I18n.init(this)

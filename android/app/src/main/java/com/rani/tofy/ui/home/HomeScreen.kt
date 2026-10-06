@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import com.rani.tofy.ui.theme.glassPane
@@ -47,6 +48,8 @@ fun HomeScreen(
     onSettings: () -> Unit,
     onBell: () -> Unit,
     onConnectDevice: (Child) -> Unit,
+    /** 📍 The family map — null = all children, else on this child. */
+    onLocation: (Child?) -> Unit = {},
     bellBadge: Int = 0,
     /** Another sheet (actions / connect / command status) owns the screen right now. */
     sheetOpen: Boolean = false,
@@ -99,6 +102,7 @@ fun HomeScreen(
                     RowSpaced {
                         GlassButton(tr("＋ צְרוּ יֶלֶד/ה"), Modifier.weight(1f).coachMark("p.newChild")) { onAddChild() }
                         GlassButton(tr("🧹 מַטְלוֹת"), Modifier.weight(1f).coachMark("p.chores")) { onChores() }
+                        GlassButton(tr("📍 מִקּוּם"), Modifier.weight(1f)) { onLocation(null) }
                     }
                 }
                 items(state.orderedChildren, key = { it.id }) { child ->
@@ -111,8 +115,10 @@ fun HomeScreen(
                         marked = child.id == firstChild?.id, markConnect = child.id == connectFirst?.id,
                         tick = tick,
                         onOpen = { onOpenChild(child) }, onActions = { onActions(child) }, onConnect = { onConnectDevice(child) },
-                        onSettings = { onChildSettings(child) })
+                        onSettings = { onChildSettings(child) }, onLocation = { onLocation(child) })
                 }
+                // 📍 Once, for families from before location — BELOW the children.
+                if (showLocationIntro(state)) item { LocationIntroCard(onOpen = { onLocation(null) }) }
                 if (!state.loading && state.children.isEmpty()) item {
                     Column(Modifier.fillMaxWidth().glassPane().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         H(tr("עוֹד אֵין יְלָדִים בַּמִּשְׁפָּחָה"), 19, align = TextAlign.Center)
@@ -168,6 +174,7 @@ private fun ChildCard(
     @Suppress("UNUSED_PARAMETER") tick: Int,   // recomposes the live countdown each second
     onOpen: () -> Unit, onActions: () -> Unit, onConnect: () -> Unit,
     onSettings: () -> Unit,
+    onLocation: () -> Unit = {},
 ) {
     val live = state.liveWindow(child)
     val inApp = state.isInAppNow(child)
@@ -213,6 +220,8 @@ private fun ChildCard(
             }
             Text("$pct%", color = pctColor, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 22.sp)
         }
+        // 📍 Where the child is, one tap from the map.
+        LocationLine(child, onLocation)
         if (hasDevice) {
             val cap = child.dailyCapMinutes?.takeIf { it > 0 }
             RowSpaced {
@@ -279,4 +288,52 @@ fun gradeNameForParent(grade: Int?): String {
     if (g == 0) return tr("גן חובה")
     val letters = listOf("א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳", "ט׳", "י׳", "יא׳", "יב׳")
     return tr("כיתה %@", tr(letters[minOf(g, 12) - 1]))
+}
+
+// MARK: - 📍 location on the home (iOS ParentDashboardView)
+
+@Composable
+private fun LocationLine(child: Child, onOpen: () -> Unit) {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val fixes by com.rani.tofy.ui.location.LocationRepository.fixes.collectAsState()
+    val addresses by com.rani.tofy.ui.location.LocationRepository.addresses.collectAsState()
+    @Suppress("UNUSED_EXPRESSION") fixes; @Suppress("UNUSED_EXPRESSION") addresses
+    val state by com.rani.tofy.data.FamilyRepository.state.collectAsState()
+    val f = com.rani.tofy.ui.location.LocationRepository.shownFix(child) ?: return
+    val fresh = System.currentTimeMillis() / 1000.0 - f.at < 600
+    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
+        .background(if (fresh) Color(0xFF06D6A0).copy(alpha = 0.22f) else Color.White.copy(alpha = 0.12f))
+        .border(1.5.dp, if (fresh) Color(0xFF5CFF9D).copy(alpha = 0.7f) else Color.Transparent, RoundedCornerShape(14.dp))
+        .clickable(onClick = onOpen).padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("📍", fontSize = 15.sp)
+        Text(com.rani.tofy.ui.location.LocationRepository.whereLine(ctx, f, state.household?.places ?: emptyList()),
+            Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, maxLines = 1)
+        Text(com.rani.tofy.ui.location.LocationRepository.relative(f.at), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 12.5.sp,
+            color = if (fresh) Color(0xFF9FF5DD) else Ink.secondary)
+    }
+}
+
+private fun showLocationIntro(state: FamilyState): Boolean {
+    val prefs = com.rani.tofy.TofyAppRef.prefs("tofy.location.parent")
+    if (prefs.getBoolean("introDismissed", false)) return false
+    return state.children.any { state.hasDevice(it) } && state.children.none { com.rani.tofy.ui.location.LocationRepository.sharingOn(it) }
+}
+
+@Composable
+private fun LocationIntroCard(onOpen: () -> Unit) {
+    var shown by remember { mutableStateOf(true) }
+    if (!shown) return
+    Row(Modifier.fillMaxWidth().glassPane(22.dp).padding(14.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text("📍", fontSize = 30.sp)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(tr("חדש: לדעת איפה הילדים"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 17.sp)
+            Text(tr("מפה, התראה כשמגיעים לבית הספר או הביתה, וצפצוף לטלפון שהלך לאיבוד."), color = Ink.secondary, fontFamily = Rounded, fontSize = 13.5.sp)
+            Text(tr("להפעלה ←"), color = Color(0xFF4B3BC4), fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 15.sp,
+                modifier = Modifier.clip(CircleShape).background(Color.White).clickable(onClick = onOpen).padding(horizontal = 16.dp, vertical = 9.dp))
+        }
+        Text("✕", color = Color.White, fontSize = 14.sp, modifier = Modifier.clip(CircleShape).background(Color.White.copy(alpha = 0.16f))
+            .clickable { shown = false; com.rani.tofy.TofyAppRef.prefs("tofy.location.parent").edit().putBoolean("introDismissed", true).apply() }
+            .padding(horizontal = 11.dp, vertical = 6.dp))
+    }
 }

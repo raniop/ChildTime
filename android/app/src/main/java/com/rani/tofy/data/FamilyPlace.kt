@@ -72,4 +72,7 @@ data class ChildLocationFix(
     val battery: Double?, val placeID: String?, val placeSince: Double?, val permission: String?,
 ) {
     val hasFix: Boolean get() = lat != null && lng != null
+    /** Which of the child's devices (fix_<installID>), and its kind ("iphone"/"ipad"/"android"). */
+    var deviceID: String = ""
+    var kind: String = ""
 }

@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         // A tapped push / opened link (iOS onOpenURL + PushManager tap) — once, not on recreation.
-        if (savedInstanceState == null) com.rani.tofy.kid.ui.home.KidDeepLinks.handle(intent)
+        if (savedInstanceState == null) { com.rani.tofy.kid.ui.home.KidDeepLinks.handle(intent); openPlacePush(intent) }
         setContent {
             TofyTheme {
                 // Tap anywhere outside a field to put the keyboard away. A child's
@@ -60,6 +60,12 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         com.rani.tofy.kid.ui.home.KidDeepLinks.handle(intent)
+        openPlacePush(intent)
+    }
+
+    /** 📍 A tapped "🏫 נוני הגיעה" push → the parent's map, on that child. */
+    private fun openPlacePush(i: android.content.Intent?) {
+        if (i?.getStringExtra("type") == "place") i.getStringExtra("childID")?.let { com.rani.tofy.ui.location.LocationRepository.openMapFor.value = it }
     }
 }
 
