@@ -12,6 +12,7 @@ import json, re
 SRC = 'ChildTime/Models/WhatsNewContent.swift'
 CAT = 'Shared/Localization/Localizable.xcstrings'
 OUT = 'docs/admin/releases.json'
+PITCH = 'tools/update-pitch.json'
 LANGS = ('en', 'ru', 'ar')
 s = open(SRC, encoding='utf-8').read()
 cat = json.load(open(CAT, encoding='utf-8'))['strings']
@@ -32,5 +33,10 @@ for m in re.finditer(r'Release\(build:\s*(\d+),\s*version:\s*"([^"]+)"(.*?)\]\),
             if t: notes[l].append(f'{emoji} {t}')
     out.append({'build': build, 'version': version, 'notes': notes})
 out.sort(key=lambda r: -r['build'])
+# The update sheet's text is written for EXISTING users (tools/update-pitch.json),
+# not the What's New titles (those are for people who just installed).
+pitch = json.load(open(PITCH, encoding='utf-8'))
+for r in out:
+    if r['version'] in pitch: r['pitch'] = pitch[r['version']]
 json.dump(out, open(OUT, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 print(len(out), 'releases →', OUT, '· newest', out[0]['build'] if out else None)

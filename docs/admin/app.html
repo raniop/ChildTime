@@ -149,7 +149,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261006194143";
+const PAGE_STAMP = "20261006194414";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -1136,8 +1136,11 @@ async function updQuick(c) {
   if (!live || !same.length) { box.innerHTML = `<div class="card">בחנות: ${esc(live || "?")} — לא מצאתי את הגרסה הזאת ברשימת "מה חדש". אפשר לעדכן ידנית ב"מתקדם".</div>`; return; }
   const build = Math.max(...same.map((r) => r.build));
   // A version can span several builds — newest first, at most 3 lines per language.
+  // The text is the hand-written update pitch for this version (tools/update-pitch.json):
+  // what's new for someone who ALREADY uses Tofy. No pitch → no list, never made up.
+  const pitch = (same.find((r) => r.pitch) || {}).pitch || null;
   const notesByLang = {};
-  for (const l of ["he", "en", "ru", "ar"]) notesByLang[l] = same.sort((x, y) => y.build - x.build).flatMap((r) => r.notes[l] || []).slice(0, 3);
+  for (const l of ["he", "en", "ru", "ar"]) notesByLang[l] = pitch ? (pitch[l] || []).slice(0, 3) : [];
   const upToDate = (c.latestBuild || 0) >= build && c.enabled;
   box.innerHTML = `
     <div class="card" style="border-color:${upToDate ? "rgba(56,209,140,.5)" : "rgba(255,210,90,.6)"}">
@@ -1145,7 +1148,8 @@ async function updQuick(c) {
       ${upToDate
         ? `<p style="margin:6px 0 0">✅ הכל מעודכן — מי שעדיין על גרסה ישנה כבר מקבל באפליקציה הודעה לעדכן. אין מה לשלוח.</p>`
         : `<p style="margin:6px 0 10px">לחיצה על <b>שלח</b> = כל מי שעל גרסה ישנה מ־${build} יראה באפליקציה "יש גרסה חדשה של טופי" עם מה חדש:</p>
-           <ul style="margin:0 0 10px;padding-inline-start:20px">${notesByLang.he.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>
+           ${pitch ? `<ul style="margin:0 0 10px;padding-inline-start:20px">${notesByLang.he.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>`
+                   : `<p class="stamp" style="margin:0 0 10px">⚠️ אין עדיין טקסט עדכון לגרסה הזאת — יוצג רק "יש גרסה חדשה", בלי רשימה.</p>`}
            <div class="stamp" style="margin-bottom:10px">ההורים יראו את הרשימה בשפה של האפליקציה שלהם (עברית, English, Русский, العربية).</div>
            <label style="display:block;margin-bottom:12px"><input type="checkbox" id="q_push"> גם לשלוח התראה (פוש) להורים</label>
            <button class="btn" id="q_send" style="font-size:16px;padding:12px 30px">🚀 שלח</button>`}
