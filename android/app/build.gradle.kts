@@ -14,15 +14,33 @@ android {
         applicationId = "com.rani.tofy"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "2026.10.6"
+        // versionName = the iOS marketing version; versionCode = iOS build × 10 + an
+        // Android-only respin digit (distribution/play-store/release-checklist-android.md).
+        versionCode = 1990
+        versionName = "2026.10.5"
         // ./gradlew assembleDebug -Pemu=true → a debug build wired to the LOCAL
         // Firebase emulators under the "demo-tofy" project (never production).
         buildConfigField("boolean", "USE_EMULATORS", (project.findProperty("emu") == "true").toString())
     }
 
+    // Upload key lives OUTSIDE the repo: ~/.tofy-keys/upload.jks, its password in
+    // ~/.gradle/gradle.properties (TOFY_UPLOAD_*) and the macOS Keychain entry
+    // "Tofy Android upload key". Play App Signing holds the real app key.
+    signingConfigs {
+        create("upload") {
+            val f = project.findProperty("TOFY_UPLOAD_STORE_FILE") as String?
+            if (f != null) {
+                storeFile = file(f)
+                storePassword = project.findProperty("TOFY_UPLOAD_STORE_PASSWORD") as String?
+                keyAlias = project.findProperty("TOFY_UPLOAD_KEY_ALIAS") as String?
+                keyPassword = project.findProperty("TOFY_UPLOAD_KEY_PASSWORD") as String?
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (project.findProperty("TOFY_UPLOAD_STORE_FILE") != null) signingConfig = signingConfigs.getByName("upload")
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

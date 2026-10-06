@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "870781732446-3c2vu6r2t11bbnom557vv1dk1fva7ftf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rani.tofy",
+            "certificate_hash": "d9a7b80792e3f9d717be8a1416315cbbace4dbb8"
+          }
+        },
+        {
+          "client_id": "870781732446-59u15cosmhl1apdsrgenbifjnkplh81l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rani.tofy",
+            "certificate_hash": "441aa6593ffd9769b08c38713ceb29a4f4c5a37e"
+          }
+        },
+        {
           "client_id": "870781732446-bp80jbd3ja94jqofkaq6hqsrl6u2skn3.apps.googleusercontent.com",
           "client_type": 3
         }
