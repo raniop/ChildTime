@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
@@ -11,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
 import com.rani.tofy.auth.AuthRepository
 import com.rani.tofy.data.AccountRepository
@@ -35,7 +37,20 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         // A tapped push / opened link (iOS onOpenURL + PushManager tap) — once, not on recreation.
         if (savedInstanceState == null) com.rani.tofy.kid.ui.home.KidDeepLinks.handle(intent)
-        setContent { TofyTheme { Root() } }
+        setContent {
+            TofyTheme {
+                // Tap anywhere outside a field to put the keyboard away. A child's
+                // tablet has no "done" habit, and a half-covered screen reads as
+                // broken. A control that consumes the tap (button, field) is
+                // untouched — detectTapGestures only fires on an unconsumed one.
+                val focus = androidx.compose.ui.platform.LocalFocusManager.current
+                androidx.compose.foundation.layout.Box(
+                    androidx.compose.ui.Modifier.fillMaxSize().pointerInput(Unit) {
+                        detectTapGestures { focus.clearFocus() }
+                    },
+                ) { Root() }
+            }
+        }
     }
 
     override fun onNewIntent(intent: android.content.Intent) {

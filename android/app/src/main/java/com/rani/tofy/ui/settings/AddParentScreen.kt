@@ -1,5 +1,7 @@
 package com.rani.tofy.ui.settings
 
+import com.rani.tofy.ui.common.contentColumn
+
 import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -81,7 +83,7 @@ fun AddParentScreen(onClose: () -> Unit) {
     LaunchedEffect(linked) { if (linked > baseline.intValue) justJoined = true }
 
     GlassBackdrop {
-        Column(Modifier.fillMaxSize().systemBarsPadding().imePadding()) {
+        Column(Modifier.contentColumn().fillMaxSize().systemBarsPadding().imePadding()) {
             SettingsTopBar(tr("הוֹסָפַת הוֹרֶה"), onClose)
             Column(
                 Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),

@@ -21,6 +21,9 @@ android {
         // ./gradlew assembleDebug -Pemu=true → a debug build wired to the LOCAL
         // Firebase emulators under the "demo-tofy" project (never production).
         buildConfigField("boolean", "USE_EMULATORS", (project.findProperty("emu") == "true").toString())
+        // 10.0.2.2 is the host as seen from an AVD. A real device on the same
+        // Wi-Fi needs the Mac's LAN address: -PemuHost=10.54.51.141
+        buildConfigField("String", "EMULATOR_HOST", "\"${project.findProperty("emuHost") ?: "10.0.2.2"}\"")
     }
 
     // Upload key lives OUTSIDE the repo: ~/.tofy-keys/upload.jks, its password in

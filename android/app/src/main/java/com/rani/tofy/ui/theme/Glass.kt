@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -40,16 +41,29 @@ object Ink {
     val sheet = Color(0xFF4A3AB0)
 }
 
+/**
+ * @param ask the weight the UI asks for; @param draw the weight Rubik actually
+ *   renders. The top weights are capped: iOS draws Hebrew in SF Hebrew Rounded,
+ *   whose heavy cuts stay airy, while Rubik at 800–900 turns vowelled Hebrew
+ *   into a black smear with the niqqud glued to the letters. Capping here fixes
+ *   every screen at once instead of editing a hundred call sites.
+ */
 @OptIn(ExperimentalTextApi::class)
-private fun rubik(w: Int) = Font(R.font.rubik, FontWeight(w), variationSettings = FontVariation.Settings(FontVariation.weight(w)))
+private fun rubik(ask: Int, draw: Int = ask) =
+    Font(R.font.rubik, FontWeight(ask), variationSettings = FontVariation.Settings(FontVariation.weight(draw)))
 
 /** Rubik stands in for SF Rounded: round, friendly, full Hebrew + Cyrillic. Arabic falls back to the system face. */
-val Rounded = FontFamily(rubik(400), rubik(500), rubik(600), rubik(700), rubik(800), rubik(900))
+val Rounded = FontFamily(rubik(400), rubik(500), rubik(600), rubik(700), rubik(800, 730), rubik(900, 780))
 
 /** GlassBackdrop.swift: the brand gradient with a pink and a teal orb. */
+/**
+ * @param maxContentWidth caps the content column on tablets while the gradient
+ *   stays full-bleed — a phone layout stretched over 1280dp throws a card's two
+ *   ends to opposite edges. Pass `null` for a screen that must fill the glass.
+ */
 @Composable
-fun GlassBackdrop(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
-    Box(modifier.fillMaxSize()) {
+fun GlassBackdrop(modifier: Modifier = Modifier, maxContentWidth: Dp? = 900.dp, content: @Composable BoxScope.() -> Unit) {
+    Box(modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.TopCenter) {
         Canvas(Modifier.fillMaxSize()) {
             drawRect(Brush.linearGradient(
                 listOf(Color(0xFF7A5CFF), Color(0xFF5E60CE), Color(0xFF3E8BF0)),
@@ -59,7 +73,9 @@ fun GlassBackdrop(modifier: Modifier = Modifier, content: @Composable BoxScope.(
             drawCircle(Color(0xFFFF7BD3).copy(alpha = 0.8f), radius = 140.dp.toPx(), center = Offset(40.dp.toPx(), 250.dp.toPx()))
             drawCircle(Color(0xFF37E2D5).copy(alpha = 0.8f), radius = 160.dp.toPx(), center = Offset(size.width - 30.dp.toPx(), size.height - 200.dp.toPx()))
         }
-        content()
+        if (maxContentWidth == null) content()
+        else Box(Modifier.widthIn(max = maxContentWidth).fillMaxSize(),
+            contentAlignment = androidx.compose.ui.Alignment.TopCenter, content = content)
     }
 }
 

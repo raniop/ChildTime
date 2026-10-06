@@ -1,5 +1,7 @@
 package com.rani.tofy.ui.onboarding
 
+import com.rani.tofy.ui.common.contentColumn
+
 import android.content.Context
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -120,7 +122,7 @@ fun ParentPinSetupScreen(onDone: () -> Unit) {
 
     GlassBackdrop {
         Column(
-            Modifier.fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 12.dp),
+            Modifier.contentColumn().fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             StepsHeader(step = 1)

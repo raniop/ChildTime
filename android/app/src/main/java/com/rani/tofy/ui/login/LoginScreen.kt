@@ -1,5 +1,7 @@
 package com.rani.tofy.ui.login
 
+import com.rani.tofy.ui.common.contentColumn
+
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.Image
@@ -44,7 +46,7 @@ fun LoginScreen() {
 
     GlassBackdrop {
         Column(
-            Modifier.fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 16.dp),
+            Modifier.contentColumn().fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterVertically),
         ) {

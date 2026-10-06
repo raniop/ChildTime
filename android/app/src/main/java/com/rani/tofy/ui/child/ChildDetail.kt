@@ -1,5 +1,7 @@
 package com.rani.tofy.ui.child
 
+import com.rani.tofy.ui.common.contentColumn
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -81,7 +83,7 @@ internal fun ChildDetailContent(childID: String, onBack: () -> Unit, onSettings:
 
     GlassBackdrop {
         if (child == null) {
-            Column(Modifier.fillMaxSize().systemBarsPadding().padding(16.dp)) { PageBar("", onBack) }
+            Column(Modifier.contentColumn().fillMaxSize().systemBarsPadding().padding(16.dp)) { PageBar("", onBack) }
             return@GlassBackdrop
         }
         val progress = state.progress[childID] ?: Progress.EMPTY
@@ -90,7 +92,7 @@ internal fun ChildDetailContent(childID: String, onBack: () -> Unit, onSettings:
         val devices = state.devicesOf(childID)
         val live = tick.let { state.liveWindow(child) }  // re-read on the 1 s tick
 
-        LazyColumn(Modifier.fillMaxSize().systemBarsPadding(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        LazyColumn(Modifier.contentColumn().fillMaxSize().systemBarsPadding(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             item {
                 PageBar("", onBack) {
                     Row(Modifier.clip(RoundedCornerShape(20.dp)).clickable(onClick = onSettings).padding(horizontal = 10.dp, vertical = 8.dp),

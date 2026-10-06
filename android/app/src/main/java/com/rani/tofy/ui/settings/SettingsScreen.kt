@@ -1,5 +1,7 @@
 package com.rani.tofy.ui.settings
 
+import com.rani.tofy.ui.common.contentColumn
+
 import android.Manifest
 import android.content.Intent
 import android.os.Build
@@ -113,7 +115,7 @@ fun SettingsScreen(onBack: () -> Unit) {
     }
 
     GlassBackdrop {
-        Column(Modifier.fillMaxSize().systemBarsPadding().imePadding()) {
+        Column(Modifier.contentColumn().fillMaxSize().systemBarsPadding().imePadding()) {
             SettingsTopBar(tr("הַגְדָּרוֹת"), onBack)
             LazyColumn(
                 Modifier.fillMaxSize(),

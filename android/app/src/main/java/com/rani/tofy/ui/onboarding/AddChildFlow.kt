@@ -99,6 +99,13 @@ fun AddChildFlow(firstChild: Boolean, onDone: () -> Unit, onCancel: () -> Unit) 
             val id = childID ?: return@DeviceQuestionScreen
             ParentOnboarding.setPlan(ctx, id, "own")
             if (firstChild) step = Step.CONNECT else sheetFor = id
+        }, onPlaysHere = {
+            val id = childID ?: return@DeviceQuestionScreen
+            ParentOnboarding.setPlan(ctx, id, "here")
+            ParentOnboarding.finish(ctx)
+            GiftWelcome.markShown(ctx, state.household)
+            com.rani.tofy.DeviceRole.startKidMode(id)   // hands this device over now
+            onDone()
         }, onLater = ::endLater)
         Step.CONNECT -> OnboardingConnectScreen(childID ?: "", name, girl, onLocked = { step = Step.DONE }, onLater = ::endLater)
         Step.DONE -> OnboardingDoneScreen(name, girl) {

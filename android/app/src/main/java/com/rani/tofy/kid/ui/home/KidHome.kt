@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -144,7 +145,10 @@ internal fun KidHome(
     val girl = child?.isGirl == true
 
     GlassBackdrop {
-        BoxWithConstraints(Modifier.fillMaxSize()) {
+        // A tablet gets a third column, but the whole board stays in a centred
+        // 900dp block — stretched across 1280dp the header pane flings the stats
+        // to opposite edges and the fox wanders over the cards.
+        BoxWithConstraints(Modifier.widthIn(max = 900.dp).fillMaxSize()) {
             val cols = if (maxWidth >= 600.dp) 3 else 2
             val hPad = if (cols == 2) 10.dp else 22.dp
             LazyVerticalGrid(

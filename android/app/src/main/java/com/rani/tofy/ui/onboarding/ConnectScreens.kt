@@ -1,5 +1,7 @@
 package com.rani.tofy.ui.onboarding
 
+import com.rani.tofy.ui.common.contentColumn
+
 import android.content.Context
 import android.content.Intent
 import android.text.format.DateFormat
@@ -114,10 +116,10 @@ private fun QRBlock(childID: String, code: String?, size: Int, retryLabel: Strin
  * the way past it.
  */
 @Composable
-fun DeviceQuestionScreen(name: String, girl: Boolean, showSteps: Boolean, onOwnDevice: () -> Unit, onLater: () -> Unit) {
+fun DeviceQuestionScreen(name: String, girl: Boolean, showSteps: Boolean, onOwnDevice: () -> Unit, onPlaysHere: () -> Unit, onLater: () -> Unit) {
     GlassBackdrop {
         Column(
-            Modifier.fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 8.dp),
+            Modifier.contentColumn().fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
             if (showSteps) StepsHeader(step = 3)
@@ -135,6 +137,20 @@ fun DeviceQuestionScreen(name: String, girl: Boolean, showSteps: Boolean, onOwnD
                     Text(if (girl) tr("כן, יש לה טלפון או אייפד") else tr("כן, יש לו טלפון או אייפד"),
                         color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
                     P(tr("נחבר אותו עכשיו בסריקת קוד"), 14f, color = Color.White.copy(alpha = 0.8f))
+                }
+            }
+            // "plays on my phone" → Kid Mode here (screen pinning), the Android
+            // counterpart of iOS's Kid Mode.
+            Row(
+                Modifier.fillMaxWidth().glassPane(20.dp).clickable(onClick = onPlaysHere).padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                Text("🧒", fontSize = 30.sp)
+                Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(if (girl) tr("לא, היא תשחק בטלפון שלי") else tr("לא, הוא ישחק בטלפון שלי"),
+                        color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                    P(if (girl) tr("%@ תשחק כאן, במצב ילד", name) else tr("%@ ישחק כאן, במצב ילד", name),
+                        14f, color = Color.White.copy(alpha = 0.8f))
                 }
             }
             Spacer(Modifier.height(24.dp))
@@ -172,7 +188,7 @@ fun OnboardingConnectScreen(childID: String, name: String, girl: Boolean, onLock
 
     GlassBackdrop {
         Column(
-            Modifier.fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 22.dp, vertical = 8.dp),
+            Modifier.contentColumn().fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 22.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             StepsHeader(step = if (linked) 4 else 3)
@@ -212,7 +228,7 @@ fun OnboardingDoneScreen(name: String, girl: Boolean, onDone: () -> Unit) {
     val gift = GiftWelcome.until(state.household) != null
     GlassBackdrop {
         Column(
-            Modifier.fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 22.dp, vertical = 8.dp),
+            Modifier.contentColumn().fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 22.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             StepsHeader(step = 5)
@@ -246,7 +262,7 @@ fun GiftWelcomeScreen(until: Double, onDone: () -> Unit) {
     }
     GlassBackdrop {
         Column(
-            Modifier.fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 26.dp, vertical = 12.dp),
+            Modifier.contentColumn().fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 26.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
             Spacer(Modifier.height(10.dp))

@@ -1,5 +1,7 @@
 package com.rani.tofy.ui.activity
 
+import com.rani.tofy.ui.common.contentColumn
+
 import android.text.format.DateFormat
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -65,7 +67,7 @@ fun ActivityScreen(onBack: () -> Unit) {
     val kids = fam.children.associateBy { it.id }
 
     GlassBackdrop {
-        Column(Modifier.fillMaxSize().systemBarsPadding()) {
+        Column(Modifier.contentColumn().fillMaxSize().systemBarsPadding()) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(44.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.22f)).clickable(onClick = onBack), contentAlignment = Alignment.Center) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, tr("חזרה"), tint = Color.White)

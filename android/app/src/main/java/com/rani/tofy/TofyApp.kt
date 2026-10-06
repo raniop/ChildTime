@@ -31,8 +31,8 @@ class TofyApp : Application() {
     private fun useLocalEmulators() {
         val opts = FirebaseOptions.fromResource(this) ?: return
         FirebaseApp.initializeApp(this, FirebaseOptions.Builder(opts).setProjectId("demo-tofy").build())
-        FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099)
-        FirebaseFirestore.getInstance().useEmulator("10.0.2.2", 8080)
+        FirebaseAuth.getInstance().useEmulator(BuildConfig.EMULATOR_HOST, 9099)
+        FirebaseFirestore.getInstance().useEmulator(BuildConfig.EMULATOR_HOST, 8080)
     }
 
     /** One channel per kind, so a parent can mute marketing without losing approvals. */

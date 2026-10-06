@@ -1,5 +1,7 @@
 package com.rani.tofy.ui.onboarding
 
+import com.rani.tofy.ui.common.contentColumn
+
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
@@ -35,7 +37,7 @@ fun FamilyChoiceScreen(onJoin: () -> Unit) {
 
     GlassBackdrop {
         Column(
-            Modifier.fillMaxSize().systemBarsPadding().imePadding().verticalScroll(rememberScrollState()).padding(24.dp),
+            Modifier.contentColumn().fillMaxSize().systemBarsPadding().imePadding().verticalScroll(rememberScrollState()).padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -83,7 +85,7 @@ fun JoinFamilyScreen(onBack: () -> Unit) {
     androidx.activity.compose.BackHandler(onBack = onBack)
     GlassBackdrop {
         Column(
-            Modifier.fillMaxSize().systemBarsPadding().imePadding().verticalScroll(rememberScrollState()).padding(24.dp),
+            Modifier.contentColumn().fillMaxSize().systemBarsPadding().imePadding().verticalScroll(rememberScrollState()).padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -114,7 +116,7 @@ fun EmailInviteScreen(invite: com.rani.tofy.data.Bootstrap.EmailInvite) {
     var busy by remember { mutableStateOf(false) }
     GlassBackdrop {
         Column(
-            Modifier.fillMaxSize().systemBarsPadding().padding(24.dp),
+            Modifier.contentColumn().fillMaxSize().systemBarsPadding().padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

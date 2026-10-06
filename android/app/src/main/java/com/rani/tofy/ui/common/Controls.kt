@@ -74,11 +74,11 @@ fun CircleIconButton(emoji: String, badge: Int = 0, onClick: () -> Unit) {
 
 @Composable
 fun H(text: String, size: Int = 22, modifier: Modifier = Modifier, color: Color = Ink.primary, align: TextAlign? = null) =
-    Text(text, modifier, color = color, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = size.sp, textAlign = align, lineHeight = (size * 1.25).sp)
+    Text(text, modifier, color = color, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = size.sp, textAlign = align, lineHeight = (size * 1.34).sp)
 
 @Composable
 fun P(text: String, size: Float = 14.5f, modifier: Modifier = Modifier, color: Color = Ink.secondary, weight: FontWeight = FontWeight.Medium, align: TextAlign? = null, maxLines: Int = Int.MAX_VALUE) =
-    Text(text, modifier, color = color, fontFamily = Rounded, fontWeight = weight, fontSize = size.sp, textAlign = align, lineHeight = (size * 1.4).sp, maxLines = maxLines)
+    Text(text, modifier, color = color, fontFamily = Rounded, fontWeight = weight, fontSize = size.sp, textAlign = align, lineHeight = (size * 1.5).sp, maxLines = maxLines)
 
 @Composable
 fun RowSpaced(content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit) =

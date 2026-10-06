@@ -1,5 +1,7 @@
 package com.rani.tofy.ui.onboarding
 
+import com.rani.tofy.ui.common.contentColumn
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -71,7 +73,7 @@ fun ChildCreateStep(showSteps: Boolean, busy: Boolean, error: Boolean, onCancel:
     val canSave = shown.isNotEmpty() && grade != null
 
     GlassBackdrop {
-        Column(Modifier.fillMaxSize().systemBarsPadding().imePadding()) {
+        Column(Modifier.contentColumn().fillMaxSize().systemBarsPadding().imePadding()) {
             if (onCancel != null) Row(Modifier.fillMaxWidth().padding(start = 12.dp, top = 6.dp)) {
                 Text(tr("ביטול"), Modifier.clip(RoundedCornerShape(50)).clickable(onClick = onCancel).padding(10.dp),
                     color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 16.sp)

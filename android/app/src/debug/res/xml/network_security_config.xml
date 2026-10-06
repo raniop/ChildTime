@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Debug only: lets a -Pemu=true build reach the local Firebase emulators. -->
+<!--
+  DEBUG BUILDS ONLY — never shipped. A -Pemu build talks to the Firebase
+  emulators over plain HTTP: 10.0.2.2 from an AVD, or the Mac's LAN address
+  from a real test tablet (-PemuHost=…), which can be any private IP.
+-->
 <network-security-config>
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="false">10.0.2.2</domain>
-    </domain-config>
+    <base-config cleartextTrafficPermitted="true" />
 </network-security-config>

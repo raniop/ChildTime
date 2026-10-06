@@ -1,5 +1,7 @@
 package com.rani.tofy.ui.home
 
+import com.rani.tofy.ui.common.contentColumn
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,7 +47,7 @@ fun HomeScreen(
 
     GlassBackdrop {
         LazyColumn(
-            Modifier.fillMaxSize().systemBarsPadding(),
+            Modifier.contentColumn().fillMaxSize().systemBarsPadding(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {

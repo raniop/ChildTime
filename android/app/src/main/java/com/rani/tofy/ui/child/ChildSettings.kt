@@ -1,5 +1,7 @@
 package com.rani.tofy.ui.child
 
+import com.rani.tofy.ui.common.contentColumn
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -65,12 +67,12 @@ internal fun ChildSettingsContent(childID: String, onBack: () -> Unit, onDeleted
 
     GlassBackdrop {
         if (child == null) {
-            Column(Modifier.fillMaxSize().systemBarsPadding().padding(16.dp)) { PageBar("", onBack) }
+            Column(Modifier.contentColumn().fillMaxSize().systemBarsPadding().padding(16.dp)) { PageBar("", onBack) }
             return@GlassBackdrop
         }
         val progress = state.progress[childID] ?: Progress.EMPTY
         val extras = remember(stateDoc) { SnapshotExtras.from(stateDoc) }
-        Box(Modifier.fillMaxSize().systemBarsPadding().imePadding()) {
+        Box(Modifier.contentColumn().fillMaxSize().systemBarsPadding().imePadding()) {
             when (page) {
                 Page.MAIN -> MainList(child, progress, extras, state.devicesOf(childID).isNotEmpty(), note, ::back, onOpen = { page = it }, write = ::write, onDeleted = onDeleted)
                 Page.PROFILE -> ProfileEditor(child, ::back, onSave = { f -> if (f.isNotEmpty()) write(f); page = Page.MAIN }, onDeleted = onDeleted, note = note)

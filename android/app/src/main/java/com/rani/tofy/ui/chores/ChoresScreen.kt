@@ -1,5 +1,7 @@
 package com.rani.tofy.ui.chores
 
+import com.rani.tofy.ui.common.contentColumn
+
 import android.graphics.BitmapFactory
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -72,7 +74,7 @@ fun ChoresScreen(onBack: () -> Unit) {
     var editing by remember { mutableStateOf<Chore?>(null) }
 
     GlassBackdrop {
-        Column(Modifier.fillMaxSize().systemBarsPadding()) {
+        Column(Modifier.contentColumn().fillMaxSize().systemBarsPadding()) {
             TopRow(if (child != null) tr("מטלות הבית · %@", child.name) else tr("מטלות הבית"), onBack)
             if (child == null) return@Column
             val mine = ChoresRepository.choresFor(child.id, all)
