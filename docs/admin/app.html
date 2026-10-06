@@ -149,7 +149,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261006195156";
+const PAGE_STAMP = "20261006195650";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -1142,7 +1142,12 @@ async function updQuick(c) {
   const notesByLang = {};
   for (const l of ["he", "en", "ru", "ar"]) notesByLang[l] = pitch ? (pitch[l] || []).slice(0, 3) : [];
   const upToDate = (c.latestBuild || 0) >= build && c.enabled;
-  const row = (t) => `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12)">${esc(t)}</div>`;
+  // Emoji in a fixed column so every line's text starts at the same edge.
+  const row = (t) => {
+    const m = t.match(/^(\p{Extended_Pictographic}[\uFE0F\u200D\p{Extended_Pictographic}]*)\s*(.*)$/u);
+    const ico = m ? m[1] : "", txt = m ? m[2] : t;
+    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12)"><span style="flex:0 0 26px;width:26px;text-align:center;font-size:18px;line-height:1">${esc(ico)}</span><span>${esc(txt)}</span></div>`;
+  };
   box.innerHTML = `
     <div class="card" style="border-color:${upToDate ? "rgba(56,209,140,.5)" : "rgba(255,210,90,.6)"};max-width:720px">
       <h4 style="margin-bottom:4px">🍎 באפסטור עכשיו: ${esc(live)} · בילד ${build}</h4>

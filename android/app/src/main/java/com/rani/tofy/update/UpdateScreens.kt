@@ -113,14 +113,20 @@ fun UpdateAvailableSheet(onUpdate: () -> Unit, onLater: () -> Unit, onDismiss: (
                 }
                 if (notes.isNotEmpty()) Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                     notes.forEach { line ->
-                        Text(
-                            line,
+                        // The emoji sits in a fixed column so every line's text starts
+                        // at the same edge (🏅 / ⏱ / 🛠 differ in width).
+                        val (icon, text) = AppUpdateLogic.splitEmoji(line)
+                        androidx.compose.foundation.layout.Row(
                             Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.10f))
                                 .border(1.dp, Color.White.copy(alpha = 0.16f), RoundedCornerShape(16.dp))
                                 .padding(vertical = 13.dp, horizontal = 14.dp),
-                            color = Color.White.copy(alpha = 0.92f), fontFamily = Rounded, fontWeight = FontWeight.Medium,
-                            fontSize = 14.5.sp, lineHeight = 21.sp,
-                        )
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            if (icon.isNotEmpty()) Text(icon, Modifier.width(24.dp), fontSize = 17.sp, textAlign = TextAlign.Center)
+                            Text(text, color = Color.White.copy(alpha = 0.92f), fontFamily = Rounded, fontWeight = FontWeight.Medium,
+                                fontSize = 14.5.sp, lineHeight = 21.sp)
+                        }
                     }
                 }
             }

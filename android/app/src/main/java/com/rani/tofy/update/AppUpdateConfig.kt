@@ -134,6 +134,16 @@ object AppUpdateConfig {
 
 /** The pure part — unit-tested (AppUpdateLogicTest). */
 object AppUpdateLogic {
+    /** "🏅 פרס…" → ("🏅", "פרס…"); a line that doesn't open with an emoji stays whole. */
+    fun splitEmoji(line: String): Pair<String, String> {
+        val space = line.indexOf(' ')
+        if (space <= 0) return "" to line
+        val head = line.substring(0, space)
+        val cp = head.codePointAt(0)
+        val isEmoji = Character.getType(cp) == Character.OTHER_SYMBOL.toInt() || cp >= 0x1F000
+        return if (isEmoji) head to line.substring(space + 1) else "" to line
+    }
+
     fun state(v: AppUpdateConfig.Values, installed: Int): AppUpdateConfig.State {
         if (!v.enabled) return AppUpdateConfig.State.None
         if (v.minBuild > 0 && installed < v.minBuild) return AppUpdateConfig.State.Required(v.minBuild)

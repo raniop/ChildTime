@@ -49,6 +49,14 @@ private struct UpdateHero: View {
 // MARK: - Parent: what changed, and a way to get it
 
 struct UpdateAvailableSheet: View {
+    /// "🏅 פרס…" → ("🏅", "פרס…"); a line that doesn't open with an emoji stays whole.
+    static func splitEmoji(_ line: String) -> (String, String) {
+        guard let first = line.first,
+              first.unicodeScalars.contains(where: { $0.properties.isEmojiPresentation || ($0.properties.isEmoji && $0.value > 0x2000) }),
+              let space = line.firstIndex(of: " ") else { return ("", line) }
+        return (String(line[..<space]), String(line[line.index(after: space)...]))
+    }
+
     let onUpdate: () -> Void
     let onLater: () -> Void
 
@@ -75,11 +83,19 @@ struct UpdateAvailableSheet: View {
                     if !config.displayNotes.isEmpty {
                         VStack(spacing: 9) {
                             ForEach(Array(config.displayNotes.enumerated()), id: \.offset) { _, line in
-                                Text(line)
-                                    .font(.system(size: 14.5, weight: .medium, design: .rounded))
-                                    .foregroundStyle(.white.opacity(0.92))
-                                    .lineSpacing(2)
-                                    .fixedSize(horizontal: false, vertical: true)
+                                // The emoji sits in a fixed column, so every line's
+                                // text starts at the same edge (🏅 / ⏱ / 🛠 differ in width).
+                                let (icon, text) = Self.splitEmoji(line)
+                                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                                    if !icon.isEmpty {
+                                        Text(icon).font(.system(size: 17)).frame(width: 24)
+                                    }
+                                    Text(text)
+                                        .font(.system(size: 14.5, weight: .medium, design: .rounded))
+                                        .foregroundStyle(.white.opacity(0.92))
+                                        .lineSpacing(2)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .padding(.vertical, 13).padding(.horizontal, 14)
                                     .background(
