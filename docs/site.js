@@ -218,7 +218,8 @@
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "video-tap";
-    btn.setAttribute("aria-label", "הפעלת הסרטון");
+    var lang = (document.documentElement.lang || "he").slice(0, 2);
+    btn.setAttribute("aria-label", { en: "Play video", ru: "Воспроизвести видео", ar: "تشغيل الفيديو" }[lang] || "הפעלת הסרטון");
     btn.textContent = "\u25B6\uFE0E";
     host.appendChild(btn);
     // Centre the ▶ on the video itself (the stage also holds a second phone).
