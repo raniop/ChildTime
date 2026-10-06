@@ -98,6 +98,9 @@ data class HomeCtaModel(
     val capMax: Int,
     val pendingMinutes: Int,
     val redeemableMinutes: Int,
+    /** 🔒 the child's own code for their minutes (iOS "קוד סודי לדקות שלי"). */
+    val hasPlayPin: Boolean = false,
+    val showPlayPin: Boolean = false,
 )
 
 /** The round-button / twin-card / games-tile / buddy entries of the home (WorldMapView). */
@@ -131,6 +134,7 @@ internal fun KidHome(
     onTile: (HomeTile) -> Unit,
     onChallenge: () -> Unit,
     onLevelInfo: () -> Unit,
+    onPlayPin: () -> Unit,
     /** ⭐ 💎 ⏱ 💝 and "הרווחת היום" each explain themselves (WorldMapView.infoStat). */
     onStatInfo: (StatInfoKind) -> Unit,
     onOpenEarned: () -> Unit,
@@ -230,6 +234,7 @@ internal fun KidHome(
             ) {
                 BuddyBubble(buddyLine, Modifier.fillMaxWidth())
                 BottomCtas(cta, onOpenEarned, onOpenGift, onTransfer)
+                if (cta.showPlayPin) PlayPinChip(cta.hasPlayPin, onPlayPin)
             }
 
             // The child's buddy roams between the header and the panel; tap → shop, 🎁 → chest.
@@ -578,6 +583,16 @@ private fun ColumnScope.BottomCtas(c: HomeCtaModel, onOpenEarned: () -> Unit, on
             c.redeemableMinutes, ProgressEngine.MINIMUM_UNLOCK_MINUTES, maxOf(0, ProgressEngine.MINIMUM_UNLOCK_MINUTES - c.redeemableMinutes)))
         else -> BottomHint(tr("עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק 🎮"))
     }
+}
+
+/** "🔓 קוד סודי לדקות שלי" / "🔒 הדקות שלי מוגנות בקוד" — small and discreet, under the buttons. */
+@Composable
+private fun PlayPinChip(hasPin: Boolean, onClick: () -> Unit) {
+    Text((if (hasPin) "🔒 " + tr("הַדַּקּוֹת שֶׁלִּי מוּגָנוֹת בְּקוֹד") else "🔓 " + tr("קוֹד סוֹדִי לַדַּקּוֹת שֶׁלִּי")),
+        Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.16f))
+            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+        color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.5.sp, maxLines = 1)
 }
 
 /** "16 דַּקּוֹת" / "16:45 דַּקּוֹת" — the gift pocket to the second, never quietly rounded. */

@@ -171,6 +171,11 @@ private sealed class Cover {
     data class Ask(val world: KidWorld?) : Cover()
     data object PlayPin : Cover()
     data object PinForgot : Cover()
+    /** 🔒 The child's own code for their minutes: choose, manage, verify-then-change / -remove. */
+    data object PinSet : Cover()
+    data object PinManage : Cover()
+    data object PinVerifyThenSet : Cover()
+    data object PinVerifyThenClear : Cover()
     data object Challenge : Cover()
     data object Level : Cover()
     data class Stat(val kind: StatInfoKind) : Cover()
@@ -391,6 +396,22 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
         cover == Cover.PlayPin -> KidPinVerify(child?.playPIN.orEmpty(),
             onSuccess = { cover = null; val a = pendingOpen; pendingOpen = null; a?.let { scope.launch { it() } } },
             onCancel = { cover = null; pendingOpen = null }, onForgot = { pendingOpen = null; cover = Cover.PinForgot })
+        cover == Cover.PinSet -> KidPinSet(onDone = { pin ->
+                cover = null
+                scope.launch { JoinRepository.childWrite(cid, child?.householdID, mapOf("playPIN" to pin)) }
+                say(tr("הַזְּמַן שֶׁלְּךָ מוּגָן! 🔒"))
+            }, onCancel = { cover = null })
+        cover == Cover.PinManage -> KidPinManage(onChange = { cover = Cover.PinVerifyThenSet },
+            onRemove = { cover = Cover.PinVerifyThenClear }, onClose = { cover = null })
+        cover == Cover.PinVerifyThenSet -> KidPinVerify(child?.playPIN.orEmpty(), title = tr("קֹדֶם הַקּוֹד הַנּוֹכְחִי"),
+            onSuccess = { cover = Cover.PinSet }, onCancel = { cover = null }, onForgot = { cover = Cover.PinForgot })
+        cover == Cover.PinVerifyThenClear -> KidPinVerify(child?.playPIN.orEmpty(), title = tr("קֹדֶם הַקּוֹד הַנּוֹכְחִי"),
+            onSuccess = {
+                cover = null
+                // "" (not deleted) — the deliberate-clear sentinel that survives sync merges.
+                scope.launch { JoinRepository.childWrite(cid, child?.householdID, mapOf("playPIN" to "")) }
+                say(tr("הַקּוֹד הוּסַר 🔓"))
+            }, onCancel = { cover = null }, onForgot = { cover = Cover.PinForgot })
         cover == Cover.PinForgot -> KidPinForgot(child?.name.orEmpty(), household?.parentPinHash, householdLoaded,
             onParentReset = {
                 cover = null
@@ -423,6 +444,9 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 canRedeem = engine.canRedeemNow, redeemableSeconds = engine.redeemableSecondsNow,
                 maxedOut = engine.dailyScreenTimeMaxedOut, minutesPlayedToday = engine.minutesPlayedToday,
                 capMax = cap.max, pendingMinutes = engine.pendingMinutes, redeemableMinutes = engine.redeemableMinutesNow,
+                hasPlayPin = child?.hasPlayPIN == true,
+                // Only where it matters: a code to manage, or minutes worth protecting.
+                showPlayPin = child?.hasPlayPIN == true || engine.pendingMinutes > 0 || engine.local.manualPausedSeconds > 0,
             )
             KidHome(
                 childID = cid, child = child, state = st, engine = engine, premium = premium, kidMode = kidMode,
@@ -441,6 +465,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 },
                 onChallenge = { cover = if (premium) Cover.Challenge else Cover.Ask(null) },
                 onLevelInfo = { cover = Cover.Level },
+                onPlayPin = { cover = if (child?.hasPlayPIN == true) Cover.PinManage else Cover.PinSet },
                 onStatInfo = { cover = Cover.Stat(it) },
                 onOpenEarned = { requestUnlock { handle(KidSession.openEarned(), false) } },
                 onOpenGift = { requestUnlock { handle(KidSession.openGift(), true) } },
