@@ -11,6 +11,9 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideOutVertically
@@ -221,20 +224,31 @@ fun MiniGameTopBar(onClose: () -> Unit, earn: MiniGameEarnSession? = null, gameC
     }
 }
 
-/** The runner's earned-time bar: seconds toward the next bonus. */
+/** The runner's earned-time bar: the child's REAL balance, to the second (each "+24 שניות" lands in it). */
 @Composable
 fun MiniGameEarnBar() {
+    EarnedBalanceRow(Modifier.fillMaxWidth().glassPane(14.dp).padding(horizontal = 12.dp, vertical = 7.dp), size = 13f)
+}
+
+/**
+ * "⏱ 23:47 דַּקּ׳ שֶׁהִרְוִיחַ" — the earned wallet, the same number the home screen
+ * and "פתחו לי" show (iOS EarnedBalanceRow). It used to be a bar toward the next
+ * batch of 10, which the home screen never showed (Rani, 2026-10-06).
+ */
+@Composable
+fun EarnedBalanceRow(modifier: Modifier = Modifier, size: Float = 14f) {
     val state by KidSession.state.collectAsState()
-    val target = KidSession.engine()?.settings?.bonusTargetSeconds ?: 240
-    val secs = minOf(target, Math.round(state?.snapshot?.cycleSeconds ?: 0.0).toInt())
-    val frac by animateFloatAsState(if (target > 0) minOf(1f, secs.toFloat() / target) else 0f, spring(dampingRatio = 0.7f), label = "earn")
-    Row(
-        Modifier.fillMaxWidth().glassPane(14.dp).padding(horizontal = 12.dp, vertical = 7.dp),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Text("⏱", fontSize = 13.sp)
-        GoldBar(frac, Modifier.weight(1f).height(7.dp))
-        Text(tr("+%lld שְׁנִ׳", secs), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+    val secs = remember(state) { KidSession.engine()?.openableSeconds(false) ?: 0 }
+    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("⏱", fontSize = (size + 1).sp)
+        Ltr {
+            AnimatedContent(secs, transitionSpec = { (slideInVertically { it } + fadeIn()) togetherWith (slideOutVertically { -it } + fadeOut()) },
+                label = "balance") { v ->
+                Text("%d:%02d".format(v / 60, v % 60), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = (size + 3).sp)
+            }
+        }
+        Text(tr("דַּקּ׳ שֶׁהִרְוִיחַ"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = (size - 1).sp, maxLines = 1)
+        Spacer(Modifier.weight(1f))
     }
 }
 

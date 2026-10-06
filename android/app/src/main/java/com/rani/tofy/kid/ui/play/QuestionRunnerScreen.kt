@@ -71,6 +71,7 @@ import com.rani.tofy.kid.content.ContentMode
 import com.rani.tofy.kid.content.Question
 import com.rani.tofy.kid.core.KidSession
 import com.rani.tofy.kid.core.RewardEngine
+import com.rani.tofy.kid.ui.games.EarnedBalanceRow
 import com.rani.tofy.kid.ui.games.GameEnv
 import com.rani.tofy.kid.ui.games.SurpriseRoundOverlay
 import com.rani.tofy.ui.child.skillName
@@ -144,7 +145,7 @@ private fun RunnerPlaying(r: RunnerController, onClose: () -> Unit) {
             Modifier.fillMaxSize().systemBarsPadding().graphicsLayer { translationX = shake * density }.padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            TopBar(r, kid?.snapshot?.stars ?: 0, kid?.snapshot?.diamonds ?: 0, kid?.snapshot?.cycleSeconds ?: 0.0, onClose)
+            TopBar(r, kid?.snapshot?.stars ?: 0, kid?.snapshot?.diamonds ?: 0, onClose)
             val q = r.current
             if (q != null) {
                 val serial = r.serial
@@ -160,7 +161,7 @@ private fun RunnerPlaying(r: RunnerController, onClose: () -> Unit) {
                             Spacer(Modifier.height(4.dp))
                             AnswersGrid(r, q, serial)
                         }
-                        StreakAndWorth(r, kid?.snapshot?.currentStreak ?: 0, kid?.snapshot?.cycleSeconds ?: 0.0)
+                        StreakAndWorth(kid?.snapshot?.currentStreak ?: 0)
                     }
                 }
                 ToolRow(r, q, waiting = HelpRequestSender.hasActiveRequest && activeQuestion == q.prompt,
@@ -200,7 +201,7 @@ private fun RunnerPlaying(r: RunnerController, onClose: () -> Unit) {
 // ── top bar ─────────────────────────────────────────────────────────────────
 
 @Composable
-private fun TopBar(r: RunnerController, stars: Int, diamonds: Int, cycleSeconds: Double, onClose: () -> Unit) {
+private fun TopBar(r: RunnerController, stars: Int, diamonds: Int, onClose: () -> Unit) {
     val total = maxOf(1, r.totalQuestions)
     val done = minOf(r.questionIndex + 1, total)
     Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -211,28 +212,7 @@ private fun TopBar(r: RunnerController, stars: Int, diamonds: Int, cycleSeconds:
             QuizChip("⭐ ${stars.currencyShort()}", KidColor.starGold)
             QuizChip(tr("%@ שְׁאֵלָה %lld/%lld", r.current?.topic?.emoji ?: r.world.emoji, done, total))
         }
-        EarnedTimeBar(cycleSeconds)
-    }
-}
-
-/** The fractional-reward timer: seconds earned toward the next bonus batch, exact to the second. */
-@Composable
-private fun EarnedTimeBar(cycleSeconds: Double) {
-    val target = KidSession.engine()?.settings?.bonusTargetSeconds ?: 240
-    val secs = minOf(target, cycleSeconds.roundToInt())
-    val frac by animateFloatAsState(if (target > 0) minOf(1f, secs.toFloat() / target) else 0f, spring(dampingRatio = 0.7f), label = "timer")
-    Row(
-        Modifier.fillMaxWidth().glassPane(16.dp).padding(horizontal = 14.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Text("⏱", fontSize = 14.sp)
-        Box(Modifier.weight(1f).height(8.dp).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.18f))) {
-            Box(
-                Modifier.fillMaxWidth(maxOf(0.03f, frac)).height(8.dp).clip(RoundedCornerShape(50))
-                    .background(Brush.horizontalGradient(listOf(Color(0xFFFFD23F), Color(0xFFFF9F1C)))),
-            )
-        }
-        Text(tr("+%lld שְׁנִ׳", secs), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+        EarnedBalanceRow(Modifier.fillMaxWidth().glassPane(16.dp).padding(horizontal = 14.dp, vertical = 10.dp), size = 14f)
     }
 }
 
@@ -319,16 +299,12 @@ private fun AnswersGrid(r: RunnerController, q: Question, serial: Int) {
 }
 
 @Composable
-private fun StreakAndWorth(r: RunnerController, streak: Int, cycleSeconds: Double) {
+private fun StreakAndWorth(streak: Int) {
     val s = KidSession.engine()?.settings
     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        // "🔥 3 ברצף · עוד 2 ובונוס!" in gold under the answers.
+        // "🔥 3 ברצף!" in gold under the answers (no "עוד 2 ובונוס" — there are no batches any more).
         if (streak >= 2) {
-            val total = s?.cycleQuestionsTotal ?: 10
-            val perSec = (s?.bonusTargetSeconds ?: 240).toDouble() / total
-            val done = minOf(total, maxOf(0, (cycleSeconds / maxOf(1.0, perSec)).roundToInt()))
-            val left = maxOf(0, total - done)
-            Text(tr("🔥 %lld בְּרֶצֶף", streak) + (if (left > 0) tr(" · עוֹד %lld וּבוֹנוּס!", left) else "!"),
+            Text(tr("🔥 %lld בְּרֶצֶף", streak) + "!",
                 color = KidColor.starGold, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
         }
         // What a right answer is worth.

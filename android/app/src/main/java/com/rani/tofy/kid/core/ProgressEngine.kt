@@ -131,7 +131,7 @@ data class AnswerOutcome(
     val stars: Int,
     val diamonds: Int,
     val points: Int,
-    /** Minutes banked into the playable wallet by this answer (cycle + variety bonus). */
+    /** Whole minutes this answer moved the session total across (per-answer seconds + variety bonus). */
     val minutesGranted: Int,
     val varietyBonusMinutes: Int,
     /** This answer reached the 30/day soft cap in its topic → nudge to another world. */
@@ -185,6 +185,17 @@ data class LocalPlayState(
     var bonusQuestionServedAt: Double? = null,
     var ownedCosmetics: Set<String> = emptySet(),
     var equippedCosmetic: String? = null,
+    /**
+     * ⏱ ProgressStore.EarnLedger — what per-answer pay keeps between answers, for
+     * ONE day (`earnDay`, Apple secs of its start): seconds in the wallet the
+     * whole-minute `minutesEarnedToday` hasn't counted yet (`earnCapCarry`), seconds
+     * past the cap waiting to bank a minute for tomorrow (`earnOverflow`), and what
+     * a miss/hint left owed by the next right answers (`earnDebt`, ≤ half a step).
+     */
+    var earnDay: Double? = null,
+    var earnCapCarry: Int = 0,
+    var earnOverflow: Int = 0,
+    var earnDebt: Int = 0,
 )
 
 /** Transient per-session values (never persisted). */
@@ -575,18 +586,14 @@ class ProgressEngine(
         ss.lastEarnedPoints = pts
 
         val topicCountToday = if (grantsScreenTime) bumpTopicAnsweredToday(ctx.topic) else 0
+        lastPaidSeconds = 0
         if (grantsScreenTime) {
-            val target = settings.bonusTargetSeconds.toDouble()
-            val perSec = target / settings.cycleQuestionsTotal
+            // ⏱ Each right answer pays its seconds STRAIGHT into the wallet (Rani,
+            // 2026-10-06 — it used to wait for a batch of 10). See [payEarned].
             val balanceFactor = if (topicCountToday > SAME_TOPIC_SOFT_CAP) 0.5 else 1.0
             if (topicCountToday == SAME_TOPIC_SOFT_CAP) { ss.topicBalanceNudgeTopic = ctx.topic; balanceNudge = true }
-            s.cycleSeconds += perSec * maxOf(1.0, cycleMultiplier) * balanceFactor
-            while (s.cycleSeconds >= target - 0.01) {
-                val granted = grantMinutesCappedRaw(maxOf(1, settings.batchMinutes))
-                ss.sessionMinutesEarned += granted
-                sittingMinutes += granted
-                s.cycleSeconds -= target
-            }
+            val pay = settings.secondsPerCorrect * maxOf(1.0, cycleMultiplier) * balanceFactor
+            lastPaidSeconds = payEarned(pay.roundHalfAwayFromZero())
             if (!varietyBonusGrantedToday) {
                 val varied = topicCountsToday().values.count { it >= VARIETY_MIN_ANSWERS_PER_TOPIC }
                 if (varied >= VARIETY_TOPICS_NEEDED) {
@@ -644,11 +651,10 @@ class ProgressEngine(
         if (affectsAdaptive) adjustAdaptiveLevel(topic, correct = false, fast = false, hintUsed = hintUsed, abandoned = false)
         s.topicAffinity = s.topicAffinity + (topic to minOf(1.0, maxOf(0.0, affinity(topic) - 0.04)))
         if (!grantsScreenTime || !settings.penaltyEnabled) return@op 0
-        val perSec = settings.bonusTargetSeconds.toDouble() / settings.cycleQuestionsTotal
-        val before = s.cycleSeconds
-        s.cycleSeconds = maxOf(0.0, s.cycleSeconds - perSec / 2)
+        // Gentle: half a step taken off the NEXT right answer — never out of the
+        // wallet, so the number the child sees never drops.
         ss.lastPenaltyMinutes = 0
-        (before - s.cycleSeconds).roundHalfAwayFromZero()
+        oweEarned(halfStepSeconds)
     }
 
     /** Legacy: half the per-correct reward, ≥1; 0 when penalties are off. */
@@ -668,15 +674,82 @@ class ProgressEngine(
 
     /** 💡 A hint costs what a mistake costs: half a step of the cycle. */
     val hintCostSeconds: Int
-        get() = if (!settings.penaltyEnabled) 0
-        else (settings.bonusTargetSeconds.toDouble() / settings.cycleQuestionsTotal / 2).roundHalfAwayFromZero()
+        get() = if (!settings.penaltyEnabled) 0 else halfStepSeconds
 
+    /** Owed by the next right answer, like a mistake. Seconds owed (0 when a miss already owes it). */
     fun chargeHint(): Int = op {
         if (!settings.penaltyEnabled) return@op 0
-        val before = s.cycleSeconds
-        s.cycleSeconds = maxOf(0.0, s.cycleSeconds - hintCostSeconds)
-        touch()
-        (before - s.cycleSeconds).roundHalfAwayFromZero()
+        oweEarned(hintCostSeconds)
+    }
+
+    // ── ⏱ per-answer pay (ProgressStore.payEarned) ──────────────────────────
+    /** Seconds the last [recordCorrect] actually put in the wallet — the "+Ns" to show. */
+    var lastPaidSeconds = 0
+        private set
+
+    /** Half of what a right answer pays — what a miss or a hint costs. */
+    private val halfStepSeconds: Int get() = (settings.secondsPerCorrect / 2.0).roundHalfAwayFromZero()
+
+    /** The per-answer ledger, cleared when the day changed. */
+    private fun earnLedgerToday() {
+        val today = todayStart()
+        val d = l.earnDay
+        if (d == null || DayMath.localDate(d, zone) != DayMath.localDate(today, zone)) {
+            l.earnDay = today; l.earnCapCarry = 0; l.earnOverflow = 0; l.earnDebt = 0
+        }
+    }
+
+    /**
+     * Pays `seconds` of earned play time into the wallet NOW, minus what a miss
+     * left owed. Today's cap is honoured to the second; past it the seconds bank
+     * for tomorrow (≤ [MAX_CARRY_OVER] minutes), like the batches did. Returns
+     * the seconds that reached the wallet.
+     */
+    private fun payEarned(seconds: Int): Int {
+        rollover()
+        earnLedgerToday()
+        // Progress an older build left toward its next batch — paid out once.
+        var amount = maxOf(0, seconds)
+        if (s.cycleSeconds > 0) {
+            amount += s.cycleSeconds.roundHalfAwayFromZero()
+            s.cycleSeconds = 0.0; touch()
+        }
+        val owed = minOf(l.earnDebt, amount)
+        l.earnDebt -= owed
+        amount -= owed
+        if (amount <= 0) return 0
+        val cap = settings.dailyCap
+        var toWallet = amount
+        if (cap.enabled) {
+            val room = maxOf(0, (maxOf(0, cap.max) - s.minutesEarnedToday) * 60 - l.earnCapCarry)
+            toWallet = minOf(amount, room)
+            l.earnOverflow += amount - toWallet
+            while (l.earnOverflow >= 60 && (s.carryOverMinutes ?: 0) < MAX_CARRY_OVER) {
+                s.carryOverMinutes = (s.carryOverMinutes ?: 0) + 1; touch()
+                l.earnOverflow -= 60
+            }
+            l.earnOverflow = minOf(l.earnOverflow, 59)
+        }
+        if (toWallet <= 0) return 0
+        creditEarnedRaw(toWallet)
+        l.earnCapCarry += toWallet
+        while (l.earnCapCarry >= 60) {
+            l.earnCapCarry -= 60
+            if (cap.enabled) { s.minutesEarnedToday += 1; touch() }
+            ss.sessionMinutesEarned += 1
+            sittingMinutes += 1
+        }
+        if (s.dailyEarnedDate == null) { s.dailyEarnedDate = todayStart(); touch() }
+        return toWallet
+    }
+
+    /** A miss / hint: owed by the next right answers, ≤ half a step in all. Seconds newly owed. */
+    private fun oweEarned(seconds: Int): Int {
+        if (seconds <= 0) return 0
+        earnLedgerToday()
+        val added = minOf(seconds, maxOf(0, halfStepSeconds - l.earnDebt))
+        l.earnDebt += added
+        return added
     }
 
     // ── 🎮 mini-games (MiniGameEarning.swift) ───────────────────────────────
@@ -686,6 +759,8 @@ class ProgressEngine(
         val minutesGranted: Int = 0,
         val lostSeconds: Int = 0,
         val capReached: Boolean = false,
+        /** 🌈 The variety bonus this answer unlocked — the only "+N דקות" pop left. */
+        val varietyBonus: Int = 0,
     )
 
     /**
@@ -717,12 +792,14 @@ class ProgressEngine(
             val granted = maxOf(0, pendingMinutes - before)
             ss.varietyBonusJustEarned = 0; ss.topicBalanceNudgeTopic = null
             ss.lastRecoveredMinutes = 0; ss.newStreakRecord = false
-            var paid = 0
-            if (paysMinutes && !cappedBefore) { paid = settings.secondsPerCorrect; roundSeconds += paid }
-            return MiniGameAnswer(paidSeconds = paid, stars = out.stars, minutesGranted = granted, capReached = atDailyCap())
+            val paid = if (paysMinutes && !cappedBefore) lastPaidSeconds else 0
+            roundSeconds += paid
+            return MiniGameAnswer(paidSeconds = paid, stars = out.stars, minutesGranted = granted, capReached = atDailyCap(),
+                varietyBonus = out.varietyBonusMinutes)
         }
+        // A miss is owed by the next right answer, which then pays (and adds to
+        // `roundSeconds`) that much less — nothing to take off here.
         val lost = recordWrong(topic, grantsScreenTime = true)
-        if (lost > 0) roundSeconds = maxOf(0, roundSeconds - lost)
         return MiniGameAnswer(lostSeconds = lost)
     }
 
@@ -736,17 +813,8 @@ class ProgressEngine(
         touch()
         rollover()
         val topicCountToday = bumpTopicAnsweredToday(topic)
-        val target = settings.bonusTargetSeconds.toDouble()
-        val perSec = target / settings.cycleQuestionsTotal
         val balanceFactor = if (topicCountToday > SAME_TOPIC_SOFT_CAP) 0.5 else 1.0
-        s.cycleSeconds += perSec * balanceFactor
-        while (s.cycleSeconds >= target - 0.01) {
-            val granted = grantMinutesCappedRaw(maxOf(1, settings.batchMinutes))
-            ss.sessionMinutesEarned += granted
-            sittingMinutes += granted
-            s.cycleSeconds -= target
-        }
-        settings.secondsPerCorrect
+        payEarned((settings.secondsPerCorrect * balanceFactor).roundHalfAwayFromZero())
     }
 
     /** ⏱ Seconds this round paid (taken once at the round's end). */
@@ -1249,6 +1317,7 @@ class ProgressEngine(
         s.revision = next
         s.lastModifiedAt = nowApple()
         l.manualPausedSeconds = 0
+        l.earnDay = null; l.earnCapCarry = 0; l.earnOverflow = 0; l.earnDebt = 0
         if (isUnlocked) endUnlock()
         ss.sessionScore = 0; ss.lastEarnedPoints = 0; ss.lastPenaltyMinutes = 0; ss.lastRecoveredMinutes = 0
     }

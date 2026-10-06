@@ -86,6 +86,8 @@ private enum Economy {
         // …and the once-a-day variety bonus is stamped as used, so it can't drop
         // surprise minutes into the middle of a measurement.
         AppGroup.defaults.set(Date(), forKey: "varietyBonusDate" + suffix)
+        // ⏱ …and no seconds a previous test's round left for its end card.
+        _ = MiniGameLedger.takeRoundSeconds()
     }
 
     static func session(_ clock: FakeClock) -> MiniGameEarnSession {
@@ -108,20 +110,24 @@ private enum Economy {
 private struct Delta {
     var stars = 0, diamonds = 0, minutes = 0, answered = 0, correct = 0
     var cycle: Double = 0
+    /// ⏱ Earned-wallet seconds — right answers pay straight in now.
+    var seconds = 0
 }
 
 @MainActor
 private func measure(_ body: () -> Void) -> Delta {
     let p = ProgressStore.shared
     let before = Delta(stars: p.stars, diamonds: p.diamonds, minutes: p.pendingMinutes,
-                       answered: p.answeredToday, correct: p.correctToday, cycle: p.cycleSeconds)
+                       answered: p.answeredToday, correct: p.correctToday, cycle: p.cycleSeconds,
+                       seconds: p.earnedSecondsAvailable)
     body()
     return Delta(stars: p.stars - before.stars,
                  diamonds: p.diamonds - before.diamonds,
                  minutes: p.pendingMinutes - before.minutes,
                  answered: p.answeredToday - before.answered,
                  correct: p.correctToday - before.correct,
-                 cycle: p.cycleSeconds - before.cycle)
+                 cycle: p.cycleSeconds - before.cycle,
+                 seconds: p.earnedSecondsAvailable - before.seconds)
 }
 
 // MARK: - The suites
@@ -229,8 +235,8 @@ struct MiniGameGrantTests {
 struct MiniGameEarnTests {
 
     /// A correct answer in earn mode walks the runner's own path: ⭐ and 💎 on
-    /// the combo ladder, a share of the bonus cycle, and the batch of minutes
-    /// when the cycle fills. 10 answers at the default 4 min / 10 answers = 4 min.
+    /// the combo ladder, and its seconds straight into the wallet. 10 answers
+    /// at the default 4 min / 10 answers = 4 min.
     @Test func tenCorrectAnswersPayOneBatch() {
         Economy.reset()
         let clock = FakeClock()
@@ -243,7 +249,8 @@ struct MiniGameEarnTests {
             }
         }
         let expected = Economy.runnerPayout(10)
-        #expect(d.minutes == 4, "10 correct answers must bank the parent's 4-minute batch")
+        #expect(d.minutes == 4, "10 correct answers must pay the parent's 4 minutes")
+        #expect(d.seconds == 240)
         #expect(d.stars == expected.stars, "⭐ per answer must match the runner's ladder")
         #expect(d.diamonds == expected.diamonds, "💎 per answer must match the runner's ladder")
         #expect(d.answered == 10)
@@ -278,8 +285,7 @@ struct MiniGameEarnTests {
             for _ in 0..<3 { MiniGameLedger.record(correct: true, topic: .math, earn: nil, surprise: true) }
             MiniGameLedger.record(correct: false, topic: .math, earn: nil, surprise: true)
         }
-        let step = Double(p.bonusTargetSeconds) / Double(p.cycleQuestionsTotal)
-        #expect(abs(d.cycle - 3 * step) < 0.01, "each right answer moves the cycle one step; a miss costs nothing")
+        #expect(d.seconds == 3 * p.secondsPerCorrect, "each right answer pays its seconds; a miss costs nothing")
         let g = MiniGameReward.grant(game: "vault", correct: 3, starsPer: 2, diamondsPer: 1, cap: 4, surprise: true)
         #expect(g.seconds == 3 * p.secondsPerCorrect, "the end card's ⏱ chip")
         #expect(d.answered == 4)
@@ -298,23 +304,55 @@ struct MiniGameEarnTests {
             }
         }
         #expect(d.minutes == 0)
-        #expect(d.cycle == 0, "a surprise answer must not move the bonus cycle")
+        #expect(d.seconds == 0, "a surprise answer outside an earning session pays no time")
         #expect(d.answered == 12)
     }
 
-    /// A miss costs half a cycle step — gently, never a banked minute.
+    /// A miss costs half a step, taken off the NEXT right answer — never out of
+    /// the wallet, so the number the child sees never drops.
     @Test func aMissCostsHalfAStepAndNoBankedMinutes() {
         Economy.reset()
         let clock = FakeClock()
         let earn = Economy.session(clock)
         let p = ProgressStore.shared
         for _ in 0..<5 { clock.tick(6); MiniGameLedger.record(correct: true, topic: .math, earn: earn, surprise: false) }
-        let cycleBefore = p.cycleSeconds
-        let minutesBefore = p.pendingMinutes
+        let walletBefore = p.earnedSecondsAvailable
         MiniGameLedger.record(correct: false, topic: .math, earn: earn, surprise: false)
-        let step = Double(p.bonusTargetSeconds) / Double(p.cycleQuestionsTotal)
-        #expect(abs((cycleBefore - p.cycleSeconds) - step / 2) < 0.01, "a miss must cost exactly half a step")
-        #expect(p.pendingMinutes == minutesBefore, "a miss must never take a banked minute")
+        #expect(p.earnedSecondsAvailable == walletBefore, "a miss must never take from the wallet")
+        clock.tick(6)
+        MiniGameLedger.record(correct: true, topic: .math, earn: earn, surprise: false)
+        #expect(p.earnedSecondsAvailable - walletBefore == p.secondsPerCorrect / 2,
+                "the next right answer pays half — the miss's half step")
+    }
+
+    /// ⏱ The daily cap bites to the second; past it the seconds bank for
+    /// tomorrow a minute at a time; a run of misses owes half a step in all.
+    @Test func perAnswerPayHonoursTheCapAndOwesOnlyOnce() {
+        Economy.reset(capEnabled: true, cap: 1)
+        let p = ProgressStore.shared
+        let ctx = ProgressStore.AnswerContext(topic: .math, combo: 0, isSuperQuestion: false, isMysteryPortal: false)
+        func right() { _ = p.recordCorrect(ctx, minutesPerCorrect: 1) }
+        let base = p.earnedSecondsAvailable
+        right(); right()
+        #expect(p.earnedSecondsAvailable - base == 48)
+        #expect(!p.atDailyCap)
+        right()
+        #expect(p.lastPaidSeconds == 12, "only what fits under a 1-minute cap")
+        #expect(p.earnedSecondsAvailable - base == 60)
+        #expect(p.atDailyCap)
+        for _ in 0..<4 { right() }
+        #expect(p.lastPaidSeconds == 0)
+        #expect(p.earnedSecondsAvailable - base == 60)
+        #expect(p.carryOverMinutes == 1, "108 s past the cap bank one minute for tomorrow")
+
+        Economy.reset()
+        _ = p.recordWrong(topic: .math, minutesPerCorrect: 1)
+        #expect(p.chargeHint() == 0, "a hint after a miss owes nothing more")
+        for _ in 0..<3 { #expect(p.recordWrong(topic: .math, minutesPerCorrect: 1) == 0) }
+        right()
+        #expect(p.lastPaidSeconds == 12)
+        right()
+        #expect(p.lastPaidSeconds == 24)
     }
 
     /// 🔁 No double-crediting: a retried answer pays once, and the miss before
@@ -512,9 +550,8 @@ struct MiniGameEconomyTableTests {
             // What the round itself pays, and what the answers inside it paid.
             let perAnswerStars = earned.stars - plain.stars
             let perAnswerDiamonds = earned.diamonds - plain.diamonds
-            // Seconds the round earned: what is still showing on the cycle bar,
-            // plus the whole minutes it already banked.
-            let seconds = earned.cycle + Double(earned.minutes) * 60
+            // Seconds the round earned — straight into the wallet.
+            let seconds = Double(earned.seconds)
 
             #expect(plain.stars > 0, "\(g.key) plain paid 0 ⭐")
             #expect(plain.diamonds > 0, "\(g.key) plain paid 0 💎")
@@ -523,8 +560,8 @@ struct MiniGameEconomyTableTests {
             #expect(surprise.minutes == 0, "\(g.key) surprise must pay no minutes")
             #expect(perAnswerStars > 0, "\(g.key) earn mode paid no per-answer ⭐")
             #expect(perAnswerDiamonds > 0, "\(g.key) earn mode paid no per-answer 💎")
-            // Earn mode pays the runner's own rate: one share of the bonus
-            // cycle per correct answer (24 s at the 4 min / 10 answers default).
+            // Earn mode pays the runner's own rate per correct answer (24 s at
+            // the 4 min / 10 answers default).
             #expect(abs(seconds - Double(g.items * 24)) < 0.5,
                     "\(g.key): \(g.items) correct answers must earn \(g.items * 24) s, got \(seconds)")
             rows.append("| \(g.title) | \(g.items) | ⭐\(plain.stars) 💎\(plain.diamonds) | "
@@ -552,7 +589,7 @@ struct MiniGameEconomyTableTests {
         }
         #expect(d.correct == 6, "six items solved must be six correct answers")
         #expect(d.stars > 0, "a solved-after-a-miss round must never pay 0 ⭐")
-        #expect(d.cycle > 0, "a solved-after-a-miss round must move the bonus cycle")
+        #expect(d.seconds > 0, "a solved-after-a-miss round must pay time")
     }
 }
 }

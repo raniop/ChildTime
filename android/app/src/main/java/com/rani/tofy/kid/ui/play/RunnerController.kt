@@ -340,6 +340,8 @@ class RunnerController(
             ctx, responseMs, hadMistakeThisQuestion, usedHintThisQuestion, grantsScreenTime = true,
             cycleMultiplier = if (isArena) 2.0 else 1.0, affectsAdaptive = !isArena && !isBonusQuestion,
         )
+        // The big "+N דקות" popup is for real bonuses only — the per-answer seconds rise into the timer.
+        var bonusPopupMinutes = out?.varietyBonusMinutes ?: 0
         // 🌈 Topic balance: celebrate the variety bonus, or nudge (positively) to another world.
         if (out != null && out.varietyBonusMinutes > 0) {
             companion.hype(tr("קֶסֶם הַגִּוּוּן! 🌈 +%lld דַּקּוֹת בּוֹנוּס!", out.varietyBonusMinutes))
@@ -351,7 +353,10 @@ class RunnerController(
         // 💫 The bonus question pays its minutes on top of the cycle (cap-aware, overflow banked).
         if (isBonusQuestion) {
             val grant = KidSession.edit { it.grantBonusMinutes(RewardEngine.bonusQuestionMinutes) }
-            if (grant != null) roundSeconds += (grant.addedToday + grant.bankedForTomorrow) * 60
+            if (grant != null) {
+                roundSeconds += (grant.addedToday + grant.bankedForTomorrow) * 60
+                bonusPopupMinutes += grant.addedToday
+            }
         }
         KidSession.edit { it.clearOneShots() }
         refreshProfile()
@@ -361,13 +366,14 @@ class RunnerController(
                 KidSession.engine()?.snapshot?.currentStreak ?: 0, voluntary = cappedBefore, skill = q.skill)
         }
 
-        // "+24 שניות" rising into the timer (doubled in the arena).
-        if (!cappedBefore) {
-            val secs = secondsPerCorrect * (if (isArena) 2 else 1)
-            roundSeconds += secs
-            flashSeconds(tr("+%lld שְׁנִיּוֹת", secs), positive = true)
+        // "+24 שניות" rising into the timer — what ACTUALLY reached the wallet (less
+        // while a miss is paid back, nothing past the cap).
+        val paid = KidSession.engine()?.lastPaidSeconds ?: 0
+        if (!cappedBefore && paid > 0) {
+            roundSeconds += paid
+            flashSeconds(tr("+%lld שְׁנִיּוֹת", paid), positive = true)
         }
-        if (minutesGranted > 0) { lastEarnedMinutes = minutesGranted; earnedPopupTrigger++ }
+        if (bonusPopupMinutes > 0) { lastEarnedMinutes = bonusPopupMinutes; earnedPopupTrigger++ }
 
         val atCapNow = KidSession.edit { it.atDailyCap() } ?: false
         if (!cappedBefore && atCapNow && !capMessageShown) {
@@ -427,8 +433,9 @@ class RunnerController(
             affectsAdaptive = !isArena && !isBonusQuestion)
         refreshProfile()
         KidSession.boundChildID?.let { LearningHistoryRecorder.recordAnswer(it, q.topic.raw, false, 0.0, 0, 0, skill = q.skill) }
+        // A miss is owed by the next right answer (which then pays, and adds to
+        // `roundSeconds`, that much less) — nothing to take off here.
         if (lost > 0) {
-            roundSeconds = maxOf(0, roundSeconds - lost)
             flashSeconds(tr("−%lld שְׁנִיּוֹת · כִּמְעַט!", lost), positive = false)
             companion.console(listOf(tr("💡 כִּמְעַט! תְּשׁוּבָה נְכוֹנָה תַּחֲזִיר אֶת הַזְּמַן"),
                 tr("✨ קָרוֹב! אֶפְשָׁר לְהַחֲזִיר מִיָּד בַּשְּׁאֵלָה הַבָּאָה"), tr("⭐ עוֹד תְּשׁוּבָה נְכוֹנָה וְחוֹזְרִים לְהִתְקַדֵּם")).random())
@@ -455,10 +462,7 @@ class RunnerController(
     fun useHint(forSerial: Int) {
         val q = current ?: return
         if (forSerial != serial || !canUseHint(q)) return
-        if (hintCost > 0) {
-            val lost = KidSession.edit { it.chargeHint() } ?: 0
-            roundSeconds = maxOf(0, roundSeconds - lost)
-        }
+        if (hintCost > 0) KidSession.edit { it.chargeHint() }   // owed by the next right answer
         usedHintThisQuestion = true
         val candidates = q.options.indices.filter { it != q.correctIndex && (feedback[it] ?: OptionFeedback.NORMAL) == OptionFeedback.NORMAL }
         val pick = candidates.randomOrNull() ?: return

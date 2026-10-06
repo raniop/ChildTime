@@ -147,15 +147,20 @@ class ProgressEngineTest {
     private fun ProgressEngine.correct(topic: String = "math") =
         recordCorrect(AnswerContext(topic, snapshot.currentStreak))
 
-    @Test fun tenRightAnswersBankOneBatch() {
+    @Test fun tenRightAnswersPayFourMinutesOneAnswerAtATime() {
         val p = engine()
-        val outs = (1..10).map { p.correct() }
+        // ⏱ Every right answer lands in the wallet at once — no waiting for a batch.
+        val first = p.correct()
+        assertEquals(24, p.lastPaidSeconds)
+        assertEquals(24, p.earnedSecondsAvailable)
+        assertEquals(0, first.minutesGranted)
+        val outs = listOf(first) + (2..10).map { p.correct() }
         val s = p.snapshot
         assertEquals(4, p.pendingMinutes)
         assertEquals(240, p.earnedSecondsAvailable)
         assertEquals(4, s.minutesEarnedToday)
-        assertEquals(4, outs.last().minutesGranted)
-        assertEquals(0.0, s.cycleSeconds, 0.011)
+        assertEquals(4, outs.sumOf { it.minutesGranted })          // whole minutes crossed, answer by answer
+        assertEquals(0.0, s.cycleSeconds, 0.0)
         assertEquals(10, s.answeredToday); assertEquals(10, s.correctToday); assertEquals(10, s.totalCorrect)
         assertEquals(3 + 3 + 6 + 6 + 9 * 5 + 12, s.stars)        // combo ×1,×1,×2,×2,×3…,×4
         assertEquals(4 * 1 + 5 * 2 + 3, s.diamonds)              // weekday, "math" never featured
@@ -199,11 +204,11 @@ class ProgressEngineTest {
         var nudged = 0
         repeat(30) { if (p.correct().balanceNudge) nudged++ }
         assertEquals(1, nudged)
-        val before = p.snapshot.cycleSeconds
+        val before = p.earnedSecondsAvailable
         p.correct()                                               // the 31st in the same topic
-        assertEquals(12.0, p.snapshot.cycleSeconds - before, 1e-9)
+        assertEquals(12, p.earnedSecondsAvailable - before)
         p.correct("logic")
-        assertEquals(36.0, p.snapshot.cycleSeconds - before, 1e-9)
+        assertEquals(36, p.earnedSecondsAvailable - before)
     }
 
     @Test fun varietyBonusOncePerDay() {
@@ -216,22 +221,79 @@ class ProgressEngineTest {
         assertNotNull(p.snapshot.varietyBonusDate)
     }
 
-    @Test fun mistakeCostsHalfAStepNeverBankedMinutes() {
+    @Test fun mistakeIsOwedByTheNextAnswerNeverTakenFromTheWallet() {
         val p = engine()
         p.correct(); p.correct()
-        assertEquals(48.0, p.snapshot.cycleSeconds, 1e-9)
+        assertEquals(48, p.earnedSecondsAvailable)
         assertEquals(12, p.recordWrong("math"))
-        assertEquals(36.0, p.snapshot.cycleSeconds, 1e-9)
+        assertEquals(48, p.earnedSecondsAvailable)                // the number the child sees never drops
         assertEquals(0, p.snapshot.currentStreak)
+        // A run of misses (and a hint) owes half a step IN ALL — it costs only once.
         assertEquals(12, p.hintCostSeconds)
+        assertEquals(0, p.chargeHint())
+        repeat(5) { assertEquals(0, p.recordWrong("math")) }
+        assertEquals(48, p.earnedSecondsAvailable)
+        p.correct()
+        assertEquals(12, p.lastPaidSeconds)                       // 24 − the 12 owed
+        assertEquals(60, p.earnedSecondsAvailable)
+        p.correct()
+        assertEquals(24, p.lastPaidSeconds)                       // paid back — full rate again
+        // A hint on its own owes the same half step.
         assertEquals(12, p.chargeHint())
-        repeat(5) { p.recordWrong("math") }
-        assertEquals(0.0, p.snapshot.cycleSeconds, 1e-9)          // floors at zero
-        assertEquals(0, p.pendingMinutes)
+        p.correct()
+        assertEquals(12, p.lastPaidSeconds)
+        assertEquals(1, p.pendingMinutes)
         val off = engine(KidSettings(penaltyEnabled = false))
         off.correct()
         assertEquals(0, off.recordWrong("math"))
         assertEquals(0, off.hintCostSeconds)
+    }
+
+    @Test fun dailyCapBitesToTheSecondAndBanksTheRest() {
+        val p = engine(KidSettings(childDailyCapMinutes = 1))   // a 1-minute cap: 60 s
+        p.correct(); p.correct()                                  // 48 s
+        assertFalse(p.atDailyCap())
+        p.correct()                                               // only 12 s fit
+        assertEquals(12, p.lastPaidSeconds)
+        assertEquals(60, p.earnedSecondsAvailable)
+        assertTrue(p.atDailyCap())
+        assertEquals(1, p.snapshot.minutesEarnedToday)
+        // Past the cap: nothing more today, the overflow banks for tomorrow a minute at a time.
+        repeat(4) { p.correct() }                                 // 12 + 96 = 108 s past the cap
+        assertEquals(0, p.lastPaidSeconds)
+        assertEquals(60, p.earnedSecondsAvailable)
+        assertEquals(1, p.snapshot.carryOverMinutes)
+        clock.advance(24 * 3600.0)
+        p.applyDailyRolloverIfNeeded()
+        assertEquals(120, p.earnedSecondsAvailable)               // yesterday's banked minute is playable
+        assertEquals(0, p.snapshot.minutesEarnedToday)
+        p.correct()
+        assertEquals(24, p.lastPaidSeconds)                       // a new day starts clean
+    }
+
+    @Test fun leftoverBatchProgressFromAnOlderBuildIsPaidOnce() {
+        val p = engine()
+        p.apply(p.snapshot.copy(cycleSeconds = 96.0))             // 4/10 toward a batch, synced from an old build
+        p.correct()
+        assertEquals(96 + 24, p.earnedSecondsAvailable)
+        assertEquals(0.0, p.snapshot.cycleSeconds, 0.0)
+        p.correct()
+        assertEquals(96 + 48, p.earnedSecondsAvailable)
+    }
+
+    @Test fun owedSecondsDoNotOutliveTheDay() {
+        val p = engine()
+        p.recordWrong("math")
+        clock.advance(24 * 3600.0)
+        p.correct()
+        assertEquals(24, p.lastPaidSeconds)
+    }
+
+    @Test fun arenaPaysDoubleStraightIn() {
+        val p = engine()
+        p.recordCorrect(AnswerContext("math", 0), cycleMultiplier = 2.0)
+        assertEquals(48, p.lastPaidSeconds)
+        assertEquals(48, p.earnedSecondsAvailable)
     }
 
     @Test fun freeLearningPaysNoMinutes() {

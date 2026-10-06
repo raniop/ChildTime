@@ -157,28 +157,34 @@ enum MiniGameLedger {
                                                      streak: progress.currentStreak,
                                                      voluntary: cappedBefore || !paysMinutes)
             // The runner's one-shot companion flags — no companion here, so they
-            // are spent now rather than surfacing late in the next session.
+            // are spent now rather than surfacing late in the next session (the
+            // variety bonus still pops its "+N דקות" below).
+            let varietyBonus = progress.varietyBonusJustEarned
             progress.varietyBonusJustEarned = 0
             progress.topicBalanceNudgeTopic = nil
             progress.lastRecoveredMinutes = 0
             progress.newStreakRecord = false
             // Answering right is NEVER silent: seconds when seconds were earned,
             // the stars themselves when they weren't.
-            if paysMinutes && !cappedBefore {
-                roundSeconds += progress.secondsPerCorrect
-                earn.flash(tr("+\(progress.secondsPerCorrect) שְׁנִיּוֹת"), positive: true)
+            let paid = paysMinutes ? progress.lastPaidSeconds : 0
+            if paid > 0 {
+                roundSeconds += paid
+                earn.flash(tr("+\(paid) שְׁנִיּוֹת"), positive: true)
             } else {
                 earn.flash("⭐ +\(stars)", positive: true)
             }
-            if minutesGranted > 0 { earn.popMinutes(minutesGranted) }
+            // Seconds land in the wallet one answer at a time now, so only a real
+            // bonus gets the big "+N דקות" pop.
+            if varietyBonus > 0 { earn.popMinutes(varietyBonus) }
             if progress.atDailyCap { earn.noteCap() }
         } else {
             let lost = progress.recordWrong(topic: topic, minutesPerCorrect: settings.minutesPerCorrectAnswer,
                                             grantsScreenTime: true)
             LearningHistoryStore.shared.recordAnswer(topic: topic, correct: false, responseMs: 0,
                                                      earnedMinutes: 0, streak: 0)
+            // A miss is owed by the next right answer, which then pays (and adds
+            // to `roundSeconds`) that much less — so nothing to take off here.
             if lost > 0 {
-                roundSeconds = max(0, roundSeconds - lost)
                 earn.flash(tr("−\(lost) שְׁנִיּוֹת · כִּמְעַט!"), positive: false)
             }
         }
@@ -230,35 +236,41 @@ struct MiniGameEarnOverlay: View {
     }
 }
 
-/// The runner's earned-time bar: seconds toward the next bonus.
+/// The runner's earned-time bar: the child's REAL balance, to the second.
+/// Every right answer's "+24 שניות" lands in this number (it used to be a bar
+/// toward the next batch of 10, which the home screen never showed — Rani).
 struct MiniGameEarnBar: View {
+    var body: some View {
+        EarnedBalanceRow(size: 13)
+            .padding(.horizontal, 12).padding(.vertical, 7)
+            .glassPane(radius: 14, shadow: false)
+    }
+}
+
+/// "⏱ 23:47 דַּקּ׳ שֶׁהִרְוִיחַ" — the earned wallet, the same number the home
+/// screen and "פתחו לי" show.
+struct EarnedBalanceRow: View {
     @ObservedObject private var progress = ProgressStore.shared
+    var size: CGFloat = 14
 
     var body: some View {
-        let target = progress.bonusTargetSeconds
-        let secs = min(target, Int(progress.cycleSeconds.rounded()))
-        let frac = target > 0 ? min(1, Double(secs) / Double(target)) : 0
-        HStack(spacing: 10) {
-            Image(systemName: "timer").font(.system(size: 14, weight: .bold)).foregroundStyle(.white.opacity(0.9))
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(.white.opacity(0.18))
-                    Capsule()
-                        .fill(LinearGradient(colors: [Color(hex: "FFD23F"), Color(hex: "FF9F1C")],
-                                             startPoint: .leading, endPoint: .trailing))
-                        .frame(width: max(6, geo.size.width * frac))
-                        .animation(.spring(response: 0.5, dampingFraction: 0.7), value: progress.cycleSeconds)
-                }
-            }
-            .frame(height: 7)
-            Text(tr("+\(secs) שְׁנִ׳"))
-                .font(.system(size: 13, weight: .heavy, design: .rounded))
+        let secs = progress.openableSeconds(gift: false)
+        HStack(spacing: 8) {
+            Image(systemName: "timer").font(.system(size: size + 1, weight: .bold)).foregroundStyle(.white.opacity(0.9))
+            Text(String(format: "%d:%02d", secs / 60, secs % 60))
+                .font(.system(size: size + 3, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .monospacedDigit()
-                .contentTransition(.numericText())
+                .environment(\.layoutDirection, .leftToRight)
+                .numericTextTransition(Double(secs))
+                .animation(.spring(response: 0.4, dampingFraction: 0.7), value: secs)
+            Text(tr("דַּקּ׳ שֶׁהִרְוִיחַ"))
+                .font(.system(size: size - 1, weight: .bold, design: .rounded))
+                .foregroundStyle(GlassInk.secondary)
+                .lineLimit(1)
+            Spacer(minLength: 0)
         }
-        .padding(.horizontal, 12).padding(.vertical, 7)
-        .glassPane(radius: 14, shadow: false)
+        .environment(\.layoutDirection, .app)
     }
 }
 

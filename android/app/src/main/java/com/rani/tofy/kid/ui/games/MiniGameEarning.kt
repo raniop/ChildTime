@@ -139,7 +139,8 @@ object MiniGameLedger {
             // Answering right is NEVER silent: seconds when earned, the stars themselves when not.
             if (out.paidSeconds > 0) earn.flash(tr("+%lld שְׁנִיּוֹת", out.paidSeconds), positive = true)
             else earn.flash("⭐ +${out.stars}", positive = true)
-            if (out.minutesGranted > 0) earn.popMinutes(out.minutesGranted)
+            // Seconds land one answer at a time now; only a real bonus gets the big "+N דקות" pop.
+            if (out.varietyBonus > 0) earn.popMinutes(out.varietyBonus)
             if (out.capReached) earn.noteCap()
         } else {
             sink.recordHistory(topic.raw, false, 0.0, 0, 0, false)

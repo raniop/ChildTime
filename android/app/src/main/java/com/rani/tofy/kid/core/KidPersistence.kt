@@ -43,6 +43,10 @@ object KidPersistence {
                 "bonusQuestionServedAt" to local.bonusQuestionServedAt,
                 "ownedCosmetics" to local.ownedCosmetics.toList(),
                 "equippedCosmetic" to local.equippedCosmetic,
+                "earnDay" to local.earnDay,
+                "earnCapCarry" to local.earnCapCarry,
+                "earnOverflow" to local.earnOverflow,
+                "earnDebt" to local.earnDebt,
             ),
         )
         return toJson(root).toString()
@@ -72,6 +76,10 @@ object KidPersistence {
             bonusQuestionServedAt = dbl("bonusQuestionServedAt"),
             ownedCosmetics = (l["ownedCosmetics"] as? List<*>)?.filterIsInstance<String>()?.toSet() ?: emptySet(),
             equippedCosmetic = l["equippedCosmetic"] as? String,
+            earnDay = dbl("earnDay"),
+            earnCapCarry = int("earnCapCarry") ?: 0,
+            earnOverflow = int("earnOverflow") ?: 0,
+            earnDebt = int("earnDebt") ?: 0,
         )
         return snap to local
     }

@@ -412,11 +412,10 @@ final class ProgressStore: ObservableObject {
     @Published private(set) var batchCounter: Int {
         didSet { defaults.set(batchCounter, forKey: Key.batchCounter) }
     }
-    /// Progress toward the next play-minutes bonus, in SECONDS. Each correct
-    /// answer adds a fraction (target ÷ batchAnswers, e.g. 24s); a wrong answer
-    /// gently removes half a step. When it reaches the target (batchMinutes × 60),
-    /// batchMinutes are banked into pendingMinutes. Gives immediate per-question
-    /// progress instead of waiting for the whole batch.
+    /// LEGACY: progress toward the next batch of minutes, from before right
+    /// answers paid straight into the wallet (2026-10-06). Still synced, so an
+    /// older build can keep using it; this build pays whatever it finds out
+    /// into the wallet on the next right answer (`payEarned`) and leaves it 0.
     @Published private(set) var cycleSeconds: Double {
         didSet { defaults.set(cycleSeconds, forKey: Key.cycleSeconds) }
     }
@@ -1053,27 +1052,21 @@ final class ProgressStore: ObservableObject {
         // the reward is in-game progression (XP/coins/levels), never minutes.
         // 🌈 Topic balance counts every earn-mode correct answer per topic/day.
         let topicCountToday = grantsScreenTime ? bumpTopicAnsweredToday(ctx.topic) : 0
+        lastPaidSeconds = 0
         if grantsScreenTime {
-            // Fractional reward: each correct answer adds its share of seconds to
-            // the cycle (e.g. 24s of a 4-min/10-question bonus). When the cycle
-            // fills, bank batchMinutes into the spendable balance.
-            let target = Double(bonusTargetSeconds)
-            let perSec = target / Double(cycleQuestionsTotal)
+            // ⏱ Each right answer pays its seconds STRAIGHT into the wallet (24s of
+            // a 4-min/10-answer rate by default) — the number on the home screen
+            // moves with every answer (Rani, 2026-10-06; it used to wait for a
+            // whole batch of 10). See `payEarned`.
             // 🌈 A) Diminishing returns: past the daily soft cap in ONE topic,
             // that topic earns at HALF rate — grinding a single favorite all
             // day stops paying; other topics stay at full rate. The companion
             // nudges (positively) the moment the cap is reached.
             let balanceFactor: Double = topicCountToday > Self.sameTopicSoftCap ? 0.5 : 1.0
             if topicCountToday == Self.sameTopicSoftCap { topicBalanceNudgeTopic = ctx.topic }
-            // 💫 Bonus arena pays DOUBLE (cycleMultiplier 2): every correct
-            // answer adds two shares, so batches bank twice as fast.
-            cycleSeconds += perSec * max(1, cycleMultiplier) * balanceFactor
-            while cycleSeconds >= target - 0.01 {
-                let granted = grantMinutesCapped(max(1, ParentSettings.shared.batchMinutes))
-                sessionMinutesEarned += granted
-                sittingMinutes += granted
-                cycleSeconds -= target
-            }
+            // 💫 Bonus arena pays DOUBLE (cycleMultiplier 2).
+            let pay = Double(secondsPerCorrect) * max(1, cycleMultiplier) * balanceFactor
+            lastPaidSeconds = payEarned(seconds: Int(pay.rounded()))
             // 🌈 B) Variety bonus — once per day, playing enough in 3 different
             // topics grants extra minutes (the carrot beside A's gentle brake).
             if !varietyBonusGrantedToday {
@@ -1442,14 +1435,11 @@ final class ProgressStore: ObservableObject {
         guard grantsScreenTime else { return 0 }
         guard ParentSettings.shared.penaltyEnabled else { return 0 }
 
-        // Gentle: a mistake removes HALF a step from the cycle progress (no
-        // banked minutes are ever taken). One correct answer wins it back.
-        // Returns the SECONDS removed, for a soft "−Ns · כמעט!" toast.
-        let perSec = Double(bonusTargetSeconds) / Double(cycleQuestionsTotal)
-        let before = cycleSeconds
-        cycleSeconds = max(0, cycleSeconds - perSec / 2)
+        // Gentle: a mistake costs HALF a step, taken off the next right answer —
+        // never out of the wallet, so the number the child sees never drops.
+        // Returns the SECONDS owed, for a soft "−Ns · כמעט!" toast.
         lastPenaltyMinutes = 0
-        return Int((before - cycleSeconds).rounded())
+        return oweEarned(seconds: halfStepSeconds)
     }
 
     /// 💡 What one hint costs — the same as a mistake: half a step off the cycle
@@ -1462,17 +1452,15 @@ final class ProgressStore: ObservableObject {
     /// parent's own settings instead of a number written here.
     var hintCostSeconds: Int {
         guard ParentSettings.shared.penaltyEnabled else { return 0 }
-        return Int((Double(bonusTargetSeconds) / Double(cycleQuestionsTotal) / 2).rounded())
+        return halfStepSeconds
     }
 
-    /// Take the hint's cost. Returns the seconds actually removed (0 when the
-    /// parent turned penalties off, or when the cycle is already at zero).
+    /// Take the hint's cost, off the next right answer. Returns the seconds
+    /// owed (0 when the parent turned penalties off, or a miss already owes it).
     @discardableResult
     func chargeHint() -> Int {
         guard ParentSettings.shared.penaltyEnabled else { return 0 }
-        let before = cycleSeconds
-        cycleSeconds = max(0, cycleSeconds - Double(hintCostSeconds))
-        return Int((before - cycleSeconds).rounded())
+        return oweEarned(seconds: hintCostSeconds)
     }
 
     private func updateTopicStat(topic: Topic, correct: Bool) {
@@ -1621,18 +1609,101 @@ final class ProgressStore: ObservableObject {
     func creditSurpriseAnswer(topic: Topic) -> Int {
         guard !atDailyCap else { return 0 }
         let topicCountToday = bumpTopicAnsweredToday(topic)
-        let target = Double(bonusTargetSeconds)
-        let perSec = target / Double(cycleQuestionsTotal)
         let balanceFactor: Double = topicCountToday > Self.sameTopicSoftCap ? 0.5 : 1.0
-        cycleSeconds += perSec * balanceFactor
-        while cycleSeconds >= target - 0.01 {
-            let granted = grantMinutesCapped(max(1, ParentSettings.shared.batchMinutes))
-            sessionMinutesEarned += granted
-            sittingMinutes += granted
-            cycleSeconds -= target
-        }
-        return secondsPerCorrect
+        return payEarned(seconds: Int((Double(secondsPerCorrect) * balanceFactor).rounded()))
     }
+
+    // MARK: - ⏱ Per-answer pay
+
+    /// What `payEarned` keeps between answers, for ONE child and ONE day. Kept
+    /// out of the synced snapshot on purpose (each is under a minute) and keyed
+    /// by the bound child, so `apply()` — which runs on every sync merge as well
+    /// as on a profile switch — never wipes it, and a sibling never inherits it.
+    private struct EarnLedger: Codable {
+        var day: Date
+        /// Seconds already in the wallet that `minutesEarnedToday` hasn't counted
+        /// yet (it counts whole minutes) — so the daily cap bites to the second.
+        var capCarry = 0
+        /// Seconds earned past today's cap, banked for tomorrow a minute at a time.
+        var overflow = 0
+        /// Owed by the next right answers after a miss / hint (never taken from
+        /// the wallet). At most half a step — a run of misses costs only once.
+        var debt = 0
+    }
+    private var earnLedgerKey: String { "earnLedger." + (belongsTo?.uuidString ?? "unbound") }
+    private func loadEarnLedger() -> EarnLedger {
+        let today = Calendar.current.startOfDay(for: Date())
+        guard let data = defaults.data(forKey: earnLedgerKey),
+              let l = try? JSONDecoder().decode(EarnLedger.self, from: data),
+              Calendar.current.isDate(l.day, inSameDayAs: today) else { return EarnLedger(day: today) }
+        return l
+    }
+    private func saveEarnLedger(_ l: EarnLedger) {
+        if let data = try? JSONEncoder().encode(l) { defaults.set(data, forKey: earnLedgerKey) }
+    }
+
+    /// Seconds the last `recordCorrect` actually put in the wallet (0 in Free
+    /// Learning, at the cap, or while paying off a miss) — the "+Ns" to show.
+    private(set) var lastPaidSeconds = 0
+
+    /// Pays `seconds` of earned play time into the wallet NOW, minus what a
+    /// miss left owed. Today's cap is honoured to the second; past it the
+    /// seconds are banked for tomorrow (up to `maxCarryOverMinutes`), exactly
+    /// like the batches were. Returns the seconds that reached the wallet.
+    @discardableResult
+    private func payEarned(seconds: Int) -> Int {
+        _ = minutesEarnedTodayRespectingDate()
+        var l = loadEarnLedger()
+        defer { saveEarnLedger(l) }
+        // Progress an older build left toward its next batch — paid out once.
+        var amount = max(0, seconds)
+        if cycleSeconds > 0 {
+            amount += Int(cycleSeconds.rounded())
+            cycleSeconds = 0
+        }
+        let owed = min(l.debt, amount)
+        l.debt -= owed
+        amount -= owed
+        guard amount > 0 else { return 0 }
+        let cap = dailyCap
+        var toWallet = amount
+        if cap.enabled {
+            let room = max(0, (max(0, cap.max) - minutesEarnedToday) * 60 - l.capCarry)
+            toWallet = min(amount, room)
+            l.overflow += amount - toWallet
+            while l.overflow >= 60, carryOverMinutes < Self.maxCarryOverMinutes {
+                carryOverMinutes += 1
+                l.overflow -= 60
+            }
+            l.overflow = min(l.overflow, 59)
+        }
+        guard toWallet > 0 else { return 0 }
+        creditEarned(seconds: toWallet)
+        l.capCarry += toWallet
+        while l.capCarry >= 60 {
+            l.capCarry -= 60
+            if cap.enabled { minutesEarnedToday += 1 }
+            sessionMinutesEarned += 1
+            sittingMinutes += 1
+        }
+        if dailyEarnedDate == nil { dailyEarnedDate = Calendar.current.startOfDay(for: Date()) }
+        return toWallet
+    }
+
+    /// A miss / hint: `seconds` owed by the next right answers — never a
+    /// second out of the wallet. Capped at half a step in all. Returns what was
+    /// newly owed (0 once the cap is reached), for the "−Ns · כמעט!" toast.
+    private func oweEarned(seconds: Int) -> Int {
+        guard seconds > 0 else { return 0 }
+        var l = loadEarnLedger()
+        let added = min(seconds, max(0, halfStepSeconds - l.debt))
+        l.debt += added
+        saveEarnLedger(l)
+        return added
+    }
+
+    /// Half of what a right answer pays — what a miss or a hint costs.
+    private var halfStepSeconds: Int { Int((Double(secondsPerCorrect) / 2).rounded()) }
 
     /// Count a correct answer for `topic` today; returns the new count.
     private func bumpTopicAnsweredToday(_ topic: Topic) -> Int {
@@ -2614,6 +2685,7 @@ final class ProgressStore: ObservableObject {
         // Device-local pockets aren't in the snapshot — wipe them too (a reset is
         // total): frozen parent time and any open window.
         manualPausedSeconds = 0
+        defaults.removeObject(forKey: earnLedgerKey)   // ⏱ a reset also clears what a miss left owed
         if isUnlocked { endUnlock() }
         sessionScore = 0
         lastEarnedPoints = 0

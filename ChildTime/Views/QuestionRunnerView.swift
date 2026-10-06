@@ -491,34 +491,12 @@ struct QuestionRunnerView: View {
         String(format: "%02d:%02d", max(0, seconds) / 60, max(0, seconds) % 60)
     }
 
-    /// The fractional-reward timer: the seconds earned toward the next bonus,
-    /// a progress bar that fills per question, and a "question X / N" label.
-    @ViewBuilder
+    /// The earned balance, to the second — each right answer's "+24 שניות"
+    /// lands straight in it (see `ProgressStore.payEarned`).
     private var earnedTimeBar: some View {
-        let target = progress.bonusTargetSeconds
-        let secs = min(target, Int(progress.cycleSeconds.rounded()))
-        let frac = target > 0 ? min(1, Double(secs) / Double(target)) : 0
-        HStack(spacing: 10) {
-            Image(systemName: "timer").font(.system(size: 15, weight: .bold)).foregroundStyle(.white.opacity(0.9))
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(.white.opacity(0.18))
-                    Capsule()
-                        .fill(LinearGradient(colors: [Color(hex: "FFD23F"), Color(hex: "FF9F1C")],
-                                             startPoint: .leading, endPoint: .trailing))
-                        .frame(width: max(6, geo.size.width * frac))
-                        .animation(.spring(response: 0.5, dampingFraction: 0.7), value: progress.cycleSeconds)
-                }
-            }
-            .frame(height: 8)
-            Text(tr("+\(secs) שְׁנִ׳"))
-                .font(.system(size: 14, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .monospacedDigit()
-                .contentTransition(.numericText())
-        }
-        .padding(.horizontal, 14).padding(.vertical, 10)
-        .glassPane(radius: 16, shadow: false)
+        EarnedBalanceRow(size: 14)
+            .padding(.horizontal, 14).padding(.vertical, 10)
+            .glassPane(radius: 16, shadow: false)
     }
 
     /// A small currency pill (emoji + value), animating its number on change.
@@ -772,8 +750,7 @@ struct QuestionRunnerView: View {
 
             // Mockup `.streak`: "🔥 3 ברצף · עוד 2 ובונוס!" in gold under the answers.
             if progress.currentStreak >= 2 {
-                let left = max(0, progress.cycleQuestionsTotal - progress.cycleQuestionsDone)
-                Text(tr("🔥 \(progress.currentStreak) בְּרֶצֶף") + (earnsTime && left > 0 ? tr(" · עוֹד \(left) וּבוֹנוּס!") : "!"))
+                Text(tr("🔥 \(progress.currentStreak) בְּרֶצֶף") + "!")
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
                     .contentTransition(.numericText())
@@ -1534,9 +1511,8 @@ struct QuestionRunnerView: View {
         let earnsTime = purpose.grantsScreenTime
         let cappedBefore = earnsTime && progress.atDailyCap
 
-        // Minutes are granted in batches (every 10 correct → 4 min), so measure
-        // what was ACTUALLY added this answer rather than assuming a per-answer
-        // rate — most answers add 0, and the 10th adds the batch.
+        // Whole minutes this answer moved the wallet across (for the parent's
+        // reports); the seconds themselves land with every right answer.
         let minutesBefore = progress.pendingMinutes
         let earned = progress.recordCorrect(
             ctx,
@@ -1552,6 +1528,9 @@ struct QuestionRunnerView: View {
         // 🌈 Topic balance — celebrate the variety bonus, or nudge (positively)
         // toward other worlds when one topic hit its daily soft cap. One-shot
         // flags set synchronously by recordCorrect just above.
+        // The big "+N דקות" popup is for real bonuses only — the per-answer
+        // seconds already rise into the timer.
+        var bonusPopupMinutes = progress.varietyBonusJustEarned
         if progress.varietyBonusJustEarned > 0 {
             companion.hype(tr("קֶסֶם הַגִּוּוּן! 🌈 +\(progress.varietyBonusJustEarned) דַּקּוֹת בּוֹנוּס!"))
             progress.varietyBonusJustEarned = 0
@@ -1567,7 +1546,7 @@ struct QuestionRunnerView: View {
         // BEFORE the delta below, so the "+X דקות" popup shows the full prize.
         // grantBonusMinutes fills today up to the cap and banks any overflow.
         if isBonusQuestion, earnsTime {
-            _ = progress.grantBonusMinutes(RewardEngine.bonusQuestionMinutes)
+            bonusPopupMinutes += progress.grantBonusMinutes(RewardEngine.bonusQuestionMinutes).addedToday
         }
         let minutesGranted = max(0, progress.pendingMinutes - minutesBefore)
 
@@ -1582,13 +1561,14 @@ struct QuestionRunnerView: View {
 
         // Immediate per-question reward: "+24 שניות" rising into the timer
         // (doubled in the bonus arena).
-        if earnsTime, !cappedBefore {
-            let secs = progress.secondsPerCorrect * (isBonusArena ? 2 : 1)
-            flashSeconds(tr("+\(secs) שְׁנִיּוֹת"), positive: true)
+        // What ACTUALLY reached the wallet: less while a miss is being paid
+        // back, nothing past the cap.
+        if earnsTime, !cappedBefore, progress.lastPaidSeconds > 0 {
+            flashSeconds(tr("+\(progress.lastPaidSeconds) שְׁנִיּוֹת"), positive: true)
         }
-        // "+X דקות" popup — only when a full bonus was banked this answer.
-        if minutesGranted > 0 {
-            showEarnedMinutesPopup(minutes: minutesGranted)
+        // "+X דקות" popup — only for a real bonus (💫 question, 🌈 variety).
+        if bonusPopupMinutes > 0 {
+            showEarnedMinutesPopup(minutes: bonusPopupMinutes)
         }
 
         // Crossed the daily maximum just now? Celebrate once and make it clear

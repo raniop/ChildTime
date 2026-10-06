@@ -118,8 +118,11 @@ class MiniGameEarningTest {
         MiniGameLedger.record(false, Topic.MATH, earn = earn, surprise = false)
         assertFalse(earn.flashPositive)
         assertTrue(earn.flashText!!.contains("כִּמְעַט"))
-        val g = MiniGameReward.grant("crush", 3, 2, 1, 10)
-        assertTrue(g.seconds in 1 until 3 * sink.secondsPerCorrect)
+        // The miss is owed by the NEXT right answer, so the round's ⏱ shows what really landed.
+        val before = sink.engine.earnedSecondsAvailable
+        MiniGameLedger.record(true, Topic.MATH, earn = earn, surprise = false)
+        val g = MiniGameReward.grant("crush", 4, 2, 1, 10)
+        assertEquals(sink.engine.earnedSecondsAvailable - before + 3 * sink.secondsPerCorrect, g.seconds)
     }
 
     @Test fun surpriseAnswersPayNoMinutes() {
