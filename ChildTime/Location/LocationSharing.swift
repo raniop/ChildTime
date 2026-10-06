@@ -333,11 +333,25 @@ final class LocationSharing: NSObject, ObservableObject {
         return nil
     }
 
-    /// The map is open: follow every child's fix, sharing switch and beep, and
-    /// ask the phones that share for a fresh fix.
+    /// A tapped "🏫 נוני הגיעה" push → the dashboard opens the map on that child.
+    @Published var openMapFor: String?
+
+    /// The map opened: follow, and ask every sharing phone for a fresh fix.
     func watch(childIDs: [String]) {
+        follow(childIDs: childIDs)
+        refresh(childIDs: childIDs)
+    }
+
+    private var following: [String] = []
+
+    /// Follow every child's fixes, sharing switch and beep (the parent home's
+    /// location line + the map). Cheap — three listeners a child — and only
+    /// re-attached when the set of children changes. Sends nothing to the phones.
+    func follow(childIDs: [String]) {
         #if canImport(FirebaseFirestore)
         guard !AppInfo.isDemoRun else { return }   // the demo's seeded fixes stay
+        guard childIDs.sorted() != following else { return }
+        following = childIDs.sorted()
         unwatch()
         for cid in childIDs {
             let child = db.collection("children").document(cid)
@@ -364,7 +378,6 @@ final class LocationSharing: NSObject, ObservableObject {
                                     d["stop"] as? Bool ?? false)
             })
         }
-        refresh(childIDs: childIDs)
         #endif
     }
 

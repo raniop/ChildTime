@@ -105,6 +105,10 @@ struct ParentDashboardView: View {
     @ObservedObject private var campaigns = CampaignTracker.shared
     @ObservedObject private var subs = SubscriptionManager.shared
     @ObservedObject private var parentHelp = ParentHelpManager.shared
+    @ObservedObject private var location = LocationSharing.shared
+    /// 📍 The map opens on this child (card line / ⚡ menu / arrival push).
+    @State private var locationChild: String?
+    @AppStorage("location.introDismissed") private var locationIntroDismissed = false
     @StateObject private var choreStore = ChoreStore.shared
     @State private var remoteGrantMsg: String?
     /// Live remote-lock status sheet — real send/ack progress, not a static alert.
@@ -403,6 +407,11 @@ struct ParentDashboardView: View {
                             }
                             childrenGrid
 
+                            // 📍 Once, for families from before location: what it
+                            // is and one tap to it. BELOW the children (Rani: nothing
+                            // promotional above them).
+                            if showsLocationIntro { locationIntroCard }
+
                             // Feedback to the team — a plain button BELOW everything
                             // (replaces the floating bubble that overlapped a child
                             // card on smaller screens).
@@ -652,8 +661,17 @@ struct ParentDashboardView: View {
                 ChoresParentView(profile: p)
                     .environment(\.layoutDirection, .app)
             }
-            .sheet(isPresented: $showingLocation) {
-                ParentLocationView()
+            // 📍 Follow the children's fixes for the cards' location line (no
+            // push to their phones — that only happens when the map opens).
+            .onAppear { location.follow(childIDs: profiles.profiles.map { $0.id.uuidString }) }
+            .onChangeCompat(of: profiles.profiles.map(\.id)) { _, ids in location.follow(childIDs: ids.map(\.uuidString)) }
+            .onChangeCompat(of: location.openMapFor) { _, cid in
+                guard let cid else { return }
+                location.openMapFor = nil
+                locationChild = cid; showingLocation = true
+            }
+            .sheet(isPresented: $showingLocation, onDismiss: { locationChild = nil }) {
+                ParentLocationView(focusChildID: locationChild)
                     .environmentObject(profiles)
                     .environment(\.layoutDirection, .app)
             }
@@ -1305,6 +1323,32 @@ struct ParentDashboardView: View {
                                      : s.answeredToday < 6 ? GlassInk.primary
                                      : (pct ?? 0) >= 60 ? GlassInk.warn : GlassInk.weak)
             }
+            // 📍 Where the child is, one tap from the map.
+            if let f = location.shownFix(profile.id.uuidString) {
+                let fresh = Date().timeIntervalSince1970 - f.at < 600
+                Button {
+                    Haptic.light(); locationChild = profile.id.uuidString; showingLocation = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Text("📍").font(.system(size: 15))
+                        Text(location.whereLine(f))
+                            .font(.system(size: 14, weight: .heavy, design: .rounded))
+                            .lineLimit(1).minimumScaleFactor(0.8)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Text(ParentLocationView.relative(f.at, now: Date()))
+                            .font(.system(size: 12.5, weight: .bold, design: .rounded))
+                            .foregroundStyle(fresh ? Color(hex: "9FF5DD") : GlassInk.secondary)
+                        Image(systemName: AppSymbol.forwardChevron).font(.system(size: 12, weight: .bold)).foregroundStyle(GlassInk.tertiary)
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12).frame(minHeight: 40)
+                    .background((fresh ? Color(hex: "06D6A0").opacity(0.22) : Color.white.opacity(0.12)),
+                                in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(fresh ? Color(hex: "5CFF9D").opacity(0.7) : .clear, lineWidth: 1.5))
+                }
+                .buttonStyle(.plain)
+            }
             if hasDevice {
                 HStack(spacing: 8) {
                     // "דקות היום" meant two different numbers on the two screens —
@@ -1410,6 +1454,44 @@ struct ParentDashboardView: View {
 
     /// Right under the greeting (Rani: "תן לילד לשחק / צור ילד / מטלות — איפה?"):
     /// the three things a parent does that aren't about one child's card.
+    /// A family with a child's own device, nobody sharing yet, card not closed.
+    private var showsLocationIntro: Bool {
+        !locationIntroDismissed && rows.contains { childHasDevice($0.profile) }
+            && !rows.contains { location.sharing[$0.profile.id.uuidString] == true }
+    }
+
+    private var locationIntroCard: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text("📍").font(.system(size: 30))
+            VStack(alignment: .leading, spacing: 6) {
+                Text(tr("חדש: לדעת איפה הילדים"))
+                    .font(.system(size: 17, weight: .heavy, design: .rounded))
+                Text(tr("מפה, התראה כשמגיעים לבית הספר או הביתה, וצפצוף לטלפון שהלך לאיבוד."))
+                    .font(.system(size: 13.5, weight: .medium, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button { Haptic.light(); showingLocation = true } label: {
+                    Text(tr("להפעלה ←"))
+                        .font(.system(size: 15, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "4B3BC4"))
+                        .padding(.horizontal, 16).frame(minHeight: 40)
+                        .background(.white, in: Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+            Spacer(minLength: 0)
+            Button { withAnimation { locationIntroDismissed = true } } label: {
+                Image(systemName: "xmark").font(.system(size: 13, weight: .bold))
+                    .frame(width: 32, height: 32).background(Color.white.opacity(0.16), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(tr("סגירה"))
+        }
+        .foregroundStyle(.white)
+        .padding(14)
+        .glassPane(radius: 22, shadow: false)
+    }
+
     private var homeActionsRow: some View {
         HStack(spacing: 8) {
             Button { Haptic.light(); showingCreateChild = true } label: { homeGhostLabel(tr("＋ צְרוּ יֶלֶד/ה")).frame(maxWidth: .infinity) }
@@ -1576,10 +1658,22 @@ struct ParentDashboardView: View {
     private func gridCardMenu(_ profile: Profile) -> some View {
         let hasDevice = childHasDevice(profile)
         return Menu {
-            // ✏️ First: the thing parents came to this menu looking for.
+            // 📍 Where is the child / 🔔 ring their phone.
+            let cid = profile.id.uuidString
+            let name = Question.stripNiqqud(profile.name)
+            Button {
+                locationChild = cid; showingLocation = true
+            } label: { Label(tr("📍 איפה \(name)"), systemImage: "location.fill") }
+            if let f = location.shownFix(cid) {
+                Button {
+                    Haptic.medium(); location.beep(childID: cid, deviceID: f.deviceID)
+                } label: { Label(tr("🔔 צפצוף לטלפון של \(name)"), systemImage: "bell.and.waves.left.and.right") }
+            }
+            Divider()
+            // ✏️ Then: the thing parents came to this menu looking for.
             Button {
                 homeSettingsChild = profile
-            } label: { Label(tr("עריכת \(Question.stripNiqqud(profile.name))"), systemImage: "pencil") }
+            } label: { Label(tr("עריכת \(name)"), systemImage: "pencil") }
             Divider()
             if !hasDevice {
                 Button {

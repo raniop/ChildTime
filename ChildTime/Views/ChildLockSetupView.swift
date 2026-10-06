@@ -31,6 +31,9 @@ struct ChildLockSetupView: View {
     @State private var asking = false
     @State private var failed = false
     @State private var approved = false
+    /// 📍 The optional last step: location, while the parent holds the phone.
+    @State private var askLocation = false
+    @State private var savingLocation = false
 
     private var child: Profile? { profiles.active }
     private var name: String { child.map { Question.stripNiqqud($0.name) } ?? "" }
@@ -43,7 +46,7 @@ struct ChildLockSetupView: View {
             VStack(spacing: 16) {
                 OnboardingStepsBar(current: 4, note: tr("רק הורה"))
                     .padding(.top, 8)
-                if approved { passcodeBody } else { approveBody }
+                if askLocation { locationBody } else if approved { passcodeBody } else { approveBody }
             }
             .padding(.horizontal, OnboardingFooter.sidePadding)
             .frame(maxWidth: 520)
@@ -53,6 +56,7 @@ struct ChildLockSetupView: View {
         .onAppear {
             if AppInfo.isDemoRun {
                 approved = ProcessInfo.processInfo.environment["DEMO_APPROVED"] == "1"
+                askLocation = ProcessInfo.processInfo.environment["DEMO_LOCATION_STEP"] == "1"
                 failed = ProcessInfo.processInfo.environment["DEMO_FAILED"] == "1"
                 return
             }
@@ -131,9 +135,67 @@ struct ChildLockSetupView: View {
             ScreenTimeShowMeButton()
             Spacer(minLength: 8)
             OnboardingFooter(title: name.isEmpty ? tr("סיימתי") : (girl ? tr("סיימתי — \(name) יכולה להתחיל") : tr("סיימתי — \(name) יכול להתחיל")),
-                             link: tr("אעשה את זה אחר כך"), onLink: { finish() }) { finish() }
+                             link: tr("אעשה את זה אחר כך"), onLink: { toLocation() }) { toLocation() }
         }
     }
+
+    // MARK: 3 — 📍 location (optional)
+
+    /// The parent is holding the child's phone right now — the one moment
+    /// Apple's location question is answered by an adult, not by a child
+    /// reading system dialogs. Skippable; it can be switched on later from the
+    /// parent's map.
+    private var locationBody: some View {
+        VStack(spacing: 14) {
+            pill(tr("✓ הנעילה פועלת"), mint: true)
+            Text("📍").font(.system(size: 44))
+            Text(name.isEmpty ? tr("לדעת איפה הטלפון? (לא חובה)") : tr("לדעת איפה \(name)? (לא חובה)"))
+                .font(.system(size: 26, weight: .black, design: .rounded))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+            VStack(alignment: .leading, spacing: 10) {
+                Text(girl ? tr("מה נשמר: המיקום האחרון של הטלפון שלה, והגעה או יציאה מהמקומות שסימנתם. לא מסלול של כל היום.")
+                          : tr("מה נשמר: המיקום האחרון של הטלפון שלו, והגעה או יציאה מהמקומות שסימנתם. לא מסלול של כל היום."))
+                Text(tr("מי רואה: רק ההורים במשפחה. שום דבר לא עובר לאף גורם אחר."))
+                Text(tr("כיבוי: מוחק מיד את המיקום השמור."))
+            }
+            .font(.system(size: 14.5, weight: .semibold, design: .rounded))
+            .foregroundStyle(.white.opacity(0.92))
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .glassPane(radius: 16)
+            Text(tr("יופיע חלון של אפל — מאשרים בו את המיקום"))
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundStyle(Color(hex: "1C1C1E"))
+                .padding(12).frame(maxWidth: .infinity)
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "F2F2F7")))
+            Spacer(minLength: 8)
+            OnboardingFooter(title: tr("אישור והפעלת מיקום"), busy: savingLocation,
+                             link: tr("אולי אחר כך"), onLink: { finish() }) { enableLocation() }
+        }
+    }
+
+    private func toLocation() {
+        // Already shared (a re-pair) → straight on.
+        guard let cid = profiles.activeID?.uuidString, LocationSharing.shared.sharing[cid] != true else { finish(); return }
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { askLocation = true }
+    }
+
+    private func enableLocation() {
+        guard let cid = profiles.activeID?.uuidString, !savingLocation else { return }
+        savingLocation = true
+        Task { @MainActor in
+            _ = await LocationSharing.shared.setSharing(childID: cid, on: true)
+            // Apple's question now, while the parent holds the phone — and the
+            // kid's own explanation later counts it as asked once.
+            LocationSharing.shared.requestPermission()
+            UserDefaults.standard.set(UserDefaults.standard.integer(forKey: "location.promptCount") + 1, forKey: "location.promptCount")
+            savingLocation = false
+            finish()
+        }
+    }
+
 
     // MARK: Actions
 

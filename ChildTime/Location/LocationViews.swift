@@ -139,6 +139,8 @@ struct FamilyMapView: UIViewRepresentable {
 // MARK: - Parent: איפה הילדים
 
 struct ParentLocationView: View {
+    /// Open on this child (their card's line, the ⚡ menu, a tapped arrival push).
+    var focusChildID: String? = nil
     @EnvironmentObject private var profiles: ProfileStore
     @ObservedObject private var loc = LocationSharing.shared
     @ObservedObject private var household = HouseholdManager.shared
@@ -157,7 +159,7 @@ struct ParentLocationView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
-                    FamilyMapView(kids: mapKids, places: places, focus: mapFocus, focusSpan: 0.05, fitAll: true)
+                    FamilyMapView(kids: mapKids, places: places, focus: mapFocus, focusSpan: 0.012, fitAll: focusChildID == nil)
                         .frame(height: 340)
                         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                         .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(.white.opacity(0.4), lineWidth: 1))
@@ -177,7 +179,6 @@ struct ParentLocationView: View {
             }
         }
         .onAppear { loc.watch(childIDs: kids.map { $0.id.uuidString }) }
-        .onDisappear { loc.unwatch() }
         .onReceive(ticker) { now = $0 }
         .sheet(item: $consentFor) { p in
             LocationConsentSheet(profile: p).environment(\.layoutDirection, .app)
@@ -197,9 +198,7 @@ struct ParentLocationView: View {
     /// The device shown for a child: the parent's pick, else the phone (a
     /// tablet usually stays home), else the freshest.
     private func shown(_ p: Profile) -> ChildLocationFix? {
-        let all = located(p)
-        if let id = picked[p.id.uuidString], let f = all.first(where: { $0.deviceID == id }) { return f }
-        return all.first { $0.kind != "ipad" } ?? all.first
+        loc.shownFix(p.id.uuidString, picked: picked[p.id.uuidString])
     }
 
     private var mapKids: [FamilyMapView.Kid] {
@@ -212,6 +211,9 @@ struct ParentLocationView: View {
     }
 
     private var mapFocus: CLLocationCoordinate2D? {
+        if let id = focusChildID, let k = mapKids.first(where: { $0.id == id }) {
+            return CLLocationCoordinate2D(latitude: k.lat, longitude: k.lng)
+        }
         if let k = mapKids.first { return CLLocationCoordinate2D(latitude: k.lat, longitude: k.lng) }
         if let p = places.first { return CLLocationCoordinate2D(latitude: p.lat, longitude: p.lng) }
         return nil
@@ -257,6 +259,14 @@ struct ParentLocationView: View {
                         .padding(.horizontal, 10).padding(.vertical, 4)
                         .background(Color.black.opacity(0.18), in: Capsule())
                 }
+            }
+            // Allowed "while using" only: the map works, arrive/leave alerts need
+            // "always" — say exactly where that is, once, in the card.
+            if current?.permission == "whenInUse" {
+                Text(tr("כדי לקבל התראות הגעה: בטלפון של \(name) ← הגדרות ← טופי ← מיקום ← תמיד"))
+                    .font(.system(size: 12.5, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color(hex: "FFE58A"))
+                    .fixedSize(horizontal: false, vertical: true)
             }
             // Two devices (a phone and an iPad): ONE line, and the parent picks
             // which device it is about — the beep goes to the same one. Every
@@ -322,18 +332,7 @@ struct ParentLocationView: View {
 
     /// "🏫 בית הספר · מאז 08:02 · לפני 3 דקות", or the street address when the
     /// device is outside every family place.
-    /// "🏫 בית הספר · מאז 08:02", or the street address when the device is
-    /// outside every family place. (How fresh it is sits by the name.)
-    private func whereLine(_ f: ChildLocationFix) -> String {
-        if let id = f.placeID, let place = places.first(where: { $0.id == id }) {
-            if let s = f.placeSince {
-                return tr("\(place.emoji) \(place.name) · מאז \(QuietHoursManager.clock(Date(timeIntervalSince1970: s)))")
-            }
-            return "\(place.emoji) \(place.name)"
-        }
-        if let a = loc.address(for: f) { return "📍 \(a)" }
-        return tr("📍 מחפשים כתובת…")
-    }
+    private func whereLine(_ f: ChildLocationFix) -> String { loc.whereLine(f) }
 
     private func statusLine(_ p: Profile) -> String {
         let cid = p.id.uuidString
@@ -348,7 +347,7 @@ struct ParentLocationView: View {
             if all.contains(where: { $0.permission == "denied" }) {
                 return tr("המיקום חסום בטלפון של \(name) — מאשרים בהגדרות של הטלפון ← טופי ← מיקום")
             }
-            return tr("מחכה לאישור בטלפון של \(name)")
+            return tr("מחכה לאישור בטלפון של \(name) — פותחים בו את טופי")
         }
         return whereLine(f)
     }
@@ -760,5 +759,31 @@ struct KidBeepOverlay: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(LinearGradient(colors: [Color(hex: "FF5FA8"), Color(hex: "B25BEA"), Color(hex: "6C4DF0")],
                                    startPoint: .top, endPoint: .bottom).ignoresSafeArea())
+    }
+}
+
+// MARK: - Shared by the map and the parent home's location line
+
+extension LocationSharing {
+    /// The device shown for a child: the parent's pick, else the phone (a
+    /// tablet usually stays home), else the freshest. nil = not sharing / no fix.
+    func shownFix(_ childID: String, picked: String? = nil) -> ChildLocationFix? {
+        guard sharing[childID] == true else { return nil }
+        let all = (fixes[childID] ?? []).filter { $0.accuracy >= 0 }
+        if let id = picked, let f = all.first(where: { $0.deviceID == id }) { return f }
+        return all.first { $0.kind != "ipad" } ?? all.first
+    }
+
+    /// "🏫 בית הספר · מאז 08:02", or the street address when the device is
+    /// outside every family place. (How fresh it is sits beside, not inside.)
+    func whereLine(_ f: ChildLocationFix) -> String {
+        if let id = f.placeID, let place = familyPlaces.first(where: { $0.id == id }) {
+            if let s = f.placeSince {
+                return tr("\(place.emoji) \(place.name) · מאז \(QuietHoursManager.clock(Date(timeIntervalSince1970: s)))")
+            }
+            return "\(place.emoji) \(place.name)"
+        }
+        if let a = address(for: f) { return "📍 \(a)" }
+        return tr("📍 מחפשים כתובת…")
     }
 }

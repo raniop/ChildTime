@@ -17467,6 +17467,28 @@
         }
       }
     },
+    "אולי אחר כך" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ربما لاحقًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maybe later"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Может, позже"
+          }
+        }
+      }
+    },
     "אותה" : {
       "localizations" : {
         "ar" : {
@@ -47126,6 +47148,28 @@
         }
       }
     },
+    "חדש: לדעת איפה הילדים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جديد: اعرفوا أين الأطفال"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New: know where the kids are"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новое: знать, где дети"
+          }
+        }
+      }
+    },
     "חוֹבָה לִבְחֹר — כָּךְ טוֹפִי מַתְאִים אֶת הַשְּׁאֵלוֹת לַתָּכְנִית שֶׁל מִשְׂרַד הַחִנּוּךְ, וְכָל 1 בְּסֶפְּטֶמְבֶּר עוֹלִים כִּתָּה אוֹטוֹמָטִית 🎉" : {
       "localizations" : {
         "ar" : {
@@ -51427,6 +51471,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Появится окно Apple"
+          }
+        }
+      }
+    },
+    "יופיע חלון של אפל — מאשרים בו את המיקום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ستظهر نافذة من Apple — اسمحوا فيها بالموقع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An Apple window will appear — allow location in it"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Появится окно Apple — разрешите в нём геолокацию"
           }
         }
       }
@@ -56360,6 +56426,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Чтобы блокировать другие приложения, пока ребёнок не заработает время, Tofy использует службу специальных возможностей Android."
+          }
+        }
+      }
+    },
+    "כדי לקבל התראות הגעה: בטלפון של %@ ← הגדרות ← טופי ← מיקום ← תמיד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لتلقي تنبيهات الوصول: على هاتف %@ ← الإعدادات ← Tofy ← الموقع ← دائمًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To get arrival alerts: on %@'s phone → Settings → Tofy → Location → Always"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чтобы получать уведомления о приходе: на телефоне %@ → Настройки → Tofy → Геопозиция → Всегда"
           }
         }
       }
@@ -61406,6 +61494,50 @@
         }
       }
     },
+    "לדעת איפה %@? (לא חובה)" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تريدون معرفة أين %@؟ (اختياري)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Know where %@ is? (optional)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Знать, где %@? (по желанию)"
+          }
+        }
+      }
+    },
+    "לדעת איפה הטלפון? (לא חובה)" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تريدون معرفة مكان هذا الهاتف؟ (اختياري)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Know where this phone is? (optional)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Знать, где этот телефон? (по желанию)"
+          }
+        }
+      }
+    },
     "לה" : {
       "localizations" : {
         "ar" : {
@@ -61646,6 +61778,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сделать устройством ребёнка"
+          }
+        }
+      }
+    },
+    "להפעלה ←" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "للتشغيل ←"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn it on →"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включить →"
           }
         }
       }
@@ -69822,6 +69976,28 @@
         }
       }
     },
+    "מחכה לאישור בטלפון של %@ — פותחים בו את טופי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بانتظار الإذن على هاتف %@ — افتحوا Tofy عليه"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for permission on %@'s phone — open Tofy on it"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ждём разрешения на телефоне %@ — откройте на нём Tofy"
+          }
+        }
+      }
+    },
     "מחכה לאישור שלכם 🕐" : {
       "localizations" : {
         "ar" : {
@@ -70922,6 +71098,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отлично, спасибо! 💛"
+          }
+        }
+      }
+    },
+    "מפה, התראה כשמגיעים לבית הספר או הביתה, וצפצוף לטלפון שהלך לאיבוד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خريطة، وتنبيه عند الوصول إلى المدرسة أو البيت، ورنين لهاتف ضائع."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A map, an alert when they reach school or home, and a beep for a lost phone."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карта, уведомление, когда дети приходят в школу или домой, и звонок на потерянный телефон."
           }
         }
       }
@@ -102828,6 +103026,28 @@
         }
       }
     },
+    "📍 איפה %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 أين %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Where is %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Где %@"
+          }
+        }
+      }
+    },
     "📍 הפעלת מיקום ל%@" : {
       "localizations" : {
         "ar" : {
@@ -103753,6 +103973,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🔔 Позвонить"
+          }
+        }
+      }
+    },
+    "🔔 צפצוף לטלפון של %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔔 رنين لهاتف %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔔 Beep %@'s phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔔 Позвонить на телефон %@"
           }
         }
       }

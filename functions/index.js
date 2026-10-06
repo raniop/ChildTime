@@ -6163,7 +6163,18 @@ exports.onPlaceEvent = onDocumentCreated("children/{childID}/placeEvents/{eventI
     if (!(await claimOnce(`place_${event.params.childID}_${e.placeID}_${e.kind}_${minute}`))) return;
     const name = strip(c.name) || "";
     const girl = c.gender === "girl";
-    await notifyParentsAckApplied(c.householdID, (lang) => placeMessage(e.kind, name, girl, place, lang));
+    // Tapping it opens the parent's map on this child (type "place").
+    const tokens = await tokensForHousehold(c.householdID);
+    if (!tokens.length) return;
+    await sendEachLocalized(tokens, (lang) => {
+      const { title, body } = placeMessage(e.kind, name, girl, place, lang);
+      return {
+        notification: { title, body },
+        data: { type: "place", childID: event.params.childID, householdID: String(c.householdID || ""), audience: "parent" },
+        apns: { payload: { aps: { sound: "default" } } },
+        android: androidFor("family"),
+      };
+    });
   } catch (err) {
     console.error("[place] failed", err && err.message);
   } finally {

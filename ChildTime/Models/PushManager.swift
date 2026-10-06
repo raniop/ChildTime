@@ -421,6 +421,10 @@ extension PushManager: UNUserNotificationCenterDelegate {
             // 🔔 The beep notification was tapped — the "מָצָאתִי!" screen, so
             // the parents hear the phone was found.
             if info["type"] as? String == "beep" { LocationSharing.shared.startBeep() }
+            // 📍 "🏫 נוני הגיעה" tapped → the parent's map, on that child.
+            if info["type"] as? String == "place", let cid = info["childID"] as? String {
+                LocationSharing.shared.openMapFor = cid
+            }
             // 📣 A campaign push: count the open, remember where to land.
             if info["type"] as? String == "campaign" { CampaignTracker.shared.handleOpen(info) }
             // 🎁 A gift push (start / day N): the next paywall within the hour is

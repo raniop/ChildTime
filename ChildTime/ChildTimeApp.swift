@@ -681,6 +681,10 @@ struct ChildTimeApp: App {
         #endif
         case "parenthome": ParentDashboardView(isRoot: true)   // DEMO_SCREEN=parenthome — the redesigned overview
             .onAppear {
+                // 📍 DEMO_LOCATION=1: the cards' location line.
+                if ProcessInfo.processInfo.environment["DEMO_LOCATION"] == "1" {
+                    LocationSharing.shared.seedDemo(childIDs: ProfileStore.shared.profiles.map { $0.id.uuidString })
+                }
                 if let id = ProfileStore.shared.activeID {
                     HouseholdManager.shared.seedDemoLiveWindow(childID: id)
                     LearningHistoryStore.shared.seedDemo(childID: id)
