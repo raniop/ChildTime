@@ -2468,6 +2468,19 @@ exports.recomputeAdminStats = onCall(
 // every household with its parents, children, progress and devices. READ-ONLY,
 // aggregated server-side (no broad client read rules), admin-gated like
 // recomputeAdminStats. First-party founder tooling — no third-party analytics.
+// The platforms of a parents/{uid} doc's live PARENT tokens ("ios"/"android").
+function parentTokenPlatforms(d) {
+  const tokens = Array.isArray(d.fcmTokens) ? d.fcmTokens : [];
+  const info = d.tokenDevices && typeof d.tokenDevices === "object" ? d.tokenDevices : {};
+  const out = new Set();
+  tokens.forEach((t) => {
+    const i = info[t];
+    if (i && i.role === "child") return;
+    out.add(i && i.platform === "android" ? "android" : LEGACY_TOKEN_PLATFORM);
+  });
+  return [...out];
+}
+
 exports.adminFamiliesOverview = onCall(
   { timeoutSeconds: 120, memory: "512MiB" },
   async (request) => {
@@ -2489,6 +2502,10 @@ exports.adminFamiliesOverview = onCall(
         email: d.email || null,
         name: d.displayName || null,
         updatedAt: p.updateTime ? p.updateTime.toMillis() / 1000 : null,
+        // 🍎/🤖 Which platforms this account's PARENT phones run: each live
+        // token's `tokenDevices` stamp. A token from before the stamp has no
+        // platform and is an iPhone (the Android app postdates the stamp).
+        platforms: parentTokenPlatforms(d),
       };
     });
     const kidsByHH = {};
@@ -2524,9 +2541,12 @@ exports.adminFamiliesOverview = onCall(
         const seen = typeof d.lastSeenAt === "number" ? d.lastSeenAt : 0;
         if (seen > Date.now() / 1000 - 14 * 86400) liveUIDs.add(d.ownerUID);
       }
+      // Both apps write `kind`/`name` on the row (deviceKind/deviceName are
+      // the event payload's names); only Android rows carry `platform`.
       (devsByChild[cid] = devsByChild[cid] || [])
-        .push({ docID: dv.id, lastSeenAt: d.lastSeenAt || 0, kind: d.deviceKind || null,
-                name: d.deviceName || null, appVersion: d.appVersion || null });
+        .push({ docID: dv.id, lastSeenAt: d.lastSeenAt || 0, kind: d.deviceKind || d.kind || null,
+                name: d.deviceName || d.name || null, appVersion: d.appVersion || null,
+                platform: d.platform === "android" ? "android" : "ios" });
     });
     const tombsByHH = {};
     tombSnap.forEach((t) => { const h = t.data().householdID; tombsByHH[h] = (tombsByHH[h] || 0) + 1; });
@@ -2588,7 +2608,7 @@ exports.adminFamiliesOverview = onCall(
           devices: devs.length,
           deviceRows: devs
             .sort((a, b) => (b.lastSeenAt || 0) - (a.lastSeenAt || 0))
-            .map((x) => ({ docID: x.docID, kind: x.kind, name: x.name,
+            .map((x) => ({ docID: x.docID, kind: x.kind, name: x.name, platform: x.platform,
                            appVersion: x.appVersion || null, lastSeenAt: x.lastSeenAt || null })),
           lastSeenAt: devs.reduce((m, x) => Math.max(m, x.lastSeenAt || 0), 0) || null,
         };
@@ -2606,6 +2626,8 @@ exports.adminFamiliesOverview = onCall(
         // but none is this uid's (dead account); null = no stamp data yet
         // (old builds) — the page falls back to the update-time signal.
         hasLiveDevice: anyRowHasUID ? liveUIDs.has(uid) : null,
+        // A child device's anonymous account is not a parent phone.
+        platforms: (!parentInfo[uid]?.email && uid !== d.createdBy) ? [] : (parentInfo[uid]?.platforms || []),
       }));
       // 🧪 Demo detection: an admin-marked family (label contains 🧪), or a
       // NAMELESS one whose children are exactly the DEMO_SCREEN seed names
@@ -2620,7 +2642,18 @@ exports.adminFamiliesOverview = onCall(
          (named.length === 0 && kids.length > 0 && kids.every((k) => demoNames.has(strip(k.name)))));
       const parentDevs = (parentDevsByHH[h.id] || [])
         .sort((a, b) => (b.lastSeenAt || 0) - (a.lastSeenAt || 0));
+      // 🍎/🤖 per family: the parents' platforms (tokens + the iPhone-only
+      // parent rows) and the children's DISTINCT devices per platform.
+      const parentPlatforms = new Set(parents.flatMap((p) => p.platforms));
+      if (parentDevs.length) parentPlatforms.add("ios");
+      const kidDevs = { ios: new Set(), android: new Set() };
+      kids.forEach((k) => k.deviceRows.forEach((r) => {
+        const dev = String(r.docID || "").split("_")[1];
+        if (dev) kidDevs[r.platform === "android" ? "android" : "ios"].add(dev);
+      }));
       families.push({
+        parentPlatforms: [...parentPlatforms].sort(),
+        kidDevices: { ios: kidDevs.ios.size, android: kidDevs.android.size },
         parentDevices: parentDevs,
         id: h.id.slice(0, 8),
         fullId: h.id,     // needed by the admin actions (admin-only page)

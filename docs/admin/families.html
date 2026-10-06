@@ -50,6 +50,9 @@
   .tot{background:var(--card); border:1px solid var(--brd); border-radius:18px; padding:16px 18px}
   .tot b{display:block; font-size:34px; font-weight:900; line-height:1.1}
   .tot span{font-size:13px; color:var(--muted); font-weight:600}
+  .tot.plat{cursor:pointer; font-family:inherit; color:inherit; text-align:inherit}
+  .tot.plat.on{border-color:#06d6a0; box-shadow:0 0 0 2px rgba(6,214,160,.45) inset}
+  .tot.plat:focus-visible{outline:2px solid #ffe58a; outline-offset:2px}
 
   /* Toolbar */
   .toolbar{display:flex; gap:12px; align-items:center; margin:20px 0 6px; flex-wrap:wrap}
@@ -201,6 +204,15 @@ async function load() {
   $("loading").hidden = true;
 }
 $("refreshBtn").onclick = load;
+// 🍎/🤖 Which platforms a family is on: its parents' phones + its children's
+// devices. "none" = nothing reported yet (a family that never connected).
+let PLAT = "all";
+function famPlat(f) {
+  const pp = f.parentPlatforms || [], kd = f.kidDevices || {};
+  const ios = pp.includes("ios") || kd.ios > 0, and = pp.includes("android") || kd.android > 0;
+  return ios && and ? "both" : ios ? "ios" : and ? "android" : "none";
+}
+window.setPlat = (p) => { PLAT = PLAT === p ? "all" : p; render(); };
 $("search").oninput = () => render();
 
 const gradeName = (g) => g == null ? "—" : g < 0 ? "טרום־חובה" : g === 0 ? "גן חובה"
@@ -241,13 +253,23 @@ function render() {
     <div class="tot"><b>${nf.format(t.familiesWithKids)}</b><span>משפחות עם ילדים</span></div>
     <div class="tot"><b>${nf.format(t.children)}</b><span>ילדים</span></div>
     <div class="tot"><b>${nf.format(t.activeToday)}</b><span>ילדים פעילים היום</span></div>`
+    + `<div class="totals" style="grid-column:1/-1; margin-top:0">` + [
+        ["ios", "🍎", "משפחות רק באפל"], ["android", "🤖", "משפחות רק באנדרואיד"], ["both", "🍎🤖", "משפחות עם שניהם"],
+      ].map(([key, icon, label]) => {
+        const n = realFams.filter((f) => famPlat(f) === key).length;
+        return `<button class="tot plat${PLAT === key ? " on" : ""}" onclick="setPlat('${key}')"
+          title="לחצו כדי להציג רק את המשפחות האלה (לחיצה נוספת מבטלת)"><b>${icon} ${nf.format(n)}</b><span>${label}</span></button>`;
+      }).join("") + (() => {
+        const sum = (key) => realFams.reduce((n, f) => n + ((f.kidDevices || {})[key] || 0), 0);
+        return `<div class="tot" title="מכשירים פיזיים שונים של ילדים (מכשיר משותף נספר פעם אחת)"><b>🍎 ${nf.format(sum("ios"))} · 🤖 ${nf.format(sum("android"))}</b><span>מכשירי ילדים</span></div>`;
+      })() + `</div>`
     + (demoKids ? `<div class="stamp" style="margin-top:8px">
          לא כולל ${nf.format(demoKids)} ילדי דמו · ${nf.format(DATA.families.length - realFams.length)} משפחות דמו</div>` : "");
   $("stamp").textContent = "עודכן " + new Date(DATA.generatedAt*1000).toLocaleTimeString("he-IL");
 
-  const match = (f) => !q ||
+  const match = (f) => (PLAT === "all" || famPlat(f) === PLAT) && (!q ||
     f.parents.some((p) => (p.name||"").toLowerCase().includes(q) || (p.email||"").toLowerCase().includes(q)) ||
-    f.children.some((k) => (k.name||"").toLowerCase().includes(q));
+    f.children.some((k) => (k.name||"").toLowerCase().includes(q)));
 
   const renderFamily = (f) => {
     const guest = f.parents.find((p) => p.isGuestParent);
@@ -272,11 +294,12 @@ function render() {
     const kidRows = f.children.map((k) => {
       const devList = (k.deviceRows || []).map((d) => {
         const stale = !d.lastSeenAt || (Date.now()/1000 - d.lastSeenAt) > 86400*7;
-        const kindEmoji = d.kind === "ipad" ? "📲" : "📱";
+        const android = d.platform === "android";
+        const kindEmoji = android ? "🤖" : "🍎";
         // "נוני · אייפד" — the child + the kind, so a row reads as a real device
         // (Rani); iOS 16+ names every phone just "iPhone", so the raw name is
         // only a tooltip.
-        const kindHe = d.kind === "ipad" ? "אייפד" : d.kind === "iphone" ? "אייפון" : "מכשיר";
+        const kindHe = android ? "אנדרואיד" : d.kind === "ipad" ? "אייפד" : d.kind === "iphone" ? "אייפון" : "אפל";
         const rawName = d.name || d.docID.split("_")[1].slice(0,8);
         return `<span class="chip ${stale ? "dim" : "mint"}" style="margin:3px" title="${esc(rawName)} · ${esc(d.docID)}">
           ${kindEmoji} ${esc(k.name)} · ${kindHe} · ${ago(d.lastSeenAt)}${d.appVersion ? " · " + esc(d.appVersion) : ""}
@@ -319,6 +342,14 @@ function render() {
           ${guest ? `<span class="chip" style="background:rgba(255,210,63,.25)"
               title="ההורה משתמש בטופי בלי חשבון רשום — זה החשבון האנונימי שלו">👤 הורה אורח · ${guest.uid.slice(0,8)}</span>` : ""}
           <span class="chip mint">${f.children.length} ילדים</span>
+          ${[["ios", "🍎", "אפל"], ["android", "🤖", "אנדרואיד"]].map(([key, icon, name]) => {
+            const parent = (f.parentPlatforms || []).includes(key);
+            const n = (f.kidDevices || {})[key] || 0;
+            if (!parent && !n) return "";
+            const parts = [parent ? "הורה" : "", n === 1 ? "מכשיר ילד" : n ? n + " מכשירי ילד" : ""].filter(Boolean);
+            return `<span class="chip" style="background:${key === "ios" ? "rgba(255,255,255,.16)" : "rgba(61,220,132,.24)"}"
+              title="${name}: ${parts.join(" · ")}">${icon} ${parts.join(" · ")}</span>`;
+          }).join("")}
           ${anon ? `<button class="chip dim" style="border:0;cursor:pointer;font-family:inherit"
               title="חשבונות אנונימיים של מכשירי ילד — לחצו לפירוט וניקוי"
               onclick="event.stopPropagation(); this.closest('.family').querySelector('.anonlist').hidden ^= 1">${anon} חשבונות ילד ▾</button>` : ""}
