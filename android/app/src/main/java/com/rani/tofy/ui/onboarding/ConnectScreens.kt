@@ -179,7 +179,7 @@ fun OnboardingConnectScreen(childID: String, name: String, girl: Boolean, onLock
             if (!linked) {
                 H(tr("מחברים את הטלפון של %@", name), 24, align = TextAlign.Center)
                 Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(12.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-                    NumberedStep(1, tr("בטלפון של %@: מורידים את טופי מה-App Store", name))
+                    NumberedStep(1, tr("בטלפון של %@: מורידים את טופי מה-App Store או מ-Google Play", name))
                     NumberedStep(2, tr("פותחים, בוחרים \"המכשיר של הילד\" וסורקים את הקוד"))
                 }
                 QRBlock(childID, code, 190, tr("נסו שוב"), retry)
@@ -311,7 +311,7 @@ fun ConnectDeviceSheet(childID: String, onDismiss: () -> Unit) {
                 H(tr("חַבְּרוּ אֶת הַמַּכְשִׁיר שֶׁל %@", name), 24, align = TextAlign.Center)
                 Box(Modifier.glassPane(24.dp).padding(16.dp)) { QRBlock(childID, code, 210, tr("נַסּוּ שׁוּב"), retry) }
                 Column(Modifier.fillMaxWidth().glassInset(16.dp).padding(14.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                    P(tr("1️⃣  הוֹרִידוּ אֶת טוֹפִי מֵה־App Store בַּמַּכְשִׁיר שֶׁל %@ (אַיְפֵּד אוֹ אַיְפוֹן)", name), 14f, color = Color.White, weight = FontWeight.SemiBold)
+                    P(tr("1️⃣  הוֹרִידוּ אֶת טוֹפִי בַּמַּכְשִׁיר שֶׁל %@ — מֵה־App Store אוֹ מִ־Google Play", name), 14f, color = Color.White, weight = FontWeight.SemiBold)
                     P(tr("2️⃣  פִּתְחוּ שָׁם אֶת טוֹפִי וּבַחֲרוּ \"הַמַּכְשִׁיר שֶׁל הַיֶּלֶד\""), 14f, color = Color.White, weight = FontWeight.SemiBold)
                     P(tr("3️⃣  סִרְקוּ אֶת הַקּוֹד — וְ%@ נִכְנָס יְשִׁירוֹת לְשַׂחֵק 🎉", name), 14f, color = Color.White, weight = FontWeight.SemiBold)
                 }

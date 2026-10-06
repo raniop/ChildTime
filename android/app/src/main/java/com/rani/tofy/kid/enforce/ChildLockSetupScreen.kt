@@ -250,6 +250,8 @@ private fun ProminentDisclosureBody() {
         P(tr("מה טופי עושה עם זה"), 15f, color = Color.White, weight = FontWeight.ExtraBold)
         Bullet("👀", tr("רואה רק איזו אפליקציה נפתחת עכשיו — כדי לדעת אם היא פתוחה או נעולה"))
         Bullet("🔒", tr("מציג את מסך הנעילה של טופי מעל אפליקציה נעולה, ומחזיר למסך הבית"))
+        // Play's parental-control exception requires disclosing the uninstall guard.
+        if (AllowList.GUARD_UNINSTALL) Bullet("🧷", tr("מונע מהילד למחוק אפליקציות (גם את טופי) או לשנות הגדרות בלי קוד ההורה"))
         Spacer(Modifier.height(4.dp))
         P(tr("מה טופי לא עושה"), 15f, color = Color.White, weight = FontWeight.ExtraBold)
         Bullet("🚫", tr("לא קורא את מה שכתוב על המסך, לא רואה הודעות או סיסמאות, ולא מקליד או לוחץ במקומכם"))

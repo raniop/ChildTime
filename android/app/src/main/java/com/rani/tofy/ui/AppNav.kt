@@ -54,7 +54,8 @@ fun AppNav() {
                 onBell = { nav.navigate("activity") },
                 onConnectDevice = { connectFor = it.id },
                 bellBadge = unreadActivityCount(),
-                banners = { HomeBanners(state, onChores = { nav.navigate("chores") }) },
+                banners = { HomeBanners(state, onChores = { nav.navigate("chores") },
+                    onPaywall = { nav.navigate("paywall") }, onPack = { pack, cid -> nav.navigate("pack/$pack/$cid") }) },
             )
         }
         composable("child/{id}") { e ->
@@ -70,6 +71,10 @@ fun AppNav() {
         composable("chores") { ChoresScreen(onBack = { nav.popBackStack() }) }
         composable("activity") { ActivityScreen(onBack = { nav.popBackStack() }) }
         composable("settings") { SettingsScreen(onBack = { nav.popBackStack() }) }
+        composable("paywall") { com.rani.tofy.billing.GatedPaywall("request") { nav.popBackStack() } }
+        composable("pack/{pack}/{cid}") { e ->
+            com.rani.tofy.billing.PackPurchaseScreen(e.arguments?.getString("pack") ?: "", e.arguments?.getString("cid")) { nav.popBackStack() }
+        }
     }
 
     actionsFor?.let { c ->

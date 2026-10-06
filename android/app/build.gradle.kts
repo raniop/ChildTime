@@ -72,6 +72,9 @@ dependencies {
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
 
+    // Google Play Billing (billing/): Tofy+, question packs / world passes, 💎 packs.
+    implementation("com.android.billingclient:billing-ktx:7.1.1")
+
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
 }

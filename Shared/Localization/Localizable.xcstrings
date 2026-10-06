@@ -2020,6 +2020,28 @@
         }
       }
     },
+    "%@ / חודש · מתחדש אוטומטית — ניתן לבטל בכל עת ב-Google Play" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / شهر · يتجدّد تلقائيًا — يمكن الإلغاء في أي وقت من Google Play"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / month · renews automatically — cancel anytime in Google Play"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / месяц · продлевается автоматически — можно отменить в любой момент в Google Play"
+          }
+        }
+      }
+    },
     "%@ / שנה" : {
       "localizations" : {
         "ar" : {
@@ -2038,6 +2060,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ / год"
+          }
+        }
+      }
+    },
+    "%@ / שנה · מתחדש אוטומטית — ניתן לבטל בכל עת ב-Google Play" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / سنة · يتجدّد تلقائيًا — يمكن الإلغاء في أي وقت من Google Play"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / year · renews automatically — cancel anytime in Google Play"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / год · продлевается автоматически — можно отменить в любой момент в Google Play"
           }
         }
       }
@@ -11200,6 +11244,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "15 звёзд"
+          }
+        }
+      }
+    },
+    "1️⃣  הוֹרִידוּ אֶת טוֹפִי בַּמַּכְשִׁיר שֶׁל %@ — מֵה־App Store אוֹ מִ־Google Play" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1️⃣  نزّلوا توفي على جهاز %@ — من App Store أو Google Play"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1️⃣  Download Tofy on %@'s device — from the App Store or Google Play"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1️⃣  Скачайте Тофи на устройство %@ — из App Store или Google Play"
           }
         }
       }
@@ -23057,6 +23123,28 @@
         }
       }
     },
+    "בטלפון של %@: מורידים את טופי מה-App Store או מ-Google Play" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "على هاتف %@: نزّلوا توفي من App Store أو Google Play"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On %@'s phone: download Tofy from the App Store or Google Play"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На телефоне %@: скачайте Тофи из App Store или Google Play"
+          }
+        }
+      }
+    },
     "בטלפון של %@: פותחים את טופי, ומאשרים \"זמן מסך\" כשהאייפון שואל. מאותו רגע הכל נעול חוץ מטופי." : {
       "localizations" : {
         "ar" : {
@@ -23949,6 +24037,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Под вашим контролем"
+          }
+        }
+      }
+    },
+    "בתום הניסיון: %@ / שנה · מתחדש אוטומטית — ניתן לבטל בכל עת ב-Google Play" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بعد انتهاء التجربة: %@ / سنة · يتجدّد تلقائيًا — يمكن الإلغاء في أي وقت من Google Play"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After the trial: %@ / year · renews automatically — cancel anytime in Google Play"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "После пробного периода: %@ / год · продлевается автоматически — можно отменить в любой момент в Google Play"
           }
         }
       }
@@ -34804,6 +34914,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Покупка требует подтверждения Apple ID (пароль / Face ID). Алмазы используются только для покупки персонажей внутри приложения."
+          }
+        }
+      }
+    },
+    "הָרְכִישָׁה דּוֹרֶשֶׁת אִישּׁוּר בְּחֶשְׁבּוֹן Google Play. הַיַּהֲלוֹמִים מְשַׁמְּשִׁים לִקְנִיַּת דְּמוּיוֹת בְּתוֹךְ הָאַפְּלִיקַצְיָה בִּלְבַד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تتطلّب عملية الشراء تأكيدًا في حساب Google Play. تُستخدم الألماسات لشراء الشخصيات داخل التطبيق فقط."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purchases require approval in your Google Play account. Diamonds can only be used to buy characters inside the app."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Покупка требует подтверждения в аккаунте Google Play. Алмазы используются только для покупки персонажей внутри приложения."
+          }
+        }
+      }
+    },
+    "הָרְכִישָׁה הִצְלִיחָה, וַאֲנַחְנוּ עוֹד מְאַמְּתִים אוֹתָהּ מוּל Google Play. הִיא תִּכָּנֵס לְתֹקֶף מֵעַצְמָהּ בְּעוֹד כַּמָּה רְגָעִים." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تمّت عملية الشراء، وما زلنا نؤكّدها مع Google Play. سيسري مفعولها تلقائيًا خلال لحظات."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your purchase went through, and we're still confirming it with Google Play. It'll take effect on its own in a few moments."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Покупка прошла, и мы ещё подтверждаем её в Google Play. Она вступит в силу сама через несколько мгновений."
           }
         }
       }
@@ -45894,6 +46048,28 @@
         }
       }
     },
+    "טלפון + טאבלט, אותה התקדמות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هاتف + جهاز لوحي، التقدّم نفسه"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phone + tablet, same progress"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Телефон + планшет, один и тот же прогресс"
+          }
+        }
+      }
+    },
     "טעויות" : {
       "localizations" : {
         "ar" : {
@@ -56670,6 +56846,28 @@
         }
       }
     },
+    "לֹא מָצָאנוּ מִנּוּי פָּעִיל בְּחֶשְׁבּוֹן Google Play הַזֶּה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم نجد اشتراكًا فعّالًا في حساب Google Play هذا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We didn't find an active subscription on this Google Play account."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мы не нашли активную подписку в этом аккаунте Google Play."
+          }
+        }
+      }
+    },
     "לֹא נִיתָּן לִיצוֹר קוֹד כָּעֵת" : {
       "localizations" : {
         "ar" : {
@@ -58497,6 +58695,28 @@
         }
       }
     },
+    "לפתוח עכשיו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "افتحوا الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть сейчас"
+          }
+        }
+      }
+    },
     "לקרוא ספר" : {
       "localizations" : {
         "ar" : {
@@ -58625,6 +58845,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Подтверждаем в Apple…"
+          }
+        }
+      }
+    },
+    "מְאַשְּׁרִים מוּל Google Play…" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نؤكّد مع Google Play…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirming with Google Play…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подтверждаем в Google Play…"
           }
         }
       }
@@ -61392,6 +61634,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "За родительским кодом · Apple ID · открывается всем детям на всех устройствах"
+          }
+        }
+      }
+    },
+    "מֵאֲחוֹרֵי קוֹד הוֹרֶה · Google Play · הַשְּׁאֵלוֹן נִכְנָס לַיֶּלֶד מִיָּד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خلف رمز الوالد · Google Play · تصل حزمة الأسئلة إلى الطفل فورًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behind the parent code · Google Play · the question pack reaches your child right away"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "За родительским кодом · Google Play · набор вопросов попадает к ребёнку сразу"
+          }
+        }
+      }
+    },
+    "מֵאֲחוֹרֵי קוֹד הוֹרֶה · Google Play · הָעוֹלָם נִפְתָּח לַיֶּלֶד מִיָּד · בְּלִי חִדּוּשׁ אוֹטוֹמָטִי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خلف رمز الوالد · Google Play · يُفتح العالم للطفل فورًا · بلا تجديد تلقائي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behind the parent code · Google Play · the world unlocks for your child right away · no auto-renewal"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "За родительским кодом · Google Play · мир открывается ребёнку сразу · без автопродления"
+          }
+        }
+      }
+    },
+    "מֵאֲחוֹרֵי קוֹד הוֹרֶה · Google Play · נִפְתָּח לְכָל הַיְלָדִים בְּכָל הַמַּכְשִׁירִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خلف رمز الوالد · Google Play · يُفتح لكل الأطفال على كل الأجهزة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behind the parent code · Google Play · unlocks for all kids on all devices"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "За родительским кодом · Google Play · открывается всем детям на всех устройствах"
           }
         }
       }
@@ -64664,6 +64972,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Рекомендуем: код «Экранного времени»"
+          }
+        }
+      }
+    },
+    "מונע מהילד למחוק אפליקציות (גם את טופי) או לשנות הגדרות בלי קוד ההורה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمنع الطفل من حذف التطبيقات (بما فيها توفي) أو تغيير الإعدادات دون رمز الوالدين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stops the child from deleting apps (Tofy included) or changing settings without the parent code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не даёт ребёнку удалять приложения (включая Тофи) или менять настройки без родительского кода"
           }
         }
       }

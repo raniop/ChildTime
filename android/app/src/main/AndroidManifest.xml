@@ -4,6 +4,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- QR + chore photos are optional: tablets without a camera can still install (type the code). -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.any" android:required="false" />
 
     <!-- 🛡 Child-device guard (kid/enforce): usage access is the guard's fallback
          for "which app is in front" right after it (re)connects. Granted by a

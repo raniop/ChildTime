@@ -1132,7 +1132,16 @@ async function notifyParentsAckApplied(householdID, build) {
 
 // Late command acks (parents). `found` is the child's name, or null when unknown.
 // The lock was switched off on a child's device (see wakeOnDeviceCommand).
-function shieldLostMessage(found, lang) {
+function shieldLostMessage(found, lang, platform) {
+  // An Android child device locks through Tofy's Accessibility service, not
+  // Screen Time — give its parents the Android way back (and only them).
+  if (platform === "android") {
+    if (lang === "en") { const n = found || "your child"; return { title: `🔓 Tofy's lock was turned off on ${n}'s device`, body: `Tofy's Accessibility service was switched off there, so every app is open. To fix it: open Tofy on ${n}'s device → ⚙️ (parent code) → “What's open and what's locked”, and turn the lock back on.` }; }
+    if (lang === "ru") { const n = found || "ребёнка"; return { title: `🔓 Блокировка Tofy выключена на устройстве: ${n}`, body: `Там отключили службу специальных возможностей Tofy, и все приложения открыты. Чтобы вернуть: откройте Tofy на устройстве ${n} → ⚙️ (родительский код) → «Что открыто и что заблокировано» и снова включите блокировку.` }; }
+    if (lang === "ar") { const n = found || "الطفل"; return { title: `🔓 أُوقف قفل Tofy في جهاز ${n}`, body: `أُوقفت خدمة إمكانية الوصول الخاصة بـ Tofy، فكل التطبيقات مفتوحة. للإصلاح: افتحوا Tofy في جهاز ${n} ← ⚙️ (رمز الوالدين) ← «ما المفتوح وما المقفل» وشغّلوا القفل من جديد.` }; }
+    const n = found || "הילד/ה";
+    return { title: `🔓 הנעילה של טופי כובתה במכשיר של ${n}`, body: `כיבו את שירות הנגישות של טופי, ועכשיו כל האפליקציות שם פתוחות. כדי להחזיר: פותחים את טופי במכשיר של ${n} ← ⚙️ (קוד הורה) ← "מה פתוח ומה נעול", ומפעילים שוב את הנעילה.` };
+  }
   if (lang === "en") { const n = found || "your child"; return { title: `🔓 Tofy's lock was turned off on ${n}'s phone`, body: `Tofy's Screen Time access was switched off there, so every app is open. To fix it: open Tofy on ${n}'s phone and allow Screen Time. A Screen Time passcode keeps this from happening again.` }; }
   if (lang === "ru") { const n = found || "ребёнка"; return { title: `🔓 Блокировка Tofy выключена на телефоне: ${n}`, body: `Там отключили доступ Tofy к «Экранному времени», и все приложения открыты. Чтобы вернуть: откройте Tofy на этом телефоне и разрешите «Экранное время». Код «Экранного времени» не даст отключить его снова.` }; }
   if (lang === "ar") { const n = found || "الطفل"; return { title: `🔓 أُوقف قفل Tofy في هاتف ${n}`, body: `أُوقف وصول Tofy إلى «مدة استخدام الجهاز»، فكل التطبيقات مفتوحة. للإصلاح: افتحوا Tofy في هاتف ${n} ووافقوا على «مدة استخدام الجهاز». رمز «مدة استخدام الجهاز» يمنع تكرار ذلك.` }; }
@@ -1224,7 +1233,7 @@ exports.wakeOnDeviceCommand = onDocumentWritten("childDevices/{id}", async (even
   if (before && before.shieldAuthorized === true && after.shieldAuthorized === false
       && await claimOnce(`shieldlost_${event.params.id}_${Math.floor(Date.now() / 3600000)}`)) {
     const found = await childNameFor(after.childID, null);
-    await notifyParentsAckApplied(after.householdID, (lang) => shieldLostMessage(found, lang));
+    await notifyParentsAckApplied(after.householdID, (lang) => shieldLostMessage(found, lang, after.platform));
   }
   // Lock ACK from the device → close the loop for a parent who already left.
   // Late-only (instant acks show live in the sheet), sender's devices excluded.
@@ -4596,6 +4605,296 @@ exports.onHouseholdPremiumWritten = onDocumentWritten("households/{hid}", async 
   await event.data.after.ref.set({ premiumSource: "paid", purchasedAt: now, purchaseSource: after.lastPaywallSource || (after.packRequestedFlag ? "child_request" : "card"),
     ...(wasGift ? { giftConvertedAt: now } : {}) }, { merge: true });
   console.log("[premium] paid conversion", event.params.hid, wasGift ? "from gift" : "direct");
+});
+
+// ============================================================================
+// 🤖 Google Play Billing — the Android twin of appStoreNotifications.
+//
+// Two doors, one household model:
+//   • verifyPlayPurchase (callable) — the Android app sends every purchase
+//     token here BEFORE it grants anything. The token is checked with Google
+//     (Play Developer API), and a Tofy+ subscription is written to the family
+//     by the SERVER (premiumUntil / premiumSource / playStore) — the client
+//     never publishes premiumUntil itself on Android. Packs and 💎 diamonds
+//     are granted by the client exactly like iOS, but only after this says ok.
+//   • playRtdn (Pub/Sub) — Real-Time Developer Notifications: Google tells US
+//     when a subscription renews, is cancelled, expires or is refunded, even if
+//     nobody opens the app (the Apple handler's job, for Play).
+//
+// Setup (docs/PLAY_BILLING_SETUP.md): enable the Google Play Android Developer
+// API in the Cloud project, invite the functions' runtime service account in
+// Play Console → Users and permissions, create the Pub/Sub topic PLAY_RTDN_TOPIC
+// and point Play Console → Monetization setup → RTDN at it.
+// ============================================================================
+const { onMessagePublished } = require("firebase-functions/v2/pubsub");
+const { GoogleAuth } = require("google-auth-library");
+const PLAY_PACKAGE_NAME = "com.rani.tofy";
+const PLAY_RTDN_TOPIC = "play-rtdn";
+// android/…/billing/ProductIds.kt — keep in sync.
+const PLAY_SUBSCRIPTION_IDS = ["tofy_plus_monthly", "tofy_plus_yearly"];
+const PLAY_INAPP_ID = /^(stars_(small|medium|large)|pack_[a-z0-9]+(_sibling)?|pass_[a-z0-9]+(_sibling)?)$/;
+
+let playAuth = null;
+// One Play Developer API call as the functions' own service account (no key
+// file — Application Default Credentials). Returns the JSON body; throws an
+// error carrying `.status` for HTTP failures so callers can tell a bad token
+// (400/404/410) from Google being down.
+async function playApi(method, pathTail, body) {
+  playAuth = playAuth || new GoogleAuth({ scopes: ["https://www.googleapis.com/auth/androidpublisher"] });
+  const client = await playAuth.getClient();
+  const url = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${PLAY_PACKAGE_NAME}/${pathTail}`;
+  try {
+    const res = await client.request({ url, method, data: body });
+    return res.data || {};
+  } catch (e) {
+    const err = new Error(`Play API ${method} ${pathTail.split("/tokens/")[0]}: ${(e.response && e.response.status) || ""} ${e.message}`);
+    err.status = (e.response && e.response.status) || 0;
+    throw err;
+  }
+}
+const playSubscriptionV2 = (token) => playApi("GET", `purchases/subscriptionsv2/tokens/${encodeURIComponent(token)}`);
+const playProduct = (productId, token) => playApi("GET", `purchases/products/${encodeURIComponent(productId)}/tokens/${encodeURIComponent(token)}`);
+const playAckSubscription = (subscriptionId, token) =>
+  playApi("POST", `purchases/subscriptions/${encodeURIComponent(subscriptionId)}/tokens/${encodeURIComponent(token)}:acknowledge`, {});
+
+// Tokens are long bearer-ish strings — store a hash, never the token itself.
+const playTokenHash = (token) => nodeCrypto.createHash("sha256").update(String(token)).digest("hex");
+
+// The line item that runs latest (a subscription has one; an upgrade may carry two).
+function playLatestLine(sub) {
+  const lines = Array.isArray(sub.lineItems) ? sub.lineItems : [];
+  return lines.reduce((best, li) => (!best || Date.parse(li.expiryTime || 0) > Date.parse(best.expiryTime || 0) ? li : best), null) || {};
+}
+
+// Which family a Play subscription belongs to: the obfuscatedAccountId the app
+// sets on every purchase (the household id, like Apple's appAccountToken),
+// else the token map a verified purchase left (playSubscriptions/{hash}), else
+// the token this one replaced (an upgrade / resubscribe carries linkedPurchaseToken).
+async function householdForPlaySubscription(token, sub) {
+  const acct = String((sub.externalAccountIdentifiers && sub.externalAccountIdentifiers.obfuscatedExternalAccountId) || "");
+  if (acct) {
+    for (const id of [acct, acct.toUpperCase(), acct.toLowerCase()]) {
+      if ((await db.collection("households").doc(id).get()).exists) return id;
+    }
+  }
+  for (const t of [token, sub.linkedPurchaseToken].filter(Boolean)) {
+    const m = await db.collection("playSubscriptions").doc(playTokenHash(t)).get();
+    if (m.exists && m.data().householdID) return m.data().householdID;
+  }
+  return null;
+}
+
+// Mirror of the Apple handler's household patch, driven by the subscription's
+// CURRENT state as Google reports it (so a verify call and every RTDN land on
+// the same answer). `event` is a label for playStore.lastType ("VERIFY",
+// "SUBSCRIPTION_RENEWED", …); `revoked` = Google took the money back.
+async function applyPlaySubscription(hhID, token, sub, event, { revoked = false } = {}) {
+  const li = playLatestLine(sub);
+  const nowS = Date.now() / 1000;
+  const expiresAt = li.expiryTime ? Date.parse(li.expiryTime) / 1000 : null;
+  const autoRenew = li.autoRenewingPlan ? li.autoRenewingPlan.autoRenewEnabled === true : null;
+  const state = String(sub.subscriptionState || "");
+  const env = sub.testPurchase ? "Test" : "Production";
+  const hash = playTokenHash(token);
+  const ref = db.collection("households").doc(hhID);
+  await db.collection("playSubscriptions").doc(hash).set({
+    householdID: hhID, productID: li.productId || null, state, expiresAt, updatedAt: nowS,
+    linkedTokenHash: sub.linkedPurchaseToken ? playTokenHash(sub.linkedPurchaseToken) : null,
+  }, { merge: true });
+  await db.runTransaction(async (t) => {
+    const h = (await t.get(ref)).data() || {};
+    const prev = h.playStore || {};
+    // An older token (replaced by an upgrade) must never take away what the
+    // current one grants — only the family's CURRENT Play subscription may
+    // mark it expired or refunded.
+    const isCurrent = !prev.tokenHash || prev.tokenHash === hash || ["SUBSCRIPTION_STATE_ACTIVE", "SUBSCRIPTION_STATE_IN_GRACE_PERIOD"].includes(state);
+    if (!isCurrent) return;
+    const patch = {
+      playStore: {
+        env, state, lastType: event, lastAt: nowS, productID: li.productId || null,
+        basePlanID: (li.offerDetails && li.offerDetails.basePlanId) || null,
+        orderID: sub.latestOrderId || null, expiresAt, autoRenew, tokenHash: hash,
+      },
+    };
+    const current = Number(h.premiumUntil || 0);
+    // Apple may hold the family's premium too — a Play refund never cuts an
+    // App Store subscription that is still running.
+    const appleRunning = h.appStore && Number(h.appStore.expiresAt || 0) > nowS;
+    if (revoked) {
+      patch.refundedAt = nowS;
+      if (h.premiumSource === "paid" && current > nowS && !appleRunning) patch.premiumUntil = nowS - 1;
+    } else if (state === "SUBSCRIPTION_STATE_ACTIVE" || state === "SUBSCRIPTION_STATE_IN_GRACE_PERIOD" || state === "SUBSCRIPTION_STATE_CANCELED") {
+      // CANCELED = auto-renew off, access runs until the paid period ends.
+      if (expiresAt && expiresAt > current) patch.premiumUntil = expiresAt;
+      if (expiresAt && expiresAt > nowS) {
+        if (h.premiumSource !== "paid" || !h.purchasedAt) {
+          Object.assign(patch, { premiumSource: "paid", purchasedAt: h.purchasedAt || nowS, purchaseSource: h.purchaseSource || h.lastPaywallSource || "card" });
+          if (h.premiumSource === "gift") patch.giftConvertedAt = nowS;
+        } else if (event === "SUBSCRIPTION_RENEWED" || event === "SUBSCRIPTION_RECOVERED") patch.renewedAt = nowS;
+        patch.expiredAt = admin.firestore.FieldValue.delete();
+      }
+      if (state === "SUBSCRIPTION_STATE_CANCELED" || autoRenew === false) {
+        if (!h.renewalOffAt) patch.renewalOffAt = nowS;
+      } else {
+        patch.renewalOffAt = admin.firestore.FieldValue.delete();
+      }
+      if (state === "SUBSCRIPTION_STATE_IN_GRACE_PERIOD") patch.billingIssueAt = nowS;
+    } else if (state === "SUBSCRIPTION_STATE_ON_HOLD" || state === "SUBSCRIPTION_STATE_PAUSED") {
+      // Payment failed past grace (or paused): no access, the period already ended.
+      patch.billingIssueAt = nowS;
+    } else if (state === "SUBSCRIPTION_STATE_EXPIRED") {
+      if (!h.expiredAt) patch.expiredAt = nowS;
+    }
+    t.set(ref, patch, { merge: true });
+  });
+  return { state, expiresAt, autoRenew, env };
+}
+
+// The Android app, right after Google Play says a purchase went through (and on
+// every restore): { householdID, productId, purchaseToken, type: "subs"|"inapp" }.
+exports.verifyPlayPurchase = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const uid = request.auth && request.auth.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Sign in first.");
+  const d = request.data || {};
+  const hhID = String(d.householdID || ""), productId = String(d.productId || ""), token = String(d.purchaseToken || "");
+  const type = d.type === "subs" ? "subs" : "inapp";
+  if (!hhID || !productId || !token || token.length > 4096) throw new HttpsError("invalid-argument", "Missing purchase fields.");
+  const hh = await db.collection("households").doc(hhID).get();
+  // Parents AND bound child devices (anonymous) are in parentUIDs — a child
+  // device buys 💎 behind the parent gate.
+  if (!hh.exists || !(hh.data().parentUIDs || []).includes(uid)) throw new HttpsError("permission-denied", "Not a member of this family.");
+  const belongsHere = (acct) => !acct || String(acct).toLowerCase() === hhID.toLowerCase();
+
+  if (type === "subs") {
+    if (!PLAY_SUBSCRIPTION_IDS.includes(productId)) throw new HttpsError("invalid-argument", "Unknown subscription.");
+    let sub;
+    try { sub = await playSubscriptionV2(token); } catch (e) {
+      console.warn("[play] verify subs failed:", e.message);
+      if ([400, 404, 410].includes(e.status)) return { ok: false, reason: "invalid" };
+      throw new HttpsError("unavailable", "Google Play could not be reached.");
+    }
+    const acct = sub.externalAccountIdentifiers && sub.externalAccountIdentifiers.obfuscatedExternalAccountId;
+    if (!belongsHere(acct)) throw new HttpsError("permission-denied", "This purchase belongs to another family.");
+    const li = playLatestLine(sub);
+    if (li.productId && !PLAY_SUBSCRIPTION_IDS.includes(li.productId)) return { ok: false, reason: "invalid" };
+    const state = String(sub.subscriptionState || "");
+    if (state === "SUBSCRIPTION_STATE_PENDING") return { ok: false, reason: "pending" };
+    const r = await applyPlaySubscription(hhID, token, sub, "VERIFY");
+    await db.collection("billingEvents").doc(`play-verify-${playTokenHash(token).slice(0, 16)}-${Date.now()}`).set({
+      store: "play", type: "VERIFY", subtype: state, env: r.env, householdID: hhID, at: Date.now() / 1000, receivedAt: Date.now() / 1000,
+      productID: li.productId || productId, orderID: sub.latestOrderId || null, expiresAt: r.expiresAt, autoRenew: r.autoRenew, uid,
+    });
+    const active = !!(r.expiresAt && r.expiresAt > Date.now() / 1000) && !["SUBSCRIPTION_STATE_ON_HOLD", "SUBSCRIPTION_STATE_PAUSED", "SUBSCRIPTION_STATE_EXPIRED"].includes(state);
+    return { ok: active, reason: active ? null : "expired", state, expiresAt: r.expiresAt, autoRenew: r.autoRenew };
+  }
+
+  // One-time products: 💎 packs, question packs, 30-day world passes.
+  if (!PLAY_INAPP_ID.test(productId)) throw new HttpsError("invalid-argument", "Unknown product.");
+  let p;
+  try { p = await playProduct(productId, token); } catch (e) {
+    console.warn("[play] verify inapp failed:", e.message);
+    if ([400, 404, 410].includes(e.status)) return { ok: false, reason: "invalid" };
+    throw new HttpsError("unavailable", "Google Play could not be reached.");
+  }
+  if (!belongsHere(p.obfuscatedExternalAccountId)) throw new HttpsError("permission-denied", "This purchase belongs to another family.");
+  const purchaseState = Number(p.purchaseState);   // 0 purchased · 1 canceled · 2 pending
+  if (purchaseState === 2) return { ok: false, reason: "pending" };
+  if (purchaseState !== 0) return { ok: false, reason: "canceled" };
+  // Consumed = the app already granted it and finished it — a replayed token.
+  if (Number(p.consumptionState) === 1) return { ok: false, reason: "consumed" };
+  const orderId = String(p.orderId || "") || `token-${playTokenHash(token).slice(0, 24)}`;
+  const nowS = Date.now() / 1000;
+  await db.collection("playPurchases").doc(orderId).set({
+    householdID: hhID, productID: productId, orderID: orderId, quantity: Number(p.quantity || 1),
+    test: Number(p.purchaseType) === 0, verifiedAt: nowS, verifiedBy: uid, tokenHash: playTokenHash(token),
+  }, { merge: true });
+  // A pack the app already wrote its ledger for (it writes packPurchases LAST,
+  // after the children and the household) — the grant happened; only the
+  // consume is left. Stops a reinstalled app from adding a second 30 days.
+  const ledgered = /^(pack|pass)_/.test(productId) && (await db.collection("packPurchases").doc(orderId).get()).exists;
+  return { ok: true, orderId, quantity: Number(p.quantity || 1), test: Number(p.purchaseType) === 0, granted: ledgered };
+});
+
+// Subscription RTDN types (developer.android.com/google/play/billing/rtdn-reference).
+const PLAY_SUB_EVENTS = {
+  1: "SUBSCRIPTION_RECOVERED", 2: "SUBSCRIPTION_RENEWED", 3: "SUBSCRIPTION_CANCELED", 4: "SUBSCRIPTION_PURCHASED",
+  5: "SUBSCRIPTION_ON_HOLD", 6: "SUBSCRIPTION_IN_GRACE_PERIOD", 7: "SUBSCRIPTION_RESTARTED", 8: "SUBSCRIPTION_PRICE_CHANGE_CONFIRMED",
+  9: "SUBSCRIPTION_DEFERRED", 10: "SUBSCRIPTION_PAUSED", 11: "SUBSCRIPTION_PAUSE_SCHEDULE_CHANGED", 12: "SUBSCRIPTION_REVOKED",
+  13: "SUBSCRIPTION_EXPIRED", 19: "SUBSCRIPTION_PRICE_CHANGE_UPDATED", 20: "SUBSCRIPTION_PENDING_PURCHASE_CANCELED",
+};
+
+exports.playRtdn = onMessagePublished({ topic: PLAY_RTDN_TOPIC, timeoutSeconds: 60, memory: "256MiB" }, async (event) => {
+  const msg = (event.data && event.data.message) || {};
+  let n;
+  try { n = JSON.parse(Buffer.from(String(msg.data || ""), "base64").toString("utf8")); } catch (e) {
+    console.warn("[play] unreadable RTDN:", e.message); return;
+  }
+  if (n.packageName && n.packageName !== PLAY_PACKAGE_NAME) return;
+  if (n.testNotification) { console.log("[play] RTDN test notification ok"); return; }
+  // Pub/Sub may deliver the same message twice.
+  const evRef = db.collection("billingEvents").doc(`play-${msg.messageId || msg.message_id || nodeCrypto.randomUUID()}`);
+  if ((await evRef.get()).exists) return;
+  const nowS = Date.now() / 1000;
+  const at = Number(n.eventTimeMillis || Date.now()) / 1000;
+
+  if (n.subscriptionNotification) {
+    const sn = n.subscriptionNotification;
+    const type = PLAY_SUB_EVENTS[Number(sn.notificationType)] || `SUBSCRIPTION_${sn.notificationType}`;
+    const token = String(sn.purchaseToken || "");
+    let sub = null;
+    try { sub = await playSubscriptionV2(token); } catch (e) { console.warn("[play] RTDN lookup failed:", type, e.message); }
+    const hhID = sub ? await householdForPlaySubscription(token, sub) : null;
+    const li = sub ? playLatestLine(sub) : {};
+    await evRef.set({
+      store: "play", type, subtype: sub ? String(sub.subscriptionState || "") : null, env: sub && sub.testPurchase ? "Test" : "Production",
+      householdID: hhID, at, receivedAt: nowS, productID: li.productId || sn.subscriptionId || null,
+      orderID: (sub && sub.latestOrderId) || null, expiresAt: li.expiryTime ? Date.parse(li.expiryTime) / 1000 : null,
+      autoRenew: li.autoRenewingPlan ? li.autoRenewingPlan.autoRenewEnabled === true : null,
+    });
+    if (!sub) return;
+    // Safety net: a purchase the app never acknowledged (killed mid-flow) is
+    // refunded by Google after 3 days — acknowledge it here.
+    if (sub.acknowledgementState === "ACKNOWLEDGEMENT_STATE_PENDING" && sub.subscriptionState === "SUBSCRIPTION_STATE_ACTIVE" && li.productId) {
+      await playAckSubscription(li.productId, token).catch((e) => console.warn("[play] ack failed:", e.message));
+    }
+    if (!hhID) { console.warn("[play]", type, "— no household for this token"); return; }
+    await applyPlaySubscription(hhID, token, sub, type, { revoked: type === "SUBSCRIPTION_REVOKED" });
+    console.log("[play]", type, hhID);
+    return;
+  }
+
+  if (n.voidedPurchaseNotification) {
+    // A refund / chargeback. productType 1 = subscription, 2 = one-time.
+    const v = n.voidedPurchaseNotification;
+    const token = String(v.purchaseToken || ""), orderId = String(v.orderId || "");
+    if (Number(v.productType) === 1) {
+      let sub = null;
+      try { sub = await playSubscriptionV2(token); } catch (e) { console.warn("[play] voided lookup failed:", e.message); }
+      const hhID = sub ? await householdForPlaySubscription(token, sub) : null;
+      await evRef.set({ store: "play", type: "VOIDED", subtype: "subscription", householdID: hhID, at, receivedAt: nowS, orderID: orderId || null });
+      if (sub && hhID) await applyPlaySubscription(hhID, token, sub, "VOIDED", { revoked: true });
+      return;
+    }
+    // One-time: mark the ledgers. A pack stays on the child (the app never takes
+    // a world away mid-play); the founder dashboard sees the refund.
+    const pp = orderId ? await db.collection("playPurchases").doc(orderId).get() : null;
+    const hhID = pp && pp.exists ? pp.data().householdID || null : null;
+    await evRef.set({ store: "play", type: "VOIDED", subtype: "product", householdID: hhID, at, receivedAt: nowS, orderID: orderId || null });
+    if (pp && pp.exists) {
+      await pp.ref.set({ refundedAt: nowS }, { merge: true });
+      const sale = db.collection("packPurchases").doc(orderId);
+      if ((await sale.get()).exists) await sale.set({ refundedAt: nowS }, { merge: true });
+    }
+    return;
+  }
+
+  if (n.oneTimeProductNotification) {
+    // The app verifies and grants these itself (with the children it was
+    // bought for); the server only keeps the record.
+    const o = n.oneTimeProductNotification;
+    await evRef.set({ store: "play", type: Number(o.notificationType) === 2 ? "ONE_TIME_PRODUCT_CANCELED" : "ONE_TIME_PRODUCT_PURCHASED",
+      at, receivedAt: nowS, productID: o.sku || null, householdID: null });
+  }
 });
 
 // ============================================================================

@@ -284,7 +284,13 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 is KidEvent.Progress -> (ev.event as? ProgressEvent.WorldUnlocked)?.let { u ->
                     KidSession.reportEvent("worldUnlocked", value = allWorlds().firstOrNull { it.id == u.worldID }?.name ?: u.worldID)
                 }
-                is KidEvent.MinutesAdjusted, is KidEvent.GiftRevoked, is KidEvent.AppRemovalWindow -> Unit
+                // The parent's remote "allow deleting apps (5 min)": open the uninstall
+                // dialog for the window (iOS: appRemovalUnlockAt → 5 min, then relock).
+                is KidEvent.AppRemovalWindow -> if (!kidMode) {
+                    val mins = maxOf(1, ((ev.untilUnix - System.currentTimeMillis() / 1000.0) / 60).toInt())
+                    com.rani.tofy.kid.enforce.EnforcementStore.allowTemporarily(ctx, com.rani.tofy.kid.enforce.AllowList.installerPackages(ctx), mins)
+                }
+                is KidEvent.MinutesAdjusted, is KidEvent.GiftRevoked -> Unit
             }
         }
     }

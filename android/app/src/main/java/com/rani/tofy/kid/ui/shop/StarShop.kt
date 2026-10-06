@@ -93,12 +93,8 @@ private fun StarShopScreen(onClose: () -> Unit) {
                     }
                     Text(tr("יַהֲלוֹמִים שֶׁלְּךָ"), color = Color.White.copy(alpha = 0.8f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
                 }
-                StarPacks.diamonds.forEach { PackRow(it, best = it == StarPacks.BEST) }
-                Text(
-                    tr("רְכִישַׁת יַהֲלוֹמִים תַּגִּיעַ לְאַנְדְּרוֹאִיד בְּקָרוֹב. עַד אָז מַרְוִיחִים יַהֲלוֹמִים בִּלְמִידָה 💎"),
-                    Modifier.fillMaxWidth().padding(top = 4.dp), color = Color.White.copy(alpha = 0.7f), fontFamily = Rounded,
-                    fontWeight = FontWeight.Medium, fontSize = 13.sp, textAlign = TextAlign.Center, lineHeight = 18.sp,
-                )
+                // Google Play Billing: verified on the server, then credited + consumed.
+                com.rani.tofy.billing.DiamondPacksPlay()
             }
         }
     }

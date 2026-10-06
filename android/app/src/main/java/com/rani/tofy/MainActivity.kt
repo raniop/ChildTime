@@ -24,6 +24,12 @@ import com.rani.tofy.ui.theme.GlassBackdrop
 import com.rani.tofy.ui.theme.TofyTheme
 
 class MainActivity : ComponentActivity() {
+    /** Play recommends it: finish any purchase that completed while we were away. */
+    override fun onResume() {
+        super.onResume()
+        runCatching { com.rani.tofy.billing.BillingRepository.resume(this) }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

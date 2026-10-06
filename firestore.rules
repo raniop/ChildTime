@@ -64,7 +64,7 @@ service cloud.firestore {
           // server notifications (appStoreNotifications) write these.
           && !request.resource.data.diff(resource.data).affectedKeys().hasAny(
                ['premiumSource', 'giftStartedAt', 'giftEndedAt', 'giftDays', 'giftUntil', 'purchasedAt', 'purchaseSource', 'giftConvertedAt', 'giftBy', 'renewedAt',
-                'appStore', 'renewalOffAt', 'expiredAt', 'refundedAt', 'billingIssueAt'])
+                'appStore', 'playStore', 'renewalOffAt', 'expiredAt', 'refundedAt', 'billingIssueAt'])
         ) ||
         // A join may touch ONLY parentUIDs.
         (request.resource.data.parentUIDs == resource.data.parentUIDs.concat([request.auth.uid])

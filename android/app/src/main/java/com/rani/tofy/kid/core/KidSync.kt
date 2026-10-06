@@ -429,6 +429,9 @@ class KidSync internal constructor(
         val joinedAt = (existing?.get("joinedAt") as? Number)?.toDouble() ?: now
         val data = hashMapOf<String, Any?>(
             "id" to "${cid}_$me", "childID" to cid, "householdID" to hid,
+            // platform: lets the server word pushes for Android ("turn the lock back on in Accessibility",
+            // not "Screen Time"). iOS rows have no such field.
+            "platform" to "android",
             "deviceID" to me, "name" to KidIdentity.friendlyName, "kind" to KidIdentity.kind,
             "systemVersion" to KidIdentity.systemVersion,
             "joinedAt" to joinedAt, "lastSeenAt" to now,

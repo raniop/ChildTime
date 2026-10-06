@@ -86,6 +86,12 @@ object AllowList {
         return SystemApps(own = ctx.packageName, launchers = launchers, alwaysAllowed = always, parentOnly = parentOnly)
     }
 
+    /** The uninstall dialog(s) — what the parent's remote "allow deleting apps (5 min)" opens. */
+    fun installerPackages(ctx: Context): Set<String> = KNOWN_INSTALLERS + runCatching {
+        ctx.packageManager.queryIntentActivities(Intent(Intent.ACTION_DELETE, Uri.parse("package:${ctx.packageName}")),
+            PackageManager.MATCH_DEFAULT_ONLY or PackageManager.MATCH_ALL).mapNotNull { it.activityInfo?.packageName }.toSet()
+    }.getOrDefault(emptySet())
+
     /** The device's Settings app(s) — what a parent's "open settings" allowance opens. */
     fun settingsPackages(ctx: Context): Set<String> = system(ctx).parentOnly
 

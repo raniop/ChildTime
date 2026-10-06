@@ -46,7 +46,7 @@ import kotlinx.coroutines.launch
  * request, and notifications being off.
  */
 @Composable
-fun ColumnScope.HomeBanners(state: FamilyState, onChores: () -> Unit) {
+fun ColumnScope.HomeBanners(state: FamilyState, onChores: () -> Unit, onPaywall: () -> Unit = {}, onPack: (packID: String, childID: String) -> Unit = { _, _ -> }) {
     LaunchedEffect(Unit) { ChoresRepository.start(); HelpRepository.start(); ActivityStore.start() }
     val help by HelpRepository.pending.collectAsState()
     val chores by ChoresRepository.chores.collectAsState()
@@ -69,7 +69,7 @@ fun ColumnScope.HomeBanners(state: FamilyState, onChores: () -> Unit) {
         }
     }
 
-    RequestBanners(state)
+    RequestBanners(state, onPaywall, onPack)
     NotificationsBanner()
 
     HelpAnswerSheetHost()
@@ -225,37 +225,40 @@ internal fun premiumAskTitle(askers: List<Child>) =
     if (askers.size == 1) tr("%@ רוצה טופי+", askers[0].name) else tr("%@ רוצים טופי+", askers.joinToString(tr(" ו")) { it.name })
 
 /**
- * The purchase itself isn't on Android yet — the banner shows the request,
- * says where buying happens, and "לא עכשיו" takes it down on the child's side
+ * "לפתוח עכשיו" opens the Play paywall / pack purchase (behind the parent
+ * code); "לא עכשיו" takes the request down on the child's side
  * (RemoteSyncManager.clearPremiumRequests / clearPackRequest).
  */
 @Composable
-private fun RequestBanners(state: FamilyState) {
+private fun RequestBanners(state: FamilyState, onPaywall: () -> Unit, onPack: (String, String) -> Unit) {
     val scope = rememberCoroutineScope()
     val premium = premiumAskers(state)
     if (premium.isNotEmpty()) {
-        RequestBanner("👑", premiumAskTitle(premium)) {
+        RequestBanner("👑", premiumAskTitle(premium), onOpen = onPaywall) {
             scope.launch { premium.forEach { ChildRepository.update(it.id, mapOf("premiumRequestedAt" to FieldValue.delete())) } }
         }
     }
     packAskers(state).forEach { (c, emoji, name) ->
-        RequestBanner(emoji, tr("%@ רוצה את %@", c.name, name)) {
+        RequestBanner(emoji, tr("%@ רוצה את %@", c.name, name), onOpen = { c.raw.str("packRequestedID")?.let { onPack(it, c.id) } }) {
             scope.launch { ChildRepository.update(c.id, mapOf("packRequestedAt" to FieldValue.delete(), "packRequestedID" to FieldValue.delete())) }
         }
     }
 }
 
 @Composable
-private fun RequestBanner(emoji: String, title: String, onDismiss: () -> Unit) {
+private fun RequestBanner(emoji: String, title: String, onOpen: () -> Unit, onDismiss: () -> Unit) {
     Column(Modifier.fillMaxWidth().glassPane(20.dp, 0.18f).background(Ink.gold2.copy(alpha = 0.14f)).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(emoji, fontSize = 26.sp)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(title, color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
-                P(tr("הרכישה נעשית במכשיר של הילד, עם קוד ההורים"), 12.5f)
             }
         }
-        GlassButton(tr("לא עכשיו"), Modifier.fillMaxWidth(), height = 40.dp, onClick = onDismiss)
+        // Google Play Billing is in: the parent buys right here, behind the parent code.
+        RowSpaced {
+            WhiteButton(tr("לפתוח עכשיו"), Modifier.weight(1f), height = 40.dp, onClick = onOpen)
+            GlassButton(tr("לא עכשיו"), Modifier.weight(1f), height = 40.dp, onClick = onDismiss)
+        }
     }
 }
 
