@@ -169,6 +169,11 @@
         });
       }, { threshold: 0.12 });
       for (var k = 0; k < reveals.length; k++) io.observe(reveals[k]);
+      // A jump to an anchor (#android, #download…) can land the reader on a
+      // section the observer never saw cross its threshold — it stayed blank on
+      // iOS Safari. Any in-page jump shows everything.
+      window.addEventListener("hashchange", revealAll);
+      if (location.hash) revealAll();
     }
   }
 
