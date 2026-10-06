@@ -55,6 +55,7 @@ import com.rani.tofy.ui.theme.Rounded
 import com.rani.tofy.ui.theme.glassPane
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.rani.tofy.kid.core.ProgressEngine
 
 // ── 🎓 ChildGradePickerView ────────────────────────────────────────────────
 
@@ -350,4 +351,73 @@ internal fun LevelInfo(level: Int, untilNext: Int, onClose: () -> Unit) {
 /** Grade-pick write: grade + the school year it was set in + "picked by the child" (Profile sync fields). */
 internal suspend fun saveChildGrade(childID: String, householdID: String?, grade: Int) {
     JoinRepository.childWrite(childID, householdID, mapOf("grade" to grade, "gradeSchoolYear" to schoolYear(), "gradeSetByChild" to true))
+}
+
+/** Which header number the child tapped (WorldMapView.StatInfo). */
+internal enum class StatInfoKind { MINUTES, STARS, DIAMONDS }
+
+/**
+ * ⏱ / ⭐ / 💎 explained — WorldMapView.statInfoCard + statInfoContent. Every
+ * number on the kid's header opens one (Rani, on the tablet: nothing explained
+ * itself). Diamonds → the shop, stars → the leaderboard, straight from it.
+ */
+@Composable
+internal fun StatInfoSheet(kind: StatInfoKind, engine: ProgressEngine, onClose: () -> Unit,
+                           onShop: () -> Unit, onLeaderboard: () -> Unit) {
+    BackHandler(onBack = onClose)
+    val emoji: String; val title: String; val subtitle: String; val body: String; val tip: String
+    when (kind) {
+        StatInfoKind.MINUTES -> {
+            val cap = engine.settings.dailyCap
+            val lines = ArrayList<String>()
+            when {
+                engine.canRedeemNow -> {
+                    lines += tr("אֶפְשָׁר לִפְתּוֹחַ עַכְשָׁיו %lld דַּקּוֹת מִשְׂחָק! 🎮", engine.redeemableMinutesNow)
+                    if (engine.pendingMinutes > engine.redeemableMinutesNow)
+                        lines += tr("בָּאַרְנָק יֵשׁ %lld — הַשְּׁאָר נִשְׁמָר לְיָמִים הַבָּאִים.", engine.pendingMinutes)
+                }
+                engine.dailyScreenTimeMaxedOut ->
+                    lines += tr("הִגַּעְתָּ לַמַּקְסִימוּם 🌙 — שִׂחַקְתָּ הַיּוֹם %lld מִתּוֹךְ %lld דַּקּוֹת. %lld דַּקּוֹת שְׁמוּרוֹת לְךָ לְמָחָר!",
+                        engine.minutesPlayedToday, cap.max, engine.pendingMinutes)
+                engine.pendingMinutes > 0 ->
+                    lines += tr("יֵשׁ לְךָ %lld דַּקּוֹת. פּוֹתְחִים זְמַן מִשְׂחָק מִ-%lld דַּקּוֹת — עֲנוּ עַל עוֹד שְׁאֵלוֹת! 😊",
+                        engine.pendingMinutes, ProgressEngine.MINIMUM_UNLOCK_MINUTES)
+                cap.enabled && engine.snapshot.minutesEarnedToday >= cap.max -> {
+                    lines += tr("וָואוּ — נִצַּלְתָּ אֶת כָּל %lld הַדַּקּוֹת שֶׁל הַיּוֹם! 🏆", cap.max)
+                    lines += tr("כָּל מַה שֶּׁתַּרְוִיחַ עַכְשָׁיו נִשְׁמָר לְמָחָר.")
+                    if (engine.parentGiftMinutes > 0)
+                        lines += tr("וְיֵשׁ לְךָ %lld דַּקּוֹת מַתָּנָה 💝 שֶׁאֶפְשָׁר לִפְתּוֹחַ גַּם עַכְשָׁיו!", engine.parentGiftMinutes)
+                }
+                else -> lines += tr("עֲדַיִן אֵין דַּקּוֹת. עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק! 🎮")
+            }
+            if (cap.enabled && !engine.dailyScreenTimeMaxedOut)
+                lines += tr("הַיּוֹם הִרְוַחְתָּ %lld מִתּוֹךְ %lld דַּקּוֹת.", engine.snapshot.minutesEarnedToday, cap.max)
+            val carry = engine.snapshot.carryOverMinutes ?: 0
+            if (carry > 0) lines += tr("🎁 %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר.", carry)
+            emoji = "🎮"; title = tr("דַּקּוֹת מִשְׂחָק"); subtitle = tr("זְמַן הַמִּשְׂחָק שֶׁלְּךָ")
+            body = lines.joinToString("\n"); tip = tr("עוֹנִים נָכוֹן — מַרְוִיחִים עוֹד דַּקּוֹת!")
+        }
+        StatInfoKind.STARS -> {
+            emoji = "⭐"; title = tr("%@ כּוֹכָבִים", "%,d".format(engine.snapshot.stars)); subtitle = tr("הַדֵּרוּג שֶׁלָּכֶם")
+            body = tr("אוֹסְפִים כּוֹכָב עַל כָּל תְּשׁוּבָה נְכוֹנָה. הַכּוֹכָבִים אַף פַּעַם לֹא יוֹרְדִים — הֵם הַנִּקּוּד שֶׁלָּכֶם בְּטַבְלַת הַחֲבֵרִים!")
+            tip = tr("כָּל מַה שֶּׁאַתֶּם לוֹמְדִים מְטַפֵּס בַּדֵּרוּג 🏆")
+        }
+        StatInfoKind.DIAMONDS -> {
+            emoji = "💎"; title = tr("%@ יַהֲלוֹמִים", "%,d".format(engine.snapshot.diamonds)); subtitle = tr("הָאַרְנָק שֶׁלָּכֶם")
+            body = tr("מַרְוִיחִים יַהֲלוֹמִים עַל תְּשׁוּבוֹת נְכוֹנוֹת, מִמַּתָּנוֹת וּמִגַּלְגַּל הַמַּזָּל — וְקוֹנִים בָּהֶם בַּחֲנוּת.")
+            tip = tr("קְנִיָּה לֹא פּוֹגַעַת בַּדֵּרוּג שֶׁלָּכֶם 😊")
+        }
+    }
+    KidCenterCard(onClose) {
+        Text(emoji, fontSize = 54.sp)
+        KidTitle(title, 26)
+        KidBody(subtitle, 14f, alpha = 0.75f)
+        KidBody(body, 17f, alpha = 0.95f)
+        KidBody("💡 $tip", 14f, alpha = 0.8f)
+        when (kind) {
+            StatInfoKind.DIAMONDS -> KidCta(tr("לַחֲנוּת"), Color(0xFFFFD23F), Color(0xFFFF9F1C), emoji = "🛍️", size = 18) { onClose(); onShop() }
+            StatInfoKind.STARS -> KidCta(tr("לַדֵּרוּג"), Color(0xFF10B981), Color(0xFF0E9E72), emoji = "🏆", size = 18) { onClose(); onLeaderboard() }
+            StatInfoKind.MINUTES -> GoldButton(tr("הֵבַנְתִּי!"), onClick = onClose)
+        }
+    }
 }

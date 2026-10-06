@@ -68,6 +68,7 @@ import com.rani.tofy.kid.ui.BottomHint
 import com.rani.tofy.kid.ui.BuddyBubble
 import com.rani.tofy.kid.ui.CharacterImage
 import com.rani.tofy.kid.ui.KidCta
+import com.rani.tofy.kid.ui.StatInfoKind
 import com.rani.tofy.kid.ui.timeLabel
 import com.rani.tofy.ui.common.coachMark
 import com.rani.tofy.ui.common.isWideScreen
@@ -130,6 +131,8 @@ internal fun KidHome(
     onTile: (HomeTile) -> Unit,
     onChallenge: () -> Unit,
     onLevelInfo: () -> Unit,
+    /** ⭐ 💎 ⏱ 💝 and "הרווחת היום" each explain themselves (WorldMapView.infoStat). */
+    onStatInfo: (StatInfoKind) -> Unit,
     onOpenEarned: () -> Unit,
     onOpenGift: () -> Unit,
     onTransfer: () -> Unit,
@@ -166,7 +169,7 @@ internal fun KidHome(
             ) {
                 item(span = { GridItemSpan(maxLineSpan) }) { BrandRow(premium, extras.friendsBadge, onShop, onFriends, onSettings) }
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    HeaderPane(child, snap.stars, snap.diamonds, snap.dayStreak, snap.xp, engine, cta, extras, onLevelInfo, onChallenge, onAvatar, onChores)
+                    HeaderPane(child, snap.stars, snap.diamonds, snap.dayStreak, snap.xp, engine, cta, extras, onLevelInfo, onStatInfo, onChallenge, onAvatar, onChores)
                 }
                 // Like iOS: the exit bar sits UNDER the header pane, right above the worlds.
                 if (kidMode) item(span = { GridItemSpan(maxLineSpan) }) { KidExitBar(onKidExit) }
@@ -322,7 +325,7 @@ private fun currencyShort(v: Int): String {
 @Composable
 private fun HeaderPane(
     child: Child?, stars: Int, diamonds: Int, dayStreak: Int, xp: Int, engine: ProgressEngine?,
-    cta: HomeCtaModel, extras: HomeExtras, onLevelInfo: () -> Unit, onChallenge: () -> Unit,
+    cta: HomeCtaModel, extras: HomeExtras, onLevelInfo: () -> Unit, onStatInfo: (StatInfoKind) -> Unit, onChallenge: () -> Unit,
     onAvatar: () -> Unit, onChores: () -> Unit,
 ) {
     // iOS sizes, one set for the phone (compact) and one for the tablet (iPad).
@@ -347,15 +350,15 @@ private fun HeaderPane(
             // ⭐ · 💎 beside the name; on a tablet also 💝 gift and ⏱ earned minutes —
             // the iPad header, with no extra row under it (Rani: it sat badly).
             Row(Modifier.coachMark("k.wallet"), horizontalArrangement = Arrangement.spacedBy(if (compact) 12.dp else 18.dp)) {
-                WalletStat("⭐ " + currencyShort(stars), tr("כּוֹכָבִים"), compact)
-                WalletStat("💎 " + currencyShort(diamonds), tr("יַהֲלוֹמִים"), compact)
+                WalletStat("⭐ " + currencyShort(stars), tr("כּוֹכָבִים"), compact) { onStatInfo(StatInfoKind.STARS) }
+                WalletStat("💎 " + currencyShort(diamonds), tr("יַהֲלוֹמִים"), compact) { onStatInfo(StatInfoKind.DIAMONDS) }
                 if (!compact) {
-                    WalletStat("💝 ${(engine?.giftSecondsAvailable ?: 0) / 60}", tr("דַּקּ׳ מַתָּנָה"), compact)
-                    WalletStat("⏱ ${engine?.pendingMinutes ?: 0}", tr("דַּקּ׳ לְשַׂחֵק"), compact)
+                    WalletStat("💝 ${(engine?.giftSecondsAvailable ?: 0) / 60}", tr("דַּקּ׳ מַתָּנָה"), compact) { onStatInfo(StatInfoKind.MINUTES) }
+                    WalletStat("⏱ ${engine?.pendingMinutes ?: 0}", tr("דַּקּ׳ לְשַׂחֵק"), compact) { onStatInfo(StatInfoKind.MINUTES) }
                 }
             }
         }
-        StatsPanel(engine, onLevelInfo, compact)
+        StatsPanel(engine, onLevelInfo, { onStatInfo(StatInfoKind.MINUTES) }, compact)
         // The twins: אתגר יומי · מטלות הבית — same size, side by side.
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ChallengeCard(engine, onChallenge, Modifier.weight(1f).fillMaxHeight().coachMark("k.challenge"))
@@ -365,8 +368,8 @@ private fun HeaderPane(
 }
 
 @Composable
-private fun WalletStat(value: String, label: String, compact: Boolean) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+private fun WalletStat(value: String, label: String, compact: Boolean, onClick: () -> Unit) {
+    Column(Modifier.clip(RoundedCornerShape(10.dp)).clickable(onClick = onClick), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
             TightText(value, if (compact) 14.5f else 16f, if (compact) 22 else 26, Color.White, FontWeight.Black)
         }
@@ -395,13 +398,13 @@ private fun tightStyle(size: Float) = TextStyle(
 
 /** ⏱ minutes today (of the cap) · ✅ correct today · ⭐ level. */
 @Composable
-private fun StatsPanel(engine: ProgressEngine?, onLevelInfo: () -> Unit, compact: Boolean) {
+private fun StatsPanel(engine: ProgressEngine?, onLevelInfo: () -> Unit, onMinutesInfo: () -> Unit, compact: Boolean) {
     val snap = engine?.snapshot
     val cap = engine?.settings?.dailyCap
     val minutes = if (cap?.enabled == true) "${snap?.minutesEarnedToday ?: 0}" else "${engine?.pendingMinutes ?: 0}"
     val suffix = if (cap?.enabled == true) "/${cap.max}" else null
     Row(Modifier.fillMaxWidth().glassInset(18.dp).padding(vertical = 13.dp, horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        StatColumn(minutes, suffix, tr("⏱ הִרְוַחְתָּ הַיּוֹם"), null, compact)
+        StatColumn(minutes, suffix, tr("⏱ הִרְוַחְתָּ הַיּוֹם"), onMinutesInfo, compact)
         StatDivider()
         StatColumn("${snap?.correctToday ?: 0}", null, tr("✅ נְכוֹנוֹת הַיּוֹם"), null, compact)
         StatDivider()

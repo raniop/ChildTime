@@ -173,6 +173,7 @@ private sealed class Cover {
     data object PinForgot : Cover()
     data object Challenge : Cover()
     data object Level : Cover()
+    data class Stat(val kind: StatInfoKind) : Cover()
 }
 
 /** The full-screen kid destinations WorldMapView presents as fullScreenCovers. */
@@ -440,6 +441,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 },
                 onChallenge = { cover = if (premium) Cover.Challenge else Cover.Ask(null) },
                 onLevelInfo = { cover = Cover.Level },
+                onStatInfo = { cover = Cover.Stat(it) },
                 onOpenEarned = { requestUnlock { handle(KidSession.openEarned(), false) } },
                 onOpenGift = { requestUnlock { handle(KidSession.openGift(), true) } },
                 onTransfer = {
@@ -546,6 +548,8 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                     val until = maxOf(0, RewardEngine.xpForNextLevel(xp) - xp + RewardEngine.xpPerCorrect - 1) / maxOf(1, RewardEngine.xpPerCorrect)
                     LevelInfo(engine.companionLevel, until) { cover = null }
                 }
+                is Cover.Stat -> StatInfoSheet(c.kind, engine, onClose = { cover = null },
+                    onShop = { screen = KidScreen.Shop }, onLeaderboard = { screen = KidScreen.Friends })
                 else -> Unit
             }
         }
