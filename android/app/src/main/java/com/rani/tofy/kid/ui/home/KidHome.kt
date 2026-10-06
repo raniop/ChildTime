@@ -353,12 +353,12 @@ private fun HeaderPane(
                 WalletStat("⭐ " + currencyShort(stars), tr("כּוֹכָבִים"), compact) { onStatInfo(StatInfoKind.STARS) }
                 WalletStat("💎 " + currencyShort(diamonds), tr("יַהֲלוֹמִים"), compact) { onStatInfo(StatInfoKind.DIAMONDS) }
                 if (!compact) {
-                    WalletStat("💝 ${(engine?.giftSecondsAvailable ?: 0) / 60}", tr("דַּקּ׳ מַתָּנָה"), compact) { onStatInfo(StatInfoKind.MINUTES) }
+                    WalletStat("💝 ${(engine?.giftSecondsAvailable ?: 0) / 60}", tr("דַּקּ׳ מַתָּנָה"), compact) { onStatInfo(StatInfoKind.GIFT) }
                     WalletStat("⏱ ${engine?.pendingMinutes ?: 0}", tr("דַּקּ׳ לְשַׂחֵק"), compact) { onStatInfo(StatInfoKind.MINUTES) }
                 }
             }
         }
-        StatsPanel(engine, onLevelInfo, { onStatInfo(StatInfoKind.MINUTES) }, compact)
+        StatsPanel(engine, onLevelInfo, onStatInfo, compact)
         // The twins: אתגר יומי · מטלות הבית — same size, side by side.
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ChallengeCard(engine, onChallenge, Modifier.weight(1f).fillMaxHeight().coachMark("k.challenge"))
@@ -398,15 +398,15 @@ private fun tightStyle(size: Float) = TextStyle(
 
 /** ⏱ minutes today (of the cap) · ✅ correct today · ⭐ level. */
 @Composable
-private fun StatsPanel(engine: ProgressEngine?, onLevelInfo: () -> Unit, onMinutesInfo: () -> Unit, compact: Boolean) {
+private fun StatsPanel(engine: ProgressEngine?, onLevelInfo: () -> Unit, onStatInfo: (StatInfoKind) -> Unit, compact: Boolean) {
     val snap = engine?.snapshot
     val cap = engine?.settings?.dailyCap
     val minutes = if (cap?.enabled == true) "${snap?.minutesEarnedToday ?: 0}" else "${engine?.pendingMinutes ?: 0}"
     val suffix = if (cap?.enabled == true) "/${cap.max}" else null
     Row(Modifier.fillMaxWidth().glassInset(18.dp).padding(vertical = 13.dp, horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        StatColumn(minutes, suffix, tr("⏱ הִרְוַחְתָּ הַיּוֹם"), onMinutesInfo, compact)
+        StatColumn(minutes, suffix, tr("⏱ הִרְוַחְתָּ הַיּוֹם"), { onStatInfo(StatInfoKind.TODAY) }, compact)
         StatDivider()
-        StatColumn("${snap?.correctToday ?: 0}", null, tr("✅ נְכוֹנוֹת הַיּוֹם"), null, compact)
+        StatColumn("${snap?.correctToday ?: 0}", null, tr("✅ נְכוֹנוֹת הַיּוֹם"), { onStatInfo(StatInfoKind.CORRECT) }, compact)
         StatDivider()
         StatColumn("${engine?.companionLevel ?: 1}", null, tr("⭐ רָמָה"), onLevelInfo, compact)
     }

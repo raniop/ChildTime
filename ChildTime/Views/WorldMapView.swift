@@ -110,6 +110,10 @@ struct WorldMapView: View {
 
     enum StatInfo: String, Identifiable {
         case minutes, stars, diamonds
+        /// 💝 the gift pocket, ⏱ "הרווחת היום", ✅ "נכונות היום" — each its own
+        /// explanation (Rani: the gift and today's tile opened the play-minutes one,
+        /// and "נכונות היום" did nothing).
+        case gift, today, correct
         var id: String { rawValue }
     }
 
@@ -1193,8 +1197,8 @@ struct WorldMapView: View {
             walletStat("⭐ " + progress.stars.currencyShort, tr("כּוֹכָבִים")) { infoStat = .stars }
             walletStat("💎 " + progress.diamonds.currencyShort, tr("יַהֲלוֹמִים")) { infoStat = .diamonds }
             if !isCompact {
-                walletStat("💝 \(progress.parentGiftMinutes)", tr("דַּקּ׳ מַתָּנָה")) { infoStat = .minutes }
-                walletStat("⏱ \(progress.pendingMinutes)", tr("דַּקּ׳ שֶׁהִרְוִיחַ")) { infoStat = .minutes }
+                walletStat("💝 \(progress.parentGiftMinutes)", tr("דַּקּ׳ מַתָּנָה")) { infoStat = .gift }
+                walletStat("⏱ \(progress.pendingMinutes)", tr("דַּקּ׳ לְשַׂחֵק")) { infoStat = .minutes }
             }
         }
         .environment(\.layoutDirection, .app)
@@ -1514,9 +1518,9 @@ struct WorldMapView: View {
         // The approved header: ⏱ minutes today · ✅ correct today · ⭐ level
         // (stars and diamonds moved up beside the name).
         return HStack(spacing: 0) {
-            statColumn(value: minutes, suffix: minutesMax, label: tr("⏱ הִרְוַחְתָּ הַיּוֹם")) { infoStat = .minutes }
+            statColumn(value: minutes, suffix: minutesMax, label: tr("⏱ הִרְוַחְתָּ הַיּוֹם")) { infoStat = .today }
             statDivider
-            statColumn(value: "\(progress.correctToday)", label: tr("✅ נְכוֹנוֹת הַיּוֹם"), action: nil)
+            statColumn(value: "\(progress.correctToday)", label: tr("✅ נְכוֹנוֹת הַיּוֹם")) { infoStat = .correct }
             statDivider
             statColumn(value: "\(progress.companionLevel)", label: tr("⭐ רָמָה")) { showLevelInfo = true }
         }
@@ -1529,7 +1533,7 @@ struct WorldMapView: View {
         .sheet(item: $infoStat) { stat in
             statInfoCard(stat)
                 .environment(\.layoutDirection, .app)
-                .presentationDetents([.height(stat == .minutes ? 460 : 380)])
+                .presentationDetents([.height(stat == .minutes || stat == .today ? 460 : 400)])
                 .presentationDragIndicator(.visible)
         }
         .eraseToAnyView()
@@ -1720,6 +1724,46 @@ struct WorldMapView: View {
                 subtitle: tr("הַדֵּרוּג שֶׁלָּכֶם"),
                 body: tr("אוֹסְפִים כּוֹכָב עַל כָּל תְּשׁוּבָה נְכוֹנָה. הַכּוֹכָבִים אַף פַּעַם לֹא יוֹרְדִים — הֵם הַנִּקּוּד שֶׁלָּכֶם בְּטַבְלַת הַחֲבֵרִים!"),
                 tip: tr("כָּל מַה שֶּׁאַתֶּם לוֹמְדִים מְטַפֵּס בַּדֵּרוּג 🏆")
+            )
+        case .gift:
+            let gift = progress.parentGiftMinutes
+            return InfoContent(
+                emoji: "💝",
+                title: tr("\(gift) דַּקּוֹת מַתָּנָה"),
+                subtitle: tr("מֵהַהוֹרִים 💝"),
+                body: gift > 0
+                    ? tr("אֶת הַדַּקּוֹת הָאֵלֶּה הַהוֹרִים נָתְנוּ לָכֶם בְּמַתָּנָה — לֹא צָרִיךְ לַעֲנוֹת עַל שְׁאֵלוֹת כְּדֵי לִפְתּוֹחַ אוֹתָן.")
+                        + "\n" + tr("פּוֹתְחִים אוֹתָן בַּכַּפְתּוֹר הַוָּרוֹד לְמַטָּה 🎁")
+                    : tr("כָּרֶגַע אֵין דַּקּוֹת מַתָּנָה. כְּשֶׁהַהוֹרִים יִשְׁלְחוּ מַתָּנָה — הִיא תּוֹפִיעַ כָּאן 💝"),
+                tip: tr("דַּקּוֹת מַתָּנָה נִשְׁמָרוֹת בִּנְפָרָד מֵהַדַּקּוֹת שֶׁהִרְוַחְתֶּם 😊")
+            )
+        case .today:
+            let cap = progress.dailyCap
+            var lines: [String] = []
+            if cap.enabled {
+                lines.append(tr("הַיּוֹם הִרְוַחְתָּ \(progress.minutesEarnedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת."))
+                lines.append(tr("כְּשֶׁמַּגִּיעִים לַמַּקְסִימוּם הַיּוֹמִי (\(cap.max) דַּקּוֹת), מַה שֶּׁמַּרְוִיחִים אַחַר כָּךְ נִשְׁמָר לְמָחָר 🎁"))
+            } else {
+                lines.append(tr("הַיּוֹם הִרְוַחְתֶּם \(progress.minutesEarnedToday) דַּקּוֹת."))
+            }
+            lines.append(tr("הַמִּסְפָּר הַזֶּה לֹא יוֹרֵד כְּשֶׁמְּשַׂחֲקִים — הוּא סוֹפֵר כַּמָּה הִרְוַחְתֶּם הַיּוֹם. כַּמָּה נִשְׁאַר לְשַׂחֵק? אֶת זֶה רוֹאִים לְיַד ⏱ דַּקּ׳ לְשַׂחֵק."))
+            return InfoContent(
+                emoji: "⏱",
+                title: tr("\(progress.minutesEarnedToday) דַּקּוֹת הַיּוֹם"),
+                subtitle: tr("כַּמָּה הִרְוַחְתֶּם הַיּוֹם"),
+                body: lines.joined(separator: "\n"),
+                tip: tr("עוֹנִים נָכוֹן — מַרְוִיחִים עוֹד דַּקּוֹת!")
+            )
+        case .correct:
+            let left = max(0, ProgressStore.dailyChallengeTarget - progress.correctToday)
+            return InfoContent(
+                emoji: "✅",
+                title: tr("\(progress.correctToday) תְּשׁוּבוֹת נְכוֹנוֹת"),
+                subtitle: tr("הַיּוֹם"),
+                body: tr("כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחָה \(progress.secondsPerCorrect) שְׁנִיּוֹת מִשְׂחָק, כּוֹכָבִים ⭐ וְיַהֲלוֹמִים 💎.")
+                    + "\n" + (left > 0 ? tr("עוֹד \(left) תְּשׁוּבוֹת נְכוֹנוֹת וְהָאֶתְגָּר הַיּוֹמִי נִפְתָּח! 🔥")
+                                         : tr("הָאֶתְגָּר הַיּוֹמִי הֻשְׁלַם! 🔥")),
+                tip: tr("מָחָר מַתְחִילִים מֵאֶפֶס — וְהַכּוֹכָבִים נִשְׁאָרִים לְתָמִיד ⭐")
             )
         case .diamonds:
             return InfoContent(

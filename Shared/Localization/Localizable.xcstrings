@@ -5763,6 +5763,28 @@
         }
       }
     },
+    "%lld דַּקּוֹת מַתָּנָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دقائق الهديّة: %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gift minutes: %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подарочные минуты: %lld"
+          }
+        }
+      }
+    },
     "%lld דקות" : {
       "localizations" : {
         "ar" : {
@@ -14380,6 +14402,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Страна иврита"
+          }
+        }
+      }
+    },
+    "אֶת הַדַּקּוֹת הָאֵלֶּה הַהוֹרִים נָתְנוּ לָכֶם בְּמַתָּנָה — לֹא צָרִיךְ לַעֲנוֹת עַל שְׁאֵלוֹת כְּדֵי לִפְתּוֹחַ אוֹתָן." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذه الدقائق هديّة من والديك — لا حاجة للإجابة عن أسئلة لفتحها."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your parents gave you these minutes as a gift — no questions needed to open them."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Эти минуты тебе подарили родители — чтобы их открыть, не нужно отвечать на вопросы."
           }
         }
       }
@@ -26285,6 +26329,28 @@
         }
       }
     },
+    "דַּקּוֹת מַתָּנָה נִשְׁמָרוֹת בִּנְפָרָד מֵהַדַּקּוֹת שֶׁהִרְוַחְתֶּם 😊" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دقائق الهديّة محفوظة بشكل منفصل عن الدقائق التي ربحتها 😊"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gift minutes are kept apart from the minutes you earned 😊"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подарочные минуты хранятся отдельно от заработанных 😊"
+          }
+        }
+      }
+    },
     "דַּקּוֹת שֶׁהוּרְוְחוּ וְדַקּוֹת שֶׁנֻּצְּלוּ לְכָל יוֹם" : {
       "localizations" : {
         "ar" : {
@@ -31204,6 +31270,28 @@
         }
       }
     },
+    "הַיּוֹם הִרְוַחְתֶּם %lld דַּקּוֹת." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدقائق التي ربحتها اليوم: %lld."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minutes earned today: %lld."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сегодня заработано минут: %lld."
+          }
+        }
+      }
+    },
     "הַיּוֹם הִרְוַחְתָּ %lld מִתּוֹךְ %lld דַּקּוֹת." : {
       "localizations" : {
         "ar" : {
@@ -31873,6 +31961,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "зонтик"
+          }
+        }
+      }
+    },
+    "הַמִּסְפָּר הַזֶּה לֹא יוֹרֵד כְּשֶׁמְּשַׂחֲקִים — הוּא סוֹפֵר כַּמָּה הִרְוַחְתֶּם הַיּוֹם. כַּמָּה נִשְׁאַר לְשַׂחֵק? אֶת זֶה רוֹאִים לְיַד ⏱ דַּקּ׳ לְשַׂחֵק." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا الرقم لا ينقص عندما تلعب — إنه يعدّ ما ربحته اليوم. كم بقي للّعب؟ تراه بجانب ⏱ د. للّعب."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This number doesn't go down when you play — it counts what you earned today. How much is left to play? That's next to ⏱ Min to play."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это число не уменьшается, когда играешь, — оно считает, сколько ты заработал сегодня. Сколько осталось играть? Смотри рядом с ⏱ Мин. для игры."
           }
         }
       }
@@ -34708,6 +34818,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Главное испытание этого мира"
+          }
+        }
+      }
+    },
+    "הָאֶתְגָּר הַיּוֹמִי הֻשְׁלַם! 🔥" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اكتمل التحدّي اليوميّ! 🔥"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily challenge done! 🔥"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ежедневное задание выполнено! 🔥"
           }
         }
       }
@@ -49540,6 +49672,28 @@
         }
       }
     },
+    "כְּשֶׁמַּגִּיעִים לַמַּקְסִימוּם הַיּוֹמִי (%lld דַּקּוֹת), מַה שֶּׁמַּרְוִיחִים אַחַר כָּךְ נִשְׁמָר לְמָחָר 🎁" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عندما تصل إلى الحدّ اليوميّ (%lld د.)، كل ما تربحه بعد ذلك يُحفظ للغد 🎁"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once you reach the daily max (%lld min), whatever you earn after that is saved for tomorrow 🎁"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Когда дойдёшь до дневного максимума (%lld мин.), всё, что заработаешь дальше, сохранится на завтра 🎁"
+          }
+        }
+      }
+    },
     "כְּתִיב נָכוֹן, מִלִּים וְדִקְדּוּק" : {
       "localizations" : {
         "ar" : {
@@ -50507,6 +50661,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сколько %@?"
+          }
+        }
+      }
+    },
+    "כַּמָּה הִרְוַחְתֶּם הַיּוֹם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما ربحته اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you earned today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сколько заработано сегодня"
           }
         }
       }
@@ -51854,6 +52030,28 @@
         }
       }
     },
+    "כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחָה %lld שְׁנִיּוֹת מִשְׂחָק, כּוֹכָבִים ⭐ וְיַהֲלוֹמִים 💎." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل إجابة صحيحة تربح %lld ثانية لعب ونجومًا ⭐ وألماسًا 💎."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every right answer earns %lld seconds of play, stars ⭐ and diamonds 💎."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждый правильный ответ приносит %lld сек. игры, звёзды ⭐ и алмазы 💎."
+          }
+        }
+      }
+    },
     "כָּל תְּשׁוּבָה נְכוֹנָה מוֹסִיפָה זְמַן מִשְׂחָק" : {
       "localizations" : {
         "ar" : {
@@ -52148,6 +52346,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "акула"
+          }
+        }
+      }
+    },
+    "כָּרֶגַע אֵין דַּקּוֹת מַתָּנָה. כְּשֶׁהַהוֹרִים יִשְׁלְחוּ מַתָּנָה — הִיא תּוֹפִיעַ כָּאן 💝" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا توجد دقائق هديّة الآن. عندما يرسل والداك هديّة ستظهر هنا 💝"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No gift minutes right now. When your parents send a gift, it shows up here 💝"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас подарочных минут нет. Когда родители пришлют подарок, он появится здесь 💝"
           }
         }
       }
@@ -62247,6 +62467,28 @@
         }
       }
     },
+    "מֵהַהוֹרִים 💝" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "من والديك 💝"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From your parents 💝"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "От родителей 💝"
+          }
+        }
+      }
+    },
     "מֵי יָם" : {
       "localizations" : {
         "ar" : {
@@ -64075,6 +64317,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "завтра"
+          }
+        }
+      }
+    },
+    "מָחָר מַתְחִילִים מֵאֶפֶס — וְהַכּוֹכָבִים נִשְׁאָרִים לְתָמִיד ⭐" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "غدًا يبدأ العدّ من الصفر — والنجوم تبقى للأبد ⭐"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tomorrow starts from zero — and your stars stay forever ⭐"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завтра счёт начнётся с нуля — а звёзды останутся навсегда ⭐"
           }
         }
       }
@@ -74812,6 +75076,28 @@
         }
       }
     },
+    "עוֹד %lld תְּשׁוּבוֹת נְכוֹנוֹת וְהָאֶתְגָּר הַיּוֹמִי נִפְתָּח! 🔥" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إجابات صحيحة متبقّية للتحدّي اليوميّ: %lld 🔥"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right answers to go until the daily challenge: %lld 🔥"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "До ежедневного задания осталось правильных ответов: %lld 🔥"
+          }
+        }
+      }
+    },
     "עוֹד %lld תְּשׁוּבוֹת נְכוֹנוֹת לָרָמָה הַבָּאָה" : {
       "localizations" : {
         "ar" : {
@@ -79303,6 +79589,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Открываем покупку…"
+          }
+        }
+      }
+    },
+    "פּוֹתְחִים אוֹתָן בַּכַּפְתּוֹר הַוָּרוֹד לְמַטָּה 🎁" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "افتحها بالزرّ الورديّ في الأسفل 🎁"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open them with the pink button below 🎁"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открой их розовой кнопкой внизу 🎁"
           }
         }
       }

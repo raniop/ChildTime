@@ -354,7 +354,7 @@ internal suspend fun saveChildGrade(childID: String, householdID: String?, grade
 }
 
 /** Which header number the child tapped (WorldMapView.StatInfo). */
-internal enum class StatInfoKind { MINUTES, STARS, DIAMONDS }
+internal enum class StatInfoKind { MINUTES, STARS, DIAMONDS, GIFT, TODAY, CORRECT }
 
 /**
  * ⏱ / ⭐ / 💎 explained — WorldMapView.statInfoCard + statInfoContent. Every
@@ -402,6 +402,35 @@ internal fun StatInfoSheet(kind: StatInfoKind, engine: ProgressEngine, onClose: 
             body = tr("אוֹסְפִים כּוֹכָב עַל כָּל תְּשׁוּבָה נְכוֹנָה. הַכּוֹכָבִים אַף פַּעַם לֹא יוֹרְדִים — הֵם הַנִּקּוּד שֶׁלָּכֶם בְּטַבְלַת הַחֲבֵרִים!")
             tip = tr("כָּל מַה שֶּׁאַתֶּם לוֹמְדִים מְטַפֵּס בַּדֵּרוּג 🏆")
         }
+        StatInfoKind.GIFT -> {
+            val gift = engine.parentGiftMinutes
+            emoji = "💝"; title = tr("%lld דַּקּוֹת מַתָּנָה", gift); subtitle = tr("מֵהַהוֹרִים 💝")
+            body = if (gift > 0)
+                tr("אֶת הַדַּקּוֹת הָאֵלֶּה הַהוֹרִים נָתְנוּ לָכֶם בְּמַתָּנָה — לֹא צָרִיךְ לַעֲנוֹת עַל שְׁאֵלוֹת כְּדֵי לִפְתּוֹחַ אוֹתָן.") +
+                    "\n" + tr("פּוֹתְחִים אוֹתָן בַּכַּפְתּוֹר הַוָּרוֹד לְמַטָּה 🎁")
+            else tr("כָּרֶגַע אֵין דַּקּוֹת מַתָּנָה. כְּשֶׁהַהוֹרִים יִשְׁלְחוּ מַתָּנָה — הִיא תּוֹפִיעַ כָּאן 💝")
+            tip = tr("דַּקּוֹת מַתָּנָה נִשְׁמָרוֹת בִּנְפָרָד מֵהַדַּקּוֹת שֶׁהִרְוַחְתֶּם 😊")
+        }
+        StatInfoKind.TODAY -> {
+            val cap = engine.settings.dailyCap
+            val earned = engine.snapshot.minutesEarnedToday
+            val lines = ArrayList<String>()
+            if (cap.enabled) {
+                lines += tr("הַיּוֹם הִרְוַחְתָּ %lld מִתּוֹךְ %lld דַּקּוֹת.", earned, cap.max)
+                lines += tr("כְּשֶׁמַּגִּיעִים לַמַּקְסִימוּם הַיּוֹמִי (%lld דַּקּוֹת), מַה שֶּׁמַּרְוִיחִים אַחַר כָּךְ נִשְׁמָר לְמָחָר 🎁", cap.max)
+            } else lines += tr("הַיּוֹם הִרְוַחְתֶּם %lld דַּקּוֹת.", earned)
+            lines += tr("הַמִּסְפָּר הַזֶּה לֹא יוֹרֵד כְּשֶׁמְּשַׂחֲקִים — הוּא סוֹפֵר כַּמָּה הִרְוַחְתֶּם הַיּוֹם. כַּמָּה נִשְׁאַר לְשַׂחֵק? אֶת זֶה רוֹאִים לְיַד ⏱ דַּקּ׳ לְשַׂחֵק.")
+            emoji = "⏱"; title = tr("%lld דַּקּוֹת הַיּוֹם", earned); subtitle = tr("כַּמָּה הִרְוַחְתֶּם הַיּוֹם")
+            body = lines.joinToString("\n"); tip = tr("עוֹנִים נָכוֹן — מַרְוִיחִים עוֹד דַּקּוֹת!")
+        }
+        StatInfoKind.CORRECT -> {
+            val correct = engine.snapshot.correctToday
+            val left = maxOf(0, ProgressEngine.DAILY_CHALLENGE_TARGET - correct)
+            emoji = "✅"; title = tr("%lld תְּשׁוּבוֹת נְכוֹנוֹת", correct); subtitle = tr("הַיּוֹם")
+            body = tr("כָּל תְּשׁוּבָה נְכוֹנָה מַרְוִיחָה %lld שְׁנִיּוֹת מִשְׂחָק, כּוֹכָבִים ⭐ וְיַהֲלוֹמִים 💎.", engine.settings.secondsPerCorrect) + "\n" +
+                (if (left > 0) tr("עוֹד %lld תְּשׁוּבוֹת נְכוֹנוֹת וְהָאֶתְגָּר הַיּוֹמִי נִפְתָּח! 🔥", left) else tr("הָאֶתְגָּר הַיּוֹמִי הֻשְׁלַם! 🔥"))
+            tip = tr("מָחָר מַתְחִילִים מֵאֶפֶס — וְהַכּוֹכָבִים נִשְׁאָרִים לְתָמִיד ⭐")
+        }
         StatInfoKind.DIAMONDS -> {
             emoji = "💎"; title = tr("%@ יַהֲלוֹמִים", "%,d".format(engine.snapshot.diamonds)); subtitle = tr("הָאַרְנָק שֶׁלָּכֶם")
             body = tr("מַרְוִיחִים יַהֲלוֹמִים עַל תְּשׁוּבוֹת נְכוֹנוֹת, מִמַּתָּנוֹת וּמִגַּלְגַּל הַמַּזָּל — וְקוֹנִים בָּהֶם בַּחֲנוּת.")
@@ -417,7 +446,7 @@ internal fun StatInfoSheet(kind: StatInfoKind, engine: ProgressEngine, onClose: 
         when (kind) {
             StatInfoKind.DIAMONDS -> KidCta(tr("לַחֲנוּת"), Color(0xFFFFD23F), Color(0xFFFF9F1C), emoji = "🛍️", size = 18) { onClose(); onShop() }
             StatInfoKind.STARS -> KidCta(tr("לַדֵּרוּג"), Color(0xFF10B981), Color(0xFF0E9E72), emoji = "🏆", size = 18) { onClose(); onLeaderboard() }
-            StatInfoKind.MINUTES -> GoldButton(tr("הֵבַנְתִּי!"), onClick = onClose)
+            else -> GoldButton(tr("הֵבַנְתִּי!"), onClick = onClose)
         }
     }
 }
