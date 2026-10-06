@@ -15,6 +15,9 @@ struct FamilyMapView: UIViewRepresentable {
     var focusSpan: Double = 0.02
     /// Off in the place editor: its own centre pin marks the place.
     var showPlaceMarkers = true
+    /// The family map: frame every child and place (not one point at a fixed
+    /// zoom, which left the circles as specks).
+    var fitAll = false
     var onCenterChange: ((CLLocationCoordinate2D) -> Void)? = nil
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
@@ -43,10 +46,53 @@ struct FamilyMapView: UIViewRepresentable {
             let a = Pin(kind: .kid(k.initial, k.girl)); a.coordinate = CLLocationCoordinate2D(latitude: k.lat, longitude: k.lng)
             map.addAnnotation(a)
         }
-        if let f = focus, context.coordinator.focused != "\(f.latitude),\(f.longitude)" {
+        if fitAll {
+            let key = map.annotations.map { "\($0.coordinate.latitude),\($0.coordinate.longitude)" }.sorted().joined(separator: "|")
+            if !key.isEmpty, context.coordinator.focused != key {
+                context.coordinator.focused = key
+                var rect = MKMapRect.null
+                for a in map.annotations {
+                    let p = MKMapPoint(a.coordinate)
+                    rect = rect.union(MKMapRect(x: p.x, y: p.y, width: 0, height: 0))
+                }
+                for o in map.overlays { rect = rect.union(o.boundingMapRect) }
+                // At least ~1 km across, so a single child is not shown at street-sign zoom.
+                let minSide = MKMapPointsPerMeterAtLatitude(map.annotations[0].coordinate.latitude) * 1000
+                if rect.size.width < minSide { rect = rect.insetBy(dx: -(minSide - rect.size.width) / 2, dy: 0) }
+                if rect.size.height < minSide { rect = rect.insetBy(dx: 0, dy: -(minSide - rect.size.height) / 2) }
+                map.setVisibleMapRect(rect, edgePadding: UIEdgeInsets(top: 60, left: 40, bottom: 40, right: 40), animated: false)
+            }
+        } else if let f = focus, context.coordinator.focused != "\(f.latitude),\(f.longitude)" {
             context.coordinator.focused = "\(f.latitude),\(f.longitude)"
             map.setRegion(MKCoordinateRegion(center: f, span: MKCoordinateSpan(latitudeDelta: focusSpan, longitudeDelta: focusSpan)), animated: false)
         }
+    }
+
+    /// A place is just its emoji in a small white dot at the centre of its
+    /// circle (Rani: name tags covered the map). The name shows on a tap.
+    final class PlaceTagView: MKAnnotationView {
+        init(annotation: MKAnnotation?, emoji: String) {
+            super.init(annotation: annotation, reuseIdentifier: nil)
+            let size: CGFloat = 26
+            let dot = UIView(frame: CGRect(x: 0, y: 0, width: size, height: size))
+            dot.backgroundColor = .white
+            dot.layer.cornerRadius = size / 2
+            dot.layer.shadowColor = UIColor.black.cgColor
+            dot.layer.shadowOpacity = 0.18
+            dot.layer.shadowRadius = 2
+            dot.layer.shadowOffset = CGSize(width: 0, height: 1)
+            let label = UILabel(frame: dot.bounds)
+            label.text = emoji
+            label.font = .systemFont(ofSize: 14)
+            label.textAlignment = .center
+            dot.addSubview(label)
+            addSubview(dot)
+            frame = dot.bounds
+            canShowCallout = true
+            displayPriority = .required
+            collisionMode = .none
+        }
+        required init?(coder: NSCoder) { fatalError() }
     }
 
     final class Pin: MKPointAnnotation {
@@ -62,20 +108,18 @@ struct FamilyMapView: UIViewRepresentable {
 
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
             guard let pin = annotation as? Pin else { return nil }
-            let v = MKMarkerAnnotationView(annotation: pin, reuseIdentifier: nil)
             switch pin.kind {
             case .kid(let initial, let girl):
+                let v = MKMarkerAnnotationView(annotation: pin, reuseIdentifier: nil)
                 v.glyphText = initial
                 v.markerTintColor = girl ? UIColor(red: 1, green: 0.37, blue: 0.66, alpha: 1) : UIColor(red: 0.02, green: 0.7, blue: 0.54, alpha: 1)
                 v.displayPriority = .required
+                return v
             case .place(let emoji):
-                v.glyphText = emoji
-                v.markerTintColor = UIColor(red: 0.48, green: 0.36, blue: 0.98, alpha: 1)
-                v.titleVisibility = .visible
-                // Under a child standing at the place — the child is the news.
-                v.displayPriority = .defaultLow
+                // A place is a small emoji dot in the middle of its circle —
+                // never a second balloon that a child's marker could hide.
+                return PlaceTagView(annotation: pin, emoji: emoji)
             }
-            return v
         }
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
@@ -113,7 +157,7 @@ struct ParentLocationView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
-                    FamilyMapView(kids: mapKids, places: places, focus: mapFocus, focusSpan: 0.05)
+                    FamilyMapView(kids: mapKids, places: places, focus: mapFocus, focusSpan: 0.05, fitAll: true)
                         .frame(height: 340)
                         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                         .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(.white.opacity(0.4), lineWidth: 1))
