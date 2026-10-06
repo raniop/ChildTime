@@ -15,6 +15,37 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     private let appGroupID = TofyShield.appGroupID
     private static let unlockName = DeviceActivityName("childtime.unlock")
 
+    private static let quietNames: Set<String> = ["childtime.quiet.school", "childtime.quiet.bedtime"]
+
+    /// 🏫🌙 A school time / bedtime begins (iOS wakes us daily at its start; we
+    /// decide here whether today counts). An EARNED or GIFT window still open
+    /// is closed now: the shield comes back and the unlock metering stops. The
+    /// refund needs the wallet and the cloud lease, which live in the app — so
+    /// we leave the window's record in place and mark the moment; the app
+    /// gives back what was left as of THIS instant when it next wakes. The
+    /// parent's own manual open ("grant") is left running.
+    override func intervalDidStart(for activity: DeviceActivityName) {
+        super.intervalDidStart(for: activity)
+        guard Self.quietNames.contains(activity.rawValue) else { return }
+        let defaults = UserDefaults(suiteName: appGroupID) ?? .standard
+        let now = Date()
+        guard QuietHoursStore.load(defaults).active(at: now) != nil else {
+            monitorLog.notice("ext: \(activity.rawValue, privacy: .public) woke — not a quiet day")
+            return
+        }
+        let open = (defaults.object(forKey: "unlockEndsAt") as? Date).map { $0 > now } ?? false
+        if open, defaults.string(forKey: "unlockKind") == "grant" {
+            monitorLog.notice("ext: quiet time began during a parent's open — left running")
+            return
+        }
+        if open, defaults.object(forKey: QuietHoursStore.cutAtKey) == nil {
+            defaults.set(now, forKey: QuietHoursStore.cutAtKey)
+        }
+        monitorLog.notice("ext: quiet time began (\(activity.rawValue, privacy: .public)) → locking")
+        reapplyShield()
+        DeviceActivityCenter().stopMonitoring([Self.unlockName])
+    }
+
     override func intervalDidEnd(for activity: DeviceActivityName) {
         super.intervalDidEnd(for: activity)
         guard activity == Self.unlockName else { return }

@@ -152,6 +152,9 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     /// written — true or false — so turning it OFF reaches a merge write too
     /// (a nil would leave the old `true` in the cloud). nil = an older doc.
     var onlyRegularQuestions: Bool?
+    /// 🏫🌙 School time + bedtime (see `QuietHours`). Written whole once set, so
+    /// switching a window OFF travels as `enabled: false`, not as a missing key.
+    var quietHours: QuietHours?
 
     init(profile: Profile, householdID: String) {
         self.id = profile.id.uuidString
@@ -185,6 +188,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.packExpiry = profile.packExpiry.isEmpty ? nil : profile.packExpiry
         self.disabledPacks = profile.disabledPacks.isEmpty ? nil : profile.disabledPacks.sorted()
         self.onlyRegularQuestions = profile.onlyRegularQuestions
+        self.quietHours = profile.quietHours
     }
 
     /// Rehydrate a local `Profile`. The photo now syncs (compressed), so a custom
@@ -225,6 +229,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         p.disabledPacks = Set(disabledPacks ?? [])
         p.gradeSetByChild = gradeSetByChild ?? false
         p.onlyRegularQuestions = onlyRegularQuestions ?? false
+        p.quietHours = quietHours
         p.characterUpdatedAt = characterUpdatedAt
         return p
     }

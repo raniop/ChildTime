@@ -54,6 +54,8 @@ data class Child(
     val language: String?,
     val playPIN: String?,
     val onlyRegularQuestions: Boolean,
+    /** 🏫🌙 School time + bedtime (QuietHours.kt); null = never set. */
+    val quietHours: QuietHours?,
     val packs: List<String>,
     val createdAt: Double,
     val raw: Doc,
@@ -88,6 +90,7 @@ data class Child(
             language = d.str("language"),
             playPIN = d.str("playPIN"),
             onlyRegularQuestions = d.bool("onlyRegularQuestions") ?: false,
+            quietHours = QuietHours.from(d.map("quietHours")),
             packs = d.strList("packs") ?: emptyList(),
             createdAt = d.secs("createdAt") ?: 0.0,
             raw = d,

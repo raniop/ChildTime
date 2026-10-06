@@ -999,6 +999,7 @@ class ProgressEngine(
     /** Never more than the wall-clock remainder NOR (granted − monotonic elapsed). */
     val refundableUnlockSeconds: Int
         get() {
+            quietRefund?.let { return it }
             if (l.unlockGrantedSeconds <= 0) return unlockSecondsRemaining
             return minOf(unlockSecondsRemaining, maxOf(0, l.unlockGrantedSeconds - elapsedSinceUnlockStart))
         }
@@ -1120,6 +1121,35 @@ class ProgressEngine(
         touch()
     }
 
+    /** 🏫🌙 Set only inside [closeForQuietTime]: the leftover as it stood at the quiet start. */
+    private var quietRefund: Int? = null
+
+    /**
+     * A school time / bedtime began at [cutUnix] while this window was open (iOS
+     * ProgressStore.closeForQuietTime). Close it through the normal stop path —
+     * earned → wallet, gift → 💝 pocket, lease released once by the caller — with
+     * the leftover AS OF [cutUnix], however late we noticed. The parent's own
+     * manual open ("grant") is not touched: returns null.
+     */
+    fun closeForQuietTime(cutUnix: Double): StopOutcome? {
+        val end = l.unlockEndsAt ?: return null
+        if (l.unlockKind == "grant") return null
+        var owed = maxOf(0, (end - cutUnix).toInt())
+        val started = l.unlockStartedAt
+        if (l.unlockGrantedSeconds > 0 && started != null) {
+            val used = maxOf(0, (cutUnix - started).toInt())
+            owed = minOf(owed, maxOf(0, l.unlockGrantedSeconds - used))
+        }
+        quietRefund = owed
+        try {
+            val out = stopAndSaveCurrentUnlock()
+            if (l.unlockEndsAt != null) endUnlock()
+            return out
+        } finally {
+            quietRefund = null
+        }
+    }
+
     fun endUnlock() = op { endUnlockRaw() }
     private fun endUnlockRaw() {
         l.unlockEndsAt = null
@@ -1163,7 +1193,7 @@ class ProgressEngine(
      * it, call [creditRefundLocally].
      */
     fun stopAndSaveCurrentUnlock(): StopOutcome = op {
-        if (!isUnlocked) return@op StopOutcome(0)
+        if (!isUnlocked && !(quietRefund != null && l.unlockEndsAt != null)) return@op StopOutcome(0)
         val leaseID = l.activeLeaseID
         val remaining = refundableUnlockSeconds
         val wasManual = l.unlockIsManual

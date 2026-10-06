@@ -3,6 +3,9 @@ package com.rani.tofy.kid.core
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.firebase.firestore.FirebaseFirestore
+import com.rani.tofy.data.QuietHours
+import com.rani.tofy.data.QuietOccurrence
+import com.rani.tofy.data.map
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -89,6 +92,8 @@ sealed class OpenResult {
     data object AlreadyOpen : OpenResult()
     data object NothingToOpen : OpenResult()
     data object Busy : OpenResult()
+    /** 🏫🌙 Inside school time / bedtime: "…הַדַּקּוֹת שֶׁלְּךָ מְחַכּוֹת לְךָ בְּ-13:30". */
+    data class Quiet(val occurrence: QuietOccurrence) : OpenResult()
 }
 
 data class Opening(val gift: Boolean)
@@ -286,6 +291,7 @@ object KidSession : LeaseHost {
 
     /** Open earned minutes: the claim commits (debit + lease) BEFORE the window opens. */
     suspend fun openEarned(): OpenResult {
+        quietNow()?.let { return OpenResult.Quiet(it) }
         val e = engine ?: return OpenResult.NothingToOpen
         val cid = childID ?: return OpenResult.NothingToOpen
         if (e.isUnlocked) return OpenResult.AlreadyOpen
@@ -316,6 +322,7 @@ object KidSession : LeaseHost {
 
     /** Bounded local window (one minimum window when the cloud isn't fresh). */
     private fun legacyOpenEarned(): OpenResult {
+        quietNow()?.let { return OpenResult.Quiet(it) }
         val e = engine ?: return OpenResult.NothingToOpen
         if (e.isUnlocked) return OpenResult.AlreadyOpen
         val fresh = cloudStateIsFresh
@@ -329,6 +336,7 @@ object KidSession : LeaseHost {
 
     /** 💝 Open the whole gift pocket as one fixed manual window (outside the daily cap). */
     suspend fun openGift(): OpenResult {
+        quietNow()?.let { return OpenResult.Quiet(it) }
         val e = engine ?: return OpenResult.NothingToOpen
         val cid = childID ?: return OpenResult.NothingToOpen
         if (e.isUnlocked) return OpenResult.AlreadyOpen
@@ -358,6 +366,7 @@ object KidSession : LeaseHost {
     }
 
     private fun legacyOpenGift(): OpenResult {
+        quietNow()?.let { return OpenResult.Quiet(it) }
         val e = engine ?: return OpenResult.NothingToOpen
         if (e.isUnlocked) return OpenResult.AlreadyOpen
         val gift = edit { it.consumeParentGiftForUnlock() } ?: 0
@@ -385,6 +394,7 @@ object KidSession : LeaseHost {
 
     /** "נעלו שם ופתחו כאן" — ask the owning device to let go, wait for idle, claim here. */
     suspend fun transferHere(): OpenResult {
+        quietNow()?.let { return OpenResult.Quiet(it) }
         val e = engine ?: return OpenResult.NothingToOpen
         val cid = childID ?: return OpenResult.NothingToOpen
         val l = leases.lease.value
@@ -439,10 +449,40 @@ object KidSession : LeaseHost {
         val cid = childID ?: return
         val l = e.local
         if (l.unlockEndsAt == null) return
+        // 🏫🌙 A quiet time began while this window was open → close it with the
+        // leftover as of its start (or the window's own start, if later).
+        quietNow()?.let { q ->
+            if (l.unlockKind != "grant") { closeForQuiet(maxOf(q.startUnix, l.unlockStartedAt ?: q.startUnix)); return }
+        }
         if (e.isUnlocked && !e.unlockBudgetExhausted) return
         val lid = l.activeLeaseID
         edit { it.endUnlock() }
         if (lid != null) scope.launch { leases.release(cid, lid, 0) }
+        _events.tryEmit(KidEvent.WindowEnded)
+    }
+
+    // ── 🏫🌙 school time + bedtime ─────────────────────────────────────────
+    /** This child's quiet hours (children/{id}.quietHours). A parent's phone in Kid Mode has none. */
+    val quietHours: QuietHours
+        get() = if (kidMode) QuietHours() else QuietHours.from(lastChildDoc?.map("quietHours")) ?: QuietHours()
+
+    fun quietNow(): QuietOccurrence? = quietHours.activeAt(AndroidKidClock.nowUnix())
+
+    private fun closeForQuiet(cutUnix: Double) {
+        val cid = childID ?: return
+        val out = edit { it.closeForQuietTime(cutUnix) } ?: return
+        val lid = out.releaseLeaseID
+        if (lid != null) {
+            inFlightWatchdog?.cancel()
+            inFlightWatchdog = scope.launch {
+                delay(12_000)
+                if ((engine?.session?.inFlightRefundSeconds ?: 0) == out.remainingSeconds) edit { it.clearInFlightRefund() }
+            }
+            scope.launch {
+                val ok = leases.release(cid, lid, out.remainingSeconds, asOfUnix = cutUnix)
+                if (!ok && childID == cid) edit { it.creditRefundLocally(out.remainingSeconds, out.wasManual) }
+            }
+        }
         _events.tryEmit(KidEvent.WindowEnded)
     }
 

@@ -37,7 +37,7 @@ import com.rani.tofy.ui.home.gradeName
 import com.rani.tofy.ui.theme.*
 import kotlinx.coroutines.launch
 
-private enum class Page { MAIN, PROFILE, LANGUAGE, DIFFICULTY, WORLDS, SCREEN_TIME, FRIENDS }
+private enum class Page { MAIN, PROFILE, LANGUAGE, DIFFICULTY, WORLDS, SCREEN_TIME, FRIENDS, SCHOOL, BEDTIME }
 
 /**
  * ChildSettingsView.swift — everything about ONE child that is SET rather than
@@ -81,6 +81,8 @@ internal fun ChildSettingsContent(childID: String, onBack: () -> Unit, onDeleted
                 Page.WORLDS -> WorldsEditor(child, ::back, ::write)
                 Page.SCREEN_TIME -> ScreenTimeEditor(child, ::back, ::write) { pendingCapSave[0] = it }
                 Page.FRIENDS -> FriendsList(child, ::back, note)
+                Page.SCHOOL -> QuietEditor(child, QuietKind.SCHOOL, ::back, ::write) { pendingCapSave[0] = it }
+                Page.BEDTIME -> QuietEditor(child, QuietKind.BEDTIME, ::back, ::write) { pendingCapSave[0] = it }
             }
             note.Host(Modifier.align(Alignment.BottomCenter))
         }
@@ -179,6 +181,11 @@ private fun MainList(
         val (capOn, capMin) = child.resolvedCap()
         SettingsSection(tr("זְמַן מָסָךְ")) {
             SettingsRow("⏳", tr("זְמַן מָסָךְ יוֹמִי"), if (capOn) tr("%lld דַּקּוֹת", capMin) else tr("לְלֹא הַגְבָּלָה")) { onOpen(Page.SCREEN_TIME) }
+            // 🏫🌙 Hours when minutes don't open (QuietHours.kt).
+            RowDivider()
+            SettingsRow("🏫", tr("זמן בית ספר"), quietSummary(child.quietHours, QuietKind.SCHOOL)) { onOpen(Page.SCHOOL) }
+            RowDivider()
+            SettingsRow("🌙", tr("שעת שינה"), quietSummary(child.quietHours, QuietKind.BEDTIME)) { onOpen(Page.BEDTIME) }
             RowDivider()
             // The child's play-protection code — full parental transparency: SEE it, and reset it.
             if (!child.hasPlayPIN) {
@@ -623,5 +630,112 @@ private fun FriendsList(child: Child, onBack: () -> Unit, note: WriteNote) {
                 }
             }
         }
+    }
+}
+
+// MARK: - 🏫 School time / 🌙 bedtime (iOS QuietHoursEditorView)
+
+/** "א׳" in Hebrew, "Sun" elsewhere. Apple numbering: 1 = Sunday … 7 = Saturday. */
+private fun dayLetter(weekday: Int): String {
+    val lang = com.rani.tofy.i18n.I18n.language
+    if (lang == AppLanguage.HE) return listOf("א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳")[(weekday - 1) % 7]
+    val dow = if (weekday == 1) java.time.DayOfWeek.SUNDAY else java.time.DayOfWeek.of(weekday - 1)
+    return dow.getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale(lang.code))
+}
+
+private fun daysText(days: List<Int>): String {
+    val d = days.toSortedSet().toList()
+    if (d.size == 7) return tr("כל יום")
+    if (d.isEmpty()) return "—"
+    if (d.size > 2 && d.last() - d.first() == d.size - 1) return "${dayLetter(d.first())}–${dayLetter(d.last())}"
+    return d.joinToString(", ") { dayLetter(it) }
+}
+
+/** The settings row: "א׳–ו׳ · 08:00–13:30" / "כבוי" / "חופש — מושהה". */
+internal fun quietSummary(q: QuietHours?, kind: QuietKind): String {
+    val w = if (kind == QuietKind.SCHOOL) q?.school else q?.bedtime
+    if (w == null || !w.enabled || w.days.isEmpty()) return tr("כבוי")
+    if (kind == QuietKind.SCHOOL && q?.schoolPaused == true) return tr("חופש — מושהה")
+    return "${daysText(w.days)} · ⁦${QuietHours.clock(w.start)}–${QuietHours.clock(w.end)}⁩"
+}
+
+@Composable
+private fun QuietEditor(child: Child, kind: QuietKind, onBack: () -> Unit, write: (Map<String, Any?>) -> Unit, registerSave: (() -> Unit) -> Unit) {
+    val school = kind == QuietKind.SCHOOL
+    val storedQ = child.quietHours
+    val stored = if (school) storedQ?.school else storedQ?.bedtime
+    val initial = stored ?: (if (school) QuietHours.SCHOOL_DEFAULT else QuietHours.BEDTIME_DEFAULT).copy(enabled = false)
+    var enabled by remember { mutableStateOf(initial.enabled) }
+    var days by remember { mutableStateOf(initial.days.toSet()) }
+    var start by remember { mutableIntStateOf(initial.start) }
+    var end by remember { mutableIntStateOf(initial.end) }
+    var shortFriday by remember { mutableStateOf(initial.fridayEnd != null && initial.fridayEnd != initial.end) }
+    var fridayEnd by remember { mutableIntStateOf(initial.fridayEnd ?: initial.end) }
+    val todayKey = QuietHours.dayKey(java.time.LocalDate.now())
+    var offToday by remember { mutableStateOf(storedQ?.schoolOffDay == todayKey) }
+    var paused by remember { mutableStateOf(storedQ?.schoolPaused == true) }
+
+    // Saved when the page closes — one write per edit session (iOS onDisappear).
+    val save = {
+        val w = QuietWindow(enabled, days.sorted(), start, end, if (school && shortFriday) fridayEnd else null)
+        val base = storedQ ?: QuietHours()
+        val q = if (school) base.copy(school = w, schoolOffDay = if (offToday) todayKey else null, schoolPaused = if (paused) true else null)
+                else base.copy(bedtime = w)
+        val untouched = storedQ == null && q.isEmpty && !offToday && !paused
+        if (!untouched && q != storedQ) write(mapOf("quietHours" to q.toMap()))
+    }
+    SideEffect { registerSave(save) }
+
+    Scroll {
+        PageBar(if (school) tr("🏫 זמן בית ספר") else tr("🌙 שעת שינה"), onBack)
+        SettingsSection(null, tr("בשעות האלה אי אפשר לפתוח דקות משחק. טופי והאפליקציות שתמיד פתוחות נשארים פתוחים, ואפשר להמשיך לענות ולצבור דקות לאחר כך. פתיחה ידנית שלכם תמיד עובדת.")) {
+            ToggleRow("", if (school) tr("זמן בית ספר פעיל") else tr("שעת שינה פעילה"), null, enabled) { enabled = it }
+        }
+        if (enabled) {
+            SettingsSection(tr("ימים")) {
+                Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    for (d in 1..7) {
+                        val on = d in days
+                        Box(Modifier.weight(1f).height(38.dp).clip(RoundedCornerShape(10.dp))
+                            .background(if (on) Color(0xFF06D6A0).copy(alpha = 0.55f) else Color.White.copy(alpha = 0.10f))
+                            .clickable { days = if (on) days - d else days + d },
+                            contentAlignment = Alignment.Center) {
+                            Text(dayLetter(d), color = if (on) Color.White else Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
+                        }
+                    }
+                }
+            }
+            SettingsSection(tr("שעות"), if (school) null else tr("שעת השינה נמשכת עד הבוקר שאחרי.")) {
+                TimeStepRow(tr("שעת התחלה"), start) { start = it }
+                RowDivider()
+                TimeStepRow(tr("שעת סיום"), end) { end = it }
+                if (school) {
+                    RowDivider()
+                    ToggleRow("", tr("ביום שישי מסיימים מוקדם"), null, shortFriday) { shortFriday = it }
+                    if (shortFriday) { RowDivider(); TimeStepRow(tr("סיום ביום שישי"), fridayEnd) { fridayEnd = it } }
+                }
+            }
+            if (school) {
+                SettingsSection(tr("חגים וחופשות"), tr("\"היום אין לימודים\" חל רק על היום. מחר זמן בית הספר חוזר כרגיל.")) {
+                    ToggleRow("", tr("היום אין לימודים"), null, offToday) { offToday = it }
+                    RowDivider()
+                    ToggleRow("", tr("חופש — זמן בית הספר מושהה"), null, paused) { paused = it }
+                }
+            }
+        }
+    }
+}
+
+/** "התחלה  − 08:00 +" — 15-minute steps, wrapping around midnight. */
+@Composable
+private fun TimeStepRow(title: String, minutes: Int, onChange: (Int) -> Unit) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(title, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontSize = 16.sp)
+        StepButton("−") { onChange(((minutes - 15) % 1440 + 1440) % 1440) }
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Text(QuietHours.clock(minutes), Modifier.width(70.dp), color = Color.White, fontFamily = Rounded,
+                fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, textAlign = TextAlign.Center)
+        }
+        StepButton("+") { onChange((minutes + 15) % 1440) }
     }
 }

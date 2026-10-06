@@ -355,7 +355,8 @@ class PlayWindowLeaseManager(
      * store only while this device is still being that child, and only on a
      * COMMITTED transaction (adopting an uncommitted revision froze iPads).
      */
-    suspend fun release(childID: String, leaseID: String, localRemainingSeconds: Int): Boolean {
+    /** [asOfUnix]: measure the leftover at that moment (a window closed by a school time / bedtime). */
+    suspend fun release(childID: String, leaseID: String, localRemainingSeconds: Int, asOfUnix: Double? = null): Boolean {
         val wRef = windowRef(childID); val sRef = stateRef(childID)
         // iOS merges its live store in unconditionally; here only when this device
         // IS that child, so a parent-side settle can never fold another child's
@@ -372,7 +373,7 @@ class PlayWindowLeaseManager(
                 if (wData["leaseID"] as? String != leaseID) return@runTransaction null
                 val remote = txn.get(sRef).data?.let { ProgressSnapshot.fromFirestore(it) } ?: ProgressSnapshot.blank()
                 val held = PlayWindowLease.from(wData)
-                val elapsed = held.startedAt?.let { maxOf(0, (AppleTime.nowUnix() - it).toInt()) } ?: 0
+                val elapsed = held.startedAt?.let { maxOf(0, ((asOfUnix ?: AppleTime.nowUnix()) - it).toInt()) } ?: 0
                 val refund = maxOf(0, minOf(localRemainingSeconds, held.grantedSeconds - elapsed))
                 // Merge our local state up, THEN add the refund (by raising "in").
                 val cloud = if (local != null) ProgressSnapshot.ratchetMerged(local, remote) else remote.copy()

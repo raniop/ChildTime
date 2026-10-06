@@ -261,6 +261,7 @@ final class ProgressStore: ObservableObject {
     /// Seconds still legitimately owed from the open window: never more than the
     /// wall-clock remainder, and never more than (granted − actually elapsed).
     private var refundableUnlockSeconds: Int {
+        if let quietRefund { return quietRefund }
         // Windows opened by an older build have no grant record — fall back to the
         // old behaviour rather than refusing the child their leftover.
         guard unlockGrantedSeconds > 0 else { return unlockSecondsRemaining }
@@ -2198,6 +2199,37 @@ final class ProgressStore: ObservableObject {
                                    characterName: ProfileStore.shared.active?.character.name ?? "")
     }
 
+    /// When the open window started (nil = none open).
+    var unlockOpenedAt: Date? { unlockEndsAt == nil ? nil : unlockStartedAt }
+
+    /// 🏫🌙 Set only inside `closeForQuietTime`: the leftover as it stood when
+    /// the quiet time began, so every stop path below banks THAT and not
+    /// whatever the clock says by the time the app woke up.
+    private var quietRefund: Int?
+    private var quietCutAt: Date?
+
+    /// A school time / bedtime began at `cut` while this window was open. Close
+    /// it through the normal stop path (earned → wallet, gift → 💝 pocket, the
+    /// cloud lease released exactly once) with the leftover AS OF `cut`. A
+    /// kid who opened 30 minutes at 20:10 and met bedtime at 20:30 gets 10 back
+    /// — even if Tofy only wakes at 21:00, long after the window would have run
+    /// out. The parent's own manual open ("grant") is not touched.
+    @discardableResult
+    func closeForQuietTime(at cut: Date) -> Bool {
+        guard let end = unlockEndsAt, unlockKind != "grant" else { return false }
+        var owed = max(0, Int(end.timeIntervalSince(cut)))
+        if unlockGrantedSeconds > 0, let started = unlockStartedAt {
+            let used = max(0, Int(cut.timeIntervalSince(started)))
+            owed = min(owed, max(0, unlockGrantedSeconds - used))
+        }
+        quietRefund = owed
+        quietCutAt = cut
+        defer { quietRefund = nil; quietCutAt = nil }
+        stopAndSaveCurrentUnlock()
+        if unlockEndsAt != nil { endUnlock() }
+        return true
+    }
+
     func endUnlock() {
         unlockEndsAt = nil
         unlockIsManual = false
@@ -2249,13 +2281,14 @@ final class ProgressStore: ObservableObject {
     /// (play screen + Live Activity button).
     @discardableResult
     func stopAndSaveCurrentUnlock() -> Int {
-        guard isUnlocked else { return 0 }
+        guard isUnlocked || (quietRefund != nil && unlockEndsAt != nil) else { return 0 }
         // Capture what the lease needs BEFORE the local stop clears it. Every stop
         // path in the app funnels through here (timer end, Live Activity button,
         // remote lock, Kid Mode exit, profile switch), so this is the single place
         // the cloud lease is released.
         let leaseID = activeLeaseID
         let remaining = refundableUnlockSeconds
+        let cutAt = quietCutAt
         let childID = ProfileStore.shared.activeID
         let wasManual = unlockIsManual
         var banked = 0
@@ -2279,7 +2312,8 @@ final class ProgressStore: ObservableObject {
             Task {
                 let ok = await PlayWindowLeaseManager.shared.release(childID: childID,
                                                                      leaseID: leaseID,
-                                                                     localRemainingSeconds: remaining)
+                                                                     localRemainingSeconds: remaining,
+                                                                     asOf: cutAt)
                 // The cloud could not take it (offline — transactions never queue).
                 // Pay locally instead, or the child just lost the leftover.
                 if !ok {

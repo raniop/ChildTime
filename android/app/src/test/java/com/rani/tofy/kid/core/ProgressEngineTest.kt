@@ -384,6 +384,41 @@ class ProgressEngineTest {
         assertEquals(0, p.earnedSecondsAvailable)
     }
 
+    // ── 🏫🌙 quiet hours (QuietHoursClose in QuietHoursTests.swift) ─────────
+    @Test fun quietStartRefundsWhatWasLeftThen() {
+        val p = engine(KidSettings(leaseEnabled = false))
+        val before = p.earnedSecondsAvailable + (p.snapshot.secondsCarry ?: 0)
+        p.startUnlock(30)
+        val cut = clock.unix + 10 * 60
+        clock.advance(50 * 60.0)                                 // noticed long after the window ran out
+        assertNotNull(p.closeForQuietTime(cut))
+        assertFalse(p.isUnlocked)
+        assertEquals(20 * 60, p.earnedSecondsAvailable + (p.snapshot.secondsCarry ?: 0) - before)
+    }
+
+    @Test fun quietStartWithALeaseIsReleasedAsOfThen() {
+        val p = engine()
+        p.startUnlock(10, leaseID = "Q1", leaseKind = "earned")
+        val out = p.closeForQuietTime(clock.unix + 4 * 60)
+        assertEquals("Q1", out?.releaseLeaseID)
+        assertEquals(6 * 60, out?.remainingSeconds)
+        assertFalse(p.isUnlocked)
+    }
+
+    @Test fun quietStartGiftGoesBackToThePocket() {
+        val p = engine(KidSettings(leaseEnabled = false))
+        p.startUnlock(10, manual = true, leaseKind = "gift")
+        assertNotNull(p.closeForQuietTime(clock.unix + 4 * 60))
+        assertEquals(6 * 60, p.giftSecondsAvailable)
+    }
+
+    @Test fun quietStartLeavesTheParentsOwnOpen() {
+        val p = engine(KidSettings(leaseEnabled = false))
+        p.startUnlock(15, manual = true)                         // kind "grant"
+        assertNull(p.closeForQuietTime(clock.unix))
+        assertTrue(p.isUnlocked)
+    }
+
     @Test fun revokeAllParentTime() {
         val p = engine()
         p.creditGift(3600)

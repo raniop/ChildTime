@@ -106,6 +106,8 @@ data class HomeCtaModel(
     val capMax: Int,
     val pendingMinutes: Int,
     val redeemableMinutes: Int,
+    /** 🏫🌙 Inside school time / bedtime: the line that stands in for the open button. */
+    val quietLine: String? = null,
     /** 🔒 the child's own code for their minutes (iOS "קוד סודי לדקות שלי"). */
     val hasPlayPin: Boolean = false,
     val showPlayPin: Boolean = false,
@@ -669,6 +671,7 @@ private fun ColumnScope.BottomCtas(c: HomeCtaModel, onOpenEarned: () -> Unit, on
             if (c.transferring) KidCta(tr("מַעֲבִירִים לְכָאן… ✨"), Color(0xFF5B6CFF), Color(0xFF9B5DE5), busy = true, size = 19) {}
             else KidCta(tr("נַעֲלוּ %@ וּפִתְחוּ כָּאן", where), Color(0xFF5B6CFF), Color(0xFF9B5DE5), emoji = "🔁", size = 19, onClick = onTransfer)
         }
+        c.quietLine != null -> BottomHint(c.quietLine)
         c.canRedeem -> {
             if (c.opening && !c.openingGift) KidCta(SocialMe.g(tr("פּוֹתְחִים לְךָ… ✨"), tr("פּוֹתְחִים לָךְ… ✨")), Color(0xFF5E60CE), Color(0xFF3E8BF0), busy = true) {}
             else KidCta(

@@ -33,6 +33,9 @@
 		C0DE5H1E1DC0RE0000000003 /* ShieldPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */; };
 		C0DE5H1E1DC0RE0000000004 /* ShieldPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */; };
 		C0DE5H1E1DC0RE0000000005 /* ShieldPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */; };
+		C0DE5H1E1DC0RE0000000013 /* QuietHours.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000011 /* QuietHours.swift */; };
+		C0DE5H1E1DC0RE0000000014 /* QuietHours.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000011 /* QuietHours.swift */; };
+		C0DE5H1E1DC0RE0000000015 /* QuietHours.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000011 /* QuietHours.swift */; };
 		E20C1E12CDDF39D6B9F10786 /* ShieldConfigurationExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F3B5ED0AA76C9A122C43D7 /* ShieldConfigurationExtension.swift */; };
 /* End PBXBuildFile section */
 
@@ -144,6 +147,7 @@
 		873C358DCB5A2C2F44C51CDB /* ShieldState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShieldState.swift; sourceTree = "<group>"; };
 		AF85E1C4DBB972D75EDDF8BB /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShieldPolicy.swift; sourceTree = "<group>"; };
+		C0DE5H1E1DC0RE0000000011 /* QuietHours.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuietHours.swift; sourceTree = "<group>"; };
 		CBA173C4588B868B8087E73A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		D54D97703A325955B8A1C24F /* ShieldConfigurationExt.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShieldConfigurationExt.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3AD695EC33940A27756C3CF /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -405,6 +409,7 @@
 			isa = PBXGroup;
 			children = (
 				C0DE5H1E1DC0RE0000000001 /* ShieldPolicy.swift */,
+				C0DE5H1E1DC0RE0000000011 /* QuietHours.swift */,
 			);
 			path = ShieldCore;
 			sourceTree = "<group>";
@@ -750,6 +755,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C0DE5H1E1DC0RE0000000004 /* ShieldPolicy.swift in Sources */,
+				C0DE5H1E1DC0RE0000000014 /* QuietHours.swift in Sources */,
 				0AD12B6CBB301CB2D63C2196 /* DeviceActivityMonitorExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -773,6 +779,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C0DE5H1E1DC0RE0000000003 /* ShieldPolicy.swift in Sources */,
+				C0DE5H1E1DC0RE0000000013 /* QuietHours.swift in Sources */,
 				7032B13B15E66D8195A4C915 /* ShieldState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -796,6 +803,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C0DE5H1E1DC0RE0000000005 /* ShieldPolicy.swift in Sources */,
+				C0DE5H1E1DC0RE0000000015 /* QuietHours.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

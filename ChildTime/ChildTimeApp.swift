@@ -187,6 +187,20 @@ struct ChildTimeApp: App {
         for var p in ProfileStore.shared.profiles where p.grade == nil { p.grade = 3; ProfileStore.shared.update(p) }
         ProgressStore.shared.seedForDemo()
         if Self.demoScreen == "leaderboard" { FriendsManager.shared.seedDemo() }
+        // 🏫🌙 DEMO_QUIET=school|bedtime: that window is on right now (every day),
+        // so the kid home, the parent card and the settings rows all show it.
+        if let kind = ProcessInfo.processInfo.environment["DEMO_QUIET"] {
+            let c = Calendar.current.dateComponents([.hour, .minute], from: Date())
+            let now = (c.hour ?? 0) * 60 + (c.minute ?? 0)
+            for var p in ProfileStore.shared.profiles {
+                var q = QuietHours(school: QuietHours.schoolDefault, bedtime: QuietHours.bedtimeDefault)
+                var w = QuietWindow(enabled: true, days: Array(1...7), start: (now + 24 * 60 - 40) % (24 * 60),
+                                    end: kind == "bedtime" ? 7 * 60 : (now + 150) % (24 * 60))
+                if kind == "bedtime" { q.bedtime = w } else { q.school = w }
+                p.quietHours = q
+                ProfileStore.shared.update(p)
+            }
+        }
     }
 
     /// A previous DEMO run left fake profiles + progress in local storage; a
@@ -295,6 +309,7 @@ struct ChildTimeApp: App {
                     }
                     ConversionConfig.shared.start()   // what a free child sees (admin knobs)
                     AppUpdateConfig.shared.start()    // "there is a newer Tofy" (admin knobs)
+                    QuietHoursManager.shared.start()  // 🏫🌙 school time + bedtime
                     enforceShieldStateIfNeeded()
                 }
                 .onChangeCompat(of: scenePhase) { _, phase in
@@ -573,6 +588,16 @@ struct ChildTimeApp: App {
         case "childdifficulty": if let id = ProfileStore.shared.activeID { ChildDifficultyView(profileID: id) }
         case "childscreentime": if let id = ProfileStore.shared.activeID { ChildScreenTimeView(profileID: id) }
         case "childworlds": if let id = ProfileStore.shared.activeID { ChildWorldsView(profileID: id) }
+        // 🏫🌙 DEMO_SCREEN=childsettings | quieteditor [DEMO_QUIET=school|bedtime]
+        case "childsettings":
+            if let id = ProfileStore.shared.activeID {
+                ChildSettingsView(profileID: id, snapshot: .blank, onResetProgress: { _ in }, onDelete: { _ in })
+            }
+        case "quieteditor":
+            if let id = ProfileStore.shared.activeID {
+                QuietHoursEditorView(profileID: id,
+                                     kind: ProcessInfo.processInfo.environment["DEMO_QUIET"] == "bedtime" ? .bedtime : .school)
+            }
         case "kidhome":                                     // DEMO_SCREEN=kidhome — the child's home
             WorldMapView()   // (+ DEMO_GIFT_MINUTES=30 to show the 💝 button)
                 .onAppear {
@@ -727,6 +752,10 @@ struct ChildTimeApp: App {
         // unlocking everything. A parent's own phone stays unrestricted.
         // EXCEPTION: a parent can open a short "allow deletion" window from Settings
         // (to legitimately uninstall Tofy); it auto-re-locks when the window ends.
+        // 🏫🌙 A school time / bedtime began while a window was open → close it
+        // (refund as of its start) BEFORE anything below can read the window as
+        // live and open the shield again.
+        if settings.deviceRole == .child { QuietHoursManager.shared.settle() }
         let removalAllowed = (settings.appRemovalUnlockedUntil ?? .distantPast) > Date()
         shields.setAppRemovalLocked(settings.deviceRole == .child && !removalAllowed)
         // Nothing managed on this device (e.g. a parent's phone with no block-list

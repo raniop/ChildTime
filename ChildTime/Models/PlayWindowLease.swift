@@ -481,7 +481,10 @@ final class PlayWindowLeaseManager: ObservableObject {
     /// The refund is clamped to `granted − elapsed` by the SERVER's start stamp, so
     /// a rolled-back device clock cannot mint minutes even in principle.
     @discardableResult
-    func release(childID: UUID, leaseID: String, localRemainingSeconds: Int) async -> Bool {
+    /// `asOf`: measure the leftover at that moment instead of now — a window
+    /// closed by a school time / bedtime that the app only noticed later still
+    /// refunds what was left when the quiet time began.
+    func release(childID: UUID, leaseID: String, localRemainingSeconds: Int, asOf: Date? = nil) async -> Bool {
         let cid = childID.uuidString
         let wRef = windowRef(cid), sRef = stateRef(cid)
         let localRevision = ProgressStore.shared.revision
@@ -497,7 +500,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                 guard (wData["leaseID"] as? String) == leaseID else { return true }
 
                 let held = PlayWindowLease.from(wData)
-                let elapsed = held.startedAt.map { max(0, Int(Date().timeIntervalSince($0))) } ?? 0
+                let elapsed = held.startedAt.map { max(0, Int((asOf ?? Date()).timeIntervalSince($0))) } ?? 0
                 let refund = max(0, min(localRemainingSeconds, held.grantedSeconds - elapsed))
                 // Merge our local state up, THEN add the refund.
                 //

@@ -1177,6 +1177,28 @@
         }
       }
     },
+    "\"היום אין לימודים\" חל רק על היום. מחר זמן בית הספר חוזר כרגיל." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«لا مدرسة اليوم» ينطبق على اليوم فقط. غدًا يعود وقت المدرسة كالمعتاد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“No school today” applies to today only. Tomorrow school time is back as usual."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Сегодня нет уроков» действует только сегодня. Завтра школьное время вернётся как обычно."
+          }
+        }
+      }
+    },
     "\"הרפתקה חכמה\" נקראת עכשיו טופי טיים" : {
       "localizations" : {
         "ar" : {
@@ -23951,6 +23973,28 @@
         }
       }
     },
+    "ביום שישי מסיימים מוקדם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يوم الجمعة ينتهي مبكرًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shorter day on Friday"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В пятницу заканчивают раньше"
+          }
+        }
+      }
+    },
     "ביטול" : {
       "localizations" : {
         "ar" : {
@@ -24824,6 +24868,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Под вашим контролем"
+          }
+        }
+      }
+    },
+    "בשעות האלה אי אפשר לפתוח דקות משחק. טופי והאפליקציות שתמיד פתוחות נשארים פתוחים, ואפשר להמשיך לענות ולצבור דקות לאחר כך. פתיחה ידנית שלכם תמיד עובדת." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خلال هذه الساعات لا يمكن فتح دقائق اللعب. يبقى Tofy والتطبيقات المفتوحة دائمًا متاحة، ويمكن الاستمرار في الإجابة وجمع الدقائق لوقت لاحق. الفتح اليدوي من جهتكم يعمل دائمًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "During these hours play minutes can't be opened. Tofy and the always-open apps stay open, and your child can keep answering and save minutes for later. Opening it yourself always works."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В эти часы игровые минуты открыть нельзя. Tofy и всегда открытые приложения остаются доступны, а ребёнок может продолжать отвечать и копить минуты на потом. Открыть вручную вы можете всегда."
           }
         }
       }
@@ -38834,6 +38900,28 @@
         }
       }
     },
+    "היום אין לימודים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا مدرسة اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No school today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сегодня нет уроков"
+          }
+        }
+      }
+    },
     "היום נצברו %lld דקות משחק" : {
       "localizations" : {
         "ar" : {
@@ -43703,6 +43791,50 @@
         }
       }
     },
+    "זמן בית ספר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت المدرسة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "School time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Школьное время"
+          }
+        }
+      }
+    },
+    "זמן בית ספר פעיל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت المدرسة مفعّل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "School time on"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Школьное время включено"
+          }
+        }
+      }
+    },
     "זמן המשחק נגמר" : {
       "localizations" : {
         "ar" : {
@@ -46554,6 +46686,28 @@
         }
       }
     },
+    "חגים וחופשות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأعياد والعطل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Holidays and vacations"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Праздники и каникулы"
+          }
+        }
+      }
+    },
     "חדש בטופי: עולם הכדורגל" : {
       "localizations" : {
         "ar" : {
@@ -46815,6 +46969,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вернитесь сюда"
+          }
+        }
+      }
+    },
+    "חופש — זמן בית הספר מושהה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عطلة — وقت المدرسة متوقف مؤقتًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vacation — school time paused"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каникулы — школьное время на паузе"
+          }
+        }
+      }
+    },
+    "חופש — מושהה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عطلة — متوقف مؤقتًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vacation — paused"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каникулы — на паузе"
           }
         }
       }
@@ -51143,6 +51341,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Дни активности"
+          }
+        }
+      }
+    },
+    "ימים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأيام"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Days"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дни"
           }
         }
       }
@@ -56569,6 +56789,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "כל יום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل يوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every day"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждый день"
           }
         }
       }
@@ -75998,6 +76240,28 @@
         }
       }
     },
+    "סיום ביום שישי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نهاية يوم الجمعة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Friday end"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конец в пятницу"
+          }
+        }
+      }
+    },
     "סיימנו" : {
       "localizations" : {
         "ar" : {
@@ -94262,6 +94526,72 @@
         }
       }
     },
+    "שעות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الساعات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hours"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Часы"
+          }
+        }
+      }
+    },
+    "שעת השינה נמשכת עד הבוקר שאחרי." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمتد وقت النوم حتى صباح اليوم التالي."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedtime runs until the next morning."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Время сна длится до следующего утра."
+          }
+        }
+      }
+    },
+    "שעת התחלה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت البداية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Время начала"
+          }
+        }
+      }
+    },
     "שעת משחק\nשמתחילה בשאלה" : {
       "localizations" : {
         "ar" : {
@@ -94280,6 +94610,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Игровое время,\nкоторое начинается с вопроса"
+          }
+        }
+      }
+    },
+    "שעת סיום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت النهاية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Время окончания"
+          }
+        }
+      }
+    },
+    "שעת שינה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت النوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedtime"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Время сна"
+          }
+        }
+      }
+    },
+    "שעת שינה פעילה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت النوم مفعّل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedtime on"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Время сна включено"
           }
         }
       }
@@ -98135,6 +98531,94 @@
         }
       }
     },
+    "🌙 עַכְשָׁיו שְׁעַת שֵׁינָה — הַדַּקּוֹת שֶׁלְּךָ מְחַכּוֹת לְךָ בְּ-%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 الآن وقت النوم — دقائقك تنتظرك في الساعة %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 It's bedtime now — your minutes are waiting for you at %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 Сейчас время спать — твои минуты ждут тебя в %@"
+          }
+        }
+      }
+    },
+    "🌙 עַכְשָׁיו שְׁעַת שֵׁינָה — הַדַּקּוֹת שֶׁלָּךְ מְחַכּוֹת לָךְ בְּ-%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 الآن وقت النوم — دقائقكِ تنتظركِ في الساعة %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 It's bedtime now — your minutes are waiting for you at %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 Сейчас время спать — твои минуты ждут тебя в %@"
+          }
+        }
+      }
+    },
+    "🌙 שְׁעַת שֵׁינָה עַד %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 وقت النوم حتى %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 Bedtime until %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 Время сна до %@"
+          }
+        }
+      }
+    },
+    "🌙 שעת שינה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 وقت النوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 Bedtime"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 Время сна"
+          }
+        }
+      }
+    },
     "🌟 %@ %@ ב%@. רוצים שאתגר %@ בשאלות קצת יותר קשות?" : {
       "localizations" : {
         "ar" : {
@@ -99584,6 +100068,94 @@
     },
     "🏠" : {
 
+    },
+    "🏫 זְמַן בֵּית סֵפֶר עַד %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 وقت المدرسة حتى %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 School time until %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 Школьное время до %@"
+          }
+        }
+      }
+    },
+    "🏫 זמן בית ספר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 وقت المدرسة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 School time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 Школьное время"
+          }
+        }
+      }
+    },
+    "🏫 עַכְשָׁיו זְמַן בֵּית סֵפֶר — הַדַּקּוֹת שֶׁלְּךָ מְחַכּוֹת לְךָ בְּ-%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 الآن وقت المدرسة — دقائقك تنتظرك في الساعة %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 It's school time now — your minutes are waiting for you at %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 Сейчас школьное время — твои минуты ждут тебя в %@"
+          }
+        }
+      }
+    },
+    "🏫 עַכְשָׁיו זְמַן בֵּית סֵפֶר — הַדַּקּוֹת שֶׁלָּךְ מְחַכּוֹת לָךְ בְּ-%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 الآن وقت المدرسة — دقائقكِ تنتظركِ في الساعة %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 It's school time now — your minutes are waiting for you at %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 Сейчас школьное время — твои минуты ждут тебя в %@"
+          }
+        }
+      }
     },
     "🏷️ מְחִיר שֶׁל %lld ₪ %@ בְּ־%lld%%. מָה הַמְּחִיר הֶחָדָשׁ?" : {
       "localizations" : {

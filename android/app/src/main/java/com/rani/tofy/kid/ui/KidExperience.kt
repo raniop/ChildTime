@@ -408,6 +408,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     fun handle(r: OpenResult, gift: Boolean) {
         when (r) {
             is OpenResult.Opened, OpenResult.AlreadyOpen, OpenResult.Busy -> Unit
+            is OpenResult.Quiet -> say(quietLine(r.occurrence, isGirl))
             is OpenResult.HeldElsewhere -> say((if (isGirl) tr("הַזְּמַן שֶׁלָּךְ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮") else tr("הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮")))
             OpenResult.Insufficient -> say((if (isGirl) tr("עוֹד קְצָת דַּקּוֹת וְנִפְתַּח לָךְ! 💪") else tr("עוֹד קְצָת דַּקּוֹת וְנִפְתַּח לְךָ! 💪")))
             is OpenResult.Failed -> say(when {
@@ -422,6 +423,8 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     // The child's own play code first, when they set one (requestUnlock).
     fun requestUnlock(action: suspend () -> Unit) {
         if (opening != null) return
+        // 🏫🌙 Before the code sheet — asking for the code only to say "not now" would be unkind.
+        KidSession.quietNow()?.let { say(quietLine(it, isGirl)); return }
         if (child?.hasPlayPIN == true) { pendingOpen = action; cover = Cover.PlayPin }
         else scope.launch { action() }
     }
@@ -511,6 +514,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 maxedOut = engine.dailyScreenTimeMaxedOut, minutesPlayedToday = engine.minutesPlayedToday,
                 capMax = cap.max, pendingMinutes = engine.pendingMinutes, redeemableMinutes = engine.redeemableMinutesNow,
                 hasPlayPin = child?.hasPlayPIN == true,
+                quietLine = KidSession.quietNow()?.let { quietLine(it, isGirl) },
                 // Only where it matters: a code to manage, or minutes worth protecting.
                 showPlayPin = child?.hasPlayPIN == true || engine.pendingMinutes > 0 || engine.local.manualPausedSeconds > 0,
             )
@@ -665,4 +669,17 @@ private fun ParentGateThen(pinHash: String?, householdLoaded: Boolean, onClose: 
     var authorized by remember { mutableStateOf(false) }
     if (authorized) content()
     else ParentGate(pinHash, householdLoaded, onAuthorized = { authorized = true }, onClose = onClose)
+}
+
+/** 🏫🌙 iOS QuietHoursManager.blockedMessage — the minutes are safe, and the line says when they come back. */
+internal fun quietLine(o: com.rani.tofy.data.QuietOccurrence, isGirl: Boolean): String {
+    val at = com.rani.tofy.data.QuietHours.clock(o.end)
+    return when (o.kind) {
+        com.rani.tofy.data.QuietKind.SCHOOL ->
+            if (isGirl) tr("🏫 עַכְשָׁיו זְמַן בֵּית סֵפֶר — הַדַּקּוֹת שֶׁלָּךְ מְחַכּוֹת לָךְ בְּ-%@", at)
+            else tr("🏫 עַכְשָׁיו זְמַן בֵּית סֵפֶר — הַדַּקּוֹת שֶׁלְּךָ מְחַכּוֹת לְךָ בְּ-%@", at)
+        com.rani.tofy.data.QuietKind.BEDTIME ->
+            if (isGirl) tr("🌙 עַכְשָׁיו שְׁעַת שֵׁינָה — הַדַּקּוֹת שֶׁלָּךְ מְחַכּוֹת לָךְ בְּ-%@", at)
+            else tr("🌙 עַכְשָׁיו שְׁעַת שֵׁינָה — הַדַּקּוֹת שֶׁלְּךָ מְחַכּוֹת לְךָ בְּ-%@", at)
+    }
 }

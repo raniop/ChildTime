@@ -14,6 +14,7 @@ struct WorldMapView: View {
     @ObservedObject private var friends = FriendsManager.shared
     @ObservedObject private var liveGame = LiveGameManager.shared
     @ObservedObject private var kidMode = KidModeManager.shared
+    @ObservedObject private var quiet = QuietHoursManager.shared
     @State private var inviteBannerVisible = false
     /// 🔄 "there is a newer Tofy" — once per launch, and never over another sheet.
     @State private var showUpdateNotice = false
@@ -1995,6 +1996,10 @@ struct WorldMapView: View {
                         .frame(maxWidth: 480)
                     }
                 }
+            } else if quiet.current != nil, let line = quiet.blockedMessage() {
+                // 🏫🌙 School time / bedtime: the minutes wait, and the line says
+                // until when — in place of the open button.
+                bottomHint(line)
             } else if progress.canRedeemNow {
                 Button {
                     requestUnlock { redeemMinutes() }
@@ -2118,6 +2123,13 @@ struct WorldMapView: View {
     private func requestUnlock(_ action: @escaping () -> Void) {
         guard let p = profiles.active else { return }
         guard !isOpening else { return }          // a claim is already in flight
+        // 🏫🌙 Before the code sheet — asking for the code only to say "not now"
+        // would be a small cruelty.
+        if let line = QuietHoursManager.shared.blockedMessage() {
+            Haptic.light()
+            companion.console(line)
+            return
+        }
         Haptic.light()                            // the tap answers immediately
         // Family-wide double-spend guard: if THIS child's OTHER device already has
         // a play window open, don't open a second one here (the wallet drain
@@ -2246,6 +2258,7 @@ struct WorldMapView: View {
     /// wallet the claim reads. Falls back to the legacy row-watching flow while
     /// the lease is off or the peer is on an old build.
     private func transferWindowHere(rowID: String?, peerSecondsLeft: Int) {
+        if quietBlocksOpening() { return }
         guard PlayWindowLeaseManager.isEnabled, let cid = profiles.activeID else {
             if let rowID, let dev = (household.devicesByChild[cid_ns] ?? []).first(where: { $0.id == rowID }) {
                 startWindowTransfer(other: dev)
@@ -2542,6 +2555,15 @@ struct WorldMapView: View {
         }
     }
 
+    /// 🏫🌙 Inside school time / bedtime no minutes open (the parent's own open
+    /// still can). Say when they come back, warmly, and stay on the map.
+    private func quietBlocksOpening() -> Bool {
+        guard let line = QuietHoursManager.shared.blockedMessage() else { return false }
+        Haptic.light()
+        progress.openWindowMessage = line
+        return true
+    }
+
     private func checkWorldUnlocks() {
         for world in Worlds.all where !progress.unlockedWorlds.contains(world.id) {
             if progress.canUnlock(world: world) {
@@ -2555,7 +2577,7 @@ struct WorldMapView: View {
     /// debit + lease write in one transaction) and the shield only opens on a
     /// granted claim — never unshield before the claim is durable.
     private func redeemMinutes() {
-        guard !progress.isUnlocked else { return }
+        guard !progress.isUnlocked, !quietBlocksOpening() else { return }
         guard PlayWindowLeaseManager.isEnabled, let cid = profiles.activeID else {
             legacyRedeemMinutes(); return
         }
@@ -2601,7 +2623,7 @@ struct WorldMapView: View {
         // Re-check (a fast double-tap with the 💝 button could open a manual
         // window first; without this guard startUnlock would overwrite it and
         // the gift window's banked leftover would be lost).
-        guard !progress.isUnlocked else { return }
+        guard !progress.isUnlocked, !quietBlocksOpening() else { return }
         // Cap a single unlock to today's remaining screen-time allowance; the
         // accumulated wallet beyond the daily cap stays for future days.
         let minutes = progress.consumeMinutesForUnlock()
@@ -2656,7 +2678,7 @@ struct WorldMapView: View {
     /// any frozen leftover. Outside the daily cap; leftover freezes again on
     /// stop-and-save (so nothing a parent gave is ever wasted).
     private func redeemGift() {
-        guard !progress.isUnlocked else { return }
+        guard !progress.isUnlocked, !quietBlocksOpening() else { return }
         guard PlayWindowLeaseManager.isEnabled, let cid = profiles.activeID,
               progress.openableSeconds(gift: true) > 0 else { legacyRedeemGift(); return }
         // Seconds included. Asking for `minutes * 60` stranded the carry: a window
@@ -2703,7 +2725,7 @@ struct WorldMapView: View {
     }
 
     private func legacyRedeemGift() {
-        guard !progress.isUnlocked else { return }   // re-check: PIN cover runs us later
+        guard !progress.isUnlocked, !quietBlocksOpening() else { return }   // re-check: PIN cover runs us later
         let gift = progress.consumeParentGiftForUnlock()
         // Frozen seconds resume as their own manual window; fold the gift on top.
         let frozenMinutes = progress.hasPausedManualTime ? progress.resumeManualUnlock() : 0

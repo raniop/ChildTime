@@ -71,6 +71,8 @@ struct ChildSettingsView: View {
     @State private var worlds: Profile? = nil
     @State private var screenTime: Profile? = nil
     @State private var friends: Profile? = nil
+    @State private var quietEdit: QuietEdit? = nil
+    private struct QuietEdit: Identifiable { let kind: QuietKind; var id: String { kind.rawValue } }
     @State private var confirmPinReset = false
     @State private var confirmReset = false
     @State private var confirmDelete = false
@@ -241,6 +243,13 @@ struct ChildSettingsView: View {
         return Section {
             row("⏳", tr("זְמַן מָסָךְ יוֹמִי"),
                 value: cap.enabled ? tr("\(cap.minutes) דַּקּוֹת") : tr("לְלֹא הַגְבָּלָה")) { screenTime = p }
+            // 🏫🌙 Hours when minutes don't open (QuietHours).
+            row("🏫", tr("זמן בית ספר"), value: QuietHoursText.summary(p.quietHours, kind: .school)) {
+                quietEdit = QuietEdit(kind: .school)
+            }
+            row("🌙", tr("שעת שינה"), value: QuietHoursText.summary(p.quietHours, kind: .bedtime)) {
+                quietEdit = QuietEdit(kind: .bedtime)
+            }
             // The child's play-protection code — full parental transparency: the
             // parent SEES the code (to remind a forgetful kid) and can reset it.
             // Always shown (Rani looked for it and couldn't find it): before the
@@ -388,6 +397,11 @@ struct ChildSettingsView: View {
                 ChildScreenTimeView(profileID: p.id)
                     .environmentObject(profiles)
                     .environmentObject(settings)
+                    .environment(\.layoutDirection, .app)
+            }
+            .sheet(item: $quietEdit) { q in
+                QuietHoursEditorView(profileID: profileID, kind: q.kind)
+                    .environmentObject(profiles)
                     .environment(\.layoutDirection, .app)
             }
             .sheet(item: $friends) { p in

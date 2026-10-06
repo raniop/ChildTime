@@ -173,10 +173,15 @@ private fun ChildCard(
     val inApp = state.isInAppNow(child)
     val hasDevice = state.hasDevice(child)
     val girl = child.isGirl
+    val quietNow = child.quietHours?.activeAt(System.currentTimeMillis() / 1000.0)
     val pct = if (s.answeredToday > 0) Math.round(s.correctToday * 100.0 / s.answeredToday).toInt() else 0
     val statusText = when {
         live != null -> tr("%@ עַכְשָׁיו · נִשְׁאֲרוּ %@", if (girl) tr("מְשַׂחֶקֶת") else tr("מְשַׂחֵק"), formatTime(live.secondsLeft))
         inApp -> tr("בְּטוֹפִי עַכְשָׁיו · %@", if (girl) tr("לוֹמֶדֶת") else tr("לוֹמֵד"))
+        // 🏫🌙 The hours the parent set aside, while they are on.
+        hasDevice && quietNow != null -> if (quietNow.kind == com.rani.tofy.data.QuietKind.SCHOOL)
+            tr("🏫 זְמַן בֵּית סֵפֶר עַד %@", com.rani.tofy.data.QuietHours.clock(quietNow.end))
+            else tr("🌙 שְׁעַת שֵׁינָה עַד %@", com.rani.tofy.data.QuietHours.clock(quietNow.end))
         // A child with no device of their own still plays in kid mode on this phone.
         !hasDevice && s.answeredToday == 0 && s.stars == 0 -> tr("עוֹד לֹא %@", if (girl) tr("הִתְחִילָה") else tr("הִתְחִיל"))
         s.answeredToday > 0 -> tr("%@ הַיּוֹם", if (girl) tr("לָמְדָה") else tr("לָמַד"))

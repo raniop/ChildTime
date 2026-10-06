@@ -145,6 +145,9 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// into regular questions — no game chooser (⚡ surprise rounds still come).
     /// Set from the parent's dashboard, synced via `ChildRecord`. Default off.
     var onlyRegularQuestions: Bool = false
+    /// 🏫🌙 School time and bedtime for THIS child (see `QuietHours`). Set from
+    /// the parent's device, synced via `ChildRecord`; nil = never set.
+    var quietHours: QuietHours?
 
     init(
         id: UUID = UUID(),
@@ -217,6 +220,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         case playPIN
         case ownedPacks, packExpiry, disabledPacks
         case onlyRegularQuestions
+        case quietHours
     }
 
     init(from decoder: Decoder) throws {
@@ -269,6 +273,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.packExpiry = (try? c.decodeIfPresent([String: Double].self, forKey: .packExpiry)) ?? nil ?? [:]
         self.disabledPacks = Set((try? c.decodeIfPresent([String].self, forKey: .disabledPacks)) ?? nil ?? [])
         self.onlyRegularQuestions = (try? c.decodeIfPresent(Bool.self, forKey: .onlyRegularQuestions)) ?? nil ?? false
+        self.quietHours = (try? c.decodeIfPresent(QuietHours.self, forKey: .quietHours)) ?? nil
     }
 
     /// The worlds a demo run is pinned to, or nil in the real app. Read ONCE:
