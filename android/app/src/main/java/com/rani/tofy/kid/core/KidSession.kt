@@ -171,7 +171,16 @@ object KidSession : LeaseHost {
         lastChildDoc = null
         _state.value = null
         _opening.value = null
-        if (kidMode) prefs?.edit()?.remove(cid)?.apply()   // Kid Mode leaves nothing kid-specific behind
+        if (kidMode) {
+            prefs?.edit()?.remove(cid)?.apply()   // Kid Mode leaves nothing kid-specific behind
+            // …nor a device row: the parent's phone published itself as this child's
+            // device while Kid Mode was on (iOS removeKidModeDeviceRow). Left behind,
+            // it stayed under the child and kept receiving child-device pushes.
+            runCatching {
+                com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                    .collection("childDevices").document("${cid}_${KidIdentity.installID}").delete()
+            }
+        }
         kidMode = false
     }
 
