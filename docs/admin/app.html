@@ -136,6 +136,7 @@
       <a href="#beta" data-p="beta">🧪 בטא</a>
       <a href="#support" data-p="support">💬 תמיכה<small id="navSupport"></small></a>
       <a href="#financials" data-p="financials">💰 כספים<small id="navFin"></small></a>
+      <a href="#appUpdate" data-p="appUpdate">🔄 עדכון גרסה</a>
       <a href="#settings" data-p="settings">⚙️ הגדרות וניסויים</a>
     </nav>
     <div class="who"><span id="whoName"></span><br><span id="stamp"></span> · <u id="refreshBtn">רענן</u> · <u id="logoutBtn">התנתק</u><br><a href="stats.html" style="color:rgba(255,255,255,.75)">סטטיסטיקה מלאה ←</a></div>
@@ -148,7 +149,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261003164552";
+const PAGE_STAMP = "20261006191210";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -227,7 +228,7 @@ $("menuBtn").onclick = () => document.querySelector(".side").classList.toggle("o
 document.querySelectorAll("#nav a").forEach((a) => a.addEventListener("click", () => document.querySelector(".side").classList.remove("open")));
 // 🧪 The beta sign-ups: the same view as תמיכה → בטא והמתנה, one click away.
 function beta() { supTab = "waitlist"; wlFilter = "beta"; return support(); }
-const PAGES = { dashboard, families, funnel, campaigns, worlds, content, support, settings, financials, beta };
+const PAGES = { dashboard, families, funnel, campaigns, worlds, content, support, settings, financials, beta, appUpdate };
 function route() {
   let p = (location.hash || "#dashboard").slice(1); if (!PAGES[p]) p = "dashboard";
   document.querySelectorAll("#nav a").forEach((a) => a.classList.toggle("on", a.dataset.p === p));
@@ -254,7 +255,7 @@ async function refreshIfStale(p) {
   if ((PAGES[cur] ? cur : "dashboard") !== p) return;
   // Keep the reader where they were — a redraw must not jump the page to the top.
   const y = window.scrollY;
-  await PAGES[p]();
+  await PAGES[p]({ background: true });   // a page with a form keeps it (appUpdate)
   window.scrollTo(0, y);
 }
 // Live: every minute while the page is visible, fetch fresh data and redraw —
@@ -1104,6 +1105,143 @@ function financials() {
       <div class="stamp" style="margin-top:6px">M1–M6: מתוך מי ששילמו, כמה עדיין משלמים אחרי N חודשים (רק משפחות שעברו את הגיל הזה). תוך שבוע/30/60/90: מתוך המצטרפים, כמה שילמו עד אז.</div></div>
     <div class="card"><h4>ציר החיים של כל משפחה</h4><div class="tblwrap"><table><tr><th>משפחה</th><th>הצטרפה</th><th>מסע</th><th>מצב</th><th>ימים עד תשלום</th><th>מקור</th><th>שאלות 14 יום / 14 לפני</th><th>סיכון</th></tr>
       ${F.families.map((f) => `<tr><td>${esc(f.name || "משפחה ללא שם")}${f.kids ? ` <span class="stamp">· ${f.kids} ילדים</span>` : ""}</td><td>${dateS(f.joined)}</td><td><div class="tl">${f.timeline.map((t) => `<span class="${TL[t.kind] || ""}" title="${dateS(t.at)}">${esc(t.label)}</span>`).join("")}</div></td><td>${STATE_L[f.state] || f.state}${f.stillActiveFree ? " · ממשיכה בחינם" : f.abandoned ? " · נטשה" : ""}</td><td>${nv(f.daysToPay)}</td><td>${f.purchaseSource ? esc((F.drivers.find((d) => d.key === f.purchaseSource) || {}).label || f.purchaseSource) : "—"}</td><td>${f.last14} / ${f.prev14}${f.drop !== null && f.drop >= 40 ? ' <span class="pct lo">↓' + f.drop + '%</span>' : ""}</td><td>${f.risk ? `<span class="risk ${f.risk}">${f.risk === "high" ? "גבוה" : f.risk === "medium" ? "בינוני" : "נמוך"}</span>` : "—"}</td></tr>`).join("")}</table></div></div>`;
+}
+
+// ---------------- 7b · עדכון גרסה ----------------
+// config/appUpdate — what the apps show as "יש גרסה חדשה". Everything is written
+// in ONE call (adminPublishAppUpdate). When the latest build of a platform goes
+// UP, the server sends one push to parent devices on an older build (never to
+// kids, never twice for the same build) — unless "לשלוח התראה" is unchecked.
+// The blocking minimum stays locked behind its own button + retyping the number.
+const UPD_LANGS = [["he", "עברית", "rtl"], ["en", "English", "ltr"], ["ru", "Русский", "ltr"], ["ar", "العربية", "rtl"]];
+const UPD_NOTE_LINES = 3;
+const HEB_RE = /[֐-׿]/;
+let UPD = null;
+async function appUpdate(opts) {
+  // The minute refresh never redraws the form under the founder's hands (a
+  // half-filled form, a reach count being read); navigating here always does.
+  if (opts && opts.background && $("updForm")) return;
+  $("main").innerHTML = '<div class="empty"><span class="spin"></span> טוען…</div>';
+  let r; try { r = await call("adminGetAppUpdate"); } catch (e) { return $("main").innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; }
+  if ((location.hash || "").slice(1) !== "appUpdate") return;
+  UPD = r.config;
+  const c = UPD, last = (r.announced || {}).last || null;
+  // A build left empty reads as 0; the blocking minimum shows its 0 (= off) outright.
+  const num = (id, v, zero) => `<input type="number" min="0" step="1" id="${id}" value="${v || (zero ? 0 : "")}" style="width:110px" inputmode="numeric">`;
+  const notes = (l) => (c.notesByLang[l] && c.notesByLang[l].length ? c.notesByLang[l] : (l === "he" ? c.notes : [])).join("\n");
+  const floorOn = c.minBuild > 0 || c.minAndroidBuild > 0;
+  $("main").innerHTML = `
+    <div class="top"><h3>עדכון גרסה</h3><span class="stamp">${c.updatedAt ? `פורסם לאחרונה ${when(c.updatedAt)}${c.updatedBy ? " · " + esc(c.updatedBy) : ""}` : r.exists ? "" : "עוד לא פורסם עדכון"}</span></div>
+    <div class="kpis">
+      ${kpi(c.latestBuild || "—", "🍎 iOS · בילד אחרון" + (c.version ? " · " + esc(c.version) : ""))}
+      ${kpi(c.latestAndroidBuild || "—", "🤖 אנדרואיד · בילד אחרון" + (c.androidVersion ? " · " + esc(c.androidVersion) : ""))}
+      ${kpi(c.enabled ? "דלוק" : "כבוי", "הודעות עדכון באפליקציה", c.enabled ? "" : "מתג החירום כבוי", "d")}
+      ${kpi(floorOn ? `${c.minBuild || "—"} / ${c.minAndroidBuild || "—"}` : "כבויה", "חסימת גרסאות ישנות (iOS / אנדרואיד)", floorOn ? "חוסם מכשירים!" : "", "d")}
+      ${kpi(last ? fmt(last.sent || 0) : "—", last ? `הורים קיבלו התראה · ${when(last.at)}` : "עוד לא נשלחה התראת עדכון", last && last.failed ? fmt(last.failed) + " נכשלו" : "", "d")}
+    </div>
+    <div id="updForm">
+      <div class="grid2">
+        <div class="card"><h4>🍎 iOS</h4><div class="knobs">
+          <div class="knob"><label>בילד אחרון (CFBundleVersion)</label>${num("u_latestBuild", c.latestBuild)}</div>
+          <div class="knob"><label>שם הגרסה</label><input id="u_version" placeholder="2026.10.4" value="${esc(c.version)}" dir="ltr"></div>
+        </div></div>
+        <div class="card"><h4>🤖 אנדרואיד</h4><div class="knobs">
+          <div class="knob"><label>בילד אחרון (versionCode)</label>${num("u_latestAndroidBuild", c.latestAndroidBuild)}</div>
+          <div class="knob"><label>שם הגרסה</label><input id="u_androidVersion" placeholder="2026.10.6" value="${esc(c.androidVersion)}" dir="ltr"></div>
+        </div></div>
+      </div>
+      <div class="card"><h4>📝 מה חדש — לכל שפה</h4>
+        <div class="stamp" style="margin-bottom:8px">שורה לכל חידוש, עד ${UPD_NOTE_LINES} שורות. כל הורה רואה רק את השפה של האפליקציה שלו — שפה ריקה = בלי רשימה (אף פעם לא עברית במקומה). השורה הראשונה נכנסת גם להתראה.</div>
+        <div class="knobs" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">${UPD_LANGS.map(([l, name, dir]) => `<div class="knob"><label>${name}</label><textarea id="u_notes_${l}" dir="${dir}" rows="3">${esc(notes(l))}</textarea></div>`).join("")}</div>
+        <label class="stamp" style="display:block;margin-top:8px"><input type="checkbox" id="u_legacyNotes" ${c.notes.length || !r.exists ? "checked" : ""}> להעתיק את העברית גם לשדה הישן <code>notes</code> — בילדים שלא מכירים שפות מציגים אותו בכל שפה</label>
+      </div>
+      <div class="card"><h4>📣 הפעלה והתראה</h4>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="sw ${c.enabled ? "on" : ""}" id="u_enabled"></span><b id="u_enabledL"></b><span class="stamp">מתג חירום: כיבוי משתיק את כל מסכי העדכון בכל המכשירים, בלי בילד.</span></div>
+        <label style="display:block;margin-top:12px"><input type="checkbox" id="u_announce" checked> <b>לשלוח התראה להורים</b> שהגרסה שלהם ישנה יותר</label>
+        <div class="stamp" style="margin-top:4px">יוצאת רק כשמספר הבילד עולה, פעם אחת לכל בילד, ורק למכשירי הורים — לא לילדים. בטלו את הסימון אם הבילד עדיין רק ב־TestFlight או בבדיקה של אפל/גוגל.</div>
+        <div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn ghost" id="u_reachBtn">כמה הורים יקבלו התראה?</button><span class="stamp" id="u_reach"></span></div>
+      </div>
+      <div class="card" style="border-color:rgba(194,41,90,.45)"><h4>🚫 חסימת גרסאות ישנות — חוסם את האפליקציה</h4>
+        <div class="stamp" style="margin-bottom:8px">מכשיר שהבילד שלו נמוך מהמינימום רואה מסך חוסם עד שהוא מעדכן. רק כשגרסה ישנה כבר לא עובדת מול השרת. 0 = כבוי.</div>
+        <div class="knobs">
+          <div class="knob"><label>מינימום iOS</label>${num("u_minBuild", c.minBuild, true)}</div>
+          <div class="knob"><label>מינימום אנדרואיד</label>${num("u_minAndroidBuild", c.minAndroidBuild, true)}</div>
+        </div>
+        <button class="btn danger" id="u_unlockMin" style="margin-top:8px">🔓 לשנות את החסימה…</button>
+      </div>
+      <div class="top" style="justify-content:flex-end;gap:12px"><span class="stamp" id="u_dirtyL"></span><button class="btn" id="u_publish" style="font-size:15px;padding:11px 24px">🚀 פרסום עדכון</button></div>
+    </div>`;
+  let enabled = c.enabled;
+  const paintEnabled = () => { $("u_enabled").classList.toggle("on", enabled); $("u_enabledL").textContent = enabled ? "הודעות העדכון דלוקות באפליקציה" : "הודעות העדכון כבויות — אף מכשיר לא יראה עדכון"; };
+  paintEnabled();
+  const markDirty = () => { $("u_dirtyL").textContent = "יש שינויים שלא פורסמו"; };
+  $("updForm").addEventListener("input", markDirty);
+  $("updForm").addEventListener("change", markDirty);
+  $("u_enabled").onclick = () => { enabled = !enabled; paintEnabled(); markDirty(); };
+  ["u_minBuild", "u_minAndroidBuild"].forEach((id) => { $(id).disabled = true; });
+  $("u_unlockMin").onclick = () => {
+    if (!confirm("חסימה היא לא הודעה — מכשיר מתחת למינימום לא יוכל להשתמש בטופי עד שיעדכן.\n\nלפתוח את השדות לעריכה?")) return;
+    ["u_minBuild", "u_minAndroidBuild"].forEach((id) => { $(id).disabled = false; });
+    $("u_unlockMin").hidden = true; $("u_minBuild").focus();
+  };
+  const intOf = (id) => { const s = $(id).value.trim(); if (s === "") return 0; const n = Number(s); return Number.isInteger(n) && n >= 0 ? n : NaN; };
+  const read = () => ({
+    latestBuild: intOf("u_latestBuild"), version: $("u_version").value.trim(),
+    latestAndroidBuild: intOf("u_latestAndroidBuild"), androidVersion: $("u_androidVersion").value.trim(),
+    minBuild: intOf("u_minBuild"), minAndroidBuild: intOf("u_minAndroidBuild"),
+    enabled, announce: $("u_announce").checked, legacyNotes: $("u_legacyNotes").checked,
+    notesByLang: Object.fromEntries(UPD_LANGS.map(([l]) => [l, $("u_notes_" + l).value.split("\n").map((s) => s.trim()).filter(Boolean)])),
+  });
+  $("u_reachBtn").onclick = async () => {
+    const f = read();
+    if ([f.latestBuild, f.latestAndroidBuild].some(Number.isNaN)) return toast("מספר בילד חייב להיות מספר שלם");
+    $("u_reach").innerHTML = '<span class="spin"></span> סופר…';
+    try {
+      const x = await call("adminAppUpdateReach", { latestBuild: f.latestBuild, latestAndroidBuild: f.latestAndroidBuild });
+      const k = x.counts || {};
+      const inst = (m) => Object.entries(m || {}).sort((a, b) => Number(b[0]) - Number(a[0])).map(([b, n]) => `${b}×${fmt(n)}`).join(", ") || "—";
+      $("u_reach").innerHTML = `לפי המספרים בטופס: <b>${fmt(x.targeted)}</b> מכשירי הורים · iOS ${fmt(k.ios || 0)} · אנדרואיד ${fmt(k.android || 0)}`
+        + (k.unknownPlatform ? ` · מתוכם ${fmt(k.unknownPlatform)} בלי גרסה ידועה (נחשבים אייפון)` : "")
+        + (k.alreadyCurrent ? ` · ${fmt(k.alreadyCurrent)} כבר מעודכנים` : "")
+        + `<br>מכשירי הורים שמדווחים בילד: iOS ${inst((x.installed || {}).ios)} · אנדרואיד ${inst((x.installed || {}).android)}`
+        + `<br>ההתראה יוצאת רק לפלטפורמה שהמספר שלה עלה ביחס למה שפורסם.`;
+    } catch (e) { $("u_reach").textContent = "נכשל: " + e.message; }
+  };
+  $("u_publish").onclick = async () => {
+    const f = read();
+    if ([f.latestBuild, f.latestAndroidBuild, f.minBuild, f.minAndroidBuild].some(Number.isNaN)) return toast("מספר בילד חייב להיות מספר שלם");
+    for (const [l, name] of UPD_LANGS) {
+      if (f.notesByLang[l].length > UPD_NOTE_LINES) { $("u_notes_" + l).focus(); return toast(`${name}: עד ${UPD_NOTE_LINES} שורות`); }
+      if (l !== "he" && f.notesByLang[l].some((s) => HEB_RE.test(s))) { $("u_notes_" + l).focus(); return toast(`${name}: יש עברית בשדה של שפה אחרת`); }
+    }
+    if (f.minBuild > 0 && f.minBuild > f.latestBuild) return toast("המינימום של iOS גבוה מהבילד האחרון — זה יחסום את כולם");
+    if (f.minAndroidBuild > 0 && f.minAndroidBuild > f.latestAndroidBuild) return toast("המינימום של אנדרואיד גבוה מהבילד האחרון — זה יחסום את כולם");
+    // The blocking floor: retype the number to confirm (only when it changes and is on).
+    let confirmMinBuild = false;
+    for (const [k, name] of [["minBuild", "iOS"], ["minAndroidBuild", "אנדרואיד"]]) {
+      if (f[k] === c[k] || f[k] === 0) continue;
+      const typed = prompt(`🚫 חסימה ב־${name}: כל מכשיר מתחת לבילד ${f[k]} יקבל מסך חוסם ולא יוכל להשתמש בטופי עד שיעדכן.\n\nכדי לאשר, הקלידו שוב את המספר:`);
+      if (typed === null) return;
+      if (typed.trim() !== String(f[k])) return toast("המספר לא תאם — החסימה לא נשמרה");
+      confirmMinBuild = true;
+    }
+    const lines = [];
+    const raise = (a, b) => b > a;
+    if (f.latestBuild !== c.latestBuild || f.version !== c.version) lines.push(`🍎 iOS: ${c.latestBuild || "—"} → ${f.latestBuild || "—"}${f.version ? " (" + f.version + ")" : ""}${f.latestBuild < c.latestBuild ? "  ⚠️ המספר יורד" : ""}`);
+    if (f.latestAndroidBuild !== c.latestAndroidBuild || f.androidVersion !== c.androidVersion) lines.push(`🤖 אנדרואיד: ${c.latestAndroidBuild || "—"} → ${f.latestAndroidBuild || "—"}${f.androidVersion ? " (" + f.androidVersion + ")" : ""}${f.latestAndroidBuild < c.latestAndroidBuild ? "  ⚠️ המספר יורד" : ""}`);
+    if (f.minBuild !== c.minBuild || f.minAndroidBuild !== c.minAndroidBuild) lines.push(`🚫 חסימה: iOS ${f.minBuild || "כבוי"} · אנדרואיד ${f.minAndroidBuild || "כבוי"}`);
+    if (f.enabled !== c.enabled) lines.push(f.enabled ? "✅ הודעות העדכון נדלקות" : "⛔ הודעות העדכון נכבות בכל המכשירים");
+    if (UPD_LANGS.some(([l]) => f.notesByLang[l].join("\n") !== notes(l))) lines.push("📝 רשימת החידושים השתנתה");
+    const pushes = [raise(c.latestBuild, f.latestBuild) && "iOS", raise(c.latestAndroidBuild, f.latestAndroidBuild) && "אנדרואיד"].filter(Boolean);
+    if (!lines.length && f.legacyNotes === (c.notes.length > 0 || !r.exists)) return toast("אין שינוי לפרסם");
+    lines.push(pushes.length && f.enabled ? (f.announce ? `📣 תישלח התראה להורים עם גרסה ישנה (${pushes.join(" + ")}), אם עוד לא נשלחה על הבילד הזה` : "🔕 בלי התראה להורים") : "🔕 אין בילד חדש — לא תישלח התראה");
+    if (!confirm("לפרסם את העדכון?\n\n" + lines.join("\n"))) return;
+    $("u_publish").disabled = true; $("u_publish").innerHTML = '<span class="spin"></span> מפרסם…';
+    try {
+      await call("adminPublishAppUpdate", { ...f, confirmMinBuild });
+      toast("פורסם ✅"); await appUpdate();
+    } catch (e) { $("u_publish").disabled = false; $("u_publish").textContent = "🚀 פרסום עדכון"; toast("נכשל: " + e.message); }
+  };
 }
 
 // ---------------- 8 · settings ----------------

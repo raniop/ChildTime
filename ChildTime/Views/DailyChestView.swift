@@ -137,7 +137,7 @@ struct DailyChestView: View {
 
                 if stage == .revealed {
                     Button { Haptic.light(); dismiss() } label: {
-                        Text(tr("הַמְשֵׁךְ"))
+                        Text(Gendered.g(tr("הַמְשֵׁךְ"), tr("הַמְשִׁיכִי")))
                             .font(.system(size: 22, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -188,7 +188,7 @@ struct DailyChestView: View {
                 reward = ChestReward(stars: reward.stars + 5, diamonds: reward.diamonds + 5,
                                      minutes: 0, cosmeticID: reward.cosmeticID)
             }
-            companion.cheer(tr("חִכִּיתִי לְךָ!"))
+            companion.cheer(Gendered.g(tr("חִכִּיתִי לְךָ!"), tr("חִכִּיתִי לָךְ!")))
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                 stage = .glowing
             }
@@ -249,7 +249,7 @@ struct DailyChestView: View {
             companion.wow(tr("טָא-דָה!"))
             let grant = progress.applyChestReward(reward)
             if grant.bankedForTomorrow > 0 {
-                bankedNote = tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! \(grant.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))")
+                bankedNote = Gendered.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! \(grant.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))"), tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! \(grant.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))"))
             }
             progress.openDailyChest()
             revealItems()

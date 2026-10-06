@@ -40,6 +40,8 @@ struct WorldGameChooserView: View {
     @State private var launch: Launch?
     @State private var lastPick: String?
     @State private var appeared = false
+    /// 💎 paid for the first visit to this world (shown once, then gone).
+    @State private var firstVisitPaid = 0
 
     private var isCompact: Bool { hsc == .compact }
     /// 👶 A גן child can't read this screen on their own, so the question at
@@ -101,6 +103,14 @@ struct WorldGameChooserView: View {
                 SpeechReader.shared.speak(Gendered.g(tr("אֵיךְ בָּא לְךָ לְשַׂחֵק?"), tr("אֵיךְ בָּא לָךְ לְשַׂחֵק?")))
             }
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) { appeared = true }
+            // 🏆 First time in this world: the 💎 nudge for trying something new.
+            if !inertPreview, !world.isBonusWorld {
+                let paid = progress.markVisited(world.id)
+                if paid > 0 {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.6).delay(0.4)) { firstVisitPaid = paid }
+                    SoundPlayer.shared.play(.correctSmall)
+                }
+            }
         }
         .fullScreenCover(item: $launch) { pick in
             Group {
@@ -162,6 +172,14 @@ struct WorldGameChooserView: View {
                         .foregroundStyle(.white)
                         .lineLimit(1).minimumScaleFactor(0.6)
                     roomBar
+                    if firstVisitPaid > 0 {
+                        Text(tr("✨ בִּקּוּר רִאשׁוֹן: +\(firstVisitPaid) 💎"))
+                            .font(.system(size: isCompact ? 13 : 15, weight: .heavy, design: .rounded))
+                            .foregroundStyle(AppColor.diamondBlue)
+                            .padding(.horizontal, 10).padding(.vertical, 4)
+                            .background(Capsule().fill(.white.opacity(0.9)))
+                            .transition(.scale.combined(with: .opacity))
+                    }
                 }
                 Spacer(minLength: 0)
             }
@@ -191,6 +209,15 @@ struct WorldGameChooserView: View {
         return "⏱ " + (cap.enabled ? tr("\(earned)/\(cap.max) דַּק' הַיּוֹם") : tr("\(earned) דַּקּוֹת"))
     }
 
+    /// "חֶדֶר 3 מִתּוֹךְ 10", with the 🏆 tier in front from silver on.
+    private var roomLine: String {
+        let tier = progress.worldTier(in: world.id)
+        if tier >= ProgressStore.worldTierCount { return tr("👑 הָעוֹלָם הֻשְׁלַם") }
+        let room = tr("חֶדֶר \(min(currentRoom + 1, world.rooms)) מִתּוֹךְ \(world.rooms)")
+        guard let badge = WorldTiers.kidBadge(tier: tier, girl: Gendered.isGirl) else { return room }
+        return badge + " · " + room
+    }
+
     /// The room pips as one slim bar, and "חֶדֶר 3 מִתּוֹךְ 10".
     private var roomBar: some View {
         let frac = Double(min(currentRoom, world.rooms)) / Double(max(1, world.rooms))
@@ -205,7 +232,7 @@ struct WorldGameChooserView: View {
             }
             .frame(width: isCompact ? 150 : 220, height: 7)
             .environment(\.layoutDirection, .app)
-            Text(tr("חֶדֶר \(min(currentRoom + 1, world.rooms)) מִתּוֹךְ \(world.rooms)"))
+            Text(roomLine)
                 .font(.system(size: isCompact ? 13 : 15, weight: .semibold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
         }

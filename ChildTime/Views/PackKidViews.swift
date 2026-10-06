@@ -86,7 +86,7 @@ struct PackRevealView: View {
                         .multilineTextAlignment(.center)
                         .scaleEffect(titleIn ? 1 : 0.3)
                         .opacity(titleIn ? 1 : 0)
-                    Text(isGift ? tr("אַבָּא וְאִמָּא שָׁלְחוּ לְךָ עוֹלָם חָדָשׁ! 🎉") : tr("עוֹלָם חָדָשׁ הִגִּיעַ לְטוֹפִי — וּפָתוּחַ בִּשְׁבִילְךָ! 👑"))
+                    Text(isGift ? Gendered.g(tr("אַבָּא וְאִמָּא שָׁלְחוּ לְךָ עוֹלָם חָדָשׁ! 🎉"), tr("אַבָּא וְאִמָּא שָׁלְחוּ לָךְ עוֹלָם חָדָשׁ! 🎉")) : Gendered.g(tr("עוֹלָם חָדָשׁ הִגִּיעַ לְטוֹפִי — וּפָתוּחַ בִּשְׁבִילְךָ! 👑"), tr("עוֹלָם חָדָשׁ הִגִּיעַ לְטוֹפִי — וּפָתוּחַ בִּשְׁבִילֵךְ! 👑")))
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white.opacity(0.92))
                         .multilineTextAlignment(.center)
@@ -99,7 +99,7 @@ struct PackRevealView: View {
                     }
                     .padding(.top, 4)
                 } else {
-                    Text(isGift ? tr("יֵשׁ לְךָ מַתָּנָה!") : tr("יֵשׁ לְךָ הַפְתָּעָה!"))
+                    Text(isGift ? Gendered.g(tr("יֵשׁ לְךָ מַתָּנָה!"), tr("יֵשׁ לָךְ מַתָּנָה!")) : Gendered.g(tr("יֵשׁ לְךָ הַפְתָּעָה!"), tr("יֵשׁ לָךְ הַפְתָּעָה!")))
                         .font(.system(size: 36, weight: .black, design: .rounded))
                         .foregroundStyle(GlassInk.primary)
                         .shadow(color: .black.opacity(0.22), radius: 8, y: 3)

@@ -45,6 +45,11 @@ import androidx.compose.ui.unit.sp
 import com.rani.tofy.i18n.tr
 import com.rani.tofy.kid.content.PreReaderContent
 import com.rani.tofy.kid.content.Question
+import com.rani.tofy.kid.content.CurriculumMath
+import com.rani.tofy.kid.core.WorldStage
+import com.rani.tofy.kid.ui.home.KidWorld
+import com.rani.tofy.kid.ui.home.WorldRouter
+import com.rani.tofy.ui.child.WorldTiers
 import com.rani.tofy.kid.ui.CharacterImage
 import com.rani.tofy.kid.ui.play.AppSound
 import com.rani.tofy.kid.ui.play.ConfettiOverlay
@@ -86,6 +91,11 @@ internal fun BossBattle(world: PlayWorld, onClose: () -> Unit) {
     var burst by remember { mutableIntStateOf(0) }
     var confetti by remember { mutableIntStateOf(0) }
     var prize by remember { mutableStateOf(Triple(0, 0, 0)) }
+    /** 🏆 The tier this win completed (0 bronze…2 gold), null on a replay — and an unvisited world to suggest next. */
+    var completedTier by remember { mutableStateOf<Int?>(null) }
+    var suggested by remember { mutableStateOf<KidWorld?>(null) }
+    val girl = GameEnv.source.isGirl
+    fun g(boy: String, girlText: String) = if (girl) girlText else boy
     var shownAt by remember { mutableDoubleStateOf(nowSecs()) }
 
     fun newQuestion() {
@@ -99,7 +109,10 @@ internal fun BossBattle(world: PlayWorld, onClose: () -> Unit) {
                 // A boss must BITE: at the top adaptive band (≥ 1.75) it draws from one grade up.
                 val base = GameEnv.source.difficulty(world.topic)
                 val level = GameEnv.adaptiveLevel(world.topic, base)
-                GameQuestions.generate(world.topic, Difficulty.HARD, if (grade != null && level >= 1.75) grade + 1 else grade)
+                // 🏆 Silver/gold bosses start one/two grades up, like their rooms.
+                var g = grade?.let { it + GameEnv.source.tierGradeOffset(world.id) }
+                if (g != null && level >= 1.75) g += 1
+                GameQuestions.generate(world.topic, Difficulty.HARD, g?.let { minOf(CurriculumMath.TOP_GRADE, it) })
             }
         }
         picked = null; locked = false; shownAt = nowSecs()
@@ -111,6 +124,13 @@ internal fun BossBattle(world: PlayWorld, onClose: () -> Unit) {
         val dayKey = "boss.won.${world.id}"
         prize = if (GameDayGate.usedToday(dayKey)) Triple(2, 0, 0) else { GameDayGate.mark(dayKey); Triple(20, 30, 5) }
         MiniGameLedger.sink.applyChest(prize.first, prize.second, prize.third)
+        // 🏆 Beaten in the last room → the tier is complete (+100 💎, the next tier
+        // a grade up). Not for the arena — it has no tiers.
+        if (!world.isBonus) MiniGameLedger.sink.completeTier(world.id)?.let { done ->
+            completedTier = done
+            prize = prize.copy(second = prize.second + WorldStage.TIER_COMPLETE_DIAMONDS)
+            suggested = WorldRouter.suggestedNewWorld(excluding = world.id)
+        }
         play(AppSound.WORLD_UNLOCK); h.success(); confetti++
     }
 
@@ -131,7 +151,7 @@ internal fun BossBattle(world: PlayWorld, onClose: () -> Unit) {
         }
     }
 
-    fun restart() { bossHP = bossMaxHP; hearts = startHearts; phase = 0; newQuestion() }
+    fun restart() { bossHP = bossMaxHP; hearts = startHearts; phase = 0; completedTier = null; suggested = null; newQuestion() }
 
     LaunchedEffect(Unit) { if (question == null) newQuestion() }
 
@@ -170,7 +190,7 @@ internal fun BossBattle(world: PlayWorld, onClose: () -> Unit) {
                 }
                 Spacer(Modifier.weight(1f))
                 Row(Modifier.padding(bottom = 24.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(tr("הַלְּבָבוֹת שֶׁלְּךָ:"), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    Text(g(tr("הַלְּבָבוֹת שֶׁלְּךָ:"), tr("הַלְּבָבוֹת שֶׁלָּךְ:")), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                     HeartsRow(startHearts, hearts, hexColor("FF5E78"), "❤️")
                 }
             } else {
@@ -179,17 +199,40 @@ internal fun BossBattle(world: PlayWorld, onClose: () -> Unit) {
                 Column(Modifier.fillMaxSize().padding(28.dp), horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterVertically)) {
                     CharacterImage("lion", Modifier.size(130.dp))
-                    Text(if (win) tr("נִצַּחְתָּ אֶת הַבּוֹס! 🏆") else tr("כִּמְעַט! בּוֹא נְנַסֶּה שׁוּב 💪"), color = Color.White, fontFamily = Rounded,
+                    val done = completedTier
+                    val title = when {
+                        !win -> g(tr("כִּמְעַט! בּוֹא נְנַסֶּה שׁוּב 💪"), tr("כִּמְעַט! בּוֹאִי נְנַסֶּה שׁוּב 💪"))
+                        done == null -> g(tr("נִצַּחְתָּ אֶת הַבּוֹס! 🏆"), tr("נִצַּחַתְּ אֶת הַבּוֹס! 🏆"))
+                        done >= WorldStage.TIER_COUNT - 1 -> g(tr("אַלּוּף הָעוֹלָם! 👑"), tr("אַלּוּפַת הָעוֹלָם! 👑"))
+                        else -> g(tr("הִשְׁלַמְתָּ אֶת הַדַּרְגָּה! 🏆"), tr("הִשְׁלַמְתְּ אֶת הַדַּרְגָּה! 🏆"))
+                    }
+                    Text(title, color = Color.White, fontFamily = Rounded,
                         fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, textAlign = TextAlign.Center)
                     if (win) Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                        // The pills say what was actually added (iOS shows 20/30 even on a replay that paid 2⭐).
-                        RewardPill("⭐", prize.first, KidColor.starGold, reveal >= 1)
-                        RewardPill("💎", prize.second, KidColor.gemPurple, reveal >= 2)
-                        RewardPill("🎮", prize.third, KidColor.successMint, reveal >= 3, tr(" דק׳"))
+                        // The pills say what was actually added — a same-day replay pays 2⭐ only.
+                        if (prize.first > 0) RewardPill("⭐", prize.first, KidColor.starGold, reveal >= 1)
+                        if (prize.second > 0) RewardPill("💎", prize.second, KidColor.gemPurple, reveal >= 2)
+                        if (prize.third > 0) RewardPill("🎮", prize.third, KidColor.successMint, reveal >= 3, tr(" דק׳"))
                     }
+                    if (win && done != null) TierUnlockCard(done, girl)
                     Column(Modifier.padding(horizontal = 16.dp).widthIn(max = 420.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         if (!win) ClassicCta(tr("עוֹד נִסָּיוֹן 🔁"), true) { restart() }
-                        ClassicCta(if (win) tr("יֵשׁ! 🎉") else tr("חֲזָרָה"), win, onClose)
+                        val cta = when {
+                            !win -> tr("חֲזָרָה")
+                            done != null && done < WorldStage.TIER_COUNT - 1 -> tr("לְדַרְגָּה %lld 🚀", done + 2)
+                            else -> tr("יֵשׁ! 🎉")
+                        }
+                        ClassicCta(cta, win, onClose)
+                        val next = suggested
+                        if (win && done != null && next != null) Text(
+                            tr("אוֹ עוֹלָם חָדָשׁ: %@ ✨ +%lld 💎", next.name, WorldStage.FIRST_VISIT_DIAMONDS),
+                            Modifier.fillMaxWidth().clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
+                                .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(50))
+                                .juicyClick { h.light(); WorldRouter.pending.value = next.id }
+                                .padding(vertical = 12.dp, horizontal = 10.dp),
+                            color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 15.sp,
+                            textAlign = TextAlign.Center, maxLines = 2,
+                        )
                     }
                 }
             }
@@ -200,6 +243,28 @@ internal fun BossBattle(world: PlayWorld, onClose: () -> Unit) {
             .juicyClick(onClick = onClose), contentAlignment = Alignment.Center) {
             Text("✕", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
         }
+    }
+}
+
+/** "⭐⭐ דַּרְגַּת כֶּסֶף נִפְתְּחָה!" — or, after gold, the world is done. */
+@Composable
+private fun TierUnlockCard(done: Int, girl: Boolean) {
+    val next = done + 1
+    val (title, line) = when (next) {
+        1 -> tr("⭐⭐ דַּרְגַּת כֶּסֶף נִפְתְּחָה!") to tr("שְׁאֵלוֹת קָשׁוֹת יוֹתֵר, פְּרָסִים גְּדוֹלִים יוֹתֵר")
+        2 -> tr("⭐⭐⭐ דַּרְגַּת זָהָב נִפְתְּחָה!") to tr("הַדַּרְגָּה הָאַחֲרוֹנָה — וְהִיא הַכִּי קָשָׁה")
+        else -> tr("👑 הָעוֹלָם הֻשְׁלַם") to (if (girl) tr("עָבַרְתְּ אֶת כָּל הַדַּרְגּוֹת! אֶפְשָׁר לְהַמְשִׁיךְ לְשַׂחֵק כָּאן תָּמִיד")
+            else tr("עָבַרְתָּ אֶת כָּל הַדַּרְגּוֹת! אֶפְשָׁר לְהַמְשִׁיךְ לְשַׂחֵק כָּאן תָּמִיד"))
+    }
+    Column(
+        Modifier.padding(horizontal = 20.dp).widthIn(max = 460.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp))
+            .background(Color.White.copy(alpha = 0.14f))
+            .border(1.5.dp, WorldTiers.color(next).copy(alpha = 0.9f), RoundedCornerShape(18.dp))
+            .padding(vertical = 12.dp, horizontal = 14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, textAlign = TextAlign.Center)
+        Text(line, color = Color.White.copy(alpha = 0.88f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, textAlign = TextAlign.Center)
     }
 }
 

@@ -55,6 +55,7 @@ fun AppNav() {
                 onBell = { nav.navigate("activity") },
                 onConnectDevice = { connectFor = it.id },
                 bellBadge = unreadActivityCount(),
+                sheetOpen = actionsFor != null || connectFor != null || status != null,
                 banners = { HomeBanners(state, onChores = { nav.navigate("chores") },
                     onPaywall = { nav.navigate("paywall") }, onPack = { pack, cid -> nav.navigate("pack/$pack/$cid") }) },
             )

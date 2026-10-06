@@ -21,7 +21,7 @@ import java.time.ZoneId
  *     (setupVersionTracking): wallet counters/mirrors, giftGivenToday, totals,
  *     stars, diamonds, xp, totalScore, the open window, minutesEarnedToday,
  *     streaks, today's counters, carryOverMinutes, cycleSeconds, owned
- *     characters, unlocked worlds, worldProgress. Anything else (topic signals,
+ *     characters, unlocked worlds, worldProgress, worldStage. Anything else (topic signals,
  *     chest date, …) rides along with the next edit.
  *   • [apply] adopts a snapshot without counting as an edit — but, exactly like
  *     iOS (its deferred deriveWalletMirrors publishes after the guard drops),
@@ -37,7 +37,7 @@ import java.time.ZoneId
  *             dailyChallengeProgress/GoalMet/Claimed/RewardReady · claimDailyChallenge ·
  *             openDailyChest · dailyChestAvailable · applyChestReward
  *   Economy   addStars/spendStars/addDiamonds/spendDiamonds/addXP/addScore/addOwnedCharacter ·
- *             unlockWorld · advanceRoom · wheel (freeWheelAvailable, resetWheelProgress,
+ *             unlockWorld · advanceRoom · 🏆 stage/worldTier/tierGradeOffset/markVisited/completeTier · wheel (freeWheelAvailable, resetWheelProgress,
  *             grantComebackWheelIfReturning) · level helpers
  *   Wallet    creditEarned/debitEarned/creditGift/debitGift · openableSeconds(gift) ·
  *             redeemableSecondsNow · redeemableMinutesNow · canRedeemNow ·
@@ -852,10 +852,52 @@ class ProgressEngine(
         if (isNew) events += ProgressEvent.WorldUnlocked(id)
     }
     fun canUnlock(starsToUnlock: Int): Boolean = s.stars >= starsToUnlock
-    fun progress(worldID: String): Int = s.worldProgress[worldID] ?: 0
+
+    // ── 🏆 World tiers (ProgressStore "World tiers" — the numbers live in [WorldStage]) ──
+
+    /** tier × 10 + room. Legacy kids (rooms only) read as bronze at their room. */
+    fun stage(worldID: String): Int = WorldStage.stage(s.worldStage, s.worldProgress, worldID)
+
+    /** 0 = ⭐ bronze, 1 = ⭐⭐ silver, 2 = ⭐⭐⭐ gold, 3 = champion. */
+    fun worldTier(worldID: String): Int = WorldStage.tier(stage(worldID))
+
+    /** Grades added to this world's questions: one per tier, at most two. */
+    fun tierGradeOffset(worldID: String): Int = WorldStage.gradeOffset(stage(worldID))
+
+    /** Room index 0…9 within the current tier (a champion sits in the last room, so the boss stays there to replay). */
+    fun progress(worldID: String): Int = WorldStage.room(stage(worldID))
+
     fun advanceRoom(worldID: String) = op {
-        s.worldProgress = s.worldProgress + (worldID to minOf(progress(worldID) + 1, 9))
+        // The stage BEFORE the legacy bump — read after it, a fresh world would
+        // jump two rooms (max(stage, the just-bumped legacy room) + 1).
+        val st = stage(worldID)
+        // The legacy counter keeps old builds on other devices right.
+        s.worldProgress = s.worldProgress + (worldID to minOf((s.worldProgress[worldID] ?: 0) + 1, 9))
+        if (st < WorldStage.CHAMPION) s.worldStage = s.worldStage + (worldID to minOf(st + 1, (st / 10) * 10 + 9))
         touch()
+    }
+
+    /** A world this child has played in at all (on any device). */
+    fun hasVisited(worldID: String): Boolean = WorldStage.visited(s.worldStage, s.worldProgress, worldID)
+
+    /** First time in a world: marks it visited and pays the 💎 nudge once. Returns the diamonds paid (0 later). */
+    fun markVisited(worldID: String): Int = op {
+        if (hasVisited(worldID)) return@op 0
+        s.worldStage = s.worldStage + (worldID to 0)
+        s.diamonds += WorldStage.FIRST_VISIT_DIAMONDS
+        touch()
+        WorldStage.FIRST_VISIT_DIAMONDS
+    }
+
+    /** The boss was beaten in the last room: completes the tier. Returns the tier just completed (0 bronze…2 gold), or null on a replay. */
+    fun completeTier(worldID: String): Int? = op {
+        val st = stage(worldID)
+        if (st >= WorldStage.CHAMPION || st % 10 != 9) return@op null
+        val done = st / 10
+        s.worldStage = s.worldStage + (worldID to (done + 1) * 10)
+        s.diamonds += WorldStage.TIER_COMPLETE_DIAMONDS
+        touch()
+        done
     }
 
     fun grantBonusWheel() { l.pendingBonusWheel = true }
@@ -1224,6 +1266,7 @@ class ProgressEngine(
         x.hourlyCorrect?.takeIf { it.size == 24 }?.let { s.hourlyCorrect = it }
         s.unlockedWorlds = x.unlockedWorlds.distinct()
         s.worldProgress = x.worldProgress
+        s.worldStage = x.worldStage
         s.topicAccuracy = x.topicAccuracy
         s.topicAnswered = x.topicAnswered
         s.topicCorrect = x.topicCorrect

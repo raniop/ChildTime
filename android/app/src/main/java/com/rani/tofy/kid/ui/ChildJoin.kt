@@ -191,7 +191,7 @@ private fun ChildJoin(justDisconnected: Boolean, canGoBack: Boolean, onJoined: (
                         Modifier.clip(RoundedCornerShape(50)).background(Color(0xFFFF9F43).copy(alpha = 0.9f)).padding(horizontal = 16.dp, vertical = 10.dp),
                         color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, textAlign = TextAlign.Center,
                     )
-                    KidBody(tr("הַהִתְקַדְּמוּת שֶׁלְּךָ שְׁמוּרָה בֶּעָנָן — שׁוּם דָּבָר לֹא אָבַד."), 14f, alpha = 0.85f)
+                    KidBody(com.rani.tofy.kid.ui.social.SocialMe.g(tr("הַהִתְקַדְּמוּת שֶׁלְּךָ שְׁמוּרָה בֶּעָנָן — שׁוּם דָּבָר לֹא אָבַד."), tr("הַהִתְקַדְּמוּת שֶׁלָּךְ שְׁמוּרָה בֶּעָנָן — שׁוּם דָּבָר לֹא אָבַד.")), 14f, alpha = 0.85f)
                 } else {
                     KidTitle(tr("מְחַבְּרִים אֶת הַטֶּלֶפוֹן הַזֶּה"), 30)
                     KidBody(tr("סוֹרְקִים אֶת הַקּוֹד שֶׁמּוֹפִיעַ בַּטֶּלֶפוֹן שֶׁל הַהוֹרֶה"), 16f, alpha = 0.9f)

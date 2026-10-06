@@ -122,8 +122,9 @@ fun RewardScreen(
         timeSeconds = roundSeconds + ((grant?.addedToday ?: 0) + (grant?.bankedForTomorrow ?: 0)) * 60
         if (grant != null && grant.bankedForTomorrow > 0) {
             val carry = KidSession.engine()?.snapshot?.carryOverMinutes ?: 0
-            bankedNote = tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (%lld/%lld)",
-                grant.bankedForTomorrow, carry, ProgressEngine.MAX_CARRY_OVER)
+            bankedNote = (if (isGirl) tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (%lld/%lld)",
+                grant.bankedForTomorrow, carry, ProgressEngine.MAX_CARRY_OVER) else tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (%lld/%lld)",
+                grant.bankedForTomorrow, carry, ProgressEngine.MAX_CARRY_OVER))
         }
         KidSession.edit { it.advanceRoom(world.id) }
     }
@@ -244,7 +245,7 @@ fun RewardScreen(
             // Pinned to the bottom so a child always sees it.
             if (stage == ChestStage.REVEALED) {
                 Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                    Text(tr("הַמְשֵׁךְ"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 18.sp,
+                    Text((if (isGirl) tr("הַמְשִׁיכִי") else tr("הַמְשֵׁךְ")), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 18.sp,
                         modifier = Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.18f))
                             .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50))
                             .clickable { haptics.light(); proceed() }.padding(horizontal = 40.dp, vertical = 12.dp))
@@ -511,7 +512,7 @@ fun LevelUpScreen(level: Int, characterID: String?, onContinue: () -> Unit) {
                     perk?.let { Text(it, color = KidColor.companionGlow, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 22.sp, textAlign = TextAlign.Center) }
                 }
             }
-            CtaGlass(tr("הַמְשֵׁךְ"), visible = titleVisible) { haptics.light(); onContinue() }
+            CtaGlass(com.rani.tofy.kid.ui.social.SocialMe.g(tr("הַמְשֵׁךְ"), tr("הַמְשִׁיכִי")), visible = titleVisible) { haptics.light(); onContinue() }
         }
         ConfettiOverlay(confetti)
     }
@@ -546,7 +547,7 @@ fun WorldUnlockScreen(world: PlayWorld, onContinue: () -> Unit) {
                     Text(world.name, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 40.sp, textAlign = TextAlign.Center)
                 }
             }
-            CtaGlass(tr("בּוֹא נַחְקוֹר!"), visible = stage >= 3) { haptics.light(); onContinue() }
+            CtaGlass(com.rani.tofy.kid.ui.social.SocialMe.g(tr("בּוֹא נַחְקוֹר!"), tr("בּוֹאִי נַחְקוֹר!")), visible = stage >= 3) { haptics.light(); onContinue() }
         }
         ConfettiOverlay(confetti)
     }

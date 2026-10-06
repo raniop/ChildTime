@@ -53,7 +53,7 @@ struct LiveGameView: View {
             }
             Button(tr("נִשְׁאָרִים בַּמִּשְׂחָק"), role: .cancel) {}
         } message: {
-            Text(amHost ? tr("אַתָּה הַמַּנְהִיג — הַמִּשְׂחָק יִסְתַּיֵּם לְכָל הַחֲבֵרִים.")
+            Text(amHost ? Gendered.g(tr("אַתָּה הַמַּנְהִיג — הַמִּשְׂחָק יִסְתַּיֵּם לְכָל הַחֲבֵרִים."), tr("אַתְּ הַמַּנְהִיגָה — הַמִּשְׂחָק יִסְתַּיֵּם לְכָל הַחֲבֵרִים."))
                         : tr("אֶפְשָׁר תָּמִיד לְהִצְטָרֵף לְמִשְׂחָק חָדָשׁ אַחַר כָּךְ."))
         }
         .sheet(item: $peekPlayer) { p in
@@ -272,7 +272,7 @@ struct LiveGameView: View {
                 .padding(.horizontal, AppSpacing.lg)
 
             if lg.myChoiceIndex != nil {
-                Label(tr("עָנִיתָ! מְחַכִּים לַשְּׁאָר…"), systemImage: "checkmark.circle.fill")
+                Label(Gendered.g(tr("עָנִיתָ! מְחַכִּים לַשְּׁאָר…"), tr("עָנִית! מְחַכִּים לַשְּׁאָר…")), systemImage: "checkmark.circle.fill")
                     .font(.system(size: 19, weight: .heavy, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
                     .padding(.top, AppSpacing.sm)
@@ -465,7 +465,7 @@ struct LiveGameView: View {
                             .foregroundStyle(.white).lineLimit(2).minimumScaleFactor(0.6)
                         Spacer()
                         if isCorrect { Text("✓").font(.system(size: 26, weight: .black)).foregroundStyle(.white) }
-                        else if isMine { Text(tr("בָּחַרְתָּ")).font(.system(size: 14, weight: .bold)).foregroundStyle(.white.opacity(0.8)) }
+                        else if isMine { Text(Gendered.g(tr("בָּחַרְתָּ"), tr("בָּחַרְתְּ"))).font(.system(size: 14, weight: .bold)).foregroundStyle(.white.opacity(0.8)) }
                     }
                     .padding(.horizontal, 18).padding(.vertical, 16)
                     .background(RoundedRectangle(cornerRadius: AppRadius.large)
@@ -576,11 +576,11 @@ struct LiveGameView: View {
         return VStack(spacing: AppSpacing.lg) {
             closeButton
             Text(iWon ? "🏆" : "🎉").font(.system(size: 76))
-            Text(iWon ? tr("וָואו, נִצַּחְתָּ! 🤩") : tr("כָּל הַכָּבוֹד! 🎉"))
+            Text(iWon ? Gendered.g(tr("וָואו, נִצַּחְתָּ! 🤩"), tr("וָואו, נִצַּחַתְּ! 🤩")) : tr("כָּל הַכָּבוֹד! 🎉"))
                 .font(.system(size: 32, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                 .glow(AppColor.starGold, radius: 14)
                 .multilineTextAlignment(.center)
-            Text(tr("הַפְּרָסִים שֶׁלְּךָ:"))
+            Text(Gendered.g(tr("הַפְּרָסִים שֶׁלְּךָ:"), tr("הַפְּרָסִים שֶׁלָּךְ:")))
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             HStack(spacing: 16) {
@@ -616,7 +616,7 @@ struct LiveGameView: View {
 
             VStack(spacing: 10) {
                 Button { Haptic.light(); Task { await lg.leaveGame(); lg.wantsNewGame = true } } label: {
-                    Text(tr("שַׂחֵק שׁוּב 🔄")).font(.system(size: 19, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    Text(Gendered.g(tr("שַׂחֵק שׁוּב 🔄"), tr("שַׂחֲקִי שׁוּב 🔄"))).font(.system(size: 19, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                         .frame(maxWidth: .infinity).padding(.vertical, 15).background(Capsule().fill(.white.opacity(0.92))).foregroundStyle(Color(hex: "4B3FBF"))
                 }
                 Button { Task { await lg.leaveGame() } } label: {
@@ -762,11 +762,11 @@ struct PlayerPeekView: View {
 
     @ViewBuilder private var addFriendArea: some View {
         if isMe {
-            Label(tr("זֶה אַתָּה 🙂"), systemImage: "person.fill")
+            Label(Gendered.g(tr("זֶה אַתָּה 🙂"), tr("זוֹ אַתְּ 🙂")), systemImage: "person.fill")
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
         } else if added || friends.isFriend(player.id) {
-            Label(tr("חָבֵר שֶׁלְּךָ"), systemImage: "checkmark.circle.fill")
+            Label(Gendered.g(tr("חָבֵר שֶׁלְּךָ"), tr("חָבֵר שֶׁלָּךְ")), systemImage: "checkmark.circle.fill")
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(AppColor.successMint)
         } else if let code = card?.code, !code.isEmpty {

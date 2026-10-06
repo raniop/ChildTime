@@ -94,19 +94,19 @@ extension WheelPrize {
             if g.addedToday > 0 && g.bankedForTomorrow > 0 {
                 return tr("+\(g.addedToday) דַּקּוֹת עַכְשָׁיו · עוֹד \(g.bankedForTomorrow) נִשְׁמְרוּ לְמָחָר 🎁")
             } else if g.bankedForTomorrow > 0 {
-                return tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! \(g.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))")
+                return Gendered.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! \(g.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))"), tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! \(g.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))"))
             } else {
                 return tr("+\(g.addedToday) דַּקּוֹת נוֹסְפוּ לִזְמַן הַמִּשְׂחָק")
             }
         case .rareItem(let id):
             if let item = CosmeticCatalog.item(id), !cosmetics.owns(item) {
                 cosmetics.unlockFree(item)
-                return tr("פָּתַחְתָּ פְּרִיט נָדִיר: \(item.name)!")
+                return Gendered.g(tr("פָּתַחְתָּ פְּרִיט נָדִיר: \(item.name)!"), tr("פָּתַחַתְּ פְּרִיט נָדִיר: \(item.name)!"))
             }
             // Already owned — fall back to a nice diamond consolation the kid
             // can actually spend (not just rank), so it never feels like a loss.
             progress.applyChestReward(ChestReward(stars: 45, diamonds: 15, minutes: 0, cosmeticID: nil))
-            return tr("כְּבָר יֵשׁ לְךָ אֶת הַפְּרִיט הַזֶּה — קַבֵּל 15 יַהֲלוֹמִים בִּמְקוֹם 💎")
+            return Gendered.g(tr("כְּבָר יֵשׁ לְךָ אֶת הַפְּרִיט הַזֶּה — קַבֵּל 15 יַהֲלוֹמִים בִּמְקוֹם 💎"), tr("כְּבָר יֵשׁ לָךְ אֶת הַפְּרִיט הַזֶּה — קַבְּלִי 15 יַהֲלוֹמִים בִּמְקוֹם 💎"))
         case .funMission(let task):
             return tr("משימה: \(task)")
         }

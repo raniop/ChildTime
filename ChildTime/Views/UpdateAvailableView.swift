@@ -72,9 +72,9 @@ struct UpdateAvailableSheet: View {
                         }
                     }
 
-                    if !config.notes.isEmpty {
+                    if !config.displayNotes.isEmpty {
                         VStack(spacing: 9) {
-                            ForEach(Array(config.notes.enumerated()), id: \.offset) { _, line in
+                            ForEach(Array(config.displayNotes.enumerated()), id: \.offset) { _, line in
                                 Text(line)
                                     .font(.system(size: 14.5, weight: .medium, design: .rounded))
                                     .foregroundStyle(.white.opacity(0.92))

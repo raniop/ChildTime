@@ -46,7 +46,7 @@ struct Character3DPickerView: View {
 
     private var header: some View {
         ZStack {
-            Text(tr("בְּחַר דְּמוּת"))
+            Text(Gendered.g(tr("בְּחַר דְּמוּת"), tr("בַּחֲרִי דְּמוּת")))
                 .font(.system(size: 24, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)

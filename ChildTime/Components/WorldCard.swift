@@ -20,25 +20,62 @@ struct WorldCard: View {
     var footOverride: String? = nil
     /// First-day glow on a freshly gifted pack — the border and badge breathe.
     var pulse: Bool = false
+    /// 🏆 0 bronze · 1 silver · 2 gold · 3 champion (ProgressStore.worldTier).
+    var tier: Int = 0
+    /// Played here at all → the tier badge and rim.
+    var visited: Bool = true
+    /// THE one world Tofy recommends next (never visited) → gold dashed rim,
+    /// "עוֹד לֹא בִּקַּרְתְּ" and the first-visit 💎. One world, not all of them.
+    var suggested: Bool = false
+    var girl: Bool = false
     @State private var glow = false
     let onTap: () -> Void
 
     @Environment(\.horizontalSizeClass) private var hsc
     private var isCompact: Bool { hsc == .compact }
 
+    private var newHere: Bool { suggested && !visited && isUnlocked && !subscriptionLocked && !world.isBonusWorld }
+    private var showTier: Bool { visited && isUnlocked && !subscriptionLocked && !world.isBonusWorld }
+    private var tierBadge: String? {
+        if newHere { return girl ? tr("✨ עוֹד לֹא בִּקַּרְתְּ") : tr("✨ עוֹד לֹא בִּקַּרְתָּ") }
+        return showTier ? WorldTiers.kidBadge(tier: tier, girl: girl) : nil
+    }
+    private var footLabel: String {
+        if newHere { return tr("בִּקּוּר רִאשׁוֹן = +\(ProgressStore.firstVisitDiamonds) 💎") }
+        if tier >= 3 { return tr("👑 הָעוֹלָם הֻשְׁלַם") }
+        if currentRoom >= world.rooms - 1 { return tr("חֶדֶר \(world.rooms)/\(world.rooms) · הַבּוֹס מְחַכֶּה 🐉") }
+        return tr("חֶדֶר \(max(1, min(currentRoom + 1, world.rooms)))/\(world.rooms)")
+    }
+
     var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 0) {
                 HomeTileHeader(emoji: world.emoji,
-                               badge: badgeOverride ?? (subscriptionLocked ? tr("👑 טוֹפִי+") : nil))
+                               badge: badgeOverride ?? (subscriptionLocked ? tr("👑 טוֹפִי+") : tierBadge),
+                               badgeTint: badgeOverride == nil && !subscriptionLocked && tierBadge != nil
+                                   ? (newHere ? Color(hex: "FFE28A") : WorldTiers.color(tier: tier)) : nil)
                 HomeTileText(title: world.name,
                              subtitle: world.isBonusWorld ? tr("כָּל הַנּוֹשְׂאִים · דַּקּוֹת כְּפוּלוֹת")
-                                : (world.topic.pack?.tagline ?? world.topic.displayName))
+                                : (showTier ? WorldTiers.crownsLine(tier: tier) : nil)
+                                    ?? (world.topic.pack?.tagline ?? world.topic.displayName))
                 Spacer(minLength: 6)
-                HomeTileFoot(label: footOverride ?? tr("חֶדֶר \(max(1, min(currentRoom + 1, world.rooms)))/\(world.rooms)"),
-                             frac: Double(currentRoom) / Double(max(1, world.rooms)))
+                HomeTileFoot(label: footOverride ?? footLabel,
+                             frac: tier >= 3 ? 1 : Double(currentRoom) / Double(max(1, world.rooms)))
             }
             .homeTileChrome(tint: world.glowColor, compact: isCompact)
+            .overlay {
+                // 🏆 Silver, gold and champion wear their colour on the rim; a
+                // world never visited gets a dashed invitation.
+                if showTier {
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .strokeBorder(WorldTiers.color(tier: tier).opacity(tier == 0 ? 0.7 : 0.95), lineWidth: 2)
+                } else if newHere {
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .strokeBorder(Color(hex: "FFE28A").opacity(0.95), style: StrokeStyle(lineWidth: 2, dash: [7, 5]))
+                }
+            }
+            .shadow(color: showTier && tier >= 1 ? WorldTiers.color(tier: tier).opacity(0.45)
+                        : (newHere ? Color(hex: "FFE28A").opacity(0.45) : .clear), radius: 10)
             .overlay {
                 if pulse {
                     RoundedRectangle(cornerRadius: 22, style: .continuous)

@@ -44,6 +44,7 @@ import com.rani.tofy.kid.ui.play.KidColor
 import com.rani.tofy.ui.theme.GlassBackdrop
 import com.rani.tofy.ui.theme.Rounded
 import com.rani.tofy.ui.theme.glassPane
+import com.rani.tofy.kid.ui.social.SocialMe
 
 /** StarPackStore's three consumables — the 💎 each grants (60 / 200 / 500, the middle one "best value"). */
 internal object StarPacks {
@@ -91,7 +92,7 @@ private fun StarShopScreen(onClose: () -> Unit) {
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                         Text(currencyShort(diamonds), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 30.sp, maxLines = 1)
                     }
-                    Text(tr("יַהֲלוֹמִים שֶׁלְּךָ"), color = Color.White.copy(alpha = 0.8f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                    Text(SocialMe.g(tr("יַהֲלוֹמִים שֶׁלְּךָ"), tr("יַהֲלוֹמִים שֶׁלָּךְ")), color = Color.White.copy(alpha = 0.8f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
                 }
                 // Google Play Billing: verified on the server, then credited + consumed.
                 com.rani.tofy.billing.DiamondPacksPlay()

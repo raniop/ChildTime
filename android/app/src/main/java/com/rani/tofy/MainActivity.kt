@@ -48,7 +48,10 @@ class MainActivity : ComponentActivity() {
                     androidx.compose.ui.Modifier.fillMaxSize().pointerInput(Unit) {
                         detectTapGestures { focus.clearFocus() }
                     },
-                ) { Root() }
+                ) {
+                    Root()
+                    ForcedUpdateOverlay()
+                }
             }
         }
     }
@@ -58,6 +61,23 @@ class MainActivity : ComponentActivity() {
         setIntent(intent)
         com.rani.tofy.kid.ui.home.KidDeepLinks.handle(intent)
     }
+}
+
+/**
+ * 🔄 Below `minAndroidBuild` this copy can no longer be trusted against the
+ * server, so it covers everything (ChildTimeApp's ForcedUpdateView overlay).
+ * The kid experience draws its own (Kid Mode keeps its parent-gated way out),
+ * so here: parent surfaces get the store button, everything else is told to
+ * ask a grown-up.
+ */
+@Composable
+private fun ForcedUpdateOverlay() {
+    val update by com.rani.tofy.update.AppUpdateConfig.state.collectAsState()
+    if (update !is com.rani.tofy.update.AppUpdateConfig.State.Required) return
+    val inKidExperience = DeviceRole.kidModeChildID != null ||
+        (DeviceRole.role == DeviceRole.Role.CHILD && DeviceRole.joinedChildID != null)
+    if (inKidExperience) return
+    com.rani.tofy.update.ForcedUpdateScreen(parent = DeviceRole.role == DeviceRole.Role.PARENT)
 }
 
 /** ContentView.parentFlow: signed out → login; no family → choice; else home. */

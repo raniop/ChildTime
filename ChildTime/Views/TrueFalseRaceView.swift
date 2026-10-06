@@ -197,7 +197,7 @@ struct TrueFalseRaceView: View {
                 .font(.system(size: 32, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
-            Text(tr("עָנִיתָ נָכוֹן עַל \(correctCount) מִתּוֹךְ \(total)"))
+            Text(Gendered.g(tr("עָנִיתָ נָכוֹן עַל \(correctCount) מִתּוֹךְ \(total)"), tr("עָנִית נָכוֹן עַל \(correctCount) מִתּוֹךְ \(total)")))
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
 

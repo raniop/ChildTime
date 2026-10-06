@@ -46,6 +46,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rani.tofy.i18n.tr
 import com.rani.tofy.kid.core.KidSession
+import com.rani.tofy.kid.core.WorldStage
+import com.rani.tofy.kid.ui.play.AppSound
+import com.rani.tofy.ui.child.WorldTiers
 import com.rani.tofy.kid.ui.play.FitText
 import com.rani.tofy.kid.ui.play.KidColor
 import com.rani.tofy.kid.ui.play.PlayWorld
@@ -97,6 +100,19 @@ internal fun WorldGameChooserScreen(world: PlayWorld, onPlayQuestions: () -> Uni
     var lastPick by remember { mutableStateOf(GameEnv.prefs.getString(lastKey)) }
     var launch by remember { mutableStateOf<String?>(null) }   // "questions" · "boss" · a game raw
     var appeared by remember { mutableStateOf(false) }
+    /** 💎 paid for the first visit to this world (shown once, then gone). */
+    var firstVisitPaid by remember { mutableStateOf(0) }
+
+    // 🏆 First time in this world: the 💎 nudge for trying something new.
+    LaunchedEffect(world.id) {
+        if (world.isBonus) return@LaunchedEffect
+        val paid = KidSession.edit { it.markVisited(world.id) } ?: 0
+        if (paid > 0) {
+            delay(400)
+            firstVisitPaid = paid
+            play(AppSound.CORRECT_SMALL)
+        }
+    }
 
     LaunchedEffect(ready) {
         if (!ready) return@LaunchedEffect
@@ -167,8 +183,21 @@ internal fun WorldGameChooserScreen(world: PlayWorld, onPlayQuestions: () -> Uni
                         Box(Modifier.width(if (m.compact) 150.dp else 220.dp).height(7.dp).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.2f))) {
                             Box(Modifier.fillMaxWidth(maxOf(0.04f, frac)).height(7.dp).clip(RoundedCornerShape(50)).background(GoldBrush))
                         }
-                        Text(tr("חֶדֶר %lld מִתּוֹךְ %lld", minOf(room + 1, WORLD_ROOMS), WORLD_ROOMS), color = Ink.secondary, fontFamily = Rounded,
+                        // "חֶדֶר 3 מִתּוֹךְ 10", with the 🏆 tier in front from silver on.
+                        val tier = KidSession.engine()?.worldTier(world.id) ?: 0
+                        val roomLine = if (tier >= WorldStage.TIER_COUNT) tr("👑 הָעוֹלָם הֻשְׁלַם") else {
+                            val r = tr("חֶדֶר %lld מִתּוֹךְ %lld", minOf(room + 1, WORLD_ROOMS), WORLD_ROOMS)
+                            WorldTiers.kidBadge(tier, girl)?.let { "$it · $r" } ?: r
+                        }
+                        Text(roomLine, color = Ink.secondary, fontFamily = Rounded,
                             fontWeight = FontWeight.SemiBold, fontSize = (if (m.compact) 13 else 15).sp)
+                        androidx.compose.animation.AnimatedVisibility(firstVisitPaid > 0,
+                            enter = androidx.compose.animation.scaleIn(spring(dampingRatio = 0.6f)) + androidx.compose.animation.fadeIn()) {
+                            Text(tr("✨ בִּקּוּר רִאשׁוֹן: +%lld 💎", firstVisitPaid), color = KidColor.diamondBlue, fontFamily = Rounded,
+                                fontWeight = FontWeight.ExtraBold, fontSize = (if (m.compact) 13 else 15).sp,
+                                modifier = Modifier.clip(RoundedCornerShape(50))
+                                    .background(Color.White.copy(alpha = 0.9f)).padding(horizontal = 10.dp, vertical = 4.dp))
+                        }
                     }
                 }
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)) {
@@ -345,12 +374,12 @@ internal fun GamesMenu(onClose: () -> Unit) {
         Column(Modifier.fillMaxSize().padding(horizontal = 22.dp).padding(top = 80.dp), horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(tr("מִשְׂחָקִים 🎮"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp)
-            Text(tr("בְּחַר מִשְׂחָק וְקָדִימָה!"), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 17.sp)
+            Text(com.rani.tofy.kid.ui.social.SocialMe.g(tr("בְּחַר מִשְׂחָק וְקָדִימָה!"), tr("בַּחֲרִי מִשְׂחָק וְקָדִימָה!")), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 17.sp)
             if (!ready) { CircularProgressIndicator(color = Color.White); return@Column }
             Column(Modifier.verticalScroll(rememberScrollState()).padding(bottom = 24.dp).widthIn(max = 600.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 if (!preReader) {
                     MenuCard("⚡️", tr("מֵרוֹץ נָכוֹן/לֹא נָכוֹן"), tr("מַהֵר! נָכוֹן אוֹ לֹא? בּוֹנוּס עַל מְהִירוּת 🔥"), listOf("EF476F", "FF8A5B"), appeared) { open = "tf" }
-                    MenuCard("🎯", tr("חִידוֹן בָּזָק"), tr("אַרְבַּע תְּשׁוּבוֹת — בְּחַר אֶת הַנְּכוֹנָה מַהֵר!"), listOf("118AB2", "5B6CFF"), appeared) { open = "quiz" }
+                    MenuCard("🎯", tr("חִידוֹן בָּזָק"), com.rani.tofy.kid.ui.social.SocialMe.g(tr("אַרְבַּע תְּשׁוּבוֹת — בְּחַר אֶת הַנְּכוֹנָה מַהֵר!"), tr("אַרְבַּע תְּשׁוּבוֹת — בַּחֲרִי אֶת הַנְּכוֹנָה מַהֵר!")), listOf("118AB2", "5B6CFF"), appeared) { open = "quiz" }
                     MenuCard("🧩", tr("הַתְאָמַת זוּגוֹת"), tr("הַתְאִימוּ שְׁאֵלָה לַתְּשׁוּבָה וּזְכוּ בִּפְרָסִים"), listOf("06D6A0", "118AB2"), appeared) { open = "match" }
                 }
                 MenuCard("🧠", tr("מִשְׂחַק הַזִּכָּרוֹן"), tr("מָצְאוּ אֶת הָאֶמוֹגִ'י וְהַמִּלָּה בְּאַנְגְּלִית"), listOf("9B5DE5", "EF476F"), appeared) { open = "memory" }

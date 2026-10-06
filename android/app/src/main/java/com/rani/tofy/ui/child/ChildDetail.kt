@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rani.tofy.data.*
 import com.rani.tofy.i18n.tr
+import com.rani.tofy.kid.core.WorldStage
 import com.rani.tofy.ui.common.ChildAvatar
 import com.rani.tofy.ui.common.GlassButton
 import com.rani.tofy.ui.common.P
@@ -53,10 +54,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /** The snapshot maps the report's engines read (ProgressSnapshot fields Progress doesn't model). */
-internal data class SnapshotExtras(val adaptive: Map<String, Double>, val affinity: Map<String, Double>, val exposure: Map<String, Int>) {
+internal data class SnapshotExtras(
+    val adaptive: Map<String, Double>, val affinity: Map<String, Double>, val exposure: Map<String, Int>,
+    /** 🏆 ProgressSnapshot.worldStage (tier × 10 + room) and the legacy worldProgress rooms. */
+    val worldStage: Map<String, Int> = emptyMap(), val worldProgress: Map<String, Int> = emptyMap(),
+) {
     companion object {
         private fun nums(d: Doc, k: String) = d.map(k)?.mapNotNull { (key, v) -> (v as? Number)?.let { key to it.toDouble() } }?.toMap() ?: emptyMap()
-        fun from(d: Doc) = SnapshotExtras(nums(d, "topicAdaptiveLevel"), nums(d, "topicAffinity"), nums(d, "topicExposure").mapValues { it.value.toInt() })
+        private fun ints(d: Doc, k: String) = nums(d, k).mapValues { it.value.toInt() }
+        fun from(d: Doc) = SnapshotExtras(nums(d, "topicAdaptiveLevel"), nums(d, "topicAffinity"), ints(d, "topicExposure"),
+            ints(d, "worldStage"), ints(d, "worldProgress"))
     }
 }
 
@@ -183,6 +190,9 @@ private fun ChildReport(
         TopicsCard(child, s, extras, engine, period, expanded, autoCollapsed) { t, open ->
             if (open) { expanded = null; autoCollapsed = true } else expanded = t
         }
+
+        // MARK: 🏆 worlds (tiers)
+        WorldsCard(child, extras)
 
         // MARK: improvement (week / month only)
         val deltas = engine.topicDeltas(period)
@@ -333,6 +343,44 @@ private fun TopicsCard(
             }
             if (idx != topics.lastIndex) RowDivider()
         }
+    }
+}
+
+/**
+ * 🏆 ChildReportView.worldsCard — the child's worlds by how far they got: tier,
+ * room, and a couple they never visited (where to nudge next). Reads the synced
+ * snapshot doc, so it is right on the parent's phone too.
+ */
+@Composable
+private fun WorldsCard(child: Child, extras: SnapshotExtras) {
+    fun g(m: String, f: String) = if (child.isGirl) f else m
+    val stageOf = { w: World -> WorldStage.stage(extras.worldStage, extras.worldProgress, w.id) }
+    val visited = { w: World -> WorldStage.visited(extras.worldStage, extras.worldProgress, w.id) }
+    val playable = child.playableTopics
+    val candidates = (BaseWorlds + Topic.entries.filter { it.isPack }.map { World("${it.raw}_world", "", it.emoji, it) })
+        .filter { it.topic in playable }
+    val played = candidates.filter(visited).sortedByDescending(stageOf)
+    val notYet = candidates.filterNot(visited).take(2)
+    val crowns = played.sumOf { minOf(WorldStage.tier(stageOf(it)), WorldStage.TIER_COUNT) }
+    ReportCard(tr("🏆 הָעוֹלָמוֹת שֶׁל %@", child.name), detail = if (crowns > 0) tr("👑 דַּרְגּוֹת שֶׁהֻשְׁלְמוּ: %lld", crowns) else null) {
+        if (played.isEmpty()) { EmptyLine(g(tr("עוֹד לֹא שִׂחֵק בְּאַף עוֹלָם."), tr("עוֹד לֹא שִׂחֲקָה בְּאַף עוֹלָם."))); return@ReportCard }
+        Column {
+            played.forEach { w ->
+                val st = stageOf(w)
+                WorldRow(w, WorldTiers.parentLabel(WorldStage.tier(st), st % 10), WorldTiers.color(WorldStage.tier(st)))
+            }
+            notYet.forEach { w -> WorldRow(w, g(tr("עוֹד לֹא בִּקֵּר"), tr("עוֹד לֹא בִּקְּרָה")), null) }
+        }
+    }
+}
+
+@Composable
+private fun WorldRow(w: World, label: String, tint: Color?) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(w.emoji, fontSize = 20.sp)
+        Text(w.name, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.5.sp, maxLines = 1)
+        Text(label, Modifier.clip(RoundedCornerShape(50)).background(tint ?: Color.White.copy(alpha = 0.18f)).padding(horizontal = 9.dp, vertical = 4.dp),
+            color = if (tint == null) Ink.secondary else Color(0xFF2A1D00), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, maxLines = 1)
     }
 }
 

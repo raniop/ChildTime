@@ -11,6 +11,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.RemoteMessage
+import com.rani.tofy.BuildConfig
 import com.rani.tofy.MainActivity
 import com.rani.tofy.R
 import com.rani.tofy.i18n.I18n
@@ -33,6 +34,11 @@ object PushRegistrar {
             "fcmTokens" to FieldValue.arrayUnion(token),
             "tokenLanguages" to mapOf(token to I18n.language.code),
             "language" to I18n.language.code,
+            // 🔄 Platform + versionCode of THIS token, so "a new version" pushes reach
+            // only parent phones on an older build (functions: announceAppUpdate).
+            "tokenDevices" to mapOf(token to mapOf(
+                "platform" to "android", "build" to BuildConfig.VERSION_CODE, "role" to "parent",
+            )),
         ), SetOptions.merge())
     }
 

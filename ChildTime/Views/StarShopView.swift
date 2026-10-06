@@ -48,7 +48,7 @@ struct StarShopView: View {
             }
         }
         // 🎚 The kid closes this screen from the rail on a foldable.
-        .railDismiss(tr("סְגֹר")) { dismiss() }
+        .railDismiss(Gendered.g(tr("סְגֹר"), tr("סִגְרִי"))) { dismiss() }
         .environment(\.layoutDirection, .app)
         .onChangeCompat(of: store.lastGrantedDiamonds) { _, new in
             if let new { celebrate = new; store.lastGrantedDiamonds = nil; Haptic.success() }
@@ -89,7 +89,7 @@ struct StarShopView: View {
                 .foregroundStyle(.white)
                 .lineLimit(1)
                 .numericTextTransition(Double(progress.diamonds))
-            Text(tr("יַהֲלוֹמִים שֶׁלְּךָ"))
+            Text(Gendered.g(tr("יַהֲלוֹמִים שֶׁלְּךָ"), tr("יַהֲלוֹמִים שֶׁלָּךְ")))
                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8))
         }
@@ -183,13 +183,13 @@ struct StarShopView: View {
                 Text(tr("הַחֲבִילוֹת אֵינָן זְמִינוֹת כָּרֶגַע"))
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text(tr("נַסֵּה שׁוּב בְּעוֹד רֶגַע."))
+                Text(Gendered.g(tr("נַסֵּה שׁוּב בְּעוֹד רֶגַע."), tr("נַסִּי שׁוּב בְּעוֹד רֶגַע.")))
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.7))
                 Button {
                     Task { await store.reload() }
                 } label: {
-                    Text(tr("נַסֵּה שׁוּב"))
+                    Text(Gendered.g(tr("נַסֵּה שׁוּב"), tr("נַסִּי שׁוּב")))
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 22).padding(.vertical, 10)

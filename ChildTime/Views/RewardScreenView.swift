@@ -306,7 +306,7 @@ struct RewardScreenView: View {
             Button {
                 proceedAfterReward()
             } label: {
-                Text(tr("הַמְשֵׁךְ"))
+                Text(Gendered.g(tr("הַמְשֵׁךְ"), tr("הַמְשִׁיכִי")))
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.horizontal, AppSpacing.xl)
@@ -368,7 +368,7 @@ struct RewardScreenView: View {
         // the won minutes weren't lost.
         let grant = progress.applyChestReward(reward)
         if grant.bankedForTomorrow > 0 {
-            bankedNote = tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! \(grant.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))")
+            bankedNote = Gendered.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! \(grant.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))"), tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! \(grant.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))"))
         }
         progress.advanceRoom(in: world.id)
     }

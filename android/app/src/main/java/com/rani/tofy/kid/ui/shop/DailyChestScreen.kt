@@ -72,6 +72,7 @@ import com.rani.tofy.ui.theme.GlassBackdrop
 import com.rani.tofy.ui.theme.Rounded
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.rani.tofy.kid.ui.social.SocialMe
 
 /**
  * DailyChestView.swift — today's magic box: tap it 5 times to pry it open,
@@ -118,8 +119,9 @@ fun DailyChestScreenImpl(onExit: () -> Unit) {
                 granted = reward
                 if (grant.bankedForTomorrow > 0) {
                     val carry = KidSession.engine()?.snapshot?.carryOverMinutes ?: 0
-                    bankedNote = tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (%lld/%lld)",
-                        grant.bankedForTomorrow, carry, ProgressEngine.MAX_CARRY_OVER)
+                    bankedNote = SocialMe.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (%lld/%lld)",
+                        grant.bankedForTomorrow, carry, ProgressEngine.MAX_CARRY_OVER), tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (%lld/%lld)",
+                        grant.bankedForTomorrow, carry, ProgressEngine.MAX_CARRY_OVER))
                 }
                 KidSession.pushNow()
             }
@@ -143,7 +145,7 @@ fun DailyChestScreenImpl(onExit: () -> Unit) {
         if (!ready) { onExit(); return@LaunchedEffect }
         // onAppear: roll the day over first — the minutes room is today's.
         KidSession.edit { e -> e.applyDailyRolloverIfNeeded(); reward = e.dailyChestReward(RewardEngine.chestContents(ChestKind.MAGIC)) }
-        companion.cheer(tr("חִכִּיתִי לְךָ!"))
+        companion.cheer(SocialMe.g(tr("חִכִּיתִי לְךָ!"), tr("חִכִּיתִי לָךְ!")))
         delay(400)
         stage = ChestStage.GLOWING
     }
@@ -203,7 +205,7 @@ fun DailyChestScreenImpl(onExit: () -> Unit) {
             // "הַמְשֵׁךְ" pinned outside the scroll so it's always visible.
             if (stage == ChestStage.REVEALED) {
                 Box(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp), contentAlignment = Alignment.Center) {
-                    KidCta(tr("הַמְשֵׁךְ"), Color(0xFF5E60CE), Color(0xFF3E8BF0), Modifier.widthIn(max = 360.dp), size = 22) { haptics.light(); onExit() }
+                    KidCta(SocialMe.g(tr("הַמְשֵׁךְ"), tr("הַמְשִׁיכִי")), Color(0xFF5E60CE), Color(0xFF3E8BF0), Modifier.widthIn(max = 360.dp), size = 22) { haptics.light(); onExit() }
                 }
             }
         }

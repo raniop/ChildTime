@@ -61,6 +61,7 @@ import com.rani.tofy.ui.theme.Rounded
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.rani.tofy.kid.ui.social.SocialMe
 
 /**
  * ShopView.swift — the character shop: the equipped character big, then the
@@ -113,7 +114,7 @@ fun CharacterCollectionScreenImpl(onExit: () -> Unit) {
 
     GlassBackdrop {
         Column(Modifier.fillMaxSize().systemBarsPadding()) {
-            ShopTopBar(tr("בְּחַר דְּמוּת"), onExit) { DiamondPill(state?.snapshot?.diamonds ?: 0) { col.haptics?.light(); starShop = true } }
+            ShopTopBar(com.rani.tofy.kid.ui.social.SocialMe.g(tr("בְּחַר דְּמוּת"), tr("בַּחֲרִי דְּמוּת")), onExit) { DiamondPill(state?.snapshot?.diamonds ?: 0) { col.haptics?.light(); starShop = true } }
             CollectionGrid(col, state?.snapshot?.diamonds ?: 0, state?.snapshot?.ownedCharacterIDs ?: emptyList()) {}
         }
         CollectionDialogs(col, onBuyDiamonds = { starShop = true })
@@ -243,7 +244,7 @@ internal fun CollectionDialogs(col: CollectionState, onBuyDiamonds: () -> Unit) 
         KidBottomCard(onDismiss = { col.pending = null }) {
             Text("${c.name} — ${c.priceDiamonds} 💎", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 18.sp, textAlign = TextAlign.Center)
             ShopCharImage(c.id, Modifier.height(120.dp))
-            KidCta(tr("קְנֵה וְהַחֲלֵף"), Color(0xFFFFB547), Color(0xFFFF8A3D), emoji = "💎") { col.buy(c) }
+            KidCta(SocialMe.g(tr("קְנֵה וְהַחֲלֵף"), tr("קְנִי וְהַחְלִיפִי")), Color(0xFFFFB547), Color(0xFFFF8A3D), emoji = "💎") { col.buy(c) }
             CancelLink(tr("בִּטּוּל")) { col.pending = null }
         }
     }
@@ -251,10 +252,10 @@ internal fun CollectionDialogs(col: CollectionState, onBuyDiamonds: () -> Unit) 
         BackHandler { col.shortBy = null }
         KidCenterCard(onDismiss = { col.shortBy = null }) {
             Text(tr("חֲסֵרִים יַהֲלוֹמִים 💎"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 20.sp, textAlign = TextAlign.Center)
-            Text(tr("צָרִיךְ עוֹד %lld יַהֲלוֹמִים. תַּמְשִׁיךְ לִלְמוֹד וְתַרְוִיחַ — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת.", s),
+            Text(SocialMe.g(tr("צָרִיךְ עוֹד %lld יַהֲלוֹמִים. תַּמְשִׁיךְ לִלְמוֹד וְתַרְוִיחַ — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת.", s), tr("צָרִיךְ עוֹד %lld יַהֲלוֹמִים. תַּמְשִׁיכִי לִלְמוֹד וְתַרְוִיחִי — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת.", s)),
                 color = Color.White.copy(alpha = 0.88f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 15.sp,
                 textAlign = TextAlign.Center, lineHeight = 21.sp)
-            KidCta(tr("קְנֵה יַהֲלוֹמִים"), Color(0xFF9B5DE5), Color(0xFF5E60CE), emoji = "💎") { col.shortBy = null; onBuyDiamonds() }
+            KidCta(SocialMe.g(tr("קְנֵה יַהֲלוֹמִים"), tr("קְנִי יַהֲלוֹמִים")), Color(0xFF9B5DE5), Color(0xFF5E60CE), emoji = "💎") { col.shortBy = null; onBuyDiamonds() }
             CancelLink(tr("הֵבַנְתִּי")) { col.shortBy = null }
         }
     }

@@ -66,7 +66,7 @@ struct ChildJoinView: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 16).padding(.vertical, 10)
                             .background(AppColor.almostWarm.opacity(0.9), in: Capsule())
-                        Text(tr("הַהִתְקַדְּמוּת שֶׁלְּךָ שְׁמוּרָה בֶּעָנָן — שׁוּם דָּבָר לֹא אָבַד."))
+                        Text(Gendered.g(tr("הַהִתְקַדְּמוּת שֶׁלְּךָ שְׁמוּרָה בֶּעָנָן — שׁוּם דָּבָר לֹא אָבַד."), tr("הַהִתְקַדְּמוּת שֶׁלָּךְ שְׁמוּרָה בֶּעָנָן — שׁוּם דָּבָר לֹא אָבַד.")))
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.85))
                             .multilineTextAlignment(.center)

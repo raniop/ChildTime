@@ -37,6 +37,17 @@ final class AppUpdateConfig: ObservableObject {
     /// is just the offer, without a list.
     @Published private(set) var versionName: String
     @Published private(set) var notes: [String]
+    /// `notesByLang` {"he": […], "en": […], "ru": […], "ar": […]}. The legacy
+    /// `notes` array is Hebrew, so it is only ever shown to a Hebrew app —
+    /// a Russian parent sees their own lines or none, never Hebrew.
+    @Published private(set) var notesByLang: [String: [String]]
+
+    /// The lines for the app's current language.
+    var displayNotes: [String] {
+        let lang = LanguageStore.shared.current
+        if let own = notesByLang[lang.rawValue], !own.isEmpty { return own }
+        return lang == .he ? notes : []
+    }
 
     /// The last build the parent said "later" to. Asking again on the same build
     /// is nagging; asking again on the NEXT one is the point of the feature.
@@ -54,6 +65,7 @@ final class AppUpdateConfig: ObservableObject {
         enabled     = d.object(forKey: "update.enabled") as? Bool ?? true
         versionName = d.string(forKey: "update.versionName") ?? ""
         notes       = d.stringArray(forKey: "update.notes") ?? []
+        notesByLang = d.dictionary(forKey: "update.notesByLang") as? [String: [String]] ?? [:]
     }
 
     /// This build, as a number. `CFBundleVersion` is a string by definition and a
@@ -107,6 +119,7 @@ final class AppUpdateConfig: ObservableObject {
         if let v = data["enabled"] as? Bool { enabled = v; defaults.set(v, forKey: "update.enabled") }
         if let v = data["version"] as? String { versionName = v; defaults.set(v, forKey: "update.versionName") }
         if let v = data["notes"] as? [String] { notes = v; defaults.set(v, forKey: "update.notes") }
+        if let v = data["notesByLang"] as? [String: [String]] { notesByLang = v; defaults.set(v, forKey: "update.notesByLang") }
     }
 
     #if DEBUG
@@ -114,7 +127,7 @@ final class AppUpdateConfig: ObservableObject {
     func setForTesting(latest: Int, min: Int = 0, enabled: Bool = true,
                        version: String = "", notes: [String] = []) {
         latestBuild = latest; minBuild = min; self.enabled = enabled
-        versionName = version; self.notes = notes
+        versionName = version; self.notes = notes; notesByLang = [:]
     }
     func resetDismissedForTesting() { dismissedBuild = 0 }
     #endif

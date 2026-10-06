@@ -164,7 +164,7 @@ internal fun LeaderboardScreen(onExit: () -> Unit, onStartGame: () -> Unit, onJo
         toRemove?.let { c ->
             KidCenterCard(onDismiss = { toRemove = null }) {
                 Text(tr("לְהָסִיר חָבֵר?"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 20.sp)
-                Text(tr("%@ יֵצֵא מִלּוּחַ הַחֲבֵרִים שֶׁלְּךָ. תָּמִיד אֶפְשָׁר לְהוֹסִיף שׁוּב.", c.displayName),
+                Text(SocialMe.g(tr("%@ יֵצֵא מִלּוּחַ הַחֲבֵרִים שֶׁלְּךָ. תָּמִיד אֶפְשָׁר לְהוֹסִיף שׁוּב.", c.displayName), tr("%@ יֵצֵא מִלּוּחַ הַחֲבֵרִים שֶׁלָּךְ. תָּמִיד אֶפְשָׁר לְהוֹסִיף שׁוּב.", c.displayName)),
                     color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontSize = 15.sp, textAlign = TextAlign.Center)
                 BrushCapsule(tr("הָסִירוּ אֶת %@", c.displayName), SolidColor(Color(0xFFEF4655)), Modifier.fillMaxWidth()) {
                     scope.launch { f.removeFriend(c.id); toRemove = null }
@@ -236,9 +236,9 @@ private fun MyRankBanner(rank: Int?) {
         Modifier.fillMaxWidth().padding(top = 8.dp).glassPane(22.dp).background(SocialColor.starGold.copy(alpha = 0.14f)).padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        Text(tr("הַמָּקוֹם שֶׁלְּךָ בְּכָל הָעוֹלָם"), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+        Text(SocialMe.g(tr("הַמָּקוֹם שֶׁלְּךָ בְּכָל הָעוֹלָם"), tr("הַמָּקוֹם שֶׁלָּךְ בְּכָל הָעוֹלָם")), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
         Text("#${"%,d".format(rank)}", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 34.sp)
-        Text(tr("כָּל כּוֹכָב מְקַדֵּם אוֹתְךָ לְמַעְלָה! ⭐"), color = SocialColor.starGold, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 13.sp)
+        Text(SocialMe.g(tr("כָּל כּוֹכָב מְקַדֵּם אוֹתְךָ לְמַעְלָה! ⭐"), tr("כָּל כּוֹכָב מְקַדֵּם אוֹתָךְ לְמַעְלָה! ⭐")), color = SocialColor.starGold, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 13.sp)
     }
 }
 
@@ -437,8 +437,8 @@ private fun FriendProfileSheet(card: FriendCard, onClose: () -> Unit) {
                 color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
             Box(Modifier.fillMaxWidth().padding(top = 8.dp), contentAlignment = Alignment.Center) {
                 when {
-                    isMe -> Text("👤 " + tr("זֶה אַתָּה 🙂"), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
-                    f.isFriend(card.id) -> Text("✅ " + tr("חָבֵר שֶׁלְּךָ"), color = SocialColor.successMint, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
+                    isMe -> Text("👤 " + SocialMe.g(tr("זֶה אַתָּה 🙂"), tr("זוֹ אַתְּ 🙂")), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                    f.isFriend(card.id) -> Text("✅ " + SocialMe.g(tr("חָבֵר שֶׁלְּךָ"), tr("חָבֵר שֶׁלָּךְ")), color = SocialColor.successMint, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
                     incoming != null -> BrushCapsule("✓ " + tr("אַשְּׁרוּ בַּקָּשַׁת חֲבֵרוּת"), SocialColor.gold, Modifier.fillMaxWidth(), size = 18) {
                         scope.launch { f.acceptRequest(incoming); haptics.success(); onClose() }
                     }
@@ -483,7 +483,7 @@ private fun FriendRequestsCover(onClose: () -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically)) {
                     Text("📭", fontSize = 64.sp)
                     Text(tr("אֵין בַּקָּשׁוֹת חֲדָשׁוֹת"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-                    Text(tr("כְּשֶׁמִּישֶׁהוּ יְבַקֵּשׁ לִהְיוֹת חָבֵר שֶׁלְּךָ — זֶה יוֹפִיעַ כָּאן."), color = Color.White.copy(alpha = 0.8f),
+                    Text(SocialMe.g(tr("כְּשֶׁמִּישֶׁהוּ יְבַקֵּשׁ לִהְיוֹת חָבֵר שֶׁלְּךָ — זֶה יוֹפִיעַ כָּאן."), tr("כְּשֶׁמִּישֶׁהוּ יְבַקֵּשׁ לִהְיוֹת חָבֵר שֶׁלָּךְ — זֶה יוֹפִיעַ כָּאן.")), color = Color.White.copy(alpha = 0.8f),
                         fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 14.sp, textAlign = TextAlign.Center)
                     Spacer(Modifier.height(80.dp))
                 }

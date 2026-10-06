@@ -33,6 +33,8 @@ interface GameProgressSink {
     fun applyChest(stars: Int, diamonds: Int, minutes: Int = 0)
     /** 🐉 recordBossAnswer: counts in the reports, pays nothing per answer. */
     fun bossAnswer(correct: Boolean)
+    /** 🏆 ProgressStore.completeTier — the boss beaten in the last room; the tier completed, or null. */
+    fun completeTier(worldID: String): Int? = null
     val secondsPerCorrect: Int
     val currentStreak: Int
     fun newBucket(): MiniGameEarnBucket
@@ -51,6 +53,7 @@ object KidSink : GameProgressSink {
     override fun takeRoundSeconds(): Int = KidSession.edit { it.takeRoundSeconds() } ?: 0
     override fun applyChest(stars: Int, diamonds: Int, minutes: Int) { KidSession.edit { it.applyChestReward(ChestReward(stars, diamonds, minutes)) } }
     override fun bossAnswer(correct: Boolean) { KidSession.edit { it.recordBossAnswer(correct) } }
+    override fun completeTier(worldID: String): Int? = KidSession.edit { it.completeTier(worldID) }
     override val secondsPerCorrect: Int get() = KidSession.engine()?.settings?.secondsPerCorrect ?: 24
     override val currentStreak: Int get() = KidSession.engine()?.snapshot?.currentStreak ?: 0
     override fun newBucket(): MiniGameEarnBucket = KidSession.newMiniGameBucket()

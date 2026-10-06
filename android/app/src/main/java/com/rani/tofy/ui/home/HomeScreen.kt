@@ -48,6 +48,8 @@ fun HomeScreen(
     onBell: () -> Unit,
     onConnectDevice: (Child) -> Unit,
     bellBadge: Int = 0,
+    /** Another sheet (actions / connect / command status) owns the screen right now. */
+    sheetOpen: Boolean = false,
     banners: @Composable ColumnScope.() -> Unit = {},
 ) {
     // The dashboard's 5 s tick: live countdowns and "in Tofy now" dots.
@@ -123,6 +125,15 @@ fun HomeScreen(
             steps = parentTourSteps(stripNiqqud(firstChild?.name.orEmpty())),
             active = tour,
             onFinish = { tour = false; CoachTours.markDone(CoachTours.PARENT_HOME) },
+        )
+        // 🔄 A newer build exists (ParentDashboardView's UpdateAvailableSheet) — the
+        // one place in the app that may leave for Google Play. Never stacked on
+        // another sheet, the first-run tour or a child's help request: it waits
+        // until the tour has run once, so a new parent meets the home first.
+        val helpPrompt by com.rani.tofy.data.HelpRepository.prompted.collectAsState()
+        com.rani.tofy.update.ParentUpdateHost(
+            blocked = sheetOpen || tour || helpPrompt != null || ParentOnboarding.isActive(ctx) ||
+                !CoachTours.isDone(CoachTours.PARENT_HOME),
         )
     }
 }

@@ -231,7 +231,7 @@ fun TrueFalseRace(onClose: () -> Unit) {
 
     ClassicBackdrop(listOf("5B6CFF", "9B5DE5", "EF476F"), burst, confetti, onClose) {
         if (done) ClassicSummary(if (correctCount >= total - 2) tr("וָואוּ, מְצֻיָּן! 🏆") else tr("כָּל הַכָּבוֹד! 🎉"),
-            tr("עָנִיתָ נָכוֹן עַל %lld מִתּוֹךְ %lld", correctCount, total), correctCount, score, earnedMinutes,
+            (if (GameEnv.source.isGirl) tr("עָנִית נָכוֹן עַל %lld מִתּוֹךְ %lld", correctCount, total) else tr("עָנִיתָ נָכוֹן עַל %lld מִתּוֹךְ %lld", correctCount, total)), correctCount, score, earnedMinutes,
             tr("עוֹד סִבּוּב 🔁"), { index = 0; correctCount = 0; score = 0; combo = 0; done = false; loadNext() }, tr("סִיּוּם"), onDone = onClose)
         else Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(20.dp)) {
             RaceHeader(index, total, combo, score, frac, cardPop)
@@ -329,7 +329,7 @@ fun QuickQuiz(onClose: () -> Unit) {
 
     ClassicBackdrop(listOf("118AB2", "5B6CFF", "9B5DE5"), burst, confetti, onClose) {
         if (done) ClassicSummary(if (correctCount >= total - 2) tr("וָואוּ, מְצֻיָּן! 🏆") else tr("כָּל הַכָּבוֹד! 🎉"),
-            tr("עָנִיתָ נָכוֹן עַל %lld מִתּוֹךְ %lld", correctCount, total), correctCount, score, earnedMinutes,
+            (if (GameEnv.source.isGirl) tr("עָנִית נָכוֹן עַל %lld מִתּוֹךְ %lld", correctCount, total) else tr("עָנִיתָ נָכוֹן עַל %lld מִתּוֹךְ %lld", correctCount, total)), correctCount, score, earnedMinutes,
             tr("עוֹד סִבּוּב 🔁"), { index = 0; correctCount = 0; score = 0; combo = 0; done = false; loadNext() }, tr("סִיּוּם"), onDone = onClose)
         else Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(18.dp)) {
             RaceHeader(index, total, combo, score, frac)
@@ -421,7 +421,7 @@ fun MatchPairs(onClose: () -> Unit) {
     LaunchedEffect(Unit) { if (lefts.isEmpty()) deal() }
 
     ClassicBackdrop(listOf("06D6A0", "5B6CFF", "9B5DE5"), burst, confetti, onClose) {
-        if (won) ClassicSummary(if (mistakes == 0) tr("מֻשְׁלָם! 🌟") else tr("כָּל הַכָּבוֹד! 🎉"), tr("הִתְאַמְתָּ אֶת כָּל הַזּוּגוֹת!"),
+        if (won) ClassicSummary(if (mistakes == 0) tr("מֻשְׁלָם! 🌟") else tr("כָּל הַכָּבוֹד! 🎉"), (if (GameEnv.source.isGirl) tr("הִתְאַמְתְּ אֶת כָּל הַזּוּגוֹת!") else tr("הִתְאַמְתָּ אֶת כָּל הַזּוּגוֹת!")),
             pairCount, maxOf(8, 20 - mistakes * 2), earnedMinutes, tr("עוֹד לוּחַ 🔁"), { deal(); won = false }, tr("סִיּוּם"), onDone = onClose)
         else Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Column(Modifier.padding(top = 60.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -506,7 +506,7 @@ fun MemoryMatch(onClose: () -> Unit) {
     LaunchedEffect(Unit) { if (cards.isEmpty()) deal() }
 
     ClassicBackdrop(listOf("9B5DE5", "5B6CFF", "06D6A0"), burst, confetti, onClose) {
-        if (won) ClassicSummary(if (mistakes <= 2) tr("זִכָּרוֹן מְצֻיָּן! 🌟") else tr("כָּל הַכָּבוֹד! 🎉"), tr("מָצָאתָ אֶת כָּל הַזּוּגוֹת!"),
+        if (won) ClassicSummary(if (mistakes <= 2) tr("זִכָּרוֹן מְצֻיָּן! 🌟") else tr("כָּל הַכָּבוֹד! 🎉"), (if (GameEnv.source.isGirl) tr("מָצָאת אֶת כָּל הַזּוּגוֹת!") else tr("מָצָאתָ אֶת כָּל הַזּוּגוֹת!")),
             pairCount, maxOf(8, 20 - mistakes * 2), earnedMinutes, tr("עוֹד לוּחַ 🔁"), { deal(); won = false }, tr("סִיּוּם"), onDone = onClose)
         else Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Column(Modifier.padding(top = 60.dp).padding(horizontal = 20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {

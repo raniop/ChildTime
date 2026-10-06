@@ -5,6 +5,7 @@ import com.rani.tofy.i18n.tr
 import com.rani.tofy.kid.core.ChestReward
 import com.rani.tofy.kid.core.ProgressEngine
 import kotlin.random.Random
+import com.rani.tofy.kid.ui.social.SocialMe
 
 /** WheelPrize.Kind (LuckyWheel.swift). */
 sealed class WheelPrizeKind {
@@ -99,18 +100,19 @@ object LuckyWheel {
                 g.addedToday > 0 && g.bankedForTomorrow > 0 ->
                     tr("+%lld דַּקּוֹת עַכְשָׁיו · עוֹד %lld נִשְׁמְרוּ לְמָחָר 🎁", g.addedToday, g.bankedForTomorrow)
                 g.bankedForTomorrow > 0 ->
-                    tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (%lld/%lld)",
-                        g.bankedForTomorrow, e.snapshot.carryOverMinutes ?: 0, ProgressEngine.MAX_CARRY_OVER)
+                    SocialMe.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (%lld/%lld)",
+                        g.bankedForTomorrow, e.snapshot.carryOverMinutes ?: 0, ProgressEngine.MAX_CARRY_OVER), tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (%lld/%lld)",
+                        g.bankedForTomorrow, e.snapshot.carryOverMinutes ?: 0, ProgressEngine.MAX_CARRY_OVER))
                 else -> tr("+%lld דַּקּוֹת נוֹסְפוּ לִזְמַן הַמִּשְׂחָק", g.addedToday)
             }
         }
         is WheelPrizeKind.RareItem -> {
             val item = CosmeticCatalog.item(k.cosmeticID)
-            if (item != null && unlockCosmetic(item)) tr("פָּתַחְתָּ פְּרִיט נָדִיר: %@!", item.name)
+            if (item != null && unlockCosmetic(item)) SocialMe.g(tr("פָּתַחְתָּ פְּרִיט נָדִיר: %@!", item.name), tr("פָּתַחַתְּ פְּרִיט נָדִיר: %@!", item.name))
             else {
                 // Already owned → a diamond consolation the kid can spend, never a loss.
                 e.applyChestReward(ChestReward(45, 15, 0))
-                tr("כְּבָר יֵשׁ לְךָ אֶת הַפְּרִיט הַזֶּה — קַבֵּל 15 יַהֲלוֹמִים בִּמְקוֹם 💎")
+                SocialMe.g(tr("כְּבָר יֵשׁ לְךָ אֶת הַפְּרִיט הַזֶּה — קַבֵּל 15 יַהֲלוֹמִים בִּמְקוֹם 💎"), tr("כְּבָר יֵשׁ לָךְ אֶת הַפְּרִיט הַזֶּה — קַבְּלִי 15 יַהֲלוֹמִים בִּמְקוֹם 💎"))
             }
         }
         is WheelPrizeKind.FunMission -> tr("משימה: %@", k.task)

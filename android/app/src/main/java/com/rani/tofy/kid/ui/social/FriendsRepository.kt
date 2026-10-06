@@ -164,14 +164,14 @@ object FriendsRepository {
         if (myCode.isEmpty()) myCode = codeFor(myID)
         val code = FriendLink.code(raw).uppercase()
         if (code.isEmpty() || code == myCode) {
-            lastError = if (code == myCode) tr("זֶה הַקּוֹד שֶׁלְּךָ 🙂") else tr("קוֹד לֹא תָּקִין")
+            lastError = if (code == myCode) SocialMe.g(tr("זֶה הַקּוֹד שֶׁלְּךָ 🙂"), tr("זֶה הַקּוֹד שֶׁלָּךְ 🙂")) else tr("קוֹד לֹא תָּקִין")
             return false
         }
         return try {
             val snap = cards().whereEqualTo("code", code).limit(1).get().await()
             val card = snap.documents.firstOrNull()?.data?.let { FriendCard.from(it) }
             if (card == null) { lastError = tr("לֹא מָצָאנוּ חָבֵר עִם הַקּוֹד הַזֶּה"); return false }
-            if (card.id == myID) { lastError = tr("זֶה אַתָּה 🙂"); return false }
+            if (card.id == myID) { lastError = SocialMe.g(tr("זֶה אַתָּה 🙂"), tr("זוֹ אַתְּ 🙂")); return false }
             cards().document(myID).set(mapOf(
                 "ownerUID" to (SocialMe.uid ?: ""),
                 "friendIDs" to FieldValue.arrayUnion(card.id),
@@ -203,7 +203,7 @@ object FriendsRepository {
     suspend fun sendRequest(card: FriendCard): Boolean {
         val myID = SocialMe.id ?: run { lastError = tr("אֵין פְּרוֹפִיל פָּעִיל"); return false }
         if (!SocialMe.isSignedIn) { lastError = tr("צָרִיךְ לְהִתְחַבֵּר לְחֶשְׁבּוֹן כְּדֵי לִשְׁלוֹחַ בַּקָּשָׁה"); return false }
-        if (card.id == myID) { lastError = tr("זֶה אַתָּה 🙂"); return false }
+        if (card.id == myID) { lastError = SocialMe.g(tr("זֶה אַתָּה 🙂"), tr("זוֹ אַתְּ 🙂")); return false }
         if (isFriend(card.id)) { lastError = tr("אַתֶּם כְּבָר חֲבֵרִים 🙂"); return false }
         // JSONEncoder.firestore(FriendRequest): nil character3DID is omitted, createdAt = epoch seconds.
         val req = mutableMapOf<String, Any>(

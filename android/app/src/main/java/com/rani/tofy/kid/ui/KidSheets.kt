@@ -46,6 +46,7 @@ import com.rani.tofy.data.nowSecs
 import com.rani.tofy.data.schoolYear
 import com.rani.tofy.i18n.tr
 import com.rani.tofy.kid.core.KidIdentity
+import com.rani.tofy.kid.ui.social.SocialMe
 import com.rani.tofy.kid.ui.home.KidWorld
 import com.rani.tofy.ui.common.GoldButton
 import com.rani.tofy.ui.theme.GlassBackdrop
@@ -82,7 +83,7 @@ internal fun ChildGradePicker(name: String, isGirl: Boolean, onPicked: (Int) -> 
             Text("🎓", fontSize = 76.sp, modifier = Modifier.padding(top = 20.dp))
             KidTitle(tr("הַיי %@!", name), 26)
             KidTitle(tr("בְּאֵיזוֹ כִּתָּה %@?", if (isGirl) tr("אַתְּ") else tr("אַתָּה")), 30)
-            KidBody(tr("כָּךְ טוֹפִי יַתְאִים אֶת הַשְּׁאֵלוֹת בְּדִיּוּק בִּשְׁבִילְךָ 🎯"), 15f, alpha = 0.9f, weight = FontWeight.Bold)
+            KidBody((if (isGirl) tr("כָּךְ טוֹפִי יַתְאִים אֶת הַשְּׁאֵלוֹת בְּדִיּוּק בִּשְׁבִילֵךְ 🎯") else tr("כָּךְ טוֹפִי יַתְאִים אֶת הַשְּׁאֵלוֹת בְּדִיּוּק בִּשְׁבִילְךָ 🎯")), 15f, alpha = 0.9f, weight = FontWeight.Bold)
             Column(Modifier.widthIn(max = 560.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     GradeChip(tr("גַּן טְרוֹם־חוֹבָה"), "🧸", chosen == -1, Modifier.weight(1f)) { pick(-1) }
@@ -322,8 +323,8 @@ internal fun ChallengeInfo(done: Int, target: Int, prize: Int, ready: Boolean, c
         Text("🔥", fontSize = 60.sp)
         KidTitle(tr("אֶתְגָּר יוֹמִי"), 26)
         KidBody(
-            if (claimed) tr("הִשְׁלַמְתָּ אֶת הָאֶתְגָּר הַיּוֹם — כָּל הַכָּבוֹד! 🎉\nאֶפְשָׁר לְהַמְשִׁיךְ לְשַׂחֵק וְלִצְבֹּר עוֹד.")
-            else tr("עֲנֵה נָכוֹן עַל %lld שְׁאֵלוֹת הַיּוֹם וְזָכֵה בִּ-%lld 💎!\nכָּל יוֹם רָצוּף שֶׁמְּשַׂחֲקִים — הַפְּרָס גָּדֵל. 🔥", target, prize),
+            if (claimed) SocialMe.g(tr("הִשְׁלַמְתָּ אֶת הָאֶתְגָּר הַיּוֹם — כָּל הַכָּבוֹד! 🎉\nאֶפְשָׁר לְהַמְשִׁיךְ לְשַׂחֵק וְלִצְבֹּר עוֹד."), tr("הִשְׁלַמְתְּ אֶת הָאֶתְגָּר הַיּוֹם — כָּל הַכָּבוֹד! 🎉\nאֶפְשָׁר לְהַמְשִׁיךְ לְשַׂחֵק וְלִצְבֹּר עוֹד."))
+            else SocialMe.g(tr("עֲנֵה נָכוֹן עַל %lld שְׁאֵלוֹת הַיּוֹם וְזָכֵה בִּ-%lld 💎!\nכָּל יוֹם רָצוּף שֶׁמְּשַׂחֲקִים — הַפְּרָס גָּדֵל. 🔥", target, prize), tr("עֲנִי נָכוֹן עַל %lld שְׁאֵלוֹת הַיּוֹם וּזְכִי בִּ-%lld 💎!\nכָּל יוֹם רָצוּף שֶׁמְּשַׂחֲקִים — הַפְּרָס גָּדֵל. 🔥", target, prize)),
             16f, alpha = 0.92f,
         )
         Text("$done/$target", color = Ink.gold2, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 22.sp)
@@ -377,24 +378,26 @@ internal fun StatInfoSheet(kind: StatInfoKind, engine: ProgressEngine, onClose: 
                         lines += tr("בָּאַרְנָק יֵשׁ %lld — הַשְּׁאָר נִשְׁמָר לְיָמִים הַבָּאִים.", engine.pendingMinutes)
                 }
                 engine.dailyScreenTimeMaxedOut ->
-                    lines += tr("הִגַּעְתָּ לַמַּקְסִימוּם 🌙 — שִׂחַקְתָּ הַיּוֹם %lld מִתּוֹךְ %lld דַּקּוֹת. %lld דַּקּוֹת שְׁמוּרוֹת לְךָ לְמָחָר!",
-                        engine.minutesPlayedToday, cap.max, engine.pendingMinutes)
+                    lines += SocialMe.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם 🌙 — שִׂחַקְתָּ הַיּוֹם %lld מִתּוֹךְ %lld דַּקּוֹת. %lld דַּקּוֹת שְׁמוּרוֹת לְךָ לְמָחָר!",
+                        engine.minutesPlayedToday, cap.max, engine.pendingMinutes), tr("הִגַּעַתְּ לַמַּקְסִימוּם 🌙 — שִׂחַקְתְּ הַיּוֹם %lld מִתּוֹךְ %lld דַּקּוֹת. %lld דַּקּוֹת שְׁמוּרוֹת לָךְ לְמָחָר!",
+                        engine.minutesPlayedToday, cap.max, engine.pendingMinutes))
                 engine.pendingMinutes > 0 ->
-                    lines += tr("יֵשׁ לְךָ %lld דַּקּוֹת. פּוֹתְחִים זְמַן מִשְׂחָק מִ-%lld דַּקּוֹת — עֲנוּ עַל עוֹד שְׁאֵלוֹת! 😊",
-                        engine.pendingMinutes, ProgressEngine.MINIMUM_UNLOCK_MINUTES)
+                    lines += SocialMe.g(tr("יֵשׁ לְךָ %lld דַּקּוֹת. פּוֹתְחִים זְמַן מִשְׂחָק מִ-%lld דַּקּוֹת — עֲנוּ עַל עוֹד שְׁאֵלוֹת! 😊",
+                        engine.pendingMinutes, ProgressEngine.MINIMUM_UNLOCK_MINUTES), tr("יֵשׁ לָךְ %lld דַּקּוֹת. פּוֹתְחִים זְמַן מִשְׂחָק מִ-%lld דַּקּוֹת — עֲנוּ עַל עוֹד שְׁאֵלוֹת! 😊",
+                        engine.pendingMinutes, ProgressEngine.MINIMUM_UNLOCK_MINUTES))
                 cap.enabled && engine.snapshot.minutesEarnedToday >= cap.max -> {
-                    lines += tr("וָואוּ — נִצַּלְתָּ אֶת כָּל %lld הַדַּקּוֹת שֶׁל הַיּוֹם! 🏆", cap.max)
-                    lines += tr("כָּל מַה שֶּׁתַּרְוִיחַ עַכְשָׁיו נִשְׁמָר לְמָחָר.")
+                    lines += SocialMe.g(tr("וָואוּ — נִצַּלְתָּ אֶת כָּל %lld הַדַּקּוֹת שֶׁל הַיּוֹם! 🏆", cap.max), tr("וָואוּ — נִצַּלְתְּ אֶת כָּל %lld הַדַּקּוֹת שֶׁל הַיּוֹם! 🏆", cap.max))
+                    lines += SocialMe.g(tr("כָּל מַה שֶּׁתַּרְוִיחַ עַכְשָׁיו נִשְׁמָר לְמָחָר."), tr("כָּל מַה שֶּׁתַּרְוִיחִי עַכְשָׁיו נִשְׁמָר לְמָחָר."))
                     if (engine.parentGiftMinutes > 0)
-                        lines += tr("וְיֵשׁ לְךָ %lld דַּקּוֹת מַתָּנָה 💝 שֶׁאֶפְשָׁר לִפְתּוֹחַ גַּם עַכְשָׁיו!", engine.parentGiftMinutes)
+                        lines += SocialMe.g(tr("וְיֵשׁ לְךָ %lld דַּקּוֹת מַתָּנָה 💝 שֶׁאֶפְשָׁר לִפְתּוֹחַ גַּם עַכְשָׁיו!", engine.parentGiftMinutes), tr("וְיֵשׁ לָךְ %lld דַּקּוֹת מַתָּנָה 💝 שֶׁאֶפְשָׁר לִפְתּוֹחַ גַּם עַכְשָׁיו!", engine.parentGiftMinutes))
                 }
                 else -> lines += tr("עֲדַיִן אֵין דַּקּוֹת. עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק! 🎮")
             }
             if (cap.enabled && !engine.dailyScreenTimeMaxedOut)
-                lines += tr("הַיּוֹם הִרְוַחְתָּ %lld מִתּוֹךְ %lld דַּקּוֹת.", engine.snapshot.minutesEarnedToday, cap.max)
+                lines += SocialMe.g(tr("הַיּוֹם הִרְוַחְתָּ %lld מִתּוֹךְ %lld דַּקּוֹת.", engine.snapshot.minutesEarnedToday, cap.max), tr("הַיּוֹם הִרְוַחַתְּ %lld מִתּוֹךְ %lld דַּקּוֹת.", engine.snapshot.minutesEarnedToday, cap.max))
             val carry = engine.snapshot.carryOverMinutes ?: 0
             if (carry > 0) lines += tr("🎁 %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר.", carry)
-            emoji = "🎮"; title = tr("דַּקּוֹת מִשְׂחָק"); subtitle = tr("זְמַן הַמִּשְׂחָק שֶׁלְּךָ")
+            emoji = "🎮"; title = tr("דַּקּוֹת מִשְׂחָק"); subtitle = SocialMe.g(tr("זְמַן הַמִּשְׂחָק שֶׁלְּךָ"), tr("זְמַן הַמִּשְׂחָק שֶׁלָּךְ"))
             body = lines.joinToString("\n"); tip = tr("עוֹנִים נָכוֹן — מַרְוִיחִים עוֹד דַּקּוֹת!")
         }
         StatInfoKind.STARS -> {
@@ -416,7 +419,7 @@ internal fun StatInfoSheet(kind: StatInfoKind, engine: ProgressEngine, onClose: 
             val earned = engine.snapshot.minutesEarnedToday
             val lines = ArrayList<String>()
             if (cap.enabled) {
-                lines += tr("הַיּוֹם הִרְוַחְתָּ %lld מִתּוֹךְ %lld דַּקּוֹת.", earned, cap.max)
+                lines += SocialMe.g(tr("הַיּוֹם הִרְוַחְתָּ %lld מִתּוֹךְ %lld דַּקּוֹת.", earned, cap.max), tr("הַיּוֹם הִרְוַחַתְּ %lld מִתּוֹךְ %lld דַּקּוֹת.", earned, cap.max))
                 lines += tr("כְּשֶׁמַּגִּיעִים לַמַּקְסִימוּם הַיּוֹמִי (%lld דַּקּוֹת), מַה שֶּׁמַּרְוִיחִים אַחַר כָּךְ נִשְׁמָר לְמָחָר 🎁", cap.max)
             } else lines += tr("הַיּוֹם הִרְוַחְתֶּם %lld דַּקּוֹת.", earned)
             lines += tr("הַמִּסְפָּר הַזֶּה לֹא יוֹרֵד כְּשֶׁמְּשַׂחֲקִים — הוּא סוֹפֵר כַּמָּה הִרְוַחְתֶּם הַיּוֹם. כַּמָּה נִשְׁאַר לְשַׂחֵק? אֶת זֶה רוֹאִים לְיַד ⏱ דַּקּ׳ לְשַׂחֵק.")

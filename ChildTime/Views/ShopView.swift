@@ -43,7 +43,7 @@ struct ShopView: View {
             }
         }
         // 🎚 The kid closes this screen from the rail on a foldable.
-        .railDismiss(tr("סְגֹר")) { dismiss() }
+        .railDismiss(Gendered.g(tr("סְגֹר"), tr("סִגְרִי"))) { dismiss() }
         .sheet(isPresented: $showStarShop) {
             // Kids Category (guideline 1.3): real-money packs MUST sit behind a
             // parental gate. Apple ID / Face ID payment auth is NOT a substitute —
@@ -149,7 +149,7 @@ struct ShopView: View {
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
 
-                pillButton(icon: "pencil", title: tr("עֲרוֹךְ פְּרוֹפִיל")) {
+                pillButton(icon: "pencil", title: Gendered.g(tr("עֲרוֹךְ פְּרוֹפִיל"), tr("עִרְכִי פְּרוֹפִיל"))) {
                     showingProfileEditor = true
                 }
                 .padding(.top, 4)

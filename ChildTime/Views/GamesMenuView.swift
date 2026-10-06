@@ -40,7 +40,7 @@ struct GamesMenuView: View {
                             gameCard(
                                 emoji: "🎯",
                                 title: tr("חִידוֹן בָּזָק"),
-                                subtitle: tr("אַרְבַּע תְּשׁוּבוֹת — בְּחַר אֶת הַנְּכוֹנָה מַהֵר!"),
+                                subtitle: Gendered.g(tr("אַרְבַּע תְּשׁוּבוֹת — בְּחַר אֶת הַנְּכוֹנָה מַהֵר!"), tr("אַרְבַּע תְּשׁוּבוֹת — בַּחֲרִי אֶת הַנְּכוֹנָה מַהֵר!")),
                                 colors: [Color(hex: "118AB2"), Color(hex: "5B6CFF")]
                             ) { showingQuiz = true }
 
@@ -101,7 +101,7 @@ struct GamesMenuView: View {
                 .font(.system(size: 36, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
-            Text(tr("בְּחַר מִשְׂחָק וְקָדִימָה!"))
+            Text(Gendered.g(tr("בְּחַר מִשְׂחָק וְקָדִימָה!"), tr("בַּחֲרִי מִשְׂחָק וְקָדִימָה!")))
                 .font(.system(size: 17, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
         }

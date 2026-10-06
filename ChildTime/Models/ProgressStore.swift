@@ -38,6 +38,7 @@ final class ProgressStore: ObservableObject {
         static let hourlyCorrect = "hourlyCorrect"
         static let unlockedWorlds = "unlockedWorlds"
         static let worldProgress = "worldProgress"
+        static let worldStage = "worldStage"
         static let ownedCosmetics = "ownedCosmetics"
         static let equippedCosmetic = "equippedCosmetic"
         static let topicAccuracy = "topicAccuracy"
@@ -389,6 +390,10 @@ final class ProgressStore: ObservableObject {
     @Published private(set) var worldProgress: [String: Int] {
         didSet { defaults.set(worldProgress, forKey: Key.worldProgress) }
     }
+    /// 🏆 tier × 10 + room — see `ProgressSnapshot.worldStage`.
+    @Published private(set) var worldStage: [String: Int] {
+        didSet { defaults.set(worldStage, forKey: Key.worldStage) }
+    }
     @Published private(set) var ownedCosmetics: Set<String> {
         didSet { defaults.set(Array(ownedCosmetics), forKey: Key.ownedCosmetics) }
     }
@@ -676,6 +681,7 @@ final class ProgressStore: ObservableObject {
         self.unlockedWorlds = Set(unlockedArray)
 
         self.worldProgress = (d.dictionary(forKey: Key.worldProgress) as? [String: Int]) ?? [:]
+        self.worldStage = (d.dictionary(forKey: Key.worldStage) as? [String: Int]) ?? [:]
         self.ownedCosmetics = Set(d.stringArray(forKey: Key.ownedCosmetics) ?? [])
         self.equippedCosmetic = d.string(forKey: Key.equippedCosmetic)
 
@@ -747,6 +753,7 @@ final class ProgressStore: ObservableObject {
             $ownedCharacterIDs.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $unlockedWorlds.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             $worldProgress.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            $worldStage.dropFirst().map { _ in () }.eraseToAnyPublisher(),
         ]
         Publishers.MergeMany(triggers)
             .sink { [weak self] _ in self?.markLocalChange() }
@@ -1306,6 +1313,21 @@ final class ProgressStore: ObservableObject {
         topicAccuracy = [Topic.math.rawValue: 0.95, Topic.logic.rawValue: 0.92, Topic.hebrew.rawValue: 0.89, Topic.science.rawValue: 0.86]
         topicAffinity = [Topic.math.rawValue: 0.9, Topic.logic.rawValue: 0.8, Topic.science.rawValue: 0.7]
         unlockedWorlds = Set(Worlds.all.prefix(4).map { $0.id })
+        // DEMO_TIERS=1 → 🏆 every tier on one screen: silver room 4, bronze boss
+        // waiting, champion, gold room 3; the rest unvisited.
+        if ProcessInfo.processInfo.environment["DEMO_TIERS"] != nil {
+            worldStage = ["math_kingdom": 9, "english_land": 13, "hebrew_land": 30, "logic_lab": 22]
+            worldProgress = ["math_kingdom": 9, "english_land": 9, "hebrew_land": 9, "logic_lab": 9]
+            // Like a real child who has played: no "חָדָשׁ!" / gift moments left.
+            if let cid = ProfileStore.shared.activeID {
+                for w in Worlds.all {
+                    if let item = w.topic.pack ?? WorldPasses.pass(for: w.topic) {
+                        PackKidState.markRevealed(item.id, childID: cid)
+                        PackKidState.markOpened(item.id, childID: cid)
+                    }
+                }
+            }
+        }
         // DEMO_BIG=1 → stress-test the currency chips with huge balances.
         if ProcessInfo.processInfo.environment["DEMO_BIG"] != nil {
             stars = 1284500      // → "1.3M"
@@ -1559,14 +1581,79 @@ final class ProgressStore: ObservableObject {
         stars >= world.starsToUnlock
     }
 
+    // MARK: - 🏆 World tiers (Rani, 2026-10-06: "10/10 and then nothing")
+    //
+    // Each world is walked three times — ⭐ bronze, ⭐⭐ silver, ⭐⭐⭐ gold — ten
+    // rooms each, the boss in the tenth. Beating it completes the tier (👑 +
+    // diamonds) and opens the next one a grade higher; after gold the world is
+    // "champion" and simply stays playable. Stored as ONE growing number per
+    // world (tier × 10 + room) so the cross-device max-merge can never undo a
+    // tier: resetting rooms to 1 would be overwritten by the other device's 9.
+
+    static let worldTierCount = 3
+    static let championStage = worldTierCount * 10
+    static let tierCompleteDiamonds = 100
+    static let firstVisitDiamonds = 20
+
+    /// tier × 10 + room. Legacy kids (rooms only) read as bronze at their room.
+    func stage(in worldID: String) -> Int {
+        min(Self.championStage, max(worldStage[worldID] ?? 0, worldProgress[worldID] ?? 0))
+    }
+
+    /// 0 = ⭐ bronze, 1 = ⭐⭐ silver, 2 = ⭐⭐⭐ gold, 3 = champion.
+    func worldTier(in worldID: String) -> Int { stage(in: worldID) / 10 }
+
+    /// Grades added to this world's questions: one per tier, at most two.
+    func tierGradeOffset(in worldID: String) -> Int { min(worldTier(in: worldID), Self.worldTierCount - 1) }
+
+    /// Room index 0…9 within the current tier (a champion sits in the last room,
+    /// so the boss stays there to replay).
     func progress(in worldID: String) -> Int {
-        worldProgress[worldID] ?? 0
+        let s = stage(in: worldID)
+        return s >= Self.championStage ? 9 : s % 10
     }
 
     func advanceRoom(in worldID: String) {
-        let current = progress(in: worldID)
-        worldProgress[worldID] = min(current + 1, 9)
+        // Read the stage BEFORE the legacy bump: stage() takes the max with
+        // worldProgress, so reading after it moved a fresh world 0 → 2.
+        let s = stage(in: worldID)
+        // The legacy counter keeps old builds on other devices right.
+        worldProgress[worldID] = min((worldProgress[worldID] ?? 0) + 1, 9)
+        guard s < Self.championStage else { return }
+        worldStage[worldID] = min(s + 1, (s / 10) * 10 + 9)
     }
+
+    /// A world this child has played in at all (on any device).
+    func hasVisited(_ worldID: String) -> Bool {
+        worldStage[worldID] != nil || (worldProgress[worldID] ?? 0) > 0
+    }
+
+    /// First time in a world: marks it visited and pays the 💎 nudge once.
+    /// Returns the diamonds paid (0 on every later visit).
+    @discardableResult
+    func markVisited(_ worldID: String) -> Int {
+        guard !hasVisited(worldID) else { return 0 }
+        worldStage[worldID] = 0
+        addDiamonds(Self.firstVisitDiamonds)
+        return Self.firstVisitDiamonds
+    }
+
+    /// The boss was beaten in the last room: completes the tier. Returns the
+    /// tier just completed (0 bronze…2 gold), or nil when it was a replay.
+    @discardableResult
+    func completeTier(in worldID: String) -> Int? {
+        let s = stage(in: worldID)
+        guard s < Self.championStage, s % 10 == 9 else { return nil }
+        let done = s / 10
+        worldStage[worldID] = (done + 1) * 10
+        addDiamonds(Self.tierCompleteDiamonds)
+        return done
+    }
+
+    /// Worlds completed through gold.
+    var championWorlds: Int { worldStage.values.filter { $0 >= Self.championStage }.count }
+    /// Tier crowns earned across all worlds (each completed tier = one 👑).
+    var totalCrowns: Int { worldStage.keys.reduce(0) { $0 + min(worldTier(in: $1), Self.worldTierCount) } }
 
     // MARK: - 🌈 Topic balance (A: diminishing returns, B: variety bonus)
 
@@ -2443,6 +2530,7 @@ final class ProgressStore: ObservableObject {
         s.hourlyCorrect = hourlyCorrect
         s.unlockedWorlds      = Array(unlockedWorlds)
         s.worldProgress       = worldProgress
+        s.worldStage          = worldStage
         s.topicAccuracy       = topicAccuracy
         s.topicAnswered       = topicAnswered
         s.topicCorrect        = topicCorrect
@@ -2529,6 +2617,7 @@ final class ProgressStore: ObservableObject {
         if let h = s.hourlyCorrect, h.count == 24 { hourlyCorrect = h }
         unlockedWorlds      = Set(s.unlockedWorlds)
         worldProgress       = s.worldProgress
+        worldStage          = s.worldStage
         topicAccuracy       = s.topicAccuracy
         topicAnswered       = s.topicAnswered
         topicCorrect        = s.topicCorrect

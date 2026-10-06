@@ -24,6 +24,11 @@ struct ProgressSnapshot: Codable, Equatable {
     var lastDailyChallengeDate: Date? = nil
     var unlockedWorlds: [String] = ["numbers_kingdom"]
     var worldProgress: [String: Int] = [:]
+    /// 🏆 World tiers: tier × 10 + room (room 0…9), only ever grows, so the
+    /// max-merge stays right across devices. 0…9 ⭐ bronze, 10…19 ⭐⭐ silver,
+    /// 20…29 ⭐⭐⭐ gold, 30 = champion. A key's presence also means "visited".
+    /// `worldProgress` stays the legacy room counter (capped at 9) for old builds.
+    var worldStage: [String: Int] = [:]
     var topicAccuracy: [String: Double] = [:]
     var topicAnswered: [String: Int] = [:]
     var topicCorrect: [String: Int] = [:]
@@ -206,7 +211,7 @@ extension ProgressSnapshot {
     enum CodingKeys: String, CodingKey {
         case pendingMinutes, totalCorrect, totalAnswered, unlockEndsAt, stars, diamonds, xp
         case currentStreak, dayStreak, lastSessionDate, lastDailyChestDate, lastDailyChallengeDate
-        case unlockedWorlds, worldProgress, topicAccuracy, topicAnswered, topicCorrect
+        case unlockedWorlds, worldProgress, worldStage, topicAccuracy, topicAnswered, topicCorrect
         case batchCounter, wrongStreak, totalScore, minutesEarnedToday, minutesUnlockedToday, dailyEarnedDate
         case returnedTodayMinutes
         case answeredToday, correctToday, carryOverMinutes, bestStreak, cycleSeconds
@@ -245,6 +250,7 @@ extension ProgressSnapshot {
         if let v = (try? c.decodeIfPresent(Date.self, forKey: .lastDailyChallengeDate)) ?? nil { lastDailyChallengeDate = v }
         if let v = (try? c.decodeIfPresent([String].self, forKey: .unlockedWorlds)) ?? nil { unlockedWorlds = v }
         if let v = (try? c.decodeIfPresent([String: Int].self, forKey: .worldProgress)) ?? nil { worldProgress = v }
+        if let v = (try? c.decodeIfPresent([String: Int].self, forKey: .worldStage)) ?? nil { worldStage = v }
         if let v = (try? c.decodeIfPresent([String: Double].self, forKey: .topicAccuracy)) ?? nil { topicAccuracy = v }
         if let v = (try? c.decodeIfPresent([String: Int].self, forKey: .topicAnswered)) ?? nil { topicAnswered = v }
         if let v = (try? c.decodeIfPresent([String: Int].self, forKey: .topicCorrect)) ?? nil { topicCorrect = v }
@@ -348,6 +354,7 @@ extension ProgressSnapshot {
         m.topicExposure = mergeMaxInt(local.topicExposure, remote.topicExposure)
         m.topicAbandon  = mergeMaxInt(local.topicAbandon, remote.topicAbandon)
         m.worldProgress = mergeMaxInt(local.worldProgress, remote.worldProgress)
+        m.worldStage    = mergeMaxInt(local.worldStage, remote.worldStage)
         m.unlockedWorlds = Array(Set(local.unlockedWorlds).union(remote.unlockedWorlds))
         m.ownedCharacterIDs = Array(Set(local.ownedCharacterIDs).union(remote.ownedCharacterIDs))
         // `dayStreak` is only meaningful PAIRED with `lastSessionDate` (the day it was

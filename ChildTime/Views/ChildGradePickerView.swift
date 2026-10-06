@@ -41,7 +41,7 @@ struct ChildGradePickerView: View {
                         .foregroundStyle(.white)
                         .glow(AppColor.starGold, radius: 10)
 
-                    Text(tr("כָּךְ טוֹפִי יַתְאִים אֶת הַשְּׁאֵלוֹת בְּדִיּוּק בִּשְׁבִילְךָ 🎯"))
+                    Text(profile.gender == .girl ? tr("כָּךְ טוֹפִי יַתְאִים אֶת הַשְּׁאֵלוֹת בְּדִיּוּק בִּשְׁבִילֵךְ 🎯") : tr("כָּךְ טוֹפִי יַתְאִים אֶת הַשְּׁאֵלוֹת בְּדִיּוּק בִּשְׁבִילְךָ 🎯"))
                         .font(.system(size: short ? 13 : 15, weight: .bold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
                         .multilineTextAlignment(.center)

@@ -41,16 +41,16 @@ struct CharacterCollectionView: View {
             titleVisibility: .visible,
             presenting: pendingPurchase
         ) { character in
-            Button(tr("קְנֵה וְהַחֲלֵף")) { buy(character) }
+            Button(Gendered.g(tr("קְנֵה וְהַחֲלֵף"), tr("קְנִי וְהַחְלִיפִי"))) { buy(character) }
             Button(tr("בִּטּוּל"), role: .cancel) {}
         }
         .alert(tr("חֲסֵרִים יַהֲלוֹמִים 💎"),
                isPresented: Binding(get: { shortBy != nil },
                                     set: { if !$0 { shortBy = nil } })) {
-            Button(tr("קְנֵה יַהֲלוֹמִים")) { showStarShop = true }
+            Button(Gendered.g(tr("קְנֵה יַהֲלוֹמִים"), tr("קְנִי יַהֲלוֹמִים"))) { showStarShop = true }
             Button(tr("הֵבַנְתִּי"), role: .cancel) {}
         } message: {
-            if let s = shortBy { Text(tr("צָרִיךְ עוֹד \(s) יַהֲלוֹמִים. תַּמְשִׁיךְ לִלְמוֹד וְתַרְוִיחַ — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת.")) }
+            if let s = shortBy { Text(Gendered.g(tr("צָרִיךְ עוֹד \(s) יַהֲלוֹמִים. תַּמְשִׁיךְ לִלְמוֹד וְתַרְוִיחַ — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת."), tr("צָרִיךְ עוֹד \(s) יַהֲלוֹמִים. תַּמְשִׁיכִי לִלְמוֹד וְתַרְוִיחִי — אוֹ הוֹרֶה יָכוֹל לִקְנוֹת."))) }
         }
     }
 

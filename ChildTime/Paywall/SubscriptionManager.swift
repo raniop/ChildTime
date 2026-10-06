@@ -47,6 +47,10 @@ final class SubscriptionManager: ObservableObject {
 
     /// True if the user has ANY form of premium access (trial, paid, or lifetime).
     var isPremium: Bool {
+        #if DEBUG
+        // Screenshots / demo checks only — never in a release build.
+        if ProcessInfo.processInfo.environment["DEMO_PREMIUM"] != nil { return true }
+        #endif
         switch subscriptionState {
         case .inTrial, .active: return true
         default:

@@ -3043,7 +3043,9 @@ async function resolveAudience(audience) {
       }
     }
   });
-  return { parentTokens: [...parentTokens], childTokens: [...childTokens], parentsN, childrenN, householdsN, owners };
+  // `parents` (uid → doc) rides along for callers that need more than tokens —
+  // the app-update announcement reads each token's platform/build from it.
+  return { parentTokens: [...parentTokens], childTokens: [...childTokens], parentsN, childrenN, householdsN, owners, parents };
 }
 
 // A campaign's copy for one audience and language. Hebrew is the authored copy;
@@ -5829,4 +5831,254 @@ exports.adminSupportThread = onCall({ timeoutSeconds: 30, memory: "256MiB" }, as
       return { id: d.id, text: m.text || "", from: m.from || "", senderName: m.senderName || "", at: supportTs(m.at) };
     }),
   };
+});
+
+// ============================================================================
+// 🔄 "יש גרסה חדשה של טופי" — the admin publishes config/appUpdate in one go
+// (docs/admin/app.html → עדכון גרסה), and when a newer build appears there the
+// PARENTS whose phones run an older build hear about it once.
+//
+// The apps read the doc live (ChildTime/Models/AppUpdateConfig.swift):
+//   latestBuild / minBuild / version                    — iOS (CFBundleVersion, e.g. 197)
+//   latestAndroidBuild / minAndroidBuild / androidVersion — Android (versionCode, e.g. 2002)
+//   enabled — fleet-wide kill switch · notesByLang {he,en,ru,ar} · notes (legacy, Hebrew)
+//   announce — server-only: false = publish quietly, no push (e.g. TestFlight-only)
+// The client cannot write config/* (firestore.rules), so the admin goes through
+// the callable below; the trigger then announces whatever the write raised.
+// ============================================================================
+const APP_UPDATE_NOTE_LINES = 3;
+const APP_UPDATE_NOTE_CHARS = 160;
+const HEBREW_LETTERS = /[֐-׿]/;
+// A parent token registered before the apps stamped `tokenDevices` has no known
+// platform. Every such token predates the Android parent app's public release
+// (Play is still in closed testing), so an unknown token is treated as an
+// iPhone/iPad. Its build is unknown too — and necessarily older than the first
+// build that stamps one — so it is announced to whenever iOS is.
+const LEGACY_TOKEN_PLATFORM = "ios";
+
+const appUpdateRef = () => db.collection("config").doc("appUpdate");
+// Admin-only (adminStats rules): which build each platform was last announced
+// for — the idempotency record — plus the last send's counts.
+const appUpdateAnnounceRef = () => db.collection("adminStats").doc("appUpdateAnnounce");
+const buildNum = (v) => { const n = Number(v); return Number.isInteger(n) && n > 0 ? n : 0; };
+
+function appUpdateView(d) {
+  const x = d || {};
+  const lines = (v) => (Array.isArray(v) ? v.map((s) => String(s)) : []);
+  const byLang = x.notesByLang && typeof x.notesByLang === "object" ? x.notesByLang : {};
+  return {
+    latestBuild: buildNum(x.latestBuild), minBuild: buildNum(x.minBuild), version: String(x.version || ""),
+    latestAndroidBuild: buildNum(x.latestAndroidBuild), minAndroidBuild: buildNum(x.minAndroidBuild), androidVersion: String(x.androidVersion || ""),
+    enabled: x.enabled !== false, announce: x.announce !== false,
+    notes: lines(x.notes), notesByLang: Object.fromEntries(LANGS.map((l) => [l, lines(byLang[l])])),
+    updatedAt: Number(x.updatedAt) || 0, updatedBy: String(x.updatedBy || ""),
+  };
+}
+
+// The admin's form → the exact doc. Throws on anything that could hurt a parent:
+// a non-integer build, a blocking floor above the newest build (that would block
+// even an up-to-date phone), Hebrew in another language's notes, or a changed
+// blocking floor without the explicit confirmation.
+function cleanAppUpdate(input, current) {
+  const d = input || {};
+  const int = (k) => {
+    const v = d[k] === undefined || d[k] === null || d[k] === "" ? 0 : Number(d[k]);
+    if (!Number.isInteger(v) || v < 0 || v > 100000000) throw new HttpsError("invalid-argument", `${k} must be a whole number`);
+    return v;
+  };
+  const str = (k) => String(d[k] == null ? "" : d[k]).trim().slice(0, 40);
+  const out = {
+    latestBuild: int("latestBuild"), minBuild: int("minBuild"), version: str("version"),
+    latestAndroidBuild: int("latestAndroidBuild"), minAndroidBuild: int("minAndroidBuild"), androidVersion: str("androidVersion"),
+    enabled: d.enabled !== false, announce: d.announce !== false,
+  };
+  if (out.minBuild > 0 && out.minBuild > out.latestBuild) throw new HttpsError("invalid-argument", "minBuild is above latestBuild");
+  if (out.minAndroidBuild > 0 && out.minAndroidBuild > out.latestAndroidBuild) throw new HttpsError("invalid-argument", "minAndroidBuild is above latestAndroidBuild");
+  const src = d.notesByLang && typeof d.notesByLang === "object" ? d.notesByLang : {};
+  out.notesByLang = {};
+  for (const lang of LANGS) {
+    const raw = Array.isArray(src[lang]) ? src[lang] : String(src[lang] || "").split("\n");
+    const lines = raw.map((s) => String(s == null ? "" : s).trim()).filter(Boolean);
+    if (lines.length > APP_UPDATE_NOTE_LINES) throw new HttpsError("invalid-argument", `notes.${lang}: at most ${APP_UPDATE_NOTE_LINES} lines`);
+    if (lines.some((s) => s.length > APP_UPDATE_NOTE_CHARS)) throw new HttpsError("invalid-argument", `notes.${lang}: a line is longer than ${APP_UPDATE_NOTE_CHARS}`);
+    if (lang !== "he" && lines.some((s) => HEBREW_LETTERS.test(s))) throw new HttpsError("invalid-argument", `notes.${lang}: Hebrew text in a non-Hebrew language`);
+    out.notesByLang[lang] = lines;
+  }
+  // Builds that predate notesByLang read `notes` in every language. It mirrors
+  // the Hebrew lines unless the admin turned that off.
+  out.notes = d.legacyNotes === false ? [] : out.notesByLang.he;
+  const cur = appUpdateView(current);
+  const floorChanged = out.minBuild !== cur.minBuild || out.minAndroidBuild !== cur.minAndroidBuild;
+  if (floorChanged && (out.minBuild > 0 || out.minAndroidBuild > 0) && d.confirmMinBuild !== true) {
+    throw new HttpsError("failed-precondition", "Changing the blocking minimum build needs confirmMinBuild");
+  }
+  return out;
+}
+
+// The parent devices a newer build should be announced to: { ios, android } is
+// the build being announced per platform (0 = nothing for that platform).
+// Parents only — the campaigns audience (household parents, child-device tokens
+// removed), minus any token that sits in some account's childFcmTokens or is
+// stamped role "child". A token whose stamped build is already >= the announced
+// one is skipped.
+async function appUpdateTargets({ ios = 0, android = 0 }) {
+  const aud = await resolveAudience({ roles: ["parents"], gradeMin: 0, gradeMax: TOP_GRADE, gradeScale: TOP_GRADE, premium: "any", topics: [], excludeOwners: false });
+  const parents = aud.parents || {};
+  const childTok = new Set();
+  for (const p of Object.values(parents)) (p.childFcmTokens || []).forEach((t) => childTok.add(t));
+  const targets = [];
+  const counts = { ios: 0, android: 0, unknownPlatform: 0, unknownBuild: 0, alreadyCurrent: 0, notThisPlatform: 0 };
+  for (const token of aud.parentTokens) {
+    if (childTok.has(token)) continue;
+    const owner = aud.owners[token] || {};
+    const p = parents[owner.uid] || {};
+    const info = p.tokenDevices && typeof p.tokenDevices === "object" ? p.tokenDevices[token] : null;
+    if (info && info.role === "child") continue;
+    const known = info && (info.platform === "ios" || info.platform === "android") ? info.platform : null;
+    const platform = known || LEGACY_TOKEN_PLATFORM;
+    const build = info ? buildNum(info.build) : 0;
+    const latest = platform === "android" ? android : ios;
+    if (!latest) { counts.notThisPlatform++; continue; }
+    if (build && build >= latest) { counts.alreadyCurrent++; continue; }
+    if (!known) counts.unknownPlatform++;
+    else if (!build) counts.unknownBuild++;
+    counts[platform]++;
+    targets.push({ token, platform, build, uid: owner.uid || "" });
+  }
+  return { targets, counts, owners: aud.owners, parents };
+}
+
+const APP_UPDATE_STORE = { ios: "App Store", android: "Google Play" };
+// ru/ar name "Tofy" in Latin letters, like every other ru/ar string here.
+function appUpdateMessage(platform, lang, cfg) {
+  const c = appUpdateView(cfg);
+  const store = APP_UPDATE_STORE[platform] || APP_UPDATE_STORE.ios;
+  const v = platform === "android" ? c.androidVersion : c.version;
+  // A language's own notes only — never another language's (Hebrew included).
+  const own = c.notesByLang[lang] || [];
+  const note = (own.length ? own : (lang === "he" ? c.notes : []))[0] || "";
+  let title, line;
+  if (lang === "en") {
+    title = "A new version of Tofy is here ✨";
+    line = `${v ? `Version ${v}` : "A new version"} is waiting for you on ${store}. Update to get everything that's new.`;
+  } else if (lang === "ru") {
+    title = "Вышла новая версия Tofy ✨";
+    line = `${v ? `Версия ${v}` : "Новая версия"} уже ждёт вас в ${store}. Обновите приложение, чтобы получить все новинки.`;
+  } else if (lang === "ar") {
+    title = "يتوفر إصدار جديد من Tofy ✨";
+    line = `${v ? `الإصدار ${v}` : "إصدار جديد"} بانتظاركم في ${store}. حدّثوا التطبيق للاستمتاع بكل الجديد.`;
+  } else {
+    title = "יש גרסה חדשה של טופי ✨";
+    line = `${v ? `גרסה ${v}` : "גרסה חדשה"} מחכה לכם ב־${store}. כדאי לעדכן כדי ליהנות מכל החידושים.`;
+  }
+  return { title, body: note ? `${line}\n${note}` : line };
+}
+
+function appUpdatePayload(platform, lang, cfg, build) {
+  return {
+    notification: appUpdateMessage(platform, lang, cfg),
+    data: { type: "appUpdate", platform, build: String(build), audience: "parent" },
+    apns: { payload: { aps: { sound: "default" } } },
+    // "reports" = the Android channel a parent may mute (TofyApp.createChannels).
+    android: androidFor("reports"),
+  };
+}
+
+// One multicast per (platform, language) group, 500 tokens a chunk.
+async function sendAppUpdate(targets, cfg, builds) {
+  let sent = 0, failed = 0;
+  const results = [];
+  for (const platform of ["ios", "android"]) {
+    const tokens = targets.filter((t) => t.platform === platform).map((t) => t.token);
+    for (const [lang, group] of langGroups(tokens)) {
+      const payload = appUpdatePayload(platform, lang, cfg, builds[platform]);
+      for (let i = 0; i < group.length; i += 500) {
+        const chunk = group.slice(i, i + 500);
+        try {
+          const res = await admin.messaging().sendEachForMulticast({ tokens: chunk, ...payload });
+          sent += res.successCount; failed += res.failureCount;
+          res.responses.forEach((r, j) => results.push({ token: chunk[j], ok: r.success, error: r.success ? "" : (r.error && r.error.code || "error") }));
+        } catch (e) {
+          console.error("[appUpdate] send failed", platform, lang, e && e.message);
+          failed += chunk.length;
+          chunk.forEach((t) => results.push({ token: t, ok: false, error: String(e && e.message || e) }));
+        }
+      }
+    }
+  }
+  return { sent, failed, results };
+}
+
+// Announce when, and only when, a write RAISES a platform's latest build above
+// both its previous value and the last build announced for that platform.
+// Re-saving the same numbers, toggling `enabled`, editing notes, or lowering
+// and re-raising a build never re-sends. The claim is written before sending
+// (like dispatchCampaigns), so a retried or doubled invocation cannot send twice.
+async function runAppUpdateAnnouncement(before, after) {
+  if (!after) return { skipped: "deleted" };
+  if (after.enabled === false) return { skipped: "disabled" };
+  if (after.announce === false) return { skipped: "announce off" };
+  const ref = appUpdateAnnounceRef();
+  const builds = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const done = snap.exists ? (snap.data() || {}) : {};
+    const raised = (key, doneKey) => {
+      const n = buildNum(after[key]);
+      return n > buildNum((before || {})[key]) && n > buildNum(done[doneKey]) ? n : 0;
+    };
+    const ios = raised("latestBuild", "ios"), android = raised("latestAndroidBuild", "android");
+    if (!ios && !android) return null;
+    tx.set(ref, { ...(ios ? { ios } : {}), ...(android ? { android } : {}), claimedAt: Date.now() }, { merge: true });
+    return { ios, android };
+  });
+  if (!builds) return { skipped: "nothing new" };
+  const { targets, counts, owners } = await appUpdateTargets(builds);
+  const r = await sendAppUpdate(targets, after, builds);
+  await pruneDeadTokens(r.results, owners);
+  const last = { at: Date.now(), ios: builds.ios, android: builds.android, targeted: targets.length, sent: r.sent, failed: r.failed, counts };
+  await ref.set({ last }, { merge: true });
+  console.log("[appUpdate] announced", JSON.stringify(last));
+  return last;
+}
+
+exports.announceAppUpdate = onDocumentWritten({ document: "config/appUpdate", timeoutSeconds: 300, memory: "512MiB" }, async (event) => {
+  const before = event.data.before && event.data.before.exists ? event.data.before.data() : {};
+  const after = event.data.after && event.data.after.exists ? event.data.after.data() : null;
+  await runAppUpdateAnnouncement(before, after);
+});
+
+exports.adminGetAppUpdate = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  requireAdmin(request);
+  const [cfg, ann] = await Promise.all([appUpdateRef().get(), appUpdateAnnounceRef().get()]);
+  return { exists: cfg.exists, config: appUpdateView(cfg.exists ? cfg.data() : {}), announced: ann.exists ? ann.data() : {} };
+});
+
+// "Who would hear about it?" for the numbers in the form, before publishing, and
+// which builds the parent phones that report one are on.
+exports.adminAppUpdateReach = onCall({ timeoutSeconds: 120, memory: "512MiB" }, async (request) => {
+  requireAdmin(request);
+  const ios = buildNum(request.data && request.data.latestBuild);
+  const android = buildNum(request.data && request.data.latestAndroidBuild);
+  const { targets, counts, parents } = await appUpdateTargets({ ios, android });
+  const installed = { ios: {}, android: {} };
+  for (const p of Object.values(parents)) {
+    const fcm = new Set(p.fcmTokens || []);
+    for (const [tok, info] of Object.entries(p.tokenDevices || {})) {
+      if (!fcm.has(tok) || !info || info.role === "child" || !installed[info.platform]) continue;
+      const b = String(buildNum(info.build) || "?");
+      installed[info.platform][b] = (installed[info.platform][b] || 0) + 1;
+    }
+  }
+  return { targeted: targets.length, counts, installed };
+});
+
+exports.adminPublishAppUpdate = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const email = requireAdmin(request);
+  const ref = appUpdateRef();
+  const cur = await ref.get();
+  const clean = cleanAppUpdate(request.data, cur.exists ? cur.data() : {});
+  await ref.set({ ...clean, updatedAt: Date.now(), updatedBy: email }, { merge: true });
+  console.log("[adminPublishAppUpdate]", email, JSON.stringify({ ...clean, notesByLang: undefined, notes: undefined }));
+  const after = await ref.get();
+  return { ok: true, config: appUpdateView(after.data()) };
 });

@@ -447,7 +447,7 @@ struct WhatsNewStoryView: View {
         }
         .buttonStyle(.juicy)
         .accessibilityLabel(userPaused
-                            ? (isKid ? tr("הַמְשֵׁךְ") : tr("המשך"))
+                            ? (isKid ? Gendered.g(tr("הַמְשֵׁךְ"), tr("הַמְשִׁיכִי")) : tr("המשך"))
                             : (isKid ? tr("עֲצִירָה") : tr("עצירה")))
     }
 

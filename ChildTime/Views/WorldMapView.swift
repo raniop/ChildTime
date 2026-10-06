@@ -71,6 +71,9 @@ struct WorldMapView: View {
     @State private var pendingUnlockAction: (() -> Void)? = nil
     @State private var lastSeenStars = 0
     @State private var heroAppeared = false
+    /// 🏆 The ONE never-visited world Tofy recommends (decided on appear, so it
+    /// doesn't hop around while the child scrolls).
+    @State private var suggestedWorldID: String?
     // 🔒→🔓 Window transfer ("נעל באייפד ופתח כאן"): when THIS child's window is
     // open on another device, the kid can ask to lock it there and continue
     // here. We open here only AFTER the other device confirms (row cleared).
@@ -438,7 +441,7 @@ struct WorldMapView: View {
                                     FeatureCard(
                                         emoji: "🎲",
                                         title: tr("טוֹפִי טַיים"),
-                                        subtitle: tr("שְׁאֵלוֹת בִּמְיוּחָד בִּשְׁבִילְךָ"),
+                                        subtitle: Gendered.g(tr("שְׁאֵלוֹת בִּמְיוּחָד בִּשְׁבִילְךָ"), tr("שְׁאֵלוֹת בִּמְיוּחָד בִּשְׁבִילֵךְ")),
                                         gradient: AppGradient.portal,
                                         glowColor: AppColor.companionGlow,
                                         // Free, always (Rani): the one thing on this screen that
@@ -487,7 +490,11 @@ struct WorldMapView: View {
                                         badgeOverride: packNew ? tr("✨ חָדָשׁ!") : (isGuest ? tr("🌟 אוֹרֵחַ הַשָּׁבוּעַ") : nil),
                                         footOverride: continueFoot,
                                         // Glows on its launch day only until the child taps it (Rani).
-                                        pulse: neverOpened && (pack.map { p in profiles.activeID.map { PackKidState.isFirstDay(p.id, childID: $0) } ?? false } ?? false)
+                                        pulse: neverOpened && (pack.map { p in profiles.activeID.map { PackKidState.isFirstDay(p.id, childID: $0) } ?? false } ?? false),
+                                        tier: progress.worldTier(in: world.id),
+                                        visited: progress.hasVisited(world.id),
+                                        suggested: world.id == suggestedWorldID,
+                                        girl: girl
                                     ) {
                                         if let pack, let cid = profiles.activeID {
                                             PackKidState.markOpened(pack.id, childID: cid)
@@ -705,6 +712,8 @@ struct WorldMapView: View {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.2)) {
                 heroAppeared = true
             }
+            suggestedWorldID = WorldTiers.suggestedNewWorld(excluding: "")?.id
+            announceWaitingBoss()
             checkWorldUnlocks()
             // 🍏 Just joined: the parent is holding the phone — say what Apple's
             // own Screen Time may be doing, before anything else.
@@ -762,6 +771,13 @@ struct WorldMapView: View {
         // already did the pack / ask-a-parent gating before setting this.
         .fullScreenCover(item: $selectedWorld) { world in
             WorldEntryView(world: world)
+        }
+        // 🏆 "עולם חדש" after a boss: close the world on screen, open the next.
+        .onReceive(WorldRouter.shared.$pending) { next in
+            guard let next else { return }
+            WorldRouter.shared.pending = nil
+            selectedWorld = nil
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) { selectedWorld = next }
         }
         .fullScreenCover(item: $packReveal) { pack in
             PackRevealView(pack: pack, isGift: profiles.active.map { PackAccess.isGift($0, pack) } ?? true, onStart: {
@@ -1337,7 +1353,7 @@ struct WorldMapView: View {
         SoundPlayer.shared.play(.streakUp)
         let total = grant.addedToday + grant.bankedForTomorrow
         challengeCelebration = tr("🎉 כָּל הַכָּבוֹד! +\(15 + min(progress.dayStreak, 7) * 2) 💎") + (total > 0 ? tr(" וְ-\(total) דַּקּוֹת") : "")
-        companion.hype(tr("שָׁמַרְתָּ עַל הָרֶצֶף! 🔥"))
+        companion.hype(Gendered.g(tr("שָׁמַרְתָּ עַל הָרֶצֶף! 🔥"), tr("שָׁמַרְתְּ עַל הָרֶצֶף! 🔥")))
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) { challengeCelebration = nil }
     }
 
@@ -1360,8 +1376,8 @@ struct WorldMapView: View {
                 emoji: "🔥",
                 title: tr("אֶתְגָּר יוֹמִי"),
                 message: claimed
-                    ? tr("הִשְׁלַמְתָּ אֶת הָאֶתְגָּר הַיּוֹם — כָּל הַכָּבוֹד! 🎉\nאֶפְשָׁר לְהַמְשִׁיךְ לְשַׂחֵק וְלִצְבֹּר עוֹד.")
-                    : tr("עֲנֵה נָכוֹן עַל \(target) שְׁאֵלוֹת הַיּוֹם וְזָכֵה בִּ-\(prize) 💎!\nכָּל יוֹם רָצוּף שֶׁמְּשַׂחֲקִים — הַפְּרָס גָּדֵל. 🔥"),
+                    ? Gendered.g(tr("הִשְׁלַמְתָּ אֶת הָאֶתְגָּר הַיּוֹם — כָּל הַכָּבוֹד! 🎉\nאֶפְשָׁר לְהַמְשִׁיךְ לְשַׂחֵק וְלִצְבֹּר עוֹד."), tr("הִשְׁלַמְתְּ אֶת הָאֶתְגָּר הַיּוֹם — כָּל הַכָּבוֹד! 🎉\nאֶפְשָׁר לְהַמְשִׁיךְ לְשַׂחֵק וְלִצְבֹּר עוֹד."))
+                    : Gendered.g(tr("עֲנֵה נָכוֹן עַל \(target) שְׁאֵלוֹת הַיּוֹם וְזָכֵה בִּ-\(prize) 💎!\nכָּל יוֹם רָצוּף שֶׁמְּשַׂחֲקִים — הַפְּרָס גָּדֵל. 🔥"), tr("עֲנִי נָכוֹן עַל \(target) שְׁאֵלוֹת הַיּוֹם וּזְכִי בִּ-\(prize) 💎!\nכָּל יוֹם רָצוּף שֶׁמְּשַׂחֲקִים — הַפְּרָס גָּדֵל. 🔥")),
                 progressText: "\(done)/\(target)",
                 ctaTitle: ready ? tr("אִסְפוּ אֶת הַפְּרָס 🎁") : tr("קָדִימָה, נְעַנֶּה! 🚀"),
                 onCTA: {
@@ -1518,7 +1534,7 @@ struct WorldMapView: View {
         // The approved header: ⏱ minutes today · ✅ correct today · ⭐ level
         // (stars and diamonds moved up beside the name).
         return HStack(spacing: 0) {
-            statColumn(value: minutes, suffix: minutesMax, label: tr("⏱ הִרְוַחְתָּ הַיּוֹם")) { infoStat = .today }
+            statColumn(value: minutes, suffix: minutesMax, label: Gendered.g(tr("⏱ הִרְוַחְתָּ הַיּוֹם"), tr("⏱ הִרְוַחַתְּ הַיּוֹם"))) { infoStat = .today }
             statDivider
             statColumn(value: "\(progress.correctToday)", label: tr("✅ נְכוֹנוֹת הַיּוֹם")) { infoStat = .correct }
             statDivider
@@ -1687,25 +1703,25 @@ struct WorldMapView: View {
                 // The cap that's full is PLAYED time, so say that number — "הרווחת
                 // היום 49 מתוך 90" under "הגעת למקסימום" read as a contradiction
                 // (Yoav, 2026-10-03).
-                lines.append(tr("הִגַּעְתָּ לַמַּקְסִימוּם 🌙 — שִׂחַקְתָּ הַיּוֹם \(progress.minutesPlayedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת. \(progress.pendingMinutes) דַּקּוֹת שְׁמוּרוֹת לְךָ לְמָחָר!"))
+                lines.append(Gendered.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם 🌙 — שִׂחַקְתָּ הַיּוֹם \(progress.minutesPlayedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת. \(progress.pendingMinutes) דַּקּוֹת שְׁמוּרוֹת לְךָ לְמָחָר!"), tr("הִגַּעַתְּ לַמַּקְסִימוּם 🌙 — שִׂחַקְתְּ הַיּוֹם \(progress.minutesPlayedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת. \(progress.pendingMinutes) דַּקּוֹת שְׁמוּרוֹת לָךְ לְמָחָר!")))
             } else if progress.pendingMinutes > 0 {
                 // Has some, but below the 15-min minimum we can open.
-                lines.append(tr("יֵשׁ לְךָ \(progress.pendingMinutes) דַּקּוֹת. פּוֹתְחִים זְמַן מִשְׂחָק מִ-\(progress.minimumUnlockMinutes) דַּקּוֹת — עֲנוּ עַל עוֹד שְׁאֵלוֹת! 😊"))
+                lines.append(Gendered.g(tr("יֵשׁ לְךָ \(progress.pendingMinutes) דַּקּוֹת. פּוֹתְחִים זְמַן מִשְׂחָק מִ-\(progress.minimumUnlockMinutes) דַּקּוֹת — עֲנוּ עַל עוֹד שְׁאֵלוֹת! 😊"), tr("יֵשׁ לָךְ \(progress.pendingMinutes) דַּקּוֹת. פּוֹתְחִים זְמַן מִשְׂחָק מִ-\(progress.minimumUnlockMinutes) דַּקּוֹת — עֲנוּ עַל עוֹד שְׁאֵלוֹת! 😊")))
             } else if cap.enabled, progress.minutesEarnedToday >= cap.max {
                 // Earned the WHOLE day's allowance and spent it — a win, not a
                 // lack ("עדיין אין דקות" here read as failure and invited more
                 // answering "to earn", when today's earning is over). Point at
                 // what IS possible now: tomorrow's bank + the gift pocket.
-                lines.append(tr("וָואוּ — נִצַּלְתָּ אֶת כָּל \(cap.max) הַדַּקּוֹת שֶׁל הַיּוֹם! 🏆"))
-                lines.append(tr("כָּל מַה שֶּׁתַּרְוִיחַ עַכְשָׁיו נִשְׁמָר לְמָחָר."))
+                lines.append(Gendered.g(tr("וָואוּ — נִצַּלְתָּ אֶת כָּל \(cap.max) הַדַּקּוֹת שֶׁל הַיּוֹם! 🏆"), tr("וָואוּ — נִצַּלְתְּ אֶת כָּל \(cap.max) הַדַּקּוֹת שֶׁל הַיּוֹם! 🏆")))
+                lines.append(Gendered.g(tr("כָּל מַה שֶּׁתַּרְוִיחַ עַכְשָׁיו נִשְׁמָר לְמָחָר."), tr("כָּל מַה שֶּׁתַּרְוִיחִי עַכְשָׁיו נִשְׁמָר לְמָחָר.")))
                 if progress.parentGiftMinutes > 0 {
-                    lines.append(tr("וְיֵשׁ לְךָ \(progress.parentGiftMinutes) דַּקּוֹת מַתָּנָה 💝 שֶׁאֶפְשָׁר לִפְתּוֹחַ גַּם עַכְשָׁיו!"))
+                    lines.append(Gendered.g(tr("וְיֵשׁ לְךָ \(progress.parentGiftMinutes) דַּקּוֹת מַתָּנָה 💝 שֶׁאֶפְשָׁר לִפְתּוֹחַ גַּם עַכְשָׁיו!"), tr("וְיֵשׁ לָךְ \(progress.parentGiftMinutes) דַּקּוֹת מַתָּנָה 💝 שֶׁאֶפְשָׁר לִפְתּוֹחַ גַּם עַכְשָׁיו!")))
                 }
             } else {
                 lines.append(tr("עֲדַיִן אֵין דַּקּוֹת. עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק! 🎮"))
             }
             if cap.enabled, !progress.dailyScreenTimeMaxedOut {
-                lines.append(tr("הַיּוֹם הִרְוַחְתָּ \(progress.minutesEarnedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת."))
+                lines.append(Gendered.g(tr("הַיּוֹם הִרְוַחְתָּ \(progress.minutesEarnedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת."), tr("הַיּוֹם הִרְוַחַתְּ \(progress.minutesEarnedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת.")))
             }
             if progress.carryOverMinutes > 0 {
                 lines.append(tr("🎁 \(progress.carryOverMinutes) דַּקּוֹת נִשְׁמְרוּ לְמָחָר."))
@@ -1713,7 +1729,7 @@ struct WorldMapView: View {
             return InfoContent(
                 emoji: "🎮",
                 title: tr("דַּקּוֹת מִשְׂחָק"),
-                subtitle: tr("זְמַן הַמִּשְׂחָק שֶׁלְּךָ"),
+                subtitle: Gendered.g(tr("זְמַן הַמִּשְׂחָק שֶׁלְּךָ"), tr("זְמַן הַמִּשְׂחָק שֶׁלָּךְ")),
                 body: lines.joined(separator: "\n"),
                 tip: tr("עוֹנִים נָכוֹן — מַרְוִיחִים עוֹד דַּקּוֹת!")
             )
@@ -1741,7 +1757,7 @@ struct WorldMapView: View {
             let cap = progress.dailyCap
             var lines: [String] = []
             if cap.enabled {
-                lines.append(tr("הַיּוֹם הִרְוַחְתָּ \(progress.minutesEarnedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת."))
+                lines.append(Gendered.g(tr("הַיּוֹם הִרְוַחְתָּ \(progress.minutesEarnedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת."), tr("הַיּוֹם הִרְוַחַתְּ \(progress.minutesEarnedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת.")))
                 lines.append(tr("כְּשֶׁמַּגִּיעִים לַמַּקְסִימוּם הַיּוֹמִי (\(cap.max) דַּקּוֹת), מַה שֶּׁמַּרְוִיחִים אַחַר כָּךְ נִשְׁמָר לְמָחָר 🎁"))
             } else {
                 lines.append(tr("הַיּוֹם הִרְוַחְתֶּם \(progress.minutesEarnedToday) דַּקּוֹת."))
@@ -1776,17 +1792,47 @@ struct WorldMapView: View {
         }
     }
 
+    // MARK: - 🏆 Boss waiting
+
+    /// Once a day, the fox points at a boss that is waiting in the last room.
+    private func announceWaitingBoss() {
+        let key = "boss.waiting.said.\(profiles.activeID?.uuidString ?? "none")"
+        guard !DayGate.usedToday(UserDefaults.standard.object(forKey: key) as? Date),
+              let profile = profiles.active else { return }
+        let waiting = Worlds.all.first { w in
+            !w.isBonusWorld && profile.playableTopics.contains(w.topic)
+                && progress.hasVisited(w.id) && progress.worldTier(in: w.id) < ProgressStore.worldTierCount
+                && progress.progress(in: w.id) >= w.rooms - 1
+        }
+        guard let w = waiting else { return }
+        UserDefaults.standard.set(Date(), forKey: key)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+            companion.wow(Gendered.g(tr("הַבּוֹס שֶׁל \(w.name) מְחַכֶּה לְךָ! 🐉"), tr("הַבּוֹס שֶׁל \(w.name) מְחַכֶּה לָךְ! 🐉")))
+        }
+    }
+
     // MARK: - Hero title
 
     private var heroTitle: some View {
         VStack(spacing: 4) {
             // The wordmark now heads the screen (brandRow); this line keeps its
             // place over the worlds — the one the mockup kept (Rani).
-            Text(tr("בּוֹחֲרִים עוֹלָם וְיוֹצְאִים לְהַרְפַּתְקָה ✨"))
-                .font(.system(size: isCompact ? 13 : 16, weight: .semibold, design: .rounded))
-                .foregroundStyle(GlassInk.secondary)
-                .lineLimit(1).minimumScaleFactor(0.6)
-                .opacity(heroAppeared ? 1 : 0)
+            HStack(spacing: 8) {
+                Text(tr("בּוֹחֲרִים עוֹלָם וְיוֹצְאִים לְהַרְפַּתְקָה ✨"))
+                    .font(.system(size: isCompact ? 13 : 16, weight: .semibold, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                // 🏆 Crowns earned across all worlds (the mockup's top pill).
+                if progress.totalCrowns > 0 {
+                    Text(tr("👑 כְּתָרִים: \(progress.totalCrowns)"))
+                        .font(.system(size: isCompact ? 12 : 14, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 10).padding(.vertical, 4)
+                        .background(Capsule().fill(.white.opacity(0.2)))
+                        .overlay(Capsule().strokeBorder(.white.opacity(0.35), lineWidth: 1))
+                }
+            }
+            .opacity(heroAppeared ? 1 : 0)
             // (The "רָמַת טוֹפִי" XP pill was removed — the level now lives in the
             // header card's level badge; tapping the avatar opens the level info.)
         }
@@ -1870,7 +1916,7 @@ struct WorldMapView: View {
                     HStack(spacing: 10) {
                         if isOpening {
                             ProgressView().tint(.white).scaleEffect(0.9)
-                            Text(tr("פּוֹתְחִים לְךָ… ✨"))
+                            Text(Gendered.g(tr("פּוֹתְחִים לְךָ… ✨"), tr("פּוֹתְחִים לָךְ… ✨")))
                                 .font(.system(size: 20, weight: .heavy, design: .rounded))
                         } else {
                             Text("💝").font(.system(size: isShort ? 19 : 22))
@@ -1907,7 +1953,7 @@ struct WorldMapView: View {
                     // transfer.
                     TimelineView(.periodic(from: .now, by: 1)) { _ in
                         let left = max(0, peerWindow?.secondsLeft ?? 0)
-                        bottomHint(tr("🎮 הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו \(where_) — נִשְׁאֲרוּ \(left / 60):\(String(format: "%02d", left % 60))"))
+                        bottomHint(Gendered.g(tr("🎮 הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו \(where_) — נִשְׁאֲרוּ \(left / 60):\(String(format: "%02d", left % 60))"), tr("🎮 הַזְּמַן שֶׁלָּךְ פָּתוּחַ עַכְשָׁיו \(where_) — נִשְׁאֲרוּ \(left / 60):\(String(format: "%02d", left % 60))")))
                     }
                     if transferRequestedAt != nil {
                         bottomHint(tr("🔒 נוֹעֲלִים \(where_)… רֶגַע אֶחָד ⏳"))
@@ -1958,7 +2004,7 @@ struct WorldMapView: View {
                         // this the button looked dead for 2–3 seconds (Rani).
                         if isOpening {
                             ProgressView().tint(.white).scaleEffect(0.9)
-                            Text(tr("פּוֹתְחִים לְךָ… ✨"))
+                            Text(Gendered.g(tr("פּוֹתְחִים לְךָ… ✨"), tr("פּוֹתְחִים לָךְ… ✨")))
                                 .font(.system(size: 20, weight: .heavy, design: .rounded))
                         } else {
                             Image(systemName: "gamecontroller.fill")
@@ -1980,7 +2026,7 @@ struct WorldMapView: View {
             } else if progress.dailyScreenTimeMaxedOut {
                 // Wallet has minutes, but today's screen-time cap is used up — they
                 // wait for tomorrow. Say so clearly (don't tell them to earn more).
-                bottomHint(tr("שִׂחַקְתָּ הַיּוֹם \(progress.minutesPlayedToday) מִתּוֹךְ \(progress.dailyCap.max) דַּקּוֹת 🌙 — \(progress.pendingMinutes) שְׁמוּרוֹת לְמָחָר"))
+                bottomHint(Gendered.g(tr("שִׂחַקְתָּ הַיּוֹם \(progress.minutesPlayedToday) מִתּוֹךְ \(progress.dailyCap.max) דַּקּוֹת 🌙 — \(progress.pendingMinutes) שְׁמוּרוֹת לְמָחָר"), tr("שִׂחַקְתְּ הַיּוֹם \(progress.minutesPlayedToday) מִתּוֹךְ \(progress.dailyCap.max) דַּקּוֹת 🌙 — \(progress.pendingMinutes) שְׁמוּרוֹת לְמָחָר")))
             } else if progress.redeemableMinutesNow > 0 {
                 // Has some minutes but below the 15-min minimum we can enforce.
                 // Say all three numbers — what they have, where opening starts, how
@@ -2080,7 +2126,7 @@ struct WorldMapView: View {
             let mins = max(1, (other.secondsLeft + 59) / 60)
             let where_ = other.device.kind == "ipad" ? tr("בָּאַיְפֵּד") : (other.device.kind == "iphone" ? tr("בָּאַיְפוֹן") : tr("בְּמַכְשִׁיר אַחֵר"))
             Haptic.warning()
-            companion.console(tr("הַזְּמַן שֶׁלְּךָ כְּבָר פָּתוּחַ \(where_) — עוֹד \(mins) דַּקּוֹת 🎮"))
+            companion.console(Gendered.g(tr("הַזְּמַן שֶׁלְּךָ כְּבָר פָּתוּחַ \(where_) — עוֹד \(mins) דַּקּוֹת 🎮"), tr("הַזְּמַן שֶׁלָּךְ כְּבָר פָּתוּחַ \(where_) — עוֹד \(mins) דַּקּוֹת 🎮")))
             return
         }
         guard p.hasPlayPIN else { action(); return }
@@ -2101,7 +2147,7 @@ struct WorldMapView: View {
         guard var p = profiles.active else { return }
         p.playPIN = pin
         profiles.update(p)
-        companion.cheer(tr("הַזְּמַן שֶׁלְּךָ מוּגָן! 🔒"))
+        companion.cheer(Gendered.g(tr("הַזְּמַן שֶׁלְּךָ מוּגָן! 🔒"), tr("הַזְּמַן שֶׁלָּךְ מוּגָן! 🔒")))
     }
 
     private func clearPlayPIN() {
@@ -2342,7 +2388,7 @@ struct WorldMapView: View {
         UserDefaults.standard.set(Date(), forKey: key)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
             companion.hype(Gendered.g(tr("פָּתַחְתָּ אֶת הַמִּשְׂחָקִים לְהַיּוֹם! 🎮✨"),
-                                      tr("פָּתַחְתְּ אֶת הַמִּשְׂחָקִים לְהַיּוֹם! 🎮✨")))
+                                      tr("פָּתַחַתְּ אֶת הַמִּשְׂחָקִים לְהַיּוֹם! 🎮✨")))
         }
     }
 
@@ -2451,9 +2497,9 @@ struct WorldMapView: View {
         if progress.dayStreak == 0 {
             companion.cheer(tr("הֵיי! יַאלְלָה לְהַרְפַּתְקָה 🌟"))
         } else if progress.dayStreak == 1 {
-            companion.cheer(tr("בָּרוּךְ הַבָּא! 👋"))
+            companion.cheer(Gendered.g(tr("בָּרוּךְ הַבָּא! 👋"), tr("בְּרוּכָה הַבָּאָה! 👋")))
         } else {
-            companion.cheer(tr("חָזַרְתָּ! \(progress.dayStreak) יָמִים בְּרֶצֶף 🔥"))
+            companion.cheer(Gendered.g(tr("חָזַרְתָּ! \(progress.dayStreak) יָמִים בְּרֶצֶף 🔥"), tr("חָזַרְתְּ! \(progress.dayStreak) יָמִים בְּרֶצֶף 🔥")))
         }
     }
 
@@ -2538,10 +2584,10 @@ struct WorldMapView: View {
             case .heldElsewhere:
                 // The lease listener drives the "open on your iPad" card + transfer.
                 Haptic.warning()
-                progress.endOpeningWindow(message: tr("הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮"))
+                progress.endOpeningWindow(message: Gendered.g(tr("הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮"), tr("הַזְּמַן שֶׁלָּךְ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮")))
             case .insufficient:
                 Haptic.light()
-                progress.endOpeningWindow(message: tr("עוֹד קְצָת דַּקּוֹת וְנִפְתַּח לְךָ! 💪"))
+                progress.endOpeningWindow(message: Gendered.g(tr("עוֹד קְצָת דַּקּוֹת וְנִפְתַּח לְךָ! 💪"), tr("עוֹד קְצָת דַּקּוֹת וְנִפְתַּח לָךְ! 💪")))
             case .offline:
                 // Transactions don't queue offline. Fall back to the bounded local
                 // window so a kid with no network is never stranded.
@@ -2563,7 +2609,7 @@ struct WorldMapView: View {
         // only on screen when the wallet says there is time, so reaching this line
         // means our own numbers disagreed — which is ours to say out loud, kindly.
         guard minutes > 0 else {
-            progress.endOpeningWindow(message: tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַדַּקּוֹת שֶׁלְּךָ — נְנַסֶּה שׁוּב? 😊"))
+            progress.endOpeningWindow(message: Gendered.g(tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַדַּקּוֹת שֶׁלְּךָ — נְנַסֶּה שׁוּב? 😊"), tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַדַּקּוֹת שֶׁלָּךְ — נְנַסֶּה שׁוּב? 😊")))
             return
         }
         shields.unlock(minutes: minutes)
@@ -2642,7 +2688,7 @@ struct WorldMapView: View {
                 progress.endOpeningWindow()
             case .heldElsewhere:
                 Haptic.warning()
-                progress.endOpeningWindow(message: tr("הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮"))
+                progress.endOpeningWindow(message: Gendered.g(tr("הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮"), tr("הַזְּמַן שֶׁלָּךְ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮")))
             case .insufficient:
                 // The button only exists when OUR pocket says there is time, so the
                 // cloud saying otherwise is two ledgers disagreeing — not an empty
@@ -2692,8 +2738,8 @@ struct WorldMapView: View {
         progress.giftOpenFailureStreak += 1
         let tellingParent = progress.giftOpenFailureStreak >= 2
         progress.endOpeningWindow(message: tellingParent
-            ? tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלְּךָ — סִפַּרְתִּי לַהוֹרִים שֶׁלְּךָ וְהֵם יַעַזְרוּ 😊")
-            : tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלְּךָ — נְנַסֶּה שׁוּב? 😊"))
+            ? Gendered.g(tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלְּךָ — סִפַּרְתִּי לַהוֹרִים שֶׁלְּךָ וְהֵם יַעַזְרוּ 😊"), tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלָּךְ — סִפַּרְתִּי לַהוֹרִים שֶׁלָּךְ וְהֵם יַעַזְרוּ 😊"))
+            : Gendered.g(tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלְּךָ — נְנַסֶּה שׁוּב? 😊"), tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלָּךְ — נְנַסֶּה שׁוּב? 😊")))
         guard tellingParent else { return }
         LiveEventReporter.report(.giftOpenFailed,
                                  extra: ["minutes": giftOpenableSeconds / 60, "reason": reason])

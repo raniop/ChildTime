@@ -126,7 +126,14 @@ final class PushManager: NSObject, ObservableObject {
         // it (a map per token: one parent account may run Hebrew and English devices).
         let language = LanguageStore.shared.current.rawValue
         // `language` = the account's most recent choice, for email.
-        ref.setData([mine: FieldValue.arrayUnion([token]), "tokenLanguages": [token: language], "language": language], merge: true)
+        // 🔄 `tokenDevices`: which platform + build THIS token runs, so "יש גרסה
+        // חדשה" pushes reach only parent phones on an older build (functions:
+        // announceAppUpdate). Refreshed on every upload, i.e. the first launch after an update.
+        let thisDevice: [String: Any] = [
+            "platform": "ios", "build": Int(AppInfo.build) ?? 0, "role": isChild ? "child" : "parent",
+        ]
+        ref.setData([mine: FieldValue.arrayUnion([token]), "tokenLanguages": [token: language], "language": language,
+                     "tokenDevices": [token: thisDevice]], merge: true)
         ref.updateData([other: FieldValue.arrayRemove([token])])   // move if role changed
         // ALSO stamp the token on this device's own childDevices row, so Cloud
         // Functions can target THIS child's device(s) precisely (the account-level

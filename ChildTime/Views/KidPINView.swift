@@ -48,11 +48,11 @@ struct KidPINView: View {
     private var subtitle: String {
         switch mode {
         case .verify:
-            return almost ? tr("כִּמְעַט! נַסּוּ שׁוּב 💪") : tr("הַזְּמַן הַזֶּה שֶׁלְּךָ — רַק אַתָּה פּוֹתֵחַ אוֹתוֹ")
+            return almost ? tr("כִּמְעַט! נַסּוּ שׁוּב 💪") : Gendered.g(tr("הַזְּמַן הַזֶּה שֶׁלְּךָ — רַק אַתָּה פּוֹתֵחַ אוֹתוֹ"), tr("הַזְּמַן הַזֶּה שֶׁלָּךְ — רַק אַתְּ פּוֹתַחַת אוֹתוֹ"))
         case .setNew:
             if almost { return tr("הַקּוֹדִים לֹא הָיוּ אוֹתוֹ דָּבָר — בּוֹאוּ נְנַסֶּה שׁוּב 🙂") }
             return firstEntry == nil
-                ? tr("4 סְפָרוֹת שֶׁרַק אַתָּה תֵּדַע — לֹא אַחִים וְלֹא חֲבֵרִים 😉")
+                ? Gendered.g(tr("4 סְפָרוֹת שֶׁרַק אַתָּה תֵּדַע — לֹא אַחִים וְלֹא חֲבֵרִים 😉"), tr("4 סְפָרוֹת שֶׁרַק אַתְּ תֵּדְעִי — לֹא אַחִים וְלֹא חֲבֵרִים 😉"))
                 : tr("מַקְלִידִים אֶת אוֹתוֹ קוֹד שׁוּב")
         }
     }
@@ -253,7 +253,7 @@ struct PlayPINForgotView: View {
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
 
-                Text(tr("שָׁלַחְנוּ עַכְשָׁיו הוֹדָעָה לְאַבָּא וּלְאִמָּא 💌\nהֵם רוֹאִים אֶת הַקּוֹד שֶׁלְּךָ בַּלּוּחַ שֶׁלָּהֶם,\nוְיוֹדְעִים אֵיךְ לַעֲזוֹר."))
+                Text(Gendered.g(tr("שָׁלַחְנוּ עַכְשָׁיו הוֹדָעָה לְאַבָּא וּלְאִמָּא 💌\nהֵם רוֹאִים אֶת הַקּוֹד שֶׁלְּךָ בַּלּוּחַ שֶׁלָּהֶם,\nוְיוֹדְעִים אֵיךְ לַעֲזוֹר."), tr("שָׁלַחְנוּ עַכְשָׁיו הוֹדָעָה לְאַבָּא וּלְאִמָּא 💌\nהֵם רוֹאִים אֶת הַקּוֹד שֶׁלָּךְ בַּלּוּחַ שֶׁלָּהֶם,\nוְיוֹדְעִים אֵיךְ לַעֲזוֹר.")))
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.9))
                     .multilineTextAlignment(.center)
@@ -332,10 +332,10 @@ struct PlayPINManageView: View {
                 Text("🔒")
                     .font(.system(size: 54))
                     .glow(AppColor.starGold, radius: 12)
-                Text(tr("הַזְּמַן שֶׁלְּךָ מוּגָן"))
+                Text(Gendered.g(tr("הַזְּמַן שֶׁלְּךָ מוּגָן"), tr("הַזְּמַן שֶׁלָּךְ מוּגָן")))
                     .font(.system(size: 26, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text(tr("רַק מִי שֶׁיּוֹדֵעַ אֶת הַקּוֹד יָכוֹל לִפְתּוֹחַ אֶת דַּקּוֹת הַמִּשְׂחָק שֶׁלְּךָ."))
+                Text(Gendered.g(tr("רַק מִי שֶׁיּוֹדֵעַ אֶת הַקּוֹד יָכוֹל לִפְתּוֹחַ אֶת דַּקּוֹת הַמִּשְׂחָק שֶׁלְּךָ."), tr("רַק מִי שֶׁיּוֹדֵעַ אֶת הַקּוֹד יָכוֹל לִפְתּוֹחַ אֶת דַּקּוֹת הַמִּשְׂחָק שֶׁלָּךְ.")))
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .multilineTextAlignment(.center)

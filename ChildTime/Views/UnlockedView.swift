@@ -35,7 +35,7 @@ struct UnlockedView: View {
                     .float()
                     .shadow(color: .black.opacity(0.25), radius: 10, y: 6)
 
-                Text(preparing ? tr("הַזְּמַן שֶׁלְּךָ בַּדֶּרֶךְ!") : tr("זְמַן מִשְׂחָק!"))
+                Text(preparing ? Gendered.g(tr("הַזְּמַן שֶׁלְּךָ בַּדֶּרֶךְ!"), tr("הַזְּמַן שֶׁלָּךְ בַּדֶּרֶךְ!")) : tr("זְמַן מִשְׂחָק!"))
                     .font(.system(size: titleSize, weight: .black, design: .rounded))
                     .foregroundStyle(GlassInk.primary)
                     .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
@@ -100,7 +100,7 @@ struct UnlockedView: View {
                 Button {
                     endEarly()
                 } label: {
-                    Text(progress.unlockIsManual ? tr("עֲצֹר וּשְׁמֹר אֶת הַזְּמַן 💝") : tr("סִיַּמְתִּי לְשַׂחֵק"))
+                    Text(progress.unlockIsManual ? Gendered.g(tr("עֲצֹר וּשְׁמֹר אֶת הַזְּמַן 💝"), tr("עִצְרִי וְשִׁמְרִי אֶת הַזְּמַן 💝")) : tr("סִיַּמְתִּי לְשַׂחֵק"))
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, AppSpacing.xl)

@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rani.tofy.i18n.tr
 import com.rani.tofy.kid.core.KidSession
+import com.rani.tofy.kid.ui.social.SocialMe
 import com.rani.tofy.ui.theme.GlassBackdrop
 import com.rani.tofy.ui.theme.Rounded
 
@@ -51,7 +52,7 @@ internal fun KidPinVerify(playPIN: String, onSuccess: () -> Unit, onCancel: () -
         ) {
             Text("🔒", fontSize = 54.sp, modifier = Modifier.padding(top = 40.dp))
             KidTitle(title, 27)
-            KidBody(if (almost) tr("כִּמְעַט! נַסּוּ שׁוּב 💪") else tr("הַזְּמַן הַזֶּה שֶׁלְּךָ — רַק אַתָּה פּוֹתֵחַ אוֹתוֹ"), 15.5f, alpha = 0.85f)
+            KidBody(if (almost) tr("כִּמְעַט! נַסּוּ שׁוּב 💪") else SocialMe.g(tr("הַזְּמַן הַזֶּה שֶׁלְּךָ — רַק אַתָּה פּוֹתֵחַ אוֹתוֹ"), tr("הַזְּמַן הַזֶּה שֶׁלָּךְ — רַק אַתְּ פּוֹתַחַת אוֹתוֹ")), 15.5f, alpha = 0.85f)
             PinDots(entered.length)
             VSpace(10)
             PinPad { key ->
@@ -97,7 +98,7 @@ internal fun KidPinForgot(
         ) {
             Text("💌", fontSize = 54.sp)
             KidTitle(tr("זֶה בְּסֵדֶר, קוֹרֶה לְכֻלָּם!"), 25)
-            KidBody(tr("שָׁלַחְנוּ עַכְשָׁיו הוֹדָעָה לְאַבָּא וּלְאִמָּא 💌\nהֵם רוֹאִים אֶת הַקּוֹד שֶׁלְּךָ בַּלּוּחַ שֶׁלָּהֶם,\nוְיוֹדְעִים אֵיךְ לַעֲזוֹר."), 16f, alpha = 0.9f)
+            KidBody(SocialMe.g(tr("שָׁלַחְנוּ עַכְשָׁיו הוֹדָעָה לְאַבָּא וּלְאִמָּא 💌\nהֵם רוֹאִים אֶת הַקּוֹד שֶׁלְּךָ בַּלּוּחַ שֶׁלָּהֶם,\nוְיוֹדְעִים אֵיךְ לַעֲזוֹר."), tr("שָׁלַחְנוּ עַכְשָׁיו הוֹדָעָה לְאַבָּא וּלְאִמָּא 💌\nהֵם רוֹאִים אֶת הַקּוֹד שֶׁלָּךְ בַּלּוּחַ שֶׁלָּהֶם,\nוְיוֹדְעִים אֵיךְ לַעֲזוֹר.")), 16f, alpha = 0.9f)
             Column(Modifier.widthIn(max = 340.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 KidCta(tr("אֲנִי הוֹרֶה · אִפּוּס עִם קוֹד הוֹרֶה"), Color(0xFF5E60CE), Color(0xFF3E8BF0), emoji = "🔑", size = 16) { gate = true }
                 Text(tr("סְגִירָה"), Modifier.clickable(onClick = onClose).padding(8.dp), color = Color.White.copy(alpha = 0.8f),
@@ -126,7 +127,7 @@ internal fun KidPinSet(onDone: (String) -> Unit, onCancel: () -> Unit) {
             KidTitle(if (first == null) tr("בַּחֲרוּ קוֹד סוֹדִי") else tr("עוֹד פַּעַם, לִבְדִיקָה"), 27)
             KidBody(when {
                 almost -> tr("הַקּוֹדִים לֹא הָיוּ אוֹתוֹ דָּבָר — בּוֹאוּ נְנַסֶּה שׁוּב 🙂")
-                first == null -> tr("4 סְפָרוֹת שֶׁרַק אַתָּה תֵּדַע — לֹא אַחִים וְלֹא חֲבֵרִים 😉")
+                first == null -> SocialMe.g(tr("4 סְפָרוֹת שֶׁרַק אַתָּה תֵּדַע — לֹא אַחִים וְלֹא חֲבֵרִים 😉"), tr("4 סְפָרוֹת שֶׁרַק אַתְּ תֵּדְעִי — לֹא אַחִים וְלֹא חֲבֵרִים 😉"))
                 else -> tr("מַקְלִידִים אֶת אוֹתוֹ קוֹד שׁוּב")
             }, 15.5f, alpha = 0.85f)
             PinDots(entered.length)
@@ -159,8 +160,8 @@ internal fun KidPinManage(onChange: () -> Unit, onRemove: () -> Unit, onClose: (
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         ) {
             Text("🔒", fontSize = 54.sp, modifier = Modifier.padding(top = 60.dp))
-            KidTitle(tr("הַזְּמַן שֶׁלְּךָ מוּגָן"), 26)
-            KidBody(tr("רַק מִי שֶׁיּוֹדֵעַ אֶת הַקּוֹד יָכוֹל לִפְתּוֹחַ אֶת דַּקּוֹת הַמִּשְׂחָק שֶׁלְּךָ."), 15f, alpha = 0.85f)
+            KidTitle(SocialMe.g(tr("הַזְּמַן שֶׁלְּךָ מוּגָן"), tr("הַזְּמַן שֶׁלָּךְ מוּגָן")), 26)
+            KidBody(SocialMe.g(tr("רַק מִי שֶׁיּוֹדֵעַ אֶת הַקּוֹד יָכוֹל לִפְתּוֹחַ אֶת דַּקּוֹת הַמִּשְׂחָק שֶׁלְּךָ."), tr("רַק מִי שֶׁיּוֹדֵעַ אֶת הַקּוֹד יָכוֹל לִפְתּוֹחַ אֶת דַּקּוֹת הַמִּשְׂחָק שֶׁלָּךְ.")), 15f, alpha = 0.85f)
             Column(Modifier.widthIn(max = 340.dp), verticalArrangement = Arrangement.spacedBy(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 KidCta(tr("הַחְלָפַת הַקּוֹד"), Color(0xFF5E60CE), Color(0xFF3E8BF0), emoji = "🔁", size = 17, onClick = onChange)
                 KidCta(tr("הֲסָרַת הַקּוֹד"), Color.White.copy(alpha = 0.16f), Color.White.copy(alpha = 0.16f), emoji = "🔓", size = 16, onClick = onRemove)

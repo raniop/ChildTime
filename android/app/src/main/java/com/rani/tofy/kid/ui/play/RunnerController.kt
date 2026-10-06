@@ -18,6 +18,7 @@ import com.rani.tofy.kid.content.Question
 import com.rani.tofy.kid.content.QuestionReporter
 import com.rani.tofy.kid.content.QuestionSession
 import com.rani.tofy.kid.content.QuestionSource
+import com.rani.tofy.kid.content.CurriculumMath
 import com.rani.tofy.kid.core.AnswerContext
 import com.rani.tofy.kid.core.ChestKind
 import com.rani.tofy.kid.core.KidSession
@@ -144,6 +145,11 @@ class RunnerController(
         contentLang = AppLanguage.of(c.language) ?: I18n.language
         QuestionSource.preload(contentLang)
         profile = ChildContentProfile.from(c, household, KidSession.engine()?.snapshot?.toFirestore(), I18n.language)
+        // 🏆 A world's silver/gold tier asks one/two grades up (pre-readers stay put).
+        (mode as? ContentMode.World)?.let { m ->
+            val offset = KidSession.engine()?.tierGradeOffset(PlayWorlds.forTopic(m.topic).id) ?: 0
+            if (profile.grade >= 1 && offset > 0) profile = profile.copy(grade = minOf(CurriculumMath.TOP_GRADE, profile.grade + offset))
+        }
         session = QuestionSource.session(profile, mode)
         phase = Phase.PLAYING
         startSession()
@@ -153,6 +159,8 @@ class RunnerController(
     private fun startSession() {
         startedLevel = KidSession.engine()?.companionLevel ?: 1
         KidSession.startSession()
+        // 🏆 Straight-to-questions worlds skip the chooser — still a first visit.
+        (mode as? ContentMode.World)?.let { m -> KidSession.edit { it.markVisited(PlayWorlds.forTopic(m.topic).id) } }
         KidSession.boundChildID?.let { LearningHistoryRecorder.recordSessionStart(it) }
         questionIndex = 0; correctInSession = 0; consecutiveWrong = 0; roundSeconds = 0
         capMessageShown = false
@@ -161,7 +169,7 @@ class RunnerController(
         nextSurpriseAt = SurpriseRound.nextGap()
         scope.launch {
             delay(300)
-            companion.cheer(if (isFeed) tr("טוֹפִי טַיים — קָדִימָה! 🧠") else tr("מוּכָן? קָדִימָה!"))
+            companion.cheer(if (isFeed) tr("טוֹפִי טַיים — קָדִימָה! 🧠") else g(tr("מוּכָן? קָדִימָה!"), tr("מוּכָנָה? קָדִימָה!")))
         }
         nextQuestion()
     }
@@ -265,7 +273,7 @@ class RunnerController(
         // Celebrate / soften only a real band change (never "it got hard").
         when (served.bandChange) {
             1 -> companion.hype(g(tr("מִתְקַדֵּם שָׁלָב! 🚀"), tr("מִתְקַדֶּמֶת שָׁלָב! 🚀")))
-            -1 -> companion.cheer(tr("בּוֹא נַעֲשֶׂה חִימּוּם קָטָן 🌟"))
+            -1 -> companion.cheer(g(tr("בּוֹא נַעֲשֶׂה חִימּוּם קָטָן 🌟"), tr("בּוֹאִי נַעֲשֶׂה חִימּוּם קָטָן 🌟")))
         }
         show(served.question, served.topic)
         // Early readers hear the instruction automatically.
@@ -436,7 +444,7 @@ class RunnerController(
         // A miss is owed by the next right answer (which then pays, and adds to
         // `roundSeconds`, that much less) — nothing to take off here.
         // …and no "−12 שניות" either (Rani, 2026-10-06): the balance never drops, so only the encouraging line.
-        companion.console(listOf(tr("כִּמְעַט!"), tr("מַמָּשׁ קָרוֹב"), tr("בּוֹא נְנַסֶּה שׁוּב"), tr("נְנַסֶּה אֶת הַבָּאָה"),
+        companion.console(listOf(tr("כִּמְעַט!"), tr("מַמָּשׁ קָרוֹב"), g(tr("בּוֹא נְנַסֶּה שׁוּב"), tr("בּוֹאִי נְנַסֶּה שׁוּב")), tr("נְנַסֶּה אֶת הַבָּאָה"),
             tr("⭐ עוֹד תְּשׁוּבָה נְכוֹנָה וְחוֹזְרִים לְהִתְקַדֵּם")).random())
     }
 
@@ -467,15 +475,15 @@ class RunnerController(
         haptics()?.medium()
         burstTrigger++
         when (helperLevel) {
-            HelpLevel.ENCOURAGE -> companion.cheer(tr("הֵסַרְתִּי לְךָ אוֹפְּצְיָה! אַתָּה יָכוֹל 💪"))
-            HelpLevel.HINT -> companion.cheer(tr("הֵסַרְתִּי אוֹפְּצְיָה. %@", HintContent.hint(q.topic)))
-            HelpLevel.EXPLAIN -> companion.cheer(HintContent.explain(q.topic))
+            HelpLevel.ENCOURAGE -> companion.cheer(g(tr("הֵסַרְתִּי לְךָ אוֹפְּצְיָה! אַתָּה יָכוֹל 💪"), tr("הֵסַרְתִּי לָךְ אוֹפְּצְיָה! אַתְּ יְכוֹלָה 💪")))
+            HelpLevel.HINT -> companion.cheer(tr("הֵסַרְתִּי אוֹפְּצְיָה. %@", HintContent.hint(q.topic, isGirl)))
+            HelpLevel.EXPLAIN -> companion.cheer(HintContent.explain(q.topic, isGirl))
         }
     }
 
     /** 🪄 "Swap question" — after two misses in a row. Replacing is an abandon signal. */
     fun magicWand() {
-        companion.cheer(tr("בּוֹא נְנַסֶּה אַחֶרֶת"))
+        companion.cheer(g(tr("בּוֹא נְנַסֶּה אַחֶרֶת"), tr("בּוֹאִי נְנַסֶּה אַחֶרֶת")))
         KidSession.edit { it.recordAbandon(currentTopic.raw) }
         createQuestion(isSuperQuestion)
         consecutiveWrong = 0
@@ -545,7 +553,7 @@ class RunnerController(
         KidSounds.play(AppSound.STREAK_UP)
         haptics()?.success()
         burstTrigger++
-        companion.wow(tr("✨ קִבַּלְתָּ רֶמֶז מֵהוֹרֶה!"))
+        companion.wow(g(tr("✨ קִבַּלְתָּ רֶמֶז מֵהוֹרֶה!"), tr("✨ קִבַּלְתְּ רֶמֶז מֵהוֹרֶה!")))
         receivedHelpThisQuestion = true
     }
 

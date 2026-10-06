@@ -112,7 +112,7 @@ struct LuckyWheelView: View {
                 .font(.system(size: isCompact ? 30 : 40, weight: .black, design: .rounded))
                 .foregroundStyle(GlassInk.primary)
                 .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
-            Text(winner == nil ? tr("הַקֵּשׁ עַל הַגַּלְגַּל כְּדֵי לְסוֹבֵב ✨") : tr("אֵיזֶה כֵּיף! 🎉"))
+            Text(winner == nil ? Gendered.g(tr("הַקֵּשׁ עַל הַגַּלְגַּל כְּדֵי לְסוֹבֵב ✨"), tr("הַקִּישִׁי עַל הַגַּלְגַּל כְּדֵי לְסוֹבֵב ✨")) : tr("אֵיזֶה כֵּיף! 🎉"))
                 .font(.system(size: 13.5, weight: .semibold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
         }
@@ -199,7 +199,7 @@ struct LuckyWheelView: View {
         VStack(spacing: 10) {
             Text(prize.emoji)
                 .font(.system(size: 54))
-            Text(prize.isPenalty ? tr("מְשִׂימָה מִשְׁפַּחְתִּית 🤗") : tr("זָכִיתָ!"))
+            Text(prize.isPenalty ? tr("מְשִׂימָה מִשְׁפַּחְתִּית 🤗") : Gendered.g(tr("זָכִיתָ!"), tr("זָכִית!")))
                 .font(.system(size: 18, weight: .heavy, design: .rounded))
                 .foregroundStyle(prize.isPenalty ? AppColor.companionGlow : AppColor.starGold)
             Text(prize.label)
@@ -222,9 +222,9 @@ struct LuckyWheelView: View {
 
     private var primaryButton: some View {
         let label: String = {
-            if winner != nil { return tr("אַחְלָה — סְגוֹר") }
+            if winner != nil { return Gendered.g(tr("אַחְלָה — סְגוֹר"), tr("אַחְלָה — סִגְרִי")) }
             if isSpinning   { return tr("מִסְתּוֹבֵב…") }
-            return tr("סוֹבֵב!")
+            return Gendered.g(tr("סוֹבֵב!"), tr("סוֹבְבִי!"))
         }()
         return Button {
             if winner != nil { onClose() }
@@ -249,7 +249,7 @@ struct LuckyWheelView: View {
             Haptic.light()
             onClose()
         } label: {
-            Text(winner == nil ? tr("דַּלֵּג הַפַּעַם") : tr("סְגוֹר"))
+            Text(winner == nil ? Gendered.g(tr("דַּלֵּג הַפַּעַם"), tr("דַּלְּגִי הַפַּעַם")) : Gendered.g(tr("סְגוֹר"), tr("סִגְרִי")))
                 .font(.system(size: 13.5, weight: .heavy, design: .rounded))
                 .foregroundStyle(GlassInk.primary)
                 .padding(.horizontal, 16).padding(.vertical, 9)

@@ -29,6 +29,13 @@ struct BossBattleView: View {
     @State private var earnedMinutes = 0
     @State private var revealStep = 0
     @State private var shownAt = Date()
+    /// What this win actually paid (a same-day replay pays less — the pills
+    /// used to show the full 20⭐ 30💎 either way).
+    @State private var wonStars = 0
+    @State private var wonDiamonds = 0
+    /// 🏆 The tier this win completed (0 bronze…2 gold), nil on a replay.
+    @State private var completedTier: Int?
+    @State private var suggested: World?
 
     var body: some View {
         ZStack {
@@ -117,7 +124,7 @@ struct BossBattleView: View {
 
             // Player hearts
             HStack(spacing: 8) {
-                Text(tr("הַלְּבָבוֹת שֶׁלְּךָ:")).font(.system(size: 14, weight: .semibold, design: .rounded))
+                Text(Gendered.g(tr("הַלְּבָבוֹת שֶׁלְּךָ:"), tr("הַלְּבָבוֹת שֶׁלָּךְ:"))).font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                 heartsRow(count: startHearts, filled: hearts, color: Color(hex: "FF5E78"), symbol: "heart.fill")
             }
@@ -158,27 +165,92 @@ struct BossBattleView: View {
         VStack(spacing: 18) {
             CharacterView(character: Character3DCatalog.find("lion"))
                 .frame(width: 130, height: 130)
-            Text(win ? tr("נִצַּחְתָּ אֶת הַבּוֹס! 🏆") : tr("כִּמְעַט! בּוֹא נְנַסֶּה שׁוּב 💪"))
+            Text(win ? winTitle : Gendered.g(tr("כִּמְעַט! בּוֹא נְנַסֶּה שׁוּב 💪"), tr("כִּמְעַט! בּוֹאִי נְנַסֶּה שׁוּב 💪")))
                 .font(.system(size: 28, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).multilineTextAlignment(.center)
             if win {
                 HStack(spacing: 14) {
-                    bossRewardPill("⭐", 20, AppColor.starGold, step: 1)
-                    bossRewardPill("💎", 30, AppColor.gemPurple, step: 2)
-                    bossRewardPill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: tr(" דק׳"))
+                    if wonStars > 0 { bossRewardPill("⭐", wonStars, AppColor.starGold, step: 1) }
+                    if wonDiamonds > 0 { bossRewardPill("💎", wonDiamonds, AppColor.gemPurple, step: 2) }
+                    if earnedMinutes > 0 { bossRewardPill("🎮", earnedMinutes, AppColor.successMint, step: 3, suffix: tr(" דק׳")) }
                 }
+                if let done = completedTier { tierUnlockCard(done: done) }
             }
             VStack(spacing: 12) {
                 if !win {
                     Button { restart() } label: { ctaLabel(tr("עוֹד נִסָּיוֹן 🔁"), dark: true) }
                         .buttonStyle(.juicy)
                 }
-                Button(action: onClose) { ctaLabel(win ? tr("יֵשׁ! 🎉") : tr("חֲזָרָה"), dark: win) }
+                Button(action: onClose) { ctaLabel(win ? winCTA : tr("חֲזָרָה"), dark: win) }
                     .buttonStyle(.juicy)
+                if win, completedTier != nil, let next = suggested {
+                    Button {
+                        Haptic.light()
+                        WorldRouter.shared.pending = next
+                    } label: {
+                        Text(tr("אוֹ עוֹלָם חָדָשׁ: \(next.name) ✨ +\(ProgressStore.firstVisitDiamonds) 💎"))
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
+                            .lineLimit(2).multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity).padding(.vertical, 12).padding(.horizontal, 10)
+                            .background(Capsule().fill(.white.opacity(0.14)))
+                            .overlay(Capsule().strokeBorder(.white.opacity(0.4), lineWidth: 1))
+                    }
+                    .buttonStyle(.juicy)
+                }
             }
             .padding(.horizontal, 44).padding(.top, 6)
         }
         .padding(28)
+    }
+
+    // MARK: - 🏆 Tier completion
+
+    private var winTitle: String {
+        guard let done = completedTier else { return Gendered.g(tr("נִצַּחְתָּ אֶת הַבּוֹס! 🏆"), tr("נִצַּחַתְּ אֶת הַבּוֹס! 🏆")) }
+        if done >= ProgressStore.worldTierCount - 1 {
+            return Gendered.g(tr("אַלּוּף הָעוֹלָם! 👑"), tr("אַלּוּפַת הָעוֹלָם! 👑"))
+        }
+        return Gendered.g(tr("הִשְׁלַמְתָּ אֶת הַדַּרְגָּה! 🏆"), tr("הִשְׁלַמְתְּ אֶת הַדַּרְגָּה! 🏆"))
+    }
+
+    private var winCTA: String {
+        guard let done = completedTier, done < ProgressStore.worldTierCount - 1 else { return tr("יֵשׁ! 🎉") }
+        return tr("לְדַרְגָּה \(done + 2) 🚀")
+    }
+
+    /// "⭐⭐ דַּרְגַּת כֶּסֶף נִפְתְּחָה!" — or, after gold, the world is done.
+    private func tierUnlockCard(done: Int) -> some View {
+        let next = done + 1
+        let title: String
+        let line: String
+        switch next {
+        case 1:
+            title = tr("⭐⭐ דַּרְגַּת כֶּסֶף נִפְתְּחָה!")
+            line = tr("שְׁאֵלוֹת קָשׁוֹת יוֹתֵר, פְּרָסִים גְּדוֹלִים יוֹתֵר")
+        case 2:
+            title = tr("⭐⭐⭐ דַּרְגַּת זָהָב נִפְתְּחָה!")
+            line = tr("הַדַּרְגָּה הָאַחֲרוֹנָה — וְהִיא הַכִּי קָשָׁה")
+        default:
+            title = tr("👑 הָעוֹלָם הֻשְׁלַם")
+            line = Gendered.g(tr("עָבַרְתָּ אֶת כָּל הַדַּרְגּוֹת! אֶפְשָׁר לְהַמְשִׁיךְ לְשַׂחֵק כָּאן תָּמִיד"),
+                              tr("עָבַרְתְּ אֶת כָּל הַדַּרְגּוֹת! אֶפְשָׁר לְהַמְשִׁיךְ לְשַׂחֵק כָּאן תָּמִיד"))
+        }
+        return VStack(spacing: 4) {
+            Text(title)
+                .font(.system(size: 18, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+            Text(line)
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.88))
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12).padding(.horizontal, 14)
+        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(.white.opacity(0.14)))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
+            .strokeBorder(WorldTiers.color(tier: next).opacity(0.9), lineWidth: 1.5))
+        .padding(.horizontal, 20)
     }
 
     private func bossRewardPill(_ emoji: String, _ value: Int, _ color: Color, step: Int, suffix: String = "") -> some View {
@@ -231,7 +303,10 @@ struct BossBattleView: View {
             let base = profile?.difficulty(for: world.topic) ?? .easy
             let level = ProgressStore.shared.adaptiveLevel(for: world.topic, base: base)
             var grade = profile?.effectiveGrade
+            // 🏆 Silver/gold bosses start one/two grades up, like their rooms.
+            if let g = grade { grade = g + ProgressStore.shared.tierGradeOffset(in: world.id) }
             if let g = grade, level >= 1.75 { grade = g + 1 }
+            if let g = grade { grade = min(CurriculumMath.topGrade, g) }
             question = QuestionGenerator.generate(topic: world.topic, difficulty: .hard,
                                                   grade: grade)
         }
@@ -283,12 +358,19 @@ struct BossBattleView: View {
             return DayGate.usedToday(UserDefaults.standard.object(forKey: dayKey) as? Date)
         }()
         if alreadyToday {
-            earnedMinutes = 0
+            earnedMinutes = 0; wonStars = 2; wonDiamonds = 0
             progress.applyChestReward(ChestReward(stars: 2, diamonds: 0, minutes: 0))
         } else {
-            earnedMinutes = 5
+            earnedMinutes = 5; wonStars = 20; wonDiamonds = 30
             progress.applyChestReward(ChestReward(stars: 20, diamonds: 30, minutes: earnedMinutes))
             UserDefaults.standard.set(Date(), forKey: dayKey)
+        }
+        // 🏆 Beaten in the last room → the tier is complete (+100 💎, next tier
+        // a grade up). Not for the arena — it has no tiers.
+        if !world.isBonusWorld, let done = progress.completeTier(in: world.id) {
+            completedTier = done
+            wonDiamonds += ProgressStore.tierCompleteDiamonds
+            suggested = WorldTiers.suggestedNewWorld(excluding: world.id)
         }
         SoundPlayer.shared.play(.worldUnlock)
         Haptic.success()
@@ -304,6 +386,7 @@ struct BossBattleView: View {
 
     private func restart() {
         bossHP = bossMaxHP; hearts = startHearts; phase = .fighting; revealStep = 0
+        completedTier = nil; suggested = nil
         newQuestion()
     }
 }

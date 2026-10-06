@@ -70,6 +70,7 @@ import com.rani.tofy.ui.theme.Rounded
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.rani.tofy.kid.ui.social.SocialMe
 
 private const val TEETH = 7
 private const val SPLIT = 0.46f
@@ -199,7 +200,7 @@ fun HatchingScreen(onContinue: () -> Unit) {
                 )
             }
             AnimatedVisibility(bubble, enter = scaleIn() + fadeIn()) {
-                CompanionBubble(tr("הֵיי! חִכִּיתִי לְךָ... אֲנִי טוֹפִי! 💫"))
+                CompanionBubble(SocialMe.g(tr("הֵיי! חִכִּיתִי לְךָ... אֲנִי טוֹפִי! 💫"), tr("הֵיי! חִכִּיתִי לָךְ... אֲנִי טוֹפִי! 💫")))
             }
             Spacer(Modifier.weight(1f))
             AnimatedVisibility(stage >= 4, enter = fadeIn()) {

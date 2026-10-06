@@ -125,7 +125,7 @@ struct MemoryMatchView: View {
             Text(mistakes <= 2 ? tr("זִכָּרוֹן מְצֻיָּן! 🌟") : tr("כָּל הַכָּבוֹד! 🎉"))
                 .font(.system(size: 32, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).shadow(color: .black.opacity(0.25), radius: 6, y: 3)
-            Text(tr("מָצָאתָ אֶת כָּל הַזּוּגוֹת!"))
+            Text(Gendered.g(tr("מָצָאתָ אֶת כָּל הַזּוּגוֹת!"), tr("מָצָאת אֶת כָּל הַזּוּגוֹת!")))
                 .font(.system(size: 17, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.9))
             HStack(spacing: 14) {
                 pill("⭐", pairCount, AppColor.starGold, step: 1)

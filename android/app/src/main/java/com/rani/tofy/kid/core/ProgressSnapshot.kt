@@ -107,6 +107,13 @@ data class ProgressSnapshot(
     var lastDailyChallengeDate: Double? = null,
     var unlockedWorlds: List<String> = listOf("numbers_kingdom"),
     var worldProgress: Map<String, Int> = emptyMap(),
+    /**
+     * 🏆 World tiers: tier × 10 + room (room 0…9), only ever grows, so the
+     * max-merge stays right across devices. 0…9 ⭐ bronze, 10…19 ⭐⭐ silver,
+     * 20…29 ⭐⭐⭐ gold, 30 = champion. A key's presence also means "visited".
+     * `worldProgress` stays the legacy room counter (capped at 9) for old builds.
+     */
+    var worldStage: Map<String, Int> = emptyMap(),
     var topicAccuracy: Map<String, Double> = emptyMap(),
     var topicAnswered: Map<String, Int> = emptyMap(),
     var topicCorrect: Map<String, Int> = emptyMap(),
@@ -193,6 +200,7 @@ data class ProgressSnapshot(
         put("lastDailyChallengeDate", lastDailyChallengeDate)
         put("unlockedWorlds", unlockedWorlds)
         put("worldProgress", worldProgress)
+        put("worldStage", worldStage)
         put("topicAccuracy", topicAccuracy)
         put("topicAnswered", topicAnswered)
         put("topicCorrect", topicCorrect)
@@ -269,6 +277,7 @@ data class ProgressSnapshot(
             raw.dbl("lastDailyChallengeDate")?.let { s.lastDailyChallengeDate = it }
             raw.strList("unlockedWorlds")?.let { s.unlockedWorlds = it }
             raw.intMap("worldProgress")?.let { s.worldProgress = it }
+            raw.intMap("worldStage")?.let { s.worldStage = it }
             raw.dblMap("topicAccuracy")?.let { s.topicAccuracy = it }
             raw.intMap("topicAnswered")?.let { s.topicAnswered = it }
             raw.intMap("topicCorrect")?.let { s.topicCorrect = it }
@@ -360,6 +369,7 @@ data class ProgressSnapshot(
             m.topicExposure = mergeMaxInt(local.topicExposure, remote.topicExposure)
             m.topicAbandon = mergeMaxInt(local.topicAbandon, remote.topicAbandon)
             m.worldProgress = mergeMaxInt(local.worldProgress, remote.worldProgress)
+            m.worldStage = mergeMaxInt(local.worldStage, remote.worldStage)
             m.unlockedWorlds = LinkedHashSet(local.unlockedWorlds).apply { addAll(remote.unlockedWorlds) }.toList()
             m.ownedCharacterIDs = LinkedHashSet(local.ownedCharacterIDs).apply { addAll(remote.ownedCharacterIDs) }.toList()
             // dayStreak is paired with lastSessionDate: follow whoever played last.

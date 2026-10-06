@@ -63,7 +63,7 @@ struct LevelUpView: View {
                         }
 
                         Button { Haptic.light(); onContinue() } label: {
-                            Text(tr("הַמְשֵׁךְ"))
+                            Text(Gendered.g(tr("הַמְשֵׁךְ"), tr("הַמְשִׁיכִי")))
                                 .font(.system(size: 22, weight: .heavy, design: .rounded))
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)

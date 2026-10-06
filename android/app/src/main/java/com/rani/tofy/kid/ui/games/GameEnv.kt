@@ -43,6 +43,8 @@ interface GameSource {
     fun adaptiveLevel(topic: Topic): Double?
     fun topicAnswered(topic: Topic): Int
     fun affinity(topic: Topic): Double
+    /** 🏆 ProgressStore.tierGradeOffset(in:) — grades added in a world's silver/gold tier. */
+    fun tierGradeOffset(worldID: String): Int = 0
 }
 
 /** The real source: the child bound to [KidSession]. Touched lazily (KidSession needs Android). */
@@ -65,6 +67,7 @@ object KidGameSource : GameSource {
     override fun adaptiveLevel(topic: Topic): Double? = KidSession.engine()?.snapshot?.topicAdaptiveLevel?.get(topic.raw)
     override fun topicAnswered(topic: Topic): Int = KidSession.engine()?.snapshot?.topicAnswered?.get(topic.raw) ?: 0
     override fun affinity(topic: Topic): Double = KidSession.engine()?.affinity(topic.raw) ?: 0.5
+    override fun tierGradeOffset(worldID: String): Int = KidSession.engine()?.tierGradeOffset(worldID) ?: 0
 }
 
 /** Tests: a fixed child. */

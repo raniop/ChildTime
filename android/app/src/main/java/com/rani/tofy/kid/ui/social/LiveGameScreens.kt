@@ -222,7 +222,7 @@ private fun LiveGameView(onExit: () -> Unit, onPlayAgain: () -> Unit) {
         ConfettiOverlay(confetti)
         if (showQuit) KidCenterCard(onDismiss = { showQuit = false }) {
             Text(tr("לָצֵאת מֵהַמִּשְׂחָק?"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 20.sp)
-            Text(if (amHost) tr("אַתָּה הַמַּנְהִיג — הַמִּשְׂחָק יִסְתַּיֵּם לְכָל הַחֲבֵרִים.") else tr("אֶפְשָׁר תָּמִיד לְהִצְטָרֵף לְמִשְׂחָק חָדָשׁ אַחַר כָּךְ."),
+            Text(if (amHost) SocialMe.g(tr("אַתָּה הַמַּנְהִיג — הַמִּשְׂחָק יִסְתַּיֵּם לְכָל הַחֲבֵרִים."), tr("אַתְּ הַמַּנְהִיגָה — הַמִּשְׂחָק יִסְתַּיֵּם לְכָל הַחֲבֵרִים.")) else tr("אֶפְשָׁר תָּמִיד לְהִצְטָרֵף לְמִשְׂחָק חָדָשׁ אַחַר כָּךְ."),
                 color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontSize = 15.sp, textAlign = TextAlign.Center)
             BrushCapsule(if (amHost) tr("כֵּן, לְסַיֵּם לְכוּלָּם") else tr("כֵּן, לָצֵאת"), androidx.compose.ui.graphics.SolidColor(Color(0xFFEF4655)), Modifier.fillMaxWidth()) {
                 showQuit = false; onExit()
@@ -368,7 +368,7 @@ private fun QuestionView(g: LiveGame, meID: String?) {
                     if (pair.size == 1) Spacer(Modifier.weight(1f))
                 }
             }
-            if (answered) Text("✅ " + tr("עָנִיתָ! מְחַכִּים לַשְּׁאָר…"), Modifier.fillMaxWidth().padding(top = 6.dp), color = SocialColor.starGold,
+            if (answered) Text("✅ " + SocialMe.g(tr("עָנִיתָ! מְחַכִּים לַשְּׁאָר…"), tr("עָנִית! מְחַכִּים לַשְּׁאָר…")), Modifier.fillMaxWidth().padding(top = 6.dp), color = SocialColor.starGold,
                 fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, textAlign = TextAlign.Center)
         }
     }
@@ -462,7 +462,7 @@ private fun RevealView(g: LiveGame, meID: String?, onPeek: (LiveGamePlayer) -> U
                     .padding(horizontal = 18.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(text, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, maxLines = 2)
                     if (isCorrect) Text("✓", color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Black)
-                    else if (isMine) Text(tr("בָּחַרְתָּ"), color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp, fontWeight = FontWeight.Bold, fontFamily = Rounded)
+                    else if (isMine) Text(SocialMe.g(tr("בָּחַרְתָּ"), tr("בָּחַרְתְּ")), color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp, fontWeight = FontWeight.Bold, fontFamily = Rounded)
                 }
             }
         }
@@ -529,9 +529,9 @@ private fun FinalView(g: LiveGame, meID: String?, onExit: () -> Unit, onPlayAgai
         Column(Modifier.fillMaxSize().padding(top = 56.dp, bottom = 16.dp), horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Text(if (iWon) "🏆" else "🎉", fontSize = 76.sp)
-            Text(if (iWon) tr("וָואו, נִצַּחְתָּ! 🤩") else tr("כָּל הַכָּבוֹד! 🎉"), Modifier.padding(horizontal = 16.dp),
+            Text(if (iWon) SocialMe.g(tr("וָואו, נִצַּחְתָּ! 🤩"), tr("וָואו, נִצַּחַתְּ! 🤩")) else tr("כָּל הַכָּבוֹד! 🎉"), Modifier.padding(horizontal = 16.dp),
                 color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 32.sp, textAlign = TextAlign.Center)
-            Text(tr("הַפְּרָסִים שֶׁלְּךָ:"), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
+            Text(SocialMe.g(tr("הַפְּרָסִים שֶׁלְּךָ:"), tr("הַפְּרָסִים שֶׁלָּךְ:")), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 PrizePill("⭐", if (iWon) LiveGameRules.WINNER_STARS else LiveGameRules.PARTICIPATION_STARS, SocialColor.starGold)
                 PrizePill("💎", if (iWon) LiveGameRules.WINNER_DIAMONDS else LiveGameRules.PARTICIPATION_DIAMONDS, SocialColor.diamondBlue)
@@ -554,7 +554,7 @@ private fun FinalView(g: LiveGame, meID: String?, onExit: () -> Unit, onPlayAgai
                 }
             }
             Column(Modifier.widthIn(max = 520.dp).padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                WhiteCapsule(tr("שַׂחֵק שׁוּב 🔄"), Modifier.fillMaxWidth(), size = 19) { haptics.light(); onPlayAgain() }
+                WhiteCapsule(SocialMe.g(tr("שַׂחֵק שׁוּב 🔄"), tr("שַׂחֲקִי שׁוּב 🔄")), Modifier.fillMaxWidth(), size = 19) { haptics.light(); onPlayAgain() }
                 Text(tr("סִיּוּם"), Modifier.fillMaxWidth().clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
                     .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).clickable(onClick = onExit).padding(vertical = 13.dp),
                     color = Color.White.copy(alpha = 0.9f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, textAlign = TextAlign.Center)
@@ -616,8 +616,8 @@ private fun PlayerPeekSheet(player: LiveGamePlayer, onClose: () -> Unit) {
             }
             Text(tr("בַּמִּשְׂחָק הַזֶּה"), color = Color.White.copy(alpha = 0.7f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
             when {
-                isMe -> Text("👤 " + tr("זֶה אַתָּה 🙂"), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
-                added || f.isFriend(player.id) -> Text("✅ " + tr("חָבֵר שֶׁלְּךָ"), color = SocialColor.successMint, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
+                isMe -> Text("👤 " + SocialMe.g(tr("זֶה אַתָּה 🙂"), tr("זוֹ אַתְּ 🙂")), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                added || f.isFriend(player.id) -> Text("✅ " + SocialMe.g(tr("חָבֵר שֶׁלְּךָ"), tr("חָבֵר שֶׁלָּךְ")), color = SocialColor.successMint, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
                 !card?.code.isNullOrEmpty() -> WhiteCapsule(if (adding) "…" else "➕ " + tr("הוֹסִיפוּ לַחֲבֵרִים"), Modifier.fillMaxWidth(), size = 18, enabled = !adding) {
                     adding = true
                     scope.launch {

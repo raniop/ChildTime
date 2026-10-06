@@ -16,6 +16,8 @@ class TofyApp : Application() {
         if (BuildConfig.DEBUG && BuildConfig.USE_EMULATORS) useLocalEmulators()
         else if (FirebaseApp.getApps(this).isEmpty()) FirebaseApp.initializeApp(this)
         I18n.init(this)
+        // 🔄 "There is a newer Tofy" (config/appUpdate) — cached numbers now, the listener once signed in.
+        com.rani.tofy.update.AppUpdateConfig.init(this)
         DeviceRole.init(this)
         createChannels()
         // Kid side: content assets/cache + the progress session (both idempotent).

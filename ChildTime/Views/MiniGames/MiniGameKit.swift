@@ -279,7 +279,7 @@ struct MiniGameTopBar<Trailing: View>: View {
                 MiniGameChip { Image(systemName: "xmark").font(.system(size: 13, weight: .heavy)) }
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(tr("סְגֹר"))
+            .accessibilityLabel(Gendered.g(tr("סְגֹר"), tr("סִגְרִי")))
             Spacer(minLength: 0)
             MiniGameChip {
                 Text("💎 \(progress.diamonds.currencyShort)")

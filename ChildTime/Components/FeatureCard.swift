@@ -12,7 +12,7 @@ struct FeatureCard: View {
     var badge: String? = nil
     var badgeTint: Color? = nil
     /// Footer line; a nil `footFrac` draws a full decorative track.
-    var foot: String = tr("✨ מֻתְאָם לְךָ")
+    var foot: String = Gendered.g(tr("✨ מֻתְאָם לְךָ"), tr("✨ מֻתְאָם לָךְ"))
     var footFrac: Double? = nil
     let onTap: () -> Void
 

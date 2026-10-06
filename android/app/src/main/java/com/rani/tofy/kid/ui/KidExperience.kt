@@ -39,6 +39,9 @@ import com.rani.tofy.kid.content.ContentMode
 import com.rani.tofy.kid.content.QuestionSource
 import com.rani.tofy.kid.core.KidEvent
 import com.rani.tofy.kid.core.KidSession
+import com.rani.tofy.kid.core.WorldStage
+import com.rani.tofy.kid.ui.games.GameDayGate
+import com.rani.tofy.kid.ui.games.GameEnv
 import com.rani.tofy.kid.core.OpenResult
 import com.rani.tofy.kid.core.ProgressEngine
 import com.rani.tofy.kid.core.ProgressEvent
@@ -58,6 +61,10 @@ import com.rani.tofy.kid.ui.home.KidHome
 import com.rani.tofy.kid.ui.home.KidWorld
 import com.rani.tofy.kid.ui.home.allWorlds
 import com.rani.tofy.kid.ui.home.homeTiles
+import com.rani.tofy.kid.ui.home.WorldRouter
+import com.rani.tofy.ui.child.ownsPack
+import androidx.compose.runtime.SideEffect
+import kotlinx.coroutines.flow.filterNotNull
 import com.rani.tofy.kid.ui.play.QuestionRunnerScreen
 import com.rani.tofy.kid.ui.shop.CharacterCollectionScreen
 import com.rani.tofy.kid.ui.shop.DailyChestScreen
@@ -77,6 +84,9 @@ import com.rani.tofy.kid.ui.social.choresTotalCount
 import com.rani.tofy.kid.ui.social.pendingChoresCount
 import com.rani.tofy.ui.child.Topic
 import com.rani.tofy.ui.child.hasPlayPIN
+import com.rani.tofy.update.AppUpdateConfig
+import com.rani.tofy.update.ForcedUpdateScreen
+import com.rani.tofy.update.UpdateKidNotice
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -179,6 +189,8 @@ private sealed class Cover {
     data object Challenge : Cover()
     data object Level : Cover()
     data class Stat(val kind: StatInfoKind) : Cover()
+    /** 🔄 "There is a newer Tofy" — told, and pointed at a grown-up. */
+    data object Update : Cover()
 }
 
 /** The full-screen kid destinations WorldMapView presents as fullScreenCovers. */
@@ -304,6 +316,21 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
         }
     }
 
+    // 🏆 WorldRouter: after a boss, "אוֹ עוֹלָם חָדָשׁ" closes the world on screen
+    // and opens the suggested one (WorldMapView's onReceive(WorldRouter.$pending)).
+    val premiumNow = household?.isPremium == true
+    SideEffect {
+        WorldRouter.access = WorldRouter.Access(premiumNow, playable, Topic.entries.filter { child?.ownsPack(it) == true }.toSet())
+    }
+    LaunchedEffect(cid) {
+        WorldRouter.pending.filterNotNull().collect { id ->
+            WorldRouter.pending.value = null
+            val next = allWorlds().firstOrNull { it.id == id } ?: return@collect
+            playing = null
+            entry = WorldEntry(next, worldOpensStraightToQuestions(next.topic?.raw ?: next.id))
+        }
+    }
+
     // checkWorldUnlocks + the greeting, once the engine is up.
     LaunchedEffect(cid, state != null) {
         if (state == null) return@LaunchedEffect
@@ -315,8 +342,23 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
             greeted = true
             delay(500)
             val ds = KidSession.engine()?.snapshot?.dayStreak ?: 0
-            say(when (ds) { 0 -> tr("הֵיי! יַאלְלָה לְהַרְפַּתְקָה 🌟"); 1 -> tr("בָּרוּךְ הַבָּא! 👋"); else -> tr("חָזַרְתָּ! %lld יָמִים בְּרֶצֶף 🔥", ds) })
+            say(when (ds) { 0 -> tr("הֵיי! יַאלְלָה לְהַרְפַּתְקָה 🌟"); 1 -> (if (childNow?.isGirl == true) tr("בְּרוּכָה הַבָּאָה! 👋") else tr("בָּרוּךְ הַבָּא! 👋")); else -> (if (childNow?.isGirl == true) tr("חָזַרְתְּ! %lld יָמִים בְּרֶצֶף 🔥", ds) else tr("חָזַרְתָּ! %lld יָמִים בְּרֶצֶף 🔥", ds)) })
         }
+    }
+
+    // 🔄 Below minAndroidBuild nothing may be reached (ForcedUpdateView). Never a
+    // store button on a kid surface; in Kid Mode the parent-gated exit stays, so a
+    // parent's own phone is never stuck pinned behind this screen.
+    val update by AppUpdateConfig.state.collectAsState()
+    if (update is AppUpdateConfig.State.Required) {
+        if (kidMode && cover == Cover.KidExit) ParentGate(household?.parentPinHash, householdLoaded,
+            tr("יְצִיאָה מִמַּצַּב יֶלֶד וְשִׁחְרוּר נְעִילַת הַמַּכְשִׁיר"), tr("אַמְּתוּ זֶהוּת כְּדֵי לָצֵאת מִמַּצַּב יֶלֶד"),
+            onAuthorized = { cover = null; onExitKidMode() }, onClose = { cover = null })
+        else {
+            BackHandler(enabled = kidMode) { cover = Cover.KidExit }
+            ForcedUpdateScreen(parent = false, onKidExit = if (kidMode) ({ cover = Cover.KidExit }) else null)
+        }
+        return
     }
 
     if (!lockSetupDone) {
@@ -366,14 +408,14 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     fun handle(r: OpenResult, gift: Boolean) {
         when (r) {
             is OpenResult.Opened, OpenResult.AlreadyOpen, OpenResult.Busy -> Unit
-            is OpenResult.HeldElsewhere -> say(tr("הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮"))
-            OpenResult.Insufficient -> say(tr("עוֹד קְצָת דַּקּוֹת וְנִפְתַּח לְךָ! 💪"))
+            is OpenResult.HeldElsewhere -> say((if (isGirl) tr("הַזְּמַן שֶׁלָּךְ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮") else tr("הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮")))
+            OpenResult.Insufficient -> say((if (isGirl) tr("עוֹד קְצָת דַּקּוֹת וְנִפְתַּח לָךְ! 💪") else tr("עוֹד קְצָת דַּקּוֹת וְנִפְתַּח לְךָ! 💪")))
             is OpenResult.Failed -> say(when {
                 !gift -> tr("רֶגַע, לֹא הִצְלַחְנוּ לִפְתֹּחַ עַכְשָׁיו — נְנַסֶּה שׁוּב 😊")
-                r.tellParent -> tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלְּךָ — סִפַּרְתִּי לַהוֹרִים שֶׁלְּךָ וְהֵם יַעַזְרוּ 😊")
-                else -> tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלְּךָ — נְנַסֶּה שׁוּב? 😊")
+                r.tellParent -> (if (isGirl) tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלָּךְ — סִפַּרְתִּי לַהוֹרִים שֶׁלָּךְ וְהֵם יַעַזְרוּ 😊") else tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלְּךָ — סִפַּרְתִּי לַהוֹרִים שֶׁלְּךָ וְהֵם יַעַזְרוּ 😊"))
+                else -> (if (isGirl) tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלָּךְ — נְנַסֶּה שׁוּב? 😊") else tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלְּךָ — נְנַסֶּה שׁוּב? 😊"))
             })
-            OpenResult.NothingToOpen -> say(if (gift) tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלְּךָ — נְנַסֶּה שׁוּב? 😊")
+            OpenResult.NothingToOpen -> say(if (gift) (if (isGirl) tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלָּךְ — נְנַסֶּה שׁוּב? 😊") else tr("רֶגַע, אֲנִי בּוֹדֵק אֶת הַמַּתָּנָה שֶׁלְּךָ — נְנַסֶּה שׁוּב? 😊"))
                 else tr("עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק 🎮"))
         }
     }
@@ -399,7 +441,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
         cover == Cover.PinSet -> KidPinSet(onDone = { pin ->
                 cover = null
                 scope.launch { JoinRepository.childWrite(cid, child?.householdID, mapOf("playPIN" to pin)) }
-                say(tr("הַזְּמַן שֶׁלְּךָ מוּגָן! 🔒"))
+                say((if (isGirl) tr("הַזְּמַן שֶׁלָּךְ מוּגָן! 🔒") else tr("הַזְּמַן שֶׁלְּךָ מוּגָן! 🔒")))
             }, onCancel = { cover = null })
         cover == Cover.PinManage -> KidPinManage(onChange = { cover = Cover.PinVerifyThenSet },
             onRemove = { cover = Cover.PinVerifyThenClear }, onClose = { cover = null })
@@ -430,6 +472,30 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
         }
         else -> {
             val premium = household?.isPremium == true
+            // 🏆 THE one never-visited world Tofy suggests — decided when the home
+            // appears (WorldMapView.onAppear → suggestedWorldID), not per recomposition;
+            // re-keyed only once the async playable topics arrive.
+            val suggestedWorldID = remember(premium, playable) {
+                WorldRouter.suggestedNewWorld("", WorldRouter.Access(premium, playable, Topic.entries.filter { child?.ownsPack(it) == true }.toSet()))?.id
+            }
+            // 🐉 announceWaitingBoss: once a day per child, the buddy points at a boss
+            // waiting in a world's last room (the first playable, visited, not-yet-champion one).
+            LaunchedEffect(cid, playable) {
+                if (playable.isEmpty()) return@LaunchedEffect
+                GameEnv.init(ctx)
+                val key = "boss.waiting.said.$cid"
+                if (GameDayGate.usedToday(key)) return@LaunchedEffect
+                delay(2200)
+                val e = KidSession.engine() ?: return@LaunchedEffect
+                val waiting = allWorlds().firstOrNull { w ->
+                    val t = w.topic ?: return@firstOrNull false   // never the 💫 arena
+                    t in playable && e.hasVisited(w.id) && e.worldTier(w.id) < WorldStage.TIER_COUNT
+                        && WorldStage.room(e.stage(w.id)) >= w.rooms - 1
+                } ?: return@LaunchedEffect
+                GameDayGate.mark(key)
+                say(if (childNow?.isGirl == true) tr("הַבּוֹס שֶׁל %@ מְחַכֶּה לָךְ! 🐉", waiting.name)
+                    else tr("הַבּוֹס שֶׁל %@ מְחַכֶּה לְךָ! 🐉", waiting.name))
+            }
             // The games' daily warm-up: one reward batch (10) for readers, 5 for גן kids.
             val gamesTarget = if ((child?.effectiveGrade ?: 1) <= 0) 5 else 10
             val tiles = remember(child?.raw, premium, playable, st.snapshot.worldProgress, conv, nowMs / 3_600_000) {
@@ -450,7 +516,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
             )
             KidHome(
                 childID = cid, child = child, state = st, engine = engine, premium = premium, kidMode = kidMode,
-                tiles = tiles, cta = cta, buddyLine = buddy,
+                tiles = tiles, cta = cta, buddyLine = buddy, suggestedWorldID = suggestedWorldID,
                 onSettings = { cover = Cover.Settings },
                 onKidExit = { cover = Cover.KidExit },
                 onTile = { t ->
@@ -523,12 +589,23 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                     val today = java.time.LocalDate.now().toString()
                     if (p.getString("gamesUnlockCelebratedDate", null) != today) {
                         p.edit().putString("gamesUnlockCelebratedDate", today).apply()
-                        launch { delay(1200); say(if (isGirl) tr("פָּתַחְתְּ אֶת הַמִּשְׂחָקִים לְהַיּוֹם! 🎮✨") else tr("פָּתַחְתָּ אֶת הַמִּשְׂחָקִים לְהַיּוֹם! 🎮✨")) }
+                        launch { delay(1200); say(if (isGirl) tr("פָּתַחַתְּ אֶת הַמִּשְׂחָקִים לְהַיּוֹם! 🎮✨") else tr("פָּתַחְתָּ אֶת הַמִּשְׂחָקִים לְהַיּוֹם! 🎮✨")) }
                     }
                 }
                 delay(600)
                 // maybeAutoPresentWheel: entering the wheel spends the spin.
                 if (wheelSpinsAvailable() > 0 && cover == null && screen == null && playing == null && entry == null) screen = KidScreen.Wheel
+            }
+            // 🔄 A newer Tofy exists (WorldMapView: the kid notice): once per run, after
+            // the wheel had its chance and never on top of another cover. The child
+            // is TOLD and sent to a grown-up — never to the store.
+            LaunchedEffect(update, cover == null, kidTour) {
+                if (update !is AppUpdateConfig.State.Recommended || AppUpdateConfig.kidNoticeShown || cover != null) return@LaunchedEffect
+                delay(1100)
+                if (cover == null && screen == null && playing == null && entry == null && !kidTour) {
+                    AppUpdateConfig.kidNoticeShown = true
+                    cover = Cover.Update
+                }
             }
             // A push tap / game link → join it; a friend link → the board (it adds the code).
             val pendingGame = KidDeepLinks.pendingGameID
@@ -573,6 +650,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                     val until = maxOf(0, RewardEngine.xpForNextLevel(xp) - xp + RewardEngine.xpPerCorrect - 1) / maxOf(1, RewardEngine.xpPerCorrect)
                     LevelInfo(engine.companionLevel, until) { cover = null }
                 }
+                Cover.Update -> UpdateKidNotice { cover = null }
                 is Cover.Stat -> StatInfoSheet(c.kind, engine, onClose = { cover = null },
                     onShop = { screen = KidScreen.Shop }, onLeaderboard = { screen = KidScreen.Friends })
                 else -> Unit

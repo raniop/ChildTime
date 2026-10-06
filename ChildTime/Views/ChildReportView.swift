@@ -50,6 +50,7 @@ struct ChildReportView: View {
                 insightCard(insight, tip: tip)
             }
             topicsCard
+            worldsCard
             improvementCard
             learningTrendCard
             screenTimeCard
@@ -201,6 +202,55 @@ struct ChildReportView: View {
     }
 
     // MARK: - Topics
+
+    // MARK: - 🏆 Worlds (tiers)
+
+    /// The child's worlds by how far they got: tier, room, and a couple they
+    /// never visited (where to nudge next). Reads the synced snapshot, so it
+    /// is right on the parent's phone too.
+    private var worldsCard: some View {
+        let stageOf: (World) -> Int = { w in
+            min(ProgressStore.championStage, max(snapshot.worldStage[w.id] ?? 0, snapshot.worldProgress[w.id] ?? 0))
+        }
+        let visited: (World) -> Bool = { w in snapshot.worldStage[w.id] != nil || (snapshot.worldProgress[w.id] ?? 0) > 0 }
+        let candidates = Worlds.all.filter { !$0.isBonusWorld && profile.playableTopics.contains($0.topic) }
+        let played = candidates.filter(visited).sorted { stageOf($0) > stageOf($1) }
+        let notYet = Array(candidates.filter { !visited($0) }.prefix(2))
+        let crowns = played.reduce(0) { $0 + min(stageOf($1) / 10, ProgressStore.worldTierCount) }
+        return card(tr("🏆 הָעוֹלָמוֹת שֶׁל \(profile.name)"),
+                    detail: crowns > 0 ? tr("👑 דַּרְגּוֹת שֶׁהֻשְׁלְמוּ: \(crowns)") : nil) {
+            if played.isEmpty {
+                empty(g(tr("עוֹד לֹא שִׂחֵק בְּאַף עוֹלָם."), tr("עוֹד לֹא שִׂחֲקָה בְּאַף עוֹלָם.")))
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(played) { w in
+                        let st = stageOf(w)
+                        worldRow(w, label: WorldTiers.parentLabel(tier: st / 10, room: st % 10),
+                                 tint: WorldTiers.color(tier: st / 10))
+                    }
+                    ForEach(notYet) { w in
+                        worldRow(w, label: g(tr("עוֹד לֹא בִּקֵּר"), tr("עוֹד לֹא בִּקְּרָה")), tint: nil)
+                    }
+                }
+            }
+        }
+    }
+
+    private func worldRow(_ w: World, label: String, tint: Color?) -> some View {
+        HStack(spacing: 10) {
+            Text(w.emoji).font(.system(size: 20))
+            Text(w.name)
+                .font(.system(size: 14.5, weight: .semibold, design: .rounded))
+                .lineLimit(1).minimumScaleFactor(0.8)
+            Spacer(minLength: 6)
+            Text(label)
+                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                .foregroundStyle(tint == nil ? GlassInk.secondary : Color(hex: "2A1D00"))
+                .padding(.horizontal, 9).padding(.vertical, 4)
+                .background(Capsule().fill(tint ?? .white.opacity(0.18)))
+        }
+        .padding(.vertical, 8)
+    }
 
     private var topicsCard: some View {
         let topics = engine.topicReports(period)

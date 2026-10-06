@@ -93,6 +93,7 @@ import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.roundToInt
 import kotlin.math.sin
+import com.rani.tofy.kid.ui.social.SocialMe
 
 /**
  * LuckyWheelView.swift — 8 glass wedges; tap the wheel (or flick it) to spin.
@@ -183,14 +184,14 @@ fun WheelScreenImpl(onExit: () -> Unit) {
                     Header(winner != null, canSpin, untilWheel)
                     AnimatedVisibility(winner != null, enter = scaleIn() + fadeIn()) { winner?.let { WinnerCard(it, message) } }
                     val label = when {
-                        winner != null || !canSpin -> if (winner != null) tr("אַחְלָה — סְגוֹר") else tr("סְגוֹר")
+                        winner != null || !canSpin -> if (winner != null) SocialMe.g(tr("אַחְלָה — סְגוֹר"), tr("אַחְלָה — סִגְרִי")) else SocialMe.g(tr("סְגוֹר"), tr("סִגְרִי"))
                         spinning -> tr("מִסְתּוֹבֵב…")
-                        else -> tr("סוֹבֵב!")
+                        else -> SocialMe.g(tr("סוֹבֵב!"), tr("סוֹבְבִי!"))
                     }
                     KidCta(label, Color(0xFF5E60CE), Color(0xFF3E8BF0), Modifier.graphicsLayer { alpha = if (spinning && winner == null) 0.6f else 1f },
                         enabled = !(spinning && winner == null)) { if (winner != null || !canSpin) onExit() else spin() }
                     if (winner == null && canSpin) Text(
-                        tr("דַּלֵּג הַפַּעַם"),
+                        SocialMe.g(tr("דַּלֵּג הַפַּעַם"), tr("דַּלְּגִי הַפַּעַם")),
                         Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
                             .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(50))
                             .clickable(enabled = !spinning) { haptics.light(); onExit() }.padding(horizontal = 16.dp, vertical = 9.dp),
@@ -227,7 +228,7 @@ private fun Header(won: Boolean, canSpin: Boolean, untilWheel: Int) {
         Text(tr("גַּלְגַּל מַזָּל!"), color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 30.sp, textAlign = TextAlign.Center)
         val sub = when {
             won -> tr("אֵיזֶה כֵּיף! 🎉")
-            canSpin -> tr("הַקֵּשׁ עַל הַגַּלְגַּל כְּדֵי לְסוֹבֵב ✨")
+            canSpin -> SocialMe.g(tr("הַקֵּשׁ עַל הַגַּלְגַּל כְּדֵי לְסוֹבֵב ✨"), tr("הַקִּישִׁי עַל הַגַּלְגַּל כְּדֵי לְסוֹבֵב ✨"))
             else -> tr("גַּלְגַּל בְּ-%lld", untilWheel)
         }
         Text(sub, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.5.sp, textAlign = TextAlign.Center)
@@ -242,7 +243,7 @@ private fun WinnerCard(prize: WheelPrize, message: String) {
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Text(prize.emoji, fontSize = 54.sp)
-        Text(if (prize.isPenalty) tr("מְשִׂימָה מִשְׁפַּחְתִּית 🤗") else tr("זָכִיתָ!"),
+        Text(if (prize.isPenalty) tr("מְשִׂימָה מִשְׁפַּחְתִּית 🤗") else SocialMe.g(tr("זָכִיתָ!"), tr("זָכִית!")),
             color = if (prize.isPenalty) KidColor.companionGlow else KidColor.starGold, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 18.sp)
         Text(prize.label, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 24.sp, textAlign = TextAlign.Center)
         if (message.isNotEmpty()) Text(message, color = Color.White.copy(alpha = 0.8f), fontFamily = Rounded, fontWeight = FontWeight.Medium,

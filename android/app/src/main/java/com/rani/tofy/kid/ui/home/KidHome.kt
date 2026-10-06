@@ -65,10 +65,17 @@ import com.rani.tofy.i18n.tr
 import com.rani.tofy.kid.core.KidState
 import com.rani.tofy.kid.core.ProgressEngine
 import com.rani.tofy.kid.core.RewardEngine
+import com.rani.tofy.kid.core.WorldStage
+import com.rani.tofy.ui.child.WorldTiers
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import com.rani.tofy.kid.ui.BottomHint
 import com.rani.tofy.kid.ui.BuddyBubble
 import com.rani.tofy.kid.ui.CharacterImage
 import com.rani.tofy.kid.ui.KidCta
+import com.rani.tofy.kid.ui.social.SocialMe
 import com.rani.tofy.kid.ui.StatInfoKind
 import com.rani.tofy.kid.ui.timeLabel
 import com.rani.tofy.ui.common.coachMark
@@ -150,6 +157,12 @@ internal fun KidHome(
     onChest: () -> Unit = {},
     /** The top banner: a friend invited me to a live game. */
     inviteBanner: @Composable () -> Unit = {},
+    /**
+     * 🏆 THE one never-visited world Tofy recommends (WorldRouter.suggestedNewWorld,
+     * decided once when the home appears) — gold dashed rim, "עוֹד לֹא בִּקַּרְתָּ"
+     * and the first-visit 💎. One world, not all of them.
+     */
+    suggestedWorldID: String? = null,
 ) {
     val snap = state.snapshot
     var panelPx by remember { mutableIntStateOf(0) }
@@ -182,25 +195,71 @@ internal fun KidHome(
                     // 🧭 The worlds' stop: on a phone the first world sits under the
                     // floating minutes panel, so the tour points at the line that heads
                     // them, which is always in view (iOS marks the same heroTitle).
-                    Text(tr("בּוֹחֲרִים עוֹלָם וְיוֹצְאִים לְהַרְפַּתְקָה ✨"), Modifier.fillMaxWidth().padding(top = 6.dp).coachMark("k.world"),
-                        color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, textAlign = TextAlign.Center, maxLines = 1)
+                    Row(Modifier.fillMaxWidth().padding(top = 6.dp).coachMark("k.world"),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) {
+                        Text(tr("בּוֹחֲרִים עוֹלָם וְיוֹצְאִים לְהַרְפַּתְקָה ✨"), Modifier.weight(1f, fill = false),
+                            color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, textAlign = TextAlign.Center,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        // 🏆 Crowns earned across all worlds (the mockup's top pill).
+                        val crowns = WorldStage.totalCrowns(snap.worldStage, snap.worldProgress)
+                        if (crowns > 0) Text(
+                            tr("👑 כְּתָרִים: %lld", crowns),
+                            Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.2f))
+                                .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(50))
+                                .padding(horizontal = 10.dp, vertical = 4.dp),
+                            color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, maxLines = 1,
+                        )
+                    }
                 }
                 items(tiles, key = { it.key }) { t ->
                     when (t) {
-                        HomeTile.TofyTime -> FeatureTile("🎲", tr("טוֹפִי טַיים"), tr("שְׁאֵלוֹת בִּמְיוּחָד בִּשְׁבִילְךָ"),
+                        HomeTile.TofyTime -> FeatureTile("🎲", tr("טוֹפִי טַיים"), (if (girl) tr("שְׁאֵלוֹת בִּמְיוּחָד בִּשְׁבִילֵךְ") else tr("שְׁאֵלוֹת בִּמְיוּחָד בִּשְׁבִילְךָ")),
                             Color(0xFF8C7BFF), Modifier.coachMark("k.tofyTime"),
                             badge = tr("✨ חינם"), badgeTint = Color(0xFF8CFFC4)) { onTile(t) }
                         is HomeTile.WorldTile -> {
                             val w = t.world
-                            val room = snap.worldProgress[w.id] ?: 0
+                            // 🏆 WorldCard: tier × 10 + room (WorldStage); the room is within the tier.
+                            val stage = WorldStage.stage(snap.worldStage, snap.worldProgress, w.id)
+                            val tier = WorldStage.tier(stage)
+                            val room = WorldStage.room(stage)
+                            val visited = WorldStage.visited(snap.worldStage, snap.worldProgress, w.id)
+                            // Only THE suggested never-visited world invites (gold dashed rim + the
+                            // first-visit 💎); every other unvisited world is a plain tile.
+                            val newHere = t.open && !w.isArena && !visited && w.id == suggestedWorldID
+                            // Played here at all → the tier badge, rim and crowns line.
+                            val showTier = t.open && !w.isArena && visited
                             val roomLabel = maxOf(1, minOf(room + 1, w.rooms))
-                            val foot = if (!t.open && room > 0)
-                                tr("חֶדֶר %lld/%lld · %@ לְהַמְשִׁיךְ?", roomLabel, w.rooms, if (girl) tr("רוֹצָה") else tr("רוֹצֶה"))
-                            else tr("חֶדֶר %lld/%lld", roomLabel, w.rooms)
-                            val badge = when { t.guest -> tr("🌟 אוֹרֵחַ הַשָּׁבוּעַ"); !t.open -> tr("👑 טוֹפִי+"); else -> null }
-                            val subtitle = if (w.isArena) tr("כָּל הַנּוֹשְׂאִים · דַּקּוֹת כְּפוּלוֹת") else w.topic?.displayName ?: ""
-                            FeatureTile(w.emoji, w.name, subtitle, w.glow, badge = badge, foot = foot,
-                                footFrac = room / maxOf(1, w.rooms).toFloat()) { onTile(t) }
+                            val foot = when {
+                                !t.open && room > 0 ->
+                                    tr("חֶדֶר %lld/%lld · %@ לְהַמְשִׁיךְ?", roomLabel, w.rooms, if (girl) tr("רוֹצָה") else tr("רוֹצֶה"))
+                                newHere -> tr("בִּקּוּר רִאשׁוֹן = +%lld 💎", WorldStage.FIRST_VISIT_DIAMONDS)
+                                tier >= WorldStage.TIER_COUNT -> tr("👑 הָעוֹלָם הֻשְׁלַם")
+                                room >= w.rooms - 1 -> tr("חֶדֶר %lld/%lld · הַבּוֹס מְחַכֶּה 🐉", w.rooms, w.rooms)
+                                else -> tr("חֶדֶר %lld/%lld", roomLabel, w.rooms)
+                            }
+                            val invite = Color(0xFFFFE28A)
+                            val tierBadge = when {
+                                newHere -> if (girl) tr("✨ עוֹד לֹא בִּקַּרְתְּ") else tr("✨ עוֹד לֹא בִּקַּרְתָּ")
+                                showTier -> WorldTiers.kidBadge(tier, girl)
+                                else -> null
+                            }
+                            val badge = when {
+                                t.guest -> tr("🌟 אוֹרֵחַ הַשָּׁבוּעַ")
+                                !t.open -> tr("👑 טוֹפִי+")
+                                else -> tierBadge
+                            }
+                            // The badge wears its tier's colour (dark text); the invitation, gold.
+                            val badgeTint = if (!t.guest && t.open && tierBadge != null) (if (newHere) invite else WorldTiers.color(tier)) else null
+                            val subtitle = if (w.isArena) tr("כָּל הַנּוֹשְׂאִים · דַּקּוֹת כְּפוּלוֹת")
+                                else (if (showTier) WorldTiers.crownsLine(tier) else null) ?: w.topic?.displayName ?: ""
+                            FeatureTile(w.emoji, w.name, subtitle, w.glow, badge = badge, badgeTint = badgeTint, foot = foot,
+                                footFrac = if (tier >= WorldStage.TIER_COUNT) 1f else room / maxOf(1, w.rooms).toFloat(),
+                                // Every played world wears its tier's colour on the rim (bronze a bit
+                                // softer; silver and up with a halo); THE suggested world gets a gold
+                                // dashed invitation.
+                                rim = if (showTier) WorldTiers.color(tier).copy(alpha = if (tier == 0) 0.7f else 0.95f) else null,
+                                halo = when { showTier && tier >= 1 -> WorldTiers.color(tier); newHere -> invite; else -> null },
+                                dashedRim = if (newHere) invite.copy(alpha = 0.95f) else null) { onTile(t) }
                         }
                     }
                 }
@@ -420,7 +479,7 @@ private fun StatsPanel(engine: ProgressEngine?, onLevelInfo: () -> Unit, onStatI
     val minutes = if (cap?.enabled == true) "${snap?.minutesEarnedToday ?: 0}" else "${engine?.pendingMinutes ?: 0}"
     val suffix = if (cap?.enabled == true) "/${cap.max}" else null
     Row(Modifier.fillMaxWidth().glassInset(18.dp).padding(vertical = 13.dp, horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        StatColumn(minutes, suffix, tr("⏱ הִרְוַחְתָּ הַיּוֹם"), { onStatInfo(StatInfoKind.TODAY) }, compact)
+        StatColumn(minutes, suffix, SocialMe.g(tr("⏱ הִרְוַחְתָּ הַיּוֹם"), tr("⏱ הִרְוַחַתְּ הַיּוֹם")), { onStatInfo(StatInfoKind.TODAY) }, compact)
         StatDivider()
         StatColumn("${snap?.correctToday ?: 0}", null, tr("✅ נְכוֹנוֹת הַיּוֹם"), { onStatInfo(StatInfoKind.CORRECT) }, compact)
         StatDivider()
@@ -531,12 +590,42 @@ fun Track(frac: Float, modifier: Modifier = Modifier, fill: Color = Color.White)
 @Composable
 private fun FeatureTile(
     emoji: String, title: String, subtitle: String, tint: Color, modifier: Modifier = Modifier,
-    badge: String? = null, badgeTint: Color? = null, foot: String? = null, footFrac: Float? = 0f, onClick: () -> Unit,
+    badge: String? = null, badgeTint: Color? = null, foot: String? = null, footFrac: Float? = 0f,
+    /** 🏆 A played world's tier colour on the rim (alpha included). */
+    rim: Color? = null,
+    /** 🏆 A soft halo around the tile (iOS: a tier-coloured shadow) — silver and up, or the invitation. */
+    halo: Color? = null,
+    /** 🏆 THE suggested never-visited world: a dashed rim in this colour. */
+    dashedRim: Color? = null,
+    onClick: () -> Unit,
 ) {
+    val corner = 22.dp
     Column(
-        modifier.fillMaxWidth().heightIn(min = 158.dp).clip(RoundedCornerShape(22.dp))
+        modifier.fillMaxWidth().heightIn(min = 158.dp)
+            .then(if (halo != null) Modifier.drawBehind {
+                // Drawn before the clip, so it spills out.
+                val r = corner.toPx()
+                for ((grow, a) in listOf(6.dp to 0.12f, 3.dp to 0.22f)) {
+                    val g = grow.toPx()
+                    drawRoundRect(halo.copy(alpha = a), topLeft = Offset(-g, -g), size = Size(size.width + 2 * g, size.height + 2 * g),
+                        cornerRadius = CornerRadius(r + g), style = Stroke(width = g))
+                }
+            } else Modifier)
+            .clip(RoundedCornerShape(corner))
             .drawBehind { drawCircle(tint.copy(alpha = 0.38f), radius = size.width * 0.75f, center = Offset(size.width * 0.15f, 0f)) }
-            .glassPane(22.dp, 0.13f).clickable(onClick = onClick).padding(14.dp),
+            .glassPane(corner, 0.13f)
+            .then(when {
+                rim != null -> Modifier.border(2.dp, rim, RoundedCornerShape(corner))
+                dashedRim != null -> Modifier.drawWithContent {
+                    drawContent()
+                    val w = 2.dp.toPx()
+                    drawRoundRect(dashedRim, topLeft = Offset(w / 2, w / 2), size = Size(size.width - w, size.height - w),
+                        cornerRadius = CornerRadius(corner.toPx() - w / 2),
+                        style = Stroke(width = w, pathEffect = PathEffect.dashPathEffect(floatArrayOf(7.dp.toPx(), 5.dp.toPx()))))
+                }
+                else -> Modifier
+            })
+            .clickable(onClick = onClick).padding(14.dp),
     ) {
         Row(verticalAlignment = Alignment.Top) {
             Text(emoji, fontSize = 32.sp)
@@ -565,7 +654,7 @@ private fun FeatureTile(
 private fun ColumnScope.BottomCtas(c: HomeCtaModel, onOpenEarned: () -> Unit, onOpenGift: () -> Unit, onTransfer: () -> Unit) {
     // 💝 ONE button for everything the PARENTS gave — never blurred with earned minutes.
     if (c.giftSeconds > 0 && c.peer == null) {
-        if (c.opening && c.openingGift) KidCta(tr("פּוֹתְחִים לְךָ… ✨"), Color(0xFFFF5FA8), Color(0xFFFFA53A), busy = true) {}
+        if (c.opening && c.openingGift) KidCta(SocialMe.g(tr("פּוֹתְחִים לְךָ… ✨"), tr("פּוֹתְחִים לָךְ… ✨")), Color(0xFFFF5FA8), Color(0xFFFFA53A), busy = true) {}
         else KidCta(tr("מַתָּנָה מֵהַהוֹרִים · ") + minutesText(c.giftSeconds),
             Color(0xFFFF5FA8), Color(0xFFFFA53A), emoji = "💝", enabled = !c.opening, size = 19, onClick = onOpenGift)
     }
@@ -574,20 +663,21 @@ private fun ColumnScope.BottomCtas(c: HomeCtaModel, onOpenEarned: () -> Unit, on
         peer != null -> {
             val where = when (peer.first) { "ipad" -> tr("בָּאַיְפֵּד"); "iphone" -> tr("בָּאַיְפוֹן"); else -> tr("בְּמַכְשִׁיר אַחֵר") }
             val left = maxOf(0, peer.second)
-            BottomHint(tr("🎮 הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו %@ — נִשְׁאֲרוּ %lld:%@", where, left / 60, "%02d".format(left % 60)))
+            BottomHint(SocialMe.g(tr("🎮 הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו %@ — נִשְׁאֲרוּ %lld:%@", where, left / 60, "%02d".format(left % 60)),
+                tr("🎮 הַזְּמַן שֶׁלָּךְ פָּתוּחַ עַכְשָׁיו %@ — נִשְׁאֲרוּ %lld:%@", where, left / 60, "%02d".format(left % 60))))
             if (c.transferTimedOut) BottomHint(tr("לֹא הִצְלַחְנוּ לִנְעֹל %@ עַכְשָׁיו — אוּלַי הוּא כָּבוּי. אֶפְשָׁר לְנַסּוֹת שׁוּב 😊", where))
             if (c.transferring) KidCta(tr("מַעֲבִירִים לְכָאן… ✨"), Color(0xFF5B6CFF), Color(0xFF9B5DE5), busy = true, size = 19) {}
             else KidCta(tr("נַעֲלוּ %@ וּפִתְחוּ כָּאן", where), Color(0xFF5B6CFF), Color(0xFF9B5DE5), emoji = "🔁", size = 19, onClick = onTransfer)
         }
         c.canRedeem -> {
-            if (c.opening && !c.openingGift) KidCta(tr("פּוֹתְחִים לְךָ… ✨"), Color(0xFF5E60CE), Color(0xFF3E8BF0), busy = true) {}
+            if (c.opening && !c.openingGift) KidCta(SocialMe.g(tr("פּוֹתְחִים לְךָ… ✨"), tr("פּוֹתְחִים לָךְ… ✨")), Color(0xFF5E60CE), Color(0xFF3E8BF0), busy = true) {}
             else KidCta(
                 if (c.redeemableSeconds % 60 == 0) tr("פִּתְחוּ לִי %lld דַּקּוֹת לְשַׂחֵק", c.redeemableSeconds / 60)
                 else tr("פִּתְחוּ לִי %@ דַּקּוֹת לְשַׂחֵק", timeLabel(c.redeemableSeconds)),
                 Color(0xFF5E60CE), Color(0xFF3E8BF0),
                 emoji = "🎮", enabled = !c.opening, onClick = onOpenEarned)
         }
-        c.maxedOut -> BottomHint(tr("שִׂחַקְתָּ הַיּוֹם %lld מִתּוֹךְ %lld דַּקּוֹת 🌙 — %lld שְׁמוּרוֹת לְמָחָר", c.minutesPlayedToday, c.capMax, c.pendingMinutes))
+        c.maxedOut -> BottomHint(SocialMe.g(tr("שִׂחַקְתָּ הַיּוֹם %lld מִתּוֹךְ %lld דַּקּוֹת 🌙 — %lld שְׁמוּרוֹת לְמָחָר", c.minutesPlayedToday, c.capMax, c.pendingMinutes), tr("שִׂחַקְתְּ הַיּוֹם %lld מִתּוֹךְ %lld דַּקּוֹת 🌙 — %lld שְׁמוּרוֹת לְמָחָר", c.minutesPlayedToday, c.capMax, c.pendingMinutes)))
         // Below the 15-min minimum: what they have, where opening starts, how many more —
         // "12 דק' לשחק" above and a bare "עוד 3" here read as a contradiction (Rani).
         c.redeemableMinutes > 0 -> BottomHint(tr("%lld דַּקּ׳ לְשַׂחֵק · פּוֹתְחִים מִ־%lld — עוֹד %lld! 🎮",

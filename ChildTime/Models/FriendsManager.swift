@@ -201,7 +201,7 @@ final class FriendsManager: ObservableObject {
         let code = FriendLink.code(from: raw).uppercased()
         log("addFriend raw=\(raw) → code=\(code), myCode=\(myCode), myID=\(myID)")
         guard !code.isEmpty, code != myCode else {
-            lastError = code == myCode ? tr("זֶה הַקּוֹד שֶׁלְּךָ 🙂") : tr("קוֹד לֹא תָּקִין")
+            lastError = code == myCode ? Gendered.g(tr("זֶה הַקּוֹד שֶׁלְּךָ 🙂"), tr("זֶה הַקּוֹד שֶׁלָּךְ 🙂")) : tr("קוֹד לֹא תָּקִין")
             log("rejected: \(lastError ?? "")")
             return false
         }
@@ -214,7 +214,7 @@ final class FriendsManager: ObservableObject {
                 log("no card matches code=\(code)")
                 return false
             }
-            guard card.id != myID else { lastError = tr("זֶה אַתָּה 🙂"); return false }
+            guard card.id != myID else { lastError = Gendered.g(tr("זֶה אַתָּה 🙂"), tr("זוֹ אַתְּ 🙂")); return false }
             log("found friend id=\(card.id) name=\(card.name); writing to my card…")
             // Add to MY card's friend list (+ un-hide if previously removed).
             // Include ownerUID so the write passes the owner gate even if this is
@@ -266,7 +266,7 @@ final class FriendsManager: ObservableObject {
             lastError = tr("צָרִיךְ לְהִתְחַבֵּר לְחֶשְׁבּוֹן כְּדֵי לִשְׁלוֹחַ בַּקָּשָׁה")
             return false
         }
-        guard card.id != myID else { lastError = tr("זֶה אַתָּה 🙂"); return false }
+        guard card.id != myID else { lastError = Gendered.g(tr("זֶה אַתָּה 🙂"), tr("זוֹ אַתְּ 🙂")); return false }
         guard !isFriend(card.id) else { lastError = tr("אַתֶּם כְּבָר חֲבֵרִים 🙂"); return false }
         let profile = ProfileStore.shared.active
         let req = FriendRequest(

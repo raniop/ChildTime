@@ -76,7 +76,7 @@ internal fun UnlockedScreen(
             Spacer(Modifier.weight(1f))
             // Gift time wears the gift heart, never the controller.
             Text(if (gift) "💝" else "🎮", fontSize = 96.sp, modifier = Modifier.graphicsLayer { translationY = bob * density })
-            KidTitle(if (preparing) tr("הַזְּמַן שֶׁלְּךָ בַּדֶּרֶךְ!") else tr("זְמַן מִשְׂחָק!"), 42)
+            KidTitle(if (preparing) (if (isGirl) tr("הַזְּמַן שֶׁלָּךְ בַּדֶּרֶךְ!") else tr("הַזְּמַן שֶׁלְּךָ בַּדֶּרֶךְ!")) else tr("זְמַן מִשְׂחָק!"), 42)
             Column(
                 Modifier.widthIn(max = 420.dp).fillMaxWidth().glassPane(28.dp).padding(22.dp),
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -96,7 +96,7 @@ internal fun UnlockedScreen(
             Spacer(Modifier.weight(1f))
             BuddyBubble(buddyLine, Modifier.fillMaxWidth())
             if (!preparing) Box(Modifier.padding(bottom = 36.dp)) {
-                KidCta(if (gift) tr("עֲצֹר וּשְׁמֹר אֶת הַזְּמַן 💝") else tr("סִיַּמְתִּי לְשַׂחֵק"), Color(0xFF5E60CE), Color(0xFF3E8BF0), onClick = onStop)
+                KidCta(if (gift) (if (isGirl) tr("עִצְרִי וְשִׁמְרִי אֶת הַזְּמַן 💝") else tr("עֲצֹר וּשְׁמֹר אֶת הַזְּמַן 💝")) else tr("סִיַּמְתִּי לְשַׂחֵק"), Color(0xFF5E60CE), Color(0xFF3E8BF0), onClick = onStop)
             } else Spacer(Modifier.height(36.dp))
         }
     }

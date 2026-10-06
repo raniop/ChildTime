@@ -132,7 +132,7 @@ struct MatchPairsView: View {
             Text(mistakes == 0 ? tr("מֻשְׁלָם! 🌟") : tr("כָּל הַכָּבוֹד! 🎉"))
                 .font(.system(size: 32, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).shadow(color: .black.opacity(0.25), radius: 6, y: 3)
-            Text(tr("הִתְאַמְתָּ אֶת כָּל הַזּוּגוֹת!"))
+            Text(Gendered.g(tr("הִתְאַמְתָּ אֶת כָּל הַזּוּגוֹת!"), tr("הִתְאַמְתְּ אֶת כָּל הַזּוּגוֹת!")))
                 .font(.system(size: 17, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
             HStack(spacing: 14) {

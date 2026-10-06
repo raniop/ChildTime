@@ -337,7 +337,7 @@ private fun ToolRow(r: RunnerController, q: Question, waiting: Boolean, onAssist
                 verticalAlignment = Alignment.CenterVertically) {
                 if (!r.showFeedback) HintPill(r, q, Modifier.weight(1f, fill = false))
                 if (r.consecutiveWrong >= 2 && !r.showFeedback) {
-                    Pill("🪄 " + tr("הַחְלֵף שְׁאֵלָה"), enabled = true, modifier = Modifier.weight(1f, fill = false)) { r.magicWand() }
+                    Pill("🪄 " + r.g(tr("הַחְלֵף שְׁאֵלָה"), tr("הַחְלִיפִי שְׁאֵלָה")), enabled = true, modifier = Modifier.weight(1f, fill = false)) { r.magicWand() }
                 }
             }
             CompanionBuddy(r.companion, r.child?.character3DID, 48.dp)

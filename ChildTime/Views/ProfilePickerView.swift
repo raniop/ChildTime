@@ -102,7 +102,7 @@ struct ProfilePickerView: View {
 
             Text(profiles.isEmpty
                  ? tr("צְרוּ פְּרוֹפִיל רִאשׁוֹן כְּדֵי לְהַתְחִיל")
-                 : tr("בְּחַר אֶת הַפְּרוֹפִיל שֶׁלְּךָ"))
+                 : tr("בַּחֲרוּ אֶת הַפְּרוֹפִיל שֶׁלָּכֶם"))
                 .font(.system(size: isCompact ? 17 : 21, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
                 .multilineTextAlignment(.center)

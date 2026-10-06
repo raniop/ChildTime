@@ -102,9 +102,9 @@ fun DiamondPacksPlay(onDone: () -> Unit = {}) {
             ) {
                 Text("🛒", fontSize = 44.sp)
                 Text(tr("הַחֲבִילוֹת אֵינָן זְמִינוֹת כָּרֶגַע"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, textAlign = TextAlign.Center)
-                Text(tr("נַסֵּה שׁוּב בְּעוֹד רֶגַע."), color = Color.White.copy(alpha = 0.7f), fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 13.sp)
+                Text(com.rani.tofy.kid.ui.social.SocialMe.g(tr("נַסֵּה שׁוּב בְּעוֹד רֶגַע."), tr("נַסִּי שׁוּב בְּעוֹד רֶגַע.")), color = Color.White.copy(alpha = 0.7f), fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 13.sp)
                 Text(
-                    tr("נַסֵּה שׁוּב"),
+                    com.rani.tofy.kid.ui.social.SocialMe.g(tr("נַסֵּה שׁוּב"), tr("נַסִּי שׁוּב")),
                     Modifier.clip(RoundedCornerShape(50)).background(KidColor.gemPurple).clickable { scope.launch { PlayDiamonds.load(ctx) } }
                         .padding(horizontal = 22.dp, vertical = 10.dp),
                     color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp,

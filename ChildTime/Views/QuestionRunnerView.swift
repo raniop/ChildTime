@@ -347,7 +347,7 @@ struct QuestionRunnerView: View {
         // they came from is gone, so the answers get its 56pt — and the buddy
         // stops standing on answer 4.
         .sideRail {
-            SideRailButton(systemImage: "xmark", label: tr("סְגֹר")) { dismiss() }
+            SideRailButton(systemImage: "xmark", label: Gendered.g(tr("סְגֹר"), tr("סִגְרִי"))) { dismiss() }
             SideRailDivider()
             SideRailButton(systemImage: "flag", label: tr("דִּוּוּחַ עַל הַשְּׁאֵלָה")) { showReportConfirm = true }
             SideRailButton(systemImage: "speaker.wave.2.fill", label: tr("הַקְרָאָה")) {
@@ -592,7 +592,7 @@ struct QuestionRunnerView: View {
             Image(systemName: atCap ? "timer.circle.fill" : "timer")
                 .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(tint)
-            Text(atCap ? tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי") : tr("\(earned)/\(cap) דַּק' הַיּוֹם"))
+            Text(atCap ? Gendered.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי"), tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי")) : tr("\(earned)/\(cap) דַּק' הַיּוֹם"))
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
         }
@@ -964,7 +964,7 @@ struct QuestionRunnerView: View {
 
     private var magicWandButton: some View {
         Button {
-            companion.cheer(tr("בּוֹא נְנַסֶּה אַחֶרֶת"))
+            companion.cheer(Gendered.g(tr("בּוֹא נְנַסֶּה אַחֶרֶת"), tr("בּוֹאִי נְנַסֶּה אַחֶרֶת")))
             withAnimation(.spring()) {
                 regenerateQuestion()
             }
@@ -974,7 +974,7 @@ struct QuestionRunnerView: View {
             // and it joins a row that already holds 🚩 🔊 🙋, the hint and the
             // buddy: on a 402pt iPhone the two pills squeezed each other until
             // the wand read "הַ" and the hint read "רְמָ…".
-            (Text("🪄 ") + Text(tr("הַחְלֵף שְׁאֵלָה")))
+            (Text("🪄 ") + Text(Gendered.g(tr("הַחְלֵף שְׁאֵלָה"), tr("הַחְלִיפִי שְׁאֵלָה"))))
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white)
                 .lineLimit(1)
@@ -1081,6 +1081,8 @@ struct QuestionRunnerView: View {
         startedLevel = progress.companionLevel
         progress.registerSessionToday()
         progress.resetSessionScore()
+        // 🏆 Straight-to-questions worlds skip the chooser — still a first visit.
+        if case .world(let w) = mode, !w.isBonusWorld { progress.markVisited(w.id) }
         LearningHistoryStore.shared.recordSessionStart(purpose: purpose)
         // Notify the parent ONCE per app-sitting (the first adventure), not on each
         // adventure — and the matching "finished" report fires on app background.
@@ -1104,7 +1106,7 @@ struct QuestionRunnerView: View {
         nextSurpriseAt = SurpriseRound.nextGap()
         QuestionMemory.shared.beginSession()   // no repeats within this session
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            companion.cheer(mode.isFeed ? tr("טוֹפִי טַיים — קָדִימָה! 🧠") : tr("מוּכָן? קָדִימָה!"))
+            companion.cheer(mode.isFeed ? tr("טוֹפִי טַיים — קָדִימָה! 🧠") : Gendered.g(tr("מוּכָן? קָדִימָה!"), tr("מוּכָנָה? קָדִימָה!")))
         }
         nextQuestion()
     }
@@ -1248,7 +1250,7 @@ struct QuestionRunnerView: View {
             if band > prev {
                 companion.hype(Gendered.g(tr("מִתְקַדֵּם שָׁלָב! 🚀"), tr("מִתְקַדֶּמֶת שָׁלָב! 🚀")))
             } else {
-                companion.cheer(tr("בּוֹא נַעֲשֶׂה חִימּוּם קָטָן 🌟"))
+                companion.cheer(Gendered.g(tr("בּוֹא נַעֲשֶׂה חִימּוּם קָטָן 🌟"), tr("בּוֹאִי נַעֲשֶׂה חִימּוּם קָטָן 🌟")))
             }
         }
         lastBandByTopic[topic] = band
@@ -1271,7 +1273,11 @@ struct QuestionRunnerView: View {
                 return
             }
         }
-        let childGrade = profiles.active?.effectiveGrade
+        // 🏆 A world's silver/gold tier asks one/two grades up (pre-readers stay put).
+        var childGrade = profiles.active?.effectiveGrade
+        if case .world(let w) = mode, let g = childGrade, g >= 1 {
+            childGrade = min(CurriculumMath.topGrade, g + progress.tierGradeOffset(in: w.id))
+        }
         func makeQuestion() -> Question {
             if bonus || isBonusArena { return QuestionGenerator.generateBonus(topic: topic, grade: childGrade) }
             return preReader
@@ -1363,7 +1369,7 @@ struct QuestionRunnerView: View {
         SoundPlayer.shared.play(.streakUp)
         Haptic.success()
         burstTrigger += 1
-        companion.wow(tr("✨ קִבַּלְתָּ רֶמֶז מֵהוֹרֶה!"))
+        companion.wow(Gendered.g(tr("✨ קִבַּלְתָּ רֶמֶז מֵהוֹרֶה!"), tr("✨ קִבַּלְתְּ רֶמֶז מֵהוֹרֶה!")))
         receivedHelpThisQuestion = true
         parentHelp.lastReply = nil
         parentHelp.stopListening()
@@ -1483,7 +1489,7 @@ struct QuestionRunnerView: View {
         // The character speaks — the smarter (pricier) it is, the more it helps.
         switch helperLevel {
         case .encourage:
-            companion.cheer(tr("הֵסַרְתִּי לְךָ אוֹפְּצְיָה! אַתָּה יָכוֹל 💪"))
+            companion.cheer(Gendered.g(tr("הֵסַרְתִּי לְךָ אוֹפְּצְיָה! אַתָּה יָכוֹל 💪"), tr("הֵסַרְתִּי לָךְ אוֹפְּצְיָה! אַתְּ יְכוֹלָה 💪")))
         case .hint:
             companion.cheer(tr("הֵסַרְתִּי אוֹפְּצְיָה. \(HintContent.hint(q.topic))"))
         case .explain:
@@ -1692,7 +1698,7 @@ struct QuestionRunnerView: View {
         companion.console([
             tr("כִּמְעַט!"),
             tr("מַמָּשׁ קָרוֹב"),
-            tr("בּוֹא נְנַסֶּה שׁוּב"),
+            Gendered.g(tr("בּוֹא נְנַסֶּה שׁוּב"), tr("בּוֹאִי נְנַסֶּה שׁוּב")),
             tr("נְנַסֶּה אֶת הַבָּאָה"),
             tr("⭐ עוֹד תְּשׁוּבָה נְכוֹנָה וְחוֹזְרִים לְהִתְקַדֵּם")
         ].randomElement()!)

@@ -55,7 +55,7 @@ struct WorldUnlockView: View {
 
                         if stage >= 3 {
                             Button { Haptic.light(); onContinue() } label: {
-                                Text(tr("בּוֹא נַחְקוֹר!"))
+                                Text(Gendered.g(tr("בּוֹא נַחְקוֹר!"), tr("בּוֹאִי נַחְקוֹר!")))
                                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                                     .foregroundStyle(.white)
                                     .frame(maxWidth: .infinity)

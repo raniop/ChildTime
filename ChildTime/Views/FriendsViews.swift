@@ -37,7 +37,7 @@ struct LeaderboardView: View {
         }
         .environment(\.layoutDirection, .app)
         .sideRail {
-            SideRailButton(systemImage: "xmark", label: tr("סְגֹר")) { dismiss() }
+            SideRailButton(systemImage: "xmark", label: Gendered.g(tr("סְגֹר"), tr("סִגְרִי"))) { dismiss() }
             SideRailDivider()
             SideRailButton(systemImage: "tray.fill",
                            label: friends.incomingRequests.isEmpty
@@ -77,7 +77,7 @@ struct LeaderboardView: View {
             }
             Button(tr("בִּטּוּל"), role: .cancel) { friendToRemove = nil }
         } message: { f in
-            Text(tr("\(f.displayName) יֵצֵא מִלּוּחַ הַחֲבֵרִים שֶׁלְּךָ. תָּמִיד אֶפְשָׁר לְהוֹסִיף שׁוּב."))
+            Text(Gendered.g(tr("\(f.displayName) יֵצֵא מִלּוּחַ הַחֲבֵרִים שֶׁלְּךָ. תָּמִיד אֶפְשָׁר לְהוֹסִיף שׁוּב."), tr("\(f.displayName) יֵצֵא מִלּוּחַ הַחֲבֵרִים שֶׁלָּךְ. תָּמִיד אֶפְשָׁר לְהוֹסִיף שׁוּב.")))
         }
     }
 
@@ -283,13 +283,13 @@ struct LeaderboardView: View {
     @ViewBuilder private var myRankBanner: some View {
         if let rank = friends.myGlobalRank {
             VStack(spacing: 2) {
-                Text(tr("הַמָּקוֹם שֶׁלְּךָ בְּכָל הָעוֹלָם"))
+                Text(Gendered.g(tr("הַמָּקוֹם שֶׁלְּךָ בְּכָל הָעוֹלָם"), tr("הַמָּקוֹם שֶׁלָּךְ בְּכָל הָעוֹלָם")))
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                 Text("#\(rank.formatted())")
                     .font(.system(size: 34, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text(tr("כָּל כּוֹכָב מְקַדֵּם אוֹתְךָ לְמַעְלָה! ⭐"))
+                Text(Gendered.g(tr("כָּל כּוֹכָב מְקַדֵּם אוֹתְךָ לְמַעְלָה! ⭐"), tr("כָּל כּוֹכָב מְקַדֵּם אוֹתָךְ לְמַעְלָה! ⭐")))
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
             }
@@ -732,11 +732,11 @@ struct FriendProfileView: View {
 
     @ViewBuilder private var actionArea: some View {
         if isMe {
-            Label(tr("זֶה אַתָּה 🙂"), systemImage: "person.fill")
+            Label(Gendered.g(tr("זֶה אַתָּה 🙂"), tr("זוֹ אַתְּ 🙂")), systemImage: "person.fill")
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
         } else if friends.isFriend(card.id) {
-            Label(tr("חָבֵר שֶׁלְּךָ"), systemImage: "checkmark.circle.fill")
+            Label(Gendered.g(tr("חָבֵר שֶׁלְּךָ"), tr("חָבֵר שֶׁלָּךְ")), systemImage: "checkmark.circle.fill")
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(AppColor.successMint)
         } else if let incoming {
@@ -874,7 +874,7 @@ struct FriendRequestsView: View {
             Text("📭").font(.system(size: 64))
             Text(tr("אֵין בַּקָּשׁוֹת חֲדָשׁוֹת"))
                 .font(.system(size: 20, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-            Text(tr("כְּשֶׁמִּישֶׁהוּ יְבַקֵּשׁ לִהְיוֹת חָבֵר שֶׁלְּךָ — זֶה יוֹפִיעַ כָּאן."))
+            Text(Gendered.g(tr("כְּשֶׁמִּישֶׁהוּ יְבַקֵּשׁ לִהְיוֹת חָבֵר שֶׁלְּךָ — זֶה יוֹפִיעַ כָּאן."), tr("כְּשֶׁמִּישֶׁהוּ יְבַקֵּשׁ לִהְיוֹת חָבֵר שֶׁלָּךְ — זֶה יוֹפִיעַ כָּאן.")))
                 .font(.system(size: 14, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8)).multilineTextAlignment(.center)
                 .padding(.horizontal, AppSpacing.xl)
