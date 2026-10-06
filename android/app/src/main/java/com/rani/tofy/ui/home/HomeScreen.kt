@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.background
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
@@ -35,6 +37,8 @@ fun HomeScreen(
     state: FamilyState,
     onOpenChild: (Child) -> Unit,
     onActions: (Child) -> Unit,
+    /** ✏️ Avatar + name → this child's settings, in one tap (iOS homeSettingsChild). */
+    onChildSettings: (Child) -> Unit,
     onAddChild: () -> Unit,
     onChores: () -> Unit,
     onSettings: () -> Unit,
@@ -101,7 +105,8 @@ fun HomeScreen(
                         // the connect button of the first child without a device.
                         marked = child.id == firstChild?.id, markConnect = child.id == connectFirst?.id,
                         tick = tick,
-                        onOpen = { onOpenChild(child) }, onActions = { onActions(child) }, onConnect = { onConnectDevice(child) })
+                        onOpen = { onOpenChild(child) }, onActions = { onActions(child) }, onConnect = { onConnectDevice(child) },
+                        onSettings = { onChildSettings(child) })
                 }
                 if (!state.loading && state.children.isEmpty()) item {
                     Column(Modifier.fillMaxWidth().glassPane().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -148,6 +153,7 @@ private fun ChildCard(
     marked: Boolean, markConnect: Boolean,
     @Suppress("UNUSED_PARAMETER") tick: Int,   // recomposes the live countdown each second
     onOpen: () -> Unit, onActions: () -> Unit, onConnect: () -> Unit,
+    onSettings: () -> Unit,
 ) {
     val live = state.liveWindow(child)
     val inApp = state.isInAppNow(child)
@@ -169,13 +175,21 @@ private fun ChildCard(
     }
     Column(Modifier.fillMaxWidth().coachMark("p.card", marked).glassPane(26.dp).clickable(onClick = onOpen).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            // ✏️ Avatar + name open this child's settings in one tap — the rest of
+            // the card opens their page (iOS: "מאוד מסובך להגיע למצב של עריכת ילד").
+            Row(Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).clickable(onClick = onSettings),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             ChildAvatar(child, 56.dp)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                H(child.name, 20)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    H(child.name, 20)
+                    Text("✏️", fontSize = 13.sp, modifier = Modifier.alpha(0.75f))
+                }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Box(Modifier.size(8.dp).clip(CircleShape).background(if (live != null || inApp) Ink.live else Color.White.copy(alpha = 0.35f)))
                     P(statusText, 12.5f, weight = FontWeight.SemiBold, maxLines = 1)
                 }
+            }
             }
             Text("$pct%", color = pctColor, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 22.sp)
         }

@@ -47,6 +47,7 @@ fun AppNav() {
             HomeScreen(
                 state = state,
                 onOpenChild = { nav.navigate("child/${it.id}") },
+                onChildSettings = { nav.navigate("childSettings/${it.id}") },
                 onActions = { actionsFor = it },
                 onAddChild = { nav.navigate("addChild") },
                 onChores = { nav.navigate("chores") },
