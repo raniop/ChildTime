@@ -267,10 +267,28 @@ struct MiniGameEarnTests {
         #expect(d.correct == 10)
     }
 
-    /// ⚡ A surprise round never pays minutes per answer, even though it is
-    /// opened from inside a question session.
+    /// ⚡ A surprise round from an EARNING session pays each right answer's
+    /// seconds (Rani, 2026-10-06), so its end card shows ⏱ like every round.
+    @Test func surpriseAnswersPaySecondsInAnEarningSession() {
+        Economy.reset()
+        MiniGameLedger.surpriseEarnsTime = true
+        defer { MiniGameLedger.surpriseEarnsTime = false }
+        let p = ProgressStore.shared
+        let d = measure {
+            for _ in 0..<3 { MiniGameLedger.record(correct: true, topic: .math, earn: nil, surprise: true) }
+            MiniGameLedger.record(correct: false, topic: .math, earn: nil, surprise: true)
+        }
+        let step = Double(p.bonusTargetSeconds) / Double(p.cycleQuestionsTotal)
+        #expect(abs(d.cycle - 3 * step) < 0.01, "each right answer moves the cycle one step; a miss costs nothing")
+        let g = MiniGameReward.grant(game: "vault", correct: 3, starsPer: 2, diamondsPer: 1, cap: 4, surprise: true)
+        #expect(g.seconds == 3 * p.secondsPerCorrect, "the end card's ⏱ chip")
+        #expect(d.answered == 4)
+    }
+
+    /// ⚡ …and outside an earning session (Free Learning) it pays no time at all.
     @Test func surpriseAnswersPayNoMinutes() {
         Economy.reset()
+        MiniGameLedger.surpriseEarnsTime = false
         let clock = FakeClock()
         let earn = Economy.session(clock)
         let d = measure {

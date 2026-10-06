@@ -22,6 +22,7 @@ import com.rani.tofy.kid.core.AnswerContext
 import com.rani.tofy.kid.core.ChestKind
 import com.rani.tofy.kid.core.KidSession
 import com.rani.tofy.kid.core.RewardEngine
+import com.rani.tofy.kid.ui.games.MiniGameLedger
 import com.rani.tofy.kid.ui.games.SurprisePlan
 import com.rani.tofy.kid.ui.games.SurpriseRound
 import com.rani.tofy.kid.ui.shop.CharacterCatalog
@@ -193,6 +194,7 @@ class RunnerController(
             if (plan != null) {
                 surprisesThisSession++
                 KidSpeech.stop()
+                MiniGameLedger.surpriseEarnsTime = true   // the Android runner always earns time
                 surprisePlan = plan
                 return
             }
@@ -231,6 +233,7 @@ class RunnerController(
     /** The surprise round ended (played or skipped) — on to the next question. */
     fun surpriseDone() {
         if (surprisePlan == null) return
+        MiniGameLedger.surpriseEarnsTime = false
         surprisePlan = null
         if (phase == Phase.PLAYING) nextQuestion()
     }

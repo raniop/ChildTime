@@ -388,7 +388,10 @@ struct QuestionRunnerView: View {
         }
         // ⚡ סִבּוּב הַפְתָּעָה — the interstitial and its game; afterwards the
         // session simply carries on with the next question.
-        .fullScreenCover(item: $surprisePlan, onDismiss: { nextQuestion() }) { plan in
+        .fullScreenCover(item: $surprisePlan, onDismiss: {
+            MiniGameLedger.surpriseEarnsTime = false
+            nextQuestion()
+        }) { plan in
             SurpriseRoundFlow(plan: plan) { surprisePlan = nil }
         }
         .fullScreenCover(isPresented: $goToReward) {
@@ -1146,6 +1149,7 @@ struct QuestionRunnerView: View {
                                              profile: profiles.active, context: mode.fixedTopic) {
                 surprisesThisSession += 1
                 SpeechReader.shared.stop()
+                MiniGameLedger.surpriseEarnsTime = earnsTime
                 surprisePlan = plan
                 return
             }

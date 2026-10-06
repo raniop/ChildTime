@@ -69,6 +69,18 @@ class MiniGameEarningTest {
         assertTrue(MiniGameReward.grant("pairs", 5, 2, 2, 5).full)
     }
 
+    @Test fun surpriseAnswersPaySecondsOnlyInAnEarningSession() {
+        val per = sink.secondsPerCorrect
+        MiniGameLedger.surpriseEarnsTime = true
+        try {
+            repeat(3) { MiniGameLedger.record(true, Topic.MATH, earn = null, surprise = true) }
+            MiniGameLedger.record(false, Topic.MATH, earn = null, surprise = true)   // a miss costs nothing here
+            assertEquals(3 * per, MiniGameReward.grant("vault", 3, 2, 1, 4, surprise = true).seconds)
+        } finally { MiniGameLedger.surpriseEarnsTime = false }
+        repeat(3) { MiniGameLedger.record(true, Topic.MATH, earn = null, surprise = true) }
+        assertEquals(0, MiniGameReward.grant("vault", 3, 2, 1, 4, surprise = true).seconds)
+    }
+
     @Test fun movedClockCannotReopenTheBigPrize() {
         sink.clock.advance(3 * 24 * 3600.0)
         MiniGameReward.grant("vault", 5, 2, 1, 10)

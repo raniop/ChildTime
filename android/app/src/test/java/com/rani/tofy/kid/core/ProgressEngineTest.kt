@@ -413,8 +413,12 @@ class ProgressEngineTest {
         val paid = p.recordMiniGameAnswer(true, "math", bucket = MiniGameEarnBucket { t }, surprise = false)
         assertEquals(24, paid.paidSeconds)
         assertEquals(24, p.takeRoundSeconds())
+        // ⚡ A surprise round (earning session) pays its seconds; a plain game answer doesn't.
         val surprise = p.recordMiniGameAnswer(true, "math", bucket = null, surprise = true)
-        assertEquals(0, surprise.paidSeconds)
-        assertEquals(2, p.snapshot.totalAnswered)
+        assertEquals(24, surprise.paidSeconds)
+        assertEquals(24, p.takeRoundSeconds())
+        val plain = p.recordMiniGameAnswer(true, "math", bucket = null, surprise = false)
+        assertEquals(0, plain.paidSeconds)
+        assertEquals(3, p.snapshot.totalAnswered)
     }
 }

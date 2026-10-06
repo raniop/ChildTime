@@ -1613,6 +1613,27 @@ final class ProgressStore: ObservableObject {
         return dict
     }
 
+    /// ⚡ A right answer in a surprise round pays screen time like any right
+    /// answer (Rani, 2026-10-06: the end card has to show ⏱ too). Only the
+    /// TIME share of `recordCorrect` — the round still pays its own ⭐/💎 ×2
+    /// at the end. Returns the seconds credited (0 at today's cap).
+    @discardableResult
+    func creditSurpriseAnswer(topic: Topic) -> Int {
+        guard !atDailyCap else { return 0 }
+        let topicCountToday = bumpTopicAnsweredToday(topic)
+        let target = Double(bonusTargetSeconds)
+        let perSec = target / Double(cycleQuestionsTotal)
+        let balanceFactor: Double = topicCountToday > Self.sameTopicSoftCap ? 0.5 : 1.0
+        cycleSeconds += perSec * balanceFactor
+        while cycleSeconds >= target - 0.01 {
+            let granted = grantMinutesCapped(max(1, ParentSettings.shared.batchMinutes))
+            sessionMinutesEarned += granted
+            sittingMinutes += granted
+            cycleSeconds -= target
+        }
+        return secondsPerCorrect
+    }
+
     /// Count a correct answer for `topic` today; returns the new count.
     private func bumpTopicAnsweredToday(_ topic: Topic) -> Int {
         var counts = topicCountsToday()

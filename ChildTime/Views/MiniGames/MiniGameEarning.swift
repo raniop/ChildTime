@@ -96,6 +96,10 @@ enum MiniGameLedger {
     /// so counting whole minutes would have shown nothing at all.
     /// `MiniGameReward.grant` takes it once, at the round's end.
     private(set) static var roundSeconds = 0
+
+    /// ⚡ Set by the question runner while its surprise round is on screen, when
+    /// the session itself earns screen time (never in Free Learning).
+    static var surpriseEarnsTime = false
     static func takeRoundSeconds() -> Int {
         defer { roundSeconds = 0 }
         return roundSeconds
@@ -105,8 +109,10 @@ enum MiniGameLedger {
     ///
     /// - From a chooser (`earn` set, not a surprise): the runner's own path —
     ///   minutes, cycle, cap, adaptive level, ⭐/💎 per answer.
-    /// - Otherwise (a surprise round): counted for the parent's reports only;
-    ///   the game pays its ⭐/💎 at the end.
+    /// - Otherwise: counted for the parent's reports; the game pays its ⭐/💎
+    ///   at the end. ⚡ In a surprise round from an earning session a right
+    ///   answer ALSO pays its seconds (`surpriseEarnsTime`), so the end card
+    ///   shows ⏱ like every other round.
     ///
     /// `retry` is a right answer that came after a miss on the SAME item — the
     /// runner's re-asked question. It pays in full (Rani, 2026-10-04: a child
@@ -119,8 +125,14 @@ enum MiniGameLedger {
         let progress = ProgressStore.shared
         guard let earn, !surprise else {
             progress.recordGameAnswer(correct: correct)
+            var earnedMinutes = 0
+            if correct && surprise && surpriseEarnsTime {
+                let before = progress.pendingMinutes
+                roundSeconds += progress.creditSurpriseAnswer(topic: topic)
+                earnedMinutes = max(0, progress.pendingMinutes - before)
+            }
             LearningHistoryStore.shared.recordAnswer(topic: topic, correct: correct, responseMs: responseMs,
-                                                     earnedMinutes: 0, streak: streak)
+                                                     earnedMinutes: earnedMinutes, streak: streak)
             return
         }
         let settings = ParentSettings.shared

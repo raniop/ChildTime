@@ -697,7 +697,15 @@ class ProgressEngine(
         correct: Boolean, topic: String, responseMs: Double = 0.0,
         bucket: MiniGameEarnBucket?, surprise: Boolean, retry: Boolean = false,
     ): MiniGameAnswer {
-        if (bucket == null || surprise) { recordGameAnswer(correct); return MiniGameAnswer() }
+        if (bucket == null) {
+            recordGameAnswer(correct)
+            // ⚡ A surprise round from an earning session: a right answer pays its seconds too.
+            if (!(surprise && correct)) return MiniGameAnswer()
+            val before = pendingMinutes
+            val paid = creditSurpriseAnswer(topic)
+            roundSeconds += paid
+            return MiniGameAnswer(paidSeconds = paid, minutesGranted = maxOf(0, pendingMinutes - before), capReached = atDailyCap())
+        }
         if (correct) {
             val paysMinutes = bucket.takeCredit()
             val cappedBefore = atDailyCap()
@@ -716,6 +724,29 @@ class ProgressEngine(
         val lost = recordWrong(topic, grantsScreenTime = true)
         if (lost > 0) roundSeconds = maxOf(0, roundSeconds - lost)
         return MiniGameAnswer(lostSeconds = lost)
+    }
+
+    /**
+     * ProgressStore.creditSurpriseAnswer — only the TIME share of [recordCorrect]
+     * (Rani, 2026-10-06: the surprise round's end card shows ⏱ too); the round
+     * still pays its own ⭐/💎 ×2 at the end. Seconds credited, 0 at today's cap.
+     */
+    private fun creditSurpriseAnswer(topic: String): Int = op {
+        if (atDailyCap()) return@op 0
+        touch()
+        rollover()
+        val topicCountToday = bumpTopicAnsweredToday(topic)
+        val target = settings.bonusTargetSeconds.toDouble()
+        val perSec = target / settings.cycleQuestionsTotal
+        val balanceFactor = if (topicCountToday > SAME_TOPIC_SOFT_CAP) 0.5 else 1.0
+        s.cycleSeconds += perSec * balanceFactor
+        while (s.cycleSeconds >= target - 0.01) {
+            val granted = grantMinutesCappedRaw(maxOf(1, settings.batchMinutes))
+            ss.sessionMinutesEarned += granted
+            sittingMinutes += granted
+            s.cycleSeconds -= target
+        }
+        settings.secondsPerCorrect
     }
 
     /** ⏱ Seconds this round paid (taken once at the round's end). */

@@ -113,18 +113,23 @@ class MiniGameEarnSession(private val scope: CoroutineScope, startSession: Boole
 object MiniGameLedger {
     var sink: GameProgressSink = KidSink
 
+    /** ⚡ Set by the runner while its surprise round is on screen (an earning session). */
+    var surpriseEarnsTime = false
+
     /**
      * One answer in `topic`. From a chooser (`earn` set, not a surprise): the
      * runner's own path — minutes, cycle, cap, adaptive level, ⭐/💎. Otherwise
-     * (a surprise round): counted for the parent's reports only.
+     * counted for the parent's reports; ⚡ a surprise round's right answer also
+     * pays its seconds (the end card's ⏱).
      * `retry` = right after a miss on the SAME item: pays in full but doesn't
      * claim the recovery pot.
      */
     fun record(correct: Boolean, topic: Topic, responseMs: Double = 0.0, streak: Int = 0,
                earn: MiniGameEarnSession?, surprise: Boolean, retry: Boolean = false) {
         if (earn == null || surprise) {
-            sink.miniGameAnswer(correct, topic.raw, responseMs, null, surprise = true, retry = false)
-            sink.recordHistory(topic.raw, correct, responseMs, 0, streak, false)
+            // ⚡ `surprise` here asks the engine to pay the answer's seconds too.
+            val out = sink.miniGameAnswer(correct, topic.raw, responseMs, null, surprise = surprise && surpriseEarnsTime, retry = false)
+            sink.recordHistory(topic.raw, correct, responseMs, out.minutesGranted, streak, false)
             return
         }
         val out = sink.miniGameAnswer(correct, topic.raw, responseMs, earn.bucket, surprise = false, retry = retry)
@@ -143,7 +148,7 @@ object MiniGameLedger {
     }
 }
 
-// MARK: - 🎁 Mini-game rewards (⭐ + 💎 only — never minutes)
+// MARK: - 🎁 Mini-game rewards (⭐ + 💎 at the end; the ⏱ seconds were paid per answer)
 
 object MiniGameReward {
     /** What a finished round paid: ⭐, 💎, and ⏱ the screen-time SECONDS it earned (the build-198 end card). */
