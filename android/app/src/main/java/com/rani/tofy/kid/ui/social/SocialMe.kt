@@ -17,6 +17,8 @@ internal object SocialMe {
     val isSignedIn: Boolean get() = uid != null
     val child: Child? get() { val cid = id ?: return null; return KidSession.childDoc.value?.let { Child.from(cid, it) } }
     val name: String get() = child?.name ?: ""
+    /** Parent switch (child doc `friendsEnabled`, missing = on): friends + leaderboards for this child. */
+    val friendsEnabled: Boolean get() = (com.rani.tofy.kid.core.KidSession.childDoc.value?.get("friendsEnabled") as? Boolean) ?: true
     val character3DID: String? get() = child?.character3DID
     val isGirl: Boolean get() = child?.isGirl == true
     val householdID: String? get() = child?.householdID?.takeIf { it.isNotEmpty() }

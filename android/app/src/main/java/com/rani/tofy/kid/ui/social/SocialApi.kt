@@ -82,6 +82,22 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun FriendsScreen(onExit: () -> Unit) {
+    // 🛡️ Families policy: a kid-facing online-safety reminder before any sharing —
+    // once per child on this device.
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val prefs = remember { ctx.getSharedPreferences("tofy", android.content.Context.MODE_PRIVATE) }
+    val key = "friendsSafetySeen." + (SocialMe.id ?: "")
+    var safety by remember { mutableStateOf(!prefs.getBoolean(key, false)) }
+    if (safety) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = {},
+            title = { androidx.compose.material3.Text(tr("🛡️ רֶגַע לִפְנֵי שֶׁמְּשַׂחֲקִים עִם חֲבֵרִים")) },
+            text = { androidx.compose.material3.Text(tr("מוֹסִיפִים רַק חֲבֵרִים שֶׁאַתֶּם מַכִּירִים בֶּאֱמֶת. אַף פַּעַם לֹא מְסַפְּרִים לְמִי שֶׁלֹּא מַכִּירִים כְּתֹבֶת, טֶלֶפוֹן אוֹ שֵׁם בֵּית סֵפֶר. מַשֶּׁהוּ מוּזָר? מְסַפְּרִים לְאַבָּא אוֹ לְאִמָּא.")) },
+            confirmButton = { androidx.compose.material3.TextButton({ prefs.edit().putBoolean(key, true).apply(); safety = false }) { androidx.compose.material3.Text(tr("הֵבַנְתִּי 👍")) } },
+            dismissButton = { androidx.compose.material3.TextButton(onExit) { androidx.compose.material3.Text(tr("חֲזָרָה")) } },
+        )
+        return
+    }
     // null = the board; "" = new game (topic pick); else = join that game id.
     var quiz by remember { mutableStateOf<String?>(null) }
     val q = quiz

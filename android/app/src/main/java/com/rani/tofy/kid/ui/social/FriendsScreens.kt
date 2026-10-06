@@ -126,7 +126,9 @@ internal fun LeaderboardScreen(onExit: () -> Unit, onStartGame: () -> Unit, onJo
                 TabButton(tr("כָּל הַשַּׂחְקָנִים"), global, Modifier.weight(1f)) { global = true; scope.launch { f.loadGlobal() } }
             }
             var refreshing by remember { mutableStateOf(false) }
-            val board = if (global) f.globalBoard else f.leaderboard
+            // "All players" are strangers: show them by an initial only (Families policy) —
+            // full first names stay for friends the child actually added.
+            val board = if (global) f.globalBoard.map { if (it.id == meID) it else it.copy(name = initialOnly(it.name)) } else f.leaderboard
             when {
                 !global && f.leaderboard.size <= 1 -> FriendsEmptyState { showAdd = true }
                 global && f.globalBoard.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = Color.White) }
@@ -536,4 +538,10 @@ internal fun FriendListRow(card: FriendCard, trailing: @Composable () -> Unit) {
         Text("${card.stars} ⭐", color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
         trailing()
     }
+}
+
+/** "דָּנָה" → "ד׳" — the first letter, niqqud dropped, with a geresh. */
+internal fun initialOnly(name: String): String {
+    val first = name.replace(Regex("[\u0591-\u05C7]"), "").trim().firstOrNull() ?: return "?"
+    return if (first in '\u05D0'..'\u05EA') "$first׳" else "$first."
 }

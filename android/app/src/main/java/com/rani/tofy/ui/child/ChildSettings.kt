@@ -135,6 +135,16 @@ private fun MainList(
             ToggleRow("📝", tr("רק שאלות רגילות"), tr("בלי מסך המשחקים: בחירת עולם מובילה ישר לשאלות"), child.onlyRegularQuestions) {
                 if (it != child.onlyRegularQuestions) write(mapOf("onlyRegularQuestions" to it))
             }
+            RowDivider()
+            // 🏆 Friends + leaderboards for this child (Families policy: a parent control).
+            // Off also takes the child's public card down, so they vanish from every board.
+            val friendsOn = child.raw["friendsEnabled"] as? Boolean ?: true
+            ToggleRow("🏆", tr("חברים וטבלת שחקנים"), tr("הילד רואה חברים שהוסיף בקוד, ובטבלה הכללית מופיעים שחקנים אחרים רק באות ראשונה"), friendsOn) { on ->
+                if (on != friendsOn) {
+                    write(mapOf("friendsEnabled" to on))
+                    if (!on) scope.launch { runCatching { com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("friendCards").document(child.id).delete() } }
+                }
+            }
         }
 
         // רמת קושי חכמה — where the adaptive engine moved each practiced topic.

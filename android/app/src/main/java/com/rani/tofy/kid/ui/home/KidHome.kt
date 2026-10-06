@@ -253,7 +253,8 @@ private fun BrandRow(premium: Boolean, friendsBadge: Boolean, onShop: () -> Unit
         // parent's corner. Shop and friends are NOT behind Tofy+.
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             NavButton("🛍️", false, onShop)
-            NavButton("🏆", friendsBadge, onFriends)
+            // The parent can switch friends + leaderboards off for this child (child doc friendsEnabled).
+            if (com.rani.tofy.kid.ui.social.SocialMe.friendsEnabled) NavButton("🏆", friendsBadge, onFriends)
             NavButton("⚙️", false, onSettings)
         }
     }

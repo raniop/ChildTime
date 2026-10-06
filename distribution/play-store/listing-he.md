@@ -75,7 +75,7 @@
 
 | שדה | ערך |
 |---|---|
-| Email | hello@tofyapp.com |
+| Email | ranioph@gmail.com |
 | Website | https://tofyapp.com |
 | Phone (אופציונלי) | להשאיר ריק |
 

@@ -28,7 +28,7 @@
 | Permissions only as needed | INTERNET, CAMERA (QR + chore photo), POST_NOTIFICATIONS, PACKAGE_USAGE_STATS (parent-granted fallback). Photo picker without READ_MEDIA. No SYSTEM_ALERT_WINDOW, no QUERY_ALL_PACKAGES, no Device Admin, no foreground service. | ✅ |
 | Purchases behind a parental gate | Play Billing is being added (`billing/`): every purchase goes through `BillingParentGate` = the parent code, re-asked on every open (respectSession:false twin), also on a parent phone. Without billing, the kid's 💎 packs show "בְּקָרוֹב בְּאַנְדְּרוֹאִיד". | ✅ — re-check on the final build that no price is visible to a child before the gate |
 | Links out of the app from kid screens | Privacy/terms/support links are on parent screens only. | ✅ verify on the kid home before review |
-| **Social features** (friends leaderboard, "All players" board, live quiz) | Not free-form (no chat, no photos, no text) — but Google's rule for apps with kids in the audience is: (a) an **in-app reminder about online safety** before a child shares information, (b) a way for **adults to manage** the social feature (enable/disable), (c) **adult action** before a child exchanges personal information. Today: parents can see and remove friends, but there is **no on/off switch**, **no kid-facing safety reminder**, and the "All players" board shows the child's first name to any signed-in user without a parent action. | ⚠️ **Risk #1** — see §6 |
+| **Social features** (friends leaderboard, "All players" board, live quiz) | Not free-form (no chat, no photos, no text) — but Google's rule for apps with kids in the audience is: (a) an **in-app reminder about online safety** before a child shares information, (b) a way for **adults to manage** the social feature (enable/disable), (c) **adult action** before a child exchanges personal information. Today: parents can see and remove friends, but there is **no on/off switch**, **no kid-facing safety reminder**, and the "All players" board shows the child's first name to any signed-in user without a parent action. | ✅ **Mitigated 2026-10-06:** (a) one-time kid safety reminder before Friends; (b) parent switch "חברים וטבלת שחקנים" per child (child doc `friendsEnabled`; off removes the public card); (c) "All players" shows other children by first initial only — full first names only for friends added by code/QR. |
 
 ---
 
@@ -130,3 +130,8 @@ Edit nothing except trimming waits. Upload as **unlisted** to YouTube (not priva
 6. **Kids see the lock card over other apps.** Its copy must stay gentle (no failure language) — it is the Android twin of the iOS shield; fine today.
 7. **Server push copy is iOS-only.** When an Android child device's lock is switched off, `functions/index.js` (~line 1136) sends "Tofy's Screen Time access was switched off … allow Screen Time. A Screen Time passcode…" — wrong on Android (it is the Accessibility service, and the fix is the parent code). Branch on the device row's kind/OS before the video in scene 7 is recorded, or the reviewer sees iOS instructions.
 8. **Store-listing statements must match the app**: "no chat, no photos" between users — true (chore photos go only to the family's parents).
+
+
+## Decisions (Rani, 2026-10-06)
+- Leaderboard / ages: Rani left it to us → initials on the global board + parent switch + safety reminder (above); target ages 6–8, 9–12, 13–15 (+ parents 18+), not "5 and under".
+- Contact email on the store listing: ranioph@gmail.com. Developer address (shown publicly by Google when selling): entered by Rani in Play Console payments profile.

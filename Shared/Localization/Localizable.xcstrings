@@ -28637,6 +28637,28 @@
         }
       }
     },
+    "הֵבַנְתִּי 👍" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فهمت 👍"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got it 👍"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Понятно 👍"
+          }
+        }
+      }
+    },
     "הֵבַנְתִּי!" : {
       "localizations" : {
         "ar" : {
@@ -37282,6 +37304,28 @@
         }
       }
     },
+    "הילד רואה חברים שהוסיף בקוד, ובטבלה הכללית מופיעים שחקנים אחרים רק באות ראשונה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يرى الطفل الأصدقاء الذين أضافهم بالرمز، وفي اللوحة العامة يظهر اللاعبون الآخرون بالحرف الأول فقط"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your child sees friends they added by code; on the global board other players appear by their first initial only"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ребёнок видит друзей, добавленных по коду; в общей таблице другие игроки показаны только первой буквой имени"
+          }
+        }
+      }
+    },
     "הילד שלי" : {
       "localizations" : {
         "ar" : {
@@ -43983,6 +44027,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Друзья"
+          }
+        }
+      }
+    },
+    "חברים וטבלת שחקנים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأصدقاء ولوحة اللاعبين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Friends & leaderboard"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Друзья и таблица игроков"
           }
         }
       }
@@ -64708,6 +64774,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Москва"
+          }
+        }
+      }
+    },
+    "מוֹסִיפִים רַק חֲבֵרִים שֶׁאַתֶּם מַכִּירִים בֶּאֱמֶת. אַף פַּעַם לֹא מְסַפְּרִים לְמִי שֶׁלֹּא מַכִּירִים כְּתֹבֶת, טֶלֶפוֹן אוֹ שֵׁם בֵּית סֵפֶר. מַשֶּׁהוּ מוּזָר? מְסַפְּרִים לְאַבָּא אוֹ לְאִמָּא." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أضف فقط أصدقاء تعرفهم حقًا. لا تخبر من لا تعرفه أبدًا بعنوانك أو رقم هاتفك أو اسم مدرستك. شيء غريب؟ أخبر أمك أو أباك."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only add friends you really know. Never tell someone you don't know your address, phone number or school. Something feels strange? Tell Mom or Dad."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавляй только тех, кого знаешь по-настоящему. Никогда не сообщай незнакомым адрес, телефон или название школы. Что-то странное? Расскажи маме или папе."
           }
         }
       }
@@ -96713,6 +96801,28 @@
     },
     "🛒 🥛" : {
 
+    },
+    "🛡️ רֶגַע לִפְנֵי שֶׁמְּשַׂחֲקִים עִם חֲבֵרִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🛡️ قبل أن تلعب مع الأصدقاء"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🛡️ Before you play with friends"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🛡️ Прежде чем играть с друзьями"
+          }
+        }
+      }
     },
     "🟢 %@ עכשיו" : {
       "localizations" : {

@@ -1,7 +1,7 @@
 # Google Play — Content rating (IARC questionnaire)
 
 > Play Console → Policy and programs → App content → **Content rating** → Start questionnaire.
-> Email for the IARC certificate: **hello@tofyapp.com**. Answers reflect the Android build as of 2026-10-06.
+> Email for the IARC certificate: **ranioph@gmail.com**. Answers reflect the Android build as of 2026-10-06.
 
 ## Category
 

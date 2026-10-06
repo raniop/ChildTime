@@ -351,6 +351,7 @@ object FriendsRepository {
 
     /** Only the card facts — never friendIDs/hiddenIDs (we may not have loaded them). */
     private suspend fun upsertMyCard(id: String) {
+        if (!SocialMe.friendsEnabled) return   // the parent switched friends off — publish nothing
         if (myCode.isEmpty()) myCode = codeFor(id)
         val fields = mutableMapOf<String, Any>(
             "id" to id, "name" to FriendCard.publicName(SocialMe.name), "stars" to SocialMe.stars,
