@@ -15,6 +15,8 @@ data class Household(
     val giftUntil: Double?,
     val choresMoneyEnabled: Boolean?,
     val ownedPacks: List<String>,
+    /** 📍 The family's fixed places (FamilyPlace.kt). */
+    val places: List<FamilyPlace> = emptyList(),
 ) {
     val isPremium: Boolean get() = (premiumUntil ?: 0.0) > nowSecs()
 
@@ -33,6 +35,7 @@ data class Household(
             giftUntil = d.secs("giftUntil"),
             choresMoneyEnabled = d.bool("choresMoneyEnabled"),
             ownedPacks = d.strList("ownedPacks") ?: emptyList(),
+            places = FamilyPlace.list(d["places"]),
         )
     }
 }

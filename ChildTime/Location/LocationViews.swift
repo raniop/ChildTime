@@ -235,7 +235,15 @@ struct ParentLocationView: View {
             HStack(spacing: 12) {
                 ProfileAvatarView(profile: p, size: 48)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(name).font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.primary)
+                    // When the phone was last seen sits by the name (Rani).
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text(name).font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.primary)
+                        if let f = current {
+                            Text(Self.relative(f.at, now: now))
+                                .font(.system(size: 12.5, weight: .bold, design: .rounded))
+                                .foregroundStyle(now.timeIntervalSince1970 - f.at < 600 ? Color(hex: "9FF5DD") : GlassInk.secondary)
+                        }
+                    }
                     Text(statusLine(p))
                         .font(.system(size: 13.5, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
@@ -313,16 +321,17 @@ struct ParentLocationView: View {
 
     /// "🏫 בית הספר · מאז 08:02 · לפני 3 דקות", or the street address when the
     /// device is outside every family place.
+    /// "🏫 בית הספר · מאז 08:02", or the street address when the device is
+    /// outside every family place. (How fresh it is sits by the name.)
     private func whereLine(_ f: ChildLocationFix) -> String {
-        let ago = Self.relative(f.at, now: now)
         if let id = f.placeID, let place = places.first(where: { $0.id == id }) {
             if let s = f.placeSince {
-                return tr("\(place.emoji) \(place.name) · מאז \(QuietHoursManager.clock(Date(timeIntervalSince1970: s))) · \(ago)")
+                return tr("\(place.emoji) \(place.name) · מאז \(QuietHoursManager.clock(Date(timeIntervalSince1970: s)))")
             }
-            return tr("\(place.emoji) \(place.name) · \(ago)")
+            return "\(place.emoji) \(place.name)"
         }
-        if let a = loc.address(for: f) { return tr("📍 \(a) · \(ago)") }
-        return tr("📍 עודכן \(ago)")
+        if let a = loc.address(for: f) { return "📍 \(a)" }
+        return tr("📍 מחפשים כתובת…")
     }
 
     private func statusLine(_ p: Profile) -> String {

@@ -92,6 +92,10 @@ dependencies {
     implementation("com.google.zxing:core:3.5.3")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
+    // 📍 Location: fused location + geofences (child device); the family map
+    // (parent) on OpenStreetMap — no API key, nothing to enable in a console.
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
 
     // Google Play Billing (billing/): Tofy+, question packs / world passes, 💎 packs.
     implementation("com.android.billingclient:billing-ktx:8.0.0")

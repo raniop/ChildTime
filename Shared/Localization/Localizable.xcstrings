@@ -1492,6 +1492,28 @@
         }
       }
     },
+    "%@ %@ · מאז %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ · منذ %3$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ · since %3$@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ · с %3$@"
+          }
+        }
+      }
+    },
     "%@ %@ · מאז %@ · %@" : {
       "localizations" : {
         "ar" : {
@@ -102846,6 +102868,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "📍 Где дети"
+          }
+        }
+      }
+    },
+    "📍 מחפשים כתובת…" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 نبحث عن العنوان…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Finding the address…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Ищем адрес…"
           }
         }
       }

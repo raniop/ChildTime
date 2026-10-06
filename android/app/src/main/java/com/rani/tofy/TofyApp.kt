@@ -23,6 +23,7 @@ class TofyApp : Application() {
         // Kid side: content assets/cache + the progress session (both idempotent).
         com.rani.tofy.kid.content.QuestionSource.init(this)
         com.rani.tofy.kid.core.KidSession.init(this)
+        com.rani.tofy.kid.location.KidLocation.init(this)
     }
 
     /**
@@ -43,5 +44,9 @@ class TofyApp : Application() {
         nm.createNotificationChannel(NotificationChannel("family", tr("עדכונים"), NotificationManager.IMPORTANCE_HIGH))
         nm.createNotificationChannel(NotificationChannel("requests", tr("בקשות לאישור"), NotificationManager.IMPORTANCE_HIGH))
         nm.createNotificationChannel(NotificationChannel("reports", tr("דוחות ותובנות"), NotificationManager.IMPORTANCE_DEFAULT))
+        // 📍 The child's "location is shared" notice (quiet, always there while
+        // sharing — Google Play requires it) and the 🔔 beep (loud, on top).
+        nm.createNotificationChannel(NotificationChannel("location", tr("שיתוף מיקום"), NotificationManager.IMPORTANCE_LOW))
+        nm.createNotificationChannel(NotificationChannel("beep", tr("🔔 צפצוף"), NotificationManager.IMPORTANCE_HIGH).apply { setSound(null, null) })
     }
 }

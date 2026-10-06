@@ -4,6 +4,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- 📍 Location sharing on a CHILD device, only after a parent switched it
+         on for that child (children/{id}.locationSharing) and the child's phone
+         allowed it. Background = arrive/leave a family place while Tofy is closed. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <!-- QR + chore photos are optional: tablets without a camera can still install (type the code). -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.any" android:required="false" />
@@ -88,6 +94,11 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+        <!-- 📍 kid/location: fixes + place crossings while Tofy is closed, and
+             the "מָצָאתִי" button on the beep notification. -->
+        <receiver android:name=".kid.location.LocationUpdatesReceiver" android:exported="false" />
+        <receiver android:name=".kid.location.GeofenceReceiver" android:exported="false" />
+        <receiver android:name=".kid.location.BeepStopReceiver" android:exported="false" />
         <service android:name=".push.TofyMessagingService" android:exported="false">
             <intent-filter><action android:name="com.google.firebase.MESSAGING_EVENT" /></intent-filter>
         </service>

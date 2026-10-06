@@ -7,6 +7,12 @@ import com.google.firebase.messaging.RemoteMessage
 class TofyMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) { PushRegistrar.register(token) }
     override fun onMessageReceived(message: RemoteMessage) {
+        // 📍 A parent asked for a fresh fix / 🔔 a beep (data-only, child device).
+        when (message.data["type"]) {
+            "location-request" -> { kotlinx.coroutines.runBlocking { com.rani.tofy.kid.location.KidLocation.freshFix() }; return }
+            "beep" -> { com.rani.tofy.kid.location.KidLocation.startBeep(); return }
+            "beep-stop" -> { com.rani.tofy.kid.location.KidLocation.stopBeep(false); return }
+        }
         // 🔔 Every VISIBLE push also lands in the activity feed, like iOS's PushManager.
         // A silent data message (the server's "wake" to a child device after a parent
         // command) has nothing to say — it used to add an empty "עדכון חדש" row (Rani).

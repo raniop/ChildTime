@@ -171,6 +171,7 @@ object KidSession : LeaseHost {
         ticker?.cancel(); ticker = null
         sync.stop()
         leases.stop()
+        com.rani.tofy.kid.location.KidLocation.bind(null, null)
         engine = null
         childID = null
         lastChildDoc = null
@@ -497,6 +498,8 @@ object KidSession : LeaseHost {
     internal fun engineFor(cid: String): ProgressEngine? = if (childID == cid) engine else null
 
     internal fun onChildDoc(d: Map<String, Any?>) {
+        // 📍 Location sharing follows the bound child (never Kid Mode on a parent's phone).
+        if (!kidMode) com.rani.tofy.kid.location.KidLocation.bind(childID, d["householdID"] as? String)
         lastChildDoc = d
         engine?.settings = KidSettings.fromChildDoc(d, baseSettings)
         publish()
