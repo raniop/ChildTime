@@ -5785,6 +5785,28 @@
         }
       }
     },
+    "%lld דַּקּ׳ לְשַׂחֵק · פּוֹתְחִים מִ־%lld — עוֹד %lld! 🎮" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld د. للّعب · يُفتح من %lld — بقي %lld! 🎮"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min to play · opens at %lld — %lld more! 🎮"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld мин. для игры · открывается с %lld — ещё %lld! 🎮"
+          }
+        }
+      }
+    },
     "%lld דקות" : {
       "localizations" : {
         "ar" : {

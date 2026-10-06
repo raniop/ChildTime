@@ -1983,8 +1983,11 @@ struct WorldMapView: View {
                 bottomHint(tr("שִׂחַקְתָּ הַיּוֹם \(progress.minutesPlayedToday) מִתּוֹךְ \(progress.dailyCap.max) דַּקּוֹת 🌙 — \(progress.pendingMinutes) שְׁמוּרוֹת לְמָחָר"))
             } else if progress.redeemableMinutesNow > 0 {
                 // Has some minutes but below the 15-min minimum we can enforce.
-                // Tell the kid how many more to go instead of hiding the button.
-                bottomHint(tr("עוֹד \(max(0, progress.minimumUnlockMinutes - progress.redeemableMinutesNow)) דַּקּוֹת וְאֶפְשָׁר לִפְתּוֹחַ זְמַן מִשְׂחָק 🎮"))
+                // Say all three numbers — what they have, where opening starts, how
+                // many more — or "12 דק' לשחק" above and "עוד 3" here read as a
+                // contradiction (Rani, on the iPad).
+                let have = progress.redeemableMinutesNow, from = progress.minimumUnlockMinutes
+                bottomHint(tr("\(have) דַּקּ׳ לְשַׂחֵק · פּוֹתְחִים מִ־\(from) — עוֹד \(max(0, from - have))! 🎮"))
             } else {
                 // Empty wallet (nothing earned / all opened). Nudge to earn instead
                 // of leaving the spot blank.

@@ -572,8 +572,10 @@ private fun ColumnScope.BottomCtas(c: HomeCtaModel, onOpenEarned: () -> Unit, on
                 emoji = "🎮", enabled = !c.opening, onClick = onOpenEarned)
         }
         c.maxedOut -> BottomHint(tr("שִׂחַקְתָּ הַיּוֹם %lld מִתּוֹךְ %lld דַּקּוֹת 🌙 — %lld שְׁמוּרוֹת לְמָחָר", c.minutesPlayedToday, c.capMax, c.pendingMinutes))
-        c.redeemableMinutes > 0 -> BottomHint(tr("עוֹד %lld דַּקּוֹת וְאֶפְשָׁר לִפְתּוֹחַ זְמַן מִשְׂחָק 🎮",
-            maxOf(0, ProgressEngine.MINIMUM_UNLOCK_MINUTES - c.redeemableMinutes)))
+        // Below the 15-min minimum: what they have, where opening starts, how many more —
+        // "12 דק' לשחק" above and a bare "עוד 3" here read as a contradiction (Rani).
+        c.redeemableMinutes > 0 -> BottomHint(tr("%lld דַּקּ׳ לְשַׂחֵק · פּוֹתְחִים מִ־%lld — עוֹד %lld! 🎮",
+            c.redeemableMinutes, ProgressEngine.MINIMUM_UNLOCK_MINUTES, maxOf(0, ProgressEngine.MINIMUM_UNLOCK_MINUTES - c.redeemableMinutes)))
         else -> BottomHint(tr("עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק 🎮"))
     }
 }
