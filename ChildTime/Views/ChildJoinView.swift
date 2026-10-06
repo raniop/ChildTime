@@ -284,8 +284,14 @@ struct ChildJoinView: View {
         let parts = payload.split(separator: "|", maxSplits: 1).map(String.init)
         guard let codePart = parts.first, codePart.count >= 6 else { return }
         let codeChildID = parts.count > 1 ? UUID(uuidString: parts[1]) : nil
+        // ONE join at a time. The hand-off can fire twice (onAppear AND the
+        // onChange of the same payload); the second redeem then found the code
+        // already used and flashed "קוד לא תקין" while the first was connecting
+        // (Rani, iPad joining an Android parent's family). Claimed synchronously,
+        // before the Task, so the two can't both get past it.
+        guard !working else { return }
+        working = true
         Task {
-            working = true
             message = tr("מִתְחַבְּרִים…")
             // A payload handed over the instant this screen appears (a parent
             // device just converted into a child one) can beat the household's
