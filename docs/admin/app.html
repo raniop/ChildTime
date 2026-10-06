@@ -149,7 +149,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261006194414";
+const PAGE_STAMP = "20261006195156";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -1142,18 +1142,23 @@ async function updQuick(c) {
   const notesByLang = {};
   for (const l of ["he", "en", "ru", "ar"]) notesByLang[l] = pitch ? (pitch[l] || []).slice(0, 3) : [];
   const upToDate = (c.latestBuild || 0) >= build && c.enabled;
+  const row = (t) => `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12)">${esc(t)}</div>`;
   box.innerHTML = `
-    <div class="card" style="border-color:${upToDate ? "rgba(56,209,140,.5)" : "rgba(255,210,90,.6)"}">
-      <h4>🍎 באפסטור עכשיו: גרסה ${esc(live)} (בילד ${build})</h4>
+    <div class="card" style="border-color:${upToDate ? "rgba(56,209,140,.5)" : "rgba(255,210,90,.6)"};max-width:720px">
+      <h4 style="margin-bottom:4px">🍎 באפסטור עכשיו: ${esc(live)} · בילד ${build}</h4>
       ${upToDate
-        ? `<p style="margin:6px 0 0">✅ הכל מעודכן — מי שעדיין על גרסה ישנה כבר מקבל באפליקציה הודעה לעדכן. אין מה לשלוח.</p>`
-        : `<p style="margin:6px 0 10px">לחיצה על <b>שלח</b> = כל מי שעל גרסה ישנה מ־${build} יראה באפליקציה "יש גרסה חדשה של טופי" עם מה חדש:</p>
-           ${pitch ? `<ul style="margin:0 0 10px;padding-inline-start:20px">${notesByLang.he.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>`
-                   : `<p class="stamp" style="margin:0 0 10px">⚠️ אין עדיין טקסט עדכון לגרסה הזאת — יוצג רק "יש גרסה חדשה", בלי רשימה.</p>`}
-           <div class="stamp" style="margin-bottom:10px">ההורים יראו את הרשימה בשפה של האפליקציה שלהם (עברית, English, Русский, العربية).</div>
-           <label style="display:block;margin-bottom:12px"><input type="checkbox" id="q_push"> גם לשלוח התראה (פוש) להורים</label>
-           <button class="btn" id="q_send" style="font-size:16px;padding:12px 30px">🚀 שלח</button>`}
-      <div class="stamp" style="margin-top:10px">🤖 אנדרואיד: עוד לא בחנות הציבורית (בבדיקה הסגורה) — אין למי לשלוח.</div>
+        ? `<p style="margin:8px 0 0">✅ הכל מעודכן — מי שעדיין על גרסה ישנה כבר רואה באפליקציה הודעה לעדכן. אין מה לשלוח.</p>`
+        : `<div class="stamp" style="margin:0 0 12px">מי שעל גרסה ישנה יותר יראה באפליקציה:</div>
+           <div style="display:grid;gap:8px;padding:14px;border-radius:16px;background:rgba(108,92,231,.18);border:1px solid rgba(255,255,255,.12);margin-bottom:6px">
+             <b style="font-size:16px;margin-bottom:2px">יש גרסה חדשה של טופי</b>
+             ${notesByLang.he.map(row).join("")}
+           </div>
+           <div class="stamp" style="margin-bottom:14px">כל הורה רואה את זה בשפה של האפליקציה שלו (עברית · English · Русский · العربية).</div>
+           <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+             <button class="btn" id="q_send" style="font-size:16px;padding:12px 34px">🚀 שלח</button>
+             <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="q_push"> גם התראת פוש להורים</label>
+           </div>`}
+      <div class="stamp" style="margin-top:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1)">🤖 אנדרואיד: עוד לא בחנות הציבורית (בבדיקה הסגורה) — אין למי לשלוח.</div>
     </div>`;
   const send = $("q_send"); if (!send) return;
   send.onclick = async () => {
@@ -1187,6 +1192,8 @@ async function appUpdate(opts) {
   const floorOn = c.minBuild > 0 || c.minAndroidBuild > 0;
   $("main").innerHTML = `
     <div class="top"><h3>עדכון גרסה</h3><span class="stamp">${c.updatedAt ? `פורסם לאחרונה ${when(c.updatedAt)}${c.updatedBy ? " · " + esc(c.updatedBy) : ""}` : r.exists ? "" : "עוד לא פורסם עדכון"}</span></div>
+    <div id="updQuick"><div class="card"><span class="spin"></span> בודק מה יש עכשיו בחנויות…</div></div>
+    <details id="updAdvanced" style="margin-top:14px"><summary class="stamp" style="cursor:pointer;font-size:14px">⚙️ מתקדם — עריכה ידנית, אנדרואיד, חסימת גרסאות</summary>
     <div class="kpis">
       ${kpi(c.latestBuild || "—", "🍎 iOS · בילד אחרון" + (c.version ? " · " + esc(c.version) : ""))}
       ${kpi(c.latestAndroidBuild || "—", "🤖 אנדרואיד · בילד אחרון" + (c.androidVersion ? " · " + esc(c.androidVersion) : ""))}
@@ -1194,8 +1201,6 @@ async function appUpdate(opts) {
       ${kpi(floorOn ? `${c.minBuild || "—"} / ${c.minAndroidBuild || "—"}` : "כבויה", "חסימת גרסאות ישנות (iOS / אנדרואיד)", floorOn ? "חוסם מכשירים!" : "", "d")}
       ${kpi(last ? fmt(last.sent || 0) : "—", last ? `הורים קיבלו התראה · ${when(last.at)}` : "עוד לא נשלחה התראת עדכון", last && last.failed ? fmt(last.failed) + " נכשלו" : "", "d")}
     </div>
-    <div id="updQuick"><div class="card"><span class="spin"></span> בודק מה יש עכשיו בחנויות…</div></div>
-    <details id="updAdvanced" style="margin-top:14px"><summary class="stamp" style="cursor:pointer;font-size:14px">⚙️ מתקדם — עריכה ידנית, אנדרואיד, חסימת גרסאות</summary>
     <div id="updForm">
       <div class="grid2">
         <div class="card"><h4>🍎 iOS</h4><div class="knobs">
