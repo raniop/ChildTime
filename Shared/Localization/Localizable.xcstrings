@@ -2644,7 +2644,26 @@
       }
     },
     "%@ דַּקּוֹת" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ دقيقة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ min"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ мин."
+          }
+        }
+      }
     },
     "%@ הִיא %lld" : {
       "localizations" : {
