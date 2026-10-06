@@ -231,7 +231,7 @@ fun MiniGameEarnBar() {
 }
 
 /**
- * "⏱ 23:47 דַּקּ׳ שֶׁהִרְוִיחַ" — the earned wallet, the same number the home screen
+ * "⏱ 23:47 דַּקּ׳ לְשַׂחֵק" — the earned wallet, the same number the home screen
  * and "פתחו לי" show (iOS EarnedBalanceRow). It used to be a bar toward the next
  * batch of 10, which the home screen never showed (Rani, 2026-10-06).
  */
@@ -247,7 +247,7 @@ fun EarnedBalanceRow(modifier: Modifier = Modifier, size: Float = 14f) {
                 Text("%d:%02d".format(v / 60, v % 60), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = (size + 3).sp)
             }
         }
-        Text(tr("דַּקּ׳ שֶׁהִרְוִיחַ"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = (size - 1).sp, maxLines = 1)
+        Text(tr("דַּקּ׳ לְשַׂחֵק"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = (size - 1).sp, maxLines = 1)
         Spacer(Modifier.weight(1f))
     }
 }

@@ -26307,6 +26307,28 @@
         }
       }
     },
+    "דַּקּ׳ לְשַׂחֵק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "د. للّعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Min to play"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мин. для игры"
+          }
+        }
+      }
+    },
     "דַּקּ׳ מַתָּנָה" : {
       "localizations" : {
         "ar" : {

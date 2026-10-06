@@ -351,7 +351,7 @@ private fun HeaderPane(
                 WalletStat("💎 " + currencyShort(diamonds), tr("יַהֲלוֹמִים"), compact)
                 if (!compact) {
                     WalletStat("💝 ${(engine?.giftSecondsAvailable ?: 0) / 60}", tr("דַּקּ׳ מַתָּנָה"), compact)
-                    WalletStat("⏱ ${engine?.pendingMinutes ?: 0}", tr("דַּקּ׳ שֶׁהִרְוִיחַ"), compact)
+                    WalletStat("⏱ ${engine?.pendingMinutes ?: 0}", tr("דַּקּ׳ לְשַׂחֵק"), compact)
                 }
             }
         }
