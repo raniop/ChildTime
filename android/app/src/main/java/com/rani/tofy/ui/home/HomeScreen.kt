@@ -9,6 +9,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import com.rani.tofy.ui.theme.glassPane
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -208,12 +211,30 @@ private fun ChildCard(
             GlassButton(tr("תְּנוּ לְ%@ לְשַׂחֵק כָּאן 🧒", child.name), Modifier.fillMaxWidth().coachMark("p.playHere", marked)) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
         } else {
             P(tr("%@ · אֵין עֲדַיִן מַכְשִׁיר מְחֻבָּר.", gradeName(child.effectiveGrade)), 13f)
+            // מידע נוסף · חברו מכשיר · פעולות — side by side, in one row (Rani:
+            // connecting used to REPLACE "מידע נוסף", and a row of its own grew the card).
             RowSpaced {
-                WhiteButton(tr("📱 חִבּוּר מַכְשִׁיר"), Modifier.weight(2f).coachMark("p.connect", markConnect)) { onConnect() }
-                GlassButton(tr("⚡ פְּעֻלּוֹת"), Modifier.weight(1f).coachMark("p.actions", marked)) { onActions() }
+                CardButton(tr("מֵידָע נוֹסָף ←"), white = true, Modifier.weight(1.1f)) { onOpen() }
+                CardButton(tr("+ חַבְּרוּ מַכְשִׁיר"), white = false, Modifier.weight(1.1f).coachMark("p.connect", markConnect)) { onConnect() }
+                CardButton(tr("⚡ פְּעֻלּוֹת"), white = false, Modifier.weight(0.9f).coachMark("p.actions", marked)) { onActions() }
             }
             GlassButton(tr("תְּנוּ לְ%@ לְשַׂחֵק כָּאן 🧒", child.name), Modifier.fillMaxWidth().coachMark("p.playHere", marked)) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
         }
+    }
+}
+
+/** A card button whose label shrinks to fit — three of them share one row. */
+@Composable
+private fun CardButton(text: String, white: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(14.dp)
+    Box(
+        modifier.height(46.dp).clip(shape)
+            .then(if (white) Modifier.background(Color.White.copy(alpha = 0.92f)) else Modifier.glassPane(14.dp, 0.18f, shadow = false))
+            .clickable(onClick = onClick).padding(horizontal = 6.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        com.rani.tofy.kid.ui.play.FitText(text, 14.sp, color = if (white) Ink.indigo else Color.White,
+            weight = if (white) FontWeight.ExtraBold else FontWeight.Bold, maxLines = 1, minScale = 0.7f)
     }
 }
 

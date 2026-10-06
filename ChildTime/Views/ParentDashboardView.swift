@@ -1333,10 +1333,13 @@ struct ParentDashboardView: View {
                         .lineLimit(1).minimumScaleFactor(0.7)
                     Spacer(minLength: 0)
                 }
-                // Same shape as a connected card: the primary control (here:
-                // connect a device) plus the slot the ⚡ menu is overlaid into.
+                // מידע נוסף · חברו מכשיר · פעולות, side by side (Rani): connecting
+                // used to REPLACE "מידע נוסף", and a row of its own grew the card.
+                // "חברו מכשיר" and ⚡ are overlaid into their slots by the grid
+                // (a Button inside the NavigationLink would swallow the tap).
                 HStack(spacing: 8) {
-                    Color.clear.frame(maxWidth: .infinity).frame(height: Self.homeControlHeight)
+                    homePrimaryLabel(tr("מֵידָע נוֹסָף ←"))
+                    Color.clear.frame(width: Self.connectButtonWidth, height: 1)
                     Color.clear.frame(width: Self.actionsMenuWidth, height: 1)
                 }
                 Color.clear.frame(maxWidth: .infinity).frame(height: Self.homeControlHeight)
@@ -1349,6 +1352,8 @@ struct ParentDashboardView: View {
     }
 
     private static let actionsMenuWidth: CGFloat = 112
+    /// "+ חברו מכשיר" between מידע נוסף and ⚡ on a card with no device yet.
+    private static let connectButtonWidth: CGFloat = 112
 
 
     private func childHasDevice(_ profile: Profile) -> Bool {
@@ -2142,21 +2147,22 @@ struct ParentDashboardView: View {
                             .environment(\.layoutDirection, .app)
                         }
                     }
-                    // 📱 No device yet → "+ חברו מכשיר" closes the card's one line.
-                    .overlay(alignment: .bottomLeading) {
+                    // 📱 No device yet → "+ חברו מכשיר", between מידע נוסף and ⚡.
+                    .overlay(alignment: .bottomTrailing) {
                         if isRoot, !childHasDevice(row.profile) {
                             Button {
                                 Haptic.light()
                                 qrCode = nil
                                 qrChild = row.profile
                             } label: {
-                                homePrimaryLabel(tr("+ חַבְּרוּ מַכְשִׁיר"))
+                                homeGhostLabel(tr("+ חַבְּרוּ מַכְשִׁיר"), width: Self.connectButtonWidth)
                             }
                             .buttonStyle(.borderless)
                             .coachMark("p.connect", if: row.profile.id == rows.first(where: { !childHasDevice($0.profile) })?.profile.id)
-                            .padding(.horizontal, 14)
                             .padding(.bottom, 14 + Self.homeControlHeight + Self.homeRowGap)
-                            .padding(.trailing, Self.actionsMenuWidth + 8)
+                            // Its slot sits between מידע נוסף and the ⚡ menu (the grid is RTL:
+                            // `.bottomTrailing` is the bottom-LEFT, where ⚡ lives).
+                            .padding(.trailing, 14 + Self.actionsMenuWidth + 8)
                             .environment(\.layoutDirection, .app)
                         }
                     }
