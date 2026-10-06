@@ -149,7 +149,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261006195650";
+const PAGE_STAMP = "20261006195914";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -1161,7 +1161,7 @@ async function updQuick(c) {
            <div class="stamp" style="margin-bottom:14px">כל הורה רואה את זה בשפה של האפליקציה שלו (עברית · English · Русский · العربية).</div>
            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
              <button class="btn" id="q_send" style="font-size:16px;padding:12px 34px">🚀 שלח</button>
-             <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="q_push"> גם התראת פוש להורים</label>
+             <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="q_push" checked> גם התראת פוש להורים</label>
            </div>`}
       <div class="stamp" style="margin-top:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1)">🤖 אנדרואיד: עוד לא בחנות הציבורית (בבדיקה הסגורה) — אין למי לשלוח.</div>
     </div>`;
@@ -1224,7 +1224,7 @@ async function appUpdate(opts) {
       </div>
       <div class="card"><h4>📣 הפעלה והתראה</h4>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="sw ${c.enabled ? "on" : ""}" id="u_enabled"></span><b id="u_enabledL"></b><span class="stamp">מתג חירום: כיבוי משתיק את כל מסכי העדכון בכל המכשירים, בלי בילד.</span></div>
-        <label style="display:block;margin-top:12px"><input type="checkbox" id="u_announce"> <b>לשלוח התראה להורים</b> שהגרסה שלהם ישנה יותר</label>
+        <label style="display:block;margin-top:12px"><input type="checkbox" id="u_announce" checked> <b>לשלוח התראה להורים</b> שהגרסה שלהם ישנה יותר</label>
         <div class="stamp" style="margin-top:4px">יוצאת רק כשמספר הבילד עולה, פעם אחת לכל בילד, ורק למכשירי הורים — לא לילדים. בטלו את הסימון אם הבילד עדיין רק ב־TestFlight או בבדיקה של אפל/גוגל.</div>
         <div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn ghost" id="u_reachBtn">כמה הורים יקבלו התראה?</button><span class="stamp" id="u_reach"></span></div>
       </div>

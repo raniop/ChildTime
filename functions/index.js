@@ -5956,22 +5956,24 @@ function appUpdateMessage(platform, lang, cfg) {
   const v = platform === "android" ? c.androidVersion : c.version;
   // A language's own notes only — never another language's (Hebrew included).
   const own = c.notesByLang[lang] || [];
-  const note = (own.length ? own : (lang === "he" ? c.notes : []))[0] || "";
+  // ALL the lines (≤3) — the lock screen showed only the first (Rani).
+  const notes = (own.length ? own : (lang === "he" ? c.notes : [])).slice(0, 3);
+  const colon = notes.length ? ":" : ".";
   let title, line;
   if (lang === "en") {
     title = "A new version of Tofy is here ✨";
-    line = `${v ? `Version ${v}` : "A new version"} is waiting for you on ${store}. Update to get everything that's new.`;
+    line = `${v ? `Version ${v}` : "A new version"} is waiting for you on ${store}${colon}`;
   } else if (lang === "ru") {
     title = "Вышла новая версия Tofy ✨";
-    line = `${v ? `Версия ${v}` : "Новая версия"} уже ждёт вас в ${store}. Обновите приложение, чтобы получить все новинки.`;
+    line = `${v ? `Версия ${v}` : "Новая версия"} уже ждёт вас в ${store}${colon}`;
   } else if (lang === "ar") {
     title = "يتوفر إصدار جديد من Tofy ✨";
-    line = `${v ? `الإصدار ${v}` : "إصدار جديد"} بانتظاركم في ${store}. حدّثوا التطبيق للاستمتاع بكل الجديد.`;
+    line = `${v ? `الإصدار ${v}` : "إصدار جديد"} بانتظاركم في ${store}${colon}`;
   } else {
     title = "יש גרסה חדשה של טופי ✨";
-    line = `${v ? `גרסה ${v}` : "גרסה חדשה"} מחכה לכם ב־${store}. כדאי לעדכן כדי ליהנות מכל החידושים.`;
+    line = `${v ? `גרסה ${v}` : "גרסה חדשה"} מחכה לכם ב־${store}${colon}`;
   }
-  return { title, body: note ? `${line}\n${note}` : line };
+  return { title, body: [line, ...notes].join("\n") };
 }
 
 function appUpdatePayload(platform, lang, cfg, build) {
