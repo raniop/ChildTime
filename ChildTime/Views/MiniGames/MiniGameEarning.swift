@@ -248,7 +248,7 @@ struct MiniGameEarnBar: View {
     }
 }
 
-/// "⏱ 23:47 דַּקּ׳ שֶׁהִרְוִיחַ" — the earned wallet, the same number the home
+/// "⏱ 23:47 דַּקּ׳ לְשַׂחֵק" — the earned wallet, the same number the home
 /// screen and "פתחו לי" show.
 struct EarnedBalanceRow: View {
     @ObservedObject private var progress = ProgressStore.shared
@@ -265,7 +265,7 @@ struct EarnedBalanceRow: View {
                 .environment(\.layoutDirection, .leftToRight)
                 .numericTextTransition(Double(secs))
                 .animation(.spring(response: 0.4, dampingFraction: 0.7), value: secs)
-            Text(tr("דַּקּ׳ שֶׁהִרְוִיחַ"))
+            Text(tr("דַּקּ׳ לְשַׂחֵק"))
                 .font(.system(size: size - 1, weight: .bold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
                 .lineLimit(1)
