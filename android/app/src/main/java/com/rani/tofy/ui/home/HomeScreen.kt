@@ -55,9 +55,24 @@ fun HomeScreen(
     val firstChild = state.orderedChildren.firstOrNull()
     val connectFirst = state.orderedChildren.firstOrNull { !state.hasDevice(it) }
     var tour by remember { mutableStateOf(false) }
+    // 🔔 Parents NEED push (ParentDashboardView: ask automatically, but only
+    // once there's a child to hear about and onboarding is over). Android 13+
+    // asks once per install; a decline leaves the banner as the manual path.
+    // The tour waits for the system dialog, so the two never overlap.
+    var notifAsked by remember { mutableStateOf(false) }
+    val askNotifications = com.rani.tofy.ui.activity.rememberNotificationsAsk(openSettingsOnDecline = false) { notifAsked = true }
     LaunchedEffect(firstChild?.id) {
-        if (firstChild == null || CoachTours.isDone(CoachTours.PARENT_HOME)) return@LaunchedEffect
-        if (ParentOnboarding.isActive(ctx)) return@LaunchedEffect
+        if (firstChild == null || ParentOnboarding.isActive(ctx)) return@LaunchedEffect
+        val prefs = ctx.getSharedPreferences("tofy", android.content.Context.MODE_PRIVATE)
+        val needsAsk = android.os.Build.VERSION.SDK_INT >= 33 &&
+            !com.rani.tofy.ui.activity.notificationsOn(ctx) && !prefs.getBoolean("notif.autoAsked", false)
+        if (needsAsk) {
+            prefs.edit().putBoolean("notif.autoAsked", true).apply()
+            delay(600)
+            askNotifications()
+            while (!notifAsked) delay(200)
+        }
+        if (CoachTours.isDone(CoachTours.PARENT_HOME)) return@LaunchedEffect
         delay(900)
         tour = true
     }
@@ -78,13 +93,15 @@ fun HomeScreen(
                     }
                 }
                 items(state.orderedChildren, key = { it.id }) { child ->
-                    key(tick) {
-                        ChildCard(state, child, state.progress[child.id] ?: Progress.EMPTY,
-                            // Like iOS: the tour marks the FIRST child's card only, and
-                            // the connect button of the first child without a device.
-                            marked = child.id == firstChild?.id, markConnect = child.id == connectFirst?.id,
-                            onOpen = { onOpenChild(child) }, onActions = { onActions(child) }, onConnect = { onConnectDevice(child) })
-                    }
+                    // `tick` is passed, not used as a key(): re-keying tore the card
+                    // down every second, dropping its tour marks — the spotlight
+                    // lost its target and the tour skipped itself to the end.
+                    ChildCard(state, child, state.progress[child.id] ?: Progress.EMPTY,
+                        // Like iOS: the tour marks the FIRST child's card only, and
+                        // the connect button of the first child without a device.
+                        marked = child.id == firstChild?.id, markConnect = child.id == connectFirst?.id,
+                        tick = tick,
+                        onOpen = { onOpenChild(child) }, onActions = { onActions(child) }, onConnect = { onConnectDevice(child) })
                 }
                 if (!state.loading && state.children.isEmpty()) item {
                     Column(Modifier.fillMaxWidth().glassPane().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -129,6 +146,7 @@ private fun Header(state: FamilyState, onSettings: () -> Unit, onBell: () -> Uni
 private fun ChildCard(
     state: FamilyState, child: Child, s: Progress,
     marked: Boolean, markConnect: Boolean,
+    @Suppress("UNUSED_PARAMETER") tick: Int,   // recomposes the live countdown each second
     onOpen: () -> Unit, onActions: () -> Unit, onConnect: () -> Unit,
 ) {
     val live = state.liveWindow(child)

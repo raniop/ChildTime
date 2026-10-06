@@ -58,6 +58,8 @@ class TofyGuardService : AccessibilityService() {
         overlay = GuardOverlay(this, onOpenTofy = ::openTofy, onDismiss = ::dismissToHome)
         GuardStateSource.ensureBound(this)
         EnforcementStatus.refresh(this, activeOverride = true)
+        // The parent just flipped the switch from our setup screen: come back.
+        if (SetupReturn.consume(this)) SetupReturn.bringTofyBack(this)
         // The child may already be inside an app: no event has come yet.
         foreground = UsageAccess.foregroundPackage(this)
         val s = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate).also { scope = it }

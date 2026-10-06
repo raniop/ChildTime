@@ -45984,6 +45984,28 @@
         }
       }
     },
+    "טופי חוזרת לכאן לבד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "توفي يعيدك إلى هنا تلقائيًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy brings you back here by itself"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тофи сама вернёт вас сюда"
+          }
+        }
+      }
+    },
     "טופי להורים — עכשיו גם באנדרואיד" : {
       "extractionState" : "stale",
       "localizations" : {

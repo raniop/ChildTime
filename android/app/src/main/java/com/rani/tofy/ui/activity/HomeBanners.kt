@@ -275,10 +275,10 @@ internal fun openNotificationSettings(ctx: Context) {
 
 /** Asks for the runtime grant; a refusal (or a pre-13 phone with them off) opens the system settings. */
 @Composable
-internal fun rememberNotificationsAsk(onResult: () -> Unit): () -> Unit {
+internal fun rememberNotificationsAsk(openSettingsOnDecline: Boolean = true, onResult: () -> Unit): () -> Unit {
     val ctx = LocalContext.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (!granted) openNotificationSettings(ctx)
+        if (!granted && openSettingsOnDecline) openNotificationSettings(ctx)
         onResult()
     }
     return {

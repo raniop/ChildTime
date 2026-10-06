@@ -199,6 +199,7 @@ fun ChildLockSetupScreen(onDone: () -> Unit, fromOnboarding: Boolean = !Enforcem
                     ) { triedSettings = true; openAccessibilitySettings(ctx) }
                     LockStep.USAGE -> OnboardingFooter(tr("פתיחת ההגדרות"), link = tr("אעשה את זה אחר כך"),
                         onLink = { step = LockStep.APPS }) {
+                        SetupReturn.arm(ctx); SetupReturn.watchUsageAccess(ctx)
                         runCatching { ctx.startActivity(UsageAccess.settingsIntent(ctx)) }
                     }
                     LockStep.APPS -> OnboardingFooter(
@@ -283,7 +284,7 @@ private fun AccessibilityBody(name: String, girl: Boolean, failed: Boolean) {
     InstructionCard(tr("ייפתחו הגדרות הנגישות"), listOf(
         tr("מקישים על ״טופי״ (לפעמים תחת ״אפליקציות שהורדו״ או ״אפליקציות מותקנות״)"),
         tr("מפעילים את המתג ומאשרים"),
-        tr("חוזרים לכאן"),
+        tr("טופי חוזרת לכאן לבד"),
     ))
     if (failed) P(tr("הנעילה עוד לא פועלת — פתחו שוב את ההגדרות והפעילו את טופי."), 14f,
         color = Color(0xFFFFE28A), weight = FontWeight.Bold, align = TextAlign.Center)
@@ -417,7 +418,16 @@ private fun InstructionCard(title: String?, steps: List<String>) {
 internal fun openAccessibilitySettings(ctx: Context) {
     // Settings is parent-only on a child device — this screen's allowance covers it.
     EnforcementStore.allowTemporarily(ctx, AllowList.settingsPackages(ctx), 15)
-    runCatching { ctx.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+    SetupReturn.arm(ctx)   // the service's connect brings Tofy back by itself
+    // Straight to Tofy's own switch where the OS allows it (Android 11+), so the
+    // parent doesn't have to hunt for "Installed apps → Tofy" in a long list.
+    val component = android.content.ComponentName(ctx.packageName, TofyGuardService::class.java.name).flattenToString()
+    val direct = Intent("android.settings.ACCESSIBILITY_DETAILS_SETTINGS")
+        .putExtra(Intent.EXTRA_COMPONENT_NAME, component)
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    val opened = android.os.Build.VERSION.SDK_INT >= 30 &&
+        direct.resolveActivity(ctx.packageManager) != null && runCatching { ctx.startActivity(direct) }.isSuccess
+    if (!opened) runCatching { ctx.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
 }
 
 /** The parent's way into the device's Settings: 10 minutes, then parent-only again. */

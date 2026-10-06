@@ -255,7 +255,13 @@ fun CoachTour(
         val h = canvas.height.toFloat()
         val need = with(density) { 120.dp.toPx() }
         var previous = -1
-        repeat(8) {
+        // The child card is re-keyed every second (live countdowns), which drops
+        // its marks for a frame — so a poll can land on 5 stops, the next on 8.
+        // Remember the fullest set seen; only a screen that NEVER showed a stop
+        // ends the tour (on device the old "settle or finish" path marked the
+        // tour done without the parent ever seeing it).
+        var best: List<CoachStep> = emptyList()
+        repeat(10) {
             delay(300)
             val live = steps.filter { step ->
                 val r = reg.marks[step.id]?.translate(-origin.x, -origin.y) ?: return@filter false
@@ -266,13 +272,14 @@ fun CoachTour(
             }
             // Settle first: a list still measuring would hand us two stops out of
             // nine and the parent would get a two-point tour.
-            if (live.size == steps.size || (live.isNotEmpty() && live.size == previous)) {
+            if (live.size > best.size) best = live
+            if (live.size == steps.size || (live.isNotEmpty() && live.size == previous && live.size >= best.size)) {
                 plan = live
                 return@LaunchedEffect
             }
             previous = live.size
         }
-        finish()
+        if (best.isNotEmpty()) plan = best else finish()
     }
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
@@ -296,8 +303,9 @@ fun CoachTour(
             // The control really went away (scrolled off, a feature closed) — move on.
             if (step != null && now == null) {
                 LaunchedEffect(index, step.id) {
-                    delay(700)
-                    if (reg.marks[step.id] == null) advance()
+                    // Gone for good, not just between two layouts: three looks.
+                    repeat(3) { delay(500); if (reg.marks[step.id] != null) return@LaunchedEffect }
+                    advance()
                 }
             }
 

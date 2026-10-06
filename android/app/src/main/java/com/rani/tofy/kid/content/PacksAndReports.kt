@@ -64,7 +64,11 @@ object QuestionPacks {
         return nowMs - at < 86_400_000L
     }
 
-    private fun isDebugBuild(): Boolean = runCatching { BuildConfig.DEBUG }.getOrDefault(false) && !forceCloudSwitch
+    // Only against the local emulators. A debug build on a real family (Rani's
+    // tablet, testing against production) must show exactly what that family
+    // gets — otherwise every unbought pack shows up as an open world.
+    private fun isDebugBuild(): Boolean =
+        runCatching { BuildConfig.DEBUG && BuildConfig.USE_EMULATORS }.getOrDefault(false) && !forceCloudSwitch
     /** Tests (and anyone wanting the release behaviour in a debug build). */
     @Volatile var forceCloudSwitch = false
 }
