@@ -8,15 +8,15 @@ plugins {
 
 android {
     namespace = "com.rani.tofy"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.rani.tofy"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         // versionName = the iOS marketing version; versionCode = iOS build × 10 + an
         // Android-only respin digit (distribution/play-store/release-checklist-android.md).
-        versionCode = 2001
+        versionCode = 2002
         versionName = "2026.10.6"
         // ./gradlew assembleDebug -Pemu=true → a debug build wired to the LOCAL
         // Firebase emulators under the "demo-tofy" project (never production).
@@ -94,7 +94,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     // Google Play Billing (billing/): Tofy+, question packs / world passes, 💎 packs.
-    implementation("com.android.billingclient:billing-ktx:7.1.1")
+    implementation("com.android.billingclient:billing-ktx:8.0.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
