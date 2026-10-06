@@ -70,6 +70,9 @@ import com.rani.tofy.kid.ui.CharacterImage
 import com.rani.tofy.kid.ui.KidCta
 import com.rani.tofy.kid.ui.timeLabel
 import com.rani.tofy.ui.common.coachMark
+import com.rani.tofy.ui.common.isWideScreen
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.PlatformTextStyle
 import com.rani.tofy.ui.home.gradeName
 import com.rani.tofy.ui.theme.GlassBackdrop
 import com.rani.tofy.ui.theme.Ink
@@ -322,32 +325,37 @@ private fun HeaderPane(
     cta: HomeCtaModel, extras: HomeExtras, onLevelInfo: () -> Unit, onChallenge: () -> Unit,
     onAvatar: () -> Unit, onChores: () -> Unit,
 ) {
+    // iOS sizes, one set for the phone (compact) and one for the tablet (iPad).
+    val compact = !isWideScreen()
     Column(Modifier.fillMaxWidth().padding(top = 6.dp).glassPane(24.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             // The ring says the level tier: bronze from 5, silver from 10, gold from 20.
             val tier = RewardEngine.levelTier(RewardEngine.level(xp))
             val ring = listOf(Color.White.copy(alpha = 0.5f), Color(0xFFCD7F32), Color(0xFFD9D9E3), Color(0xFFFFD23F))[tier]
             CharacterImage(child?.character3DID ?: "fox",
-                Modifier.size(52.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.22f))
+                Modifier.size(if (compact) 52.dp else 60.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.22f))
                     .border(if (tier == 0) 1.dp else 2.5.dp, ring, CircleShape).clickable(onClick = onAvatar),
                 contentScale = ContentScale.Crop)
             Column(Modifier.weight(1f).clickable(onClick = onLevelInfo), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 val first = (child?.name?.takeIf { it.isNotBlank() } ?: tr("טוֹפִי")).split(" ").first()
-                Text(first, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 17.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                // Two fixed lines, so the wallet's numbers sit on the name line and its
+                // labels on the grade line (iOS identityBlock / walletStat).
+                TightText(first, if (compact) 17f else 20f, if (compact) 22 else 26, Color.White, FontWeight.Black)
                 val line = gradeName(child?.effectiveGrade ?: 1) + if (dayStreak > 0) tr(" · 🔥 %lld יָמִים", dayStreak) else ""
-                Text(line, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
+                TightText(line, if (compact) 12f else 13f, 16, Ink.secondary, FontWeight.Bold)
             }
-            Row(Modifier.coachMark("k.wallet"), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                WalletStat("⭐ " + currencyShort(stars), tr("כּוֹכָבִים"))
-                WalletStat("💎 " + currencyShort(diamonds), tr("יַהֲלוֹמִים"))
+            // ⭐ · 💎 beside the name; on a tablet also 💝 gift and ⏱ earned minutes —
+            // the iPad header, with no extra row under it (Rani: it sat badly).
+            Row(Modifier.coachMark("k.wallet"), horizontalArrangement = Arrangement.spacedBy(if (compact) 12.dp else 18.dp)) {
+                WalletStat("⭐ " + currencyShort(stars), tr("כּוֹכָבִים"), compact)
+                WalletStat("💎 " + currencyShort(diamonds), tr("יַהֲלוֹמִים"), compact)
+                if (!compact) {
+                    WalletStat("💝 ${(engine?.giftSecondsAvailable ?: 0) / 60}", tr("דַּקּ׳ מַתָּנָה"), compact)
+                    WalletStat("⏱ ${engine?.pendingMinutes ?: 0}", tr("דַּקּ׳ שֶׁהִרְוִיחַ"), compact)
+                }
             }
         }
-        // 🎮 earned and 💝 gift wallets, to the second (build 198 "זמן מדויק לשנייה").
-        Row(Modifier.fillMaxWidth().glassInset(16.dp).padding(vertical = 10.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
-            WalletStat("🎮 " + timeLabel(engine?.openableSeconds(false) ?: 0), tr("דַּקּ׳ שֶׁהִרְוִיחַ"))
-            WalletStat("💝 " + timeLabel(cta.giftSeconds), tr("דַּקּ׳ מַתָּנָה"))
-        }
-        StatsPanel(engine, onLevelInfo)
+        StatsPanel(engine, onLevelInfo, compact)
         // The twins: אתגר יומי · מטלות הבית — same size, side by side.
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ChallengeCard(engine, onChallenge, Modifier.weight(1f).fillMaxHeight().coachMark("k.challenge"))
@@ -357,45 +365,70 @@ private fun HeaderPane(
 }
 
 @Composable
-private fun WalletStat(value: String, label: String) {
+private fun WalletStat(value: String, label: String, compact: Boolean) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-            Text(value, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 14.5.sp, maxLines = 1)
+            TightText(value, if (compact) 14.5f else 16f, if (compact) 22 else 26, Color.White, FontWeight.Black)
         }
-        Text(label, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1)
+        TightText(label, if (compact) 11f else 12.5f, 16, Ink.secondary, FontWeight.Bold)
     }
 }
 
+/**
+ * One line in a box exactly `boxDp` tall, the glyphs centred in it — iOS's
+ * `.frame(height:)`. Without it Rubik's own ascent/descent (tall, for niqqud)
+ * pushed each number a long way from its label (Rani, on the tablet).
+ */
+@Composable
+private fun TightText(text: String, size: Float, boxDp: Int, color: Color, weight: FontWeight) {
+    Box(Modifier.height(boxDp.dp), contentAlignment = Alignment.Center) {
+        Text(text, color = color, fontFamily = Rounded, fontWeight = weight, fontSize = size.sp, maxLines = 1,
+            overflow = TextOverflow.Ellipsis, style = tightStyle(size))
+    }
+}
+
+private fun tightStyle(size: Float) = TextStyle(
+    lineHeight = (size * 1.2f).sp,
+    lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.Both),
+    platformStyle = PlatformTextStyle(includeFontPadding = false),
+)
+
 /** ⏱ minutes today (of the cap) · ✅ correct today · ⭐ level. */
 @Composable
-private fun StatsPanel(engine: ProgressEngine?, onLevelInfo: () -> Unit) {
+private fun StatsPanel(engine: ProgressEngine?, onLevelInfo: () -> Unit, compact: Boolean) {
     val snap = engine?.snapshot
     val cap = engine?.settings?.dailyCap
     val minutes = if (cap?.enabled == true) "${snap?.minutesEarnedToday ?: 0}" else "${engine?.pendingMinutes ?: 0}"
     val suffix = if (cap?.enabled == true) "/${cap.max}" else null
     Row(Modifier.fillMaxWidth().glassInset(18.dp).padding(vertical = 13.dp, horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        StatColumn(minutes, suffix, tr("⏱ הִרְוַחְתָּ הַיּוֹם"), null)
+        StatColumn(minutes, suffix, tr("⏱ הִרְוַחְתָּ הַיּוֹם"), null, compact)
         StatDivider()
-        StatColumn("${snap?.correctToday ?: 0}", null, tr("✅ נְכוֹנוֹת הַיּוֹם"), null)
+        StatColumn("${snap?.correctToday ?: 0}", null, tr("✅ נְכוֹנוֹת הַיּוֹם"), null, compact)
         StatDivider()
-        StatColumn("${engine?.companionLevel ?: 1}", null, tr("⭐ רָמָה"), onLevelInfo)
+        StatColumn("${engine?.companionLevel ?: 1}", null, tr("⭐ רָמָה"), onLevelInfo, compact)
     }
 }
 
 @Composable
-private fun androidx.compose.foundation.layout.RowScope.StatColumn(value: String, suffix: String?, label: String, onClick: (() -> Unit)?) {
+private fun androidx.compose.foundation.layout.RowScope.StatColumn(value: String, suffix: String?, label: String, onClick: (() -> Unit)?, compact: Boolean) {
     Column(
         Modifier.weight(1f).then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            val big = if (compact) 20f else 24f
             Row(verticalAlignment = Alignment.Bottom) {
-                Text(value, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 20.sp)
-                if (suffix != null) Text(suffix, color = Ink.tertiary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp,
-                    modifier = Modifier.padding(bottom = 2.dp))
+                Text(value, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = big.sp, style = tightStyle(big))
+                if (suffix != null) {
+                    val small = if (compact) 14f else 16f
+                    Text(suffix, color = Ink.tertiary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = small.sp,
+                        style = tightStyle(small), modifier = Modifier.padding(bottom = 2.dp))
+                }
             }
         }
-        Text(label, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
+        val labelSize = if (compact) 12f else 13.5f
+        Text(label, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = labelSize.sp, maxLines = 1,
+            style = tightStyle(labelSize))
     }
 }
 
