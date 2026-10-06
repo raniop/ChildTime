@@ -183,9 +183,10 @@ enum MiniGameLedger {
             LearningHistoryStore.shared.recordAnswer(topic: topic, correct: false, responseMs: 0,
                                                      earnedMinutes: 0, streak: 0)
             // A miss is owed by the next right answer, which then pays (and adds
-            // to `roundSeconds`) that much less — so nothing to take off here.
+            // to `roundSeconds`) that much less — so nothing to take off here,
+            // and no "−12 שניות" either: just the encouraging word.
             if lost > 0 {
-                earn.flash(tr("−\(lost) שְׁנִיּוֹת · כִּמְעַט!"), positive: false)
+                earn.flash(tr("כִּמְעַט!"), positive: false)
             }
         }
     }

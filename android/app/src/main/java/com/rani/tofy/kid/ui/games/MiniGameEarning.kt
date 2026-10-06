@@ -144,7 +144,8 @@ object MiniGameLedger {
             if (out.capReached) earn.noteCap()
         } else {
             sink.recordHistory(topic.raw, false, 0.0, 0, 0, false)
-            if (out.lostSeconds > 0) earn.flash(tr("−%lld שְׁנִיּוֹת · כִּמְעַט!", out.lostSeconds), positive = false)
+            // No "−12 שניות": the balance never drops — just the encouraging word.
+            if (out.lostSeconds > 0) earn.flash(tr("כִּמְעַט!"), positive = false)
         }
     }
 }

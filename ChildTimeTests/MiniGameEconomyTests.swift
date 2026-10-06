@@ -147,7 +147,8 @@ struct MiniGameEconomy {
 struct MiniGameGrantTests {
 
     /// Every game's first finished round of the day pays the full per-item
-    /// amount, and the wallet gains EXACTLY what the end card shows.
+    /// amount ×3 (the day's big prize), and the wallet gains EXACTLY what the
+    /// end card shows.
     @Test func fullGrantMatchesTheCard() {
         for g in Economy.specs {
             Economy.reset()
@@ -155,17 +156,17 @@ struct MiniGameGrantTests {
                 let grant = MiniGameReward.grant(game: g.key, correct: g.items, starsPer: g.starsPer,
                                                  diamondsPer: g.diamondsPer, cap: g.cap)
                 #expect(grant.full, "\(g.key): the first round of the day must pay in full")
-                #expect(grant.stars == min(g.items, g.cap) * g.starsPer)
-                #expect(grant.diamonds == min(g.items, g.cap) * g.diamondsPer)
+                #expect(grant.stars == min(g.items, g.cap) * g.starsPer * 3)
+                #expect(grant.diamonds == min(g.items, g.cap) * g.diamondsPer * 3)
             }
-            #expect(d.stars == min(g.items, g.cap) * g.starsPer, "\(g.key): ⭐ written ≠ ⭐ shown")
-            #expect(d.diamonds == min(g.items, g.cap) * g.diamondsPer, "\(g.key): 💎 written ≠ 💎 shown")
+            #expect(d.stars == min(g.items, g.cap) * g.starsPer * 3, "\(g.key): ⭐ written ≠ ⭐ shown")
+            #expect(d.diamonds == min(g.items, g.cap) * g.diamondsPer * 3, "\(g.key): 💎 written ≠ 💎 shown")
             #expect(d.minutes == 0, "\(g.key): a round must never pay minutes at the end")
         }
     }
 
-    /// The replay rule: the second finished round of the same day pays a small
-    /// practice reward — capped at 5 ⭐, no 💎 — and is NOT zeroed.
+    /// The replay rule: the second finished round of the same day pays the plain
+    /// per-item amount (×1, a third of the day's big prize) — never zeroed.
     @Test func replayIsCappedNotZeroed() {
         for g in Economy.specs {
             Economy.reset()
@@ -175,11 +176,11 @@ struct MiniGameGrantTests {
                 let again = MiniGameReward.grant(game: g.key, correct: g.items, starsPer: g.starsPer,
                                                  diamondsPer: g.diamondsPer, cap: g.cap)
                 #expect(!again.full)
-                #expect(again.stars == min(min(g.items, g.cap), 5), "\(g.key): replay must pay min(items, 5) ⭐")
-                #expect(again.diamonds == 0)
+                #expect(again.stars == min(g.items, g.cap) * g.starsPer, "\(g.key): replay pays ×1 ⭐")
+                #expect(again.diamonds == min(g.items, g.cap) * g.diamondsPer, "\(g.key): replay pays ×1 💎")
             }
             #expect(d.stars > 0, "\(g.key): a successful replay must never pay 0 ⭐")
-            #expect(d.diamonds == 0)
+            #expect(d.diamonds > 0, "\(g.key): a successful replay must never pay 0 💎")
         }
     }
 
@@ -201,18 +202,19 @@ struct MiniGameGrantTests {
         }
     }
 
-    /// A round with nothing solved pays nothing — and must NOT burn the day's
-    /// full grant, so the next real round still pays in full.
+    /// A round with nothing solved still ends on a prize (3 ⭐ · 2 💎, Rani
+    /// 2026-10-05: never an empty card) — and must NOT burn the day's full
+    /// grant, so the next real round still pays in full.
     @Test func emptyRoundKeepsTheDaysFullGrant() {
         for g in Economy.specs {
             Economy.reset()
             let empty = MiniGameReward.grant(game: g.key, correct: 0, starsPer: g.starsPer,
                                              diamondsPer: g.diamondsPer, cap: g.cap)
-            #expect(empty.stars == 0 && empty.diamonds == 0)
+            #expect(empty.stars == 3 && empty.diamonds == 2, "\(g.key): an empty round still pays 3 ⭐ · 2 💎")
             let real = MiniGameReward.grant(game: g.key, correct: g.items, starsPer: g.starsPer,
                                             diamondsPer: g.diamondsPer, cap: g.cap)
             #expect(real.full, "\(g.key): an empty round must not spend the day's full grant")
-            #expect(real.stars == min(g.items, g.cap) * g.starsPer)
+            #expect(real.stars == min(g.items, g.cap) * g.starsPer * 3)
         }
     }
 
@@ -222,8 +224,8 @@ struct MiniGameGrantTests {
             Economy.reset()
             let grant = MiniGameReward.grant(game: g.key, correct: g.cap + 50, starsPer: g.starsPer,
                                              diamondsPer: g.diamondsPer, cap: g.cap)
-            #expect(grant.stars == g.cap * g.starsPer, "\(g.key): over-cap ⭐")
-            #expect(grant.diamonds == g.cap * g.diamondsPer, "\(g.key): over-cap 💎")
+            #expect(grant.stars == g.cap * g.starsPer * 3, "\(g.key): over-cap ⭐ (the day's first round, ×3)")
+            #expect(grant.diamonds == g.cap * g.diamondsPer * 3, "\(g.key): over-cap 💎 (the day's first round, ×3)")
         }
     }
 }
@@ -555,8 +557,9 @@ struct MiniGameEconomyTableTests {
 
             #expect(plain.stars > 0, "\(g.key) plain paid 0 ⭐")
             #expect(plain.diamonds > 0, "\(g.key) plain paid 0 💎")
-            #expect(surprise.stars == plain.stars * 2, "\(g.key) surprise must double plain's ⭐")
-            #expect(surprise.diamonds == plain.diamonds * 2, "\(g.key) surprise must double plain's 💎")
+            // `plain` is the day's first round (×3); a surprise round pays ×2 of the per-item rate.
+            #expect(surprise.stars * 3 == plain.stars * 2, "\(g.key) surprise must pay ×2 of the per-item ⭐")
+            #expect(surprise.diamonds * 3 == plain.diamonds * 2, "\(g.key) surprise must pay ×2 of the per-item 💎")
             #expect(surprise.minutes == 0, "\(g.key) surprise must pay no minutes")
             #expect(perAnswerStars > 0, "\(g.key) earn mode paid no per-answer ⭐")
             #expect(perAnswerDiamonds > 0, "\(g.key) earn mode paid no per-answer 💎")

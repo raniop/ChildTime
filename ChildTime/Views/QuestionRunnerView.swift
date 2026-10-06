@@ -1685,23 +1685,17 @@ struct QuestionRunnerView: View {
             topic: q.topic, correct: false, responseMs: 0,
             earnedMinutes: 0, streak: 0, skill: q.skill
         )
-        if lostSeconds > 0 {
-            // Gentle: small seconds dip + a "you can win it right back" message.
-            flashSeconds(tr("−\(lostSeconds) שְׁנִיּוֹת · כִּמְעַט!"), positive: false)
-            // Safe negative experience: never accusatory, always a way back.
-            companion.console([
-                tr("💡 כִּמְעַט! תְּשׁוּבָה נְכוֹנָה תַּחֲזִיר אֶת הַזְּמַן"),
-                tr("✨ קָרוֹב! אֶפְשָׁר לְהַחֲזִיר מִיָּד בַּשְּׁאֵלָה הַבָּאָה"),
-                tr("⭐ עוֹד תְּשׁוּבָה נְכוֹנָה וְחוֹזְרִים לְהִתְקַדֵּם")
-            ].randomElement()!)
-        } else {
-            companion.console([
-                tr("כִּמְעַט!"),
-                tr("מַמָּשׁ קָרוֹב"),
-                tr("בּוֹא נְנַסֶּה שׁוּב"),
-                tr("נְנַסֶּה אֶת הַבָּאָה")
-            ].randomElement()!)
-        }
+        // No "−12 שניות" (Rani, 2026-10-06): the balance never drops on a miss —
+        // the next right answer just pays a little less — so only the
+        // encouraging line. Safe negative experience: never accusatory.
+        _ = lostSeconds
+        companion.console([
+            tr("כִּמְעַט!"),
+            tr("מַמָּשׁ קָרוֹב"),
+            tr("בּוֹא נְנַסֶּה שׁוּב"),
+            tr("נְנַסֶּה אֶת הַבָּאָה"),
+            tr("⭐ עוֹד תְּשׁוּבָה נְכוֹנָה וְחוֹזְרִים לְהִתְקַדֵּם")
+        ].randomElement()!)
     }
 }
 

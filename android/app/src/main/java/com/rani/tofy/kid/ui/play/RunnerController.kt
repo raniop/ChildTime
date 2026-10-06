@@ -429,19 +429,15 @@ class RunnerController(
         consecutiveWrong++
         hadMistakeThisQuestion = true
         // Neither the arena nor a 💫 bonus question (hard by design) may lower the adaptive level.
-        val lost = KidSession.answerWrong(q.topic.raw, usedHintThisQuestion, grantsScreenTime = true,
+        KidSession.answerWrong(q.topic.raw, usedHintThisQuestion, grantsScreenTime = true,
             affectsAdaptive = !isArena && !isBonusQuestion)
         refreshProfile()
         KidSession.boundChildID?.let { LearningHistoryRecorder.recordAnswer(it, q.topic.raw, false, 0.0, 0, 0, skill = q.skill) }
         // A miss is owed by the next right answer (which then pays, and adds to
         // `roundSeconds`, that much less) — nothing to take off here.
-        if (lost > 0) {
-            flashSeconds(tr("−%lld שְׁנִיּוֹת · כִּמְעַט!", lost), positive = false)
-            companion.console(listOf(tr("💡 כִּמְעַט! תְּשׁוּבָה נְכוֹנָה תַּחֲזִיר אֶת הַזְּמַן"),
-                tr("✨ קָרוֹב! אֶפְשָׁר לְהַחֲזִיר מִיָּד בַּשְּׁאֵלָה הַבָּאָה"), tr("⭐ עוֹד תְּשׁוּבָה נְכוֹנָה וְחוֹזְרִים לְהִתְקַדֵּם")).random())
-        } else {
-            companion.console(listOf(tr("כִּמְעַט!"), tr("מַמָּשׁ קָרוֹב"), tr("בּוֹא נְנַסֶּה שׁוּב"), tr("נְנַסֶּה אֶת הַבָּאָה")).random())
-        }
+        // …and no "−12 שניות" either (Rani, 2026-10-06): the balance never drops, so only the encouraging line.
+        companion.console(listOf(tr("כִּמְעַט!"), tr("מַמָּשׁ קָרוֹב"), tr("בּוֹא נְנַסֶּה שׁוּב"), tr("נְנַסֶּה אֶת הַבָּאָה"),
+            tr("⭐ עוֹד תְּשׁוּבָה נְכוֹנָה וְחוֹזְרִים לְהִתְקַדֵּם")).random())
     }
 
     private fun flashSeconds(text: String, positive: Boolean) {
