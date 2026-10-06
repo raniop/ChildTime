@@ -137,7 +137,11 @@ class TofyGuardService : AccessibilityService() {
     private fun recheck(@Suppress("UNUSED_PARAMETER") why: String) {
         val ov = overlay ?: return
         val now = AppleTime.nowUnix()
-        val sys = AllowList.system(this)
+        // 📸 A live chore-photo pass lets the camera app through (CameraPass).
+        val sys = AllowList.system(this).let { s ->
+            val cam = CameraPass.packages(this)
+            if (cam.isEmpty()) s else s.copy(alwaysAllowed = s.alwaysAllowed + cam)
+        }
         val state = GuardStateSource.current(this, now)
 
         // A card that is up: still needed?

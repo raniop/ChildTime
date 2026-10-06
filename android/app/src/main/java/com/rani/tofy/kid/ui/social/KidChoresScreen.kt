@@ -117,6 +117,7 @@ internal fun KidChoresContent(onClose: () -> Unit) {
     // Full-size capture into our cache via the FileProvider (TakePicturePreview is a thumbnail).
     val shotFile = remember { java.io.File(ctx.cacheDir, "photos/chore_proof.jpg") }
     val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+        com.rani.tofy.kid.enforce.CameraPass.disarm(ctx)   // back in Tofy — the camera is locked again
         if (!ok || !shotFile.exists()) { pending = null; return@rememberLauncherForActivityResult }
         scope.launch {
             finish(withContext(Dispatchers.IO) {
@@ -130,7 +131,9 @@ internal fun KidChoresContent(onClose: () -> Unit) {
             androidx.core.content.FileProvider.getUriForFile(ctx, ctx.packageName + ".files", shotFile)
         }.getOrNull()
         if (uri == null) { pending = null; return }
-        runCatching { camera.launch(uri) }.onFailure { pending = null }
+        // 📸 The lock blocks every other app — let the camera through for this one photo.
+        com.rani.tofy.kid.enforce.CameraPass.arm(ctx)
+        runCatching { camera.launch(uri) }.onFailure { pending = null; com.rani.tofy.kid.enforce.CameraPass.disarm(ctx) }
     }
     val cameraPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
         if (ok) launchCamera() else pending = null

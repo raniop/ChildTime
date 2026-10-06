@@ -123,7 +123,8 @@ enum ActivityKind: String, Codable, CaseIterable {
         switch self {
         case .playStarted:      return tr("התחלת משחק")
         case .playEnded:        return tr("סבב הסתיים")
-        case .minutesEarned:    return tr("עוד \(n) דקות משחק נצברו")
+        // Today's running total, not a fresh batch — "עוד 26" read as 26 new minutes (Rani).
+        case .minutesEarned:    return tr("היום נצברו \(n) דקות משחק")
         case .dailyCapReached:  return tr("המגבלה היומית נגמרה")
         case .screenTimeStart:  return tr("זמן המשחק נפתח")
         case .screenTimeEnd:    return tr("זמן המשחק נגמר")

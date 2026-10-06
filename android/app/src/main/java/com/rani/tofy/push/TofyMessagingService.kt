@@ -7,9 +7,13 @@ import com.google.firebase.messaging.RemoteMessage
 class TofyMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) { PushRegistrar.register(token) }
     override fun onMessageReceived(message: RemoteMessage) {
-        // 🔔 Every push also lands in the activity feed, like iOS's PushManager.
-        com.rani.tofy.data.ActivityStore.recordNotification(message.data["type"], message.messageId ?: "${System.currentTimeMillis()}",
-            message.notification?.body ?: message.data["body"])
+        // 🔔 Every VISIBLE push also lands in the activity feed, like iOS's PushManager.
+        // A silent data message (the server's "wake" to a child device after a parent
+        // command) has nothing to say — it used to add an empty "עדכון חדש" row (Rani).
+        val body = message.notification?.body ?: message.data["body"]
+        val title = message.notification?.title ?: message.data["title"]
+        if (title != null || body != null)
+            com.rani.tofy.data.ActivityStore.recordNotification(message.data["type"], message.messageId ?: "${System.currentTimeMillis()}", body)
         Notifier.show(this, message)
     }
 }

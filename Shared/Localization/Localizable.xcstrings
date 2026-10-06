@@ -37424,6 +37424,28 @@
         }
       }
     },
+    "היום נצברו %lld דקות משחק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دقائق اللعب التي جُمعت اليوم: %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play minutes earned today: %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сегодня накоплено минут игры: %lld"
+          }
+        }
+      }
+    },
     "היי! אני טופי 💫" : {
       "localizations" : {
         "ar" : {

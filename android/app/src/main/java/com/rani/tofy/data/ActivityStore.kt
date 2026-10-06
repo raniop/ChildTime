@@ -53,7 +53,8 @@ object ActivityStore {
             return when (this) {
                 PLAY_STARTED -> tr("התחלת משחק")
                 PLAY_ENDED -> tr("סבב הסתיים")
-                MINUTES_EARNED -> tr("עוד %lld דקות משחק נצברו", n)
+                // Today's running total, not a fresh batch — "עוד 26" read as 26 new minutes (Rani).
+                MINUTES_EARNED -> tr("היום נצברו %lld דקות משחק", n)
                 DAILY_CAP_REACHED -> tr("המגבלה היומית נגמרה")
                 SCREEN_TIME_START -> tr("זמן המשחק נפתח")
                 SCREEN_TIME_END -> tr("זמן המשחק נגמר")

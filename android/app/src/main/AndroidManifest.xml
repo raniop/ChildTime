@@ -17,6 +17,10 @@
     <!-- kid/enforce/AllowList: the launcher(s), Settings, the uninstall dialog,
          keyboards, and the launchable apps for "what stays open" (no QUERY_ALL_PACKAGES). -->
     <queries>
+        <!-- 📸 CameraPass resolves the camera app the chore photo opens. -->
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
         <intent>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
