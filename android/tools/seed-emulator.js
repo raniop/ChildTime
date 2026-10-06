@@ -51,6 +51,18 @@ const parentPinHash = `${salt}:${crypto.createHash('sha256').update(salt + '1234
   await db.doc(`childDevices/${dana}_dana-ipad`).set(dev(dana, 'dana-ipad', 'iPad של דנה', now - 5));
   await db.doc(`childDevices/${yoav}_yoav-ipad`).set(dev(yoav, 'yoav-ipad', 'iPad של יואב', now - 3600));
   await db.doc(`households/${hid}/chores/room`).set({ id: 'room', childID: yoav, title: 'סידור החדר', emoji: '🛏️', rewardMinutes: 15, rewardCoins: 0, isDaily: true, timesPerDay: 1, markedDoneAt: now - 600, chosenReward: 'minutes', createdAt: now - 86400 * 5 });
+  // 📍 Location: both children share; Dana has a phone at school + an iPad at home.
+  const ts = (unix) => admin.firestore.Timestamp.fromMillis(unix * 1000);
+  const school = { id: 'demo-school', name: 'בית הספר', emoji: '🏫', lat: 32.0870, lng: 34.7900, radius: 200,
+                   alerts: { [dana]: { arrive: true, leave: true }, [yoav]: { arrive: true, leave: false } } };
+  const home = { id: 'demo-home', name: 'הבית', emoji: '🏠', lat: 32.0790, lng: 34.7810, radius: 100, alerts: {} };
+  await db.doc(`households/${hid}`).set({ places: [school, home] }, { merge: true });
+  for (const c of [dana, yoav]) await db.doc(`children/${c}`).set({ locationSharing: { enabled: true, consentAt: now - 86400, consentBy: uid } }, { merge: true });
+  const fix = (dev, kind, lat, lng, ago, battery, placeID, since) => ({ lat, lng, accuracy: 30, clientAt: now - ago, at: ts(now - ago),
+    platform: kind === 'android' ? 'android' : 'ios', kind, deviceID: dev, permission: 'always', battery, placeID: placeID || null, placeSince: since || null });
+  await db.doc(`children/${dana}/location/fix_dana-phone`).set(fix('dana-phone', 'iphone', 32.0872, 34.7903, 4, 0.56, 'demo-school', now - 9000));
+  await db.doc(`children/${dana}/location/fix_dana-ipad`).set(fix('dana-ipad', 'ipad', 32.0791, 34.7811, 3600, 0.9, 'demo-home', now - 72000));
+  await db.doc(`children/${yoav}/location/fix_yoav-phone`).set(fix('yoav-phone', 'android', 32.0805, 34.7845, 9, 0.81));
   console.log('seeded', { uid, hid });
   process.exit(0);
 })().catch(e => { console.error(e); process.exit(1); });

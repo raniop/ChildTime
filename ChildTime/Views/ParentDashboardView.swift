@@ -1331,7 +1331,7 @@ struct ParentDashboardView: View {
                 } label: {
                     HStack(spacing: 8) {
                         Text("📍").font(.system(size: 15))
-                        Text(location.whereLine(f))
+                        Text(location.whereLine(f).replacingOccurrences(of: "📍 ", with: ""))
                             .font(.system(size: 14, weight: .heavy, design: .rounded))
                             .lineLimit(1).minimumScaleFactor(0.8)
                             .frame(maxWidth: .infinity, alignment: .leading)

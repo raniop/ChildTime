@@ -14,6 +14,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,7 +61,13 @@ fun GlassButton(text: String, modifier: Modifier = Modifier, height: Dp = 46.dp,
     Box(
         modifier.height(height).glassPane(radius, 0.18f, shadow = false).clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
-    ) { Text(text, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 14.5.sp, color = Color.White, textAlign = TextAlign.Center, maxLines = 1) }
+    ) {
+        // Shrinks to fit (iOS minimumScaleFactor) — three buttons in a row must not cut "Create a child".
+        var size by remember(text) { mutableStateOf(14.5f) }
+        Text(text, Modifier.padding(horizontal = 6.dp), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = size.sp, color = Color.White,
+            textAlign = TextAlign.Center, maxLines = 1, softWrap = false,
+            onTextLayout = { if (it.hasVisualOverflow && size > 10f) size -= 0.5f })
+    }
 }
 
 @Composable
