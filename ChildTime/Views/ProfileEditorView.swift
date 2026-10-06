@@ -421,7 +421,8 @@ struct ProfileEditorView: View {
         } label: {
             HStack(spacing: 8) {
                 Text(g.emoji).font(.system(size: 22))
-                Text(compactCreate ? (g == .girl ? tr("ילדה") : tr("ילד")) : g.displayName)
+                // Own keys (Boy/Girl), never the step name "ילד" (= "Child"); niqqud-free in compact.
+                Text(compactCreate ? Question.stripNiqqud(g.displayName) : g.displayName)
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
             }

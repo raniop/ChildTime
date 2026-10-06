@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.rani.tofy.i18n.tr
 import com.rani.tofy.ui.common.H
 import com.rani.tofy.ui.common.P
+import com.rani.tofy.ui.home.stripNiqqud
 import com.rani.tofy.ui.theme.*
 
 /** What step ② hands back — Profile's create-mode fields. */
@@ -99,12 +100,12 @@ fun ChildCreateStep(showSteps: Boolean, busy: Boolean, error: Boolean, onCancel:
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Choice(Modifier.weight(1f), gender == "boy", radius = 14.dp, stroke = 2.5f, onClick = { gender = "boy" }) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("👦", fontSize = 22.sp); ChoiceText(tr("ילד"), 17)
+                            Text("👦", fontSize = 22.sp); ChoiceText(stripNiqqud(tr("יֶלֶד")), 17)
                         }
                     }
                     Choice(Modifier.weight(1f), gender == "girl", radius = 14.dp, stroke = 2.5f, onClick = { gender = "girl" }) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("👧", fontSize = 22.sp); ChoiceText(tr("ילדה"), 17)
+                            Text("👧", fontSize = 22.sp); ChoiceText(stripNiqqud(tr("יַלְדָּה")), 17)
                         }
                     }
                 }
