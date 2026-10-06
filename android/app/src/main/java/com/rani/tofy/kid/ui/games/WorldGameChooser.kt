@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -239,11 +240,17 @@ internal fun WorldGameChooserScreen(world: PlayWorld, onPlayQuestions: () -> Uni
 /** A chooser tile + its gold "last played" outline and tag. */
 @Composable
 private fun ChooserCard(modifier: Modifier, tint: Color, last: Boolean, girl: Boolean, content: @Composable () -> Unit) {
-    Box(modifier.miniGameTile(TileState.NORMAL, tint, 24.dp).then(if (last) Modifier.border(2.5.dp, KidColor.starGold, RoundedCornerShape(24.dp)) else Modifier)) {
-        content()
+    Box(modifier) {
+        Box(Modifier.fillMaxWidth().miniGameTile(TileState.NORMAL, tint, 24.dp).then(if (last) Modifier.border(2.5.dp, KidColor.starGold, RoundedCornerShape(24.dp)) else Modifier)) {
+            content()
+        }
+        // The tag sits ON the gold outline, in the corner away from the title —
+        // inside the card it covered the heading (Rani, 2026-10-06). Outside the
+        // tile's clip, so the half above the border isn't cut off.
         if (last) Text(if (girl) tr("שִׂחַקְתְּ לָאַחֲרוֹנָה") else tr("שִׂחַקְתָּ לָאַחֲרוֹנָה"), color = Color(0xFF4B3FBF), fontFamily = Rounded,
             fontWeight = FontWeight.ExtraBold, fontSize = 10.5.sp,
-            modifier = Modifier.align(Alignment.TopStart).padding(8.dp).clip(RoundedCornerShape(50)).background(KidColor.starGold).padding(horizontal = 9.dp, vertical = 4.dp))
+            modifier = Modifier.align(Alignment.TopEnd).padding(end = 16.dp).offset(y = (-11).dp)
+                .clip(RoundedCornerShape(50)).background(KidColor.starGold).padding(horizontal = 9.dp, vertical = 4.dp))
     }
 }
 

@@ -217,14 +217,17 @@ struct WorldGameChooserView: View {
         let last = lastPick == pickID
         return RoundedRectangle(cornerRadius: 24, style: .continuous)
             .strokeBorder(last ? AppColor.starGold : .clear, lineWidth: 2.5)
-            .overlay(alignment: .topLeading) {
+            // The tag sits ON the gold outline, in the corner away from the
+            // title — inside the card it covered the heading (Rani, 2026-10-06).
+            .overlay(alignment: .topTrailing) {
                 if last {
                     Text(Gendered.g(tr("שִׂחַקְתָּ לָאַחֲרוֹנָה"), tr("שִׂחַקְתְּ לָאַחֲרוֹנָה")))
                         .font(.system(size: 10.5, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3FBF"))
                         .padding(.horizontal, 9).padding(.vertical, 4)
                         .background(Capsule().fill(AppColor.starGold))
-                        .padding(8)
+                        .padding(.trailing, 16)
+                        .offset(y: -11)
                 }
             }
             .allowsHitTesting(false)
