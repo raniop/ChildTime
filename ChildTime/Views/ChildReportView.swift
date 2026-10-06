@@ -44,7 +44,7 @@ struct ChildReportView: View {
     var body: some View {
         VStack(spacing: 14) {
             header
-            let insight = engine.dailyInsight(name: profile.name, isGirl: isGirl, period: period)
+            let insight = engine.dailyInsight(name: profile.name, isGirl: isGirl, period: period, minutesToday: snapshot.minutesEarnedToday)
             let tip = parentTip
             if insight != nil || tip != nil {
                 insightCard(insight, tip: tip)

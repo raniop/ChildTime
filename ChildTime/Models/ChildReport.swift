@@ -269,7 +269,9 @@ extension InsightsEngine {
 
     /// Rules, in priority order. Each fires only on enough data, and each says
     /// something a parent can act on. Never a judgement of the child.
-    func dailyInsight(name: String, isGirl: Bool, period: ReportPeriod) -> DailyInsight? {
+    /// `minutesToday`: for `.today`, the same live count the "דקות" tile above shows.
+    /// History records only answer minutes, so without it the insight said 12 under a 23.
+    func dailyInsight(name: String, isGirl: Bool, period: ReportPeriod, minutesToday: Int? = nil) -> DailyInsight? {
         let g = { (m: String, f: String) in isGirl ? f : m }
         let topics = topicReports(period).filter { $0.answered >= 8 }
         let deltas = topicDeltas(period)
@@ -320,10 +322,11 @@ extension InsightsEngine {
         }
         // 6. Plain summary when there is data but no story yet.
         guard s.questions > 0 else { return nil }
+        let mins = (period == .today ? minutesToday : nil) ?? s.minutesEarned
         return DailyInsight(
             emoji: "📚",
             title: tr("\(s.questions) שְׁאֵלוֹת \(period.title.lowercased())"),
-            body: tr("\(pct(s.accuracy)) הַצְלָחָה") + (s.minutesEarned > 0 ? tr(" · \(s.minutesEarned) דַּקּוֹת שֶׁ\(g(tr("הִרְוִיחַ"), tr("הִרְוִיחָה")))") : ""),
+            body: tr("\(pct(s.accuracy)) הַצְלָחָה") + (mins > 0 ? tr(" · \(mins) דַּקּוֹת שֶׁ\(g(tr("הִרְוִיחַ"), tr("הִרְוִיחָה")))") : ""),
             recommendation: nil)
     }
 

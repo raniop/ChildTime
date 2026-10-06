@@ -174,7 +174,8 @@ class ReportEngine(history: List<DailyStat>) {
     }
 
     /** The one most useful thing to tell the parent — rules in priority order. */
-    fun dailyInsight(name: String, isGirl: Boolean, p: ReportPeriod): DailyInsight? {
+    /** [minutesToday]: for TODAY, the same live count the "דקות" tile shows — history holds only answer minutes. */
+    fun dailyInsight(name: String, isGirl: Boolean, p: ReportPeriod, minutesToday: Int? = null): DailyInsight? {
         fun g(m: String, f: String) = if (isGirl) f else m
         val topics = topicReports(p).filter { it.answered >= 8 }
         val deltas = topicDeltas(p)
@@ -212,8 +213,9 @@ class ReportEngine(history: List<DailyStat>) {
                     (s.voluntaryLearningRate * 100).roundToInt(), name, g(tr("רָצָה"), tr("רָצְתָה"))), null)
         }
         if (s.questions <= 0) return null
+        val mins = (if (p == ReportPeriod.TODAY) minutesToday else null) ?: s.minutesEarned
         return DailyInsight("📚", tr("%lld שְׁאֵלוֹת %@", s.questions, p.title.lowercase()),
-            tr("%@ הַצְלָחָה", pct(s.accuracy)) + (if (s.minutesEarned > 0) tr(" · %lld דַּקּוֹת שֶׁ%@", s.minutesEarned, g(tr("הִרְוִיחַ"), tr("הִרְוִיחָה"))) else ""),
+            tr("%@ הַצְלָחָה", pct(s.accuracy)) + (if (mins > 0) tr(" · %lld דַּקּוֹת שֶׁ%@", mins, g(tr("הִרְוִיחַ"), tr("הִרְוִיחָה"))) else ""),
             null)
     }
 }

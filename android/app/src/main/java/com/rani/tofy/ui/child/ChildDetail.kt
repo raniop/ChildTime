@@ -177,7 +177,7 @@ private fun ChildReport(
         }
 
         // MARK: insight
-        engine.dailyInsight(child.name, girl, period)?.let { InsightCard(it, period) }
+        engine.dailyInsight(child.name, girl, period, minutesToday = s.minutesEarnedToday)?.let { InsightCard(it, period) }
 
         // MARK: topics
         TopicsCard(child, s, extras, engine, period, expanded, autoCollapsed) { t, open ->
