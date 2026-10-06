@@ -24407,6 +24407,28 @@
         }
       }
     },
+    "בית הספר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المدرسة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "School"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Школа"
+          }
+        }
+      }
+    },
     "בכפתור \"תנו ל%@ לשחק כאן\" שבכרטיס שלה" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -25088,6 +25110,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Добро пожаловать, %@! 👋\nКак называется семья?"
+          }
+        }
+      }
+    },
+    "בריכה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المسبح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pool"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бассейн"
           }
         }
       }
@@ -37537,6 +37581,28 @@
         }
       }
     },
+    "הבית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "البيت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дом"
+          }
+        }
+      }
+    },
     "הבנת הנקרא באייפד" : {
       "localizations" : {
         "ar" : {
@@ -47320,6 +47386,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Футболки"
+          }
+        }
+      }
+    },
+    "חוג" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النادي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Club"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кружок"
           }
         }
       }
@@ -61538,6 +61626,28 @@
         }
       }
     },
+    "לדעת איפה הילדים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اعرفوا أين الأطفال"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Know where the kids are"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Знать, где дети"
+          }
+        }
+      }
+    },
     "לה" : {
       "localizations" : {
         "ar" : {
@@ -71102,6 +71212,28 @@
         }
       }
     },
+    "מפה עם הילדים, התראה כשמגיעים לבית הספר או הביתה, וצפצוף לטלפון שהלך לאיבוד. רק אם תפעילו, ורק ההורים רואים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خريطة بالأطفال، وتنبيه عند الوصول إلى المدرسة أو البيت، ورنين لهاتف ضائع. فقط إذا شغّلتم ذلك، ولا يراه إلا الوالدان"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A map with the kids, an alert when they reach school or home, and a beep for a lost phone. Only if you turn it on, and only parents see it"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карта с детьми, уведомление, когда они приходят в школу или домой, и звонок на потерянный телефон. Только если вы включите, и видят только родители"
+          }
+        }
+      }
+    },
     "מפה, התראה כשמגיעים לבית הספר או הביתה, וצפצוף לטלפון שהלך לאיבוד." : {
       "localizations" : {
         "ar" : {
@@ -76993,6 +77125,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "конфета"
+          }
+        }
+      }
+    },
+    "סבא וסבתא" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الجدّ والجدّة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grandparents"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бабушка и дедушка"
           }
         }
       }

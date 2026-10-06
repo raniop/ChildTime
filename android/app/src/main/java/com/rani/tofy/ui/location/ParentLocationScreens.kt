@@ -386,7 +386,12 @@ private fun PlaceEditor(start: FamilyPlace, kids: List<Child>, places: List<Fami
                     for (e in listOf("🏠", "🏫", "⚽", "🎨", "🎵", "👵", "🏊", "📍")) Text(e, fontSize = 22.sp, textAlign = TextAlign.Center,
                         modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
                             .background(if (place.emoji == e) Mint.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.1f))
-                            .clickable { place = place.copy(emoji = e) }.padding(vertical = 8.dp))
+                            .clickable {
+                                // An empty name takes the obvious one, in the app's language.
+                                val defaults = mapOf("🏠" to tr("הבית"), "🏫" to tr("בית הספר"), "⚽" to tr("חוג"), "👵" to tr("סבא וסבתא"), "🏊" to tr("בריכה"))
+                                val name = if (place.name.isBlank() || place.name in defaults.values) defaults[e] ?: place.name else place.name
+                                place = place.copy(emoji = e, name = name)
+                            }.padding(vertical = 8.dp))
                 }
                 Text(tr("גודל האזור"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

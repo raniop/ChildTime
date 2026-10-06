@@ -55,6 +55,11 @@ enum WhatsNewContent {
     /// notes were dated — the first release, as one entry.
     static let releases: [Release] = [
 
+        Release(build: 204, version: "2026.10.6", headline: tr("לדעת איפה הילדים"), items: [
+            Item(emoji: "📍", title: tr("לדעת איפה הילדים"),
+                 line: tr("מפה עם הילדים, התראה כשמגיעים לבית הספר או הביתה, וצפצוף לטלפון שהלך לאיבוד. רק אם תפעילו, ורק ההורים רואים")),
+        ]),
+
         Release(build: 203, version: "2026.10.6", headline: tr("זמן בית ספר ושעת שינה"), items: [
             Item(emoji: "🏫", title: tr("זמן בית ספר ושעת שינה"),
                  line: tr("בהגדרות של כל ילד בוחרים ימים ושעות שבהם אי אפשר לפתוח דקות משחק. משחק פתוח נעצר, והדקות שנשארו חוזרות לארנק")),

@@ -521,6 +521,9 @@ struct PlaceEditorView: View {
     @State private var saving = false
 
     private static let emojis = ["🏠", "🏫", "⚽", "🎨", "🎵", "👵", "🏊", "📍"]
+    private static var defaultNames: [String: String] {
+        ["🏠": tr("הבית"), "🏫": tr("בית הספר"), "⚽": tr("חוג"), "👵": tr("סבא וסבתא"), "🏊": tr("בריכה")]
+    }
     private var isNew: Bool { !LocationSharing.shared.familyPlaces.contains { $0.id == place.id } }
 
     var body: some View {
@@ -575,7 +578,13 @@ struct PlaceEditorView: View {
                             .background(Color.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         HStack(spacing: 6) {
                             ForEach(Self.emojis, id: \.self) { e in
-                                Button { place.emoji = e } label: {
+                                Button {
+                                    // An empty name takes the obvious one, in the app's language.
+                                    if place.name.trimmingCharacters(in: .whitespaces).isEmpty || Self.defaultNames.values.contains(place.name) {
+                                        place.name = Self.defaultNames[e] ?? place.name
+                                    }
+                                    place.emoji = e
+                                } label: {
                                     Text(e).font(.system(size: 22)).frame(maxWidth: .infinity, minHeight: 40)
                                         .background((place.emoji == e ? AppColor.successMint.opacity(0.5) : Color.white.opacity(0.1)),
                                                     in: RoundedRectangle(cornerRadius: 10, style: .continuous))
