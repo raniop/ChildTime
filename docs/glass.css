@@ -349,3 +349,11 @@ html[lang="ar"] select{
 .play-soon small{opacity:.85}
 .android-steps{max-width:620px;margin:6px auto 18px;padding-inline-start:22px;display:grid;gap:8px;line-height:1.6;text-align:start}
 .android-note{margin:12px 0 0;font-size:.9rem;opacity:.75}
+
+/* ▶ when the browser refused autoplay (iOS Low Power Mode, in-app browsers) */
+.stage{position:relative}
+.video-tap{position:absolute;inset:auto;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;
+  width:76px;height:76px;border-radius:50%;border:2px solid rgba(255,255,255,.85);
+  background:rgba(20,10,60,.55);color:#fff;font-size:30px;line-height:1;cursor:pointer;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.video-tap:focus-visible{outline:3px solid #FFD25A;outline-offset:3px}

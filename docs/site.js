@@ -207,6 +207,54 @@
      button then offers to start it rather than stop it. */
   if (reduced && reduced.matches) setPaused(true);
 
+  /* Mobile Safari refuses autoplay in Low Power Mode (and some in-app browsers
+     always do), even for a muted inline video — it just sits on its poster.
+     Playback IS allowed after a user gesture, so: if the autoplay was refused,
+     put a ▶ on the video and start it on the first touch anywhere. */
+  function armTapToPlay(v) {
+    if (v.dataset.tapArmed) return;
+    v.dataset.tapArmed = "1";
+    var host = v.parentNode;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "video-tap";
+    btn.setAttribute("aria-label", "הפעלת הסרטון");
+    btn.textContent = "\u25B6\uFE0E";
+    host.appendChild(btn);
+    // Centre the ▶ on the video itself (the stage also holds a second phone).
+    function place() {
+      btn.style.left = (v.offsetLeft + v.offsetWidth / 2) + "px";
+      btn.style.top = (v.offsetTop + v.offsetHeight / 2) + "px";
+    }
+    place();
+    window.addEventListener("resize", place);
+    function go() {
+      if (root.classList.contains("motion-paused")) return;
+      var p = v.play();
+      if (p && p.then) p.then(done, function () {});
+      else done();
+    }
+    function done() {
+      btn.remove();
+      document.removeEventListener("touchstart", go, true);
+      document.removeEventListener("click", go, true);
+    }
+    btn.addEventListener("click", function (e) { e.stopPropagation(); root.classList.remove("motion-paused"); go(); });
+    document.addEventListener("touchstart", go, { capture: true, passive: true });
+    document.addEventListener("click", go, true);
+  }
+  if (!(reduced && reduced.matches)) {
+    for (var w = 0; w < videos.length; w++) {
+      (function (v) {
+        v.muted = true;            // belt and braces: Safari only autoplays when muted is a PROPERTY too
+        var p = v.play();
+        if (p && p.catch) p.catch(function () { armTapToPlay(v); });
+        // No promise (old browsers): if still paused shortly after load, arm.
+        setTimeout(function () { if (v.paused && !root.classList.contains("motion-paused")) armTapToPlay(v); }, 1500);
+      })(videos[w]);
+    }
+  }
+
   var motionToggles = document.querySelectorAll("[data-motion-toggle]");
   for (var m = 0; m < motionToggles.length; m++) {
     motionToggles[m].addEventListener("click", function () {
