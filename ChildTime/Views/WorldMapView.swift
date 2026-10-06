@@ -329,22 +329,14 @@ struct WorldMapView: View {
         .firstDayGlow(packStore.isFirstDay(pack) && !(profiles.activeID.map { PackKidState.isOpened(pack.id, childID: $0) } ?? false))
     }
 
-    /// Where טופי טיים sits among the worlds. Rani: the categories move once a
-    /// day — but without Tofy+ it is the ONLY thing the child can open, so it
-    /// stays first, always, rather than hiding behind seven locked tiles. With
-    /// Tofy+ it takes its turn in the same daily shuffle as everything else.
-    /// `worlds` arrive already in today's order (`orderForToday`).
+    /// Where טופי טיים sits among the worlds: FIRST, always. Rani (6.10.26):
+    /// "טופי טיים תמיד ראשון" — it picks the questions each child most needs
+    /// across every world, so it must never sink into the middle of the grid,
+    /// with or without Tofy+. The worlds behind it still move once a day
+    /// (`orderForToday`). `premium`/`date` stay for the callers' signature.
     static func homeOrder(worlds: [World], childID: UUID?, premium: Bool, on date: Date = Date()) -> [HomeTile] {
         var tiles: [HomeTile] = worlds.map { .world($0) }
-        guard premium, !tiles.isEmpty else { tiles.insert(.tofyTime, at: 0); return tiles }
-        // Same seed family as the worlds, stepped once so the slot isn't
-        // correlated with the first world's shuffle draw.
-        var rng = SeededRandom(seed: daySeed(childID: childID, on: date) &+ 0x51ED)
-        _ = rng.next()
-        // Never after the arena (it keeps the last slot) — pick among the topic slots.
-        let lastTopic = tiles.lastIndex { if case .world(let w) = $0 { return !w.isBonusWorld } else { return false } } ?? 0
-        let slot = Int(rng.next() % UInt64(lastTopic + 2))   // 0…lastTopic+1 inclusive
-        tiles.insert(.tofyTime, at: min(slot, tiles.count))
+        tiles.insert(.tofyTime, at: 0)
         return tiles
     }
 

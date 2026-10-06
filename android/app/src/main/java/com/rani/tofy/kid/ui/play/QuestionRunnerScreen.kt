@@ -238,6 +238,23 @@ private fun EarnedTimeBar(cycleSeconds: Double) {
 
 // ── question card ───────────────────────────────────────────────────────────
 
+/**
+ * "מָה בָּא אַחֲרֵי?\n50, 40, 30, ?" — a number SEQUENCE is read in the
+ * sentence's direction. Laid out left-to-right in a Hebrew question, a child
+ * reads it right-to-left as "?, 30, 40, 50": the ? comes FIRST, and "what comes
+ * next" looks like "what came before" (Rani, on the tablet — and on the iPad).
+ * A Right-to-Left Mark makes such a line an RTL paragraph, so the ? sits at the
+ * end of the reading. Arithmetic ("6 × 4 + 17 = ?") has no commas and stays
+ * left-to-right, as numbers are written. Same rule as Question.displayPrompt on iOS.
+ */
+internal fun sequenceAware(prompt: String, rtl: Boolean): String {
+    if (!rtl) return prompt
+    return prompt.split("\n").joinToString("\n") { line ->
+        val sequence = line.contains(',') && line.any { it.isDigit() } && line.none { it.isLetter() }
+        if (sequence) "\u200F" + line else line
+    }
+}
+
 private fun promptSize(prompt: String, passage: Boolean): Float {
     val longest = prompt.split(' ', '\n').maxOfOrNull { it.length } ?: 0
     var size = 42f
@@ -278,7 +295,7 @@ private fun QuestionHeader(r: RunnerController, q: Question) {
         q.spoken?.takeIf { it.isNotEmpty() }?.let {
             FitText(it, 26.sp, weight = FontWeight.ExtraBold, maxLines = 3, minScale = 0.6f, modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp))
         }
-        FitText(q.prompt, promptSize(q.prompt, q.passage != null).sp, weight = FontWeight.ExtraBold, maxLines = 12, minScale = 0.4f,
+        FitText(sequenceAware(q.prompt, r.contentLang.rtl), promptSize(q.prompt, q.passage != null).sp, weight = FontWeight.ExtraBold, maxLines = 12, minScale = 0.4f,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp))
         Text(tr("בַּחֲרוּ תְּשׁוּבָה אַחַת"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
     }

@@ -43,3 +43,22 @@ struct Question: Identifiable, Equatable {
         String(s.unicodeScalars.filter { !(0x0591...0x05C7).contains(Int($0.value)) })
     }
 }
+
+extension Question {
+    /// "מָה בָּא אַחֲרֵי?\n50, 40, 30, ?" — a number SEQUENCE is read in the
+    /// sentence's direction. Laid out left-to-right inside a Hebrew question, a
+    /// child reads it right-to-left as "?, 30, 40, 50": the ? comes FIRST, and
+    /// "what comes next" looks like "what came before" (Rani, 6.10.26, on the
+    /// iPad and the Android tablet). A Right-to-Left Mark makes such a line an
+    /// RTL paragraph, so the ? sits at the end of the reading. Arithmetic
+    /// ("6 × 4 + 17 = ?") has no commas and stays left-to-right, as numbers are
+    /// written. Same rule as `sequenceAware` on Android.
+    static func displayPrompt(_ prompt: String, rightToLeft: Bool) -> String {
+        guard rightToLeft else { return prompt }
+        return prompt.split(separator: "\n", omittingEmptySubsequences: false).map { sub -> String in
+            let line = String(sub)
+            let sequence = line.contains(",") && line.contains(where: \.isNumber) && !line.contains(where: \.isLetter)
+            return sequence ? "\u{200F}" + line : line
+        }.joined(separator: "\n")
+    }
+}

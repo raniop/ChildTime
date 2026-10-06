@@ -197,13 +197,9 @@ fun homeTiles(
     val tiles = ordered.map { w ->
         HomeTile.WorldTile(w, open = premium || owned(w) || w.id in guestIDs, guest = !premium && w.id in guestIDs)
     }.toMutableList<HomeTile>()
-    // homeOrder: without Tofy+ טופי טיים is the one open thing — first, always.
-    // With Tofy+ it takes its turn in the daily shuffle (never after the arena).
-    if (!premium || tiles.isEmpty()) { tiles.add(0, HomeTile.TofyTime); return tiles }
-    val rng = SeededRandom(daySeed(childID) + 0x51EDuL)
-    rng.next()
-    val lastTopic = tiles.indexOfLast { it is HomeTile.WorldTile && !it.world.isArena }.coerceAtLeast(0)
-    val slot = (rng.next() % (lastTopic + 2).toULong()).toInt()
-    tiles.add(minOf(slot, tiles.size), HomeTile.TofyTime)
+    // homeOrder: טופי טיים is FIRST, always, with or without Tofy+ (Rani,
+    // 6.10.26 — it picks what the child most needs; it must never sink into the
+    // grid). Same rule as WorldMapView.homeOrder on iOS.
+    tiles.add(0, HomeTile.TofyTime)
     return tiles
 }
