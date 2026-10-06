@@ -343,3 +343,9 @@ html[lang="ar"] select{
   font-family:"Cairo","Heebo",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
 }
 
+
+/* 🤖 Android — coming soon (closed testing) */
+.play-soon{background:rgba(11,11,16,.55)}
+.play-soon small{opacity:.85}
+.android-steps{max-width:620px;margin:6px auto 18px;padding-inline-start:22px;display:grid;gap:8px;line-height:1.6;text-align:start}
+.android-note{margin:12px 0 0;font-size:.9rem;opacity:.75}
