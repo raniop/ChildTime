@@ -1,47 +1,53 @@
 {
-  "_comment": "What the 'יש גרסה חדשה' sheet tells someone who ALREADY uses Tofy — short, clear, what's new for them (not onboarding). Up to 3 lines per language. tools/releases-json.py copies it into docs/admin/releases.json.",
+  "_comment": "What the 'יש גרסה חדשה' sheet tells someone who ALREADY uses Tofy — short, clear, what's new for them (not onboarding). Up to 3 lines per language; the LAST line is always _fixes (Rani). A version with no entry gets only _fixes.",
   "2026.10.5": {
     "he": [
       "🏅 פרס בסוף כל סיבוב, גם כשלא הכל הצליח",
       "⏱ רואים בדיוק כמה זמן הילד הרוויח",
-      "🛠 תיקונים קטנים ושיפורים, שהכל ירוץ חלק"
+      "🛠 תיקונים קטנים ושיפורים, שטופי 🦁 ירוץ חלק"
     ],
     "en": [
       "🏅 A prize at the end of every round, even a tough one",
       "⏱ See exactly how much time your child earned",
-      "🛠 Small fixes and polish, so everything runs smoothly"
+      "🛠 Small fixes and polish, so Tofy 🦁 runs smoothly"
     ],
     "ru": [
       "🏅 Приз в конце каждого раунда, даже если не всё получилось",
       "⏱ Точно видно, сколько времени заработал ребёнок",
-      "🛠 Мелкие исправления и улучшения — чтобы всё работало гладко"
+      "🛠 Мелкие исправления и улучшения — чтобы Tofy 🦁 работал гладко"
     ],
     "ar": [
       "🏅 جائزة في نهاية كل جولة، حتى لو لم ينجح كل شيء",
       "⏱ ترون بالضبط كم من الوقت ربح الطفل",
-      "🛠 إصلاحات صغيرة وتحسينات ليعمل كل شيء بسلاسة"
+      "🛠 إصلاحات صغيرة وتحسينات ليعمل Tofy 🦁 بسلاسة"
     ]
   },
   "2026.10.6": {
     "he": [
       "🏆 דרגות לכל עולם: ארד, כסף וזהב",
       "⚡ כל תשובה נכונה מוסיפה זמן מיד",
-      "🛠 תיקונים קטנים ושיפורים, שהכל ירוץ חלק"
+      "🛠 תיקונים קטנים ושיפורים, שטופי 🦁 ירוץ חלק"
     ],
     "en": [
       "🏆 Levels in every world: bronze, silver and gold",
       "⚡ Every right answer adds time instantly",
-      "🛠 Small fixes and polish, so everything runs smoothly"
+      "🛠 Small fixes and polish, so Tofy 🦁 runs smoothly"
     ],
     "ru": [
       "🏆 Уровни в каждом мире: бронза, серебро и золото",
       "⚡ Каждый правильный ответ сразу добавляет время",
-      "🛠 Мелкие исправления и улучшения — чтобы всё работало гладко"
+      "🛠 Мелкие исправления и улучшения — чтобы Tofy 🦁 работал гладко"
     ],
     "ar": [
       "🏆 مستويات في كل عالم: برونزي وفضي وذهبي",
       "⚡ كل إجابة صحيحة تضيف وقتًا فورًا",
-      "🛠 إصلاحات صغيرة وتحسينات ليعمل كل شيء بسلاسة"
+      "🛠 إصلاحات صغيرة وتحسينات ليعمل Tofy 🦁 بسلاسة"
     ]
+  },
+  "_fixes": {
+    "he": "🛠 תיקונים קטנים ושיפורים, שטופי 🦁 ירוץ חלק",
+    "en": "🛠 Small fixes and polish, so Tofy 🦁 runs smoothly",
+    "ru": "🛠 Мелкие исправления и улучшения — чтобы Tofy 🦁 работал гладко",
+    "ar": "🛠 إصلاحات صغيرة وتحسينات ليعمل Tofy 🦁 بسلاسة"
   }
 }

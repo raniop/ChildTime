@@ -36,7 +36,9 @@ out.sort(key=lambda r: -r['build'])
 # The update sheet's text is written for EXISTING users (tools/update-pitch.json),
 # not the What's New titles (those are for people who just installed).
 pitch = json.load(open(PITCH, encoding='utf-8'))
+fixes = pitch['_fixes']
 for r in out:
-    if r['version'] in pitch: r['pitch'] = pitch[r['version']]
+    # Every version gets a pitch: its own lines, or just the friendly fixes line.
+    r['pitch'] = pitch.get(r['version']) or {l: [fixes[l]] for l in fixes}
 json.dump(out, open(OUT, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 print(len(out), 'releases →', OUT, '· newest', out[0]['build'] if out else None)
