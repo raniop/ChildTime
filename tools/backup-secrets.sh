@@ -25,6 +25,6 @@ TXT
 
 DMG="$OUT/tofy-secrets-$(date '+%Y-%m-%d').dmg"
 echo "יוצר $DMG — תתבקש להקליד סיסמה פעמיים:"
-hdiutil create -encryption AES-256 -stdinpass -srcfolder "$STAGE" -volname "Tofy Secrets" -format UDZO "$DMG"
+hdiutil create -encryption AES-256 -srcfolder "$STAGE" -volname "Tofy Secrets" -format UDZO "$DMG"
 echo "✅ מוכן: $DMG"
 echo "   להעלות לענן / מנהל הסיסמאות, ולשמור את הסיסמה במקום נפרד."
