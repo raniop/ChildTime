@@ -114,12 +114,26 @@ internal fun KidChoresContent(onClose: () -> Unit) {
     }
     fun finish(photo: ByteArray?) { val c = pending ?: return; pending = null; send(c, photo) }
 
-    val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bmp ->
-        if (bmp == null) { pending = null; return@rememberLauncherForActivityResult }
-        scope.launch { finish(withContext(Dispatchers.Default) { KidChoresStore.compressProof(bmp) }) }
+    // Full-size capture into our cache via the FileProvider (TakePicturePreview is a thumbnail).
+    val shotFile = remember { java.io.File(ctx.cacheDir, "photos/chore_proof.jpg") }
+    val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+        if (!ok || !shotFile.exists()) { pending = null; return@rememberLauncherForActivityResult }
+        scope.launch {
+            finish(withContext(Dispatchers.IO) {
+                decodeProof(ctx, Uri.fromFile(shotFile))?.let { KidChoresStore.compressProof(it) }.also { shotFile.delete() }
+            })
+        }
+    }
+    fun launchCamera() {
+        val uri = runCatching {
+            shotFile.parentFile?.mkdirs(); shotFile.delete()
+            androidx.core.content.FileProvider.getUriForFile(ctx, ctx.packageName + ".files", shotFile)
+        }.getOrNull()
+        if (uri == null) { pending = null; return }
+        runCatching { camera.launch(uri) }.onFailure { pending = null }
     }
     val cameraPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
-        if (ok) camera.launch(null) else pending = null
+        if (ok) launchCamera() else pending = null
     }
     val library = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri == null) { pending = null; return@rememberLauncherForActivityResult }
@@ -193,7 +207,7 @@ internal fun KidChoresContent(onClose: () -> Unit) {
             Text(tr("רוֹצִים לְצָרֵף תְּמוּנָה שֶׁל מַה שֶּׁעֲשִׂיתֶם? 📸"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold,
                 fontSize = 17.sp, textAlign = TextAlign.Center)
             if (hasCamera) WhiteCapsule(tr("📸 לְצַלֵּם עַכְשָׁו"), Modifier.fillMaxWidth()) {
-                if (ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) camera.launch(null)
+                if (ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) launchCamera()
                 else cameraPermission.launch(Manifest.permission.CAMERA)
             }
             WhiteCapsule(tr("🖼 לִבְחֹר תְּמוּנָה"), Modifier.fillMaxWidth()) {

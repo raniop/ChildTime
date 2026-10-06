@@ -71,6 +71,8 @@ import com.rani.tofy.kid.content.ContentMode
 import com.rani.tofy.kid.content.Question
 import com.rani.tofy.kid.core.KidSession
 import com.rani.tofy.kid.core.RewardEngine
+import com.rani.tofy.kid.ui.games.GameEnv
+import com.rani.tofy.kid.ui.games.SurpriseRoundOverlay
 import com.rani.tofy.ui.child.skillName
 import com.rani.tofy.ui.theme.GlassBackdrop
 import com.rani.tofy.ui.theme.Ink
@@ -85,8 +87,9 @@ import kotlin.math.roundToInt
  * [RunnerController]; this file is the glass quiz layout (mockup order, top-down:
  * chips · timer · question card · answers · streak · tool row).
  *
- * TODO(android): ⚡ surprise mini-game rounds, 🎡 the lucky wheel and 🐉 the boss
- *  battle are not ported yet (iOS: SurpriseRoundFlow / LuckyWheelView / BossBattleView).
+ * ⚡ The surprise round (iOS: a fullScreenCover of SurpriseRoundFlow) takes the
+ * screen while [RunnerController.surprisePlan] is set. 🎡 The wheel pops on the
+ * kid home after the round; 🐉 the boss lives in the world's game chooser.
  */
 @Composable
 fun QuestionRunnerScreen(mode: ContentMode, onExit: () -> Unit) {
@@ -94,7 +97,8 @@ fun QuestionRunnerScreen(mode: ContentMode, onExit: () -> Unit) {
     val view = LocalView.current
     val scope = rememberCoroutineScope()
     val haptics = remember(view) { KidHaptics(view) }
-    remember { KidSounds.init(ctx); KidSpeech.init(ctx); HelpRequestSender.init(ctx); LearningHistoryRecorder.init(ctx); 0 }
+    // GameEnv: the surprise round's day/rotation prefs persist like iOS's UserDefaults.
+    remember { KidSounds.init(ctx); KidSpeech.init(ctx); HelpRequestSender.init(ctx); LearningHistoryRecorder.init(ctx); GameEnv.init(ctx); 0 }
     val runner = remember { RunnerController(mode, scope) { haptics } }
     LaunchedEffect(Unit) { if (!runner.prepare()) onExit() }
     DisposableEffect(Unit) { onDispose { KidSpeech.stop(); HelpRequestSender.expireActiveRequest() } }
@@ -106,7 +110,15 @@ fun QuestionRunnerScreen(mode: ContentMode, onExit: () -> Unit) {
         RunnerController.Phase.LOADING -> GlassBackdrop {
             CircularProgressIndicator(Modifier.align(Alignment.Center), color = Color.White)
         }
-        RunnerController.Phase.PLAYING -> RunnerPlaying(runner, leave)
+        RunnerController.Phase.PLAYING -> {
+            val plan = runner.surprisePlan
+            if (plan != null) {
+                // Back skips the surprise (its "דִּלּוּג"), never the whole round.
+                BackHandler { runner.surpriseDone() }
+                SurpriseRoundOverlay(plan) { runner.surpriseDone() }
+            }
+            else RunnerPlaying(runner, leave)
+        }
         RunnerController.Phase.REWARD -> RewardScreen(
             kind = runner.chestKind, world = runner.world, startedLevel = runner.startedLevel,
             roundSeconds = runner.roundSeconds, isGirl = runner.isGirl, characterID = runner.child?.character3DID,

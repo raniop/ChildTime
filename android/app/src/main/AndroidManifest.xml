@@ -42,13 +42,45 @@
         android:theme="@style/Theme.Tofy">
         <activity
             android:name=".MainActivity"
+            android:launchMode="singleTask"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Friend / live-game / join links (iOS universal links + tofy://), routed by
+                 kid/ui/home/KidDeepLinks. Not auto-verified: the site has no assetlinks yet. -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="tofyapp.com" />
+                <data android:host="www.tofyapp.com" />
+                <data android:pathPrefix="/friend" />
+                <data android:pathPrefix="/join" />
+                <data android:pathPrefix="/game" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="tofy" />
+                <data android:host="friend" />
+                <data android:host="game" />
+            </intent-filter>
         </activity>
+        <!-- Full-size chore proof photos (kid/ui/social/KidChoresScreen → TakePicture). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
         <service android:name=".push.TofyMessagingService" android:exported="false">
             <intent-filter><action android:name="com.google.firebase.MESSAGING_EVENT" /></intent-filter>
         </service>

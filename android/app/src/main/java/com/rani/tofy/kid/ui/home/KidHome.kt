@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -92,6 +94,20 @@ data class HomeCtaModel(
     val redeemableMinutes: Int,
 )
 
+/** The round-button / twin-card / games-tile / buddy entries of the home (WorldMapView). */
+data class HomeExtras(
+    /** 🏆 badge: a live-game invite is waiting. */
+    val friendsBadge: Boolean = false,
+    /** 🎁 on the buddy's head (ProgressStore.dailyChestAvailable). */
+    val chestReady: Boolean = false,
+    val choresPending: Int = 0,
+    val choresDoneToday: Int = 0,
+    val choresTotal: Int = 0,
+    /** The games' daily warm-up: correct answers today vs the target (גן 5, readers 10). */
+    val correctToday: Int = 0,
+    val gamesGateTarget: Int = 10,
+)
+
 /** The approved kid home (WorldMapView): brand row, the glass header, the world grid, the floating minutes panel. */
 @Composable
 internal fun KidHome(
@@ -112,6 +128,15 @@ internal fun KidHome(
     onOpenEarned: () -> Unit,
     onOpenGift: () -> Unit,
     onTransfer: () -> Unit,
+    extras: HomeExtras = HomeExtras(),
+    onShop: () -> Unit = {},
+    onFriends: () -> Unit = {},
+    onAvatar: () -> Unit = {},
+    onChores: () -> Unit = {},
+    onGames: () -> Unit = {},
+    onChest: () -> Unit = {},
+    /** The top banner: a friend invited me to a live game. */
+    inviteBanner: @Composable () -> Unit = {},
 ) {
     val snap = state.snapshot
     var panelPx by remember { mutableIntStateOf(0) }
@@ -131,10 +156,10 @@ internal fun KidHome(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                item(span = { GridItemSpan(maxLineSpan) }) { BrandRow(premium, onSettings) }
+                item(span = { GridItemSpan(maxLineSpan) }) { BrandRow(premium, extras.friendsBadge, onShop, onFriends, onSettings) }
                 if (kidMode) item(span = { GridItemSpan(maxLineSpan) }) { KidExitBar(onKidExit) }
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    HeaderPane(child, snap.stars, snap.diamonds, snap.dayStreak, snap.xp, engine, cta, onLevelInfo, onChallenge)
+                    HeaderPane(child, snap.stars, snap.diamonds, snap.dayStreak, snap.xp, engine, cta, extras, onLevelInfo, onChallenge, onAvatar, onChores)
                 }
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Text(tr("בּוֹחֲרִים עוֹלָם וְיוֹצְאִים לְהַרְפַּתְקָה ✨"), Modifier.fillMaxWidth().padding(top = 6.dp),
@@ -158,6 +183,22 @@ internal fun KidHome(
                         }
                     }
                 }
+                // 🎮 Games LAST in the grid (Rani): learning first, the arcade is dessert.
+                // A daily warm-up goal, never a lock — no grey-out, no failure language.
+                item(key = "games") {
+                    val target = extras.gamesGateTarget
+                    val done = minOf(extras.correctToday, target)
+                    val open = extras.correctToday >= target
+                    FeatureTile(
+                        "🎮", tr("מִשְׂחָקִים"),
+                        if (open) tr("מֵרוֹץ נָכוֹן/לֹא · הַתְאָמַת זוּגוֹת") else tr("עוֹנִים %lld נְכוֹנוֹת — וְנִפְתָּח! 💪", target),
+                        Color(0xFFEF476F),
+                        badge = when { !premium -> tr("👑 טוֹפִי+"); open -> null; else -> "$done/$target ✅" },
+                        foot = if (open) tr("🎮 פָּתוּחַ הַיּוֹם") else tr("חִמּוּם יוֹמִי"),
+                        footFrac = if (open) null else done / maxOf(1, target).toFloat(),
+                        onClick = onGames,
+                    )
+                }
             }
 
             // The floating minutes panel over a soft scrim — tiles fade out under it.
@@ -171,6 +212,20 @@ internal fun KidHome(
                 BuddyBubble(buddyLine, Modifier.fillMaxWidth())
                 BottomCtas(cta, onOpenEarned, onOpenGift, onTransfer)
             }
+
+            // The child's buddy roams between the header and the panel; tap → shop, 🎁 → chest.
+            val compact = cols == 2
+            FloatingBuddy(
+                child?.character3DID, extras.chestReady,
+                topInset = if (compact) 300.dp else 230.dp,
+                bottomInset = with(density) { panelPx.toDp() },
+                size = if (compact) 90.dp else 120.dp,
+                onTap = onShop, onGift = onChest,
+                modifier = Modifier.statusBarsPadding(),
+            )
+
+            // 🎮 "You're invited!" drops in at the top for a few seconds.
+            Box(Modifier.align(Alignment.TopCenter).fillMaxWidth().statusBarsPadding(), contentAlignment = Alignment.TopCenter) { inviteBanner() }
         }
     }
 }
@@ -178,7 +233,7 @@ internal fun KidHome(
 // ── brand row + header ──────────────────────────────────────────────────────
 
 @Composable
-private fun BrandRow(premium: Boolean, onSettings: () -> Unit) {
+private fun BrandRow(premium: Boolean, friendsBadge: Boolean, onShop: () -> Unit, onFriends: () -> Unit, onSettings: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(
             if (premium) tr("טופי+") else tr("טופי"),
@@ -193,12 +248,29 @@ private fun BrandRow(premium: Boolean, onSettings: () -> Unit) {
             CharacterImage("lion", Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alignment = Alignment.TopCenter)
         }
         Spacer(Modifier.weight(1f))
-        // 🛍️ shop and 🏆 friends join here once they're ported; ⚙️ is the parent's corner.
+        // Three round glass buttons, no captions (Rani, 2026-09-06): 🛍️ shop · 🏆 friends
+        // (the live tournament lives inside; a waiting invite lights the dot) · ⚙️ the
+        // parent's corner. Shop and friends are NOT behind Tofy+.
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            NavButton("🛍️", false, onShop)
+            NavButton("🏆", friendsBadge, onFriends)
+            NavButton("⚙️", false, onSettings)
+        }
+    }
+}
+
+@Composable
+private fun NavButton(emoji: String, badge: Boolean, onClick: () -> Unit) {
+    Box(Modifier.size(44.dp)) {
         Box(
             Modifier.size(44.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.24f))
-                .border(1.dp, Color.White.copy(alpha = 0.32f), CircleShape).clickable(onClick = onSettings),
+                .border(1.dp, Color.White.copy(alpha = 0.32f), CircleShape).clickable(onClick = onClick),
             contentAlignment = Alignment.Center,
-        ) { Text("⚙️", fontSize = 19.sp) }
+        ) { Text(emoji, fontSize = 19.sp) }
+        if (badge) Box(
+            Modifier.align(Alignment.TopEnd).size(12.dp).clip(CircleShape).background(Color.White).padding(2.dp)
+                .clip(CircleShape).background(Color(0xFFFF7A3D)),
+        )
     }
 }
 
@@ -233,7 +305,8 @@ private fun currencyShort(v: Int): String {
 @Composable
 private fun HeaderPane(
     child: Child?, stars: Int, diamonds: Int, dayStreak: Int, xp: Int, engine: ProgressEngine?,
-    cta: HomeCtaModel, onLevelInfo: () -> Unit, onChallenge: () -> Unit,
+    cta: HomeCtaModel, extras: HomeExtras, onLevelInfo: () -> Unit, onChallenge: () -> Unit,
+    onAvatar: () -> Unit, onChores: () -> Unit,
 ) {
     Column(Modifier.fillMaxWidth().padding(top = 6.dp).glassPane(24.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -242,7 +315,7 @@ private fun HeaderPane(
             val ring = listOf(Color.White.copy(alpha = 0.5f), Color(0xFFCD7F32), Color(0xFFD9D9E3), Color(0xFFFFD23F))[tier]
             CharacterImage(child?.character3DID ?: "fox",
                 Modifier.size(52.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.22f))
-                    .border(if (tier == 0) 1.dp else 2.5.dp, ring, CircleShape),
+                    .border(if (tier == 0) 1.dp else 2.5.dp, ring, CircleShape).clickable(onClick = onAvatar),
                 contentScale = ContentScale.Crop)
             Column(Modifier.weight(1f).clickable(onClick = onLevelInfo), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 val first = (child?.name?.takeIf { it.isNotBlank() } ?: tr("טוֹפִי")).split(" ").first()
@@ -259,7 +332,11 @@ private fun HeaderPane(
             WalletStat("💝 " + timeLabel(cta.giftSeconds), tr("דַּקּ׳ מַתָּנָה"))
         }
         StatsPanel(engine, onLevelInfo)
-        ChallengeCard(engine, onChallenge)
+        // The twins: אתגר יומי · מטלות הבית — same size, side by side.
+        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            ChallengeCard(engine, onChallenge, Modifier.weight(1f).fillMaxHeight())
+            ChoresCard(extras, onChores, Modifier.weight(1f).fillMaxHeight())
+        }
     }
 }
 
@@ -311,7 +388,7 @@ private fun StatDivider() = Box(Modifier.width(1.dp).height(36.dp).background(Co
 
 /** The daily challenge twin card: 🔥 ring → title → status → track. */
 @Composable
-private fun ChallengeCard(engine: ProgressEngine?, onClick: () -> Unit) {
+private fun ChallengeCard(engine: ProgressEngine?, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val target = ProgressEngine.DAILY_CHALLENGE_TARGET
     val done = engine?.dailyChallengeProgress ?: 0
     val ready = engine?.dailyChallengeRewardReady == true
@@ -320,7 +397,7 @@ private fun ChallengeCard(engine: ProgressEngine?, onClick: () -> Unit) {
     val t = rememberInfiniteTransition(label = "pulse")
     val pulse by t.animateFloat(0.95f, 1.12f, infiniteRepeatable(tween(900), RepeatMode.Reverse), label = "pulse")
     Row(
-        Modifier.fillMaxWidth().glassInset(16.dp).clickable(onClick = onClick).padding(horizontal = 12.dp, vertical = 10.dp),
+        modifier.glassInset(16.dp).clickable(onClick = onClick).padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Box(
@@ -343,6 +420,36 @@ private fun ChallengeCard(engine: ProgressEngine?, onClick: () -> Unit) {
     }
 }
 
+/** choresTopCard — the twin of the challenge: 🧹 ring → title → live line → today's track. */
+@Composable
+private fun ChoresCard(e: HomeExtras, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val frac = if (e.choresTotal == 0) 0f else e.choresDoneToday / e.choresTotal.toFloat()
+    Row(
+        modifier.glassInset(16.dp).clickable(onClick = onClick).padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Box(
+            Modifier.size(40.dp).clip(CircleShape).background(Brush.linearGradient(listOf(Color(0xFF48BFE3), Color(0xFF5E60CE))))
+                .border(1.5.dp, Color.White.copy(alpha = 0.55f), CircleShape),
+            contentAlignment = Alignment.Center,
+        ) { Text("🧹", fontSize = 20.sp) }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(tr("מַטְלוֹת הַבַּיִת"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 13.5.sp, maxLines = 1)
+            Text(
+                when {
+                    e.choresPending == 1 -> tr("אַחַת מְחַכָּה")
+                    e.choresPending > 1 -> tr("%lld מְחַכּוֹת", e.choresPending)
+                    e.choresDoneToday > 0 -> tr("%lld הֻשְׁלְמוּ הַיּוֹם! 💪", e.choresDoneToday)
+                    else -> tr("עוֹזְרִים — וּבוֹחֲרִים פְּרָס!")
+                },
+                color = Color.White.copy(alpha = 0.88f), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 11.5.sp, maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Track(frac, Modifier.padding(top = 4.dp))
+        }
+    }
+}
+
 @Composable
 fun Track(frac: Float, modifier: Modifier = Modifier, fill: Color = Color.White) {
     Box(modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))) {
@@ -356,7 +463,7 @@ fun Track(frac: Float, modifier: Modifier = Modifier, fill: Color = Color.White)
 @Composable
 private fun FeatureTile(
     emoji: String, title: String, subtitle: String, tint: Color,
-    badge: String? = null, badgeTint: Color? = null, foot: String? = null, footFrac: Float = 0f, onClick: () -> Unit,
+    badge: String? = null, badgeTint: Color? = null, foot: String? = null, footFrac: Float? = 0f, onClick: () -> Unit,
 ) {
     Column(
         Modifier.fillMaxWidth().heightIn(min = 158.dp).clip(RoundedCornerShape(22.dp))
@@ -379,7 +486,7 @@ private fun FeatureTile(
         if (foot != null) {
             Spacer(Modifier.height(8.dp))
             Text(foot, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1)
-            Track(footFrac, Modifier.padding(top = 4.dp).height(6.dp))
+            if (footFrac != null) Track(footFrac, Modifier.padding(top = 4.dp).height(6.dp))
         }
     }
 }

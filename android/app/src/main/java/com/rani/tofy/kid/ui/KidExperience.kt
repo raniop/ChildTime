@@ -12,6 +12,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -39,14 +40,38 @@ import com.rani.tofy.kid.core.OpenResult
 import com.rani.tofy.kid.core.ProgressEngine
 import com.rani.tofy.kid.core.ProgressEvent
 import com.rani.tofy.kid.core.RewardEngine
+import com.rani.tofy.kid.enforce.ChildLockSetupScreen
+import com.rani.tofy.kid.enforce.EnforcementStatus
+import com.rani.tofy.kid.enforce.EnforcementStore
+import com.rani.tofy.kid.ui.games.GamesMenuScreen
+import com.rani.tofy.kid.ui.games.WorldGameChooser
+import com.rani.tofy.kid.ui.games.worldOpensStraightToQuestions
 import com.rani.tofy.kid.ui.home.ConversionConfig
 import com.rani.tofy.kid.ui.home.HomeCtaModel
+import com.rani.tofy.kid.ui.home.HomeExtras
 import com.rani.tofy.kid.ui.home.HomeTile
+import com.rani.tofy.kid.ui.home.KidDeepLinks
 import com.rani.tofy.kid.ui.home.KidHome
 import com.rani.tofy.kid.ui.home.KidWorld
 import com.rani.tofy.kid.ui.home.allWorlds
 import com.rani.tofy.kid.ui.home.homeTiles
 import com.rani.tofy.kid.ui.play.QuestionRunnerScreen
+import com.rani.tofy.kid.ui.shop.CharacterCollectionScreen
+import com.rani.tofy.kid.ui.shop.DailyChestScreen
+import com.rani.tofy.kid.ui.shop.ShopScreen
+import com.rani.tofy.kid.ui.shop.WheelScreen
+import com.rani.tofy.kid.ui.shop.dailyChestReady
+import com.rani.tofy.kid.ui.shop.grantComebackWheelIfReturning
+import com.rani.tofy.kid.ui.shop.wheelSpinsAvailable
+import com.rani.tofy.kid.ui.social.FriendsRepository
+import com.rani.tofy.kid.ui.social.FriendsScreen
+import com.rani.tofy.kid.ui.social.KidChoresScreen
+import com.rani.tofy.kid.ui.social.LiveGameRepository
+import com.rani.tofy.kid.ui.social.LiveInviteBanner
+import com.rani.tofy.kid.ui.social.LiveQuizScreen
+import com.rani.tofy.kid.ui.social.choresDoneTodayCount
+import com.rani.tofy.kid.ui.social.choresTotalCount
+import com.rani.tofy.kid.ui.social.pendingChoresCount
 import com.rani.tofy.ui.child.Topic
 import com.rani.tofy.ui.child.hasPlayPIN
 import kotlinx.coroutines.Dispatchers
@@ -147,6 +172,27 @@ private sealed class Cover {
     data object Level : Cover()
 }
 
+/** The full-screen kid destinations WorldMapView presents as fullScreenCovers. */
+private sealed class KidScreen {
+    data object Shop : KidScreen()
+    data object Characters : KidScreen()
+    data object Friends : KidScreen()
+    data class LiveQuiz(val gameID: String?) : KidScreen()
+    data object Chores : KidScreen()
+    data object Games : KidScreen()
+    data object Wheel : KidScreen()
+    data object Chest : KidScreen()
+    /** The guard's manage screen, from the parent-gated ⚙️. */
+    data object AppLock : KidScreen()
+}
+
+/**
+ * WorldEntryView: a tapped world decides ONCE whether it opens to the game
+ * chooser or straight to its questions; [questions] = the chooser's 📝 card
+ * opened the runner on top of it (closing it returns to the chooser).
+ */
+private data class WorldEntry(val world: KidWorld, val straight: Boolean, val questions: Boolean = false)
+
 @Composable
 private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Unit) {
     remember(cid, kidMode) { KidSession.bind(cid, kidMode); 0 }
@@ -172,6 +218,11 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     var transferTimedOut by remember { mutableStateOf(false) }
     var playable by remember { mutableStateOf<Set<Topic>>(emptySet()) }
     var greeted by remember { mutableStateOf(false) }
+    var screen by remember { mutableStateOf<KidScreen?>(null) }
+    var entry by remember { mutableStateOf<WorldEntry?>(null) }
+    val ctx = LocalContext.current
+    // 🛡 ChildLockSetup.markPending → step ④ on a child device, before its home (iOS ContentView cover).
+    var lockSetupDone by remember { mutableStateOf(kidMode || EnforcementStore.setupDone(ctx)) }
 
     fun say(line: String) {
         buddyJob?.cancel()
@@ -184,7 +235,11 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     DisposableEffect(owner) {
         val obs = LifecycleEventObserver { _, e ->
             when (e) {
-                Lifecycle.Event.ON_START -> { KidSession.onForeground(); QuestionSource.refreshCloud() }
+                Lifecycle.Event.ON_START -> {
+                    KidSession.onForeground(); QuestionSource.refreshCloud()
+                    // shieldAuthorized / newAppsLocked for the heartbeat (+ the parent's "lock is off" push).
+                    EnforcementStatus.refresh(ctx)
+                }
                 Lifecycle.Event.ON_STOP -> {
                     KidSession.onBackground()
                     // The device is in the kid's hands: leaving the app closes the parent's corner.
@@ -249,16 +304,44 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
         }
     }
 
+    if (!lockSetupDone) {
+        ChildLockSetupScreen(onDone = { lockSetupDone = true; EnforcementStatus.refresh(ctx) }, fromOnboarding = true)
+        return
+    }
+
     val st = state
     val engine = KidSession.engine()
     if (st == null || engine == null) { Box(Modifier.fillMaxSize()); return }
 
     // Kid Mode: system back never leaves — it asks for the parent code.
-    BackHandler(enabled = kidMode && cover == null && playing == null) { cover = Cover.KidExit }
+    BackHandler(enabled = kidMode && cover == null && playing == null && entry == null && screen == null) { cover = Cover.KidExit }
 
     // ── routing ────────────────────────────────────────────────────────────
     playing?.let { mode ->
         QuestionRunnerScreen(mode) { playing = null }
+        return
+    }
+    entry?.let { e ->
+        key(e) {
+            val mode = e.world.topic?.let { ContentMode.World(it) } ?: ContentMode.BonusArena
+            if (e.straight || e.questions) QuestionRunnerScreen(mode) { entry = if (e.straight) null else e.copy(questions = false) }
+            else WorldGameChooser(e.world.topic?.raw ?: e.world.id, onPlayQuestions = { entry = e.copy(questions = true) }, onExit = { entry = null })
+        }
+        return
+    }
+    screen?.let { s ->
+        val close = { screen = null }
+        when (s) {
+            KidScreen.Shop -> ShopScreen(close)
+            KidScreen.Characters -> CharacterCollectionScreen(close)
+            KidScreen.Friends -> FriendsScreen(close)
+            is KidScreen.LiveQuiz -> LiveQuizScreen(s.gameID, close)
+            KidScreen.Chores -> KidChoresScreen(close)
+            KidScreen.Games -> GamesMenuScreen(close)
+            KidScreen.Wheel -> WheelScreen(close)
+            KidScreen.Chest -> DailyChestScreen(close)
+            KidScreen.AppLock -> ChildLockSetupScreen(onDone = { close(); EnforcementStatus.refresh(ctx) }, fromOnboarding = false)
+        }
         return
     }
     val unlocked = nowMs > 0 && engine.isUnlocked   // nowMs: re-read the window every second
@@ -316,6 +399,8 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
         }
         else -> {
             val premium = household?.isPremium == true
+            // The games' daily warm-up: one reward batch (10) for readers, 5 for גן kids.
+            val gamesTarget = if ((child?.effectiveGrade ?: 1) <= 0) 5 else 10
             val tiles = remember(child?.raw, premium, playable, st.snapshot.worldProgress, conv, nowMs / 3_600_000) {
                 homeTiles(child, cid, child?.effectiveGrade ?: 1, premium, playable, st.snapshot.worldProgress, conv)
             }
@@ -339,8 +424,8 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                         HomeTile.TofyTime -> playing = ContentMode.SmartFeed
                         is HomeTile.WorldTile -> when {
                             !t.open -> cover = Cover.Ask(t.world)   // the kid screen never sells — ask a parent
-                            t.world.isArena -> playing = ContentMode.BonusArena
-                            else -> t.world.topic?.let { playing = ContentMode.World(it) }
+                            // WorldEntryView: the chooser, or straight to questions (decided once, on tap).
+                            else -> entry = WorldEntry(t.world, worldOpensStraightToQuestions(t.world.topic?.raw ?: t.world.id))
                         }
                     }
                 },
@@ -356,7 +441,53 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                         if (r is OpenResult.Opened) say(tr("נָעוּל שָׁם! ✅ אֶפְשָׁר לְשַׂחֵק כָּאן 🎉")) else transferTimedOut = true
                     }
                 },
+                extras = HomeExtras(
+                    friendsBadge = LiveGameRepository.invites.isNotEmpty(),
+                    chestReady = dailyChestReady(),
+                    choresPending = pendingChoresCount(), choresDoneToday = choresDoneTodayCount(), choresTotal = choresTotalCount(),
+                    correctToday = st.snapshot.correctToday, gamesGateTarget = gamesTarget,
+                ),
+                onShop = { screen = KidScreen.Shop },
+                onFriends = { screen = KidScreen.Friends },
+                onAvatar = { screen = KidScreen.Characters },
+                // Everything on the home but טופי טיים, the shop and friends is Tofy+ (requirePremium → ask a parent).
+                onChores = { if (premium) screen = KidScreen.Chores else cover = Cover.Ask(null) },
+                onGames = {
+                    when {
+                        !premium -> cover = Cover.Ask(null)
+                        st.snapshot.correctToday >= gamesTarget -> screen = KidScreen.Games
+                        else -> say(tr("עוֹד %lld תְּשׁוּבוֹת נְכוֹנוֹת וְהַמִּשְׂחָקִים נִפְתָּחִים! 🎮", gamesTarget - st.snapshot.correctToday))
+                    }
+                },
+                onChest = { screen = KidScreen.Chest },
+                inviteBanner = { LiveInviteBanner { id -> screen = KidScreen.LiveQuiz(id) } },
             )
+
+            // WorldMapView.onAppear (and the return from a round / world, which iOS
+            // watches separately): the comeback spin, then the wheel if a spin waits,
+            // and one line the first time today the games open.
+            LaunchedEffect(Unit) {
+                grantComebackWheelIfReturning()
+                if (st.snapshot.correctToday >= gamesTarget) {
+                    val p = ctx.getSharedPreferences("tofy", android.content.Context.MODE_PRIVATE)
+                    val today = java.time.LocalDate.now().toString()
+                    if (p.getString("gamesUnlockCelebratedDate", null) != today) {
+                        p.edit().putString("gamesUnlockCelebratedDate", today).apply()
+                        launch { delay(1200); say(if (isGirl) tr("פָּתַחְתְּ אֶת הַמִּשְׂחָקִים לְהַיּוֹם! 🎮✨") else tr("פָּתַחְתָּ אֶת הַמִּשְׂחָקִים לְהַיּוֹם! 🎮✨")) }
+                    }
+                }
+                delay(600)
+                // maybeAutoPresentWheel: entering the wheel spends the spin.
+                if (wheelSpinsAvailable() > 0 && cover == null && screen == null && playing == null && entry == null) screen = KidScreen.Wheel
+            }
+            // A push tap / game link → join it; a friend link → the board (it adds the code).
+            val pendingGame = KidDeepLinks.pendingGameID
+            val pendingFriend = FriendsRepository.pendingFriendCode
+            LaunchedEffect(pendingGame, pendingFriend, cover == null) {
+                if (cover != null) return@LaunchedEffect
+                if (pendingGame != null) { KidDeepLinks.pendingGameID = null; screen = KidScreen.LiveQuiz(pendingGame) }
+                else if (pendingFriend != null) screen = KidScreen.Friends
+            }
             when (val c = cover) {
                 Cover.Settings -> ParentGateThen(household?.parentPinHash, householdLoaded, onClose = { cover = null }) {
                     KidDeviceControls(
@@ -370,6 +501,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                             KidSession.onDeviceRemoved(cid)
                         },
                         onClose = { cover = null },
+                        onAppLock = if (kidMode) null else ({ cover = null; screen = KidScreen.AppLock }),
                     )
                 }
                 is Cover.Ask -> AskParent(child, cid, child?.householdID, c.world) { cover = null }

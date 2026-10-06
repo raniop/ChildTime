@@ -22,6 +22,10 @@ import com.rani.tofy.kid.core.AnswerContext
 import com.rani.tofy.kid.core.ChestKind
 import com.rani.tofy.kid.core.KidSession
 import com.rani.tofy.kid.core.RewardEngine
+import com.rani.tofy.kid.ui.games.SurprisePlan
+import com.rani.tofy.kid.ui.games.SurpriseRound
+import com.rani.tofy.kid.ui.shop.CharacterCatalog
+import com.rani.tofy.kid.ui.shop.CharacterTier
 import com.rani.tofy.ui.child.Topic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -84,6 +88,12 @@ class RunnerController(
     private val reAskQueue = mutableListOf<Pair<Question, Int>>()
     private val reAskSpacing = 3
 
+    // ── ⚡ surprise round (QuestionRunnerView.surprisePlan / surprisesThisSession / nextSurpriseAt) ──
+    /** Non-null = the surprise round is on screen (the runner shows SurpriseRoundOverlay, then [surpriseDone]). */
+    var surprisePlan by mutableStateOf<SurprisePlan?>(null); private set
+    private var surprisesThisSession = 0
+    private var nextSurpriseAt = SurpriseRound.nextGap()
+
     // ── effects ─────────────────────────────────────────────────────────────
     var burstTrigger by mutableIntStateOf(0); private set
     var confettiTrigger by mutableIntStateOf(0); private set
@@ -114,7 +124,12 @@ class RunnerController(
     val totalQuestions: Int get() = minOf(KidSession.engine()?.settings?.questionsPerSession ?: 15, 30)
     private val secondsPerCorrect: Int get() = KidSession.engine()?.settings?.secondsPerCorrect ?: 24
     val world: PlayWorld get() = PlayWorlds.forMode(mode, currentTopic)
-    val helperLevel: HelpLevel get() = CharacterHelp.level(child?.character3DID)
+    /** CharacterTier.help from the shop's catalog (one price table for the shop and the runner). */
+    val helperLevel: HelpLevel get() = when (CharacterCatalog.help(child?.character3DID)) {
+        CharacterTier.Help.ENCOURAGE -> HelpLevel.ENCOURAGE
+        CharacterTier.Help.HINT -> HelpLevel.HINT
+        CharacterTier.Help.EXPLAIN -> HelpLevel.EXPLAIN
+    }
     val hintCost: Int get() = if (helperLevel == HelpLevel.EXPLAIN) 0 else (KidSession.engine()?.hintCostSeconds ?: 0)
 
     // ── setup ───────────────────────────────────────────────────────────────
@@ -141,6 +156,8 @@ class RunnerController(
         questionIndex = 0; correctInSession = 0; consecutiveWrong = 0; roundSeconds = 0
         capMessageShown = false
         reAskQueue.clear()
+        surprisesThisSession = 0
+        nextSurpriseAt = SurpriseRound.nextGap()
         scope.launch {
             delay(300)
             companion.cheer(if (isFeed) tr("טוֹפִי טַיים — קָדִימָה! 🧠") else tr("מוּכָן? קָדִימָה!"))
@@ -164,8 +181,22 @@ class RunnerController(
             scope.launch { delay(400); finishRound() }
             return
         }
-        // TODO(android): ⚡ surprise mini-game rounds (SurpriseRound, every 12–15
-        //  questions, twice a session at most) — not ported yet.
+        // ⚡ A surprise round is due — show it; the next question follows when it's
+        // over (surpriseDone). `current` is still the PREVIOUS question here, like iOS.
+        // The session's reading queue is private: a passage question in progress is
+        // the signal (its follow-ups are queued exactly while one is on screen).
+        val passage = current?.passage != null
+        if (SurpriseRound.shouldTrigger(questionIndex, nextSurpriseAt, surprisesThisSession, isArena, isPreReader,
+                readingQueueEmpty = !passage, currentHasPassage = passage, isBonusQuestion = isBonusQuestion)) {
+            nextSurpriseAt = questionIndex + SurpriseRound.nextGap()
+            val plan = runCatching { SurpriseRound.plan(child?.effectiveGrade ?: 1, (mode as? ContentMode.World)?.topic) }.getOrNull()
+            if (plan != null) {
+                surprisesThisSession++
+                KidSpeech.stop()
+                surprisePlan = plan
+                return
+            }
+        }
 
         // A cooldown keeps ≥3 normal questions between bonuses; none in the arena.
         val cooldownOK = !isArena && (questionIndex - lastBonusIndex) >= 3
@@ -195,6 +226,13 @@ class RunnerController(
             }
             else -> { isInPortal = false; createQuestion(superQ) }
         }
+    }
+
+    /** The surprise round ended (played or skipped) — on to the next question. */
+    fun surpriseDone() {
+        if (surprisePlan == null) return
+        surprisePlan = null
+        if (phase == Phase.PLAYING) nextQuestion()
     }
 
     private fun createQuestion(isSuper: Boolean, bonus: Boolean = false) {

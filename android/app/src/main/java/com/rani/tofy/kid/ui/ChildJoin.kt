@@ -168,6 +168,11 @@ private fun ChildJoin(justDisconnected: Boolean, canGoBack: Boolean, onJoined: (
             working = false
         }
     }
+    // An opened https://tofyapp.com/join?c=&k= link (KidDeepLinks) joins like a scan.
+    val joinLink = com.rani.tofy.kid.ui.home.KidDeepLinks.pendingJoinLink
+    LaunchedEffect(joinLink) {
+        if (joinLink != null) { com.rani.tofy.kid.ui.home.KidDeepLinks.pendingJoinLink = null; join(joinLink) }
+    }
 
     GlassBackdrop {
         Column(

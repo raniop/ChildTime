@@ -27,7 +27,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // A tapped push / opened link (iOS onOpenURL + PushManager tap) — once, not on recreation.
+        if (savedInstanceState == null) com.rani.tofy.kid.ui.home.KidDeepLinks.handle(intent)
         setContent { TofyTheme { Root() } }
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        com.rani.tofy.kid.ui.home.KidDeepLinks.handle(intent)
     }
 }
 

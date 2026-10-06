@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -200,9 +201,12 @@ internal fun AskParent(child: Child?, childID: String, householdID: String?, wor
 internal fun KidDeviceControls(
     child: Child?, kidMode: Boolean, windowOpen: Boolean, secondsLeft: Int,
     onLockNow: () -> Unit, onExitKidMode: () -> Unit, onDisconnect: () -> Unit, onClose: () -> Unit,
+    /** 🛡 The app lock's manage screen (child devices only — Kid Mode pins the screen instead). */
+    onAppLock: (() -> Unit)? = null,
 ) {
     BackHandler(onBack = onClose)
     var confirm by remember { mutableStateOf(false) }
+    val rtl = androidx.compose.ui.platform.LocalLayoutDirection.current == androidx.compose.ui.unit.LayoutDirection.Rtl
     GlassBackdrop {
         Column(
             Modifier.fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 24.dp),
@@ -238,6 +242,18 @@ internal fun KidDeviceControls(
                         .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(50)).clickable(onClick = onLockNow)
                         .padding(horizontal = 14.dp, vertical = 8.dp),
                         color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+                }
+
+                // iOS's "מָה פָּתוּחַ וּמָה נָעוּל" section → Android's guard manage screen.
+                if (!kidMode && onAppLock != null) Row(
+                    Modifier.fillMaxWidth().glassPane(18.dp, 0.18f).clickable(onClick = onAppLock).padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text("🔒", fontSize = 22.sp)
+                    Text(tr("מָה פָּתוּחַ וּמָה נָעוּל"), Modifier.weight(1f), color = Color.White, fontFamily = Rounded,
+                        fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                    Text("›", color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 22.sp,
+                        modifier = Modifier.graphicsLayer { scaleX = if (rtl) -1f else 1f })
                 }
 
                 if (!kidMode) Text(
