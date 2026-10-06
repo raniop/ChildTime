@@ -394,8 +394,10 @@ final class JoinCoordinator: ObservableObject {
     }
 
     func dismiss() {
-        active = false; rawPayload = ""
-        invite = nil; resolved = false; resolving = false
+        // Only close. Clearing `invite` here re-rendered the cover — while it was
+        // still sliding away — as "הקוד לא תקין" (no invite = invalid), the flash
+        // Rani saw on every successful child join. `present` resets it all anyway.
+        active = false
     }
 
     /// DEMO only (screenshots): seed a resolved invite without hitting Firestore.

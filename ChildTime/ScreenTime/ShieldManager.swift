@@ -25,8 +25,17 @@ final class ShieldManager: ObservableObject {
     @Published var authorizationError: String?
     @Published var authStatusText: String = "unknown"
 
+    private var statusWatch: AnyCancellable?
+
     private init() {
         refreshStatus()
+        // The status read once at launch can still be `.notDetermined` on a device
+        // where Screen Time IS approved (it settles a moment later). Read once, the
+        // kid's home kept "בקשו מאבא או מאמא לסיים את ההגדרה" up on Rani's own kids'
+        // devices. Follow Apple's own published status instead.
+        statusWatch = authCenter.$authorizationStatus
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshStatus() }
     }
 
     func refreshStatus() {
