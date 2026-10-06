@@ -42,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -222,9 +223,19 @@ internal fun KidHome(
             }
 
             // The floating minutes panel over a soft scrim — tiles fade out under it.
+            // The scrim spans the WHOLE screen width, like the iPad: drawn wider than
+            // the centred 900dp column it lives in, so on a tablet it isn't a box
+            // with edges (Rani: "הוא לא עד הסוף מגיע כמו באייפד").
             Column(
                 Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-                    .background(Brush.verticalGradient(0f to Color.Transparent, 0.35f to Ink.deep.copy(alpha = 0.72f), 1f to Ink.deep.copy(alpha = 0.9f)))
+                    .drawBehind {
+                        val extra = 4000f
+                        drawRect(
+                            Brush.verticalGradient(0f to Color.Transparent, 0.35f to Ink.deep.copy(alpha = 0.72f), 1f to Ink.deep.copy(alpha = 0.9f),
+                                startY = 0f, endY = size.height),
+                            topLeft = Offset(-extra, 0f), size = Size(size.width + 2 * extra, size.height + extra),
+                        )
+                    }
                     .navigationBarsPadding()
                     .padding(start = 20.dp, end = 20.dp, top = 40.dp, bottom = 14.dp)
                     .onSizeChanged { panelPx = it.height }
