@@ -220,7 +220,9 @@ fun VaultGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, onCl
                         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(7.dp)) {
                         FitText(if (cracked) tr("הַכַּסֶּפֶת נִפְתְּחָה! 🔓") else tr("🔐 הַקּוֹד הַסּוֹדִי — הַקִּישׁוּ אוֹתוֹ כָּאן"), (if (m.compact) 12.5f else 15f).sp,
                             color = if (cracked) KidColor.successMint else KidColor.starGold, weight = FontWeight.ExtraBold, maxLines = 1, minScale = 0.65f)
-                        Ltr {
+                        // The code reads in the language's direction, like the
+                        // number sequences: in Hebrew the FIRST digit is on the right.
+                        Ltr(!GameEnv.lang.rtl) {
                             Row(Modifier.graphicsLayer { translationX = dx * density }, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                                 for (i in 0 until maxOf(digits, 1)) {
                                     val d = if (cracked) round.code.getOrNull(i) else input.getOrNull(i)
@@ -237,7 +239,7 @@ fun VaultGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, onCl
                             Ltr {
                                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                                     attempts.forEach { a ->
-                                        Text(a.joinToString(""), color = Color.White.copy(alpha = 0.45f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp,
+                                        Text((if (GameEnv.lang.rtl) a.reversed() else a).joinToString(""), color = Color.White.copy(alpha = 0.45f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp,
                                             modifier = Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.08f)).padding(horizontal = 7.dp, vertical = 2.dp))
                                     }
                                 }

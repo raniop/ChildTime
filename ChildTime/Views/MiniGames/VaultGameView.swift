@@ -230,7 +230,9 @@ struct VaultGameView: View {
                                       tint: AppColor.starGold, radius: 16)
                 }
             }
-            .environment(\.layoutDirection, .leftToRight)
+            // The code reads in the language's direction, like the number
+            // sequences: in Hebrew the FIRST digit is on the right.
+            .environment(\.layoutDirection, codeRTL ? .rightToLeft : .leftToRight)
             .modifier(MiniGameShake(animatableData: shake))
             if !attempts.isEmpty { triedStrip }
         }
@@ -238,6 +240,8 @@ struct VaultGameView: View {
         .frame(maxWidth: .infinity)
         .glassPane(radius: 22)
     }
+
+    private var codeRTL: Bool { LanguageStore.shared.current.isRightToLeft }
 
     private var triedStrip: some View {
         HStack(spacing: 6) {
@@ -247,7 +251,7 @@ struct VaultGameView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 5) {
                     ForEach(Array(attempts.enumerated()), id: \.offset) { _, a in
-                        Text(a.map(String.init).joined())
+                        Text((codeRTL ? a.reversed() : a).map(String.init).joined())
                             .font(.system(size: 12.5, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white.opacity(0.45))
                             .padding(.horizontal, 7).padding(.vertical, 2)
