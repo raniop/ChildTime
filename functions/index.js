@@ -6117,3 +6117,114 @@ exports.adminPublishAppUpdate = onCall({ timeoutSeconds: 30, memory: "256MiB" },
   const after = await ref.get();
   return { ok: true, config: appUpdateView(after.data()) };
 });
+
+// ============================================================================
+// 📍 Location, places and 🔔 beep (2026-10-07).
+//
+// The child's device writes children/{id}/location/current (its last fix) and
+// children/{id}/placeEvents/* (arrive/leave a parent-set place). A parent writes
+// children/{id}/location/request (refresh) and children/{id}/location/beep.
+// Nothing here keeps a history: a place event is pushed to the parents and
+// deleted, and only the LAST fix is ever stored (Rani: no route of the day).
+// Gated on the household by the existing children/{id}/{sub=**} rule.
+// ============================================================================
+
+function strip(s) { return String(s || "").normalize("NFD").replace(/[֑-ׇ]/g, "").trim(); }
+
+// "Noni just arrived" — the place is the title, so no Hebrew preposition has
+// to be glued onto a name the parent typed ("ל" + "הבית" is not Hebrew).
+function placeMessage(kind, name, girl, place, lang) {
+  const arrive = kind === "arrive";
+  const title = `${place.emoji || "📍"} ${place.name || ""}`.trim();
+  if (lang === "en") return { title, body: `${name} just ${arrive ? "arrived" : "left"}` };
+  if (lang === "ru") return { title, body: `${name} ${arrive ? (girl ? "только что пришла" : "только что пришёл") : (girl ? "только что ушла" : "только что ушёл")}` };
+  if (lang === "ar") return { title, body: arrive ? (girl ? `وصلت ${name} الآن` : `وصل ${name} الآن`) : (girl ? `غادرت ${name} الآن` : `غادر ${name} الآن`) };
+  return { title, body: `${name} ${arrive ? (girl ? "הגיעה עכשיו" : "הגיע עכשיו") : (girl ? "יצאה עכשיו" : "יצא עכשיו")}` };
+}
+
+exports.onPlaceEvent = onDocumentCreated("children/{childID}/placeEvents/{eventID}", async (event) => {
+  const e = event.data ? event.data.data() : null;
+  const ref = event.data ? event.data.ref : null;
+  try {
+    if (!e || (e.kind !== "arrive" && e.kind !== "leave")) return;
+    const child = await db.collection("children").doc(event.params.childID).get();
+    if (!child.exists) return;
+    const c = child.data();
+    if (!(c.locationSharing && c.locationSharing.enabled === true)) return;
+    const hh = await db.collection("households").doc(String(c.householdID || "")).get();
+    if (!hh.exists) return;
+    const place = (hh.data().places || []).find((p) => p && p.id === e.placeID);
+    if (!place) return;
+    const pref = (place.alerts || {})[event.params.childID] || {};
+    if (pref[e.kind] !== true) return;
+    // One push per (child, place, kind, minute): two devices of the same child
+    // crossing the same fence must not ping the parents twice.
+    const minute = Math.floor(Number(e.clientAt || Date.now() / 1000) / 60);
+    if (!(await claimOnce(`place_${event.params.childID}_${e.placeID}_${e.kind}_${minute}`))) return;
+    const name = strip(c.name) || "";
+    const girl = c.gender === "girl";
+    await notifyParentsAckApplied(c.householdID, (lang) => placeMessage(e.kind, name, girl, place, lang));
+  } catch (err) {
+    console.error("[place] failed", err && err.message);
+  } finally {
+    if (ref) await ref.delete().catch(() => {});
+  }
+});
+
+// The parent asked for a fresh fix (map opened / "רענון") or a beep.
+exports.onLocationCommand = onDocumentWritten("children/{childID}/location/{docID}", async (event) => {
+  const docID = event.params.docID;
+  if (docID !== "request" && docID !== "beep") return;
+  const after = event.data.after.exists ? event.data.after.data() : null;
+  if (!after) return;
+  const before = event.data.before.exists ? event.data.before.data() : null;
+  const stamp = (x) => (x && x.at && typeof x.at.toMillis === "function" ? x.at.toMillis() : 0);
+  if (stamp(after) === stamp(before) && (after.stop === (before && before.stop))) return;
+  const child = await db.collection("children").doc(event.params.childID).get();
+  if (!child.exists) return;
+  const c = child.data();
+  let tokens = await tokensForChildOwnDevices(event.params.childID, c.householdID);
+  // A beep for ONE of the child's devices (the iPad, not the phone in class).
+  const target = docID === "beep" ? String(after.deviceID || "") : "";
+  if (target) {
+    const rows = await db.collection("childDevices").where("childID", "==", event.params.childID).get();
+    const mine = rows.docs.map((d) => d.data()).filter((d) => d.deviceID === target && d.fcmToken).map((d) => d.fcmToken);
+    if (mine.length) tokens = [...new Set(mine)];
+  }
+  if (!tokens.length) return;
+  try {
+    if (docID === "request") {
+      if (!(c.locationSharing && c.locationSharing.enabled === true)) return;
+      const res = await admin.messaging().sendEachForMulticast({
+        tokens,
+        data: { type: "location-request", childID: event.params.childID },
+        android: { priority: "high" },
+        apns: { headers: { "apns-priority": "5", "apns-push-type": "background" },
+                payload: { aps: { "content-available": 1 } } },
+      });
+      console.log("[location-request] sent", res.successCount, "/", tokens.length);
+      return;
+    }
+    // 🔔 Beep: a loud sound on the child's phone so it can be found. iOS plays
+    // the bundled 30-second sound (unless the phone is on silent); Android
+    // plays its own alarm, silent mode or not.
+    const stop = after.stop === true;
+    const res = await sendEachLocalized(tokens, (lang) => {
+      const alert = lang === "en" ? { title: "🔔 Tofy", body: "Your parents are looking for this phone" }
+        : lang === "ru" ? { title: "🔔 Tofy", body: "Родители ищут этот телефон" }
+        : lang === "ar" ? { title: "🔔 Tofy", body: "الأهل يبحثون عن هذا الهاتف" }
+        : { title: "🔔 טופי", body: "ההורים מחפשים את הטלפון" };
+      return {
+        data: { type: stop ? "beep-stop" : "beep", childID: event.params.childID },
+        android: { priority: "high" },
+        apns: stop
+          ? { headers: { "apns-priority": "5", "apns-push-type": "background" }, payload: { aps: { "content-available": 1 } } }
+          : { headers: { "apns-priority": "10", "apns-push-type": "alert" },
+              payload: { aps: { alert, sound: "tofy_beep.caf", "content-available": 1 } } },
+      };
+    });
+    console.log("[beep]", stop ? "stop" : "start", "sent", res.successCount, "/", tokens.length);
+  } catch (err) {
+    console.error("[location-command] failed", err && err.message);
+  }
+});

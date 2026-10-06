@@ -42,6 +42,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         MainActor.assumeIsolated {
             UNUserNotificationCenter.current().delegate = PushManager.shared
             PushManager.shared.configureCategories()
+            // 📍 iOS relaunches the app in the background for a significant
+            // move or a place crossing — the location delegate must exist now.
+            LocationSharing.shared.start()
         }
         // Cold launch via the "מצב ילד" Quick Action.
         if let sc = launchOptions?[.shortcutItem] as? UIApplicationShortcutItem,
@@ -70,6 +73,24 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
                      didReceiveRemoteNotification userInfo: [AnyHashable: Any],
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         let type = userInfo["type"] as? String ?? ""
+        // 📍 A parent opened the map / tapped "רענון": one fresh fix, now.
+        if type == "location-request" {
+            Task { @MainActor in
+                await LocationSharing.shared.freshFix()
+                completionHandler(.newData)
+            }
+            return
+        }
+        // 🔔 Beep: the alert's own sound plays in the background; in the
+        // foreground we loop it loudly and show "מָצָאתִי!".
+        if type == "beep" || type == "beep-stop" {
+            Task { @MainActor in
+                if type == "beep-stop" { LocationSharing.shared.stopBeep(report: false) }
+                else if UIApplication.shared.applicationState == .active { LocationSharing.shared.startBeep() }
+                completionHandler(.noData)
+            }
+            return
+        }
         // "wake" = silent command wake. "remote-lock" = the visible lock push
         // (its content-available also lands here when the app is backgrounded);
         // the NSE already applied the shield — this drain lets the Firestore
@@ -588,6 +609,20 @@ struct ChildTimeApp: App {
         case "childdifficulty": if let id = ProfileStore.shared.activeID { ChildDifficultyView(profileID: id) }
         case "childscreentime": if let id = ProfileStore.shared.activeID { ChildScreenTimeView(profileID: id) }
         case "childworlds": if let id = ProfileStore.shared.activeID { ChildWorldsView(profileID: id) }
+        // 📍 DEMO_SCREEN=location | places | placeeditor | locconsent | kidbeep | kidlocperm
+        case "location":
+            ParentLocationView().onAppear { LocationSharing.shared.seedDemo(childIDs: ProfileStore.shared.profiles.map { $0.id.uuidString }) }
+        case "places":
+            PlacesListView().onAppear { LocationSharing.shared.seedDemo(childIDs: ProfileStore.shared.profiles.map { $0.id.uuidString }) }
+        case "placeeditor":
+            PlaceEditorView(place: {
+                LocationSharing.shared.seedDemo(childIDs: ProfileStore.shared.profiles.map { $0.id.uuidString })
+                return LocationSharing.shared.familyPlaces[0]
+            }())
+        case "locconsent":
+            if let p = ProfileStore.shared.active { LocationConsentSheet(profile: p) }
+        case "kidbeep": KidBeepOverlay()
+        case "kidlocperm": KidLocationPermissionSheet()
         // 🏫🌙 DEMO_SCREEN=childsettings | quieteditor [DEMO_QUIET=school|bedtime]
         case "childsettings":
             if let id = ProfileStore.shared.activeID {

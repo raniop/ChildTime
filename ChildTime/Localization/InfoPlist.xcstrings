@@ -71,6 +71,64 @@
         }
       }
     },
+    "NSLocationAlwaysAndWhenInUseUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כך ההורים שלך יודעים שהגעת בשלום — לבית הספר, הביתה או לחוג — גם כשטופי סגור. רק ההורים במשפחה רואים את המיקום."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This lets your parents know you got there safely — to school, home or a club — even when Tofy is closed. Only the parents in your family see the location."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Так родители узнают, что ты благополучно добрался — до школы, домой или на кружок, — даже когда Tofy закрыт. Местоположение видят только родители в вашей семье."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هكذا يعرف أهلك أنك وصلت بأمان — إلى المدرسة أو البيت أو النادي — حتى عندما يكون Tofy مغلقًا. يرى الموقعَ الأهلُ في عائلتك فقط."
+          }
+        }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההורים שלך רואים בטופי איפה הטלפון, כדי לדעת שהגעת בשלום."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your parents see in Tofy where this phone is, so they know you got there safely."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Родители видят в Tofy, где этот телефон, чтобы знать, что ты добрался благополучно."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يرى أهلك في Tofy مكان هذا الهاتف، ليعرفوا أنك وصلت بأمان."
+          }
+        }
+      }
+    },
     "מצב ילד" : {
       "extractionState" : "manual",
       "localizations" : {

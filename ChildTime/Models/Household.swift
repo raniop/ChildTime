@@ -6,6 +6,9 @@ import Foundation
 struct Household: Codable, Identifiable, Equatable {
     let id: String
     var parentUIDs: [String]
+    /// 📍 The family's fixed places (home, school, a club) — arrive/leave
+    /// alerts per child. Written by a parent with updateData(["places": …]).
+    var places: [FamilyPlace]?
     var childIDs: [String]
     var createdBy: String
     var createdAt: Date

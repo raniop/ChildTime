@@ -383,6 +383,15 @@ extension PushManager: UNUserNotificationCenterDelegate {
         let info = notification.request.content.userInfo
         logArrival(notification.request)   // 🔔 keep it in the activity centre
         let supportHH = info["type"] as? String == "support-chat" ? info["householdID"] as? String : nil
+        // 🔔 A beep while Tofy is open: ring loudly in-app (through the silent
+        // switch) with the "מָצָאתִי!" screen, instead of a banner.
+        if info["type"] as? String == "beep" {
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated { LocationSharing.shared.startBeep() }
+                completionHandler([])
+            }
+            return
+        }
         DispatchQueue.main.async {
             // 💬 The chat it is about is already on screen — the bubble is the news.
             if let supportHH, MainActor.assumeIsolated({ SupportChatStore.shared.visibleHouseholdID == supportHH }) {
@@ -409,6 +418,9 @@ extension PushManager: UNUserNotificationCenterDelegate {
                let gameID = info["gameID"] as? String {
                 LiveGameManager.shared.pendingGameID = gameID
             }
+            // 🔔 The beep notification was tapped — the "מָצָאתִי!" screen, so
+            // the parents hear the phone was found.
+            if info["type"] as? String == "beep" { LocationSharing.shared.startBeep() }
             // 📣 A campaign push: count the open, remember where to land.
             if info["type"] as? String == "campaign" { CampaignTracker.shared.handleOpen(info) }
             // 🎁 A gift push (start / day N): the next paywall within the hour is

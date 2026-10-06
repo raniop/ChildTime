@@ -1414,6 +1414,28 @@
         }
       }
     },
+    "%@ %@ · %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ · %3$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ · %3$@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ · %3$@"
+          }
+        }
+      }
+    },
     "%@ %@ · הַטּוֹב מִ-%lld סִבּוּבִים" : {
       "localizations" : {
         "ar" : {
@@ -1466,6 +1488,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%@ %@ · מאז %@ · %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ · منذ %3$@ · %4$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ · since %3$@ · %4$@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ · с %3$@ · %4$@"
           }
         }
       }
@@ -8061,6 +8105,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld из %lld играли сегодня"
+          }
+        }
+      }
+    },
+    "%lld מ׳" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld م"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld m"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld м"
           }
         }
       }
@@ -14711,6 +14777,28 @@
         }
       }
     },
+    "אַבָּא אוֹ אִמָּא בִּקְּשׁוּ לְצַפְצֵף כְּדֵי לִמְצֹא אוֹתוֹ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "طلب بابا أو ماما أن يرنّ حتى يجداه"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mom or Dad asked it to beep so they can find it"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мама или папа включили звук, чтобы найти его"
+          }
+        }
+      }
+    },
     "אַבָּא אוֹ אִמָּא יְכוֹלִים לִפְתּוֹחַ אוֹתָן מִטּוֹפִי, עִם קוֹד הַהוֹרֶה" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -14774,6 +14862,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Папа или мама уберут один неверный ответ — и ты отвечаешь 😉"
+          }
+        }
+      }
+    },
+    "אַבָּא וְאִמָּא יִרְאוּ אֵיפֹה אַתְּ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سيرى بابا وماما أين أنتِ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mom and Dad will see where you are"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мама и папа будут видеть, где ты"
+          }
+        }
+      }
+    },
+    "אַבָּא וְאִמָּא יִרְאוּ אֵיפֹה אַתָּה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سيرى بابا وماما أين أنت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mom and Dad will see where you are"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мама и папа будут видеть, где ты"
           }
         }
       }
@@ -18126,6 +18258,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Где ребёнок силён, а где нужна помощь"
+          }
+        }
+      }
+    },
+    "איפה הילדים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أين الأطفال"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where are the kids"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Где дети"
+          }
+        }
+      }
+    },
+    "אישור והפעלת מיקום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تأكيد وتشغيل الموقع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm and turn on location"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подтвердить и включить геолокацию"
           }
         }
       }
@@ -23905,6 +24081,50 @@
         }
       }
     },
+    "בטלפון של %@ יופיע אישור מיקום, והוא ידע שהמיקום שלו גלוי לכם." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سيظهر على هاتف %@ طلب إذن الموقع، وسيعرف أنكم ترون موقعه."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s phone will ask for location permission, and he'll know you can see where he is."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На телефоне %@ появится запрос на геолокацию, и он будет знать, что вы видите, где он."
+          }
+        }
+      }
+    },
+    "בטלפון של %@ יופיע אישור מיקום, והיא תדע שהמיקום שלה גלוי לכם." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سيظهر على هاتف %@ طلب إذن الموقع، وستعرف أنكم ترون موقعها."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s phone will ask for location permission, and she'll know you can see where she is."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На телефоне %@ появится запрос на геолокацию, и она будет знать, что вы видите, где она."
+          }
+        }
+      }
+    },
     "בטלפון של %@: מורידים את טופי מה-App Store" : {
       "localizations" : {
         "ar" : {
@@ -25891,6 +26111,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Детёныши, звуки и что едят животные"
+          }
+        }
+      }
+    },
+    "גודל האזור" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حجم المنطقة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Area size"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Размер зоны"
           }
         }
       }
@@ -38612,6 +38854,28 @@
         }
       }
     },
+    "הזיזו את המפה כך שהסיכה על המקום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حرّكوا الخريطة حتى يكون الدبوس على المكان"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move the map so the pin is on the place"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сдвиньте карту, чтобы метка была на месте"
+          }
+        }
+      }
+    },
     "הזמן שהילד הרוויח מוצג בדיוק כמו זמן מתנה — בלי עיגול שמעלים שניות" : {
       "localizations" : {
         "ar" : {
@@ -39571,6 +39835,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Задания %@"
+          }
+        }
+      }
+    },
+    "המיקום חסום בטלפון של %@ — מאשרים בהגדרות של הטלפון ← טופי ← מיקום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الموقع محظور على هاتف %@ — اسمحوا به في إعدادات الهاتف ← Tofy ← الموقع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location is blocked on %@'s phone — allow it in the phone's Settings → Tofy → Location"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Геолокация заблокирована на телефоне %@ — разрешите в Настройках телефона → Tofy → Геопозиция"
+          }
+        }
+      }
+    },
+    "המיקום כבוי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الموقع متوقف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location is off"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Геолокация выключена"
           }
         }
       }
@@ -41811,6 +42119,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Новая установка открывается на языке устройства — иврит, английский, русский или арабский — и сменить его можно прямо на первом экране"
+          }
+        }
+      }
+    },
+    "התראה כש…" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تنبيه عندما…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notify when…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Уведомлять, когда…"
           }
         }
       }
@@ -47261,6 +47591,50 @@
         }
       }
     },
+    "חיפוש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بحث"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Найти"
+          }
+        }
+      }
+    },
+    "חיפוש כתובת או מקום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ابحثوا عن عنوان أو مكان"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search an address or place"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск адреса или места"
+          }
+        }
+      }
+    },
     "חלון משחק אחד — בכל המכשירים יחד" : {
       "localizations" : {
         "ar" : {
@@ -51035,6 +51409,50 @@
         }
       }
     },
+    "יוצא" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يغادر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leaves"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Уходит"
+          }
+        }
+      }
+    },
+    "יוצאת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تغادر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leaves"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Уходит"
+          }
+        }
+      }
+    },
     "יותר מדי ניסיונות — המתינו דקה ונסו שוב" : {
       "localizations" : {
         "ar" : {
@@ -52270,6 +52688,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Акулы, киты, рифы и кто где живёт — в трёх уровнях, которые подстраиваются под ребёнка, и за каждый правильный ответ начисляются игровые минуты, как и в любом мире."
+          }
+        }
+      }
+    },
+    "כְּשֶׁהַטֵּלֵפוֹן זָז, הַהוֹרִים שֶׁלְּךָ יוֹדְעִים שֶׁהִגַּעְתָּ בְּשָׁלוֹם — לְבֵית הַסֵּפֶר, הַבַּיְתָה אוֹ לַחוּג." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عندما يتحرك الهاتف، يعرف أهلك أنك وصلت بأمان — إلى المدرسة أو البيت أو النادي."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When the phone moves, your parents know you got there safely — to school, home or your club."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Когда телефон перемещается, родители знают, что ты благополучно добрался — до школы, домой или на кружок."
+          }
+        }
+      }
+    },
+    "כְּשֶׁהַטֵּלֵפוֹן זָז, הַהוֹרִים שֶׁלָּךְ יוֹדְעִים שֶׁהִגַּעַתְּ בְּשָׁלוֹם — לְבֵית הַסֵּפֶר, הַבַּיְתָה אוֹ לַחוּג." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عندما يتحرك الهاتف، يعرف أهلكِ أنكِ وصلتِ بأمان — إلى المدرسة أو البيت أو النادي."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When the phone moves, your parents know you got there safely — to school, home or your club."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Когда телефон перемещается, родители знают, что ты благополучно добралась — до школы, домой или на кружок."
           }
         }
       }
@@ -55992,6 +56454,50 @@
         }
       }
     },
+    "כיבוי המיקום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إيقاف الموقع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn off location"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выключить геолокацию"
+          }
+        }
+      }
+    },
+    "כיבוי המיקום של %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إيقاف موقع %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn off %@'s location"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выключить геолокацию: %@"
+          }
+        }
+      }
+    },
     "כיבוי ”פעילות ביישומים ואתרים”" : {
       "localizations" : {
         "ar" : {
@@ -56010,6 +56516,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выключить «Активность в приложениях и на сайтах»"
+          }
+        }
+      }
+    },
+    "כיבוי: מוחק מיד את המיקום השמור." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإيقاف: يحذف الموقع المحفوظ فورًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turning it off: deletes the saved location right away."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выключение: сохранённое местоположение сразу удаляется."
           }
         }
       }
@@ -60834,6 +61362,28 @@
         }
       }
     },
+    "לדעת איפה %@ — בלי לשאול" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اعرفوا أين %@ — بدون أن تسألوا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Know where %@ is — without asking"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Знать, где %@, — не спрашивая"
+          }
+        }
+      }
+    },
     "לה" : {
       "localizations" : {
         "ar" : {
@@ -61607,6 +62157,50 @@
         }
       }
     },
+    "לכבות את שיתוף המיקום? המיקום השמור יימחק." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إيقاف مشاركة الموقع؟ سيُحذف الموقع المحفوظ."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn off location sharing? The saved location will be deleted."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выключить передачу геолокации? Сохранённое местоположение будет удалено."
+          }
+        }
+      }
+    },
+    "לכל המכשירים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل الأجهزة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All devices"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все устройства"
+          }
+        }
+      }
+    },
     "לכל המשפחה · ניהול המנוי" : {
       "localizations" : {
         "ar" : {
@@ -61802,6 +62396,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Учёба по желанию"
+          }
+        }
+      }
+    },
+    "למשל: בית הספר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مثلًا: المدرسة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For example: School"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Например: школа"
           }
         }
       }
@@ -62133,6 +62749,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Убрать свою тарелку со стола"
+          }
+        }
+      }
+    },
+    "לפני %lld דק׳" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قبل %lld د"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min ago"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld мин назад"
+          }
+        }
+      }
+    },
+    "לפני %lld שע׳" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قبل %lld س"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld h ago"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ч назад"
           }
         }
       }
@@ -62886,6 +63546,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ждём, пока %@ начнёт… ⏳"
+          }
+        }
+      }
+    },
+    "מְחַפְּשִׂים אֶת הַטֵּלֵפוֹן!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يبحثون عن هذا الهاتف!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Someone's looking for this phone!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ищут этот телефон!"
           }
         }
       }
@@ -66104,6 +66786,28 @@
         }
       }
     },
+    "מַמְשִׁיכִים ←" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "متابعة ←"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue →"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дальше →"
+          }
+        }
+      }
+    },
     "מַמְשִׁיכִים! 🚀" : {
       "localizations" : {
         "ar" : {
@@ -67431,6 +68135,28 @@
         }
       }
     },
+    "מָצָאתִי! 👋" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وجدته! 👋"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Found it! 👋"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нашёл! 👋"
+          }
+        }
+      }
+    },
     "מָצָאתֶם אֶת הַכַּרְטִיס הַנָּכוֹן %lld פְּעָמִים!" : {
       "localizations" : {
         "ar" : {
@@ -67945,6 +68671,50 @@
         }
       }
     },
+    "מגיע" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يصل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrives"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приходит"
+          }
+        }
+      }
+    },
+    "מגיעה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تصل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrives"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приходит"
+          }
+        }
+      }
+    },
     "מגלה" : {
       "localizations" : {
         "ar" : {
@@ -68319,6 +69089,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Что остаётся открытым?"
+          }
+        }
+      }
+    },
+    "מה נשמר: המיקום האחרון של הטלפון שלה, והגעה או יציאה מהמקומות שסימנתם. לא מסלול של כל היום." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما يُحفظ: آخر موقع لهاتفها، والوصول إلى الأماكن التي حددتموها أو مغادرتها. وليس مسار اليوم كله."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What's saved: her phone's last location, and arriving at or leaving the places you mark. Not a route of the whole day."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что сохраняется: последнее местоположение её телефона и приход или уход из отмеченных вами мест. Не маршрут за весь день."
+          }
+        }
+      }
+    },
+    "מה נשמר: המיקום האחרון של הטלפון שלו, והגעה או יציאה מהמקומות שסימנתם. לא מסלול של כל היום." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما يُحفظ: آخر موقع لهاتفه، والوصول إلى الأماكن التي حددتموها أو مغادرتها. وليس مسار اليوم كله."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What's saved: his phone's last location, and arriving at or leaving the places you mark. Not a route of the whole day."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что сохраняется: последнее местоположение его телефона и приход или уход из отмеченных вами мест. Не маршрут за весь день."
           }
         }
       }
@@ -68942,6 +69756,50 @@
         }
       }
     },
+    "מחיקת המקום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حذف المكان"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete place"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить место"
+          }
+        }
+      }
+    },
+    "מחכה לאישור בטלפון של %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بانتظار الإذن على هاتف %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for permission on %@'s phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ждём разрешения на телефоне %@"
+          }
+        }
+      }
+    },
     "מחכה לאישור שלכם 🕐" : {
       "localizations" : {
         "ar" : {
@@ -69358,6 +70216,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Кто играет, какие дела ждут, копилка — и вся статистика."
+          }
+        }
+      }
+    },
+    "מי רואה: רק ההורים במשפחה. שום דבר לא עובר לאף גורם אחר." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "من يرى: الأهل في العائلة فقط. لا يُرسل شيء لأي جهة أخرى."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Who sees it: only the parents in the family. Nothing goes to anyone else."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кто видит: только родители в семье. Никому больше ничего не передаётся."
           }
         }
       }
@@ -70266,6 +71146,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Одно место на устройстве ребёнка"
+          }
+        }
+      }
+    },
+    "מקום חדש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مكان جديد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New place"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новое место"
+          }
+        }
+      }
+    },
+    "מקומות קבועים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأماكن الثابتة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved places"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Постоянные места"
           }
         }
       }
@@ -76196,6 +77120,28 @@
         }
       }
     },
+    "סוללה: מתעדכן כשהטלפון זז או כשמבקשים — בלי GPS שרץ כל הזמן." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "البطارية: يتحدث عندما يتحرك الهاتف أو عندما تطلبون — بدون GPS يعمل طوال الوقت."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Battery: updates when the phone moves or when you ask — no GPS running all the time."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Батарея: обновляется, когда телефон перемещается или когда вы просите, — без постоянно работающего GPS."
+          }
+        }
+      }
+    },
     "סיבוב הפתעה באמצע השאלות" : {
       "localizations" : {
         "ar" : {
@@ -80229,6 +81175,28 @@
         }
       }
     },
+    "עוד אין מקומות. הוסיפו את הבית ואת בית הספר, ותקבלו התראה כשהילדים מגיעים ויוצאים." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا توجد أماكن بعد. أضيفوا البيت والمدرسة، وستصلكم تنبيهات عندما يصل الأطفال ويغادرون."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No places yet. Add home and school, and you'll be notified when the kids arrive and leave."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мест пока нет. Добавьте дом и школу — и вы будете получать уведомления, когда дети приходят и уходят."
+          }
+        }
+      }
+    },
     "עוד אין פעילות להראות. ברגע שהילדים יתחילו לשחק, הכל יופיע כאן." : {
       "localizations" : {
         "ar" : {
@@ -80581,6 +81549,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Новый стеклянный дизайн — во всём приложении"
+          }
+        }
+      }
+    },
+    "עכשיו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "just now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "только что"
           }
         }
       }
@@ -93930,6 +94920,28 @@
         }
       }
     },
+    "שיתוף מיקום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مشاركة الموقع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location sharing"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Передача геолокации"
+          }
+        }
+      }
+    },
     "שכחתי סיסמה" : {
       "localizations" : {
         "ar" : {
@@ -94324,6 +95336,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Имя родителя"
+          }
+        }
+      }
+    },
+    "שם המקום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اسم المكان"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Place name"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Название места"
           }
         }
       }
@@ -96473,6 +97507,28 @@
         }
       }
     },
+    "↻ רענון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "↻ تحديث"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "↻ Refresh"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "↻ Обновить"
+          }
+        }
+      }
+    },
     "−%lld שְׁנִיּוֹת · כִּמְעַט!" : {
       "localizations" : {
         "ar" : {
@@ -96922,6 +97978,28 @@
         }
       }
     },
+    "⏹ עצירת הצפצוף" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏹ إيقاف الرنين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏹ Stop the beep"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏹ Остановить звук"
+          }
+        }
+      }
+    },
     "●" : {
 
     },
@@ -97224,6 +98302,50 @@
     },
     "⚡️ %lld" : {
 
+    },
+    "✅ %@ מצא את הטלפון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ وجد %@ الهاتف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ %@ found the phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ %@ нашёл телефон"
+          }
+        }
+      }
+    },
+    "✅ %@ מצאה את הטלפון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ وجدت %@ الهاتف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ %@ found the phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ %@ нашла телефон"
+          }
+        }
+      }
     },
     "✅ %lld/%lld היום" : {
       "localizations" : {
@@ -98499,6 +99621,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "⭕ Круг, радиус которого %lld см. Найди его %@. (%@)"
+          }
+        }
+      }
+    },
+    "＋ הוספת מקום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "＋ إضافة مكان"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "＋ Add a place"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "＋ Добавить место"
           }
         }
       }
@@ -100292,6 +101436,50 @@
         }
       }
     },
+    "👉 בַּמָּסָךְ הַבָּא הַטֵּלֵפוֹן יִשְׁאַל — לְחַץ עַל הָאִשּׁוּר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👉 في الشاشة التالية سيسأل الهاتف — اضغط على السماح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👉 On the next screen the phone will ask — tap Allow"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👉 На следующем экране телефон спросит — нажми «Разрешить»"
+          }
+        }
+      }
+    },
+    "👉 בַּמָּסָךְ הַבָּא הַטֵּלֵפוֹן יִשְׁאַל — לִחְצִי עַל הָאִשּׁוּר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👉 في الشاشة التالية سيسأل الهاتف — اضغطي على السماح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👉 On the next screen the phone will ask — tap Allow"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👉 На следующем экране телефон спросит — нажми «Разрешить»"
+          }
+        }
+      }
+    },
     "👋 בַּקְּשִׁי עֶזְרָה מ%@" : {
       "localizations" : {
         "ar" : {
@@ -101596,6 +102784,116 @@
         }
       }
     },
+    "📍 %@ · %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 %1$@ · %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 %1$@ · %2$@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 %1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "📍 הפעלת מיקום ל%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 تشغيل الموقع لـ%@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Turn on location for %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Включить геолокацию для %@"
+          }
+        }
+      }
+    },
+    "📍 מִקּוּם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 الموقع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Location"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Где дети"
+          }
+        }
+      }
+    },
+    "📍 מקומות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 الأماكن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Places"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Места"
+          }
+        }
+      }
+    },
+    "📍 עודכן %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 تم التحديث %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Updated %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Обновлено %@"
+          }
+        }
+      }
+    },
     "📐 בִּמְשֻׁלָּשׁ יְשַׁר זָוִית אָרְכֵי הַנִּצָּבִים %lld ס\"מ וְ־%lld ס\"מ. מָה אֹרֶךְ הַיֶּתֶר?" : {
       "localizations" : {
         "ar" : {
@@ -101853,6 +103151,50 @@
     "📭" : {
 
     },
+    "📱 אייפון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📱 آيفون"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📱 iPhone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📱 iPhone"
+          }
+        }
+      }
+    },
+    "📱 אנדרואיד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📱 أندرويد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📱 Android"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📱 Android"
+          }
+        }
+      }
+    },
     "📱 חִבּוּר מַכְשִׁיר" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -101876,8 +103218,52 @@
         }
       }
     },
+    "📱 טלפון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📱 هاتف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📱 Phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📱 Телефон"
+          }
+        }
+      }
+    },
     "📱 → 🧒" : {
 
+    },
+    "📲 אייפד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📲 آيباد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📲 iPad"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📲 iPad"
+          }
+        }
+      }
     },
     "📷 אוֹ הַעֲלֵה תְּמוּנָה (אוֹפְּצִיוֹנָלִי)" : {
       "localizations" : {
@@ -102304,6 +103690,28 @@
     },
     "🔔" : {
 
+    },
+    "🔔 צפצוף" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔔 رنين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔔 Beep"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔔 Позвонить"
+          }
+        }
+      }
     },
     "🔗" : {
 

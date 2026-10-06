@@ -11,6 +11,11 @@ struct ContentView: View {
     @StateObject private var joinCoord = JoinCoordinator.shared
     @StateObject private var liveGame = LiveGameManager.shared
     @AppStorage(ChildLockSetup.pendingKey) private var lockSetupPending = false
+    @ObservedObject private var location = LocationSharing.shared
+    /// 📍 The child's explanation shows at most once per launch and 3 times in
+    /// all — iOS asks for "always" only once, so a kid who declined is not nagged.
+    @State private var locationPromptShown = false
+    @AppStorage("location.promptCount") private var locationPromptCount = 0
 
     /// Guests (no account) can answer this many questions before registration
     /// is required.
@@ -100,6 +105,22 @@ struct ContentView: View {
                 .environmentObject(settings)
                 .environment(\.layoutDirection, .app)
         }
+        // 🔔 A parent is beeping this phone — "מָצָאתִי!" over everything.
+        .background(
+            Color.clear.fullScreenCover(isPresented: $location.beeping) {
+                KidBeepOverlay().environment(\.layoutDirection, .app)
+            }
+        )
+        // 📍 A parent switched location sharing on — the kid's one-time words
+        // before Apple's own question.
+        .background(
+            Color.clear.sheet(isPresented: Binding(
+                get: { settings.deviceRole == .child && !kidMode.active && location.needsPermissionPrompt
+                        && !locationPromptShown && locationPromptCount < 3 },
+                set: { if !$0 { locationPromptShown = true; locationPromptCount += 1 } })) {
+                KidLocationPermissionSheet().environment(\.layoutDirection, .app)
+            }
+        )
     }
 
     /// The kid experience shown while Kid Mode is on (parent's phone). Same play

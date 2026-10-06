@@ -64,6 +64,7 @@ struct ParentDashboardView: View {
     @State private var showingSettings = false
     @State private var showingActivity = false      // 🔔 the activity centre
     @State private var showingCreateChild = false
+    @State private var showingLocation = false
     @State private var showingKidMode = false
     /// Kid Mode straight for one child (from the card's ⚡ menu).
     @State private var kidModeChild: Profile? = nil
@@ -247,6 +248,7 @@ struct ParentDashboardView: View {
                                label: tr("עדכונים")) { showingActivity = true }
                 SideRailButton(systemImage: "person.badge.plus", label: tr("＋ צְרוּ יֶלֶד/ה")) { showingCreateChild = true }
                 SideRailButton(emoji: "🧹", label: tr("🧹 מַטְלוֹת")) { openChores() }
+                SideRailButton(emoji: "📍", label: tr("📍 מִקּוּם")) { showingLocation = true }
                 if !rows.isEmpty {
                     SideRailDivider()
                     ScrollView {
@@ -648,6 +650,11 @@ struct ParentDashboardView: View {
             }
             .sheet(item: $choresProfile) { p in
                 ChoresParentView(profile: p)
+                    .environment(\.layoutDirection, .app)
+            }
+            .sheet(isPresented: $showingLocation) {
+                ParentLocationView()
+                    .environmentObject(profiles)
                     .environment(\.layoutDirection, .app)
             }
             .sheet(isPresented: $showingFeedback) {
@@ -1420,6 +1427,9 @@ struct ParentDashboardView: View {
             } label: { homeGhostLabel(tr("🧹 מַטְלוֹת")).frame(maxWidth: .infinity) }
                 .buttonStyle(.plain)
                 .coachMark("p.chores")
+            // 📍 Where the children are — map, places, beep.
+            Button { Haptic.light(); showingLocation = true } label: { homeGhostLabel(tr("📍 מִקּוּם")).frame(maxWidth: .infinity) }
+                .buttonStyle(.plain)
             // 📱 "🧒 מצב ילד" lived here until every child's card got its own
             // "תנו ל… לשחק כאן" — the same thing, already aimed at the right
             // child. Rani: "הכפתור מצב ילד למעלה אפשר להסיר, לא צריך אותו יותר".
