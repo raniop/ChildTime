@@ -201,8 +201,9 @@ private fun ChildReport(
             ReportCard(tr("הַאִם %@ %@?", child.name, g(tr("מִשְׁתַּפֵּר"), tr("מִשְׁתַּפֶּרֶת")))) {
                 overall?.let { o ->
                     val up = o >= 0
-                    Text(tr("%@ %@ בְּ-%lld%% %@", if (up) "📈" else "📉", if (up) g(tr("הִשְׁתַּפֵּר"), tr("הִשְׁתַּפְּרָה")) else tr("יָרַד קְצָת"),
-                        Math.round(kotlin.math.abs(o)).toInt(), if (period == ReportPeriod.WEEK) tr("הַשָּׁבוּעַ") else tr("הַחֹדֶשׁ")),
+                    // The tab above already names the period — no tab label inside the sentence.
+                    Text(tr("%@ %@ בְּ-%lld%%", if (up) "📈" else "📉", if (up) g(tr("הִשְׁתַּפֵּר"), tr("הִשְׁתַּפְּרָה")) else tr("יָרַד קְצָת"),
+                        Math.round(kotlin.math.abs(o)).toInt()),
                         color = if (up) Ink.good else Ink.weak, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -306,8 +307,10 @@ private fun InsightCard(i: DailyInsight, period: ReportPeriod) {
             .border(1.dp, Color(0xFFFFEBAA).copy(alpha = 0.7f), shape).padding(14.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        val p = when (period) { ReportPeriod.TODAY -> tr("הַיּוֹם"); ReportPeriod.WEEK -> tr("הַשָּׁבוּעַ"); ReportPeriod.MONTH -> tr("הַחֹדֶשׁ") }
-        Text(tr("💡 תּוֹבְנַת %@", p), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.5.sp)
+        // One whole key per period: dropping the TAB label ("This week" / "Эта неделя")
+        // into a template read "Insight for This week" / "Вывод о Эта неделя".
+        val title = when (period) { ReportPeriod.TODAY -> tr("💡 תּוֹבְנַת הַיּוֹם"); ReportPeriod.WEEK -> tr("💡 תּוֹבְנַת הַשָּׁבוּעַ"); ReportPeriod.MONTH -> tr("💡 תּוֹבְנַת הַחֹדֶשׁ") }
+        Text(title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.5.sp)
         Text(i.body, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 13.5.sp)
         i.recommendation?.let {
             Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.35f)))
@@ -378,7 +381,7 @@ private fun WorldsCard(child: Child, extras: SnapshotExtras) {
 private fun WorldRow(w: World, label: String, tint: Color?) {
     Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(w.emoji, fontSize = 20.sp)
-        Text(w.name, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.5.sp, maxLines = 1)
+        Text(w.name, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.5.sp, maxLines = 2, lineHeight = 18.sp)
         Text(label, Modifier.clip(RoundedCornerShape(50)).background(tint ?: Color.White.copy(alpha = 0.18f)).padding(horizontal = 9.dp, vertical = 4.dp),
             color = if (tint == null) Ink.secondary else Color(0xFF2A1D00), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, maxLines = 1)
     }

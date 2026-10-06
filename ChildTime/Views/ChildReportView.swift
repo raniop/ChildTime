@@ -169,7 +169,7 @@ struct ChildReportView: View {
 
     private func insightCard(_ i: DailyInsight?, tip: CoachingEngine.RecommendedAction?) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(tr("💡 תּוֹבְנַת \(period == .today ? tr("הַיּוֹם") : period == .week ? tr("הַשָּׁבוּעַ") : tr("הַחֹדֶשׁ"))"))
+            Text(period == .today ? tr("💡 תּוֹבְנַת הַיּוֹם") : period == .week ? tr("💡 תּוֹבְנַת הַשָּׁבוּעַ") : tr("💡 תּוֹבְנַת הַחֹדֶשׁ"))
                 .font(.system(size: 14.5, weight: .heavy, design: .rounded))
             if let i {
                 Text(i.body)
@@ -241,7 +241,7 @@ struct ChildReportView: View {
             Text(w.emoji).font(.system(size: 20))
             Text(w.name)
                 .font(.system(size: 14.5, weight: .semibold, design: .rounded))
-                .lineLimit(1).minimumScaleFactor(0.8)
+                .lineLimit(2).minimumScaleFactor(0.85)
             Spacer(minLength: 6)
             Text(label)
                 .font(.system(size: 12, weight: .heavy, design: .rounded))
@@ -421,7 +421,7 @@ struct ChildReportView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     if let o = overall {
                         let up = o >= 0
-                        Text(tr("\(up ? "📈" : "📉") \(up ? g(tr("הִשְׁתַּפֵּר"), tr("הִשְׁתַּפְּרָה")) : tr("יָרַד קְצָת")) בְּ-\(Int(abs(o).rounded()))% \(period == .week ? tr("הַשָּׁבוּעַ") : tr("הַחֹדֶשׁ"))"))
+                        Text(tr("\(up ? "📈" : "📉") \(up ? g(tr("הִשְׁתַּפֵּר"), tr("הִשְׁתַּפְּרָה")) : tr("יָרַד קְצָת")) בְּ-\(Int(abs(o).rounded()))%"))
                             .font(.system(size: 18, weight: .heavy, design: .rounded))
                             .foregroundStyle(up ? GlassInk.good : GlassInk.weak)
                     }

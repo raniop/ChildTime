@@ -1671,6 +1671,28 @@
         }
       }
     },
+    "%@ %@ בְּ-%lld%%" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@ بنسبة %lld%%"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@ by %lld%%"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@ на %lld%%"
+          }
+        }
+      }
+    },
     "%@ %@ בְּ-%lld%% %@" : {
       "localizations" : {
         "ar" : {
@@ -100322,6 +100344,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "💡 Вывод о %@"
+          }
+        }
+      }
+    },
+    "💡 תּוֹבְנַת הַחֹדֶשׁ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 خلاصة الشهر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 This month's insight"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 Вывод за месяц"
+          }
+        }
+      }
+    },
+    "💡 תּוֹבְנַת הַיּוֹם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 خلاصة اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 Today's insight"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 Вывод за сегодня"
+          }
+        }
+      }
+    },
+    "💡 תּוֹבְנַת הַשָּׁבוּעַ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 خلاصة الأسبوع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 This week's insight"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 Вывод за неделю"
           }
         }
       }
