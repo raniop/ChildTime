@@ -162,10 +162,11 @@ internal fun KidHome(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 item(span = { GridItemSpan(maxLineSpan) }) { BrandRow(premium, extras.friendsBadge, onShop, onFriends, onSettings) }
-                if (kidMode) item(span = { GridItemSpan(maxLineSpan) }) { KidExitBar(onKidExit) }
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     HeaderPane(child, snap.stars, snap.diamonds, snap.dayStreak, snap.xp, engine, cta, extras, onLevelInfo, onChallenge, onAvatar, onChores)
                 }
+                // Like iOS: the exit bar sits UNDER the header pane, right above the worlds.
+                if (kidMode) item(span = { GridItemSpan(maxLineSpan) }) { KidExitBar(onKidExit) }
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     // 🧭 The worlds' stop: on a phone the first world sits under the
                     // floating minutes panel, so the tour points at the line that heads
