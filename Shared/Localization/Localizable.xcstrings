@@ -23329,6 +23329,28 @@
         }
       }
     },
+    "בהוספת ילד, הבחירה בין ילד לילדה מופיעה נכון באנגלית, ברוסית ובערבית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عند إضافة طفل، يظهر اختيار ولد أو بنت الآن بشكل صحيح بالإنجليزية والروسية والعربية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When adding a child, the boy/girl choice now shows correctly in English, Russian and Arabic"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "При добавлении ребёнка выбор «мальчик/девочка» теперь правильно отображается на английском, русском и арабском"
+          }
+        }
+      }
+    },
     "בהמשך אתם מאשרים כהורים את תנאי השימוש ואת מדיניות הפרטיות" : {
       "localizations" : {
         "ar" : {
@@ -24361,6 +24383,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "На родительском экране теперь есть полка «Новые викторины»: целый мир вопросов на тему, которую ребёнок любит. Подписчикам Tofy+ она открывается автоматически для всех детей; без подписки вы выбираете, какому ребёнку её отправить, и он сразу получает подарок на своём домашнем экране. Ребёнок, который хочет викторину, нажимает «Попроси маму или папу» — без цен на детском устройстве"
+          }
+        }
+      }
+    },
+    "במסכים של ילדה, טופי פונה אליה בלשון נקבה — בפרסים, ברמזים ובמשחקים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بالعبرية، يخاطب Tofy البنت الآن بصيغة المؤنث في كل شاشاتها — في الجوائز والتلميحات والألعاب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Hebrew, Tofy now addresses a girl in the feminine on all her screens — rewards, hints and games"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На иврите Tofy теперь обращается к девочке в женском роде на всех её экранах — в наградах, подсказках и играх"
           }
         }
       }
@@ -50660,6 +50704,28 @@
         }
       }
     },
+    "יודעים כשיש גרסה חדשה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اعرفوا متى يصدر إصدار جديد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Know when there's a new version"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Узнавайте о новой версии"
+          }
+        }
+      }
+    },
     "יום" : {
       "localizations" : {
         "ar" : {
@@ -50856,6 +50922,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ребёнок"
+          }
+        }
+      }
+    },
+    "ילד או ילדה — בכל שפה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ولد أو بنت — بكل لغة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boy or girl — in every language"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мальчик или девочка — на любом языке"
           }
         }
       }
@@ -56661,6 +56749,28 @@
         }
       }
     },
+    "כל עולם נפתח שוב בשלוש דרגות — ארד, כסף וזהב — וכל דרגה מאתגרת קצת יותר. מי שמסיים את שלושתן מקבל כתר של אלוף או אלופה 👑" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل عالم يُفتح من جديد بثلاث درجات — برونز وفضة وذهب — وكل درجة أصعب قليلًا. من يُنهي الثلاث يحصل على تاج البطل أو البطلة 👑"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every world opens again in three tiers — bronze, silver and gold — each a little more challenging. Finish all three and earn a champion's crown 👑"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждый мир открывается заново на трёх уровнях — бронза, серебро и золото, — и каждый чуть сложнее предыдущего. Кто пройдёт все три, получит корону чемпиона 👑"
+          }
+        }
+      }
+    },
     "כל שאלה באפליקציה מתויגת לפי תוכנית הלימודים — כל ילד מקבל בדיוק את הרמה שלו" : {
       "localizations" : {
         "ar" : {
@@ -57429,6 +57539,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Когда ребёнок открывает минуты на iPhone, iPad показывает, что окно открыто там, и предлагает перенести его сюда. Одни и те же минуты не открываются дважды, а дневной лимит считается один раз на ребёнка"
+          }
+        }
+      }
+    },
+    "כשיוצאת גרסה חדשה של טופי, מופיעה הודעה קצרה עם מה שחדש וכפתור שמוביל ישר לעדכון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عند صدور إصدار جديد من Tofy تظهر رسالة قصيرة بما هو جديد، مع زر ينقلكم مباشرة إلى التحديث"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When a new version of Tofy comes out, a short message shows what's new, with a button that goes straight to the update"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Когда выходит новая версия Tofy, появляется короткое сообщение о том, что нового, и кнопка, которая ведёт прямо к обновлению"
           }
         }
       }
@@ -67590,6 +67722,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Динамика точности"
+          }
+        }
+      }
+    },
+    "מדברים אל הילדה בלשון נקבה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مخاطبة البنت بصيغة المؤنث"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speaking to girls as girls"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "К девочкам — в женском роде"
           }
         }
       }
@@ -93620,6 +93774,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Здравствуйте, родитель 👋"
+          }
+        }
+      }
+    },
+    "שלוש דרגות בכל עולם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ثلاث درجات في كل عالم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Three tiers in every world"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Три уровня в каждом мире"
+          }
+        }
+      }
+    },
+    "שלוש דרגות בכל עולם, ופנייה נכונה לכל ילד וילדה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ثلاث درجات في كل عالم، ومخاطبة صحيحة لكل ولد وبنت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Three tiers in every world, and the right words for every boy and girl"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Три уровня в каждом мире и правильное обращение к каждому ребёнку"
           }
         }
       }
