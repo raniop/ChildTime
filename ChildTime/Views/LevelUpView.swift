@@ -32,7 +32,7 @@ struct LevelUpView: View {
 
                         if titleVisible {
                             VStack(spacing: AppSpacing.md) {
-                                Text(tr("עָלִיתָ רָמָה!"))
+                                Text(Gendered.isGirl ? tr("עָלִית רָמָה!") : tr("עָלִיתָ רָמָה!"))
                                     .font(.system(size: titleFontSize, weight: .heavy, design: .rounded))
                                     .foregroundStyle(AppColor.starGold)
                                     .glow(AppColor.starGold, radius: 20)

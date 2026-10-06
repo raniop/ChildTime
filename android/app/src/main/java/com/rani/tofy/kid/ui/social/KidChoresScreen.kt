@@ -255,8 +255,8 @@ private fun ActiveCard(c: Chore, onDone: () -> Unit) {
             .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).padding(horizontal = 9.dp, vertical = 4.dp),
             color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
         // Reserved even when absent so every card in a row keeps the same height.
-        Text(if (c.timesPerDay > 1) tr("הַיּוֹם: %lld/%lld ✔️", c.doneToday, c.timesPerDay) else " ", Modifier.height(15.dp),
-            color = Color.White.copy(alpha = 0.8f), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 10.5.sp, maxLines = 1)
+        Text(if (c.timesPerDay > 1) tr("הַיּוֹם: %lld/%lld ✔️", c.doneToday, c.timesPerDay) else " ", Modifier.heightIn(min = 20.dp),
+            color = Color.White.copy(alpha = 0.8f), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 10.5.sp, lineHeight = 16.sp, maxLines = 1)
         Text(tr("עָשִׂיתִי! ✅"), Modifier.fillMaxWidth().clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.92f)).clickable(onClick = onDone)
             .padding(vertical = 10.dp), color = SocialColor.indigo, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp,
             textAlign = TextAlign.Center, maxLines = 1)

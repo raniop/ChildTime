@@ -1257,7 +1257,8 @@ struct ParentDashboardView: View {
         let state: String = {
             if playing { return tr("\(girl ? tr("מְשַׂחֶקֶת") : tr("מְשַׂחֵק")) עַכְשָׁיו · נִשְׁאֲרוּ \(formatTime(liveSecs))") }
             if isChildPlayingNow(profile) { return tr("בְּטוֹפִי עַכְשָׁיו · \(girl ? tr("לוֹמֶדֶת") : tr("לוֹמֵד"))") }
-            if !hasDevice { return tr("עוֹד לֹא \(girl ? tr("הִתְחִילָה") : tr("הִתְחִיל"))") }
+            // A child with no device of their own still plays in kid mode on this phone.
+            if !hasDevice && s.answeredToday == 0 && s.stars == 0 { return tr("עוֹד לֹא \(girl ? tr("הִתְחִילָה") : tr("הִתְחִיל"))") }
             return s.answeredToday > 0 ? tr("\(girl ? tr("לָמְדָה") : tr("לָמַד")) הַיּוֹם") : tr("לֹא בְּטוֹפִי הַיּוֹם")
         }()
         return VStack(spacing: Self.homeRowGap) {

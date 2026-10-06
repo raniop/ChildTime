@@ -504,7 +504,7 @@ fun LevelUpScreen(level: Int, characterID: String?, onContinue: () -> Unit) {
             )
             AnimatedVisibility(titleVisible, enter = scaleIn() + fadeIn()) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Text(tr("עָלִיתָ רָמָה!"), color = KidColor.starGold, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 46.sp, textAlign = TextAlign.Center)
+                    Text(if (com.rani.tofy.kid.ui.social.SocialMe.isGirl) tr("עָלִית רָמָה!") else tr("עָלִיתָ רָמָה!"), color = KidColor.starGold, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 46.sp, textAlign = TextAlign.Center)
                     Text(tr("רָמָה %lld", level), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 28.sp)
                     Text(tr("+%lld 💎 בּוֹנוּס לַחֲנוּת!", RewardEngine.levelUpDiamonds(level)), color = KidColor.starGold, fontFamily = Rounded,
                         fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, textAlign = TextAlign.Center)

@@ -230,7 +230,8 @@ struct ChoresKidView: View {
                 .font(.system(size: 10.5, weight: .bold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8))
                 .lineLimit(1)
-                .frame(height: 13)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(minHeight: 16)   // niqqud needs the room; a fixed 13 let it run into "עשיתי!"
 
             Button {
                 Haptic.success()

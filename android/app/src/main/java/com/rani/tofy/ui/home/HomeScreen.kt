@@ -166,7 +166,8 @@ private fun ChildCard(
     val statusText = when {
         live != null -> tr("%@ עַכְשָׁיו · נִשְׁאֲרוּ %@", if (girl) tr("מְשַׂחֶקֶת") else tr("מְשַׂחֵק"), formatTime(live.secondsLeft))
         inApp -> tr("בְּטוֹפִי עַכְשָׁיו · %@", if (girl) tr("לוֹמֶדֶת") else tr("לוֹמֵד"))
-        !hasDevice -> tr("עוֹד לֹא %@", if (girl) tr("הִתְחִילָה") else tr("הִתְחִיל"))
+        // A child with no device of their own still plays in kid mode on this phone.
+        !hasDevice && s.answeredToday == 0 && s.stars == 0 -> tr("עוֹד לֹא %@", if (girl) tr("הִתְחִילָה") else tr("הִתְחִיל"))
         s.answeredToday > 0 -> tr("%@ הַיּוֹם", if (girl) tr("לָמְדָה") else tr("לָמַד"))
         else -> tr("לֹא בְּטוֹפִי הַיּוֹם")
     }

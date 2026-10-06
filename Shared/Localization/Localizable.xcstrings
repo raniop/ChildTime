@@ -74411,6 +74411,28 @@
         }
       }
     },
+    "עָלִית רָמָה!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ارتقيتِ مستوى!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You leveled up!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ты перешла на новый уровень!"
+          }
+        }
+      }
+    },
     "עָלִיתָ רָמָה!" : {
       "localizations" : {
         "ar" : {
