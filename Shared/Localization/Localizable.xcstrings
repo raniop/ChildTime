@@ -25414,6 +25414,28 @@
         }
       }
     },
+    "גם תשובות נכונות בסיבוב ההפתעה מוסיפות זמן משחק, ומסך הסיום מראה כמה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإجابات الصحيحة في الجولة المفاجئة تضيف وقت لعب أيضًا، وشاشة النهاية تعرض كم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right answers in a surprise round add play time too, and the end screen shows how much"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Правильные ответы в раунде-сюрпризе тоже добавляют игровое время, а финальный экран показывает сколько"
+          }
+        }
+      }
+    },
     "גן" : {
       "localizations" : {
         "ar" : {
@@ -54213,6 +54235,28 @@
         }
       }
     },
+    "כל מספר מסביר את עצמו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل رقم يشرح نفسه"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every number explains itself"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждое число объясняет себя"
+          }
+        }
+      }
+    },
     "כל משחק לפי הכיתה של הילד" : {
       "localizations" : {
         "ar" : {
@@ -54323,6 +54367,28 @@
         }
       }
     },
+    "כל תשובה נכונה מוסיפה מיד את השניות שלה לזמן המשחק, בלי לחכות לסבב של 10 — וטעות אף פעם לא מורידה מהזמן שכבר נצבר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل إجابة صحيحة تضيف ثوانيها إلى وقت اللعب فورًا، دون انتظار جولة من 10 — والخطأ لا ينقص أبدًا من الوقت الذي جُمع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every right answer adds its seconds to play time at once, with no waiting for a round of 10 — and a mistake never takes away time already earned"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждый правильный ответ сразу добавляет свои секунды к игровому времени, без ожидания серии из 10 — а ошибка никогда не отнимает уже заработанное время"
+          }
+        }
+      }
+    },
     "כל תשובה נכונה מזכה בזמן משחק" : {
       "localizations" : {
         "ar" : {
@@ -54341,6 +54407,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Каждый правильный ответ даёт время игры"
+          }
+        }
+      }
+    },
+    "כל תשובה נכונה נכנסת מיד לזמן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل إجابة صحيحة تُحتسب فورًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every right answer counts right away"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждый правильный ответ засчитывается сразу"
           }
         }
       }
@@ -58693,6 +58781,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Нажмите на имя ребёнка на главном экране — откроются его настройки; также из меню действий и вверху его страницы"
+          }
+        }
+      }
+    },
+    "לחיצה על כל מספר במסך הבית של הילד — דקות לשחק, דקות מתנה, הרווחת היום, נכונות היום — פותחת הסבר קצר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النقر على أي رقم في الشاشة الرئيسية لطفلك — دقائق اللعب، دقائق الهديّة، ما رُبح اليوم، الإجابات الصحيحة اليوم — يفتح شرحًا قصيرًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tapping any number on your child's home screen — minutes to play, gift minutes, earned today, correct today — opens a short explanation"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажатие на любое число на главном экране ребёнка — минуты для игры, подарочные минуты, заработано сегодня, верно сегодня — открывает короткое объяснение"
           }
         }
       }
@@ -66456,6 +66566,28 @@
         }
       }
     },
+    "מימין לשמאל, כמו בעברית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "من اليمين إلى اليسار، كما في العبرية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right to left, the Hebrew way"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Справа налево, как на иврите"
+          }
+        }
+      }
+    },
     "מיקרופון · גלגיליות" : {
       "localizations" : {
         "ar" : {
@@ -72794,6 +72926,28 @@
         }
       }
     },
+    "סדרות מספרים והקוד בכספת נקראים עכשיו מימין לשמאל, וטופי טיים תמיד ראשון בין העולמות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في العبرية والعربية تُقرأ سلاسل الأرقام ورمز الخزنة الآن من اليمين إلى اليسار، وTofy Time دائمًا أول العوالم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Hebrew and Arabic, number sequences and the vault code now read right to left, and Tofy Time always comes first among the worlds"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На иврите и арабском ряды чисел и код сейфа теперь читаются справа налево, а Tofy Time всегда первое среди миров"
+          }
+        }
+      }
+    },
     "סה\"כ הרוויח%@ מהמטלות: 🎮 %lld דקות משחק" : {
       "localizations" : {
         "ar" : {
@@ -72978,6 +73132,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сюрприз-раунд посреди вопросов"
+          }
+        }
+      }
+    },
+    "סיבוב הפתעה מרוויח זמן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الجولة المفاجئة تربح وقتًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surprise rounds earn time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Раунд-сюрприз приносит время"
           }
         }
       }
