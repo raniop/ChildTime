@@ -357,3 +357,11 @@ html[lang="ar"] select{
   background:rgba(20,10,60,.55);color:#fff;font-size:30px;line-height:1;cursor:pointer;
   box-shadow:0 10px 30px rgba(0,0,0,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .video-tap:focus-visible{outline:3px solid #FFD25A;outline-offset:3px}
+
+/* 🤖 Android band: buttons stack with air between them on phones */
+#android .cta-row{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:6px}
+@media (max-width:640px){
+  #android .cta-row{flex-direction:column;align-items:stretch;max-width:360px;margin-inline:auto}
+  #android .cta-row .btn{width:100%}
+  #android .android-steps{font-size:.98rem}
+}
