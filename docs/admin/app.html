@@ -149,7 +149,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261006191210";
+const PAGE_STAMP = "20261006194143";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -1117,6 +1117,57 @@ const UPD_LANGS = [["he", "עברית", "rtl"], ["en", "English", "ltr"], ["ru",
 const UPD_NOTE_LINES = 3;
 const HEB_RE = /[֐-׿]/;
 let UPD = null;
+
+// 🟢 One click: what is LIVE on the App Store right now (Apple's public lookup)
+// + its "מה חדש" lines in all four languages (docs/admin/releases.json, built by
+// tools/releases-json.py from WhatsNewContent). The founder only presses "שלח".
+const IOS_APP_ID = "6773805449";
+async function updQuick(c) {
+  const box = $("updQuick"); if (!box) return;
+  let live, rel;
+  try {
+    const [a, b] = await Promise.all([
+      fetch(`https://itunes.apple.com/lookup?id=${IOS_APP_ID}&country=il&t=${Date.now()}`).then((x) => x.json()),
+      fetch(`releases.json?t=${Date.now()}`).then((x) => x.json()),
+    ]);
+    live = a.results && a.results[0] && a.results[0].version; rel = b;
+  } catch (e) { box.innerHTML = `<div class="card">לא הצלחתי לבדוק את החנות (${esc(e.message)}). אפשר לעדכן ידנית ב"מתקדם".</div>`; return; }
+  const same = rel.filter((r) => r.version === live);
+  if (!live || !same.length) { box.innerHTML = `<div class="card">בחנות: ${esc(live || "?")} — לא מצאתי את הגרסה הזאת ברשימת "מה חדש". אפשר לעדכן ידנית ב"מתקדם".</div>`; return; }
+  const build = Math.max(...same.map((r) => r.build));
+  // A version can span several builds — newest first, at most 3 lines per language.
+  const notesByLang = {};
+  for (const l of ["he", "en", "ru", "ar"]) notesByLang[l] = same.sort((x, y) => y.build - x.build).flatMap((r) => r.notes[l] || []).slice(0, 3);
+  const upToDate = (c.latestBuild || 0) >= build && c.enabled;
+  box.innerHTML = `
+    <div class="card" style="border-color:${upToDate ? "rgba(56,209,140,.5)" : "rgba(255,210,90,.6)"}">
+      <h4>🍎 באפסטור עכשיו: גרסה ${esc(live)} (בילד ${build})</h4>
+      ${upToDate
+        ? `<p style="margin:6px 0 0">✅ הכל מעודכן — מי שעדיין על גרסה ישנה כבר מקבל באפליקציה הודעה לעדכן. אין מה לשלוח.</p>`
+        : `<p style="margin:6px 0 10px">לחיצה על <b>שלח</b> = כל מי שעל גרסה ישנה מ־${build} יראה באפליקציה "יש גרסה חדשה של טופי" עם מה חדש:</p>
+           <ul style="margin:0 0 10px;padding-inline-start:20px">${notesByLang.he.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>
+           <div class="stamp" style="margin-bottom:10px">ההורים יראו את הרשימה בשפה של האפליקציה שלהם (עברית, English, Русский, العربية).</div>
+           <label style="display:block;margin-bottom:12px"><input type="checkbox" id="q_push"> גם לשלוח התראה (פוש) להורים</label>
+           <button class="btn" id="q_send" style="font-size:16px;padding:12px 30px">🚀 שלח</button>`}
+      <div class="stamp" style="margin-top:10px">🤖 אנדרואיד: עוד לא בחנות הציבורית (בבדיקה הסגורה) — אין למי לשלוח.</div>
+    </div>`;
+  const send = $("q_send"); if (!send) return;
+  send.onclick = async () => {
+    const push = $("q_push").checked;
+    if (!confirm(`לשלוח עדכון לגרסה ${live} (בילד ${build})?${push ? "\n📣 כולל התראה להורים" : "\n🔕 בלי התראה — רק הודעה בתוך האפליקציה"}`)) return;
+    send.disabled = true; send.innerHTML = '<span class="spin"></span> שולח…';
+    try {
+      await call("adminPublishAppUpdate", {
+        latestBuild: build, version: live,
+        latestAndroidBuild: c.latestAndroidBuild || 0, androidVersion: c.androidVersion || "",
+        minBuild: c.minBuild || 0, minAndroidBuild: c.minAndroidBuild || 0,
+        enabled: true, announce: push, legacyNotes: false, notesByLang,
+      });
+      toast("נשלח ✅"); await appUpdate();
+    } catch (e) { send.disabled = false; send.textContent = "🚀 שלח"; toast("נכשל: " + e.message); }
+  };
+}
+
 async function appUpdate(opts) {
   // The minute refresh never redraws the form under the founder's hands (a
   // half-filled form, a reach count being read); navigating here always does.
@@ -1139,6 +1190,8 @@ async function appUpdate(opts) {
       ${kpi(floorOn ? `${c.minBuild || "—"} / ${c.minAndroidBuild || "—"}` : "כבויה", "חסימת גרסאות ישנות (iOS / אנדרואיד)", floorOn ? "חוסם מכשירים!" : "", "d")}
       ${kpi(last ? fmt(last.sent || 0) : "—", last ? `הורים קיבלו התראה · ${when(last.at)}` : "עוד לא נשלחה התראת עדכון", last && last.failed ? fmt(last.failed) + " נכשלו" : "", "d")}
     </div>
+    <div id="updQuick"><div class="card"><span class="spin"></span> בודק מה יש עכשיו בחנויות…</div></div>
+    <details id="updAdvanced" style="margin-top:14px"><summary class="stamp" style="cursor:pointer;font-size:14px">⚙️ מתקדם — עריכה ידנית, אנדרואיד, חסימת גרסאות</summary>
     <div id="updForm">
       <div class="grid2">
         <div class="card"><h4>🍎 iOS</h4><div class="knobs">
@@ -1157,7 +1210,7 @@ async function appUpdate(opts) {
       </div>
       <div class="card"><h4>📣 הפעלה והתראה</h4>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="sw ${c.enabled ? "on" : ""}" id="u_enabled"></span><b id="u_enabledL"></b><span class="stamp">מתג חירום: כיבוי משתיק את כל מסכי העדכון בכל המכשירים, בלי בילד.</span></div>
-        <label style="display:block;margin-top:12px"><input type="checkbox" id="u_announce" checked> <b>לשלוח התראה להורים</b> שהגרסה שלהם ישנה יותר</label>
+        <label style="display:block;margin-top:12px"><input type="checkbox" id="u_announce"> <b>לשלוח התראה להורים</b> שהגרסה שלהם ישנה יותר</label>
         <div class="stamp" style="margin-top:4px">יוצאת רק כשמספר הבילד עולה, פעם אחת לכל בילד, ורק למכשירי הורים — לא לילדים. בטלו את הסימון אם הבילד עדיין רק ב־TestFlight או בבדיקה של אפל/גוגל.</div>
         <div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn ghost" id="u_reachBtn">כמה הורים יקבלו התראה?</button><span class="stamp" id="u_reach"></span></div>
       </div>
@@ -1170,7 +1223,8 @@ async function appUpdate(opts) {
         <button class="btn danger" id="u_unlockMin" style="margin-top:8px">🔓 לשנות את החסימה…</button>
       </div>
       <div class="top" style="justify-content:flex-end;gap:12px"><span class="stamp" id="u_dirtyL"></span><button class="btn" id="u_publish" style="font-size:15px;padding:11px 24px">🚀 פרסום עדכון</button></div>
-    </div>`;
+    </div></details>`;
+  updQuick(c);
   let enabled = c.enabled;
   const paintEnabled = () => { $("u_enabled").classList.toggle("on", enabled); $("u_enabledL").textContent = enabled ? "הודעות העדכון דלוקות באפליקציה" : "הודעות העדכון כבויות — אף מכשיר לא יראה עדכון"; };
   paintEnabled();
