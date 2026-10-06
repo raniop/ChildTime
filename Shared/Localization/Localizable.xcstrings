@@ -23351,6 +23351,28 @@
         }
       }
     },
+    "בהגדרות של כל ילד בוחרים ימים ושעות שבהם אי אפשר לפתוח דקות משחק. משחק פתוח נעצר, והדקות שנשארו חוזרות לארנק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في إعدادات كل طفل اختاروا الأيام والساعات التي لا يمكن فيها فتح دقائق اللعب. اللعب الجاري يتوقف، والدقائق المتبقية تعود إلى المحفظة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In each child's settings, choose the days and hours when play minutes can't be opened. A game in progress stops, and the minutes left go back to the wallet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В настройках каждого ребёнка выберите дни и часы, когда игровые минуты нельзя открыть. Начатая игра останавливается, а оставшиеся минуты возвращаются в кошелёк"
+          }
+        }
+      }
+    },
     "בהוספת ילד, הבחירה בין ילד לילדה מופיעה נכון באנגלית, ברוסית ובערבית" : {
       "localizations" : {
         "ar" : {
@@ -43809,6 +43831,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Школьное время"
+          }
+        }
+      }
+    },
+    "זמן בית ספר ושעת שינה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت المدرسة ووقت النوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "School time and bedtime"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Школьное время и время сна"
           }
         }
       }

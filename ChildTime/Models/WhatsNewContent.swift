@@ -55,6 +55,11 @@ enum WhatsNewContent {
     /// notes were dated — the first release, as one entry.
     static let releases: [Release] = [
 
+        Release(build: 203, version: "2026.10.6", headline: tr("זמן בית ספר ושעת שינה"), items: [
+            Item(emoji: "🏫", title: tr("זמן בית ספר ושעת שינה"),
+                 line: tr("בהגדרות של כל ילד בוחרים ימים ושעות שבהם אי אפשר לפתוח דקות משחק. משחק פתוח נעצר, והדקות שנשארו חוזרות לארנק")),
+        ]),
+
         Release(build: 202, version: "2026.10.6", headline: tr("שלוש דרגות בכל עולם, ופנייה נכונה לכל ילד וילדה"), items: [
             Item(emoji: "🏆", title: tr("שלוש דרגות בכל עולם"),
                  line: tr("כל עולם נפתח שוב בשלוש דרגות — ארד, כסף וזהב — וכל דרגה מאתגרת קצת יותר. מי שמסיים את שלושתן מקבל כתר של אלוף או אלופה 👑")),
