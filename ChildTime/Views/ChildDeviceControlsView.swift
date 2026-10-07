@@ -89,6 +89,31 @@ struct ChildDeviceControlsView: View {
                 .frame(maxWidth: 520)
                 .frame(maxWidth: .infinity)
             }
+
+            // ✕ always in reach — "סְגִירָה" sits at the very bottom, and the
+            // sheet's swipe-down did not dismiss it for Rani on a real phone.
+            VStack {
+                HStack {
+                    Button {
+                        Haptic.light()
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(.white)
+                            .frame(width: 40, height: 40)
+                            .background(.white.opacity(0.22), in: Circle())
+                            .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(tr("סְגִירָה"))
+                    Spacer()
+                }
+                .awayFromBar()
+                Spacer()
+            }
+            .padding(.horizontal, AppSpacing.md)
+            .padding(.top, AppSpacing.sm)
         }
         .environment(\.layoutDirection, .app)
         .onAppear {
