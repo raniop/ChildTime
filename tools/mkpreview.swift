@@ -30,7 +30,10 @@ Task {
     let natural = try! await track.load(.naturalSize)
     var tracks: [URL: AVAssetTrack] = [src: track]
     var assets = [asset]                    // a track is only valid while its asset lives
-    let scale = max(CGFloat(W) / natural.width, CGFloat(H) / natural.height)
+    // FIT=1 letterboxes instead of filling — a portrait phone clip inside a landscape video.
+    let fit = ProcessInfo.processInfo.environment["FIT"] == "1"
+    let scale = fit ? min(CGFloat(W) / natural.width, CGFloat(H) / natural.height)
+                    : max(CGFloat(W) / natural.width, CGFloat(H) / natural.height)
     let dx = (CGFloat(W) - natural.width * scale) / 2, dy = (CGFloat(H) - natural.height * scale) / 2
 
     let comp = AVMutableComposition()
