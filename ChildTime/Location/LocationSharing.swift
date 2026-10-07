@@ -78,6 +78,7 @@ final class LocationSharing: NSObject, ObservableObject {
     private let manager = CLLocationManager()
     private var bag = Set<AnyCancellable>()
     private var lastWrite: Date = .distantPast
+    private var lastReported: String?
     private var waiters: [CheckedContinuation<Void, Never>] = []
     private var player: AVAudioPlayer?
     #if canImport(FirebaseFirestore)
@@ -168,6 +169,18 @@ final class LocationSharing: NSObject, ObservableObject {
         manager.requestLocation()
     }
 
+    /// Tofy came to the front on the child's phone: a fresh fix now (a phone
+    /// that only allows "while using" can share ONLY now), the fences again
+    /// (a place added while the phone slept), and what the phone allows.
+    func appBecameActive() {
+        guard enabledHere else { return }
+        reportPermission()
+        guard hasPermission else { return }
+        lastWrite = .distantPast
+        syncRegions()
+        manager.requestLocation()
+    }
+
     private func stopSharing() {
         enabledHere = false
         manager.stopMonitoringSignificantLocationChanges()
@@ -247,7 +260,8 @@ final class LocationSharing: NSObject, ObservableObject {
     /// say why. Writes only the permission field.
     private func reportPermission() {
         #if canImport(FirebaseFirestore)
-        guard let cid = childID, enabledHere else { return }
+        guard let cid = childID, enabledHere, permissionName != lastReported else { return }
+        lastReported = permissionName
         db.collection("children").document(cid).collection("location").document(Self.fixDoc)
             .setData(["permission": permissionName, "platform": "ios", "kind": DeviceIdentity.kind,
                       "deviceID": DeviceIdentity.installID], merge: true)
@@ -388,8 +402,13 @@ final class LocationSharing: NSObject, ObservableObject {
         #endif
     }
 
+    /// childID → when the parent last asked for a fresh fix (the card says
+    /// "מרענן…", then why nothing came if the phone did not answer).
+    @Published private(set) var refreshedAt: [String: Date] = [:]
+
     /// "רענון" (and the map opening): ask each sharing child's phone for a fix.
     func refresh(childIDs: [String]) {
+        for cid in childIDs { refreshedAt[cid] = Date() }
         #if canImport(FirebaseFirestore)
         let me = Auth.auth().currentUser?.uid ?? ""
         for cid in childIDs {
@@ -454,7 +473,7 @@ extension LocationSharing: CLLocationManagerDelegate {
                 UserDefaults.standard.set(true, forKey: key)
                 manager.requestAlwaysAuthorization()
             }
-            if self.enabledHere { self.startSharing() }
+            if self.enabledHere { self.reportPermission(); self.startSharing() }
         }
     }
 

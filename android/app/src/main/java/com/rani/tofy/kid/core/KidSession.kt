@@ -192,6 +192,7 @@ object KidSession : LeaseHost {
 
     fun onForeground() {
         val cid = childID ?: return
+        if (!kidMode) com.rani.tofy.kid.location.KidLocation.appBecameActive()
         edit { it.applyDailyRolloverIfNeeded() }
         tick()
         leases.reconcileOfflineWindowIfNeeded(cid)

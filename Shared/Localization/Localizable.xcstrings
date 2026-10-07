@@ -39141,6 +39141,72 @@
         }
       }
     },
+    "הטלפון של %@ לא ענה — כנראה הוא כבוי או בלי אינטרנט, או שטופי סגור בו לגמרי. כשטופי ייפתח בו, המיקום יתעדכן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يستجب هاتف %@ — ربما هو مطفأ أو بلا إنترنت أو Tofy مغلق فيه تمامًا. سيتحدث الموقع فور فتح Tofy عليه"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s phone didn't answer — it may be off, offline, or Tofy is fully closed on it. The location updates as soon as Tofy opens there"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Телефон %@ не ответил — возможно, он выключен, без интернета или Tofy на нём полностью закрыт. Местоположение обновится, как только Tofy откроют"
+          }
+        }
+      }
+    },
+    "הטלפון של %@ מאשר מיקום רק בזמן השימוש, ולכן לא עונה לרענון — בטלפון שלה: הגדרות ← טופי ← מיקום ← תמיד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هاتف %@ يسمح بالموقع أثناء الاستخدام فقط، لذلك لا يستجيب للتحديث — على هاتفها: الإعدادات ← Tofy ← الموقع ← دائمًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s phone allows location only while using the app, so it can't answer a refresh — on her phone: Settings → Tofy → Location → Always"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Телефон %@ разрешает геолокацию только при использовании, поэтому не отвечает на обновление — на её телефоне: Настройки → Tofy → Геопозиция → Всегда"
+          }
+        }
+      }
+    },
+    "הטלפון של %@ מאשר מיקום רק בזמן השימוש, ולכן לא עונה לרענון — בטלפון שלו: הגדרות ← טופי ← מיקום ← תמיד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هاتف %@ يسمح بالموقع أثناء الاستخدام فقط، لذلك لا يستجيب للتحديث — على هاتفه: الإعدادات ← Tofy ← الموقع ← دائمًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s phone allows location only while using the app, so it can't answer a refresh — on his phone: Settings → Tofy → Location → Always"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Телефон %@ разрешает геолокацию только при использовании, поэтому не отвечает на обновление — на его телефоне: Настройки → Tofy → Геопозиция → Всегда"
+          }
+        }
+      }
+    },
     "הטלפון של %@ נעול, והוא מרוויח זמן מסך על כל תשובה נכונה" : {
       "localizations" : {
         "ar" : {
@@ -71830,6 +71896,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Расстояние до экрана"
+          }
+        }
+      }
+    },
+    "מרענן…" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جارٍ التحديث…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refreshing…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обновляем…"
           }
         }
       }

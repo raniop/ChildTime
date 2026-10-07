@@ -260,6 +260,13 @@ struct ParentLocationView: View {
                         .background(Color.black.opacity(0.18), in: Capsule())
                 }
             }
+            // "רענון" got no answer within 30 s — say why, instead of nothing.
+            if let why = refreshUnanswered(p) {
+                Text(why)
+                    .font(.system(size: 12.5, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color(hex: "FFE58A"))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             // Allowed "while using" only: the map works, arrive/leave alerts need
             // "always" — say exactly where that is, once, in the card.
             if current?.permission == "whenInUse" {
@@ -294,7 +301,7 @@ struct ParentLocationView: View {
                 HStack(spacing: 10) {
                     beepButton(cid: cid, deviceID: devices.count > 1 ? current?.deviceID : nil)
                     Button { Haptic.light(); loc.refresh(childIDs: [cid]) } label: {
-                        Text(tr("↻ רענון"))
+                        Text(isRefreshing(cid) ? tr("מרענן…") : tr("↻ רענון"))
                             .font(.system(size: 15, weight: .heavy, design: .rounded))
                             .frame(maxWidth: .infinity, minHeight: 48)
                             .background(Color.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -314,6 +321,28 @@ struct ParentLocationView: View {
         .foregroundStyle(.white)
         .padding(14)
         .glassPane(radius: 22, shadow: false)
+    }
+
+    private func isRefreshing(_ cid: String) -> Bool {
+        guard let at = loc.refreshedAt[cid], now.timeIntervalSince(at) < 30 else { return false }
+        let newest = (loc.fixes[cid] ?? []).map(\.at).max() ?? 0
+        return newest < at.timeIntervalSince1970 - 5
+    }
+
+    /// The parent asked 30 s–10 min ago and no fix came: the honest reason.
+    private func refreshUnanswered(_ p: Profile) -> String? {
+        let cid = p.id.uuidString
+        guard let at = loc.refreshedAt[cid] else { return nil }
+        let waited = now.timeIntervalSince(at)
+        let newest = (loc.fixes[cid] ?? []).map(\.at).max() ?? 0
+        guard waited >= 30, waited < 600, newest < at.timeIntervalSince1970 - 5 else { return nil }
+        let name = Question.stripNiqqud(p.name)
+        if (loc.fixes[cid] ?? []).contains(where: { $0.permission == "whenInUse" }) {
+            return p.gender == .girl
+                ? tr("הטלפון של \(name) מאשר מיקום רק בזמן השימוש, ולכן לא עונה לרענון — בטלפון שלה: הגדרות ← טופי ← מיקום ← תמיד")
+                : tr("הטלפון של \(name) מאשר מיקום רק בזמן השימוש, ולכן לא עונה לרענון — בטלפון שלו: הגדרות ← טופי ← מיקום ← תמיד")
+        }
+        return tr("הטלפון של \(name) לא ענה — כנראה הוא כבוי או בלי אינטרנט, או שטופי סגור בו לגמרי. כשטופי ייפתח בו, המיקום יתעדכן")
     }
 
     /// Rings the device on screen (all of them when the child has one).

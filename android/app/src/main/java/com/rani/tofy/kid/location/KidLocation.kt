@@ -160,6 +160,16 @@ object KidLocation {
         freshFixAsync()
     }
 
+    /** Tofy came to the front: a fresh fix (a "while using" phone can share ONLY now) + fences. */
+    fun appBecameActive() {
+        if (!_enabled.value) return
+        reportPermission()
+        if (!hasFine()) return
+        prefs.edit().putLong("lastWrite", 0).apply()
+        syncGeofences()
+        freshFixAsync()
+    }
+
     private fun stop() {
         runCatching { LocationServices.getFusedLocationProviderClient(app).removeLocationUpdates(updatesIntent()) }
         runCatching { LocationServices.getGeofencingClient(app).removeGeofences(fenceIntent()) }

@@ -346,6 +346,7 @@ struct ChildTimeApp: App {
                             progress.applyDailyRolloverIfNeeded()
                         }
                         StopAndSaveBridge.applyIfRequested()   // Live Activity "עצור ושמור" fallback
+                        LocationSharing.shared.appBecameActive()   // 📍 child device: a fresh fix + fences
                         ShieldManager.shared.refreshStatus()   // Screen Time approved in Settings meanwhile?
                         // 🔑 Re-mint Screen Time tokens that iOS expired while we
                         // were away — an expired token silently stops shielding

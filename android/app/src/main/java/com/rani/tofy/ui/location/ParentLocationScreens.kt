@@ -212,6 +212,16 @@ private fun KidCard(ctx: Context, c: Child, places: List<FamilyPlace>, picked: M
                     modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.18f)).padding(horizontal = 10.dp, vertical = 4.dp))
             }
         }
+        // "רענון" got no answer within 30 s — the honest reason, not silence.
+        val asked = LocationRepository.refreshedAt.value[c.id]
+        val newest = all.maxOfOrNull { it.at } ?: 0.0
+        val waiting = asked != null && newest < asked - 5
+        if (waiting && now - asked!! in 30.0..600.0) Text(
+            if (all.any { it.permission == "whenInUse" }) {
+                if (c.isGirl) tr("הטלפון של %@ מאשר מיקום רק בזמן השימוש, ולכן לא עונה לרענון — בטלפון שלה: הגדרות ← טופי ← מיקום ← תמיד", name)
+                else tr("הטלפון של %@ מאשר מיקום רק בזמן השימוש, ולכן לא עונה לרענון — בטלפון שלו: הגדרות ← טופי ← מיקום ← תמיד", name)
+            } else tr("הטלפון של %@ לא ענה — כנראה הוא כבוי או בלי אינטרנט, או שטופי סגור בו לגמרי. כשטופי ייפתח בו, המיקום יתעדכן", name),
+            color = Color(0xFFFFE58A), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 12.5.sp)
         if (current?.permission == "whenInUse") Text(tr("כדי לקבל התראות הגעה: בטלפון של %@ ← הגדרות ← טופי ← מיקום ← תמיד", name),
             color = Color(0xFFFFE58A), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 12.5.sp)
         if (devices.size > 1 && current != null) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -232,7 +242,7 @@ private fun KidCard(ctx: Context, c: Child, places: List<FamilyPlace>, picked: M
                 modifier = Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(Brush.horizontalGradient(listOf(Pink, Orange)))
                     .clickable { LocationRepository.beep(c.id, if (devices.size > 1) current?.deviceID else null, stop = ringing) }
                     .padding(vertical = 14.dp))
-            Text(tr("↻ רענון"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, textAlign = TextAlign.Center,
+            Text(if (waiting && now - asked!! < 30) tr("מרענן…") else tr("↻ רענון"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.18f))
                     .clickable { LocationRepository.refresh(listOf(c.id)) }.padding(vertical = 14.dp))
         } else Text(tr("📍 הפעלת מיקום ל%@", name), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 16.sp,

@@ -79,7 +79,11 @@ object LocationRepository {
     }
 
     /** The map opened / "רענון": ask each child's phone for a fresh fix. */
+    /** childID → when the parent last asked (unix s) — "מרענן…", then why nothing came. */
+    val refreshedAt = MutableStateFlow<Map<String, Double>>(emptyMap())
+
     fun refresh(childIDs: List<String>) {
+        refreshedAt.value = refreshedAt.value + childIDs.associateWith { System.currentTimeMillis() / 1000.0 }
         val me = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         childIDs.forEach { cid ->
             db.collection("children").document(cid).collection("location").document("request")
