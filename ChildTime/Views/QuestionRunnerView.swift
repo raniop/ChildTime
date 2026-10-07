@@ -1307,6 +1307,12 @@ struct QuestionRunnerView: View {
         questionShownAt = Date()
         // Read the instruction aloud automatically for early readers.
         if preReader { SpeechReader.shared.speak(q.readAloudText) }
+        #if DEBUG
+        // 📏 DEMO_AUTOTAP: answer each question correctly after 2.5s, to time the tap path.
+        if ProcessInfo.processInfo.environment["DEMO_AUTOTAP"] != nil {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { pickOption(q.correctIndex, q: q) }
+        }
+        #endif
     }
 
     /// ⚡ After 12–15 questions (twice a session at most) — never in the bonus
@@ -1388,6 +1394,19 @@ struct QuestionRunnerView: View {
 
     // MARK: - Picking
 
+    /// 👆 The tap's answer first, the bookkeeping right after. Recording an
+    /// answer (progress, learning history, the parent's live feed, the wallet)
+    /// took ~60ms on the main thread on an M-series simulator — several times
+    /// that on a child's older iPad — and the green / red tile could not draw
+    /// until it finished (Rani: "יש סוג של דיליי כזה" on Dan's iPad). So the
+    /// tile's new state is set synchronously and this runs a moment later.
+    /// A timer, not `main.async`: the frame is committed only when the run
+    /// loop is about to sleep, and queued main-queue work keeps it awake — a
+    /// timer guarantees it sleeps (and draws) first. 30ms is two frames.
+    private func afterThisFrame(_ work: @escaping () -> Void) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.03, execute: work)
+    }
+
     private func pickOption(_ idx: Int, q: Question) {
         SpeechReader.shared.stop()   // the child answered — don't keep reading a question that's gone
         // A tap must belong to the question ON SCREEN. If a stale option view
@@ -1419,7 +1438,7 @@ struct QuestionRunnerView: View {
             }
             feedbackForIndex = map
             showFeedback = true
-            handleCorrect(q: q)
+            afterThisFrame { handleCorrect(q: q) }
             // If the child stumbled on this one, queue it to re-ask later — the
             // only question that's allowed to repeat in a session.
             if hadMistakeThisQuestion, !reAskQueue.contains(where: { $0.question.prompt == q.prompt }) {
@@ -1433,7 +1452,7 @@ struct QuestionRunnerView: View {
             // 💫 Bonus: the rare event is its own challenge — flash the pick red,
             // dim it, and let the kid keep trying on THIS question (old behavior).
             feedbackForIndex[idx] = .wrong
-            handleWrong(q: q)
+            afterThisFrame { handleWrong(q: q) }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
                     feedbackForIndex[idx] = .dimmed
@@ -1446,7 +1465,7 @@ struct QuestionRunnerView: View {
             // coming back to it after a breather teaches better (Rani).
             // Do NOT reveal the correct answer.
             feedbackForIndex[idx] = .wrong
-            handleWrong(q: q)
+            afterThisFrame { handleWrong(q: q) }
             if !reAskQueue.contains(where: { $0.question.prompt == q.prompt }) {
                 reAskQueue.append((q, questionIndex + reAskSpacing))
             }
