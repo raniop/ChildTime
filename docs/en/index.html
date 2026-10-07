@@ -141,6 +141,23 @@
   .card p{color:var(--muted);font-size:15.5px}
   @media(max-width:820px){.steps,.cards{grid-template-columns:1fr}}
 
+  /* ---------- getting started: two steps, each with its real screen ---------- */
+  .start{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;max-width:960px;margin:0 auto}
+  .start-step{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:20px;align-items:center;padding:28px 26px}
+  .start-step .n{width:42px;height:42px;line-height:40px;border-radius:50%;text-align:center;font-weight:900;
+    background:linear-gradient(180deg,#FFE28A,#FFC23D);color:#3B2A00;margin-bottom:12px}
+  .start-step h3{font-size:21px;font-weight:900;margin-bottom:8px}
+  .start-step p{color:var(--muted);font-size:15.5px}
+  .start-step img{width:150px;border-radius:22px;border:1px solid rgba(255,255,255,.2);
+    box-shadow:0 18px 40px rgba(18,9,58,.4)}
+  .start-note{text-align:center;color:var(--faint);font-size:15px;margin-top:22px}
+  .start-cta{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:24px}
+  @media(max-width:820px){
+    .start{grid-template-columns:1fr}
+    .start-step{grid-template-columns:minmax(0,1fr) 112px;padding:22px 20px}
+    .start-step img{width:112px;border-radius:18px}
+  }
+
   /* ---------- safety band ---------- */
   .band{padding:48px 30px;text-align:center}
   .band .list{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:26px}
@@ -205,11 +222,10 @@
   <a class="brand" href="./"><img src="../lion.png" alt=""><span>Tofy</span><span class="visually-hidden"> — home</span></a>
   <button class="menu-btn" id="menuBtn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav">☰</button>
   <nav class="site-nav" id="nav" aria-label="Main">
-    <a href="#how">How it works</a>
-    <a href="#games">Games</a>
+    <a href="#what">What is Tofy</a>
+    <a href="#reports">Parent report</a>
+    <a href="#start">Getting started</a>
     <a href="#screens">Sneak peek</a>
-    <a href="#worlds">Worlds</a>
-    <a href="#reports">For parents</a>
     <a href="#price">Pricing</a>
     <a class="btn" href="https://apps.apple.com/app/id6773805449" data-store>Get Tofy</a>
   </nav>
@@ -229,7 +245,7 @@
 <section class="hero"><div class="wrap">
   <div>
     <h1>Screen time<br>they earn by learning</h1>
-    <p class="sub">Your child answers grade-level questions — and earns real play minutes in the apps you choose. You see everything from your own phone.</p>
+    <p class="sub">No more fights over screens. Your child answers grade-level questions and earns play minutes — and you see what they’re learning and stay in control from your own phone.</p>
     <div class="cta-row">
       <a class="appstore" href="https://apps.apple.com/app/id6773805449" data-store>
         <svg viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM262.1 104.5c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
@@ -239,13 +255,14 @@
         <svg viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M96 52c-9 5-14 15-14 28v352c0 13 5 23 14 28l200-204L96 52zm226 178 58-59L130 30c-6-3-12-4-17-3l209 203zm0 52L113 485c5 1 11 0 17-3l250-141-58-59zm88-104-58 61 58 59 58-33c20-11 20-43 0-54l-58-33z"/></svg>
         <span class="tx"><small>Coming soon to</small><b>Google&nbsp;Play</b></span>
       </a>
-      <a class="btn ghost" href="#how">How it works ↓</a>
+      <a class="btn ghost" href="#start">Getting started ↓</a>
     </div>
     <ul class="pills">
-      <li><span aria-hidden="true">🎒</span> Grades K–8</li>
+      <li><span aria-hidden="true">🎒</span> Kindergarten to 8th grade</li>
       <li><span aria-hidden="true">🚫</span> No ads</li>
       <li><span aria-hidden="true">🔒</span> No tracking</li>
       <li><span aria-hidden="true">🇺🇸</span> Fully in English</li>
+      <li><span aria-hidden="true">📱</span> iPhone &amp; Android</li>
     </ul>
   </div>
   <div class="stage">
@@ -269,30 +286,37 @@
   </div>
 </div></section>
 
-<!-- ===================== HOW ===================== -->
-<section id="how"><div class="wrap">
-  <div class="eyebrow reveal">SIMPLE AND CLEAR</div>
-  <h2 class="title reveal">How it works</h2>
-  <p class="lead reveal">Instead of fighting over screens, turn them into a fair deal where everyone wins.</p>
-  <div class="steps">
-    <div class="step pane reveal"><div class="n">1</div><div class="ico" aria-hidden="true">🧠</div>
-      <h3>Your child learns and plays</h3>
-      <p>Grade-level questions in math, reading, science, and more — inside a colorful adventure with a character, stars, and diamonds.</p></div>
-    <div class="step pane reveal"><div class="n">2</div><div class="ico" aria-hidden="true">🎮</div>
-      <h3>Earns play minutes</h3>
-      <p>Every correct answer is worth seconds of play time, and they add up to minutes. Once there are enough, the apps you blocked really open.</p></div>
-    <div class="step pane reveal"><div class="n">3</div><div class="ico" aria-hidden="true">📊</div>
-      <h3>You see it all and stay in control</h3>
-      <p>What they learned today, where they shine and where they need help, how much time is allowed, and which worlds are open — all behind a parent code.</p></div>
+<!-- ===================== 1 · WHAT — what parents get ===================== -->
+<section id="what"><div class="wrap">
+  <div class="eyebrow reveal">What is Tofy</div>
+  <h2 class="title reveal">What’s in it for you</h2>
+  <p class="lead reveal">Tofy is an app for the whole family: your child answers grade-level questions and earns play minutes in the apps you choose to lock. So what do you get?</p>
+  <div class="cards">
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🤝</div><h3>No more screen-time fights</h3>
+      <p>Time isn’t handed out or taken away by force. Your child earns it on their own — and you’re no longer the household screen police.</p></div>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🎒</div><h3>They learn without you pushing</h3>
+      <p>Questions for their grade in math, reading, English, and more. The level adjusts itself, and they come back because they want to.</p></div>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">📊</div><h3>Know what they’re strong at</h3>
+      <p>A report for every child, by subject: where they shine, where they need help, and what’s worth practicing together at home.</p></div>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">⏱</div><h3>You set the rules</h3>
+      <p>How much time a day, which apps are locked, school time, and bedtime. And you can unlock time remotely with one tap.</p></div>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">📍</div><h3>Know they’re OK</h3>
+      <p>See where the kids are right now, get an alert when they arrive home or at school, and ring a phone that went missing.</p></div>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🛡️</div><h3>Safe for kids</h3>
+      <p>No ads, no tracking, and no purchases on your child’s device. Every payment happens only on yours, behind a parent code.</p></div>
   </div>
 </div></section>
 
-<!-- ===================== SCREENS ===================== -->
-<!-- ===================== FOR PARENTS: what you learn about your child ===================== -->
+<!-- ===================== 2 · REPORTS — the proof: what you learn about your child ===================== -->
 <section id="reports"><div class="wrap">
   <div class="eyebrow reveal">What you get</div>
   <h2 class="title reveal">Know exactly where your child is strong — and where less so</h2>
   <p class="lead reveal">Every answer goes into a personal report that updates live on your phone. Not just how long they played — what they’re really learning, and where it’s worth helping.</p>
+  <div class="rail reveal" style="margin:4px 0 26px">
+    <figure><button class="shot" type="button"><img src="../shots/en/parentreport.jpg" alt="Weekly report: questions, success rate, minutes and insight" loading="lazy"></button><figcaption><span aria-hidden="true">📊</span> The weekly report</figcaption></figure>
+    <figure><button class="shot" type="button"><img src="../shots/en/parenttopics.jpg" alt="Performance by subject" loading="lazy"></button><figcaption><span aria-hidden="true">💪</span> Strong in… · less in…</figcaption></figure>
+    <figure><button class="shot" type="button"><img src="../shots/en/parentworlds.jpg" alt="Improvement, worlds and learning trend" loading="lazy"></button><figcaption><span aria-hidden="true">📈</span> Are they improving?</figcaption></figure>
+  </div>
   <div class="cards">
     <div class="card pane reveal"><div class="ico" aria-hidden="true">📊</div><h3>A report for every child</h3>
       <p>Today, this week and this month: questions answered, success rate, minutes earned and days in a row.</p></div>
@@ -307,13 +331,45 @@
     <div class="card pane reveal"><div class="ico" aria-hidden="true">🔔</div><h3>Real-time notifications</h3>
       <p>When your child starts, finishes or asks for help with a question — and you answer right from your phone.</p></div>
   </div>
-  <div class="rail reveal" style="margin-top:22px">
-    <figure><button class="shot" type="button"><img src="../shots/en/parentreport.jpg" alt="Weekly report: questions, success rate, minutes and insight" loading="lazy"></button><figcaption><span aria-hidden="true">📊</span> The weekly report</figcaption></figure>
-    <figure><button class="shot" type="button"><img src="../shots/en/parenttopics.jpg" alt="Performance by subject" loading="lazy"></button><figcaption><span aria-hidden="true">💪</span> Strong in… · less in…</figcaption></figure>
-    <figure><button class="shot" type="button"><img src="../shots/en/parentworlds.jpg" alt="Improvement, worlds and learning trend" loading="lazy"></button><figcaption><span aria-hidden="true">📈</span> Are they improving?</figcaption></figure>
+</div></section>
+
+<!-- ===================== 3 · START ===================== -->
+<section id="start"><div class="wrap">
+  <div class="eyebrow reveal">Getting started</div>
+  <h2 class="title reveal">Two steps, that’s it</h2>
+  <p class="lead reveal">A few minutes and your family is connected. It works the same on iPhone and Android.</p>
+  <div class="start">
+    <div class="start-step pane reveal">
+      <div>
+        <div class="n">1</div>
+        <h3>On your phone <span aria-hidden="true">📱</span></h3>
+        <p>Download Tofy, choose “My device (parent),” and create your family: a family name, plus your child’s name and grade. Every new family gets Tofy+ free for 30 days.</p>
+      </div>
+      <img src="../shots/en/start-family.jpg" alt="Creating a family on the parent’s phone: what’s your family called?" width="819" height="1781" loading="lazy">
+    </div>
+    <div class="start-step pane reveal">
+      <div>
+        <div class="n">2</div>
+        <h3>On your child’s device <span aria-hidden="true">🧒</span></h3>
+        <p>Download Tofy on your child’s phone or tablet, choose “My child’s device,” and scan the code shown on your phone. They’re connected, and everything syncs.</p>
+      </div>
+      <img src="../shots/en/start-join.jpg" alt="Connecting the child’s phone: scan the code from the parent’s phone" width="819" height="1781" loading="lazy">
+    </div>
+  </div>
+  <p class="start-note reveal">No device of their own? Your child can play on your phone, too.</p>
+  <div class="start-cta reveal">
+    <a class="appstore" href="https://apps.apple.com/app/id6773805449" data-store>
+      <svg viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM262.1 104.5c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+      <span class="tx"><small data-store-small>Download on the</small><b>App&nbsp;Store</b></span>
+    </a>
+    <a class="appstore play-soon" href="#android">
+      <svg viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M96 52c-9 5-14 15-14 28v352c0 13 5 23 14 28l200-204L96 52zm226 178 58-59L130 30c-6-3-12-4-17-3l209 203zm0 52L113 485c5 1 11 0 17-3l250-141-58-59zm88-104-58 61 58 59 58-33c20-11 20-43 0-54l-58-33z"/></svg>
+      <span class="tx"><small>In testing on</small><b>Google&nbsp;Play</b></span>
+    </a>
   </div>
 </div></section>
 
+<!-- ===================== SCREENS ===================== -->
 <section id="screens"><div class="wrap">
   <div class="eyebrow reveal">SNEAK PEEK</div>
   <h2 class="title reveal">Tofy in action</h2>
@@ -341,14 +397,14 @@
       <figure><button class="shot" type="button"><img src="../shots/en/childscreentime.jpg" alt="Daily screen time limit" loading="lazy"></button><figcaption><span aria-hidden="true">⏱</span> Daily limit</figcaption></figure>
       <figure><button class="shot" type="button"><img src="../shots/en/childworlds.jpg" alt="Active worlds for each child" loading="lazy"></button><figcaption><span aria-hidden="true">🌍</span> Worlds for each child</figcaption></figure>
       <figure><button class="shot" type="button"><img src="../shots/en/choresparent.jpg" alt="Chore approvals" loading="lazy"></button><figcaption><span aria-hidden="true">✅</span> Chore approvals</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="../shots/en/childdifficulty.jpg" alt="Difficulty level for each topic" loading="lazy"></button><figcaption><span aria-hidden="true">🎯</span> Level for each topic</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="../shots/en/location.jpg" alt="Where the kids are: a map with every child, where each one is and since when" loading="lazy"></button><figcaption><span aria-hidden="true">📍</span> Where the kids are</figcaption></figure>
     </div>
   </div>
 </div></section>
 
 <!-- ===================== GAMES ===================== -->
 <section id="games"><div class="wrap">
-  <div class="eyebrow reveal">New</div>
+  <div class="eyebrow reveal">Games</div>
   <h2 class="title reveal">12 games — your child picks how to answer</h2>
   <p class="lead reveal">Choosing a world opens “How do you want to play?” — regular questions or one of the games. The content is the same content, and the minutes are earned either way.</p>
   <div class="side reveal">
@@ -431,13 +487,15 @@
   <div class="band pane reveal">
     <div class="eyebrow">PEACE OF MIND</div>
     <h2 class="title">Built for you, too</h2>
-    <p class="lead" style="margin-bottom:0">Apps are blocked through Apple's Screen Time and open only once your child has earned the time. You set a daily limit, unlock time manually from anywhere, and get a notification when your child starts, finishes, or asks for help.</p>
+    <p class="lead" style="margin-bottom:0">Apps are blocked through Apple's Screen Time on iPhone and through Tofy's own permissions on Android, and open only once your child has earned the time. You set a daily limit, unlock time manually from anywhere, and get a notification when your child starts, finishes, asks for help, or gets home.</p>
     <ul class="list">
       <li><span aria-hidden="true">⏱</span> A daily limit for each child</li>
       <li><span aria-hidden="true">🎁</span> Unlock time remotely</li>
       <li><span aria-hidden="true">🎯</span> Difficulty for each topic</li>
       <li><span aria-hidden="true">🌍</span> Choose worlds for each child</li>
       <li><span aria-hidden="true">🔔</span> Smart notifications</li>
+      <li><span aria-hidden="true">📍</span> Where the kids are now</li>
+      <li><span aria-hidden="true">🌙</span> School time &amp; bedtime</li>
       <li><span aria-hidden="true">👨‍👩‍👧</span> Multiple parents, multiple kids</li>
       <li><span aria-hidden="true">⌚️</span> On Apple Watch, too</li>
       <li><span aria-hidden="true">🔐</span> Everything behind a parent code</li>
@@ -487,9 +545,9 @@
         <li>Every world unlocked</li>
         <li>For every child in the family, on every device</li>
         <li>Every new world we add is included</li>
-        <li>Cancel anytime in your Apple ID settings</li>
+        <li>Cancel anytime via your Apple ID or Google Play</li>
       </ul>
-      <div class="foot">Once your child really starts learning, we give you two weeks of Tofy+ as a gift. No credit card, and it doesn't renew.</div>
+      <div class="foot">Every new family gets Tofy+ free for 30 days from sign-up. No credit card, no auto-renew.</div>
     </div>
     <div class="plan pane reveal">
       <h3>Single world</h3>
@@ -510,19 +568,21 @@
   <h2 class="title reveal">Frequently asked questions</h2>
   <div class="faq" style="margin-top:32px">
     <details class="pane reveal"><summary>What ages is Tofy for?</summary>
-      <p>Kindergarten through 8th grade. During setup you pick your child's grade, and questions are served right at that level. Younger kids who can't read yet can play too, with questions read aloud.</p></details>
+      <p>Kindergarten through 8th grade, roughly ages 4 to 14. During setup you pick your child's grade, and questions are served right at that level. Younger kids who can't read yet can play too, with questions read aloud.</p></details>
     <details class="pane reveal"><summary>How is screen time actually blocked?</summary>
-      <p>Through Apple's Screen Time (Family Controls). You choose which apps are locked, and they open only once your child has earned minutes. You can always unlock time manually from your phone.</p></details>
+      <p>On iPhone, through Apple's Screen Time (Family Controls); on Android, through the accessibility and usage-access permissions Tofy gets on your child's device. You choose which apps are locked, and they open only once your child has earned minutes. You can always unlock time manually from your phone.</p></details>
     <details class="pane reveal"><summary>Do we need two devices?</summary>
-      <p>We recommend it: one device for your child and one for you. You can also connect several devices to the same child, and several parents to the same family — everything stays in sync.</p></details>
+      <p>We recommend it: one device for your child and one for you. But it isn't required — your child can play on your phone, too. You can also connect several devices to the same child, and several parents to the same family, and everything stays in sync.</p></details>
     <details class="pane reveal"><summary>Can my child buy something on their own?</summary>
       <p>No. Your child's device never shows prices. If they want a new world, they tap "Ask Mom or Dad" — and you decide.</p></details>
+    <details class="pane reveal"><summary>What about my child's location?</summary>
+      <p>Location sharing is off until you turn it on, separately for each child. Only the most recent location is kept — no history of where they've been — and only the parents in your family can see it.</p></details>
     <details class="pane reveal"><summary>Are there ads or tracking?</summary>
       <p>No. No ads, no advertising identifier, and no third-party analytics. Data is used only to save progress and sync between your family's devices. Read our <a href="privacy.html" style="text-decoration:underline">Privacy Policy</a>.</p></details>
     <details class="pane reveal"><summary>What about siblings?</summary>
       <p>One Tofy+ subscription unlocks every world for every child in the family. A single world is bought for one child, and it's half price for a brother or sister.</p></details>
     <details class="pane reveal"><summary>How much does it cost?</summary>
-      <p>You can start for free. Tofy+ is a monthly or yearly family subscription; the price is shown in the app in your local currency, and you can cancel anytime from your Apple ID settings. Once your child really starts learning, we unlock Tofy+ for two weeks as a gift — no credit card and no automatic renewal.</p></details>
+      <p>You can start for free. Tofy+ is a monthly or yearly family subscription; the price is shown in the app in your local currency, and you can cancel anytime via your Apple ID or Google Play. Every new family gets Tofy+ free for 30 days from sign-up — no credit card and no automatic renewal.</p></details>
   </div>
 </div></section>
 
@@ -535,7 +595,8 @@
     <p class="lead">Have an Android phone or tablet? Join the tester group and be among the first to get Tofy — before it reaches the store.</p>
     <ol class="android-steps">
       <li>Open the tester group and tap <b>“Join group”</b> — with the same Gmail account that’s signed in to Google Play on your phone.</li>
-      <li>Download Tofy from Google Play using the tester link.</li>
+      <li>Download Tofy from Google Play using the tester link, and create your family on your phone.</li>
+      <li>On your child's device: download Tofy, choose “My child’s device,” and scan the code from your phone.</li>
       <li>Keep Tofy installed for at least 14 days — that’s how Google approves it for everyone.</li>
     </ol>
     <div class="cta-row">
