@@ -6225,6 +6225,18 @@ exports.onLocationCommand = onDocumentWritten("children/{childID}/location/{docI
   try {
     if (docID === "request") {
       if (!(c.locationSharing && c.locationSharing.enabled === true)) return;
+      // At most one location push per child per minute, however often parents
+      // open the map or tap "רענון" (we told Apple so in the Location Push
+      // entitlement request). Server-only doc — no client rule reaches it.
+      const gate = db.collection("locationThrottle").doc(event.params.childID);
+      const allowed = await db.runTransaction(async (tx) => {
+        const g = await tx.get(gate);
+        const last = g.exists && g.data().sentAt ? g.data().sentAt.toMillis() : 0;
+        if (Date.now() - last < 60 * 1000) return false;
+        tx.set(gate, { sentAt: admin.firestore.Timestamp.now() });
+        return true;
+      });
+      if (!allowed) { console.log("[location-request] throttled", event.params.childID); return; }
       const res = await admin.messaging().sendEachForMulticast({
         tokens,
         data: { type: "location-request", childID: event.params.childID },
