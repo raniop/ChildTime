@@ -39,7 +39,99 @@ enum WhatsNewStories {
     /// "בָּא לָךְ", so a brother and a sister on one iPad must not share a cache
     /// entry the way two screens in one language can.
     static var byBuild: [Int: [StoryItem]] {
-        LocalizedCache.value("whatsNewStories.byBuild." + (Gendered.isGirl ? "f" : "m")) { [196: build187] }
+        LocalizedCache.value("whatsNewStories.byBuild." + (Gendered.isGirl ? "f" : "m")) { [196: build187, 208: build2026_10_7] }
+    }
+
+    /// 📍 2026.10.7 (keyed on 208 — a story key must be a build with release notes) — school
+    /// time and bedtime, and the whole location feature: where the kids are,
+    /// places with arrival alerts, the beep, and what stays private. A parent
+    /// coming from 2026.10.6 and a tester coming from 207 both get this run.
+    private static var build2026_10_7: [StoryItem] {
+        var items: [StoryItem] = []
+
+        items.append(StoryItem(
+            id: "208.where.parent",
+            art: .rows([
+                StoryRow(label: tr("🏫 נועה"), value: tr("בבית הספר · מאז 08:02")),
+                StoryRow(label: tr("🏠 דן"), value: tr("בבית")),
+                StoryRow(label: tr("🔋 הטלפון של נועה"), value: "56%"),
+            ]),
+            kicker: tr("מיקום"),
+            title: tr("לדעת איפה הילדים"),
+            line: tr("מפה עם המיקום האחרון של הטלפון של כל ילד, וכמה סוללה נשארה בו"),
+            audience: .parent,
+            seconds: 7,
+            priority: 3))
+
+        items.append(StoryItem(
+            id: "208.places.parent",
+            art: .rows([
+                StoryRow(label: tr("🏫 בית הספר"), value: tr("100 מ׳")),
+                StoryRow(label: tr("התראה כשמגיעים"), value: "", kind: .switchOn),
+                StoryRow(label: tr("התראה כשיוצאים"), value: "", kind: .switchOn),
+            ]),
+            kicker: tr("מקומות"),
+            title: tr("התראה כשמגיעים או יוצאים"),
+            line: tr("מסמנים מקומות קבועים כמו הבית ובית הספר, ומקבלים הודעה כשהילד מגיע או יוצא"),
+            audience: .parent,
+            seconds: 7,
+            priority: 2))
+
+        items.append(StoryItem(
+            id: "208.quiet.parent",
+            art: .rows([
+                StoryRow(label: tr("🏫 זמן בית ספר"), value: tr("א׳–ה׳ · 08:00–13:30")),
+                StoryRow(label: tr("🌙 שעת שינה"), value: tr("כל ערב · 20:30")),
+            ]),
+            kicker: tr("בית ספר ושינה"),
+            title: tr("זמן בית ספר ושעת שינה"),
+            line: tr("בהגדרות של כל ילד בוחרים ימים ושעות שבהם אי אפשר לפתוח דקות משחק. משחק פתוח נעצר, והדקות שנשארו חוזרות לארנק"),
+            audience: .parent,
+            seconds: 7,
+            priority: 3))
+
+        items.append(StoryItem(
+            id: "208.privacy.parent",
+            art: .emoji("🔒"),
+            kicker: tr("פרטיות"),
+            title: tr("רק אם תפעילו, ורק ההורים רואים"),
+            line: tr("המיקום כבוי כברירת מחדל ונשמר רק המיקום האחרון, בלי מסלול. מכבים בכל רגע, והוא נמחק מיד"),
+            audience: .parent,
+            seconds: 6.5,
+            priority: 2))
+
+        items.append(StoryItem(
+            id: "208.beep.parent",
+            art: .emoji("🔔"),
+            kicker: tr("טלפון שהלך לאיבוד"),
+            title: tr("צפצוף לטלפון"),
+            line: tr("לוחצים 🔔 והטלפון של הילד מצפצף, כדי שיהיה קל למצוא אותו"),
+            audience: .parent,
+            seconds: 6,
+            priority: 1))
+
+        // 👧 The child's side of it: the hours belong to the parents, the
+        // minutes stay the child's.
+        items.append(StoryItem(
+            id: "208.quiet.kid",
+            art: .emoji("🌙"),
+            title: tr("זְמַן בֵּית סֵפֶר וּשְׁעַת שֵׁינָה"),
+            line: Gendered.g(tr("אִם אַבָּא וְאִמָּא בָּחֲרוּ, בַּשָּׁעוֹת הָאֵלֶּה טוֹפִי נָח — וְהַדַּקּוֹת שֶׁלְּךָ מְחַכּוֹת לְךָ אַחַר כָּךְ"),
+                             tr("אִם אַבָּא וְאִמָּא בָּחֲרוּ, בַּשָּׁעוֹת הָאֵלֶּה טוֹפִי נָח — וְהַדַּקּוֹת שֶׁלָּךְ מְחַכּוֹת לָךְ אַחַר כָּךְ")),
+            audience: .child,
+            seconds: 6,
+            priority: 2))
+
+        items.append(StoryItem(
+            id: "208.closing.kid",
+            art: .gift(.childsBuddy, stars: Self.watchStars, diamonds: Self.watchDiamonds),
+            title: tr("בּוֹאוּ נְשַׂחֵק! 🚀"),
+            line: Gendered.g(tr("הִנֵּה מַתָּנָה קְטַנָּה בִּשְׁבִילְךָ 🎁"), tr("הִנֵּה מַתָּנָה קְטַנָּה בִּשְׁבִילֵךְ 🎁")),
+            audience: .child,
+            seconds: 6,
+            priority: 3))
+
+        return items
     }
 
     /// 🎮 Build 187 — the twelve mini-games, the chooser in front of them, the
@@ -452,6 +544,34 @@ enum WhatsNewStories {
 
     @MainActor
     static func markParentShown() { WhatsNewContent.markShown() }
+
+    // MARK: - ✨ The parent's story is an INVITATION, not a cover
+
+    /// Rani, 2026.10.7: a story that plays by itself is the wrong way to greet a
+    /// parent who opened Tofy to check on a child. After an update the parent
+    /// gets the short "מה חדש" list; the story waits behind a gold ✨ ring next
+    /// to the 🔔 until they choose to watch it. Nothing sits above the children.
+    private static let storyWatchedKey = "whatsNew.parentStoryWatched"
+
+    /// This version's parent story — every build of the version in hand, so a
+    /// parent coming from the last App Store release sees all of it.
+    static var parentStoryForThisVersion: [StoryItem] {
+        let build = Int(AppInfo.build) ?? 0
+        let builds = WhatsNewContent.releases
+            .filter { $0.version == WhatsNewContent.currentVersion && $0.build <= build }
+            .map(\.build)
+        return items(for: .parent, unseenBuilds: builds)
+    }
+
+    /// The ✨ ring is gold while this version's story has not been opened.
+    static var parentStoryUnwatched: Bool {
+        !parentStoryForThisVersion.isEmpty
+            && UserDefaults.standard.string(forKey: storyWatchedKey) != WhatsNewContent.currentVersion
+    }
+
+    static func markParentStoryWatched() {
+        UserDefaults.standard.set(WhatsNewContent.currentVersion, forKey: storyWatchedKey)
+    }
 
     // MARK: - 👧 Shown once, per child
 

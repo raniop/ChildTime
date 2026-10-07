@@ -16,11 +16,14 @@ struct WhatsNewView: View {
     @State private var showHistory = false
 
     /// What this sheet lists. Re-opened by hand after everything was already
-    /// seen, it falls back to the newest update rather than showing nothing.
+    /// seen, it shows this whole version (Rani: everything since the last App
+    /// Store release), and only then the newest update.
     private var items: [WhatsNewContent.Item] {
         if let release { return release.items }
         let unseen = WhatsNewContent.unseenItems
-        return unseen.isEmpty ? (WhatsNewContent.releases.first?.items ?? []) : unseen
+        if !unseen.isEmpty { return unseen }
+        let version = WhatsNewContent.thisVersionItems
+        return version.isEmpty ? (WhatsNewContent.releases.first?.items ?? []) : version
     }
 
     /// How many updates this catches the parent up on. Reading one is "the

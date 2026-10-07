@@ -65,7 +65,7 @@ enum WhatsNewContent {
                  line: tr("מפה עם הילדים, התראה כשמגיעים לבית הספר או הביתה, וצפצוף לטלפון שהלך לאיבוד. רק אם תפעילו, ורק ההורים רואים")),
         ]),
 
-        Release(build: 203, version: "2026.10.6", headline: tr("זמן בית ספר ושעת שינה"), items: [
+        Release(build: 203, version: "2026.10.7", headline: tr("זמן בית ספר ושעת שינה"), items: [
             Item(emoji: "🏫", title: tr("זמן בית ספר ושעת שינה"),
                  line: tr("בהגדרות של כל ילד בוחרים ימים ושעות שבהם אי אפשר לפתוח דקות משחק. משחק פתוח נעצר, והדקות שנשארו חוזרות לארנק")),
         ]),
@@ -366,10 +366,26 @@ enum WhatsNewContent {
     /// build that has not shipped yet must not appear on the build in hand.
     static var unseenReleases: [Release] {
         guard let seen = seenBuild else { return [] }   // fresh install: nothing is "new"
-        return releases.filter { $0.build > seen && $0.build <= currentBuild }
+        return releases.filter { $0.build > min(seen, versionFloor) && $0.build <= currentBuild }
+    }
+
+    /// The last build BEFORE the version in hand. Rani: "אתה אמור להציג את כל
+    /// הדברים החדשים מהגרסה האחרונה שאושרה באפל" — a tester who already saw
+    /// build 207 of 2026.10.7 is shown all of 2026.10.7 on 208, not only 208's
+    /// one line, because that whole version is what the App Store parent gets.
+    /// It widens WHAT is shown, never WHEN (`shouldShow` still asks for a build
+    /// this install has not opened yet).
+    private static var versionFloor: Int {
+        (releases.filter { $0.version == currentVersion }.map(\.build).min() ?? (currentBuild + 1)) - 1
     }
 
     static var unseenItems: [Item] { unseenReleases.flatMap(\.items) }
+
+    /// Everything the version in hand brought, newest build first — what the
+    /// sheet shows when it is opened again by hand.
+    static var thisVersionItems: [Item] {
+        releases.filter { $0.version == currentVersion && $0.build <= currentBuild }.flatMap(\.items)
+    }
 
     /// Real parents should see the notes once per RELEASE, not on every internal
     /// upload. Testers need the opposite. Both fall out of the same list: on the
@@ -380,6 +396,9 @@ enum WhatsNewContent {
             UserDefaults.standard.set(seenToken, forKey: seenKey)   // fresh install → just record
             return false
         }
+        // Only on a build this install has not opened yet — the version floor
+        // above widens the content, and must not bring the sheet back daily.
+        guard (seenBuild ?? 0) < currentBuild else { return false }
         return !unseenItems.isEmpty
     }
 

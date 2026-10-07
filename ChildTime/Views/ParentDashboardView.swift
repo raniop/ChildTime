@@ -348,10 +348,14 @@ struct ParentDashboardView: View {
             case .support:
                 openSupportChat()
             case .whatsNew:
-                if WhatsNewStories.parentItems.isEmpty {
+                // The bell's "גרסה חדשה" row plays THIS version's story — it used
+                // to fall back to the newest story table entry, an older build's.
+                let story = WhatsNewStories.parentStoryForThisVersion
+                if story.isEmpty {
                     showWhatsNew = true
                 } else {
-                    whatsNewStory = WhatsNewStories.parentItems
+                    whatsNewStory = story
+                    WhatsNewStories.markParentStoryWatched()
                     showWhatsNewStory = true
                 }
             case .child:
@@ -800,22 +804,14 @@ struct ParentDashboardView: View {
                     // greeted again on the next launch.
                     SchoolYearCelebration.markParentGreeted()
                     showSchoolYearParty = true
-                } else if isRoot, WhatsNewStories.parentShouldShow {
-                    // 📖 Once per app UPDATE, and with no action from the parent:
-                    // the story of what changed, in parent language. Marked on
-                    // SHOW (like the September party) — an exit that skipped the
-                    // dismiss closure used to leave it unmarked and it opened
-                    // again on the next launch.
-                    whatsNewStory = WhatsNewStories.parentItems
-                    WhatsNewStories.markParentShown()
-                    showWhatsNewStory = true
                 } else if isRoot, GiftWelcome.isDue(household.household) {
                     // 🎁 The family's gift just opened (or was stretched to 30
                     // days) — the parent hears it as a moment, once.
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { showGiftWelcome = true }
                 } else if isRoot, WhatsNewContent.shouldShow {
-                    // A build with notes but no story of its own still gets the
-                    // old sheet, so nothing a parent should read can go missing.
+                    // 📋 Once per update: the short list of what is new. The story
+                    // no longer opens by itself on the parent's side (Rani,
+                    // 2026.10.7) — it waits behind the ✨ ring by the 🔔.
                     showWhatsNew = true
                 } else if isRoot, !rows.isEmpty, household.household != nil,
                           household.familyNameShown == nil, shouldAskFamilyName {
@@ -1529,6 +1525,26 @@ struct ParentDashboardView: View {
     // `ActivityOffers.current` and routed back here by `openOffer`, so every one
     // of them still leads exactly where its pane led.
 
+    /// ✨ This version's story, one tap away — a gold ring while it is unwatched,
+    /// a plain glass circle after. It opens only when the parent taps it.
+    private var storyRing: some View {
+        let fresh = WhatsNewStories.parentStoryUnwatched
+        return Button {
+            Haptic.light()
+            whatsNewStory = WhatsNewStories.parentStoryForThisVersion
+            WhatsNewStories.markParentStoryWatched()
+            showWhatsNewStory = true
+        } label: {
+            Text("✨")
+                .font(.system(size: 17))
+                .frame(width: 40, height: 40)
+                .background(Circle().fill(Color.white.opacity(0.22)))
+                .overlay(Circle().stroke(fresh ? Color(hex: "FFD84A") : .white.opacity(0.32), lineWidth: fresh ? 2.5 : 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(tr("מה חדש בטופי"))
+    }
+
     /// "שלום עמית 👋" and one true line about the family — in the page, like the mockup.
     private var homeHeader: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -1548,6 +1564,9 @@ struct ParentDashboardView: View {
                 .coachMark("p.gear")
                 ActivityBellButton(unread: activity.unread) { showingActivity = true }
                     .coachMark("p.bell")
+                if !WhatsNewStories.parentStoryForThisVersion.isEmpty {
+                    storyRing
+                }
             }
             VStack(alignment: .trailing, spacing: 4) {
                 // The family's name IS the title (Rani); tap to name / rename.
@@ -1558,7 +1577,7 @@ struct ParentDashboardView: View {
                 } label: {
                     HStack(spacing: 8) {
                         Text("✏️").font(.system(size: 14)).opacity(0.7)
-                        Text(household.familyNameShown.map { "\($0) 👋" } ?? greetingLine)
+                        Text(household.familyNameShown ?? greetingLine)
                             .font(.system(size: 24, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .lineLimit(1).minimumScaleFactor(0.7)
@@ -1755,7 +1774,7 @@ struct ParentDashboardView: View {
     private var greetingLine: String {
         let first = (auth.displayName ?? "")
             .split(separator: " ").first.map(String.init) ?? ""
-        return first.isEmpty ? tr("שָׁלוֹם 👋") : tr("שָׁלוֹם \(first) 👋")
+        return first.isEmpty ? tr("שָׁלוֹם") : tr("שָׁלוֹם \(first)")
     }
 
     /// One short line from real family data — picked by priority so it's always

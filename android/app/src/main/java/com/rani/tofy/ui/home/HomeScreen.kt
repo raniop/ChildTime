@@ -152,7 +152,7 @@ private fun Header(state: FamilyState, onSettings: () -> Unit, onBell: () -> Uni
     val playing = state.orderedChildren.firstOrNull { state.liveWindow(it) != null }
     Row(Modifier.fillMaxWidth().padding(top = 6.dp), verticalAlignment = Alignment.Top) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            H(if (first.isNotEmpty()) tr("שָׁלוֹם %@ 👋", first) else tr("שָׁלוֹם 👋"), 27)
+            H(if (first.isNotEmpty()) tr("שָׁלוֹם %@", first) else tr("שָׁלוֹם"), 27)
             val parts = buildList {
                 state.household?.familyName?.let { add(it) }
                 add(when (kids) { 0 -> tr("עוֹד אֵין יְלָדִים"); 1 -> tr("יֶלֶד אֶחָד"); 2 -> tr("שְׁנֵי יְלָדִים"); else -> tr("%lld יְלָדִים", kids) })

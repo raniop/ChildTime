@@ -11465,6 +11465,28 @@
         }
       }
     },
+    "100 מ׳" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "100 م"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "100 m"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "100 м"
+          }
+        }
+      }
+    },
     "12 משחקים חדשים" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -13262,6 +13284,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Итай"
+          }
+        }
+      }
+    },
+    "אִם אַבָּא וְאִמָּא בָּחֲרוּ, בַּשָּׁעוֹת הָאֵלֶּה טוֹפִי נָח — וְהַדַּקּוֹת שֶׁלְּךָ מְחַכּוֹת לְךָ אַחַר כָּךְ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إذا اختارها أبي وأمي، يرتاح Tofy في هذه الساعات — ودقائقك تنتظرك لاحقًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If Mom and Dad chose them, Tofy rests during these hours — and your minutes wait for you until later"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если мама и папа выбрали эти часы, Tofy в это время отдыхает — а твои минуты ждут тебя потом"
+          }
+        }
+      }
+    },
+    "אִם אַבָּא וְאִמָּא בָּחֲרוּ, בַּשָּׁעוֹת הָאֵלֶּה טוֹפִי נָח — וְהַדַּקּוֹת שֶׁלָּךְ מְחַכּוֹת לָךְ אַחַר כָּךְ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إذا اختارها أبي وأمي، يرتاح Tofy في هذه الساعات — ودقائقكِ تنتظركِ لاحقًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If Mom and Dad chose them, Tofy rests during these hours — and your minutes wait for you until later"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если мама и папа выбрали эти часы, Tofy в это время отдыхает — а твои минуты ждут тебя потом"
           }
         }
       }
@@ -19367,6 +19433,28 @@
         }
       }
     },
+    "א׳–ה׳ · 08:00–13:30" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأحد–الخميس · 08:00–13:30"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sun–Thu · 08:00–13:30"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вс–Чт · 08:00–13:30"
+          }
+        }
+      }
+    },
     "ב\"טופי טיים\" המערכת בונה לכל ילד פיד אישי: 80%% מהנושאים שהוא אוהב ו-20%% תחומים חדשים לגילוי. הפיד משתפר אחרי כל שאלה. כל %lld שאלות הילד מרוויח סיבוב חינם בגלגל המזל." : {
       "localizations" : {
         "ar" : {
@@ -23592,6 +23680,50 @@
         }
       }
     },
+    "בבית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في البيت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At home"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дома"
+          }
+        }
+      }
+    },
+    "בבית הספר · מאז 08:02" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في المدرسة · منذ 08:02"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At school · since 08:02"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В школе · с 08:02"
+          }
+        }
+      }
+    },
     "בגן המשחקים הם תמונות, צבעים וכמויות — וההוראה נאמרת בקול, לא נכתבת" : {
       "localizations" : {
         "ar" : {
@@ -24513,6 +24645,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Школа"
+          }
+        }
+      }
+    },
+    "בית ספר ושינה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المدرسة والنوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "School and sleep"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Школа и сон"
           }
         }
       }
@@ -29526,6 +29680,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вот ответ — продолжаем! ✨"
+          }
+        }
+      }
+    },
+    "הִנֵּה מַתָּנָה קְטַנָּה בִּשְׁבִילְךָ 🎁" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إليك هدية صغيرة 🎁"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Here's a little gift for you 🎁"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вот тебе маленький подарок 🎁"
+          }
+        }
+      }
+    },
+    "הִנֵּה מַתָּנָה קְטַנָּה בִּשְׁבִילֵךְ 🎁" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إليكِ هدية صغيرة 🎁"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Here's a little gift for you 🎁"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вот тебе маленький подарок 🎁"
           }
         }
       }
@@ -40169,6 +40367,28 @@
         }
       }
     },
+    "המיקום כבוי כברירת מחדל ונשמר רק המיקום האחרון, בלי מסלול. מכבים בכל רגע, והוא נמחק מיד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الموقع مُطفأ افتراضيًا ويُحفظ آخر موقع فقط، بدون مسار. يمكن إطفاؤه في أي لحظة فيُحذف فورًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location is off by default and only the last location is kept, with no route history. Turn it off any time and it's deleted right away"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Местоположение по умолчанию выключено, хранится только последнее, без маршрута. Выключить можно в любой момент — и оно сразу удаляется"
+          }
+        }
+      }
+    },
     "המכולת" : {
       "localizations" : {
         "ar" : {
@@ -42409,6 +42629,72 @@
         }
       }
     },
+    "התראה כשיוצאים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تنبيه عند المغادرة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alert on leaving"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Уведомлять об уходе"
+          }
+        }
+      }
+    },
+    "התראה כשמגיעים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تنبيه عند الوصول"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alert on arrival"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Уведомлять о приходе"
+          }
+        }
+      }
+    },
+    "התראה כשמגיעים או יוצאים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تنبيه عند الوصول أو المغادرة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An alert on arrival or departure"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Уведомление о приходе и уходе"
+          }
+        }
+      }
+    },
     "התראה כש…" : {
       "localizations" : {
         "ar" : {
@@ -43412,6 +43698,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "6-й"
+          }
+        }
+      }
+    },
+    "זְמַן בֵּית סֵפֶר וּשְׁעַת שֵׁינָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت المدرسة ووقت النوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "School time and bedtime"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Школьное время и время сна"
           }
         }
       }
@@ -49677,6 +49985,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Телефон + планшет, один и тот же прогресс"
+          }
+        }
+      }
+    },
+    "טלפון שהלך לאיבוד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هاتف ضائع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A lost phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Потерянный телефон"
           }
         }
       }
@@ -58047,6 +58377,28 @@
         }
       }
     },
+    "כל ערב · 20:30" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل مساء · 20:30"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every evening · 20:30"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждый вечер · 20:30"
+          }
+        }
+      }
+    },
     "כל שאלה באפליקציה מתויגת לפי תוכנית הלימודים — כל ילד מקבל בדיוק את הרמה שלו" : {
       "localizations" : {
         "ar" : {
@@ -62681,6 +63033,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Нажмите «Дальше» и разрешите геолокацию, а если спросят — выберите «Всегда»"
+          }
+        }
+      }
+    },
+    "לוחצים 🔔 והטלפון של הילד מצפצף, כדי שיהיה קל למצוא אותו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اضغطوا 🔔 فيرنّ هاتف الطفل ليسهل العثور عليه"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap 🔔 and your child's phone rings, so it's easy to find"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите 🔔 — и телефон ребёнка зазвонит, чтобы его было легко найти"
           }
         }
       }
@@ -71034,6 +71408,28 @@
         }
       }
     },
+    "מיקום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الموقع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Местоположение"
+          }
+        }
+      }
+    },
     "מיקרופון · גלגיליות" : {
       "localizations" : {
         "ar" : {
@@ -71564,6 +71960,28 @@
         }
       }
     },
+    "מסמנים מקומות קבועים כמו הבית ובית הספר, ומקבלים הודעה כשהילד מגיע או יוצא" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حدّدوا أماكن ثابتة مثل البيت والمدرسة، واحصلوا على رسالة عندما يصل الطفل أو يغادر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save places like home and school, and get a message when your child arrives or leaves"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отметьте постоянные места, например дом и школу, и получайте сообщение, когда ребёнок приходит или уходит"
+          }
+        }
+      }
+    },
     "מעבירים את הזמן בלחיצה אחת" : {
       "localizations" : {
         "ar" : {
@@ -71626,6 +72044,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Карта с детьми, уведомление, когда они приходят в школу или домой, и звонок на потерянный телефон. Только если вы включите, и видят только родители"
+          }
+        }
+      }
+    },
+    "מפה עם המיקום האחרון של הטלפון של כל ילד, וכמה סוללה נשארה בו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خريطة بآخر موقع لهاتف كل طفل ومقدار البطارية المتبقية فيه"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A map with each child's phone's last location, and how much battery it has left"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карта с последним местоположением телефона каждого ребёнка и остатком заряда"
           }
         }
       }
@@ -71916,6 +72356,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Новое место"
+          }
+        }
+      }
+    },
+    "מקומות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأماكن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Places"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Места"
           }
         }
       }
@@ -85699,6 +86161,28 @@
         }
       }
     },
+    "פרטיות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخصوصية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конфиденциальность"
+          }
+        }
+      }
+    },
     "פרטיות ונתונים" : {
       "localizations" : {
         "ar" : {
@@ -87291,6 +87775,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Посмотрите вместе матч и попросите %@ объяснить вам одно правило, которое вы увидели."
+          }
+        }
+      }
+    },
+    "צפצוף לטלפון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رنين للهاتف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ring the phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Звонок на телефон"
           }
         }
       }
@@ -91752,6 +92258,28 @@
         }
       }
     },
+    "רק אם תפעילו, ורק ההורים רואים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فقط إذا فعّلتموه، ولا يراه إلا الوالدان"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only if you turn it on, and only parents see it"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Только если вы включите, и видят только родители"
+          }
+        }
+      }
+    },
     "רק אתה תדע אותו — הילד לא יוכל לפתוח הגדרות בלעדיו" : {
       "localizations" : {
         "ar" : {
@@ -94412,6 +94940,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Привет"
+          }
+        }
+      }
+    },
+    "שָׁלוֹם %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مرحبًا %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hi %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Привет, %@"
           }
         }
       }
@@ -102181,6 +102731,50 @@
     "🏠" : {
 
     },
+    "🏠 דן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏠 دان"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏠 Dan"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏠 Дан"
+          }
+        }
+      }
+    },
+    "🏫 בית הספר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 المدرسة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 School"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 Школа"
+          }
+        }
+      }
+    },
     "🏫 זְמַן בֵּית סֵפֶר עַד %@" : {
       "localizations" : {
         "ar" : {
@@ -102221,6 +102815,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🏫 Школьное время"
+          }
+        }
+      }
+    },
+    "🏫 נועה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 نوعا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 Noa"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 Ноа"
           }
         }
       }
@@ -104465,6 +105081,28 @@
     },
     "🔊" : {
 
+    },
+    "🔋 הטלפון של נועה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔋 هاتف نوعا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔋 Noa's phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔋 Телефон Ноа"
+          }
+        }
+      }
     },
     "🔐" : {
 
