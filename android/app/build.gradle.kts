@@ -16,7 +16,7 @@ android {
         targetSdk = 36
         // versionName = the iOS marketing version; versionCode = iOS build × 10 + an
         // Android-only respin digit (distribution/play-store/release-checklist-android.md).
-        versionCode = 2071
+        versionCode = 2072
         versionName = "2026.10.7"
         // ./gradlew assembleDebug -Pemu=true → a debug build wired to the LOCAL
         // Firebase emulators under the "demo-tofy" project (never production).

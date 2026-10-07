@@ -387,6 +387,22 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
         return
     }
 
+    // 🔔 A child's device needs notifications too — the beep, live-game invites and the
+    // "location is shared" notice. iOS asks on the child's first home (WorldMapView);
+    // Android 13+ never asked on this side, so nothing reached a child's tablet. Once only:
+    // Android can't tell "undecided" from "declined", so a flag stands in for it.
+    val notifAsk = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { }
+    LaunchedEffect(kidMode) {
+        if (kidMode || android.os.Build.VERSION.SDK_INT < 33) return@LaunchedEffect
+        val perm = android.Manifest.permission.POST_NOTIFICATIONS
+        if (androidx.core.content.ContextCompat.checkSelfPermission(ctx, perm) == android.content.pm.PackageManager.PERMISSION_GRANTED) return@LaunchedEffect
+        val prefs = ctx.getSharedPreferences("tofy.kid", android.content.Context.MODE_PRIVATE)
+        if (prefs.getBoolean("notifAsked", false)) return@LaunchedEffect
+        prefs.edit().putBoolean("notifAsked", true).apply()
+        notifAsk.launch(perm)
+    }
+
     val st = state
     val engine = KidSession.engine()
     if (st == null || engine == null) { Box(Modifier.fillMaxSize()); return }
