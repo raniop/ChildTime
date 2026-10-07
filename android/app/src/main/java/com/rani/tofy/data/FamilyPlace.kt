@@ -43,9 +43,12 @@ data class FamilyPlace(
             return 2 * r * atan2(sqrt(a), sqrt(1 - a))
         }
 
-        /** The place a point is in — the nearest centre when fences overlap. */
-        fun at(lat: Double, lng: Double, places: List<FamilyPlace>): FamilyPlace? =
-            places.filter { it.contains(lat, lng) }.minByOrNull { meters(lat, lng, it.lat, it.lng) }
+        /** The place a point is in — the nearest centre when fences overlap. [slack]: the fix's
+         *  own uncertainty (≤ 75 m) — indoors a phone at home reads 30–60 m off (iOS FamilyPlace). */
+        fun at(lat: Double, lng: Double, places: List<FamilyPlace>, slack: Double = 0.0): FamilyPlace? {
+            val s = slack.coerceIn(0.0, 75.0)
+            return places.filter { meters(lat, lng, it.lat, it.lng) <= it.radius + s }.minByOrNull { meters(lat, lng, it.lat, it.lng) }
+        }
 
         fun from(d: Doc?): FamilyPlace? {
             d ?: return null

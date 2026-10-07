@@ -843,8 +843,12 @@ extension LocationSharing {
     /// "🏫 בית הספר · מאז 08:02", or the street address when the device is
     /// outside every family place. (How fresh it is sits beside, not inside.)
     func whereLine(_ f: ChildLocationFix) -> String {
-        if let id = f.placeID, let place = familyPlaces.first(where: { $0.id == id }) {
-            if let s = f.placeSince {
+        // The child's phone names the place when it writes the fix; the parent
+        // also checks here, so a place added after the phone last moved (or a
+        // fix a little off indoors) still reads "🏠 הבית" and not a street.
+        let reported = f.placeID.flatMap { id in familyPlaces.first { $0.id == id } }
+        if let place = reported ?? FamilyPlace.place(at: f.lat, f.lng, in: familyPlaces, slack: f.accuracy) {
+            if let s = f.placeSince, reported != nil {
                 return tr("\(place.emoji) \(place.name) · מאז \(QuietHoursManager.clock(Date(timeIntervalSince1970: s)))")
             }
             return "\(place.emoji) \(place.name)"

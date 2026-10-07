@@ -32,6 +32,15 @@ import Foundation
         #expect(FamilyPlace.place(at: 32.1, 34.9, in: [school, home]) == nil)
     }
 
+    @Test func indoorFixStillCountsAsHome() {
+        let home50 = FamilyPlace(id: "h", name: "הבית", lat: 32.0800, lng: 34.7800, radius: 50)
+        // ~78 m off with ±40 m accuracy → home; without the slack it was "a street".
+        #expect(FamilyPlace.place(at: 32.0807, 34.7800, in: [home50]) == nil)
+        #expect(FamilyPlace.place(at: 32.0807, 34.7800, in: [home50], slack: 40)?.id == "h")
+        // The slack is capped: a 500 m "accuracy" does not make everything home.
+        #expect(FamilyPlace.place(at: 32.0830, 34.7800, in: [home50], slack: 500) == nil)
+    }
+
     @Test func householdDecodesPlacesAndOldDocsStillDecode() throws {
         var raw: [String: Any] = ["id": "hh", "parentUIDs": ["u"], "childIDs": [], "createdBy": "u",
                                   "createdAt": 0, "places": [school.firestore]]

@@ -123,9 +123,12 @@ object LocationRepository {
 
     /** "🏫 בית הספר · מאז 08:02", or the street address outside every place. */
     fun whereLine(ctx: Context, f: ChildLocationFix, places: List<FamilyPlace>): String {
-        val place = f.placeID?.let { id -> places.firstOrNull { it.id == id } }
+        // The child's phone names the place; the parent also checks, so a place added after
+        // the phone last moved (or a fix a little off indoors) still reads as the place.
+        val reported = f.placeID?.let { id -> places.firstOrNull { it.id == id } }
+        val place = reported ?: FamilyPlace.at(f.lat!!, f.lng!!, places, f.accuracy)
         if (place != null) {
-            val since = f.placeSince?.let { clock(it) }
+            val since = if (reported != null) f.placeSince?.let { clock(it) } else null
             return if (since != null) tr("%@ %@ · מאז %@", place.emoji, place.name, since) else "${place.emoji} ${place.name}"
         }
         val key = String.format(Locale.ROOT, "%.4f,%.4f", Math.round(f.lat!! * 2000) / 2000.0, Math.round(f.lng!! * 2000) / 2000.0)

@@ -25,6 +25,13 @@ class FamilyPlaceTest {
         assertNull(FamilyPlace.at(32.1, 34.9, listOf(school, home)))
     }
 
+    @Test fun indoorFixStillCountsAsHome() {
+        val home50 = FamilyPlace(id = "h", name = "הבית", lat = 32.0800, lng = 34.7800, radius = 50.0)
+        assertNull(FamilyPlace.at(32.0807, 34.7800, listOf(home50)))
+        assertEquals("h", FamilyPlace.at(32.0807, 34.7800, listOf(home50), 40.0)?.id)
+        assertNull(FamilyPlace.at(32.0830, 34.7800, listOf(home50), 500.0))
+    }
+
     @Test fun firestoreRoundTrip() {
         val p = school.copy(alerts = mapOf("kid" to PlaceAlert(arrive = true, leave = false)))
         assertEquals(listOf(p), FamilyPlace.list(listOf(p.toMap())))

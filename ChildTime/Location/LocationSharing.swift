@@ -211,7 +211,8 @@ final class LocationSharing: NSObject, ObservableObject {
         guard let cid = childID, enabledHere else { return }
         guard force || Date().timeIntervalSince(lastWrite) > 60 else { return }
         lastWrite = Date()
-        let place = FamilyPlace.place(at: loc.coordinate.latitude, loc.coordinate.longitude, in: places)
+        let place = FamilyPlace.place(at: loc.coordinate.latitude, loc.coordinate.longitude, in: places,
+                                      slack: loc.horizontalAccuracy)
         let d = AppGroup.defaults
         if d.string(forKey: "location.placeID") != place?.id {
             d.set(place?.id, forKey: "location.placeID")
@@ -444,6 +445,15 @@ extension LocationSharing: CLLocationManagerDelegate {
         let status = manager.authorizationStatus
         Task { @MainActor in
             self.permission = status
+            // iOS answers the first ask with "while using" only and offers
+            // "always" much later on its own. Asking again right after the
+            // first answer shows Apple's "Change to Always Allow" sheet NOW —
+            // while the parent still holds the phone (once; iOS allows one).
+            let key = "location.askedAlwaysUpgrade"
+            if status == .authorizedWhenInUse, self.enabledHere, !UserDefaults.standard.bool(forKey: key) {
+                UserDefaults.standard.set(true, forKey: key)
+                manager.requestAlwaysAuthorization()
+            }
             if self.enabledHere { self.startSharing() }
         }
     }

@@ -221,7 +221,7 @@ object KidLocation {
         val now = System.currentTimeMillis()
         if (!force && now - prefs.getLong("lastWrite", 0) < 60_000) return
         prefs.edit().putLong("lastWrite", now).apply()
-        val place = FamilyPlace.at(loc.latitude, loc.longitude, places)
+        val place = FamilyPlace.at(loc.latitude, loc.longitude, places, loc.accuracy.toDouble())
         if (prefs.getString("placeID", null) != place?.id) {
             prefs.edit().putString("placeID", place?.id).putLong("placeSince", now / 1000).apply()
         }

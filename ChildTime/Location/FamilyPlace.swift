@@ -49,8 +49,11 @@ struct FamilyPlace: Codable, Hashable, Identifiable, Sendable {
     }
 
     /// The place a point is in — the nearest centre when fences overlap.
-    static func place(at lat: Double, _ lng: Double, in places: [FamilyPlace]) -> FamilyPlace? {
-        places.filter { $0.contains(lat: lat, lng: lng) }
+    /// `slack`: the fix's own uncertainty (meters, capped at 75) — indoors a
+    /// phone at home reads 30–60 m off, which put it OUTSIDE a 50 m "home".
+    static func place(at lat: Double, _ lng: Double, in places: [FamilyPlace], slack: Double = 0) -> FamilyPlace? {
+        let s = max(0, min(slack, 75))
+        return places.filter { meters(lat, lng, $0.lat, $0.lng) <= $0.radius + s }
             .min { meters(lat, lng, $0.lat, $0.lng) < meters(lat, lng, $1.lat, $1.lng) }
     }
 }
