@@ -59,6 +59,8 @@ final class DisplayGeometry: ObservableObject {
     /// Which PHYSICAL side that bar is on. `verticalBarEdge` reports `.trailing`
     /// even in Hebrew, so it cannot answer this — the window's insets can.
     @Published private(set) var barOnLeft: Bool = false
+    /// A strip that just disappeared, waiting to see whether it comes back.
+    private var pendingBarDrop: DispatchWorkItem?
 
     /// Below this usable height a phone layout stops fitting: the Duo held
     /// open (≈658pt) and the iPhone SE (647pt) are under it, a 13 mini (728)
@@ -89,6 +91,13 @@ final class DisplayGeometry: ObservableObject {
     /// Measured on both Duos: a tap above that line is swallowed, a tap below
     /// it reaches our views — so the rest of the strip is ours to use.
     var hasBarStrip: Bool { barInset >= 40 && screenSize.width > 0 }
+
+    /// 🎚 Controls IN the strip (the side rail). Off by Rani's call, 2026-10-07:
+    /// "אני לא רוצה את הכפתורים בצד! אני רוצה שזה יראה כמו במכשירים אחרים" —
+    /// every screen keeps its phone controls, and only keeps its top row clear
+    /// of the clock (see the top-band helpers in SideRail.swift).
+    static let railEnabled = false
+    var hasRail: Bool { Self.railEnabled && hasBarStrip }
 
     /// The strip in full-screen coordinates (empty when there is no bar).
     var barStrip: CGRect {
@@ -141,7 +150,29 @@ final class DisplayGeometry: ObservableObject {
         set(\.divisions, divisions)
         set(\.occlusions, occlusions)
         set(\.screenSize, screenSize)
-        set(\.barInset, barInset)
+        // 🎞 A fold or unfold reports "no bar" for a moment mid-transition
+        // (recorded on the Duo: ~0.4s of the phone layout — header buttons, no
+        // rail — between the closed and the open home). A strip only goes away
+        // if it STAYS gone; coming back cancels the drop.
+        if let barInset {
+            if barInset < 40, self.barInset >= 40 {
+                if pendingBarDrop == nil {
+                    let work = DispatchWorkItem { [weak self] in
+                        guard let self else { return }
+                        self.pendingBarDrop = nil
+                        self.barInset = barInset
+                        #if DEBUG
+                        print(self.debugLine)
+                        #endif
+                    }
+                    pendingBarDrop = work
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.45, execute: work)
+                }
+            } else {
+                pendingBarDrop?.cancel(); pendingBarDrop = nil
+                set(\.barInset, barInset)
+            }
+        }
         set(\.barOnLeft, barOnLeft)
         #if DEBUG
         if changed { print(debugLine) }

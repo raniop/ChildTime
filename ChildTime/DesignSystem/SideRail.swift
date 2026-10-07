@@ -34,7 +34,7 @@ struct SideRailContainer<Content: View>: View {
     private static var topGap: CGFloat { 10 }
 
     var body: some View {
-        if display.hasBarStrip {
+        if display.hasRail {
             GeometryReader { geo in
                 VStack(spacing: 8) { content() }
                     .frame(width: display.barInset)
@@ -175,6 +175,25 @@ extension View {
     }
 }
 
+private struct InSplitColumnKey: EnvironmentKey { static let defaultValue = false }
+extension EnvironmentValues {
+    /// True inside the home column of the open foldable's split — the split
+    /// already handed the strip back, so the column must not pad for it again.
+    var inSplitColumn: Bool {
+        get { self[InSplitColumnKey.self] }
+        set { self[InSplitColumnKey.self] = newValue }
+    }
+}
+
+/// `BarSidePadding` for a page that sometimes sits in the open split's column.
+struct RailPaddingUnlessSplit: ViewModifier {
+    let useRail: Bool
+    @Environment(\.inSplitColumn) private var inSplit
+    func body(content: Content) -> some View {
+        content.modifier(BarSidePadding(active: useRail && !inSplit))
+    }
+}
+
 /// The strip handed back as plain padding on the bar's PHYSICAL side — for a
 /// page inside a NavigationStack, whose controllers do not pass a SwiftUI
 /// safe-area inset through.
@@ -204,7 +223,7 @@ struct SideRailReserve: ViewModifier {
     @Environment(\.layoutDirection) private var direction
 
     func body(content: Content) -> some View {
-        if active && display.hasBarStrip {
+        if active && display.hasRail {
             // The strip is PHYSICAL; SwiftUI's edges follow the language.
             let leading = display.barOnLeft == (direction == .leftToRight)
             content.safeAreaInset(edge: leading ? .leading : .trailing, spacing: 0) {
@@ -269,7 +288,7 @@ extension View {
     /// left the page beside it 42pt off the device's centre. Now the page takes
     /// the whole glass and the button sits in the top corner AWAY from the bar
     /// (Rani approved, 2026-10-07) — clear of the clock and the camera.
-    /// Hide the toolbar item behind `DisplayGeometry.shared.hasBarStrip` so the
+    /// Hide the toolbar item behind `DisplayGeometry.shared.hasRail` so the
     /// same screen is untouched on every other device.
     func railDismiss(_ label: String, systemImage: String = "xmark",
                      action: @escaping () -> Void) -> some View {
@@ -286,7 +305,7 @@ private struct CornerDismiss: ViewModifier {
     @Environment(\.layoutDirection) private var direction
 
     func body(content: Content) -> some View {
-        if display.hasBarStrip {
+        if display.hasRail {
             // The corner opposite the PHYSICAL bar, in this language's terms.
             let farIsLeading = display.barOnLeft != (direction == .leftToRight)
             content.overlay(alignment: farIsLeading ? .topLeading : .topTrailing) {

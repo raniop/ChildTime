@@ -93,7 +93,7 @@ struct LeaderboardView: View {
     private var header: some View {
         VStack(spacing: 10) {
             // 🎚 All three are chrome — on a foldable they live in the rail.
-            if !railHost.hasBarStrip {
+            if !railHost.hasRail {
                 HStack(spacing: 8) {
                     Button { dismiss() } label: { headerCircle("xmark") }
                     Spacer()
@@ -113,6 +113,8 @@ struct LeaderboardView: View {
                     }
                     Button { showAdd = true } label: { headerCircle("person.badge.plus") }
                 }
+                // Beside the foldable's clock: stop short of it.
+                .clearOfBar()
                 .environment(\.layoutDirection, .appMirrored)
             }
             Text(tr("הַחֲבֵרִים"))

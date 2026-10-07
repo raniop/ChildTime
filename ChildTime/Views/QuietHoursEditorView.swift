@@ -82,7 +82,7 @@ struct QuietHoursEditorView: View {
             .navigationTitle(isSchool ? tr("🏫 זמן בית ספר") : tr("🌙 שעת שינה"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                if !railHost.hasBarStrip {
+                if !railHost.hasRail {
                     ToolbarItem(placement: .confirmationAction) {
                         Button(tr("סִיּוּם")) { save(); dismiss() }
                     }

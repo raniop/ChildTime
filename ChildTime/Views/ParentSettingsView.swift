@@ -103,7 +103,7 @@ struct ParentSettingsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
-                if !railHost.hasBarStrip {
+                if !railHost.hasRail {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(tr("סיום")) { dismiss() }
                     }

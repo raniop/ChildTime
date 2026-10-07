@@ -98,7 +98,7 @@ struct QuestionRunnerView: View {
     /// an expanded block drawn with the content-sized `LazyVGrid` just moves the
     /// empty space into the middle of the screen instead of the bottom.
     private func answersFill(_ q: Question) -> Bool {
-        (display.hasBarStrip && q.passage == nil) || !isCompact
+        (display.hasRail && q.passage == nil) || !isCompact
     }
 
     /// Is there a real strip under the answers for the floating buddy to stand in?
@@ -113,7 +113,7 @@ struct QuestionRunnerView: View {
     /// On the foldable it never floats at all: the rail holds טופי already, and
     /// two of him on one screen is worse than either place.
     private var buddyHasFreeStrip: Bool {
-        guard !display.hasBarStrip else { return false }
+        guard !display.hasRail else { return false }
         guard runnerHeight > 0, answersBottom > 0 else { return !display.isShort }
         return runnerHeight - answersBottom >= companionSize + 24
     }
@@ -198,7 +198,7 @@ struct QuestionRunnerView: View {
                 } action: { answersBottom = $0 }
             // Room above the floating companion — none is needed where the
             // buddy lives in the rail and the answers already fill the screen.
-            if !(display.hasBarStrip && q.passage == nil) {
+            if !(display.hasRail && q.passage == nil) {
                 // …and this reserves exactly the strip the floating buddy stands in.
                 // Without it the filling answers would push him into the tool row on
                 // the very device with the most room for him.
@@ -222,7 +222,8 @@ struct QuestionRunnerView: View {
             background
 
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
-                topBar
+                // Beside the foldable's clock: stop short of it.
+                topBar.clearOfBar()
                 if let q = current {
                     // 📐 Laid out plainly when it fits; when it doesn't (a reading
                     // passage with long answers — in English they run to four lines),
@@ -270,7 +271,7 @@ struct QuestionRunnerView: View {
             }
 
             // 💬 What the rail's buddy says — pinned low, clear of the answers.
-            if display.hasBarStrip {
+            if display.hasRail {
                 VStack {
                     Spacer()
                     InlineBuddyBubble(controller: companion, clearance: 0)
@@ -443,7 +444,7 @@ struct QuestionRunnerView: View {
         return VStack(spacing: 8) {
             HStack(spacing: 8) {
                 // ✕ heads the rail on the foldable — see `.sideRail` on the body.
-                if !display.hasBarStrip {
+                if !display.hasRail {
                     Button { dismiss() } label: {
                         quizChip { Image(systemName: "xmark").font(.system(size: 13, weight: .heavy)) }
                     }
@@ -465,7 +466,7 @@ struct QuestionRunnerView: View {
                 quizChip {
                     Text(tr("\(current?.topic.emoji ?? themeWorld.emoji) שְׁאֵלָה \(done)/\(total)"))
                 }
-                if display.hasBarStrip { Spacer(minLength: 0) }
+                if display.hasRail { Spacer(minLength: 0) }
             }
             .font(.system(size: 12.5, weight: .heavy, design: .rounded))
             .foregroundStyle(.white)
@@ -772,7 +773,7 @@ struct QuestionRunnerView: View {
             // 🎚 On the foldable every one of these lives in the rail, and this
             // 56pt row disappears — real height back to the answers on a 644pt
             // screen, and the buddy stops standing on answer 4.
-            if !display.hasBarStrip {
+            if !display.hasRail {
                 // Hint shows whenever it's payable; wand only after 2 wrong picks.
                 // Fixed height so the layout never jumps when these appear/disappear
                 // (e.g. the hint hides the moment the answer is locked in).

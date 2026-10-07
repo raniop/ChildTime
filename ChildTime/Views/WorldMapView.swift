@@ -408,6 +408,8 @@ struct WorldMapView: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.horizontal, homeHPad)
                     topBar
+                        // Beside the foldable's clock: stop short of it.
+                        .clearOfBar()
                         .frame(maxWidth: worldGridMaxWidth)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.horizontal, homeHPad)
@@ -601,7 +603,7 @@ struct WorldMapView: View {
             // there is no free screen to wander in at all — it stood on
             // "עולם הכדורגל" and cut its name — so the buddy moves into the
             // rail (see `.sideRail`) and only its speech comes out.
-            if !display.hasBarStrip {
+            if !display.hasRail {
             FloatingCompanion(
                 controller: companion,
                 profile: profiles.active,
@@ -629,7 +631,7 @@ struct WorldMapView: View {
         // 💬 What the rail's buddy says — over the bottom scrim, where it can
         // cover nothing that matters, instead of over a world card.
         .overlay(alignment: .bottom) {
-            if display.hasBarStrip {
+            if display.hasRail {
                 // Beside the buddy, which lives at the BOTTOM of the rail — so
                 // the bubble opens over the bottom scrim, not over a world card
                 // (it was landing a whole panel-height too high).
@@ -1198,9 +1200,11 @@ struct WorldMapView: View {
             Spacer(minLength: 6)
             // 🎚 On the foldable these three live in the bar's strip instead —
             // see `.sideRail` on the body.
-            if !display.hasBarStrip { navButtonsRow(size: isCompact ? 44 : 50) }
+            if !display.hasRail { navButtonsRow(size: isCompact ? 44 : 50) }
         }
         .environment(\.layoutDirection, .app)
+        // Beside the foldable's clock: stop short of it.
+        .clearOfBar()
         .padding(.top, AppSpacing.sm)
         .padding(.bottom, 2)
         .eraseToAnyView()

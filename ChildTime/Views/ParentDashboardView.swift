@@ -167,7 +167,7 @@ struct ParentDashboardView: View {
 
     /// The parent's home owns the bar strip (see `SideRailContainer`). Only at
     /// the root — a pushed page has its own back button up there.
-    private var useRail: Bool { isRoot && display.hasBarStrip && (splitOpen || navPath.isEmpty) }
+    private var useRail: Bool { isRoot && display.hasRail && (splitOpen || navPath.isEmpty) }
 
     /// Held open: the home column keeps its width and the revealed half shows
     /// one child. Nothing moves between the two states — the screen just grows.
@@ -176,8 +176,8 @@ struct ParentDashboardView: View {
     /// The home column keeps a phone's width, so folding back changes nothing
     /// about it. Measured on the Duo: its outer screen's safe width is 382pt.
     /// Clamped, so a future foldable with other proportions still splits sanely.
-    private var homeColumnWidth: CGFloat {
-        min(382, max(300, display.safeSize.width * 0.55))
+    private func homeColumnWidth(for width: CGFloat) -> CGFloat {
+        min(382, max(300, width * 0.55))
     }
 
     var body: some View {
@@ -191,27 +191,39 @@ struct ParentDashboardView: View {
         // .infinity)` pane claimed the whole proposal and then the column was
         // added on top, stretching the root to 1165pt on a 951pt screen.
         GeometryReader { geo in
-            let home = splitOpen ? min(homeColumnWidth, geo.size.width * 0.6) : geo.size.width
-            // Open, the page hands the rail's strip back here, on the bar's own
-            // side (closed, the cards carry it as padding — see dashboardStack).
-            let rest = splitOpen ? max(0, geo.size.width - display.barInset - home) : 0
+            // Decided from THIS layout's size, not the published one: the
+            // published size lands a frame later, and that frame drew the home
+            // full width — which then animated back into its column, every card
+            // reflowing on top of the next (recorded on the Duo).
+            let open = isRoot && display.hasBarStrip
+                && geo.size.width >= DisplayGeometry.wideWidth
+                && geo.size.height < DisplayGeometry.shortHeight
+            // The column keeps the closed glass's width: a phone column, plus
+            // the strip it now runs into when there is no rail.
+            let column = homeColumnWidth(for: geo.size.width) + (display.hasRail ? 0 : display.barInset)
+            let home = open ? min(column, geo.size.width * 0.6) : geo.size.width
+            // With a rail, the strip is handed back on the bar's own side;
+            // without one (Rani's call) the home column runs to the edge and
+            // only its top row keeps clear of the clock.
+            let strip = display.hasRail ? display.barInset : 0
+            let rest = open ? max(0, geo.size.width - strip - home) : 0
             HStack(spacing: 0) {
                 if display.barOnLeft {
-                    if splitOpen { Color.clear.frame(width: display.barInset) }
-                    homePane(width: home).zIndex(1)
-                    if splitOpen { revealedPane(width: rest).transition(revealTransition) }
+                    if open && strip > 0 { Color.clear.frame(width: strip) }
+                    homePane(width: home).zIndex(1).environment(\.inSplitColumn, open)
+                    if open { revealedPane(width: rest).transition(revealTransition) }
                 } else {
-                    if splitOpen { revealedPane(width: rest).transition(revealTransition) }
-                    homePane(width: home).zIndex(1)
-                    if splitOpen { Color.clear.frame(width: display.barInset) }
+                    if open { revealedPane(width: rest).transition(revealTransition) }
+                    homePane(width: home).zIndex(1).environment(\.inSplitColumn, open)
+                    if open && strip > 0 { Color.clear.frame(width: strip) }
                 }
             }
+            // ✨ Unfold: the child's page slides out from under the home
+            // column, from the fold outward; fold: it slides back in. The home
+            // column itself never moves — beside the rail before, and after.
+            .animation(.spring(response: 0.62, dampingFraction: 0.86), value: open)
         }
         .environment(\.layoutDirection, .leftToRight)
-        // ✨ Unfold: the child's page slides out from under the home column,
-        // from the fold outward; fold: it slides back in. The home column
-        // itself never moves — it was beside the rail before and stays there.
-        .animation(.spring(response: 0.62, dampingFraction: 0.86), value: splitOpen)
         .overlay { parentRail }
         .onAppear { syncSplit(open: splitOpen) }
         // Watch the split itself, not the width: the strip and the width are
@@ -406,9 +418,11 @@ struct ParentDashboardView: View {
                                 // that instantiating its metadata overflowed the 1 MB main-thread
                                 // stack on a real iPhone (build 209 crashed at launch; the
                                 // simulator's 8 MB stack hid it). AnyView cuts the nesting.
-                                AnyView(homeHeader)
+                                // Its top rows sit beside the foldable's clock —
+                                // they stop short of it; the cards run full width.
+                                AnyView(homeHeader).clearOfBar()
                                 // ⚙️ / ＋ / 🧹 moved into the rail on the Duo.
-                                if !useRail { homeActionsRow }
+                                if !useRail { homeActionsRow.clearOfBar() }
                                 // 🚀 "עוד קצת וסיימנו" — only while a child's setup
                                 // is unfinished (band ב).
                                 AnyView(setupChecklist)
@@ -490,7 +504,7 @@ struct ParentDashboardView: View {
                         // cards, not a safe area — the NavigationStack's
                         // controllers would swallow one — so the backdrop still
                         // runs under the rail. (Open, the split reserves it.)
-                        .modifier(BarSidePadding(active: useRail && !splitOpen))
+                        .modifier(RailPaddingUnlessSplit(useRail: useRail))
                         // Room to scroll the last card out from under the 💬 button.
                         .padding(.bottom, showsSupport ? 64 : 0)
                         .frame(maxWidth: 720)
@@ -2251,7 +2265,7 @@ struct ParentDashboardView: View {
                 // it. On the Duo the home keeps a phone's width and the second
                 // half of the screen holds the child's page, so one column.
                 columns: Array(repeating: GridItem(.flexible(), spacing: 12),
-                               count: display.isWideShort && !useRail && rows.count > 1 ? 2 : 1),
+                               count: display.isWideShort && !splitOpen && rows.count > 1 ? 2 : 1),
                 spacing: 12
             ) {
                 ForEach(rows, id: \.profile.id) { row in

@@ -80,7 +80,7 @@ struct ChildScreenTimeView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
-                if !railHost.hasBarStrip {
+                if !railHost.hasRail {
                     ToolbarItem(placement: .confirmationAction) {
                         Button(tr("סִיּוּם")) { save(); dismiss() }
                     }
