@@ -6150,15 +6150,51 @@ exports.adminPublishAppUpdate = onCall({ timeoutSeconds: 30, memory: "256MiB" },
 
 function strip(s) { return String(s || "").normalize("NFD").replace(/[֑-ׇ]/g, "").trim(); }
 
-// "Noni just arrived" — the place is the title, so no Hebrew preposition has
-// to be glued onto a name the parent typed ("ל" + "הבית" is not Hebrew).
+// 📍 The push reads as ONE sentence (Rani: "🏠 הבית / נוני הגיעה עכשיו" "זה לא
+// נראה טוב"): "🏠 נוני הגיעה הביתה", "🏫 נוני יצאה מבית הספר". Hebrew glues the
+// preposition onto the name the parent typed, so the name is shaped first —
+// the same rules as the card's "בבית / אצל סבתא" (FamilyPlace.whereName).
+function hePlaceTo(n) {            // הגיעה ___
+  if (n === "הבית" || n === "בית") return "הביתה";
+  if (n.startsWith("אצל ")) return "ל" + n.slice(4);          // אצל סבתא → לסבתא
+  if (n.startsWith("ליד ")) return n;                         // ליד הפארק
+  if (/^ב(בית|גן |חוג|בריכה)/.test(n)) return "ל" + n.slice(1); // בחוג → לחוג
+  if (n.startsWith("ה")) return "ל" + n.slice(1);             // הצופים → לצופים
+  return "ל" + n;                                             // בית הספר → לבית הספר
+}
+function hePlaceFrom(n) {          // יצאה ___ (null → say it another way)
+  if (n === "הבית" || n === "בית") return "מהבית";
+  if (n.startsWith("אצל ")) return "מ" + n;                   // מאצל סבתא
+  if (n.startsWith("ליד ")) return "מ" + n.slice(4);          // ליד הפארק → מהפארק
+  if (/^ב(בית|גן |חוג|בריכה)/.test(n)) {
+    const rest = n.slice(1);
+    // One word is definite (בחוג → מהחוג), and so is "בית של …" (מהבית של
+    // סבתא). Longer names can't be told apart — "בחוג כדורגל" wants מחוג, "בגן
+    // הירוק" wants מהגן — so those say it without gluing: "כבר לא בגן הירוק".
+    if (!rest.includes(" ") || rest.startsWith("בית של")) return "מה" + rest;
+    return null;
+  }
+  return "מ" + n;                                             // מבית הספר, מהצופים
+}
+
 function placeMessage(kind, name, girl, place, lang) {
   const arrive = kind === "arrive";
-  const title = `${place.emoji || "📍"} ${place.name || ""}`.trim();
-  if (lang === "en") return { title, body: `${name} just ${arrive ? "arrived" : "left"}` };
-  if (lang === "ru") return { title, body: `${name} ${arrive ? (girl ? "только что пришла" : "только что пришёл") : (girl ? "только что ушла" : "только что ушёл")}` };
-  if (lang === "ar") return { title, body: arrive ? (girl ? `وصلت ${name} الآن` : `وصل ${name} الآن`) : (girl ? `غادرت ${name} الآن` : `غادر ${name} الآن`) };
-  return { title, body: `${name} ${arrive ? (girl ? "הגיעה עכשיו" : "הגיע עכשיו") : (girl ? "יצאה עכשיו" : "יצא עכשיו")}` };
+  const emoji = place.emoji || "📍";
+  const where = strip(place.name);
+  if (lang === "en") {
+    const home = /^home$/i.test(where);
+    const what = arrive ? (home ? "arrived home" : `arrived at ${where}`) : (home ? "left home" : `left ${where}`);
+    return { title: `${emoji} ${name} ${what}`, body: "Tap to see it on the map 📍" };
+  }
+  if (lang === "ru") return { title: `${emoji} ${where}`, body: `${name} ${arrive ? (girl ? "только что пришла" : "только что пришёл") : (girl ? "только что ушла" : "только что ушёл")}` };
+  if (lang === "ar") return { title: `${emoji} ${where}`, body: arrive ? (girl ? `وصلت ${name} الآن` : `وصل ${name} الآن`) : (girl ? `غادرت ${name} الآن` : `غادر ${name} الآن`) };
+  const verb = arrive ? (girl ? "הגיעה" : "הגיע") : (girl ? "יצאה" : "יצא");
+  const from = arrive ? null : hePlaceFrom(where);
+  const title = !where ? `${emoji} ${name} ${verb}`
+    : arrive ? `${emoji} ${name} ${verb} ${hePlaceTo(where)}`
+    : from ? `${emoji} ${name} ${verb} ${from}`
+    : `${emoji} ${name} כבר לא ${where}`;
+  return { title, body: "לחצו לראות במפה 📍" };
 }
 
 exports.onPlaceEvent = onDocumentCreated("children/{childID}/placeEvents/{eventID}", async (event) => {
