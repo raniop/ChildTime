@@ -125,20 +125,40 @@ object LocationRepository {
         return all.firstOrNull { it.kind != "ipad" } ?: all.firstOrNull()
     }
 
-    /** "🏫 בית הספר · מאז 08:02", or the street address outside every place. */
-    fun whereLine(ctx: Context, f: ChildLocationFix, places: List<FamilyPlace>): String {
+    /** "🏫 בבית הספר · מאז 08:02", or "📍 <street address>" outside every place. */
+    fun whereLine(ctx: Context, f: ChildLocationFix, places: List<FamilyPlace>): String =
+        whereParts(ctx, f, places).let { (icon, text) -> "$icon $text" }
+
+    /**
+     * The card's location line in two parts — the icon (the place's own emoji, or 📍 for
+     * an address) and the words: "בבית · מאז 07:57", "בבית הספר", "אצל סבתא". A place
+     * emoji next to a 📍 read as two icons, and a bare "הבית" wasn't a sentence (iOS twin).
+     */
+    fun whereParts(ctx: Context, f: ChildLocationFix, places: List<FamilyPlace>): Pair<String, String> {
         // The child's phone names the place; the parent also checks, so a place added after
         // the phone last moved (or a fix a little off indoors) still reads as the place.
         val reported = f.placeID?.let { id -> places.firstOrNull { it.id == id } }
         val place = reported ?: FamilyPlace.at(f.lat!!, f.lng!!, places, f.accuracy)
         if (place != null) {
+            // "מאז" only when the phone itself saw the arrival — a coordinate match has no time.
             val since = if (reported != null) f.placeSince?.let { clock(it) } else null
-            return if (since != null) tr("%@ %@ · מאז %@", place.emoji, place.name, since) else "${place.emoji} ${place.name}"
+            return place.emoji to (if (since != null) tr("%@ · מאז %@", whereName(place), since) else whereName(place))
         }
         val key = String.format(Locale.ROOT, "%.4f,%.4f", Math.round(f.lat!! * 2000) / 2000.0, Math.round(f.lng!! * 2000) / 2000.0)
-        _addresses.value[key]?.let { return "📍 $it" }
+        _addresses.value[key]?.let { return "📍" to it }
         geocode(ctx, key, f.lat, f.lng!!)
-        return tr("📍 מחפשים כתובת…")
+        return "📍" to tr("מחפשים כתובת…")
+    }
+
+    /** Where a child IS, in Hebrew: "הבית" → "בבית", "בית הספר" → "בבית הספר", 👵 "סבתא" →
+     *  "אצל סבתא". A name already written that way stays; other languages show it as typed. */
+    fun whereName(p: FamilyPlace): String {
+        val n = p.name.trim()
+        if (I18n.language.code != "he" || n.isEmpty()) return n
+        if (listOf("אצל ", "ליד ", "בבית", "בגן ", "בחוג", "בבריכה").any { n.startsWith(it) }) return n
+        if (p.emoji == "👵" || listOf("סבתא", "סבא", "סבתה", "דודה", "דוד", "אבא", "אמא").any { n.startsWith(it) }) return "אצל $n"
+        if (n.startsWith("ה")) return "ב" + n.drop(1)
+        return "ב$n"
     }
 
     private val geocoding = mutableSetOf<String>()

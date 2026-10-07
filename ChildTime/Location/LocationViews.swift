@@ -872,17 +872,44 @@ extension LocationSharing {
     /// "🏫 בית הספר · מאז 08:02", or the street address when the device is
     /// outside every family place. (How fresh it is sits beside, not inside.)
     func whereLine(_ f: ChildLocationFix) -> String {
+        let p = whereParts(f)
+        return "\(p.icon) \(p.text)"
+    }
+
+    /// The card's location line in two parts — the icon (the place's own emoji,
+    /// or 📍 for a street address) and the words: "בבית · מאז 07:57",
+    /// "בבית הספר", "אצל סבתא", or the address. A place emoji next to a 📍 read
+    /// as two icons, and a bare "הבית" wasn't a sentence.
+    func whereParts(_ f: ChildLocationFix) -> (icon: String, text: String) {
         // The child's phone names the place when it writes the fix; the parent
         // also checks here, so a place added after the phone last moved (or a
-        // fix a little off indoors) still reads "🏠 הבית" and not a street.
+        // fix a little off indoors) still reads as the place and not a street.
         let reported = f.placeID.flatMap { id in familyPlaces.first { $0.id == id } }
         if let place = reported ?? FamilyPlace.place(at: f.lat, f.lng, in: familyPlaces, slack: f.accuracy) {
+            // "מאז" only when the phone itself saw the arrival — a match made here
+            // from coordinates has no real time to show.
             if let s = f.placeSince, reported != nil {
-                return tr("\(place.emoji) \(place.name) · מאז \(QuietHoursManager.clock(Date(timeIntervalSince1970: s)))")
+                return (place.emoji, tr("\(place.whereName) · מאז \(QuietHoursManager.clock(Date(timeIntervalSince1970: s)))"))
             }
-            return "\(place.emoji) \(place.name)"
+            return (place.emoji, place.whereName)
         }
-        if let a = address(for: f) { return "📍 \(a)" }
-        return tr("📍 מחפשים כתובת…")
+        if let a = address(for: f) { return ("📍", a) }
+        return ("📍", tr("מחפשים כתובת…"))
+    }
+}
+
+extension FamilyPlace {
+    /// Where a child IS, in Hebrew: "הבית" → "בבית", "בית הספר" → "בבית הספר",
+    /// 👵 "סבתא" → "אצל סבתא". A name the parent already wrote that way stays.
+    /// Other languages show the name as typed.
+    var whereName: String {
+        let n = name.trimmingCharacters(in: .whitespaces)
+        guard LanguageStore.shared.current == .he, !n.isEmpty else { return n }
+        let kept = ["אצל ", "ליד ", "בבית", "בגן ", "בחוג", "בבריכה"]
+        if kept.contains(where: { n.hasPrefix($0) }) { return n }
+        let people = ["סבתא", "סבא", "סבתה", "דודה", "דוד", "אבא", "אמא"]
+        if emoji == "👵" || people.contains(where: { n.hasPrefix($0) }) { return "אצל \(n)" }
+        if n.hasPrefix("ה") { return "ב" + n.dropFirst() }
+        return "ב" + n
     }
 }

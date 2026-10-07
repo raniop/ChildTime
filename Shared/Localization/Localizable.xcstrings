@@ -2477,6 +2477,28 @@
         }
       }
     },
+    "%@ · מאז %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · منذ %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · since %2$@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · с %2$@"
+          }
+        }
+      }
+    },
     "%@ · תּוֹבָנוֹת %@ בְּיוֹם" : {
       "localizations" : {
         "ar" : {
@@ -18328,6 +18350,28 @@
         }
       }
     },
+    "איפה הילדים, במבט אחד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أين الأطفال بنظرة واحدة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where the kids are, at a glance"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Где дети — с первого взгляда"
+          }
+        }
+      }
+    },
     "אישור והפעלת מיקום" : {
       "localizations" : {
         "ar" : {
@@ -24559,6 +24603,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "На карточке каждого ребёнка есть своя кнопка с его именем, которая передаёт ему ваш телефон, — а выход защищён кодом"
+          }
+        }
+      }
+    },
+    "בכרטיס של כל ילד כתוב עכשיו בבית, בבית הספר או אצל סבתא, עם הסמל של המקום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعرض بطاقة كل طفل الآن المكان الذي يوجد فيه، مع رمز المكان"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each child's card now shows the place they're at, with the place's own icon"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В карточке каждого ребёнка теперь видно, где он сейчас, со значком этого места"
           }
         }
       }
@@ -70500,6 +70566,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ждём сканирования на телефоне %@…"
+          }
+        }
+      }
+    },
+    "מחפשים כתובת…" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نبحث عن العنوان…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finding the address…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ищем адрес…"
           }
         }
       }

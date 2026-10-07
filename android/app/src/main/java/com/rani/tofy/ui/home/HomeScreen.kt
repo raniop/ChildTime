@@ -306,8 +306,9 @@ private fun LocationLine(child: Child, onOpen: () -> Unit) {
         .border(1.5.dp, if (fresh) Color(0xFF5CFF9D).copy(alpha = 0.7f) else Color.Transparent, RoundedCornerShape(14.dp))
         .clickable(onClick = onOpen).padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("📍", fontSize = 15.sp)
-        Text(com.rani.tofy.ui.location.LocationRepository.whereLine(ctx, f, state.household?.places ?: emptyList()).removePrefix("📍 "),
+        val (icon, where) = com.rani.tofy.ui.location.LocationRepository.whereParts(ctx, f, state.household?.places ?: emptyList())
+        Text(icon, fontSize = 15.sp)
+        Text(where,
             Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, maxLines = 1)
         Text(com.rani.tofy.ui.location.LocationRepository.relative(f.at), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 12.5.sp,
             color = if (fresh) Color(0xFF9FF5DD) else Ink.secondary)

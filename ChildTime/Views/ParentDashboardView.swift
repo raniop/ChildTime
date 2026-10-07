@@ -1329,9 +1329,10 @@ struct ParentDashboardView: View {
                 Button {
                     Haptic.light(); locationChild = profile.id.uuidString; showingLocation = true
                 } label: {
+                    let place = location.whereParts(f)
                     HStack(spacing: 8) {
-                        Text("📍").font(.system(size: 15))
-                        Text(location.whereLine(f).replacingOccurrences(of: "📍 ", with: ""))
+                        Text(place.icon).font(.system(size: 15))
+                        Text(place.text)
                             .font(.system(size: 14, weight: .heavy, design: .rounded))
                             .lineLimit(1).minimumScaleFactor(0.8)
                             .frame(maxWidth: .infinity, alignment: .leading)
