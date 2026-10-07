@@ -21152,6 +21152,28 @@
         }
       }
     },
+    "בַּהַגְדָּרוֹת שֶׁיִּפָּתְחוּ: הַרְשָׁאוֹת ← מִקּוּם ← כָּל הַזְּמַן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الإعدادات التي ستُفتح: الأذونات ← الموقع ← السماح طوال الوقت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In the settings that open: Permissions → Location → Allow all the time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В открывшихся настройках: Разрешения → Местоположение → Разрешить в любом режиме"
+          }
+        }
+      }
+    },
     "בַּחֲרִי דְּמוּת" : {
       "localizations" : {
         "ar" : {
@@ -56694,6 +56716,28 @@
         }
       }
     },
+    "כדי שההתראות על הגעה ויציאה יעבדו גם כשטופי סגור: בהגדרות שייפתחו בוחרים הרשאות ← מיקום ← כל הזמן." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لكي تعمل تنبيهات الوصول والمغادرة حتى عندما يكون Tofy مغلقًا: في الإعدادات التي ستُفتح اختاروا الأذونات ← الموقع ← السماح طوال الوقت."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So arrival and departure alerts work even when Tofy is closed: in the settings that open, choose Permissions → Location → Allow all the time."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чтобы уведомления о приходе и уходе работали, даже когда Tofy закрыт: в открывшихся настройках выберите Разрешения → Местоположение → Разрешить в любом режиме."
+          }
+        }
+      }
+    },
     "כוכבים (דירוג)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -81027,6 +81071,28 @@
         }
       }
     },
+    "עוֹד צַעַד אֶחָד 📍" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خطوة واحدة أخرى 📍"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One more step 📍"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё один шаг 📍"
+          }
+        }
+      }
+    },
     "עוֹד קְצָת דַּקּוֹת וְנִפְתַּח לְךָ! 💪" : {
       "localizations" : {
         "ar" : {
@@ -81990,6 +82056,28 @@
         }
       }
     },
+    "עוד צעד אחד 📍" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خطوة واحدة أخرى 📍"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One more step 📍"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё один шаг 📍"
+          }
+        }
+      }
+    },
     "עוד קצת וטופי+ ייפתח לכם במתנה" : {
       "localizations" : {
         "ar" : {
@@ -82821,6 +82909,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Открыть определённое приложение"
+          }
+        }
+      }
+    },
+    "פְּתִיחַת הַהַגְדָּרוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فتح الإعدادات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть настройки"
           }
         }
       }
