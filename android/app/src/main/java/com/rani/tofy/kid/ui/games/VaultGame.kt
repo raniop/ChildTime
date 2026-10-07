@@ -1,24 +1,25 @@
 package com.rani.tofy.kid.ui.games
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,7 +35,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -44,21 +47,21 @@ import com.rani.tofy.kid.ui.play.AppSound
 import com.rani.tofy.kid.ui.play.FitText
 import com.rani.tofy.kid.ui.play.KidColor
 import com.rani.tofy.ui.child.Topic
-import com.rani.tofy.ui.theme.GoldBrush
-import com.rani.tofy.ui.theme.Ink
 import com.rani.tofy.ui.theme.Rounded
 import com.rani.tofy.ui.theme.glassPane
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
- * 🔐 VaultGameView.swift — "הַכַּסֶּפֶת": a code of distinct digits 1–9 the
- * child WORKS OUT, never guesses. A question → one more clue opens and stays.
- * The clue set is proven to leave exactly one code (VaultGen.round), with at
- * least one slack clue — opening it early pays more. A wrong attempt only
- * points at the open clue it disagrees with ("💡 כִּמְעַט!"); no attempt limit.
+ * 🔐 VaultGameView.swift — "הַכַּסֶּפֶת": a safe with three dials. Every right
+ * answer turns the next dial onto its digit; three dials and the door swings
+ * open on the treasure.
+ *
+ * Rani, 2026-10-07: "משחק הכספת הוא מסובך מידי! ולא מובן". The version before
+ * opened a CLUE per answer and asked the child to deduce the code from all of
+ * them — two games at once. Now: a question → a dial → the next question.
+ * From ה׳ the digit hides in a small exercise and the child turns the dial.
+ * A miss never fails: the dial stays put and the next question comes.
  */
 @Composable
 fun VaultGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, onClose: () -> Unit) {
@@ -68,34 +71,34 @@ fun VaultGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, onCl
     val mathWorld = topic == null || topic in listOf(Topic.MATH, Topic.MONEY, Topic.LOGIC, Topic.GIFTED)
     val grade = MiniGameLevel.grade(if (mathWorld) Topic.MATH else topic)
     val recordTopic = topic ?: Topic.LOGIC
+    // ה׳ and up work the digit out themselves.
+    val solvesDigits = grade >= 5
+    val dials = 3
+    val rtl = GameEnv.lang.rtl
 
     var phase by remember { mutableIntStateOf(0) }
-    var round by remember { mutableStateOf(VaultGen.Round(emptyList(), emptyList(), 0)) }
-    var revealed by remember { mutableIntStateOf(0) }
-    val input = remember { mutableStateListOf<Int?>() }
-    val attempts = remember { mutableStateListOf<List<Int>>() }
+    val code = remember { mutableStateListOf<Int>() }
+    var opened by remember { mutableIntStateOf(0) }
     var question by remember { mutableStateOf<GameItem?>(null) }
-    var hint by remember { mutableStateOf("idle") }   // idle · broke · consistent · already · retry
-    var flagged by remember { mutableStateOf<Int?>(null) }
+    var riddle by remember { mutableStateOf<String?>(null) }
+    var riddleMiss by remember { mutableStateOf(false) }
+    var missNote by remember { mutableStateOf(false) }
+    // The next question is already on its way — the button is only for a
+    // child who put a question away.
+    var nextPending by remember { mutableStateOf(false) }
     val seen = remember { HashSet<String>() }
     var askedAt by remember { mutableDoubleStateOf(nowSecs()) }
     var cracked by remember { mutableStateOf(false) }
+    var doorOpen by remember { mutableStateOf(false) }
     var shake by remember { mutableIntStateOf(0) }
     var coins by remember { mutableIntStateOf(0) }
     var confetti by remember { mutableIntStateOf(0) }
     var grant by remember { mutableStateOf<MiniGameReward.Grant?>(null) }
     var startedAt by remember { mutableDoubleStateOf(nowSecs()) }
 
-    val digits = round.code.size
-    val total = round.clues.size
-    val spare = maxOf(0, total - revealed)
-    val opening = revealed == 0 && !cracked
-    val full = input.isNotEmpty() && input.all { it != null }
-    val firstEmpty = input.indexOfFirst { it == null }.takeIf { it >= 0 }
-    val offerReveal = !cracked && revealed >= total && attempts.size >= 2
-
     fun ask() {
-        if (revealed >= total || question != null || cracked) return
+        nextPending = false
+        if (phase != 1 || opened >= dials || question != null || riddle != null || cracked) return
         val item = if (mathWorld && kotlin.random.Random.nextBoolean()) VaultGen.dialQuestion(grade)
         else GameContent.card(topic, maxOf(1, GameEnv.grade(2)), seen)
         askedAt = nowSecs()
@@ -104,197 +107,93 @@ fun VaultGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, onCl
 
     fun finish() {
         if (phase != 1) return
-        // 🧠 Opening it with clues to spare is the big win: every clue NOT needed is worth double.
-        val score = if (cracked) 3 + 2 * spare + revealed else revealed
-        grant = MiniGameReward.grant("vault", score, 2, 1, 10, surprise)
+        grant = MiniGameReward.grant("vault", 3 + opened, 2, 1, 10, surprise)
         phase = 2
-        play(AppSound.CHEST_OPEN); h.success()
-        if (cracked) confetti++
-    }
-
-    fun start() {
-        question = null; hint = "idle"; flagged = null; seen.clear(); cracked = false; grant = null
-        revealed = 0; attempts.clear(); input.clear()
-        scope.launch {
-            // ⚡ A surprise round is a short deduction: three digits, four clues. (Brute-force proof → off the main thread.)
-            val r = withContext(Dispatchers.Default) { VaultGen.round(grade, if (surprise) 3 else null, if (surprise) 4 else null) }
-            round = r
-            input.addAll(List(r.code.size) { null })
-            startedAt = nowSecs()
-            phase = 1
-            // 🚪 The round OPENS with a question — clue ① flips open before the board appears.
-            delay(350); ask()
-        }
-    }
-
-    fun press(k: String) {
-        if (phase != 1 || question != null || cracked) return
-        if (k == "⌫") { input.indices.lastOrNull { input[it] != null }?.let { input[it] = null }; return }
-        val d = k.toIntOrNull() ?: return
-        val slot = firstEmpty ?: return
-        // The lock's own two rules: every digit different, and 0 is not one of them.
-        if (d == 0 || d in input) { shake++; h.light(); return }
-        input[slot] = d
+        h.success()
     }
 
     fun crack() {
-        cracked = true; coins++
-        play(AppSound.LEVEL_UP); h.success()
+        cracked = true
+        play(AppSound.LEVEL_UP)
         MiniGameLedger.record(true, recordTopic, (nowSecs() - startedAt) * 1000, earn = earn, surprise = surprise)
-        scope.launch { delay(1000); finish() }
+        scope.launch {
+            delay(450); doorOpen = true; confetti++; coins++
+            delay(1750); finish()
+        }
     }
 
-    fun submit() {
-        if (!full || phase != 1 || cracked) return
-        val guess = input.filterNotNull()
-        if (guess == round.code) { crack(); return }
-        if (guess in attempts) { hint = "already"; shake++; h.light(); return }
-        attempts += guess
-        // The one piece of feedback a miss gives: WHICH open clue it disagrees with.
-        val i = (0 until revealed).firstOrNull { !round.clues[it].holds(guess) }
-        if (i != null) { hint = "broke"; flagged = i } else { hint = "consistent"; flagged = null }
-        play(AppSound.UI_TAP); h.light(); shake++
-        for (j in input.indices) input[j] = null
+    /** Click — the next dial lands on its digit. */
+    fun turnDial() {
+        play(AppSound.CHEST_OPEN); h.success()
+        opened++
+        if (opened >= dials) crack()
+        else { nextPending = true; scope.launch { delay(800); ask() } }
+    }
+
+    fun start() {
+        code.clear(); code.addAll((1..9).shuffled().take(dials))
+        opened = 0; question = null; riddle = null; riddleMiss = false; missNote = false
+        nextPending = true   // the round asks its first question itself
+        seen.clear(); cracked = false; doorOpen = false; grant = null
+        startedAt = nowSecs()
+        phase = 1
+        scope.launch { delay(350); ask() }
     }
 
     fun answered(item: GameItem, right: Boolean) {
         MiniGameLedger.record(right, item.topic, (nowSecs() - askedAt) * 1000, earn = earn, surprise = surprise)
         question = null
         if (!right) {
-            // Nothing is lost — the clue stays shut; before the first clue the next question comes by itself.
-            hint = "retry"
-            if (revealed == 0 && !cracked) scope.launch { delay(400); ask() }
+            // The dial just stays put; the next question comes by itself.
+            missNote = true; nextPending = true
+            scope.launch { delay(900); ask() }
             return
         }
-        flagged = null; hint = "idle"; coins++
-        play(AppSound.CHEST_OPEN)
-        revealed++
+        missNote = false; coins++
+        if (solvesDigits) { riddleMiss = false; riddle = VaultGen.expression(code[opened], grade) }
+        else turnDial()
     }
 
-    fun giveTheCode() {
-        if (cracked || phase != 1) return
-        for (j in input.indices) input[j] = round.code[j]
-        scope.launch { delay(700); finish() }
+    fun pickDigit(d: Int) {
+        if (riddle == null || opened >= code.size) return
+        if (d != code[opened]) { h.light(); shake++; riddleMiss = true; return }
+        riddle = null; riddleMiss = false
+        turnDial()
     }
 
     LaunchedEffect(Unit) { if ((surprise || earn != null) && phase == 0) start() }
 
-    GameFrame(onClose, earn, surprise, if (total > 0) "🔑 $revealed/$total" else "🔐", coins, KidColor.starGold, confetti) {
+    GameFrame(onClose, earn, surprise, if (code.isEmpty()) "🔐" else "🔐 $opened/$dials", coins, KidColor.starGold, confetti) {
         when (phase) {
             0 -> Centered { MiniGameIntroCard(MiniGameKind.VAULT) { start() } }
             2 -> Centered {
-                val codeText = MiniGameText.ltr(round.code.joinToString(""))
-                val detail = when {
-                    !cracked -> tr("הַקּוֹד הָיָה %@ — נְנַסֶּה שׁוּב?", codeText)
-                    spare <= 0 -> tr("פְּתַרְתֶּם אֶת כָּל הָרְמָזִים וּפִצַּחְתֶּם אֶת הַקּוֹד!")
-                    else -> tr("פִּצַּחְתֶּם אֶת הַקּוֹד וְעוֹד נִשְׁאֲרוּ רְמָזִים סְגוּרִים — הַסָּקָה מְשֻׁבַּחַת! 🧠")
-                }
-                MiniGameEndCard(if (cracked) tr("פִּצַּחְתֶּם אֶת הַכַּסֶּפֶת! 🔓") else tr("עֲבוֹדָה יָפָה! 💪"), detail, grant, surprise,
+                MiniGameEndCard(tr("פְּתַחְתֶּם אֶת הַכַּסֶּפֶת! 🔓"), tr("שָׁלֹשׁ תְּשׁוּבוֹת נְכוֹנוֹת — וְהָאוֹצָר שֶׁלָּכֶם! 💎"), grant, surprise,
                     tr("עוֹד כַּסֶּפֶת 🔁"), { start() }, onClose)
             }
             else -> Box(Modifier.weight(1f).fillMaxWidth()) {
-                val loopBanner = @Composable {
-                    FitText(tr("🔑 עוֹנִים עַל שְׁאֵלָה ← 💡 נִפְתָּח רֶמֶז ← 🔓 פּוֹתְחִים אֶת הַכַּסֶּפֶת"), (if (m.compact) 14 else 18).sp,
+                Column(
+                    Modifier.align(Alignment.TopCenter).widthIn(max = if (m.compact) 560.dp else 680.dp).fillMaxWidth().padding(horizontal = 20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(if (m.short) 10.dp else 16.dp),
+                ) {
+                    FitText(tr("🔑 עוֹנִים נָכוֹן ← 🎡 גַּלְגַּל מִסְתּוֹבֵב ← 🔓 הַכַּסֶּפֶת נִפְתַּחַת"), (if (m.compact) 14 else 18).sp,
                         Modifier.fillMaxWidth().glassPane(18.dp).padding(horizontal = 12.dp, vertical = if (m.compact) 7.dp else 10.dp),
                         weight = FontWeight.ExtraBold, maxLines = 2, minScale = 0.7f)
-                }
-                if (opening) Column(
-                    Modifier.align(Alignment.TopCenter).widthIn(max = if (m.compact) 560.dp else 720.dp).fillMaxWidth().padding(horizontal = 20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp),
-                ) {
-                    loopBanner()
-                    if (question == null) {
-                        Text(MiniGameKind.VAULT.emoji, fontSize = (if (m.compact) 76 else 110).sp, modifier = Modifier.padding(top = 20.dp).floating(6f))
-                        MiniGameGoldButton(tr("🔑 לַשְּׁאֵלָה הָרִאשׁוֹנָה"), Modifier.widthIn(max = if (m.compact) 320.dp else 420.dp)) { ask() }
+                    Safe(code, opened, cracked, doorOpen, rtl, shake, if (m.compact) 76f else 104f)
+                    val r = riddle
+                    if (r != null) RiddlePanel(r, riddleMiss, m.compact) { pickDigit(it) }
+                    else if (!cracked && question == null && !nextPending) {
+                        MiniGameGoldButton(tr("🔑 לַשְּׁאֵלָה הַבָּאָה"), Modifier.widthIn(max = if (m.compact) 320.dp else 420.dp)) { ask() }
                     }
-                } else Column(
-                    Modifier.align(Alignment.TopCenter).widthIn(max = if (m.compact) 600.dp else 760.dp).fillMaxWidth()
-                        .verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(if (m.short) 7.dp else 10.dp),
-                ) {
-                    loopBanner()
-                    // The vault door: a captioned row of "?" slots + the codes already tried.
-                    val slot = if (m.compact) (if (digits >= 4) 48f else 56f) else 68f
-                    val dx = shakeOffset(shake)
-                    Column(Modifier.fillMaxWidth().glassPane(22.dp).padding(horizontal = 12.dp, vertical = 10.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(7.dp)) {
-                        FitText(if (cracked) tr("הַכַּסֶּפֶת נִפְתְּחָה! 🔓") else tr("🔐 הַקּוֹד הַסּוֹדִי — הַקִּישׁוּ אוֹתוֹ כָּאן"), (if (m.compact) 12.5f else 15f).sp,
-                            color = if (cracked) KidColor.successMint else KidColor.starGold, weight = FontWeight.ExtraBold, maxLines = 1, minScale = 0.65f)
-                        // The code reads in the language's direction, like the
-                        // number sequences: in Hebrew the FIRST digit is on the right.
-                        Ltr(!GameEnv.lang.rtl) {
-                            Row(Modifier.graphicsLayer { translationX = dx * density }, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                                for (i in 0 until maxOf(digits, 1)) {
-                                    val d = if (cracked) round.code.getOrNull(i) else input.getOrNull(i)
-                                    Box(Modifier.size(slot.dp, (slot * 1.1f).dp).miniGameTile(if (cracked) TileState.CORRECT else if (i == firstEmpty) TileState.PICKED else TileState.NORMAL,
-                                        KidColor.starGold, 16.dp), contentAlignment = Alignment.Center) {
-                                        Text(d?.toString() ?: "?", color = if (cracked) KidColor.starGold else if (d == null) Color.White.copy(alpha = 0.45f) else Color.White,
-                                            fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = (slot * (if (d == null) 0.46f else 0.52f)).sp)
-                                    }
-                                }
-                            }
-                        }
-                        if (attempts.isNotEmpty()) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(tr("נִסִּינוּ:"), color = Ink.tertiary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp)
-                            Ltr {
-                                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                                    attempts.forEach { a ->
-                                        Text((if (GameEnv.lang.rtl) a.reversed() else a).joinToString(""), color = Color.White.copy(alpha = 0.45f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp,
-                                            modifier = Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.08f)).padding(horizontal = 7.dp, vertical = 2.dp))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    val hintText = when (hint) {
-                        "idle" -> if (revealed < total) tr("יוֹדְעִים אֶת הַקּוֹד? הַקִּישׁוּ אוֹתוֹ! וְאִם לֹא — פִּתְחוּ עוֹד רֶמֶז")
-                        else tr("כָּל הָרְמָזִים כָּאן — וְיֵשׁ רַק קוֹד אֶחָד שֶׁמַּתְאִים לְכֻלָּם! 🧠")
-                        "broke" -> tr("💡 כִּמְעַט! הַקּוֹד הַזֶּה לֹא מַסְכִּים עִם הָרֶמֶז הַמְּסֻמָּן")
-                        "consistent" -> tr("✨ מַתְאִים לְכָל הָרְמָזִים שֶׁכָּאן — אֲבָל צָרִיךְ עוֹד רֶמֶז")
-                        "already" -> tr("אֶת הַקּוֹד הַזֶּה כְּבָר נִסִּינוּ — בּוֹאוּ נְנַסֶּה אַחֵר")
-                        else -> tr("💡 כִּמְעַט! אֶפְשָׁר לְבַקֵּשׁ שְׁאֵלָה חֲדָשָׁה")
-                    }
-                    SubText(hintText, (if (m.compact) 13 else 15).sp, color = if (hint == "idle") Ink.secondary else Color.White)
-                    // The clue list — the heart of the screen.
-                    val askRow = revealed < total && !cracked
-                    Column(Modifier.fillMaxWidth().glassPane(20.dp).padding(10.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                        ClueRow("🔐", tr("בַּקּוֹד %lld סְפָרוֹת שׁוֹנוֹת, מִ־1 עַד 9", digits), rule = true, flagged = false, compact = m.compact)
-                        round.clues.forEachIndexed { i, clue ->
-                            key(i) {
-                                when {
-                                    i < revealed -> ClueRow("${i + 1}", clue.text, rule = false, flagged = flagged == i, compact = m.compact)
-                                    i == revealed && askRow -> Row(
-                                        Modifier.fillMaxWidth().clip(RoundedCornerShape(13.dp)).background(GoldBrush).juicyClick { ask() }
-                                            .padding(horizontal = 9.dp, vertical = if (m.compact) 8.dp else 11.dp),
-                                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    ) {
-                                        Box(Modifier.size(22.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.28f)), contentAlignment = Alignment.Center) { Text("🔑", fontSize = 13.sp) }
-                                        FitText(tr("עֲנוּ עַל שְׁאֵלָה וְיִפָּתַח רֶמֶז %lld", revealed + 1), (if (m.compact) 14f else 16.5f).sp, Modifier.weight(1f),
-                                            weight = FontWeight.ExtraBold, maxLines = 1, minScale = 0.6f, align = androidx.compose.ui.text.style.TextAlign.Start)
-                                    }
-                                    else -> Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(13.dp)).background(Color.White.copy(alpha = 0.05f)).padding(horizontal = 9.dp, vertical = 5.dp),
-                                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        Box(Modifier.size(22.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.08f)), contentAlignment = Alignment.Center) { Text("🔒", fontSize = 12.sp) }
-                                        Text(tr("רֶמֶז %lld", i + 1), color = Ink.tertiary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = (if (m.compact) 13 else 15).sp)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (offerReveal) MiniGameGlassButton(tr("✨ לִפְתֹּחַ אֶת הַכַּסֶּפֶת יַחַד"), Modifier.widthIn(max = if (m.compact) 320.dp else 420.dp)) { giveTheCode() }
-                    Box(Modifier.widthIn(max = if (m.compact) 320.dp else 420.dp)) {
-                        MiniGameNumberPad(keyHeight = if (m.short) 38.dp else if (m.compact) 44.dp else 58.dp) { press(it) }
-                    }
-                    Box(Modifier.widthIn(max = if (m.compact) 320.dp else 420.dp).graphicsLayer { alpha = if (full && !cracked) 1f else 0.5f }) {
-                        MiniGameGoldButton(tr("פְּתִיחָה 🔓")) { if (full && !cracked) submit() }
+                    if (missNote && riddle == null && !cracked) {
+                        SubText(tr("לֹא נוֹרָא! הַגַּלְגַּל מְחַכֶּה לַשְּׁאֵלָה הַבָּאָה 💪"), (if (m.compact) 14 else 16).sp, color = Color.White)
                     }
                 }
                 val item = question
                 if (item != null) {
-                    // Tapping outside closes it — nothing is spent by putting a question away.
+                    // Tapping outside puts it away — the child must be able to reach the ✕.
                     Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.35f))
                         .clickable(remember { MutableInteractionSource() }, null) { question = null }, contentAlignment = Alignment.Center) {
-                        key(item) { MiniGameQuestionCard(item, tr("🔑 תְּשׁוּבָה נְכוֹנָה פּוֹתַחַת רֶמֶז!")) { right -> answered(item, right) } }
+                        key(item) { MiniGameQuestionCard(item, tr("🔑 תְּשׁוּבָה נְכוֹנָה מְסוֹבֶבֶת גַּלְגַּל!")) { right -> answered(item, right) } }
                     }
                 }
             }
@@ -302,18 +201,86 @@ fun VaultGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, onCl
     }
 }
 
+/** The safe: a steel door with three dials and a handle; it swings open on the treasure. */
 @Composable
-private fun ClueRow(badge: String, text: String, rule: Boolean, flagged: Boolean, compact: Boolean) {
-    Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(13.dp)).background(Color.White.copy(alpha = if (rule) 0.05f else 0.12f))
-            .border(2.dp, if (flagged) KidColor.almostWarm else Color.Transparent, RoundedCornerShape(13.dp)).padding(horizontal = 9.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Box(Modifier.size(22.dp).clip(CircleShape).background(if (flagged) KidColor.almostWarm.copy(alpha = 0.9f) else Color.White.copy(alpha = if (rule) 0.10f else 0.20f)),
+private fun Safe(code: List<Int>, opened: Int, cracked: Boolean, doorOpen: Boolean, rtl: Boolean, shake: Int, dial: Float) {
+    val swing by animateFloatAsState(if (doorOpen) (if (rtl) -75f else 75f) else 0f,
+        spring(dampingRatio = 0.75f, stiffness = Spring.StiffnessLow), label = "door")
+    val handle by animateFloatAsState(if (cracked) -35f else 0f, label = "handle")
+    val dx = shakeOffset(shake)
+    val shape = RoundedCornerShape(28.dp)
+    Box(Modifier.fillMaxWidth().height((dial * 1.25f + if (dial > 90f) 110f else 80f).dp)) {
+        // Behind the door: the treasure.
+        Box(Modifier.fillMaxSize().clip(shape)
+            .background(Brush.verticalGradient(listOf(Color(0xFF2A1F5C), Color(0xFF1A1240)))),
             contentAlignment = Alignment.Center) {
-            Text(badge, color = if (rule) Ink.secondary else Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 12.5.sp)
+            if (doorOpen) Text("💎⭐💰", fontSize = (if (dial > 90f) 62 else 46).sp)
         }
-        Text(text, Modifier.weight(1f), color = if (rule) Ink.secondary else Color.White, fontFamily = Rounded,
-            fontWeight = if (rule) FontWeight.SemiBold else FontWeight.ExtraBold, fontSize = (if (compact) 14f else 16.5f).sp)
+        // The door.
+        Column(
+            Modifier.fillMaxSize()
+                .graphicsLayer {
+                    rotationY = swing
+                    cameraDistance = 12f * density
+                    transformOrigin = TransformOrigin(if (rtl) 1f else 0f, 0.5f)
+                }
+                .clip(shape)
+                .background(Brush.linearGradient(listOf(Color(0xFF8E86C9), Color(0xFF5B5196))))
+                .border(2.dp, Color.White.copy(alpha = 0.4f), shape),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(if (dial > 90f) 20.dp else 14.dp, Alignment.CenterVertically),
+        ) {
+            // The first dial is on the reading side: in Hebrew, the right.
+            Ltr(!rtl) {
+                Row(Modifier.graphicsLayer { translationX = dx * density }, horizontalArrangement = Arrangement.spacedBy(if (dial > 90f) 18.dp else 12.dp)) {
+                    for (i in 0 until 3) DialView(code.getOrNull(i), set = i < opened, next = i == opened && !cracked, size = dial)
+                }
+            }
+            Box(Modifier.width((if (dial > 90f) 120 else 90).dp).height(14.dp)
+                .graphicsLayer { rotationZ = handle }
+                .clip(RoundedCornerShape(50))
+                .background(Brush.verticalGradient(listOf(Color(0xFFE9E4FF), Color(0xFF9A93C9)))))
+        }
+    }
+}
+
+@Composable
+private fun DialView(digit: Int?, set: Boolean, next: Boolean, size: Float) {
+    val spin by animateFloatAsState(if (set) 360f else 0f, spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessLow), label = "dial")
+    Box(
+        Modifier.size(size.dp).graphicsLayer { rotationZ = spin }.clip(CircleShape)
+            .background(Brush.radialGradient(listOf(Color.White.copy(alpha = if (set) 0.95f else 0.35f),
+                Color(0xFFC9C3F0).copy(alpha = if (set) 0.9f else 0.2f))))
+            .border(if (set || next) 3.dp else 1.5.dp,
+                if (set) KidColor.starGold else Color.White.copy(alpha = if (next) 0.9f else 0.4f), CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (set && digit != null) Text("$digit", color = Color(0xFF3B2F86), fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = (size * 0.5f).sp)
+        else Text("?", color = Color.White.copy(alpha = if (next) 0.85f else 0.45f), fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = (size * 0.42f).sp)
+    }
+}
+
+/** ה׳+: the exercise for the dial just earned, and the nine digits. */
+@Composable
+private fun RiddlePanel(text: String, miss: Boolean, compact: Boolean, onDigit: (Int) -> Unit) {
+    Column(Modifier.fillMaxWidth().glassPane(22.dp).padding(14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        FitText(tr("🎡 סוֹבְבוּ אֶת הַגַּלְגַּל לַתְּשׁוּבָה:"), (if (compact) 14 else 17).sp, color = KidColor.starGold, weight = FontWeight.ExtraBold, maxLines = 1)
+        FitText(MiniGameText.ltr("$text = ?"), (if (compact) 26 else 34).sp, weight = FontWeight.Black, maxLines = 1, minScale = 0.6f)
+        Ltr {
+            Column(Modifier.widthIn(max = if (compact) 300.dp else 380.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                for (row in 0 until 3) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for (col in 1..3) {
+                        val d = row * 3 + col
+                        Box(Modifier.weight(1f).height(if (compact) 44.dp else 56.dp).clip(RoundedCornerShape(14.dp))
+                            .background(Color.White.copy(alpha = 0.14f)).border(1.dp, Color.White.copy(alpha = 0.28f), RoundedCornerShape(14.dp))
+                            .juicyClick { onDigit(d) }, contentAlignment = Alignment.Center) {
+                            Text("$d", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = (if (compact) 22 else 28).sp)
+                        }
+                    }
+                }
+            }
+        }
+        if (miss) SubText(tr("כִּמְעַט! בִּדְקוּ שׁוּב אֶת הַתַּרְגִּיל 🔍"), (if (compact) 13.5f else 15.5f).sp, color = Color.White)
     }
 }
