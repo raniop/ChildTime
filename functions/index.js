@@ -1187,6 +1187,25 @@ exports.wakeOnChildCommand = onDocumentWritten("children/{childID}", async (even
   const before = event.data.before.exists ? event.data.before.data() : null;
   const after = event.data.after.exists ? event.data.after.data() : null;
   if (!after) return;
+  // 📍 A parent switched location sharing on → remind the child's phone to open
+  // Tofy and allow it (the onboarding step already asked, on that very phone).
+  const was = before && before.locationSharing && before.locationSharing.enabled === true;
+  const now = after.locationSharing && after.locationSharing.enabled === true;
+  if (!was && now && after.locationSharing.consentBy !== "onboarding"
+      && await claimOnce(`locon_${event.params.childID}_${Math.floor(Date.now() / 600000)}`)) {
+    const tokens = await tokensForChildOwnDevices(event.params.childID, after.householdID);
+    if (tokens.length) {
+      await sendEachLocalized(tokens, (lang) => ({
+        notification: lang === "en" ? { title: "Tofy 📍", body: "Mom or Dad turned on location — open Tofy to allow it" }
+          : lang === "ru" ? { title: "Tofy 📍", body: "Мама или папа включили геолокацию — открой Tofy, чтобы разрешить" }
+          : lang === "ar" ? { title: "Tofy 📍", body: "شغّل بابا أو ماما الموقع — افتح Tofy للسماح بذلك" }
+          : { title: "טוֹפִי 📍", body: "אַבָּא אוֹ אִמָּא הִפְעִילוּ מִקּוּם — פִּתְחוּ אֶת טוֹפִי כְּדֵי לְאַשֵּׁר" },
+        data: { type: "location-on" },
+        apns: { payload: { aps: { sound: "default" } } },
+        android: androidFor("family"),
+      })).catch((e) => console.error("[location-on] failed", e && e.message));
+    }
+  }
   if (commandChanged(before, after, COMMAND_FIELDS_CHILD)) {
     await wakeChildDevices(after.householdID, "child-command");
   }

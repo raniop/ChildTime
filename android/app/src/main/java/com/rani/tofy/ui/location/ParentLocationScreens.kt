@@ -247,7 +247,9 @@ private fun KidCard(ctx: Context, c: Child, places: List<FamilyPlace>, picked: M
 private fun ConsentPage(c: Child, onDone: () -> Unit) {
     val scope = rememberCoroutineScope()
     var saving by remember { mutableStateOf(false) }
+    var enabled by remember { mutableStateOf(false) }
     val name = stripNiqqud(c.name)
+    if (enabled) { NextStepPage(name, c.isGirl, onDone); return }
     GlassBackdrop {
         Column(Modifier.fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(18.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -260,7 +262,7 @@ private fun ConsentPage(c: Child, onDone: () -> Unit) {
                     "🗺️" to (if (c.isGirl) tr("מה נשמר: המיקום האחרון של הטלפון שלה, והגעה או יציאה מהמקומות שסימנתם. לא מסלול של כל היום.")
                              else tr("מה נשמר: המיקום האחרון של הטלפון שלו, והגעה או יציאה מהמקומות שסימנתם. לא מסלול של כל היום.")),
                     "👪" to tr("מי רואה: רק ההורים במשפחה. שום דבר לא עובר לאף גורם אחר."),
-                    "🗑️" to tr("כיבוי: מוחק מיד את המיקום השמור."),
+                    "🗑️" to tr("אפשר לכבות בכל רגע, והמיקום השמור נמחק מיד."),
                     "🔋" to tr("סוללה: מתעדכן כשהטלפון זז או כשמבקשים — בלי GPS שרץ כל הזמן."),
                 ).forEach { (e, t) ->
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -275,8 +277,39 @@ private fun ConsentPage(c: Child, onDone: () -> Unit) {
                 textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.White)
                     .clickable(enabled = !saving) {
                         saving = true
-                        scope.launch { LocationRepository.setSharing(c.id, true); saving = false; onDone() }
+                        scope.launch { LocationRepository.setSharing(c.id, true); saving = false; enabled = true }
                     }.padding(vertical = 16.dp))
+        }
+    }
+}
+
+/** After "אישור": the next step happens on the CHILD's phone — say so (Rani). */
+@Composable
+private fun NextStepPage(name: String, girl: Boolean, onDone: () -> Unit) {
+    GlassBackdrop {
+        Column(Modifier.fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Spacer(Modifier.height(20.dp))
+            Text("📱", fontSize = 48.sp)
+            Text(tr("עוד צעד אחד — בטלפון של %@", name), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black,
+                fontSize = 23.sp, textAlign = TextAlign.Center)
+            Column(Modifier.fillMaxWidth().glassPane(20.dp, 0.16f, shadow = false).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                listOf(tr("פותחים את טופי בטלפון של %@", name),
+                    tr("לוחצים \"ממשיכים\" ומאשרים מיקום — ואם שואלים, בוחרים \"תמיד\""),
+                    if (girl) tr("זהו — %@ תופיע כאן על המפה", name) else tr("זהו — %@ יופיע כאן על המפה", name),
+                ).forEachIndexed { i, t ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
+                        Text("${i + 1}", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 15.sp, textAlign = TextAlign.Center,
+                            modifier = Modifier.size(28.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.22f)).padding(top = 3.dp))
+                        Text(t, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                    }
+                }
+            }
+            Text(tr("שלחנו לטלפון של %@ התראה שמזכירה לפתוח את טופי.", name), color = Ink.secondary, fontFamily = Rounded,
+                fontSize = 13.sp, textAlign = TextAlign.Center)
+            Text(tr("הבנתי"), color = Color(0xFF4B3BC4), fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 18.sp,
+                textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.White)
+                    .clickable(onClick = onDone).padding(vertical = 16.dp))
         }
     }
 }
@@ -402,20 +435,35 @@ private fun PlaceEditor(start: FamilyPlace, kids: List<Child>, places: List<Fami
                 }
             }
             Column(Modifier.fillMaxWidth().glassPane(20.dp, 0.16f, shadow = false).padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(tr("התראה כש…"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text(tr("התראות על המקום הזה"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                // Two plain switches per child, each a whole sentence (Rani: "התראה כש… — לא מובן").
                 for (c in kids) {
                     val a = place.alerts[c.id] ?: PlaceAlert(false, false)
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        ChildAvatar(c, 30.dp)
-                        Text(stripNiqqud(c.name), Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 16.sp)
-                        Chip(if (c.isGirl) tr("מגיעה") else tr("מגיע"), a.arrive) { place = place.copy(alerts = place.alerts + (c.id to a.copy(arrive = !a.arrive))) }
-                        Chip(if (c.isGirl) tr("יוצאת") else tr("יוצא"), a.leave) { place = place.copy(alerts = place.alerts + (c.id to a.copy(leave = !a.leave))) }
+                    val name = stripNiqqud(c.name)
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(top = 6.dp)) {
+                        ChildAvatar(c, 28.dp)
+                        Text(name, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 16.sp)
+                    }
+                    AlertSwitch(if (c.isGirl) tr("להודיע לי כש%@ מגיעה לכאן", name) else tr("להודיע לי כש%@ מגיע לכאן", name), a.arrive) {
+                        place = place.copy(alerts = place.alerts + (c.id to a.copy(arrive = it)))
+                    }
+                    AlertSwitch(if (c.isGirl) tr("להודיע לי כש%@ יוצאת מכאן", name) else tr("להודיע לי כש%@ יוצא מכאן", name), a.leave) {
+                        place = place.copy(alerts = place.alerts + (c.id to a.copy(leave = it)))
                     }
                 }
             }
             if (!isNew) Text(tr("מחיקת המקום"), color = Color(0xFFFFB4C8), fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 15.sp,
                 modifier = Modifier.align(Alignment.CenterHorizontally).clickable { save(true) }.padding(10.dp))
         }
+    }
+}
+
+@Composable
+private fun AlertSwitch(title: String, on: Boolean, onChange: (Boolean) -> Unit) {
+    Row(Modifier.fillMaxWidth().clickable { onChange(!on) }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(title, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+        androidx.compose.material3.Switch(on, onChange, colors = androidx.compose.material3.SwitchDefaults.colors(checkedTrackColor = Mint))
     }
 }
 

@@ -20,7 +20,7 @@ data class FamilyPlace(
     val lat: Double,
     val lng: Double,
     /** Meters. */
-    val radius: Double = 200.0,
+    val radius: Double = 100.0,
     val alerts: Map<String, PlaceAlert> = emptyMap(),
 ) {
     fun toMap(): Map<String, Any?> = mapOf(
@@ -31,7 +31,8 @@ data class FamilyPlace(
     fun contains(lat: Double, lng: Double) = meters(lat, lng, this.lat, this.lng) <= radius
 
     companion object {
-        val RADII = listOf(100.0, 200.0, 400.0)
+        /** iOS FamilyPlace.radii — 50 marks the spot; fences fire at the OS minimum (~100 m). */
+        val RADII = listOf(50.0, 100.0, 200.0)
 
         /** Great-circle distance in meters (haversine). */
         fun meters(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Double {

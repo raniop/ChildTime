@@ -81,13 +81,20 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
             }
             return
         }
-        // 🔔 Beep: the alert's own sound plays in the background; in the
-        // foreground we loop it loudly and show "מָצָאתִי!".
+        // 🔔 Beep, like Find My (Rani: "ציפיתי שיעשה צפצוף"): the push wakes
+        // Tofy even in the background, and Tofy itself plays the sound for 30 s
+        // through the `.playback` session — which the silent switch does not mute
+        // (the push's own sound does obey it). The wake window is held open
+        // while it rings; a force-quit app is not woken (Apple's rule), and then
+        // only the push's own sound is left.
         if type == "beep" || type == "beep-stop" {
             Task { @MainActor in
-                if type == "beep-stop" { LocationSharing.shared.stopBeep(report: false) }
-                else if UIApplication.shared.applicationState == .active { LocationSharing.shared.startBeep() }
-                completionHandler(.noData)
+                if type == "beep-stop" { LocationSharing.shared.stopBeep(report: false); completionHandler(.noData); return }
+                let task = UIApplication.shared.beginBackgroundTask(withName: "tofy.beep")
+                LocationSharing.shared.startBeep()
+                try? await Task.sleep(nanoseconds: 28_000_000_000)
+                completionHandler(.newData)
+                if task != .invalid { UIApplication.shared.endBackgroundTask(task) }
             }
             return
         }
@@ -620,7 +627,7 @@ struct ChildTimeApp: App {
                 return LocationSharing.shared.familyPlaces[0]
             }())
         case "locconsent":
-            if let p = ProfileStore.shared.active { LocationConsentSheet(profile: p) }
+            if let p = ProfileStore.shared.active { LocationConsentSheet(profile: p, startEnabled: ProcessInfo.processInfo.environment["DEMO_NEXT"] == "1") }
         case "kidbeep": KidBeepOverlay()
         case "kidlocperm": KidLocationPermissionSheet()
         // 🏫🌙 DEMO_SCREEN=childsettings | quieteditor [DEMO_QUIET=school|bedtime]

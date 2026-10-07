@@ -120,7 +120,7 @@ fun OnboardingLocationStep(childID: String, householdID: String?, name: String, 
                     if (isGirl) tr("מה נשמר: המיקום האחרון של הטלפון שלה, והגעה או יציאה מהמקומות שסימנתם. לא מסלול של כל היום.")
                     else tr("מה נשמר: המיקום האחרון של הטלפון שלו, והגעה או יציאה מהמקומות שסימנתם. לא מסלול של כל היום."),
                     tr("מי רואה: רק ההורים במשפחה. שום דבר לא עובר לאף גורם אחר."),
-                    tr("כיבוי: מוחק מיד את המיקום השמור."),
+                    tr("אפשר לכבות בכל רגע, והמיקום השמור נמחק מיד."),
                 ).forEach { Text(it, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.5.sp) }
             }
             Spacer(Modifier.weight(1f))

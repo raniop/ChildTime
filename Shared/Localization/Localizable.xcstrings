@@ -19059,6 +19059,28 @@
         }
       }
     },
+    "אפשר לכבות בכל רגע, והמיקום השמור נמחק מיד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمكن إيقافه في أي لحظة، ويُحذف الموقع المحفوظ فورًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can turn it off anytime, and the saved location is deleted right away."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Можно выключить в любой момент, и сохранённое местоположение сразу удалится."
+          }
+        }
+      }
+    },
     "אפשר לסגור — אם האישור יגיע אחר כך, תקבלו התראה ברגע שהמכשיר יינעל." : {
       "localizations" : {
         "ar" : {
@@ -42277,6 +42299,28 @@
         }
       }
     },
+    "התראות על המקום הזה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تنبيهات هذا المكان"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alerts for this place"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Уведомления об этом месте"
+          }
+        }
+      }
+    },
     "התראות פעילות" : {
       "localizations" : {
         "ar" : {
@@ -44073,6 +44117,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Это то, что iOS получила от нас сейчас, — а не то, что отмечено на экранах выше."
+          }
+        }
+      }
+    },
+    "זהו — %@ יופיע כאן על המפה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا كل شيء — سيظهر %@ هنا على الخريطة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That's it — %@ will show up here on the map"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готово — %@ появится здесь на карте"
+          }
+        }
+      }
+    },
+    "זהו — %@ תופיע כאן על המפה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا كل شيء — ستظهر %@ هنا على الخريطة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That's it — %@ will show up here on the map"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готово — %@ появится здесь на карте"
           }
         }
       }
@@ -61692,6 +61780,94 @@
         }
       }
     },
+    "להודיע לי כש%@ יוצא מכאן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أخبروني عندما يغادر %@ من هنا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tell me when %@ leaves here"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сообщить, когда %@ уходит отсюда"
+          }
+        }
+      }
+    },
+    "להודיע לי כש%@ יוצאת מכאן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أخبروني عندما تغادر %@ من هنا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tell me when %@ leaves here"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сообщить, когда %@ уходит отсюда"
+          }
+        }
+      }
+    },
+    "להודיע לי כש%@ מגיע לכאן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أخبروني عندما يصل %@ إلى هنا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tell me when %@ arrives here"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сообщить, когда %@ приходит сюда"
+          }
+        }
+      }
+    },
+    "להודיע לי כש%@ מגיעה לכאן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أخبروني عندما تصل %@ إلى هنا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tell me when %@ arrives here"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сообщить, когда %@ приходит сюда"
+          }
+        }
+      }
+    },
     "להוריד את הזבל" : {
       "localizations" : {
         "ar" : {
@@ -62307,6 +62483,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Нажмите «Продолжить» и подтвердите кодом телефона или Face ID"
+          }
+        }
+      }
+    },
+    "לוחצים \"ממשיכים\" ומאשרים מיקום — ואם שואלים, בוחרים \"תמיד\"" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اضغطوا \"متابعة\" واسمحوا بالموقع — وإذا سُئلتم، اختاروا \"دائمًا\""
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap \"Continue\" and allow location — and if asked, choose \"Always\""
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите «Дальше» и разрешите геолокацию, а если спросят — выберите «Всегда»"
           }
         }
       }
@@ -81682,6 +81880,28 @@
         }
       }
     },
+    "עוד צעד אחד — בטלפון של %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خطوة أخرى — على هاتف %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One more step — on %@'s phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё один шаг — на телефоне %@"
+          }
+        }
+      }
+    },
     "עוד קצת וטופי+ ייפתח לכם במתנה" : {
       "localizations" : {
         "ar" : {
@@ -84836,6 +85056,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Линейная функция"
+          }
+        }
+      }
+    },
+    "פותחים את טופי בטלפון של %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "افتحوا Tofy على هاتف %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Tofy on %@'s phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Откройте Tofy на телефоне %@"
           }
         }
       }
@@ -95578,6 +95820,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отправить тестовое уведомление"
+          }
+        }
+      }
+    },
+    "שלחנו לטלפון של %@ התראה שמזכירה לפתוח את טופי." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أرسلنا إلى هاتف %@ إشعارًا يذكّر بفتح Tofy."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We sent %@'s phone a notification reminding them to open Tofy."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мы отправили на телефон %@ уведомление с напоминанием открыть Tofy."
           }
         }
       }

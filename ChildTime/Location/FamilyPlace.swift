@@ -19,10 +19,12 @@ struct FamilyPlace: Codable, Hashable, Identifiable, Sendable {
         var leave: Bool
     }
 
-    static let radii: [Double] = [100, 200, 400]
+    /// Rani: "חייבים לצמצם". The phone fences at ~100 m at best, so 50 marks the
+    /// spot for the label; arrive/leave still fire at the OS minimum.
+    static let radii: [Double] = [50, 100, 200]
 
     init(id: String = UUID().uuidString, name: String, emoji: String = "📍",
-         lat: Double, lng: Double, radius: Double = 200, alerts: [String: PlaceAlert] = [:]) {
+         lat: Double, lng: Double, radius: Double = 100, alerts: [String: PlaceAlert] = [:]) {
         self.id = id; self.name = name; self.emoji = emoji
         self.lat = lat; self.lng = lng; self.radius = radius; self.alerts = alerts
     }

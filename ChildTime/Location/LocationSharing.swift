@@ -276,7 +276,7 @@ final class LocationSharing: NSObject, ObservableObject {
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         try? AVAudioSession.sharedInstance().setActive(true)
         player = try? AVAudioPlayer(contentsOf: url)
-        player?.numberOfLoops = 0
+        player?.numberOfLoops = -1      // the stop timer below ends it at 30 s
         player?.volume = 1
         player?.play()
         beeping = true

@@ -370,13 +370,24 @@ struct ParentLocationView: View {
 
 struct LocationConsentSheet: View {
     let profile: Profile
+    init(profile: Profile, startEnabled: Bool = false) {
+        self.profile = profile
+        self.startEnabled = startEnabled
+        _enabled = State(initialValue: startEnabled)
+    }
     @Environment(\.dismiss) private var dismiss
     @State private var saving = false
+    /// After "אישור": what to do on the child's phone (Rani: the parent could
+    /// not guess that the next step happens THERE).
+    @State private var enabled = false
+    /// DEMO_SCREEN=locconsent DEMO_NEXT=1 — open on the next-step page.
+    var startEnabled = false
 
     var body: some View {
         let name = Question.stripNiqqud(profile.name)
         let girl = profile.gender == .girl
         NavigationStack {
+            if enabled { nextStep(name: name, girl: girl) } else {
             ScrollView {
                 VStack(spacing: 16) {
                     Text("📍").font(.system(size: 44))
@@ -386,7 +397,7 @@ struct LocationConsentSheet: View {
                         row("🗺️", girl ? tr("מה נשמר: המיקום האחרון של הטלפון שלה, והגעה או יציאה מהמקומות שסימנתם. לא מסלול של כל היום.")
                                        : tr("מה נשמר: המיקום האחרון של הטלפון שלו, והגעה או יציאה מהמקומות שסימנתם. לא מסלול של כל היום."))
                         row("👪", tr("מי רואה: רק ההורים במשפחה. שום דבר לא עובר לאף גורם אחר."))
-                        row("🗑️", tr("כיבוי: מוחק מיד את המיקום השמור."))
+                        row("🗑️", tr("אפשר לכבות בכל רגע, והמיקום השמור נמחק מיד."))
                         row("🔋", tr("סוללה: מתעדכן כשהטלפון זז או כשמבקשים — בלי GPS שרץ כל הזמן."), last: true)
                     }
                     .padding(.horizontal, 16)
@@ -400,7 +411,8 @@ struct LocationConsentSheet: View {
                         Task {
                             _ = await LocationSharing.shared.setSharing(childID: profile.id.uuidString, on: true)
                             saving = false
-                            dismiss()
+                            Haptic.success()
+                            withAnimation { enabled = true }
                         }
                     } label: {
                         Text(tr("אישור והפעלת מיקום"))
@@ -418,7 +430,51 @@ struct LocationConsentSheet: View {
             }
             .background(GlassBackdrop())
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button(tr("ביטול")) { dismiss() } } }
+            }
         }
+    }
+
+    private func nextStep(name: String, girl: Bool) -> some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                Text("📱").font(.system(size: 48))
+                Text(tr("עוד צעד אחד — בטלפון של \(name)"))
+                    .font(.system(size: 23, weight: .heavy, design: .rounded)).multilineTextAlignment(.center)
+                VStack(alignment: .leading, spacing: 0) {
+                    step(1, tr("פותחים את טופי בטלפון של \(name)"))
+                    step(2, tr("לוחצים \"ממשיכים\" ומאשרים מיקום — ואם שואלים, בוחרים \"תמיד\""))
+                    step(3, girl ? tr("זהו — \(name) תופיע כאן על המפה") : tr("זהו — \(name) יופיע כאן על המפה"), last: true)
+                }
+                .padding(.horizontal, 16)
+                .glassPane(radius: 20, shadow: false)
+                Text(tr("שלחנו לטלפון של \(name) התראה שמזכירה לפתוח את טופי."))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary).multilineTextAlignment(.center)
+                Button { dismiss() } label: {
+                    Text(tr("הבנתי"))
+                        .font(.system(size: 18, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "4B3BC4"))
+                        .frame(maxWidth: .infinity, minHeight: 56)
+                        .background(.white, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                }
+                .buttonStyle(.plain)
+            }
+            .foregroundStyle(.white)
+            .padding(18)
+            .readableColumn()
+        }
+        .background(GlassBackdrop())
+    }
+
+    private func step(_ n: Int, _ text: String, last: Bool = false) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text("\(n)").font(.system(size: 15, weight: .black, design: .rounded))
+                .frame(width: 28, height: 28).background(Color.white.opacity(0.22), in: Circle())
+            Text(text).font(.system(size: 15, weight: .semibold, design: .rounded)).fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 12)
+        .overlay(alignment: .bottom) { if !last { Rectangle().fill(.white.opacity(0.14)).frame(height: 1) } }
     }
 
     private func row(_ emoji: String, _ text: String, last: Bool = false) -> some View {
@@ -609,7 +665,7 @@ struct PlaceEditorView: View {
                     .glassPane(radius: 20, shadow: false)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(tr("התראה כש…")).font(.system(size: 13, weight: .bold, design: .rounded)).foregroundStyle(GlassInk.secondary)
+                        Text(tr("התראות על המקום הזה")).font(.system(size: 13, weight: .bold, design: .rounded)).foregroundStyle(GlassInk.secondary)
                         ForEach(profiles.profiles) { p in alertRow(p) }
                     }
                     .padding(14)
@@ -641,29 +697,30 @@ struct PlaceEditorView: View {
         .onAppear { focus = CLLocationCoordinate2D(latitude: place.lat, longitude: place.lng) }
     }
 
+    /// Rani: "התראה כש… — לא מובן מה לעשות". Two plain switches per child,
+    /// each a whole sentence.
     private func alertRow(_ p: Profile) -> some View {
         let cid = p.id.uuidString
         let girl = p.gender == .girl
+        let name = Question.stripNiqqud(p.name)
         let a = place.alerts[cid] ?? .init(arrive: false, leave: false)
-        return HStack(spacing: 8) {
-            ProfileAvatarView(profile: p, size: 30)
-            Text(Question.stripNiqqud(p.name)).font(.system(size: 16, weight: .heavy, design: .rounded))
-            Spacer()
-            chip(girl ? tr("מגיעה") : tr("מגיע"), on: a.arrive) { place.alerts[cid] = .init(arrive: !a.arrive, leave: a.leave) }
-            chip(girl ? tr("יוצאת") : tr("יוצא"), on: a.leave) { place.alerts[cid] = .init(arrive: a.arrive, leave: !a.leave) }
+        return VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                ProfileAvatarView(profile: p, size: 28)
+                Text(name).font(.system(size: 16, weight: .heavy, design: .rounded))
+            }
+            .padding(.top, 6)
+            Toggle(isOn: Binding(get: { a.arrive }, set: { place.alerts[cid] = .init(arrive: $0, leave: a.leave) })) {
+                Text(girl ? tr("להודיע לי כש\(name) מגיעה לכאן") : tr("להודיע לי כש\(name) מגיע לכאן"))
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+            }
+            .tint(AppColor.successMint)
+            Toggle(isOn: Binding(get: { a.leave }, set: { place.alerts[cid] = .init(arrive: a.arrive, leave: $0) })) {
+                Text(girl ? tr("להודיע לי כש\(name) יוצאת מכאן") : tr("להודיע לי כש\(name) יוצא מכאן"))
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+            }
+            .tint(AppColor.successMint)
         }
-        .frame(minHeight: 48)
-    }
-
-    private func chip(_ title: String, on: Bool, _ action: @escaping () -> Void) -> some View {
-        Button { Haptic.light(); action() } label: {
-            Text(on ? "\(title) ✓" : title)
-                .font(.system(size: 13.5, weight: .heavy, design: .rounded))
-                .padding(.horizontal, 12).frame(minHeight: 34)
-                .background((on ? AppColor.successMint.opacity(0.45) : Color.white.opacity(0.12)), in: Capsule())
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(on ? .isSelected : [])
     }
 
     private func search() {
