@@ -211,17 +211,21 @@ struct ParentDashboardView: View {
                 if display.barOnLeft {
                     if open && strip > 0 { Color.clear.frame(width: strip) }
                     homePane(width: home).zIndex(1).environment(\.inSplitColumn, open)
-                    if open { revealedPane(width: rest).transition(revealTransition) }
+                    if open { revealedPane(width: rest) }
                 } else {
-                    if open { revealedPane(width: rest).transition(revealTransition) }
+                    if open { revealedPane(width: rest) }
                     homePane(width: home).zIndex(1).environment(\.inSplitColumn, open)
                     if open && strip > 0 { Color.clear.frame(width: strip) }
                 }
             }
-            // ✨ Unfold: the child's page slides out from under the home
-            // column, from the fold outward; fold: it slides back in. The home
-            // column itself never moves — beside the rail before, and after.
-            .animation(.spring(response: 0.62, dampingFraction: 0.86), value: open)
+            // 🎞 No animation of our own across a fold. The system already
+            // animates it — on fold it keeps the home column (the half that
+            // becomes the outer screen) and blurs the rest away; on unfold it
+            // cross-fades into our first frame. A slide of our own ran UNDER
+            // that cross-fade and left the child's half empty for ~0.7s
+            // (recorded on the Duo). So the first frame at the new size is
+            // already the finished layout, and the system's transition does
+            // the rest — the same in both directions.
         }
         .environment(\.layoutDirection, .leftToRight)
         .overlay { parentRail }
@@ -245,17 +249,6 @@ struct ParentDashboardView: View {
         AnyView(dashboardStack)
             .frame(width: width)
             .environment(\.layoutDirection, .app)
-    }
-
-    /// The revealed half emerges from the fold — from the side it shares with
-    /// the home column — with a fade and a breath of scale, the way the system
-    /// itself grows a page.
-    private var revealTransition: AnyTransition {
-        let fold: Edge = display.barOnLeft ? .leading : .trailing
-        return .asymmetric(
-            insertion: .move(edge: fold).combined(with: .opacity)
-                .combined(with: .scale(scale: 0.96, anchor: display.barOnLeft ? .leading : .trailing)),
-            removal: .move(edge: fold).combined(with: .opacity))
     }
 
     /// What the fold reveals: the selected child's page, exactly the page a tap
