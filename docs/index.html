@@ -12,7 +12,7 @@
 <link rel="alternate" hreflang="ru" href="https://tofyapp.com/ru/">
 <link rel="alternate" hreflang="ar" href="https://tofyapp.com/ar/">
 <meta property="og:title" content="טופי — זמן מסך שמרוויחים בלמידה">
-<meta property="og:description" content="הילד לומד, עונה על שאלות ומרוויח דקות משחק. אתם רואים ושולטים מהטלפון שלכם. לגילאי 4–12, בלי פרסומות ובלי מעקב.">
+<meta property="og:description" content="הילד לומד, עונה על שאלות ומרוויח דקות משחק. אתם רואים ושולטים מהטלפון שלכם. מגן ועד כיתה ח׳, בלי פרסומות ובלי מעקב.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="טופי">
 <meta property="og:url" content="https://tofyapp.com/">
@@ -24,7 +24,7 @@
 <meta property="og:image:alt" content="טופי — אפליקציית למידה וזמן מסך לילדים">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="טופי — זמן מסך שמרוויחים בלמידה">
-<meta name="twitter:description" content="כיף לילד, שקט להורה. לגילאי 4–12.">
+<meta name="twitter:description" content="כיף לילד, שקט להורה. מגן ועד כיתה ח׳.">
 <meta name="twitter:image" content="https://tofyapp.com/og-image.jpg?v=6">
 <link rel="icon" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -139,6 +139,23 @@
   .card p{color:var(--muted);font-size:15.5px}
   @media(max-width:820px){.steps,.cards{grid-template-columns:1fr}}
 
+  /* ---------- getting started: two steps, each with its real screen ---------- */
+  .start{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;max-width:960px;margin:0 auto}
+  .start-step{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:20px;align-items:center;padding:28px 26px}
+  .start-step .n{width:42px;height:42px;line-height:40px;border-radius:50%;text-align:center;font-weight:900;
+    background:linear-gradient(180deg,#FFE28A,#FFC23D);color:#3B2A00;margin-bottom:12px}
+  .start-step h3{font-size:21px;font-weight:900;margin-bottom:8px}
+  .start-step p{color:var(--muted);font-size:15.5px}
+  .start-step img{width:150px;border-radius:22px;border:1px solid rgba(255,255,255,.2);
+    box-shadow:0 18px 40px rgba(18,9,58,.4)}
+  .start-note{text-align:center;color:var(--faint);font-size:15px;margin-top:22px}
+  .start-cta{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:24px}
+  @media(max-width:820px){
+    .start{grid-template-columns:1fr}
+    .start-step{grid-template-columns:minmax(0,1fr) 112px;padding:22px 20px}
+    .start-step img{width:112px;border-radius:18px}
+  }
+
   /* ---------- safety band ---------- */
   .band{padding:48px 30px;text-align:center}
   .band .list{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:26px}
@@ -202,11 +219,10 @@
   <a class="brand" href="/"><img src="lion.png" alt=""><span>טופי</span><span class="visually-hidden"> — דף הבית</span></a>
   <button class="menu-btn" id="menuBtn" type="button" aria-label="תפריט" aria-expanded="false" aria-controls="nav">☰</button>
   <nav class="site-nav" id="nav" aria-label="ניווט ראשי">
-    <a href="#how">איך זה עובד</a>
-    <a href="#games">משחקים</a>
+    <a href="#what">מה זה טופי</a>
+    <a href="#reports">הדוח להורים</a>
+    <a href="#start">איך מתחילים</a>
     <a href="#screens">הצצה לאפליקציה</a>
-    <a href="#worlds">העולמות</a>
-    <a href="#reports">להורים</a>
     <a href="#price">מחירים</a>
     <a class="btn" href="https://apps.apple.com/app/id6773805449" data-store>הורידו את טופי</a>
   </nav>
@@ -226,7 +242,7 @@
 <section class="hero"><div class="wrap">
   <div>
     <h1>זמן מסך<br>שמרוויחים בלמידה</h1>
-    <p class="sub">הילד עונה על שאלות לפי תוכנית הלימודים — ומקבל דקות משחק אמיתיות באפליקציות שאתם בוחרים. אתם רואים הכול מהטלפון שלכם.</p>
+    <p class="sub">בלי ריבים על המסך. הילד עונה על שאלות לפי תוכנית הלימודים ומרוויח דקות משחק, ואתם רואים מה הוא לומד ושולטים בהכול מהטלפון שלכם.</p>
     <div class="cta-row">
       <a class="appstore" href="https://apps.apple.com/app/id6773805449" data-store>
         <svg viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM262.1 104.5c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
@@ -236,13 +252,14 @@
         <svg viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M96 52c-9 5-14 15-14 28v352c0 13 5 23 14 28l200-204L96 52zm226 178 58-59L130 30c-6-3-12-4-17-3l209 203zm0 52L113 485c5 1 11 0 17-3l250-141-58-59zm88-104-58 61 58 59 58-33c20-11 20-43 0-54l-58-33z"/></svg>
         <span class="tx"><small>בקרוב ב־</small><b>Google&nbsp;Play</b></span>
       </a>
-      <a class="btn ghost" href="#how">איך זה עובד ↓</a>
+      <a class="btn ghost" href="#start">איך מתחילים ↓</a>
     </div>
     <ul class="pills">
-      <li><span aria-hidden="true">👧</span> לגילאי 4–12</li>
+      <li><span aria-hidden="true">👧</span> מגן ועד כיתה ח׳</li>
       <li><span aria-hidden="true">🚫</span> בלי פרסומות</li>
       <li><span aria-hidden="true">🔒</span> בלי מעקב</li>
       <li><span aria-hidden="true">🇮🇱</span> עברית מלאה</li>
+      <li><span aria-hidden="true">📱</span> אייפון ואנדרואיד</li>
     </ul>
   </div>
   <div class="stage">
@@ -266,30 +283,37 @@
   </div>
 </div></section>
 
-<!-- ===================== HOW ===================== -->
-<section id="how"><div class="wrap">
-  <div class="eyebrow reveal">פשוט וברור</div>
-  <h2 class="title reveal">איך זה עובד</h2>
-  <p class="lead reveal">במקום לריב על המסך — הופכים אותו לעסקה הוגנת שכולם מרוויחים ממנה.</p>
-  <div class="steps">
-    <div class="step pane reveal"><div class="n">1</div><div class="ico" aria-hidden="true">🧠</div>
-      <h3>הילד לומד ומשחק</h3>
-      <p>שאלות לפי הכיתה בחשבון, עברית, אנגלית, מדעים ועוד — בתוך הרפתקה צבעונית עם דמות, כוכבים ויהלומים.</p></div>
-    <div class="step pane reveal"><div class="n">2</div><div class="ico" aria-hidden="true">🎮</div>
-      <h3>מרוויח דקות משחק</h3>
-      <p>כל תשובה נכונה שווה שניות משחק, והן מצטברות לדקות. כשיש מספיק דקות, האפליקציות שחסמתם נפתחות באמת.</p></div>
-    <div class="step pane reveal"><div class="n">3</div><div class="ico" aria-hidden="true">📊</div>
-      <h3>אתם רואים ושולטים</h3>
-      <p>מה נלמד היום, במה הילד חזק ובמה הוא צריך עזרה, כמה זמן מותר ואילו עולמות פתוחים — הכול מאחורי קוד הורה.</p></div>
+<!-- ===================== 1 · WHAT — what parents get ===================== -->
+<section id="what"><div class="wrap">
+  <div class="eyebrow reveal">מה זה טופי</div>
+  <h2 class="title reveal">מה יוצא לכם מזה</h2>
+  <p class="lead reveal">טופי זו אפליקציה למשפחה: הילד עונה על שאלות לפי תוכנית הלימודים ומרוויח דקות משחק באפליקציות שאתם בוחרים לנעול. ומה אתם מקבלים?</p>
+  <div class="cards">
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🤝</div><h3>נגמרים הריבים על המסך</h3>
+      <p>הזמן לא ניתן ולא נלקח בכוח. הילד מרוויח אותו בעצמו, ואתם כבר לא השוטרים של הבית.</p></div>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🎒</div><h3>הילד לומד בלי שתדחפו</h3>
+      <p>שאלות לפי הכיתה שלו בחשבון, עברית, אנגלית ועוד. הרמה מתכווננת לבד, והוא חוזר כי בא לו.</p></div>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">📊</div><h3>יודעים במה הוא חזק</h3>
+      <p>דוח לכל ילד לפי נושא: במה הוא חזק, איפה צריך עזרה, ומה כדאי לתרגל איתו בבית.</p></div>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">⏱</div><h3>אתם קובעים את הכללים</h3>
+      <p>כמה זמן ביום, אילו אפליקציות נעולות, זמן בית ספר ושעת שינה. ואפשר לפתוח זמן מרחוק בלחיצה.</p></div>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">📍</div><h3>יודעים שהם בסדר</h3>
+      <p>איפה הילדים עכשיו, התראה כשהגיעו הביתה או לבית הספר, וצפצוף לטלפון שנעלם.</p></div>
+    <div class="card pane reveal"><div class="ico" aria-hidden="true">🛡️</div><h3>בטוח לילדים</h3>
+      <p>בלי פרסומות, בלי מעקב ובלי קניות אצל הילד. כל תשלום רק אצלכם, מאחורי קוד הורה.</p></div>
   </div>
 </div></section>
 
-<!-- ===================== SCREENS ===================== -->
-<!-- ===================== FOR PARENTS: what you learn about your child ===================== -->
+<!-- ===================== 2 · REPORTS — the proof: what you learn about your child ===================== -->
 <section id="reports"><div class="wrap">
   <div class="eyebrow reveal">מה אתם מקבלים</div>
   <h2 class="title reveal">יודעים בדיוק במה הילד חזק — ובמה פחות</h2>
   <p class="lead reveal">כל תשובה של הילד נכנסת לדוח אישי שמתעדכן בזמן אמת בטלפון שלכם. לא רק כמה זמן הוא שיחק — אלא מה הוא באמת לומד, ואיפה כדאי לעזור לו.</p>
+  <div class="rail reveal" style="margin:4px 0 26px">
+    <figure><button class="shot" type="button"><img src="shots/parentreport.jpg" alt="הדוח השבועי: שאלות, אחוז הצלחה, דקות ותובנה" loading="lazy"></button><figcaption><span aria-hidden="true">📊</span> הדוח השבועי</figcaption></figure>
+    <figure><button class="shot" type="button"><img src="shots/parenttopics.jpg" alt="ביצועים לפי נושא: חזק מאוד, חזק, בסדר" loading="lazy"></button><figcaption><span aria-hidden="true">💪</span> במה חזק, במה פחות</figcaption></figure>
+    <figure><button class="shot" type="button"><img src="shots/parentworlds.jpg" alt="האם הילד משתפר, העולמות שלו ומגמת הלמידה" loading="lazy"></button><figcaption><span aria-hidden="true">📈</span> האם הוא משתפר?</figcaption></figure>
+  </div>
   <div class="cards">
     <div class="card pane reveal"><div class="ico" aria-hidden="true">📊</div><h3>דוח לכל ילד</h3>
       <p>היום, השבוע והחודש: כמה שאלות ענה, אחוז ההצלחה, כמה דקות הרוויח וכמה ימים ברצף.</p></div>
@@ -304,13 +328,45 @@
     <div class="card pane reveal"><div class="ico" aria-hidden="true">🔔</div><h3>התראות בזמן אמת</h3>
       <p>כשהילד מתחיל, מסיים או מבקש עזרה בשאלה — ואתם עונים לו ישר מהטלפון.</p></div>
   </div>
-  <div class="rail reveal" style="margin-top:22px">
-    <figure><button class="shot" type="button"><img src="shots/parentreport.jpg" alt="הדוח השבועי: שאלות, אחוז הצלחה, דקות ותובנה" loading="lazy"></button><figcaption><span aria-hidden="true">📊</span> הדוח השבועי</figcaption></figure>
-    <figure><button class="shot" type="button"><img src="shots/parenttopics.jpg" alt="ביצועים לפי נושא: חזק מאוד, חזק, בסדר" loading="lazy"></button><figcaption><span aria-hidden="true">💪</span> במה חזק, במה פחות</figcaption></figure>
-    <figure><button class="shot" type="button"><img src="shots/parentworlds.jpg" alt="האם הילד משתפר, העולמות שלו ומגמת הלמידה" loading="lazy"></button><figcaption><span aria-hidden="true">📈</span> האם הוא משתפר?</figcaption></figure>
+</div></section>
+
+<!-- ===================== 3 · START ===================== -->
+<section id="start"><div class="wrap">
+  <div class="eyebrow reveal">איך מתחילים</div>
+  <h2 class="title reveal">שני צעדים, וזהו</h2>
+  <p class="lead reveal">כמה דקות והמשפחה מחוברת. אותו דבר באייפון ובאנדרואיד.</p>
+  <div class="start">
+    <div class="start-step pane reveal">
+      <div>
+        <div class="n">1</div>
+        <h3>בטלפון שלכם <span aria-hidden="true">📱</span></h3>
+        <p>מורידים את טופי, בוחרים "הורה" ויוצרים משפחה: שם המשפחה, שם הילד והכיתה שלו. כל משפחה חדשה מקבלת את טופי+ במתנה ל־30 יום.</p>
+      </div>
+      <img src="shots/start-family.jpg" alt="יצירת משפחה בטלפון של ההורה: איך קוראים למשפחה?" width="819" height="1781" loading="lazy">
+    </div>
+    <div class="start-step pane reveal">
+      <div>
+        <div class="n">2</div>
+        <h3>במכשיר של הילד <span aria-hidden="true">🧒</span></h3>
+        <p>מורידים את טופי בטלפון או בטאבלט של הילד, בוחרים "ילד" וסורקים את הברקוד שמופיע אצלכם בטלפון. הילד מחובר, והכול מסתנכרן.</p>
+      </div>
+      <img src="shots/start-join.jpg" alt="חיבור הטלפון של הילד: סורקים את הקוד מהטלפון של ההורה" width="819" height="1781" loading="lazy">
+    </div>
+  </div>
+  <p class="start-note reveal">אין לילד מכשיר משלו? אפשר לתת לו לשחק גם בטלפון שלכם.</p>
+  <div class="start-cta reveal">
+    <a class="appstore" href="https://apps.apple.com/app/id6773805449" data-store>
+      <svg viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM262.1 104.5c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+      <span class="tx"><small data-store-small>הורידו ב־</small><b>App&nbsp;Store</b></span>
+    </a>
+    <a class="appstore play-soon" href="#android">
+      <svg viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M96 52c-9 5-14 15-14 28v352c0 13 5 23 14 28l200-204L96 52zm226 178 58-59L130 30c-6-3-12-4-17-3l209 203zm0 52L113 485c5 1 11 0 17-3l250-141-58-59zm88-104-58 61 58 59 58-33c20-11 20-43 0-54l-58-33z"/></svg>
+      <span class="tx"><small>בבדיקות ב־</small><b>Google&nbsp;Play</b></span>
+    </a>
   </div>
 </div></section>
 
+<!-- ===================== SCREENS ===================== -->
 <section id="screens"><div class="wrap">
   <div class="eyebrow reveal">הצצה</div>
   <h2 class="title reveal">טופי בפעולה</h2>
@@ -338,14 +394,14 @@
       <figure><button class="shot" type="button"><img src="shots/childscreentime.jpg" alt="הגבלת זמן מסך יומית" loading="lazy"></button><figcaption><span aria-hidden="true">⏱</span> תקרה יומית</figcaption></figure>
       <figure><button class="shot" type="button"><img src="shots/childworlds.jpg" alt="עולמות פעילים לכל ילד" loading="lazy"></button><figcaption><span aria-hidden="true">🌍</span> עולם לכל ילד</figcaption></figure>
       <figure><button class="shot" type="button"><img src="shots/choresparent.jpg" alt="אישור מטלות" loading="lazy"></button><figcaption><span aria-hidden="true">✅</span> אישור מטלות</figcaption></figure>
-      <figure><button class="shot" type="button"><img src="shots/childdifficulty.jpg" alt="רמת קושי לכל נושא" loading="lazy"></button><figcaption><span aria-hidden="true">🎯</span> רמה לכל נושא</figcaption></figure>
+      <figure><button class="shot" type="button"><img src="shots/location.jpg" alt="איפה הילדים: מפה עם כל הילדים, איפה כל אחד ומאז מתי" loading="lazy"></button><figcaption><span aria-hidden="true">📍</span> איפה הילדים</figcaption></figure>
     </div>
   </div>
 </div></section>
 
 <!-- ===================== GAMES ===================== -->
 <section id="games"><div class="wrap">
-  <div class="eyebrow reveal">חדש</div>
+  <div class="eyebrow reveal">משחקים</div>
   <h2 class="title reveal">12 משחקים — הילד בוחר איך לענות</h2>
   <p class="lead reveal">אחרי שבוחרים עולם נפתח מסך "איך בא לך לשחק?" — שאלות רגילות או אחד המשחקים. התוכן נשאר אותו תוכן, והדקות מורווחות גם ככה.</p>
   <div class="side reveal">
@@ -412,7 +468,7 @@
   <p class="lead reveal">לא עוד אפליקציית חידונים. טופי יודע באיזו כיתה הילד נמצא, במה הוא חזק, ומתי כדאי לעלות רמה.</p>
   <div class="cards">
     <div class="card pane reveal"><div class="ico" aria-hidden="true">🎒</div><h3>לפי תוכנית הלימודים</h3>
-      <p>כל שאלה מתויגת לכיתה שלה, מגן טרום־חובה ועד כיתה ו׳. בספטמבר הילד עולה כיתה — והשאלות עולות איתו.</p></div>
+      <p>כל שאלה מתויגת לכיתה שלה, מגן טרום־חובה ועד כיתה ח׳. בספטמבר הילד עולה כיתה — והשאלות עולות איתו.</p></div>
     <div class="card pane reveal"><div class="ico" aria-hidden="true">📈</div><h3>רמה שמתכווננת לבד</h3>
       <p>הרמה נקבעת לכל נושא בנפרד לפי ההצלחות בפועל, סביב הרמה שאתם קבעתם. קל מדי? עולה. קשה מדי? יורדת.</p></div>
     <div class="card pane reveal"><div class="ico" aria-hidden="true">🔊</div><h3>גם למי שעוד לא קורא</h3>
@@ -431,13 +487,15 @@
   <div class="band pane reveal">
     <div class="eyebrow">שקט נפשי</div>
     <h2 class="title">בנוי גם בשבילכם</h2>
-    <p class="lead" style="margin-bottom:0">האפליקציות נחסמות דרך Screen Time של אפל ונפתחות רק כשהילד הרוויח. אתם קובעים תקרה יומית, פותחים זמן ידנית מכל מקום, ומקבלים התראה כשהילד התחיל, סיים או ביקש עזרה.</p>
+    <p class="lead" style="margin-bottom:0">האפליקציות נחסמות באייפון דרך Screen Time של אפל ובאנדרואיד דרך ההרשאות של טופי, ונפתחות רק כשהילד הרוויח. אתם קובעים תקרה יומית, פותחים זמן ידנית מכל מקום, ומקבלים התראה כשהילד התחיל, סיים, ביקש עזרה או הגיע הביתה.</p>
     <ul class="list">
       <li><span aria-hidden="true">⏱</span> תקרה יומית לכל ילד</li>
       <li><span aria-hidden="true">🎁</span> פתיחת זמן מרחוק</li>
       <li><span aria-hidden="true">🎯</span> רמת קושי לכל נושא</li>
       <li><span aria-hidden="true">🌍</span> בחירת עולמות לכל ילד</li>
       <li><span aria-hidden="true">🔔</span> התראות חכמות</li>
+      <li><span aria-hidden="true">📍</span> איפה הילדים עכשיו</li>
+      <li><span aria-hidden="true">🌙</span> זמן בית ספר ושעת שינה</li>
       <li><span aria-hidden="true">👨‍👩‍👧</span> כמה הורים, כמה ילדים</li>
       <li><span aria-hidden="true">⌚️</span> גם על ה־<span lang="en">Apple Watch</span></li>
       <li><span aria-hidden="true">🔐</span> הכול מאחורי קוד הורה</li>
@@ -487,9 +545,9 @@
         <li>כל העולמות פתוחים</li>
         <li>לכל הילדים במשפחה, בכל המכשירים</li>
         <li>כל עולם חדש שנוסיף — נכלל</li>
-        <li>ניתן לביטול בכל רגע מהגדרות Apple ID</li>
+        <li>ניתן לביטול בכל רגע, מ־Apple ID או מ־Google Play</li>
       </ul>
-      <div class="foot">אחרי שהילד באמת מתחיל ללמוד, אנחנו פותחים לכם את טופי+ במתנה לשבועיים. בלי כרטיס, לא מתחדש.</div>
+      <div class="foot">כל משפחה חדשה מקבלת את טופי+ במתנה ל־30 יום מרגע ההרשמה. בלי כרטיס, לא מתחדש.</div>
     </div>
     <div class="plan pane reveal">
       <h3>עולם בודד</h3>
@@ -510,19 +568,21 @@
   <h2 class="title reveal">שאלות נפוצות</h2>
   <div class="faq" style="margin-top:32px">
     <details class="pane reveal"><summary>לאיזה גיל טופי מתאים?</summary>
-      <p>מגן טרום־חובה ועד כיתה ו׳, בערך גילאי 4 עד 12. בהתקנה בוחרים כיתה, והשאלות מוגשות בדיוק לרמה שלה.</p></details>
+      <p>מגן טרום־חובה ועד כיתה ח׳, בערך גילאי 4 עד 14. בהתקנה בוחרים כיתה, והשאלות מוגשות בדיוק לרמה שלה.</p></details>
     <details class="pane reveal"><summary>איך באמת נחסם זמן המסך?</summary>
-      <p>דרך Screen Time של אפל (Family Controls). אתם בוחרים אילו אפליקציות נעולות, והן נפתחות רק כשהילד הרוויח דקות. אפשר תמיד לפתוח זמן ידנית מהטלפון שלכם.</p></details>
+      <p>באייפון דרך Screen Time של אפל (Family Controls), ובאנדרואיד דרך הרשאות הנגישות והשימוש של טופי במכשיר הילד. אתם בוחרים אילו אפליקציות נעולות, והן נפתחות רק כשהילד הרוויח דקות. אפשר תמיד לפתוח זמן ידנית מהטלפון שלכם.</p></details>
     <details class="pane reveal"><summary>צריך שני מכשירים?</summary>
-      <p>מומלץ: מכשיר לילד ומכשיר להורה. אפשר גם לחבר כמה מכשירים לאותו ילד, וכמה הורים לאותה משפחה — הכול מסתנכרן.</p></details>
+      <p>מומלץ: מכשיר לילד ומכשיר להורה. אבל זה לא חובה: אפשר לתת לילד לשחק גם בטלפון שלכם. אפשר גם לחבר כמה מכשירים לאותו ילד, וכמה הורים לאותה משפחה, והכול מסתנכרן.</p></details>
     <details class="pane reveal"><summary>הילד יכול לקנות משהו לבד?</summary>
       <p>לא. במכשיר של הילד לא מוצגים מחירים בכלל. אם הוא רוצה עולם חדש, הוא לוחץ "בקש מאבא או אמא" — ואתם מחליטים.</p></details>
+    <details class="pane reveal"><summary>מה עם המיקום של הילד?</summary>
+      <p>שיתוף המיקום כבוי עד שאתם מפעילים אותו, לכל ילד בנפרד. נשמר רק המיקום האחרון, בלי היסטוריה של המסלול, והוא נראה רק להורים במשפחה.</p></details>
     <details class="pane reveal"><summary>יש פרסומות או מעקב?</summary>
       <p>אין. לא פרסומות, לא מזהה פרסומי, ולא כלי אנליטיקה של צד שלישי. הנתונים משמשים רק לשמירת ההתקדמות ולסנכרון בין מכשירי המשפחה.</p></details>
     <details class="pane reveal"><summary>ומה עם אחים?</summary>
       <p>מנוי טופי+ אחד פותח את כל העולמות לכל הילדים במשפחה. עולם בודד נקנה לילד אחד, ולאח או אחות הוא עולה חצי מחיר.</p></details>
     <details class="pane reveal"><summary>כמה זה עולה?</summary>
-      <p>אפשר להתחיל בחינם. טופי+ עולה ₪24.90 לחודש או ₪199 לשנה, ואפשר לבטל בכל רגע מהגדרות ה־Apple ID. אחרי שהילד באמת מתחיל ללמוד אנחנו פותחים את טופי+ במתנה לשבועיים, בלי כרטיס אשראי ובלי חידוש אוטומטי.</p></details>
+      <p>אפשר להתחיל בחינם. טופי+ עולה ₪24.90 לחודש או ₪199 לשנה, ואפשר לבטל בכל רגע מ־Apple ID או מ־Google Play. כל משפחה חדשה מקבלת את טופי+ במתנה ל־30 יום מרגע ההרשמה, בלי כרטיס אשראי ובלי חידוש אוטומטי.</p></details>
   </div>
 </div></section>
 
@@ -535,7 +595,8 @@
     <p class="lead">יש לכם טלפון או טאבלט אנדרואיד? הצטרפו לקבוצת הבודקים ותהיו מהראשונים שמורידים את טופי, עוד לפני שהוא עולה לחנות.</p>
     <ol class="android-steps">
       <li>נכנסים לקבוצת הבודקים ולוחצים <b>"הצטרפות לקבוצה"</b> — עם אותו חשבון Gmail שמחובר ל־Google Play בטלפון.</li>
-      <li>מורידים את טופי מ־Google Play בקישור הבודקים.</li>
+      <li>מורידים את טופי מ־Google Play בקישור הבודקים, ויוצרים משפחה בטלפון שלכם.</li>
+      <li>במכשיר של הילד: מורידים, בוחרים "ילד" וסורקים את הברקוד מהטלפון שלכם.</li>
       <li>משאירים את טופי בטלפון לפחות 14 יום — כך גוגל מאשרת אותו לכולם.</li>
     </ol>
     <div class="cta-row">
