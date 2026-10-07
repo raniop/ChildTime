@@ -67,13 +67,18 @@ final class HeroVideoUITests: XCTestCase {
                 app.terminate(); wait(0.5); continue        // a word problem — draw again
             }
             // The four options live in the lower half; the same digits can also
-            // appear in the counters at the top, so take the lowest match.
+            // appear in the counters at the top, so only the lower part counts.
             let screen = app.windows.element(boundBy: 0).frame
             let option = app.descendants(matching: .any)
                 .matching(NSPredicate(format: "label == %@", answer))
                 .allElementsBoundByIndex
-                .filter { $0.isHittable && $0.frame.midY > screen.height * 0.45 }
-                .sorted { $0.frame.midY < $1.frame.midY }
+                // The answer tiles start at ~44% of the height on a Pro Max, and each
+                // carries a small number badge (1–4). With a 45% cut the top-row tile
+                // was dropped and the "4" badge — sitting on tile "1" — was tapped:
+                // a red wrong answer in the Arabic take. The tile's number is set far
+                // larger than its badge, so the tallest match is the tile.
+                .filter { $0.isHittable && $0.frame.midY > screen.height * 0.35 }
+                .sorted { $0.frame.height > $1.frame.height }
                 .first
             guard let option else { app.terminate(); wait(0.5); continue }
 
@@ -85,24 +90,44 @@ final class HeroVideoUITests: XCTestCase {
         XCTFail("No plain-arithmetic question came up in 8 draws")
     }
 
-    /// "20 ÷ 4 = ?" → "5". Returns nil for anything that isn't two whole numbers
-    /// and one operator with a whole answer.
+    /// "20 ÷ 4 = ?" → "5", "8 × 3 + 14 = ?" → "38". Whole numbers and + − × ÷
+    /// only, × and ÷ before + and −; nil for a word problem, a fraction, or an
+    /// answer that isn't a whole number. (Taking just the first "8 × 3" once
+    /// tapped 24 — a red wrong answer in the Russian take.)
     static func solve(_ text: String) -> String? {
-        let pattern = #"(\d+)\s*([+\-−×xX*÷:/])\s*(\d+)"#
-        guard text.contains("?") || text.contains("=") ,
-              let re = try? NSRegularExpression(pattern: pattern),
-              let m = re.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)),
-              let r1 = Range(m.range(at: 1), in: text),
-              let r2 = Range(m.range(at: 2), in: text),
-              let r3 = Range(m.range(at: 3), in: text),
-              let a = Int(text[r1]), let b = Int(text[r3]) else { return nil }
-        switch text[r2] {
-        case "+": return String(a + b)
-        case "-", "−": return a >= b ? String(a - b) : nil
-        case "×", "x", "X", "*": return String(a * b)
-        case "÷", ":", "/": return (b != 0 && a % b == 0) ? String(a / b) : nil
-        default: return nil
+        guard let eq = text.firstIndex(of: "=") else { return nil }
+        let expr = text[..<eq].trimmingCharacters(in: .whitespaces)
+        var nums: [Int] = [], ops: [Character] = [], digits = ""
+        for ch in expr {
+            if ch.isWholeNumber, let d = ch.wholeNumberValue { digits.append(String(d)); continue }
+            if !digits.isEmpty { nums.append(Int(digits)!); digits = "" }
+            switch ch {
+            case " ", "\u{00A0}", "\u{200E}", "\u{200F}", "\u{2066}", "\u{2067}", "\u{2068}", "\u{2069}": continue  // RTL marks
+            case "+": ops.append("+")
+            case "-", "−": ops.append("-")
+            case "×", "x", "X", "*": ops.append("*")
+            case "÷", ":", "/": ops.append("/")
+            default: return nil                       // a letter: a word problem
+            }
         }
+        if !digits.isEmpty { nums.append(Int(digits)!) }
+        guard nums.count >= 2, ops.count == nums.count - 1 else { return nil }
+        // × and ÷ first, left to right…
+        var terms = [nums[0]], signs: [Character] = []
+        for (i, op) in ops.enumerated() {
+            let n = nums[i + 1]
+            switch op {
+            case "*": terms[terms.count - 1] *= n
+            case "/":
+                guard n != 0, terms[terms.count - 1] % n == 0 else { return nil }
+                terms[terms.count - 1] /= n
+            default: terms.append(n); signs.append(op)
+            }
+        }
+        // …then + and −.
+        var total = terms[0]
+        for (i, s) in signs.enumerated() { total += s == "+" ? terms[i + 1] : -terms[i + 1] }
+        return total >= 0 ? String(total) : nil
     }
 
     // MARK: 2) the round trip
