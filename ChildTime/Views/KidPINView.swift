@@ -86,6 +86,8 @@ struct KidPINView: View {
                     }
                     .padding(.top, 4)
                     .environment(\.layoutDirection, .leftToRight)
+                    // Open, the keypad's top row reached under the clock.
+                    .clearOfBar()
                 } else {
                     header
                         .padding(.top, display.isShort ? 4 : 10)

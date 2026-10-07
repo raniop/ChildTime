@@ -28,7 +28,11 @@ struct OnboardingView: View {
     @State private var welcomeConfettiTrigger = 0
     @State private var welcomeBurstTrigger = 0
 
-    private var isCompact: Bool { hsc == .compact }
+    @ObservedObject private var display = DisplayGeometry.shared
+    /// A short screen sizes like a phone even when it is wide — the open Duo
+    /// (regular width, 619pt tall) pushed the hero's bubble off the top and
+    /// cut the subtitle.
+    private var isCompact: Bool { hsc == .compact || display.isShort }
     private var welcomeCompanionSize: CGFloat { isCompact ? 140 : 180 }
     private var titleSize: CGFloat { isCompact ? 38 : 56 }
     private var subtitleSize: CGFloat { isCompact ? 18 : 24 }
