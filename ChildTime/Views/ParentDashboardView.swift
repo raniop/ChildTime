@@ -380,12 +380,16 @@ struct ParentDashboardView: View {
                                 // greeting, one card per child, the version line.
                                 // No family totals, no big buttons — banners only
                                 // when something actually needs the parent.
-                                homeHeader
+                                // 🧱 Type-erased: the dashboard's full generic type grew so deep
+                                // that instantiating its metadata overflowed the 1 MB main-thread
+                                // stack on a real iPhone (build 209 crashed at launch; the
+                                // simulator's 8 MB stack hid it). AnyView cuts the nesting.
+                                AnyView(homeHeader)
                                 // ⚙️ / ＋ / 🧹 moved into the rail on the Duo.
                                 if !useRail { homeActionsRow }
                                 // 🚀 "עוד קצת וסיימנו" — only while a child's setup
                                 // is unfinished (band ב).
-                                setupChecklist
+                                AnyView(setupChecklist)
                                 // Rani: "אני לא רוצה יותר להציג את זה שם" — nothing
                                 // promotional or merely informational stacks above the
                                 // children any more. Tofy+, the gift journey, a child's
@@ -409,7 +413,7 @@ struct ParentDashboardView: View {
                                         .transition(.opacity.combined(with: .scale(scale: 0.97)))
                                 }
                             }
-                            childrenGrid
+                            AnyView(childrenGrid)
 
                             // 📍 Once, for families from before location: what it
                             // is and one tap to it. BELOW the children (Rani: nothing
@@ -2223,7 +2227,7 @@ struct ParentDashboardView: View {
                 spacing: 12
             ) {
                 ForEach(rows, id: \.profile.id) { row in
-                    childCardTap(row)
+                    AnyView(childCardTap(row))
                         .coachMark("p.card", if: row.profile.id == rows.first?.profile.id)
                         // ✏️ Avatar + name → this child's settings, in one tap
                         // (Rani: "מאוד מסובך להגיע למצב של עריכת ילד"). The grid
