@@ -181,31 +181,37 @@ struct ParentDashboardView: View {
     }
 
     var body: some View {
-        Group {
-            if splitOpen {
-                // Laid out PHYSICALLY: the home column belongs beside the rail,
-                // on the bar's own side of the glass, in Hebrew as in English.
-                // Both widths are handed out from the measured container — a
-                // `.frame(maxWidth: .infinity)` pane claimed the whole proposal
-                // and then the column was added on top, stretching the root to
-                // 1165pt on a 951pt screen (and pushing the rail off the glass).
-                GeometryReader { geo in
-                    let home = min(homeColumnWidth, geo.size.width * 0.6)
-                    HStack(spacing: 0) {
-                        if display.barOnLeft {
-                            homePane(width: home)
-                            revealedPane(width: geo.size.width - home)
-                        } else {
-                            revealedPane(width: geo.size.width - home)
-                            homePane(width: home)
-                        }
-                    }
+        // ONE tree for both poses, so the home column keeps its identity (its
+        // scroll position, its navigation) across a fold, and the change can
+        // animate instead of swapping one screen for another.
+        //
+        // Laid out PHYSICALLY: the home column belongs beside the rail, on the
+        // bar's own side of the glass, in Hebrew as in English. Both widths are
+        // handed out from the measured container — a `.frame(maxWidth:
+        // .infinity)` pane claimed the whole proposal and then the column was
+        // added on top, stretching the root to 1165pt on a 951pt screen.
+        GeometryReader { geo in
+            let home = splitOpen ? min(homeColumnWidth, geo.size.width * 0.6) : geo.size.width
+            // Open, the page hands the rail's strip back here, on the bar's own
+            // side (closed, the cards carry it as padding — see dashboardStack).
+            let rest = splitOpen ? max(0, geo.size.width - display.barInset - home) : 0
+            HStack(spacing: 0) {
+                if display.barOnLeft {
+                    if splitOpen { Color.clear.frame(width: display.barInset) }
+                    homePane(width: home).zIndex(1)
+                    if splitOpen { revealedPane(width: rest).transition(revealTransition) }
+                } else {
+                    if splitOpen { revealedPane(width: rest).transition(revealTransition) }
+                    homePane(width: home).zIndex(1)
+                    if splitOpen { Color.clear.frame(width: display.barInset) }
                 }
-                .environment(\.layoutDirection, .leftToRight)
-            } else {
-                dashboardStack
             }
         }
+        .environment(\.layoutDirection, .leftToRight)
+        // ✨ Unfold: the child's page slides out from under the home column,
+        // from the fold outward; fold: it slides back in. The home column
+        // itself never moves — it was beside the rail before and stays there.
+        .animation(.spring(response: 0.62, dampingFraction: 0.86), value: splitOpen)
         .overlay { parentRail }
         .onAppear { syncSplit(open: splitOpen) }
         // Watch the split itself, not the width: the strip and the width are
@@ -223,9 +229,21 @@ struct ParentDashboardView: View {
     }
 
     private func homePane(width: CGFloat) -> some View {
-        dashboardStack
+        // 🧱 Type-erased, like the rest of the home — see `dashboardStack`.
+        AnyView(dashboardStack)
             .frame(width: width)
             .environment(\.layoutDirection, .app)
+    }
+
+    /// The revealed half emerges from the fold — from the side it shares with
+    /// the home column — with a fade and a breath of scale, the way the system
+    /// itself grows a page.
+    private var revealTransition: AnyTransition {
+        let fold: Edge = display.barOnLeft ? .leading : .trailing
+        return .asymmetric(
+            insertion: .move(edge: fold).combined(with: .opacity)
+                .combined(with: .scale(scale: 0.96, anchor: display.barOnLeft ? .leading : .trailing)),
+            removal: .move(edge: fold).combined(with: .opacity))
     }
 
     /// What the fold reveals: the selected child's page, exactly the page a tap
@@ -250,6 +268,10 @@ struct ParentDashboardView: View {
                 SideRailButton(systemImage: "gearshape.fill", label: tr("הגדרות")) { showingSettings = true }
                 SideRailButton(systemImage: activity.unread > 0 ? "bell.badge.fill" : "bell.fill",
                                label: tr("עדכונים")) { showingActivity = true }
+                // ✨ This version's story — the same ring as on the phone's header.
+                if !WhatsNewStories.parentStoryForThisVersion.isEmpty {
+                    storyRing.frame(width: 46, height: 46)
+                }
                 SideRailButton(systemImage: "person.badge.plus", label: tr("＋ צְרוּ יֶלֶד/ה")) { showingCreateChild = true }
                 SideRailButton(emoji: "🧹", label: tr("🧹 מַטְלוֹת")) { openChores() }
                 SideRailButton(emoji: "📍", label: tr("📍 מִקּוּם")) { showingLocation = true }
@@ -463,6 +485,12 @@ struct ParentDashboardView: View {
                             }
                         }
                         .padding(AppSpacing.lg)
+                        // The app hands every page the whole glass; the closed
+                        // home gives the strip back to its rail. Padding on the
+                        // cards, not a safe area — the NavigationStack's
+                        // controllers would swallow one — so the backdrop still
+                        // runs under the rail. (Open, the split reserves it.)
+                        .modifier(BarSidePadding(active: useRail && !splitOpen))
                         // Room to scroll the last card out from under the 💬 button.
                         .padding(.bottom, showsSupport ? 64 : 0)
                         .frame(maxWidth: 720)

@@ -85,6 +85,8 @@ struct ConsentView: View {
                     }
                     Spacer()
                 }
+                // In the corner away from the foldable's clock.
+                .awayFromBar()
                 Spacer()
             }
             .padding(.horizontal, AppSpacing.md)

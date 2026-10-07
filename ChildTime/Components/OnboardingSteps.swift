@@ -75,6 +75,9 @@ struct OnboardingStepsBar: View {
             }
         }
         .frame(maxWidth: 520)
+        // It heads the page, in the band beside the foldable's clock — kept
+        // clear of it on both sides so it stays centred on the glass.
+        .clearOfBarBothSides()
         .environment(\.layoutDirection, .app)
         .accessibilityElement(children: .combine)
     }

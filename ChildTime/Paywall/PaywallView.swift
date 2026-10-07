@@ -107,6 +107,7 @@ struct PaywallView: View {
                         .environment(\.layoutDirection, .appMirrored)
                         Spacer()
                     }
+                    .awayFromBar()
                     .padding(.horizontal, AppSpacing.lg)
                     .padding(.top, AppSpacing.sm)
                     Spacer()
@@ -272,6 +273,7 @@ struct PaywallView: View {
             .environment(\.layoutDirection, .appMirrored)
             Spacer()
         }
+        .awayFromBar()
         .padding(.top, AppSpacing.md)
     }
 

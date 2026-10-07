@@ -77,6 +77,7 @@ struct KidPINView: View {
                     Spacer()
                 }
                 .padding(.horizontal, 16)
+                .awayFromBar()
 
                 if display.isWideShort {
                     HStack(alignment: .center, spacing: 28) {

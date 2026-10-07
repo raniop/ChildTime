@@ -12,7 +12,7 @@
 # The app must already be installed. What the screen measured is printed by the
 # app itself (DisplayGeometry, DEBUG) — see tools/measure in the commit notes:
 #   xcrun simctl launch --console-pty <udid> com.rani.ChildTime | grep 📐
-export DEVELOPER_DIR=${DEVELOPER_DIR:-/Applications/Xcode-27.1.app/Contents/Developer}
+export DEVELOPER_DIR=${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}
 DEV="$1"; OUT="$2"; LANG_CODE="${3:-he}"
 [ -z "$DEV" ] || [ -z "$OUT" ] && { echo "usage: duoscan.sh <udid> <out-dir> [lang]"; exit 2; }
 mkdir -p "$OUT"

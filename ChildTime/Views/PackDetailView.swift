@@ -5,7 +5,6 @@ import StoreKit
 /// whom, and the one button that buys it (behind the parent gate) and sends it
 /// to the chosen children. Approved mockup: notifications-and-packs.html.
 struct PackDetailView: View {
-    @ObservedObject private var railHost = DisplayGeometry.shared
     let pack: QuestionPack
     var preselected: UUID? = nil
     var onClose: () -> Void
@@ -53,7 +52,6 @@ struct PackDetailView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .railDismiss(tr("סְגֹר")) { Haptic.light(); onClose() }
         .environment(\.layoutDirection, .app)
         .foregroundStyle(GlassInk.primary)
         .onAppear {
@@ -87,16 +85,13 @@ struct PackDetailView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                // 🎚 The way out lives in the rail on a foldable.
-                if !railHost.hasBarStrip {
-                    Button { Haptic.light(); onClose() } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 15, weight: .bold))
-                            .frame(width: 36, height: 36)
-                            .background(Circle().fill(.white.opacity(0.18)))
-                    }
-                    .buttonStyle(.plain)
+                Button { Haptic.light(); onClose() } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 15, weight: .bold))
+                        .frame(width: 36, height: 36)
+                        .background(Circle().fill(.white.opacity(0.18)))
                 }
+                .buttonStyle(.plain)
                 Spacer()
                 Text(pack.isPass ? tr("עוֹלָם בְּסִיסִי · כָּלוּל בְּטוֹפִי+") : tr("כָּלוּל בְּטוֹפִי+ · אוֹ רְכִישָׁה חַד־פַּעֲמִית"))
                     .font(.system(size: 11.5, weight: .bold, design: .rounded))
@@ -104,6 +99,10 @@ struct PackDetailView: View {
                     .padding(.horizontal, 10).padding(.vertical, 5)
                     .background(Capsule().fill(.white.opacity(0.12)))
             }
+            // On the foldable: ✕ in the corner away from the clock, the badge
+            // stopping short of it.
+            .awayFromBar()
+            .clearOfBar()
             PackHeroArt(emoji: pack.emoji, colors: pack.heroColors)
             Text(pack.name)
                 .font(.system(size: 24, weight: .heavy, design: .rounded))

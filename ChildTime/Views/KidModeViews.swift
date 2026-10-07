@@ -101,7 +101,11 @@ struct KidModeEntryView: View {
                 }
                 .environment(\.layoutDirection, .appMirrored)
             }
+            // ✕ in the corner away from the clock on the foldable.
+            .awayFromBar(.trailing)
         }
+        // The title fills the band beside the clock; the children start below.
+        .fillsTopBand(above: DisplayProbeView.minimumTopMargin + AppSpacing.md)
         .padding(.horizontal, AppSpacing.lg)
         .padding(.vertical, AppSpacing.md)
     }

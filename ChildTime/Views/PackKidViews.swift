@@ -50,6 +50,7 @@ struct PackRevealView: View {
                     }
                     Spacer()
                 }
+                .awayFromBar()
                 Spacer(minLength: 0)
                 ZStack {
                     // Living glow behind the hero — breathes the whole time.
@@ -225,6 +226,7 @@ struct PackAskParentView: View {
                     }
                     Spacer()
                 }
+                .awayFromBar()
                 Spacer(minLength: 0)
                 Text(pack.emoji).font(.system(size: 72))
                     .shadow(color: .black.opacity(0.25), radius: 10, y: 6)

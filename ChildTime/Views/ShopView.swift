@@ -4,7 +4,6 @@ import SwiftUI
 /// with earned stars (or buy more stars with real money, parent-gated), and
 /// equip them. The hero shows the currently-equipped character big.
 struct ShopView: View {
-    @ObservedObject private var railHost = DisplayGeometry.shared
     @EnvironmentObject var profiles: ProfileStore
     @EnvironmentObject var progress: ProgressStore
     @Environment(\.dismiss) private var dismiss
@@ -16,6 +15,7 @@ struct ShopView: View {
     /// keeps clear of BOTH by this much, so it stays centred and never runs
     /// into the balance ("Магазин персонажей" did, on an iPhone — QA round 3).
     @State private var topBarSide: CGFloat = 44
+    @ObservedObject private var display = DisplayGeometry.shared
 
     private var isCompact: Bool { hsc == .compact }
     private var avatarSize: CGFloat { isCompact ? 140 : 180 }
@@ -42,8 +42,6 @@ struct ShopView: View {
                 }
             }
         }
-        // 🎚 The kid closes this screen from the rail on a foldable.
-        .railDismiss(Gendered.g(tr("סְגֹר"), tr("סִגְרִי"))) { dismiss() }
         .sheet(isPresented: $showStarShop) {
             // Kids Category (guideline 1.3): real-money packs MUST sit behind a
             // parental gate. Apple ID / Face ID payment auth is NOT a substitute —
@@ -78,62 +76,86 @@ struct ShopView: View {
     // MARK: - Top bar
 
     private var topBar: some View {
-        ZStack {
-            Text(tr("חֲנוּת הַדְּמוּיוֹת"))
-                .font(.system(size: isCompact ? 22 : 28, weight: .black, design: .rounded))
-                .foregroundStyle(GlassInk.primary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
-                .padding(.horizontal, topBarSide + AppSpacing.sm)
+        Group {
+            if display.hasBarStrip {
+                // 🖼 The foldable: the title with the 💎 balance under it,
+                // centred in the band beside the clock, and the ✕ in the corner
+                // away from it. Side by side they did not fit beside the clock.
+                VStack(spacing: 8) {
+                    title
+                    balanceChip
+                }
                 .frame(maxWidth: .infinity)
-
-            HStack {
-                // 🎚 The way out lives in the rail on a foldable.
-                if !railHost.hasBarStrip {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(.white)
-                            .frame(width: 40, height: 40)
-                            .background(.white.opacity(0.22), in: Circle())
-                            .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
-                    }
-                    .environment(\.layoutDirection, .appMirrored)
+                .clearOfBarBothSides()
+                .overlay(alignment: .top) {
+                    HStack { closeButton; Spacer() }.awayFromBar()
                 }
-
-                Spacer()
-
-                // Tappable balance → buy more diamonds (parent-gated).
-                Button {
-                    Haptic.light()
-                    showStarShop = true
-                } label: {
-                    HStack(spacing: 4) {
-                        Text("💎").font(.system(size: 16))
-                        Text(progress.diamonds.currencyShort)
-                            .font(.system(size: 17, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                            .lineLimit(1)
-                            .numericTextTransition(Double(progress.diamonds))
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 16))
-                            .foregroundStyle(.white)
+                .fillsTopBand(above: DisplayProbeView.minimumTopMargin + AppSpacing.sm)
+            } else {
+                ZStack {
+                    title
+                        .padding(.horizontal, topBarSide + AppSpacing.sm)
+                        .frame(maxWidth: .infinity)
+                    HStack {
+                        closeButton
+                        Spacer()
+                        balanceChip
+                            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { topBarSide = max(40, $0) }
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Capsule().fill(.white.opacity(0.14)))
-                    .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
-                    .fixedSize()
-                    .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { topBarSide = max(40, $0) }
                 }
-                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, AppSpacing.md)
         .padding(.vertical, AppSpacing.sm)
+    }
+
+    private var title: some View {
+        Text(tr("חֲנוּת הַדְּמוּיוֹת"))
+            .font(.system(size: isCompact ? 22 : 28, weight: .black, design: .rounded))
+            .foregroundStyle(GlassInk.primary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+            .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
+    }
+
+    private var closeButton: some View {
+        Button {
+            dismiss()
+        } label: {
+            Image(systemName: "xmark")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 40, height: 40)
+                .background(.white.opacity(0.22), in: Circle())
+                .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
+        }
+        .environment(\.layoutDirection, .appMirrored)
+    }
+
+    /// Tappable balance → buy more diamonds (parent-gated).
+    private var balanceChip: some View {
+        Button {
+            Haptic.light()
+            showStarShop = true
+        } label: {
+            HStack(spacing: 4) {
+                Text("💎").font(.system(size: 16))
+                Text(progress.diamonds.currencyShort)
+                    .font(.system(size: 17, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .numericTextTransition(Double(progress.diamonds))
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 16))
+                    .foregroundStyle(.white)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Capsule().fill(.white.opacity(0.14)))
+            .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
+            .fixedSize()
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Hero (currently-equipped character)

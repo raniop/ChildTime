@@ -86,6 +86,8 @@ struct LoginGateView: View {
                         .accessibilityLabel(tr("חזרה"))
                         Spacer()
                     }
+                    // In the corner away from the foldable's clock.
+                    .awayFromBar()
                     Spacer()
                 }
                 .padding(.horizontal, AppSpacing.md)

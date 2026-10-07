@@ -213,18 +213,40 @@ final class DisplayProbeView: UIView {
         let bar = max(l, r)
         let active = bar >= 40 && abs(l - r) >= 40
         let barOnLeft = l > r
+        // How far down the strip the clock and its items reach.
+        let stripTop = DisplayGeometry.shared.barStripTop
 
         var touched = false
         forEachViewController(from: window.rootViewController) { vc in
             guard vc.isViewLoaded else { return }
             var add = vc.additionalSafeAreaInsets
-            // What the SYSTEM gives on the side the bar is not on — our own
-            // correction is subtracted back out so this reads the same value
-            // on every pass instead of chasing itself.
+            // What the SYSTEM gives on each side — our own correction is
+            // subtracted back out so this reads the same value on every pass
+            // instead of chasing itself.
             let insets = vc.view.safeAreaInsets
             let far = barOnLeft ? insets.right - add.right : insets.left - add.left
             let want = active ? -max(0, far) : 0
             let current = barOnLeft ? add.right : add.left
+
+            // 🖼 The bar's own side is cancelled too: the page gets the WHOLE
+            // glass, the way Apple's 27.1 apps do ("extend to use the full
+            // display"). The strip is the system's only above `barStripTop`;
+            // below it, it is ours. Content left beside an empty strip sat
+            // 42pt left of the device's centre on every screen (Rani: "הכל
+            // עקום נוטה לצד שמאל"). A screen that puts controls in the strip
+            // reserves it again itself — see `.sideRail`.
+            let near = barOnLeft ? insets.left - add.left : insets.right - add.right
+            let currentNear = barOnLeft ? add.left : add.right
+            // A visible navigation bar is the exception: its back button and
+            // its items sit at the top, where the strip is the system's and a
+            // tap never arrives. The bar keeps the strip's inset; the page
+            // under it takes the whole width again, starting below the clock.
+            let navBar = (vc as? UINavigationController).map { !$0.isNavigationBarHidden } ?? false
+            let underNavBar = (vc.parent as? UINavigationController).map { !$0.isNavigationBarHidden } ?? false
+            let wantNear: CGFloat
+            if !active { wantNear = 0 }
+            else if navBar { wantNear = max(0, bar - near) }
+            else { wantNear = -max(0, near) }
 
             // ⬆️ With the status bar moved to the side, the TOP safe area is 0
             // and every screen in the app sat flush against the glass (Rani:
@@ -232,10 +254,12 @@ final class DisplayProbeView: UIView {
             // margin a status bar used to provide — measured the same way, so
             // a screen that already has a top inset is left alone.
             let systemTop = insets.top - add.top
-            let wantTop = active ? max(0, Self.minimumTopMargin - systemTop) : 0
+            let floor = underNavBar ? stripTop + 6 : Self.minimumTopMargin
+            let wantTop = active ? max(0, floor - systemTop) : 0
 
-            guard abs(current - want) > 0.5 || abs(add.top - wantTop) > 0.5 else { return }
-            if barOnLeft { add.right = want } else { add.left = want }
+            guard abs(current - want) > 0.5 || abs(currentNear - wantNear) > 0.5
+                    || abs(add.top - wantTop) > 0.5 else { return }
+            if barOnLeft { add.right = want; add.left = wantNear } else { add.left = want; add.right = wantNear }
             add.top = wantTop
             vc.additionalSafeAreaInsets = add
             touched = true

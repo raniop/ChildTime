@@ -40,6 +40,8 @@ struct AskParentView: View {
                     }
                     Spacer()
                 }
+                // ✕ in the corner away from the clock on the foldable.
+                .awayFromBar()
                 Spacer(minLength: 0)
 
                 Text(world?.emoji ?? "👑").font(.system(size: 72))

@@ -215,6 +215,7 @@ struct ParentGateView<Content: View>: View {
                         .buttonStyle(.plain)
                         .padding(AppSpacing.md)
                     }
+                    .awayFromBar(.trailing)
                     Spacer()
                 }
             }
@@ -306,6 +307,9 @@ struct ParentGateView<Content: View>: View {
                     }
                     Spacer()
                 }
+                // ✕ / חֲזָרָה in the corner away from the clock on the foldable
+                // (the steps bar keeps itself clear of it).
+                .awayFromBar(active: allowClose || (!onboardingSetup && isSetupMode))
 
                 // Header block — pulled toward the top so nothing floats in a
                 // big empty middle.

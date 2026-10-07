@@ -127,6 +127,9 @@ struct ChildDeviceControlsView: View {
                 .foregroundStyle(GlassInk.primary)
                 .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
         }
+        // On the foldable the header fills the band beside the clock, so the
+        // first card starts below it at the glass's full width.
+        .fillsTopBand(above: DisplayProbeView.minimumTopMargin + AppSpacing.md)
     }
 
     // MARK: - Exit Kid Mode (parent's phone temporarily acting as a kid device)

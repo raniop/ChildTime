@@ -161,6 +161,10 @@ struct ChoresKidView: View {
             Spacer()
             Color.clear.frame(width: 40, height: 40)
         }
+        // On the foldable: the way back in the corner away from the clock, and
+        // the title centred in the band beside it — the chores start below.
+        .awayFromBar()
+        .fillsTopBand(above: DisplayProbeView.minimumTopMargin + AppSpacing.md)
         .padding(.horizontal, AppSpacing.lg)
         .padding(.top, AppSpacing.md)
         .padding(.bottom, AppSpacing.sm)

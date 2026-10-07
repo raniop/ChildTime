@@ -171,7 +171,48 @@ extension View {
     /// preference from inside one never reaches the root, and those are exactly
     /// the screens that were losing the strip.
     func sideRail<Rail: View>(@ViewBuilder _ rail: @escaping () -> Rail) -> some View {
-        overlay { SideRailContainer(content: rail) }
+        modifier(SideRailReserve()).overlay { SideRailContainer(content: rail) }
+    }
+}
+
+/// The strip handed back as plain padding on the bar's PHYSICAL side — for a
+/// page inside a NavigationStack, whose controllers do not pass a SwiftUI
+/// safe-area inset through.
+struct BarSidePadding: ViewModifier {
+    var active: Bool = true
+    @ObservedObject private var display = DisplayGeometry.shared
+    @Environment(\.layoutDirection) private var direction
+
+    func body(content: Content) -> some View {
+        if active && display.hasBarStrip {
+            let leading = display.barOnLeft == (direction == .leftToRight)
+            content.padding(leading ? .leading : .trailing, display.barInset)
+        } else {
+            content
+        }
+    }
+}
+
+/// The app gives every page the whole glass (`DisplayProbeView`), strip
+/// included. A page that puts its controls in the strip takes it back here, so
+/// its content stops beside the rail instead of running under it. A safe-area
+/// inset, not padding: backgrounds that ignore the safe area still reach the
+/// edge behind the rail.
+struct SideRailReserve: ViewModifier {
+    var active: Bool = true
+    @ObservedObject private var display = DisplayGeometry.shared
+    @Environment(\.layoutDirection) private var direction
+
+    func body(content: Content) -> some View {
+        if active && display.hasBarStrip {
+            // The strip is PHYSICAL; SwiftUI's edges follow the language.
+            let leading = display.barOnLeft == (direction == .leftToRight)
+            content.safeAreaInset(edge: leading ? .leading : .trailing, spacing: 0) {
+                Color.clear.frame(width: display.barInset)
+            }
+        } else {
+            content
+        }
     }
 }
 
@@ -220,16 +261,142 @@ struct SideRailCounter: View {
 }
 
 extension View {
-    /// 🎚 A screen whose only chrome is a way out puts that way out in the rail.
+    /// ✕ A screen whose only chrome is a way out.
     ///
     /// Sheets and covers — settings, chores, a child's worlds, the paywall —
-    /// carry one button and a title. On the foldable the title bar is squeezed
-    /// against the top of the glass while the bar's whole strip sits empty, so
-    /// the button moves into the strip and the screen keeps its full height.
+    /// carry one button and a title. On the foldable that button used to head
+    /// an otherwise empty rail, which kept the whole strip for one control and
+    /// left the page beside it 42pt off the device's centre. Now the page takes
+    /// the whole glass and the button sits in the top corner AWAY from the bar
+    /// (Rani approved, 2026-10-07) — clear of the clock and the camera.
     /// Hide the toolbar item behind `DisplayGeometry.shared.hasBarStrip` so the
     /// same screen is untouched on every other device.
     func railDismiss(_ label: String, systemImage: String = "xmark",
                      action: @escaping () -> Void) -> some View {
-        sideRail { SideRailButton(systemImage: systemImage, label: label, action: action) }
+        modifier(CornerDismiss(label: label, systemImage: systemImage, action: action))
     }
+}
+
+/// See `railDismiss`.
+private struct CornerDismiss: ViewModifier {
+    let label: String
+    let systemImage: String
+    let action: () -> Void
+    @ObservedObject private var display = DisplayGeometry.shared
+    @Environment(\.layoutDirection) private var direction
+
+    func body(content: Content) -> some View {
+        if display.hasBarStrip {
+            // The corner opposite the PHYSICAL bar, in this language's terms.
+            let farIsLeading = display.barOnLeft != (direction == .leftToRight)
+            content.overlay(alignment: farIsLeading ? .topLeading : .topTrailing) {
+                CornerDismissButton(label: label, systemImage: systemImage, action: action)
+                    .padding(.horizontal, 14)
+                    .padding(.top, 4)
+            }
+        } else {
+            content
+        }
+    }
+}
+
+/// The round glass ✕ / ✓ in the corner — the same ink as the rail's buttons.
+struct CornerDismissButton: View {
+    let label: String
+    var systemImage: String = "xmark"
+    let action: () -> Void
+
+    var body: some View {
+        Button {
+            Haptic.light()
+            action()
+        } label: {
+            Image(systemName: systemImage)
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 38, height: 38)
+                .background(Circle().fill(.white.opacity(0.18)))
+                .overlay(Circle().strokeBorder(.white.opacity(0.32), lineWidth: 1))
+                .frame(width: 44, height: 44)
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+    }
+}
+
+// MARK: - 🖼 Whole-glass pages: the top band beside the clock
+
+/// On the foldable every page now has the whole glass (`DisplayProbeView`),
+/// strip included. The strip is the system's only at the top — the clock and
+/// its items, down to `DisplayGeometry.barStripTop` (170pt closed). These
+/// helpers keep a page's top row out of that corner. On every other device
+/// they do nothing.
+private struct AwayFromBar: ViewModifier {
+    let edge: HorizontalEdge
+    let active: Bool
+    @ObservedObject private var display = DisplayGeometry.shared
+
+    func body(content: Content) -> some View {
+        if active && display.hasBarStrip {
+            // A direction whose `edge` lands on the PHYSICAL side away from the bar.
+            let farIsLeft = !display.barOnLeft
+            let ltr = (edge == .leading) == farIsLeft
+            content.environment(\.layoutDirection, ltr ? .leftToRight : .rightToLeft)
+        } else {
+            content
+        }
+    }
+}
+
+/// The header block fills the band beside the clock, centred in it, so the
+/// page's content starts below the clock at full width — the TravelSure
+/// shape Rani pointed at: a band on top, the whole glass under it.
+private struct FillsTopBand: ViewModifier {
+    /// What already sits above the header (the safe area's 16pt, a padding…).
+    let above: CGFloat
+    @ObservedObject private var display = DisplayGeometry.shared
+
+    func body(content: Content) -> some View {
+        if display.hasBarStrip {
+            content.frame(minHeight: max(0, display.barStripTop - above), alignment: .center)
+        } else {
+            content
+        }
+    }
+}
+
+/// The same clearance on BOTH sides — for a centred row in the band (a
+/// progress bar, a title) that has to stay centred on the glass.
+private struct ClearOfBarBothSides: ViewModifier {
+    var active: Bool = true
+    @ObservedObject private var display = DisplayGeometry.shared
+
+    func body(content: Content) -> some View {
+        if active && display.hasBarStrip {
+            content.padding(.horizontal, display.barInset)
+        } else {
+            content
+        }
+    }
+}
+
+extension View {
+    /// A row whose control sits at its `edge` (a ✕ before a Spacer, or after
+    /// one): on the foldable that control goes to the corner AWAY from the
+    /// clock (Rani approved the ✕ there, 2026-10-07).
+    func awayFromBar(_ edge: HorizontalEdge = .leading, active: Bool = true) -> some View {
+        modifier(AwayFromBar(edge: edge, active: active))
+    }
+
+    /// See `FillsTopBand`. `above` is what the header already sits below.
+    func fillsTopBand(above: CGFloat = DisplayProbeView.minimumTopMargin) -> some View {
+        modifier(FillsTopBand(above: above))
+    }
+
+    /// Keep a row in the band clear of the clock on the bar's side only.
+    func clearOfBar() -> some View { modifier(BarSidePadding()) }
+
+    /// See `ClearOfBarBothSides`.
+    func clearOfBarBothSides(active: Bool = true) -> some View { modifier(ClearOfBarBothSides(active: active)) }
 }
