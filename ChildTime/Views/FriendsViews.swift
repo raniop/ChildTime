@@ -90,31 +90,45 @@ struct LeaderboardView: View {
         }
     }
 
+    /// 📥 Friend requests, with the count of the waiting ones.
+    private var requestsButton: some View {
+        Button { showRequests = true } label: {
+            ZStack(alignment: .topTrailing) {
+                headerCircle("tray.fill")
+                if !friends.incomingRequests.isEmpty {
+                    Text("\(friends.incomingRequests.count)")
+                        .font(.system(size: 11, weight: .black, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(minWidth: 18, minHeight: 18)
+                        .background(Circle().fill(AppColor.almostWarm))
+                        .overlay(Circle().stroke(.white, lineWidth: 1.5))
+                        .offset(x: 4, y: -4)
+                }
+            }
+        }
+    }
+
     private var header: some View {
         VStack(spacing: 10) {
             // 🎚 All three are chrome — on a foldable they live in the rail.
-            if !railHost.hasRail {
+            if !railHost.hasRail && railHost.hasBarStrip {
+                // 📐 The foldable: nothing to tap beside the camera and clock —
+                // ✕, requests and add-a-friend all go to the far corner.
+                HStack(spacing: 8) {
+                    Button { dismiss() } label: { headerCircle("xmark") }
+                    Spacer().frame(width: 10)
+                    requestsButton
+                    Button { showAdd = true } label: { headerCircle("person.badge.plus") }
+                    Spacer()
+                }
+                .awayFromBar(.leading)
+            } else if !railHost.hasRail {
                 HStack(spacing: 8) {
                     Button { dismiss() } label: { headerCircle("xmark") }
                     Spacer()
-                    Button { showRequests = true } label: {
-                        ZStack(alignment: .topTrailing) {
-                            headerCircle("tray.fill")
-                            if !friends.incomingRequests.isEmpty {
-                                Text("\(friends.incomingRequests.count)")
-                                    .font(.system(size: 11, weight: .black, design: .rounded))
-                                    .foregroundStyle(.white)
-                                    .frame(minWidth: 18, minHeight: 18)
-                                    .background(Circle().fill(AppColor.almostWarm))
-                                    .overlay(Circle().stroke(.white, lineWidth: 1.5))
-                                    .offset(x: 4, y: -4)
-                            }
-                        }
-                    }
+                    requestsButton
                     Button { showAdd = true } label: { headerCircle("person.badge.plus") }
                 }
-                // Beside the foldable's clock: stop short of it.
-                .clearOfBar()
                 .environment(\.layoutDirection, .appMirrored)
             }
             Text(tr("הַחֲבֵרִים"))
