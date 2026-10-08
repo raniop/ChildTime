@@ -49989,6 +49989,28 @@
         }
       }
     },
+    "הצג את כל %lld הנושאים ▼" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عرض كل المواضيع الـ%lld ▼"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show all %lld subjects ▼"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показать все темы (%lld) ▼"
+          }
+        }
+      }
+    },
     "הצג סיסמה" : {
       "localizations" : {
         "ar" : {
@@ -50007,6 +50029,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Показать пароль"
+          }
+        }
+      }
+    },
+    "הצג פחות ▲" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عرض أقل ▲"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show less ▲"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показать меньше ▲"
           }
         }
       }
@@ -98044,6 +98088,28 @@
         }
       }
     },
+    "עוד ▼" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المزيد ▼"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More ▼"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё ▼"
+          }
+        }
+      }
+    },
     "עולם" : {
       "localizations" : {
         "ar" : {
@@ -101506,6 +101572,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "может открыть"
+          }
+        }
+      }
+    },
+    "פחות ▲" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أقل ▲"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Less ▲"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Меньше ▲"
           }
         }
       }

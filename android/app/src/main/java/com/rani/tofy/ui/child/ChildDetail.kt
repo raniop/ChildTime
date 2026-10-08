@@ -166,20 +166,24 @@ private fun ChildReport(
         val sum = engine.summary(period)
         val (capOn, capMin) = child.resolvedCap()
         val minutes = if (period == ReportPeriod.TODAY) (if (capOn) "${s.minutesEarnedToday}/$capMin" else "${s.minutesEarnedToday}") else "${sum.minutesEarned}"
-        Row(Modifier.fillMaxWidth().glassPane(16.dp).padding(vertical = 10.dp)) {
-            Snap(Modifier.weight(1f), "${sum.questions}", tr("שאלות"))
-            Snap(Modifier.weight(1f), if (sum.questions > 0) pct(sum.accuracy) else "0%", tr("הצלחה"))
-            Snap(Modifier.weight(1f), minutes, tr("דקות"))
-            Snap(Modifier.weight(1f), "${s.dayStreak}", if (s.dayStreak == 1) tr("יום רצף") else tr("ימי רצף"))
-        }
-        // Period filter — drives every card below.
-        Row(Modifier.fillMaxWidth().glassPane(12.dp).padding(3.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            ReportPeriod.entries.forEach { p ->
-                val on = period == p
-                Box(Modifier.weight(1f).clip(RoundedCornerShape(9.dp)).background(if (on) Color.White.copy(alpha = 0.92f) else Color.Transparent)
-                    .clickable { period = p; expanded = null }.padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
-                    Text(p.title, color = if (on) Ink.indigo else Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.5.sp)
+        // ONE summary card (Rani: "עמוס מדי" — it was a strip + a picker):
+        // the period on top, the four numbers under it.
+        Column(Modifier.fillMaxWidth().glassPane(18.dp).padding(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color.White.copy(alpha = 0.10f)).padding(3.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                ReportPeriod.entries.forEach { p ->
+                    val on = period == p
+                    Box(Modifier.weight(1f).clip(RoundedCornerShape(9.dp)).background(if (on) Color.White.copy(alpha = 0.92f) else Color.Transparent)
+                        .clickable { period = p; expanded = null }.padding(vertical = 7.dp), contentAlignment = Alignment.Center) {
+                        Text(p.title, color = if (on) Ink.indigo else Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.5.sp)
+                    }
                 }
+            }
+            Row(Modifier.fillMaxWidth()) {
+                Snap(Modifier.weight(1f), "${sum.questions}", tr("שאלות"))
+                Snap(Modifier.weight(1f), if (sum.questions > 0) pct(sum.accuracy) else "0%", tr("הצלחה"))
+                Snap(Modifier.weight(1f), minutes, tr("דקות"))
+                Snap(Modifier.weight(1f), "${s.dayStreak}", if (s.dayStreak == 1) tr("יום רצף") else tr("ימי רצף"))
             }
         }
 
@@ -311,11 +315,19 @@ private fun InsightCard(i: DailyInsight, period: ReportPeriod) {
         // into a template read "Insight for This week" / "Вывод о Эта неделя".
         val title = when (period) { ReportPeriod.TODAY -> tr("💡 תובנת היום"); ReportPeriod.WEEK -> tr("💡 תובנת השבוע"); ReportPeriod.MONTH -> tr("💡 תובנת החודש") }
         Text(title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.5.sp)
-        Text(i.body, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 13.5.sp)
+        // One line by default — the recommendation is what to DO, so it leads;
+        // the explanation opens on "עוד" (Rani: the page was "עמוס מדי").
+        var open by remember { mutableStateOf(false) }
         i.recommendation?.let {
-            Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.35f)))
-            Text(tr("מומלץ: %@", it), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.5.sp)
+            Text(tr("מומלץ: %@", it), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.5.sp,
+                maxLines = if (open) Int.MAX_VALUE else 2)
         }
+        if (open || i.recommendation == null) {
+            Text(i.body, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 13.5.sp,
+                maxLines = if (open) Int.MAX_VALUE else 2)
+        }
+        Text(if (open) tr("פחות ▲") else tr("עוד ▼"), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp,
+            modifier = Modifier.clickable { open = !open })
     }
 }
 
@@ -332,7 +344,9 @@ private fun TopicsCard(
             ?: topics.firstOrNull { it.verdict == TopicReport.Verdict.WEAK }
         val open = expanded ?: (if (autoCollapsed) null else weakest?.topic)
         LearningProfileLines(child, s, extras)
-        topics.forEachIndexed { idx, t ->
+        var all by remember { mutableStateOf(false) }
+        val shown = if (all) topics else topics.take(3)
+        shown.forEachIndexed { idx, t ->
             TopicRow(child, s, extras, t, open == t.topic) { onToggle(t.topic, open == t.topic) }
             if (open == t.topic) {
                 val skills = engine.skillReports(t.topic, period)
@@ -344,7 +358,14 @@ private fun TopicsCard(
                     }
                 }
             }
-            if (idx != topics.lastIndex) RowDivider()
+            if (idx != shown.lastIndex) RowDivider()
+        }
+        if (topics.size > 3) {
+            Box(Modifier.fillMaxWidth().padding(top = 10.dp).clip(RoundedCornerShape(12.dp)).background(Color.White.copy(alpha = 0.12f))
+                .clickable { all = !all }.padding(vertical = 10.dp), contentAlignment = Alignment.Center) {
+                Text(if (all) tr("הצג פחות ▲") else tr("הצג את כל %lld הנושאים ▼", topics.size),
+                    color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+            }
         }
     }
 }

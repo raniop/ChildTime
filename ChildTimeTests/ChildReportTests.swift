@@ -88,7 +88,7 @@ struct ChildReportTests {
         ])])
         let done = e.mastered(.today).map(\.name)
         let todo = e.toPractice(.today).map(\.name)
-        #expect(done.contains(Topic.hebrew.displayName))
+        #expect(done.contains(Topic.hebrew.parentName))
         #expect(done.contains(SkillCatalog.name("mul")))
         #expect(todo.contains(SkillCatalog.name("fractions")))
         #expect(!todo.contains(SkillCatalog.name("mul")))

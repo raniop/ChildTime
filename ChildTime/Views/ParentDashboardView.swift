@@ -2421,42 +2421,8 @@ struct ParentDashboardView: View {
         VStack(spacing: 10) {
             // LIVE: an open play window right now — with the lock one tap away.
             liveWindowBanner(profile, compact: false) { remoteLock(profile) }
-            HStack(spacing: 8) {
-                Menu {
-                    // 15 minutes: "עוד רבע שעה ודי" needs its own button.
-                    Button(tr("רבע שעה")) { remoteOpen(profile, 15) }
-                    Button(tr("חצי שעה")) { remoteOpen(profile, 30) }
-                    Button(tr("שעה")) { remoteOpen(profile, 60) }
-                    Button(tr("שעתיים")) { remoteOpen(profile, 120) }
-                    Button(tr("4 שעות")) { remoteOpen(profile, 240) }
-                } label: {
-                    quickActionLabel("💝", tr("מתנת דקות"))
-                }
-                .buttonStyle(.plain)
-                Menu {
-                    Button {
-                        remoteLock(profile)
-                    } label: {
-                        Label(tr("נעל עכשיו"), systemImage: "lock.fill")
-                    }
-                    Button(role: .destructive) {
-                        revokeGiftProfile = profile
-                    } label: {
-                        Label(tr("נעל ואפס דקות מתנה"), systemImage: "gift.circle")
-                    }
-                } label: {
-                    quickActionLabel("🔒", tr("נעילה"))
-                }
-                .buttonStyle(.plain)
-                Button {
-                    Haptic.light()
-                    choresProfile = profile
-                } label: {
-                    quickActionLabel("🧹", tr("מטלות"))
-                }
-                .buttonStyle(.juicy)
-            }
-            .fixedSize(horizontal: false, vertical: true)   // three tiles, one height
+            // The gift / lock / chores tiles were here — they live in "⚡ פעולות"
+            // now (Rani: the page was "עמוס מדי" and said it twice).
         }
         .environment(\.layoutDirection, .app)
     }

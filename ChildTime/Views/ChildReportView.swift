@@ -30,6 +30,10 @@ struct ChildReportView: View {
     @State private var expandedTopic: Topic? = nil
     @State private var autoCollapsed = false
     @State private var isRefreshing = false
+    /// The insight shows one line; the rest opens on "עוד" (Rani: "עמוס מדי").
+    @State private var insightOpen = false
+    /// The topics list shows the top three; the rest opens on "הצג הכול".
+    @State private var allTopics = false
     @Environment(\.requestReview) private var requestReview
 
     private var engine: InsightsEngine {
@@ -110,35 +114,38 @@ struct ChildReportView: View {
                 if isRefreshing { ProgressView().tint(.white) }
             }
             if let topActions { topActions }
-            // The four numbers that answer "is my kid using it and learning?"
-            HStack(spacing: 0) {
-                snap("\(s.questions)", tr("שאלות"))
-                snap(s.questions > 0 ? pct(s.accuracy) : "0%", tr("הצלחה"))
-                snap(minutes, tr("דקות"))   // minutes EARNED, not the wallet — see the dashboard note
-                snap("\(snapshot.dayStreak)", snapshot.dayStreak == 1 ? tr("יום רצף") : tr("ימי רצף"))   // "1 ימי רצף" read wrong
-            }
-            .padding(.vertical, 10)
-            .glassPane(radius: 16, shadow: false)
-            // Period filter — drives every card below.
-            HStack(spacing: 4) {
-                ForEach(ReportPeriod.allCases) { p in
-                    Button {
-                        Haptic.light()
-                        withAnimation(.easeInOut(duration: 0.2)) { period = p; expandedTopic = nil }
-                    } label: {
-                        Text(p.title)
-                            .font(.system(size: 13.5, weight: .heavy, design: .rounded))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .background(period == p ? Color.white.opacity(0.92) : .clear,
-                                        in: RoundedRectangle(cornerRadius: 9, style: .continuous))
-                            .foregroundStyle(period == p ? AppColor.dreamyIndigo : .white)
+            // ONE summary card (Rani: "עמוס מדי" — it was a strip + a picker):
+            // the period on top, the four numbers under it.
+            VStack(spacing: 10) {
+                HStack(spacing: 4) {
+                    ForEach(ReportPeriod.allCases) { p in
+                        Button {
+                            Haptic.light()
+                            withAnimation(.easeInOut(duration: 0.2)) { period = p; expandedTopic = nil }
+                        } label: {
+                            Text(p.title)
+                                .font(.system(size: 13.5, weight: .heavy, design: .rounded))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 7)
+                                .background(period == p ? Color.white.opacity(0.92) : .clear,
+                                            in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                                .foregroundStyle(period == p ? AppColor.dreamyIndigo : .white)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
+                }
+                .padding(3)
+                .background(Color.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                // The four numbers that answer "is my kid using it and learning?"
+                HStack(spacing: 0) {
+                    snap("\(s.questions)", tr("שאלות"))
+                    snap(s.questions > 0 ? pct(s.accuracy) : "0%", tr("הצלחה"))
+                    snap(minutes, tr("דקות"))   // minutes EARNED, not the wallet — see the dashboard note
+                    snap("\(snapshot.dayStreak)", snapshot.dayStreak == 1 ? tr("יום רצף") : tr("ימי רצף"))   // "1 ימי רצף" read wrong
                 }
             }
-            .padding(3)
-            .glassPane(radius: 12, shadow: false)
+            .padding(10)
+            .glassPane(radius: 18, shadow: false)
         }
     }
 
@@ -172,22 +179,36 @@ struct ChildReportView: View {
             Text(period == .today ? tr("💡 תובנת היום") : period == .week ? tr("💡 תובנת השבוע") : tr("💡 תובנת החודש"))
                 .font(.system(size: 14.5, weight: .heavy, design: .rounded))
             if let i {
-                Text(i.body)
-                    .font(.system(size: 13.5, weight: .medium, design: .rounded))
-                    .fixedSize(horizontal: false, vertical: true)
+                // One line by default — the recommendation is what to DO, so it
+                // leads; the explanation opens on "עוד".
                 if let rec = i.recommendation {
-                    Divider().overlay(Color.white.opacity(0.35))
                     Text(tr("מומלץ: \(rec)"))
                         .font(.system(size: 13.5, weight: .heavy, design: .rounded))
                         .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(insightOpen ? nil : 2)
+                }
+                if insightOpen || i.recommendation == nil {
+                    Text(i.body)
+                        .font(.system(size: 13.5, weight: .medium, design: .rounded))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(insightOpen ? nil : 2)
                 }
             }
-            if let tip, tip.text != i?.recommendation {
+            if insightOpen, let tip, tip.text != i?.recommendation {
                 if i != nil, i?.recommendation == nil { Divider().overlay(Color.white.opacity(0.35)) }
                 Text("\(tip.emoji) \(tip.text)")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .fixedSize(horizontal: false, vertical: true)
             }
+            Button {
+                Haptic.light()
+                withAnimation(.easeInOut(duration: 0.2)) { insightOpen.toggle() }
+            } label: {
+                Text(insightOpen ? tr("פחות ▲") : tr("עוד ▼"))
+                    .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                    .foregroundStyle(GlassInk.primary.opacity(0.85))
+            }
+            .buttonStyle(.plain)
         }
         .foregroundStyle(GlassInk.primary)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -263,9 +284,10 @@ struct ChildReportView: View {
                 let weakest = topics.reversed().first(where: { $0.verdict == .weak && !engine.skillReports($0.topic, period).isEmpty })
                     ?? topics.first(where: { $0.verdict == .weak })
                 let open = expandedTopic ?? (autoCollapsed ? nil : weakest?.topic)
+                let shown = allTopics ? topics : Array(topics.prefix(3))
                 VStack(spacing: 0) {
                     learningProfileLines
-                    ForEach(topics) { t in
+                    ForEach(shown) { t in
                         topicRow(t, open: open == t.topic)
                         if open == t.topic {
                             let skills = engine.skillReports(t.topic, period)
@@ -290,7 +312,21 @@ struct ChildReportView: View {
                                 }
                             }
                         }
-                        if t.id != topics.last?.id { Divider().overlay(Color.white.opacity(0.16)).padding(.vertical, 8) }
+                        if t.id != shown.last?.id { Divider().overlay(Color.white.opacity(0.16)).padding(.vertical, 8) }
+                    }
+                    if topics.count > 3 {
+                        Button {
+                            Haptic.light()
+                            withAnimation(.easeInOut(duration: 0.2)) { allTopics.toggle() }
+                        } label: {
+                            Text(allTopics ? tr("הצג פחות ▲") : tr("הצג את כל \(topics.count) הנושאים ▼"))
+                                .font(.system(size: 13, weight: .heavy, design: .rounded))
+                                .foregroundStyle(GlassInk.primary)
+                                .frame(maxWidth: .infinity).padding(.vertical, 10)
+                                .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.top, 10)
                     }
                 }
             }
