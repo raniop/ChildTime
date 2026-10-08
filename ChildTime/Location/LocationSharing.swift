@@ -227,9 +227,25 @@ final class LocationSharing: NSObject, ObservableObject {
         let place = FamilyPlace.place(at: loc.coordinate.latitude, loc.coordinate.longitude, in: places,
                                       slack: loc.horizontalAccuracy)
         let d = AppGroup.defaults
-        if d.string(forKey: "location.placeID") != place?.id {
-            d.set(place?.id, forKey: "location.placeID")
-            d.set(Date().timeIntervalSince1970, forKey: "location.placeSince")
+        let now = Date().timeIntervalSince1970
+        // "מאז" must survive a single bad reading. Indoors one fix can land
+        // outside the place's circle, and resetting on it turned "at school
+        // since 8:00" into "since 12:43" (Rani, 2026-10-08). The child has left
+        // only after 10 minutes with no match, or on arriving somewhere else.
+        if let place {
+            if d.string(forKey: "location.placeID") != place.id {
+                d.set(place.id, forKey: "location.placeID")
+                d.set(now, forKey: "location.placeSince")
+            }
+            d.removeObject(forKey: "location.awaySince")
+        } else if d.string(forKey: "location.placeID") != nil {
+            let away = d.double(forKey: "location.awaySince")
+            if away == 0 {
+                d.set(now, forKey: "location.awaySince")
+            } else if now - away > 600 {
+                d.removeObject(forKey: "location.placeID")
+                d.removeObject(forKey: "location.awaySince")
+            }
         }
         let battery = UIDevice.current.batteryLevel
         let data: [String: Any] = [

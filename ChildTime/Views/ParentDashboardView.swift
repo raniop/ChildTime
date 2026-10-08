@@ -1434,7 +1434,7 @@ struct ParentDashboardView: View {
                                  // "Earned", said out loud: a parent read "60/60 דקות היום"
                                  // as "played 60 of 60" (Ben David, 2026-10-08).
                                  label: tr("דקות שהרוויחו היום"),
-                                 progress: cap.enabled ? min(1, Double(s.minutesEarnedToday) / Double(max(cap.minutes, 1))) : nil)
+                                 progress: nil)   // no filling bar (Rani)
                     overviewStat(value: "\(s.answeredToday)", suffix: nil, label: tr("שאלות היום"), progress: nil)
                     overviewStat(value: "\(s.correctToday)", suffix: nil, label: tr("נכונות"), progress: nil)
                 }
@@ -1771,7 +1771,20 @@ struct ParentDashboardView: View {
             Haptic.light()
             actionsChild = profile
         } label: {
-            homeGhostLabel(tr("⚡ פעולות"), width: width)
+            // ⚡ as a symbol, not the emoji: the emoji's empty side bearing
+            // pushed "פעולות" visibly off centre (Rani).
+            HStack(spacing: 5) {
+                Image(systemName: "bolt.fill")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Color(hex: "FFD54A"))
+                Text(tr("פעולות"))
+                    .font(.system(size: 13.5, weight: .heavy, design: .rounded))
+                    .foregroundStyle(GlassInk.primary)
+                    .lineLimit(1).minimumScaleFactor(0.65)
+            }
+            .frame(width: width, height: Self.homeControlHeight)
+            .background(Color.white.opacity(0.22), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
         }
         .buttonStyle(.plain)
     }

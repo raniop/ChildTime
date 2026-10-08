@@ -232,8 +232,18 @@ object KidLocation {
         if (!force && now - prefs.getLong("lastWrite", 0) < 60_000) return
         prefs.edit().putLong("lastWrite", now).apply()
         val place = FamilyPlace.at(loc.latitude, loc.longitude, places, loc.accuracy.toDouble())
-        if (prefs.getString("placeID", null) != place?.id) {
-            prefs.edit().putString("placeID", place?.id).putLong("placeSince", now / 1000).apply()
+        // "מאז" must survive a single bad reading: indoors one fix can land outside
+        // the place's circle, and resetting on it turned "at school since 8:00" into
+        // "since 12:43" (Rani). The child has left only after 10 minutes with no
+        // match, or on arriving somewhere else.
+        if (place != null) {
+            if (prefs.getString("placeID", null) != place.id)
+                prefs.edit().putString("placeID", place.id).putLong("placeSince", now / 1000).apply()
+            prefs.edit().remove("awaySince").apply()
+        } else if (prefs.getString("placeID", null) != null) {
+            val away = prefs.getLong("awaySince", 0)
+            if (away == 0L) prefs.edit().putLong("awaySince", now).apply()
+            else if (now - away > 600_000) prefs.edit().remove("placeID").remove("awaySince").apply()
         }
         val battery = runCatching {
             (app.getSystemService(Context.BATTERY_SERVICE) as BatteryManager)
