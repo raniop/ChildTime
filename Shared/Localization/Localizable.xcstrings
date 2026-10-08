@@ -28412,6 +28412,28 @@
         }
       }
     },
+    "בכפתור ״פעולות״ של כל ילד: מתנת דקות, נעילה ואיפה הילד בלחיצה אחת, ומשם זמן מסך, מטלות וכל ההגדרות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "زر «إجراءات» لكل طفل: دقائق هدية والقفل ومكان الطفل بضغطة واحدة، ومن هناك وقت الشاشة والمهام وكل الإعدادات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each child's “Actions” button: gift minutes, lock and where they are in one tap, and from there screen time, chores and all settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кнопка «Действия» у каждого ребёнка: подарить минуты, заблокировать и узнать, где он, одним нажатием, а оттуда — экранное время, дела и все настройки"
+          }
+        }
+      }
+    },
     "בכרטיס של כל ילד במסך ההורים אפשר לבחור באיזו שפה האפליקציה תופיע אצלו — והמכשיר שלו מתחלף מיד, בלי לגעת בו" : {
       "localizations" : {
         "ar" : {
@@ -28650,6 +28672,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Без экрана игр: выбор мира сразу ведёт к вопросам"
+          }
+        }
+      }
+    },
+    "בלי ניקוד במסכי ההורה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شاشات الوالدين بلا تشكيل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parent screens without vowel marks"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экраны родителя без огласовок"
           }
         }
       }
@@ -32514,6 +32558,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Заработано сегодня, мин"
+          }
+        }
+      }
+    },
+    "דקות שחזרו לארנק כשחלון משחק נסגר מוקדם לא נספרות יותר כאילו שוחקו, גם בדוח להורה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدقائق التي عادت إلى المحفظة عند إغلاق نافذة اللعب مبكرًا لم تعد تُحسب كأنها لُعبت، وكذلك في تقرير الوالدين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minutes returned to the wallet when a play window closes early no longer count as played, in the parent's report too"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Минуты, вернувшиеся в кошелёк при раннем закрытии игрового окна, больше не считаются сыгранными — и в отчёте для родителя тоже"
           }
         }
       }
@@ -47622,6 +47688,28 @@
         }
       }
     },
+    "העיפרון ליד שם הילד פותח ישר את השם, התמונה והכיתה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "القلم بجانب اسم الطفل يفتح مباشرة الاسم والصورة والصف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The pencil by the child's name opens their name, photo and grade"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карандаш рядом с именем ребёнка сразу открывает имя, фото и класс"
+          }
+        }
+      }
+    },
     "הפחתת מאמץ העיניים" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -51870,6 +51958,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Школьное время включено"
+          }
+        }
+      }
+    },
+    "זמן המסך נספר נכון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت الشاشة يُحسب بشكل صحيح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screen time counted correctly"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экранное время считается верно"
           }
         }
       }
@@ -66020,6 +66130,28 @@
         }
       }
     },
+    "כל המסכים של ההורה כתובים עכשיו בלי ניקוד. אצל הילדים הניקוד נשאר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل شاشات الوالدين مكتوبة الآن بلا تشكيل عبري. شاشات الأطفال تحتفظ به"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All parent screens are now written without Hebrew vowel marks. The children's screens keep them"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все экраны родителя теперь без огласовок на иврите. У детей огласовки остаются"
+          }
+        }
+      }
+    },
     "כל הנושאים" : {
       "localizations" : {
         "ar" : {
@@ -66280,6 +66412,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Все миры, игры и дела — для всех детей и на всех устройствах · 7 дней бесплатно"
+          }
+        }
+      }
+    },
+    "כל הפעולות במקום אחד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل الإجراءات في مكان واحد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All actions in one place"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все действия в одном месте"
           }
         }
       }
@@ -94821,6 +94975,28 @@
         }
       }
     },
+    "עריכה בלחיצה על העיפרון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التعديل بالقلم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit with the pencil"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Редактирование карандашом"
+          }
+        }
+      }
+    },
     "עריכת %@" : {
       "localizations" : {
         "ar" : {
@@ -97883,6 +98059,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Действия"
+          }
+        }
+      }
+    },
+    "פעולות פשוטות יותר, וזמן מסך מדויק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إجراءات أبسط، ووقت شاشة دقيق"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simpler actions, and accurate screen time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проще действия и точное экранное время"
           }
         }
       }
