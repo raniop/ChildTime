@@ -14,6 +14,28 @@ struct WelcomeIntroView: View {
 
     private var isCompact: Bool { hsc == .compact }
 
+    private var languagePill: some View {
+        Button {
+            Haptic.light()
+            showLanguages = true
+        } label: {
+            HStack(spacing: 6) {
+                Text(language.current.flag)
+                Text(language.current.nativeName)
+                    .font(.system(size: 14, weight: .heavy, design: .rounded))
+                Image(systemName: "globe")
+                    .font(.system(size: 13, weight: .bold))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 14).padding(.vertical, 9)
+            .background(Capsule().fill(.white.opacity(0.16)))
+            .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .padding(.top, 8).padding(.horizontal, AppSpacing.lg)
+        .accessibilityLabel("Language · שפה")
+    }
+
     var body: some View {
         ZStack {
             GlassBackdrop()
@@ -40,26 +62,20 @@ struct WelcomeIntroView: View {
         // whose phone speaks a different language than they want fixes it, on the
         // very first screen, before signing up in a language they did not pick.
         // Each name in its own language, so it reads whatever is showing now.
-        .overlay(alignment: .topTrailing) {
-            Button {
-                Haptic.light()
-                showLanguages = true
-            } label: {
-                HStack(spacing: 6) {
-                    Text(language.current.flag)
-                    Text(language.current.nativeName)
-                        .font(.system(size: 14, weight: .heavy, design: .rounded))
-                    Image(systemName: "globe")
-                        .font(.system(size: 13, weight: .bold))
+        // On the foldable nothing may sit in the top corner by the camera (Rani:
+        // "אסור כפתורים בצד ימין למעלה") — the pill goes to the OTHER top corner.
+        .overlay(alignment: .top) {
+            let display = DisplayGeometry.shared
+            if display.hasBarStrip {
+                HStack {
+                    if display.barOnLeft { Spacer(minLength: 0) }
+                    languagePill
+                    if !display.barOnLeft { Spacer(minLength: 0) }
                 }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 14).padding(.vertical, 9)
-                .background(Capsule().fill(.white.opacity(0.16)))
-                .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                .environment(\.layoutDirection, .leftToRight)
+            } else {
+                HStack { Spacer(minLength: 0); languagePill }
             }
-            .buttonStyle(.plain)
-            .padding(.top, 8).padding(.horizontal, AppSpacing.lg)
-            .accessibilityLabel("Language · שפה")
         }
         .sheet(isPresented: $showLanguages) {
             NavigationStack { LanguagePickerView() }

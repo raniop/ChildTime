@@ -92,6 +92,14 @@ final class DisplayGeometry: ObservableObject {
     /// it reaches our views — so the rest of the strip is ours to use.
     var hasBarStrip: Bool { barInset >= 40 && screenSize.width > 0 }
 
+    /// True when the LEADING edge (in `layout`) is the camera/clock side — a
+    /// toolbar button meant for the leading corner must go to the other one.
+    func leadingIsBarSide(layout: LayoutDirection) -> Bool {
+        guard hasBarStrip else { return false }
+        let leadingIsLeft = layout == .leftToRight
+        return leadingIsLeft == barOnLeft
+    }
+
     /// 🎚 Controls IN the strip (the side rail). Off by Rani's call, 2026-10-07:
     /// "אני לא רוצה את הכפתורים בצד! אני רוצה שזה יראה כמו במכשירים אחרים" —
     /// every screen keeps its phone controls, and only keeps its top row clear

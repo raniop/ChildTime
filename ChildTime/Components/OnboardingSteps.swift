@@ -196,7 +196,10 @@ struct OnboardingFooter: View {
                 .frame(height: 56)
                 .background(AppGradient.gold, in: Capsule())
                 .glow(AppColor.starGold, radius: enabled ? 12 : 0)
-                .opacity(enabled ? 1 : 0.5)
+                // Dimmed by colour, not by transparency: a see-through button
+                // let the options scrolling underneath show through it (Rani,
+                // on the closed Duo).
+                .overlay(Capsule().fill(Color(hex: "2A1E5C").opacity(enabled ? 0 : 0.35)))
             }
             .buttonStyle(.juicy)
 
@@ -216,5 +219,16 @@ struct OnboardingFooter: View {
             .disabled(link == nil)
         }
         .padding(.bottom, 10)
+        .padding(.top, 14)
+        // A soft floor under the footer, so content scrolling beneath it fades
+        // out instead of running through the button.
+        .background(
+            LinearGradient(stops: [.init(color: .clear, location: 0),
+                                   .init(color: Color(hex: "2A1E5C").opacity(0.55), location: 0.4),
+                                   .init(color: Color(hex: "2A1E5C").opacity(0.7), location: 1)],
+                           startPoint: .top, endPoint: .bottom)
+                .padding(.horizontal, -40)
+                .ignoresSafeArea(edges: .bottom)
+        )
     }
 }

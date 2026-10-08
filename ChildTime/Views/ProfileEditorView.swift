@@ -69,6 +69,8 @@ struct ProfileEditorView: View {
     /// (avatar, age AND grade, level, interests) plus a separate ⏱ step, whose
     /// only way on was a small "המשך" in the corner. Parent side: no niqqud.
     private var compactCreate: Bool { !isEdit && canEditLearning }
+    /// The foldable's closed or open glass, in the one-screen create: own top row.
+    private var foldTopRow: Bool { compactCreate && !showCapStep && DisplayGeometry.shared.hasBarStrip }
     @State private var showMore = false
     @State private var customCap = false
 
@@ -165,9 +167,12 @@ struct ProfileEditorView: View {
             }
             .dismissKeyboardOnTap()
             .navigationTitle(compactCreate ? "" : (isEdit ? tr("ערוך פרופיל") : tr("פרופיל חדש")))
+            .toolbar(foldTopRow ? .hidden : .visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                // On the foldable the close button never sits in the camera's
+                // corner (Rani): it moves to the other side when the bar is there.
+                ToolbarItem(placement: DisplayGeometry.shared.leadingIsBarSide(layout: .app) ? .topBarTrailing : .topBarLeading) {
                     if showCapStep {
                         Button(tr("חזרה")) {
                             withAnimation(.easeInOut(duration: 0.25)) { showCapStep = false }
@@ -218,11 +223,35 @@ struct ProfileEditorView: View {
                     OnboardingStepsBar(current: 2)
                         .frame(maxWidth: .infinity)
                 }
+                if foldTopRow {
+                    // 📐 The foldable: no navigation bar. The title is centred and
+                    // "ביטול" sits on the side away from the camera; the rows beside
+                    // the clock are just narrower (Rani: "תעלה הכל למעלה, והחלק
+                    // שמתנגש עם צד ימין — תקטין").
+                    ZStack {
+                        Text(tr("מי הילד?"))
+                            .font(.system(size: 24, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                        HStack {
+                            Button(tr("ביטול")) { dismiss() }
+                                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 14).padding(.vertical, 8)
+                                .background(Capsule().fill(.white.opacity(0.18)))
+                            Spacer()
+                        }
+                        .environment(\.layoutDirection, .leftToRight)
+                    }
+                    // Centred on the whole glass (not the narrowed band) so the
+                    // title never meets "Cancel".
+                    .padding(.top, 5)   // a touch lower (Rani)
+                } else {
                 Text(tr("מי הילד?"))
                     .font(.system(size: 26, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .multilineTextAlignment(.center)
+                }
 
                 VStack(alignment: .leading, spacing: 6) {
                     compactLabel(tr("שם"))
@@ -232,6 +261,7 @@ struct ProfileEditorView: View {
                         .padding(.vertical, AppSpacing.sm)
                         .glassPane(radius: AppRadius.medium, shadow: false)
                 }
+                .clearOfBar(active: foldTopRow)   // beside the clock: narrower
 
                 HStack(spacing: AppSpacing.md) {
                     ForEach(ChildGender.allCases) { g in genderOption(g) }
