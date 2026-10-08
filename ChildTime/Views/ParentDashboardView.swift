@@ -286,7 +286,7 @@ struct ParentDashboardView: View {
                 }
                 SideRailButton(systemImage: "person.badge.plus", label: tr("＋ צרו ילד/ה")) { showingCreateChild = true }
                 SideRailButton(emoji: "🧹", label: tr("🧹 מטלות")) { openChores() }
-                SideRailButton(emoji: "📍", label: tr("📍 מקום")) { showingLocation = true }
+                SideRailButton(emoji: "📍", label: tr("📍 איפה הילדים")) { showingLocation = true }
                 if !rows.isEmpty {
                     SideRailDivider()
                     ScrollView {
@@ -1564,7 +1564,7 @@ struct ParentDashboardView: View {
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3BC4"))
                         .padding(.horizontal, 16).frame(minHeight: 40)
-                        .background(.white, in: Capsule())
+                        .background(.white, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
                 }
                 .buttonStyle(.plain)
             }
@@ -1576,9 +1576,13 @@ struct ParentDashboardView: View {
             .buttonStyle(.plain)
             .accessibilityLabel(tr("סגירה"))
         }
+        .multilineTextAlignment(.leading)
         .foregroundStyle(.white)
         .padding(14)
         .glassPane(radius: 22, shadow: false)
+        // The column it sits in is laid out LTR; in Hebrew the pin, the text and
+        // the button belong on the RIGHT and ✕ on the left (Rani).
+        .environment(\.layoutDirection, .app)
     }
 
     private var homeActionsRow: some View {
@@ -1599,7 +1603,7 @@ struct ParentDashboardView: View {
                 .buttonStyle(.plain)
                 .coachMark("p.chores")
             // 📍 Where the children are — map, places, beep.
-            Button { Haptic.light(); showingLocation = true } label: { homeGhostLabel(tr("📍 מקום")).frame(maxWidth: .infinity) }
+            Button { Haptic.light(); showingLocation = true } label: { homeGhostLabel(tr("📍 איפה הילדים")).frame(maxWidth: .infinity) }
                 .buttonStyle(.plain)
             // 📱 "🧒 מצב ילד" lived here until every child's card got its own
             // "תנו ל… לשחק כאן" — the same thing, already aimed at the right

@@ -119633,6 +119633,28 @@
         }
       }
     },
+    "📍 איפה הילדים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 أين الأطفال"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Where the kids are"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Где дети"
+          }
+        }
+      }
+    },
     "📍 הפעלת מיקום ל%@" : {
       "localizations" : {
         "ar" : {
