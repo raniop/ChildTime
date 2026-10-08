@@ -96,7 +96,7 @@ private fun SheetBar(title: String, cancel: String? = null, onCancel: () -> Unit
 @Composable
 fun LanguageSheet(onDismiss: () -> Unit) {
     Sheet(onDismiss) {
-        SheetBar(tr("שָׁפָה · Language"))
+        SheetBar(tr("שפה · Language"))
         Column(Modifier.fillMaxWidth().glassPane(20.dp)) {
             AppLanguage.entries.forEachIndexed { i, lang ->
                 if (i > 0) RowDivider()
@@ -108,7 +108,7 @@ fun LanguageSheet(onDismiss: () -> Unit) {
                 }
             }
         }
-        P(tr("הַשָּׂפָה מִשְׁתַּנָּה מִיָּד בְּכָל הָאַפְּלִיקַצְיָה: טֶקְסְטִים, כִּוּוּן, הַקְרָאָה וּשְׁאֵלוֹת."), 12.5f, Modifier.padding(14.dp), color = Ink.tertiary)
+        P(tr("השפה משתנה מיד בכל האפליקציה: טקסטים, כוון, הקראה ושאלות."), 12.5f, Modifier.padding(14.dp), color = Ink.tertiary)
     }
 }
 
@@ -246,24 +246,24 @@ fun FeedbackSheet(onDismiss: () -> Unit) {
     var sent by remember { mutableStateOf(false) }
     val canSend = text.trim().length >= 3
     Sheet(onDismiss) {
-        SheetBar(tr("פִידְבֶּק"), cancel = tr("סְגוֹר"), onCancel = onDismiss)
+        SheetBar(tr("פידבק"), cancel = tr("סגור"), onCancel = onDismiss)
         if (sent) {
             Column(Modifier.fillMaxWidth().padding(vertical = 30.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Text("🙏", fontSize = 60.sp)
-                H(tr("תּוֹדָה רַבָּה!"), 22, align = TextAlign.Center)
-                P(tr("קִבַּלְנוּ אֶת הַפִידְבֶּק שֶׁלָּכֶם — זֶה מְאוֹד עוֹזֵר לָנוּ."), 15f, Modifier.padding(horizontal = 24.dp), align = TextAlign.Center)
-                GoldButton(tr("סְגוֹר"), Modifier.padding(top = 10.dp), onClick = onDismiss)
+                H(tr("תודה רבה!"), 22, align = TextAlign.Center)
+                P(tr("קבלנו את הפידבק שלכם — זה מאוד עוזר לנו."), 15f, Modifier.padding(horizontal = 24.dp), align = TextAlign.Center)
+                GoldButton(tr("סגור"), Modifier.padding(top = 10.dp), onClick = onDismiss)
             }
         } else {
             Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                P(tr("נִשְׂמַח לִשְׁמוֹעַ מָה דַּעְתְּכֶם — מָה לְשַׁפֵּר, מָה חָסֵר, אוֹ כָּל רַעְיוֹן שֶׁיֵּשׁ לָכֶם. כָּל מִלָּה עוֹזֶרֶת לָנוּ לְשַׁפֵּר אֶת טוֹפִי לַיְּלָדִים."), 13f)
-                P(tr("הַהוֹדָעָה שֶׁלָּכֶם"), 13f, color = Ink.tertiary, weight = FontWeight.Bold)
+                P(tr("נשמח לשמוע מה דעתכם — מה לשפר, מה חסר, או כל רעיון שיש לכם. כל מלה עוזרת לנו לשפר את טופי לילדים."), 13f)
+                P(tr("ההודעה שלכם"), 13f, color = Ink.tertiary, weight = FontWeight.Bold)
                 OutlinedTextField(
                     text, { text = it }, Modifier.fillMaxWidth().heightIn(min = 140.dp),
-                    placeholder = { Text(tr("כִּתְבוּ כָּאן…"), fontFamily = Rounded) },
+                    placeholder = { Text(tr("כתבו כאן…"), fontFamily = Rounded) },
                     colors = glassFieldColors(), shape = RoundedCornerShape(14.dp),
                 )
-                GoldButton("✈️  " + tr("שְׁלַח לָנוּ"), enabled = canSend) {
+                GoldButton("✈️  " + tr("שלח לנו"), enabled = canSend) {
                     SettingsRepository.submitFeedback(text.trim())
                     sent = true
                 }

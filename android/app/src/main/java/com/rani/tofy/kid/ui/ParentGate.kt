@@ -94,9 +94,9 @@ fun ParentGate(
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterVertically),
             ) {
                 Text("🔐", fontSize = 56.sp)
-                KidTitle(tr("קוֹד הַהוֹרֶה לֹא זָמִין כָּאן"), 26)
-                KidBody(tr("קוֹד הַהוֹרֶה שֶׁל הַמִּשְׁפָּחָה עֲדַיִן לֹא הִגִּיעַ לַמַּכְשִׁיר הַזֶּה (בִּדְקוּ חִבּוּר לָאִינְטֶרְנֶט). אֶפְשָׁר תָּמִיד לְאַפֵּס מִלּוּחַ הַהוֹרִים בַּמַּכְשִׁיר שֶׁל אַבָּא אוֹ אִמָּא."), 16f, alpha = 0.85f)
-                Text(tr("סְגִירָה"), Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
+                KidTitle(tr("קוד ההורה לא זמין כאן"), 26)
+                KidBody(tr("קוד ההורה של המשפחה עדין לא הגיע למכשיר הזה (בדקו חבור לאינטרנט). אפשר תמיד לאפס מלוח ההורים במכשיר של אבא או אמא."), 16f, alpha = 0.85f)
+                Text(tr("סגירה"), Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
                     .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).clickable(onClick = onClose)
                     .padding(horizontal = 34.dp, vertical = 13.dp),
                     color = Color.White, fontFamily = com.rani.tofy.ui.theme.Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
@@ -106,8 +106,8 @@ fun ParentGate(
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 Text("🔒", fontSize = 48.sp, modifier = Modifier.padding(top = 36.dp))
-                KidTitle(title ?: tr("הַגְדָּרוֹת הוֹרֶה"), 28)
-                KidBody(reason ?: tr("הַזִּינוּ קוֹד בֶּן 4 סְפָרוֹת"), 16f, alpha = 0.8f, weight = FontWeight.Medium)
+                KidTitle(title ?: tr("הגדרות הורה"), 28)
+                KidBody(reason ?: tr("הזינו קוד בן 4 ספרות"), 16f, alpha = 0.8f, weight = FontWeight.Medium)
                 PinDots(entered.length, Modifier.graphicsLayer { translationX = shake.value * density })
                 VSpace(14)
                 PinPad { key ->
@@ -132,12 +132,12 @@ private fun FamilyLoadingGate() {
         ) {
             if (timedOut) {
                 Text("📡", fontSize = 44.sp)
-                KidTitle(tr("הַמַּכְשִׁיר לֹא הִצְלִיחַ לְהִתְחַבֵּר לַמִּשְׁפָּחָה"), 19)
-                KidBody(tr("בִּדְקוּ שֶׁיֵּשׁ אִינְטֶרְנֶט, וְשֶׁהַמַּכְשִׁיר עֲדַיִן מְקֻשָּׁר לַמִּשְׁפָּחָה בְּלוּחַ הַהוֹרִים."), 14f, weight = FontWeight.Medium)
+                KidTitle(tr("המכשיר לא הצליח להתחבר למשפחה"), 19)
+                KidBody(tr("בדקו שיש אינטרנט, ושהמכשיר עדין מקשר למשפחה בלוח ההורים."), 14f, weight = FontWeight.Medium)
             } else {
                 CircularProgressIndicator(color = Color.White)
-                KidTitle(tr("טוֹעֲנִים אֶת הַמִּשְׁפָּחָה שֶׁלָּכֶם…"), 20)
-                KidBody(tr("רֶגַע אֶחָד…"), 14f, weight = FontWeight.Medium)
+                KidTitle(tr("טוענים את המשפחה שלכם…"), 20)
+                KidBody(tr("רגע אחד…"), 14f, weight = FontWeight.Medium)
             }
         }
     }

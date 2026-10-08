@@ -162,9 +162,9 @@ private fun ChoreBanner(kid: Child, c: Chore, approving: Boolean, onOpen: () -> 
     ) {
         Text(c.emoji, fontSize = 24.sp)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(if (kid.isGirl) tr("%@ סִיְּמָה מְטַלָּה", kid.name) else tr("%@ סִיֵּם מְטַלָּה", kid.name),
+            Text(if (kid.isGirl) tr("%@ סימה מטלה", kid.name) else tr("%@ סים מטלה", kid.name),
                 color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
-            P(tr("%@ · מְחַכָּה לְאִשּׁוּר", c.title), 13f, color = Ink.secondary, maxLines = 2)
+            P(tr("%@ · מחכה לאשור", c.title), 13f, color = Ink.secondary, maxLines = 2)
         }
         Box(
             Modifier.height(38.dp).clip(RoundedCornerShape(12.dp)).background(Color.White.copy(alpha = 0.92f))
@@ -174,7 +174,7 @@ private fun ChoreBanner(kid: Child, c: Chore, approving: Boolean, onOpen: () -> 
             if (approving) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 CircularProgressIndicator(Modifier.size(14.dp), color = Ink.indigo, strokeWidth = 2.dp)
                 Text(tr("מאשר…"), color = Ink.indigo, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
-            } else Text(tr("אַשְּׁרוּ"), color = Ink.indigo, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+            } else Text(tr("אשרו"), color = Ink.indigo, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
         }
     }
 }
@@ -183,29 +183,29 @@ private fun ChoreBanner(kid: Child, c: Chore, approving: Boolean, onOpen: () -> 
 
 /** A pack or world pass by id (QuestionPacks.find) — the name + emoji the parent sees. */
 internal fun packLabel(id: String): Pair<String, String>? = when (id) {
-    "soccer" -> "⚽" to tr("עוֹלַם הַכַּדּוּרֶגֶל")
-    "dinosaurs" -> "🦖" to tr("דִּינוֹזָאוּרִים")
-    "space" -> "🚀" to tr("חָלָל וְכוֹכָבִים")
-    "animals" -> "🐾" to tr("עוֹלַם הַחַיּוֹת")
-    "sea" -> "🌊" to tr("מַעֲמַקֵּי הַיָּם")
-    "gifted" -> "🧠" to tr("הֲכָנָה לִמְחוֹנָנִים")
-    "food" -> "🍳" to tr("מִטְבָּח וּמַדָּע שֶׁל אֹכֶל")
-    "israel" -> "🏛️" to tr("יִשְׂרָאֵל שֶׁלִּי")
-    "tishrei" -> "🍎" to tr("חַגֵּי תִּשְׁרֵי")
-    "music" -> "🎵" to tr("מוּזִיקָה")
-    "body" -> "🧍" to tr("גּוּף הָאָדָם")
-    "vehicles" -> "🚗" to tr("כְּלֵי רֶכֶב וְתַחְבּוּרָה")
-    "flags" -> "🌍" to tr("דְּגָלִים וּמְדִינוֹת")
-    "math" -> "🧮" to tr("מַמְלֶכֶת הַמָּתֵמָטִיקָה")
-    "english" -> "🔤" to tr("אֶרֶץ אַנְגְּלִית")
-    "hebrew" -> "✍️" to tr("אֶרֶץ הָעִבְרִית")
-    "logic" -> "🧩" to tr("חִידוֹת הַלּוֹגִיקָה")
-    "science" -> "🔬" to tr("מַעְבְּדַת הַמַּדָּעִים")
-    "history" -> "🏛️" to tr("מוּזֵיאוֹן הַהִיסְטוֹרְיָה")
-    "geography" -> "🌍" to tr("מַסָּע סְבִיב הָעוֹלָם")
-    "money" -> "💰" to tr("שׁוּק הַכֶּסֶף")
-    "reading" -> "📖" to tr("יַעַר הַסִּפּוּרִים")
-    "holidays" -> "🎊" to tr("הַחַגִּים")
+    "soccer" -> "⚽" to tr("עולם הכדורגל")
+    "dinosaurs" -> "🦖" to tr("דינוזאורים")
+    "space" -> "🚀" to tr("חלל וכוכבים")
+    "animals" -> "🐾" to tr("עולם החיות")
+    "sea" -> "🌊" to tr("מעמקי הים")
+    "gifted" -> "🧠" to tr("הכנה למחוננים")
+    "food" -> "🍳" to tr("מטבח ומדע של אכל")
+    "israel" -> "🏛️" to tr("ישראל שלי")
+    "tishrei" -> "🍎" to tr("חגי תשרי")
+    "music" -> "🎵" to tr("מוזיקה")
+    "body" -> "🧍" to tr("גוף האדם")
+    "vehicles" -> "🚗" to tr("כלי רכב ותחבורה")
+    "flags" -> "🌍" to tr("דגלים ומדינות")
+    "math" -> "🧮" to tr("ממלכת המתמטיקה")
+    "english" -> "🔤" to tr("ארץ אנגלית")
+    "hebrew" -> "✍️" to tr("ארץ העברית")
+    "logic" -> "🧩" to tr("חידות הלוגיקה")
+    "science" -> "🔬" to tr("מעבדת המדעים")
+    "history" -> "🏛️" to tr("מוזיאון ההיסטוריה")
+    "geography" -> "🌍" to tr("מסע סביב העולם")
+    "money" -> "💰" to tr("שוק הכסף")
+    "reading" -> "📖" to tr("יער הספורים")
+    "holidays" -> "🎊" to tr("החגים")
     else -> null
 }
 
@@ -294,7 +294,7 @@ private fun NotificationsBanner() {
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { on = notificationsOn(ctx) }
     val ask = rememberNotificationsAsk { on = notificationsOn(ctx) }
     if (on) return
-    NoticeBanner("🔔", tr("הַהַתְרָאוֹת כָּבוּיוֹת"), tr("הַפְעִילוּ כְּדֵי לְקַבֵּל עִדְכּוּנִים עַל הַיֶּלֶד"), tint = Color(0xFFFF8C42), onClick = ask)
+    NoticeBanner("🔔", tr("ההתראות כבויות"), tr("הפעילו כדי לקבל עדכונים על הילד"), tint = Color(0xFFFF8C42), onClick = ask)
 }
 
 @Composable

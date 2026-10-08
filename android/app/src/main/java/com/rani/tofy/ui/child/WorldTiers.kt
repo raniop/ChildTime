@@ -35,12 +35,12 @@ object WorldTiers {
 
     /** The parent's line for a world: tier, then room or "boss waiting". */
     fun parentLabel(tier: Int, room: Int): String {
-        val where = if (room >= 9) tr("הַבּוֹס מְחַכֶּה") else tr("חֶדֶר %lld/10", room + 1)
+        val where = if (room >= 9) tr("הבוס מחכה") else tr("חדר %lld/10", room + 1)
         return when (tier) {
-            0 -> tr("⭐ אָרָד") + " · " + where
-            1 -> tr("⭐⭐ כֶּסֶף") + " · " + where
-            2 -> tr("⭐⭐⭐ זָהָב") + " · " + where
-            else -> tr("👑 הֻשְׁלַם")
+            0 -> tr("⭐ ארד") + " · " + where
+            1 -> tr("⭐⭐ כסף") + " · " + where
+            2 -> tr("⭐⭐⭐ זהב") + " · " + where
+            else -> tr("👑 השלם")
         }
     }
 }

@@ -321,19 +321,19 @@ fun ConnectDeviceSheet(childID: String, onDismiss: () -> Unit) {
                 Spacer(Modifier.height(30.dp))
                 Text("✓", Modifier.size(96.dp).clip(RoundedCornerShape(50)).background(Ink.good).wrapContentSize(),
                     color = Ink.deep, fontWeight = FontWeight.Black, fontSize = 56.sp)
-                H(tr("הַמַּכְשִׁיר שֶׁל %@ חוּבַּר! 🎉", name), 24, align = TextAlign.Center)
+                H(tr("המכשיר של %@ חובר! 🎉", name), 24, align = TextAlign.Center)
                 Spacer(Modifier.height(30.dp))
             } else {
-                H(tr("חַבְּרוּ אֶת הַמַּכְשִׁיר שֶׁל %@", name), 24, align = TextAlign.Center)
-                Box(Modifier.glassPane(24.dp).padding(16.dp)) { QRBlock(childID, code, 210, tr("נַסּוּ שׁוּב"), retry) }
+                H(tr("חברו את המכשיר של %@", name), 24, align = TextAlign.Center)
+                Box(Modifier.glassPane(24.dp).padding(16.dp)) { QRBlock(childID, code, 210, tr("נסו שוב"), retry) }
                 Column(Modifier.fillMaxWidth().glassInset(16.dp).padding(14.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                    P(tr("1️⃣  הוֹרִידוּ אֶת טוֹפִי בַּמַּכְשִׁיר שֶׁל %@ — מֵה־App Store אוֹ מִ־Google Play", name), 14f, color = Color.White, weight = FontWeight.SemiBold)
-                    P(tr("2️⃣  פִּתְחוּ שָׁם אֶת טוֹפִי וּבַחֲרוּ \"הַמַּכְשִׁיר שֶׁל הַיֶּלֶד\""), 14f, color = Color.White, weight = FontWeight.SemiBold)
-                    P(tr("3️⃣  סִרְקוּ אֶת הַקּוֹד — וְ%@ נִכְנָס יְשִׁירוֹת לְשַׂחֵק 🎉", name), 14f, color = Color.White, weight = FontWeight.SemiBold)
+                    P(tr("1️⃣  הורידו את טופי במכשיר של %@ — מהApp Store או מGoogle Play", name), 14f, color = Color.White, weight = FontWeight.SemiBold)
+                    P(tr("2️⃣  פתחו שם את טופי ובחרו \"המכשיר של הילד\""), 14f, color = Color.White, weight = FontWeight.SemiBold)
+                    P(tr("3️⃣  סרקו את הקוד — ו%@ נכנס ישירות לשחק 🎉", name), 14f, color = Color.White, weight = FontWeight.SemiBold)
                 }
-                if (!code.isNullOrEmpty()) ShareCapsule(tr("שִׁלְחוּ אֶת טוֹפִי לַמַּכְשִׁיר שֶׁל %@", name)) { shareJoinLink(ctx, ChildRepository.joinURL(code, childID)) }
-                WhiteButton(tr("סְגוֹר"), Modifier.widthIn(min = 140.dp).padding(horizontal = 8.dp)) { onDismiss() }
-                P(tr("אֶפְשָׁר לְדַלֵּג וּלְחַבֵּר אֶת הַמַּכְשִׁיר אַחַר כָּךְ — מֵהַמָּסָךְ הָרָאשִׁי."), 12f, align = TextAlign.Center)
+                if (!code.isNullOrEmpty()) ShareCapsule(tr("שלחו את טופי למכשיר של %@", name)) { shareJoinLink(ctx, ChildRepository.joinURL(code, childID)) }
+                WhiteButton(tr("סגור"), Modifier.widthIn(min = 140.dp).padding(horizontal = 8.dp)) { onDismiss() }
+                P(tr("אפשר לדלג ולחבר את המכשיר אחר כך — מהמסך הראשי."), 12f, align = TextAlign.Center)
             }
         }
     }

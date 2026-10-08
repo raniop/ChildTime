@@ -105,9 +105,9 @@ fun HomeScreen(
                 item { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { banners() } }
                 item {
                     RowSpaced {
-                        GlassButton(tr("＋ צְרוּ יֶלֶד/ה"), Modifier.weight(1f).coachMark("p.newChild")) { onAddChild() }
-                        GlassButton(tr("🧹 מַטְלוֹת"), Modifier.weight(1f).coachMark("p.chores")) { onChores() }
-                        GlassButton(tr("📍 מִקּוּם"), Modifier.weight(1f)) { onLocation(null) }
+                        GlassButton(tr("＋ צרו ילד/ה"), Modifier.weight(1f).coachMark("p.newChild")) { onAddChild() }
+                        GlassButton(tr("🧹 מטלות"), Modifier.weight(1f).coachMark("p.chores")) { onChores() }
+                        GlassButton(tr("📍 מקום"), Modifier.weight(1f)) { onLocation(null) }
                     }
                 }
                 items(state.orderedChildren, key = { it.id }) { child ->
@@ -126,8 +126,8 @@ fun HomeScreen(
                 if (showLocationIntro(state)) item { LocationIntroCard(onOpen = { onLocation(null) }) }
                 if (!state.loading && state.children.isEmpty()) item {
                     Column(Modifier.fillMaxWidth().glassPane().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        H(tr("עוֹד אֵין יְלָדִים בַּמִּשְׁפָּחָה"), 19, align = TextAlign.Center)
-                        GoldButton(tr("＋ צְרוּ יֶלֶד/ה")) { onAddChild() }
+                        H(tr("עוד אין ילדים במשפחה"), 19, align = TextAlign.Center)
+                        GoldButton(tr("＋ צרו ילד/ה")) { onAddChild() }
                     }
                 }
             }
@@ -158,11 +158,11 @@ private fun Header(state: FamilyState, onSettings: () -> Unit, onBell: () -> Uni
     val playing = state.orderedChildren.firstOrNull { state.liveWindow(it) != null }
     Row(Modifier.fillMaxWidth().padding(top = 6.dp), verticalAlignment = Alignment.Top) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            H(if (first.isNotEmpty()) tr("שָׁלוֹם %@", first) else tr("שָׁלוֹם"), 27)
+            H(if (first.isNotEmpty()) tr("שלום %@", first) else tr("שלום"), 27)
             val parts = buildList {
                 state.household?.familyName?.let { add(it) }
-                add(when (kids) { 0 -> tr("עוֹד אֵין יְלָדִים"); 1 -> tr("יֶלֶד אֶחָד"); 2 -> tr("שְׁנֵי יְלָדִים"); else -> tr("%lld יְלָדִים", kids) })
-                playing?.let { add(if (it.isGirl) tr("%@ מְשַׂחֶקֶת עַכְשָׁיו 🎮", it.name) else tr("%@ מְשַׂחֵק עַכְשָׁיו 🎮", it.name)) }
+                add(when (kids) { 0 -> tr("עוד אין ילדים"); 1 -> tr("ילד אחד"); 2 -> tr("שני ילדים"); else -> tr("%lld ילדים", kids) })
+                playing?.let { add(if (it.isGirl) tr("%@ משחקת עכשיו 🎮", it.name) else tr("%@ משחק עכשיו 🎮", it.name)) }
             }
             P(parts.joinToString(" · "), 13.5f, color = Ink.secondary, weight = FontWeight.SemiBold)
         }
@@ -189,16 +189,16 @@ private fun ChildCard(
     val quietNow = child.quietHours?.activeAt(System.currentTimeMillis() / 1000.0)
     val pct = if (s.answeredToday > 0) Math.round(s.correctToday * 100.0 / s.answeredToday).toInt() else 0
     val statusText = when {
-        live != null -> tr("%@ עַכְשָׁיו · נִשְׁאֲרוּ %@", if (girl) tr("מְשַׂחֶקֶת") else tr("מְשַׂחֵק"), formatTime(live.secondsLeft))
-        inApp -> tr("בְּטוֹפִי עַכְשָׁיו · %@", if (girl) tr("לוֹמֶדֶת") else tr("לוֹמֵד"))
+        live != null -> tr("%@ עכשיו · נשארו %@", if (girl) tr("משחקת") else tr("משחק"), formatTime(live.secondsLeft))
+        inApp -> tr("בטופי עכשיו · %@", if (girl) tr("לומדת") else tr("לומד"))
         // 🏫🌙 The hours the parent set aside, while they are on.
         hasDevice && quietNow != null -> if (quietNow.kind == com.rani.tofy.data.QuietKind.SCHOOL)
-            tr("🏫 זְמַן בֵּית סֵפֶר עַד %@", com.rani.tofy.data.QuietHours.clock(quietNow.end))
-            else tr("🌙 שְׁעַת שֵׁינָה עַד %@", com.rani.tofy.data.QuietHours.clock(quietNow.end))
+            tr("🏫 זמן בית ספר עד %@", com.rani.tofy.data.QuietHours.clock(quietNow.end))
+            else tr("🌙 שעת שינה עד %@", com.rani.tofy.data.QuietHours.clock(quietNow.end))
         // A child with no device of their own still plays in kid mode on this phone.
-        !hasDevice && s.answeredToday == 0 && s.stars == 0 -> tr("עוֹד לֹא %@", if (girl) tr("הִתְחִילָה") else tr("הִתְחִיל"))
-        s.answeredToday > 0 -> tr("%@ הַיּוֹם", if (girl) tr("לָמְדָה") else tr("לָמַד"))
-        else -> tr("לֹא בְּטוֹפִי הַיּוֹם")
+        !hasDevice && s.answeredToday == 0 && s.stars == 0 -> tr("עוד לא %@", if (girl) tr("התחילה") else tr("התחיל"))
+        s.answeredToday > 0 -> tr("%@ היום", if (girl) tr("למדה") else tr("למד"))
+        else -> tr("לא בטופי היום")
     }
     val pctColor = when {
         pct >= 80 && s.answeredToday > 0 -> Ink.good
@@ -231,26 +231,26 @@ private fun ChildCard(
         if (hasDevice) {
             val cap = child.dailyCapMinutes?.takeIf { it > 0 }
             RowSpaced {
-                Stat(Modifier.weight(1f), "${s.minutesEarnedToday}" + (cap?.let { "/$it" } ?: ""), tr("דַּקּוֹת הַיּוֹם"))
-                Stat(Modifier.weight(1f), "${s.answeredToday}", tr("שְׁאֵלוֹת הַיּוֹם"))
-                Stat(Modifier.weight(1f), "${s.correctToday}", tr("נְכוֹנוֹת"))
+                Stat(Modifier.weight(1f), "${s.minutesEarnedToday}" + (cap?.let { "/$it" } ?: ""), tr("דקות שהרוויחו היום"))
+                Stat(Modifier.weight(1f), "${s.answeredToday}", tr("שאלות היום"))
+                Stat(Modifier.weight(1f), "${s.correctToday}", tr("נכונות"))
             }
             RowSpaced {
-                WhiteButton(tr("מֵידָע נוֹסָף ←"), Modifier.weight(2f)) { onOpen() }
-                GlassButton(tr("⚡ פְּעֻלּוֹת"), Modifier.weight(1f).coachMark("p.actions", marked)) { onActions() }
+                WhiteButton(tr("מידע נוסף ←"), Modifier.weight(2f)) { onOpen() }
+                GlassButton(tr("⚡ פעלות"), Modifier.weight(1f).coachMark("p.actions", marked)) { onActions() }
             }
             // 🧒 Kid Mode: this phone becomes the child's for a while (screen-pinned).
-            GlassButton(tr("תְּנוּ לְ%@ לְשַׂחֵק כָּאן 🧒", child.name), Modifier.fillMaxWidth().coachMark("p.playHere", marked)) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
+            GlassButton(tr("תנו ל%@ לשחק כאן 🧒", child.name), Modifier.fillMaxWidth().coachMark("p.playHere", marked)) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
         } else {
-            P(tr("%@ · אֵין עֲדַיִן מַכְשִׁיר מְחֻבָּר.", gradeName(child.effectiveGrade)), 13f)
+            P(tr("%@ · אין עדין מכשיר מחבר.", gradeName(child.effectiveGrade)), 13f)
             // מידע נוסף · חברו מכשיר · פעולות — side by side, in one row (Rani:
             // connecting used to REPLACE "מידע נוסף", and a row of its own grew the card).
             RowSpaced {
-                CardButton(tr("מֵידָע נוֹסָף ←"), white = true, Modifier.weight(1.1f)) { onOpen() }
-                CardButton(tr("+ חַבְּרוּ מַכְשִׁיר"), white = false, Modifier.weight(1.1f).coachMark("p.connect", markConnect)) { onConnect() }
-                CardButton(tr("⚡ פְּעֻלּוֹת"), white = false, Modifier.weight(0.9f).coachMark("p.actions", marked)) { onActions() }
+                CardButton(tr("מידע נוסף ←"), white = true, Modifier.weight(1.1f)) { onOpen() }
+                CardButton(tr("+ חברו מכשיר"), white = false, Modifier.weight(1.1f).coachMark("p.connect", markConnect)) { onConnect() }
+                CardButton(tr("⚡ פעלות"), white = false, Modifier.weight(0.9f).coachMark("p.actions", marked)) { onActions() }
             }
-            GlassButton(tr("תְּנוּ לְ%@ לְשַׂחֵק כָּאן 🧒", child.name), Modifier.fillMaxWidth().coachMark("p.playHere", marked)) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
+            GlassButton(tr("תנו ל%@ לשחק כאן 🧒", child.name), Modifier.fillMaxWidth().coachMark("p.playHere", marked)) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
         }
     }
 }
@@ -281,16 +281,16 @@ private fun Stat(modifier: Modifier, value: String, label: String) {
 /** Profile.gradeDisplayName — same keys as iOS. */
 fun gradeName(grade: Int?): String {
     val g = grade ?: return ""
-    if (g < 0) return tr("גַּן טְרוֹם־חוֹבָה")
-    if (g == 0) return tr("גַּן חוֹבָה")
+    if (g < 0) return tr("גן טרוםחובה")
+    if (g == 0) return tr("גן חובה")
     val letters = listOf("א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳", "ט׳", "י׳", "יא׳", "יב׳")
-    return tr("כִּתָּה %@", tr(letters[minOf(g, 12) - 1]))
+    return tr("כתה %@", tr(letters[minOf(g, 12) - 1]))
 }
 
 /** Profile.gradeNameForParent — the parent's spelling, no niqqud. */
 fun gradeNameForParent(grade: Int?): String {
     val g = grade ?: return ""
-    if (g < 0) return tr("גן טרום־חובה")
+    if (g < 0) return tr("גן טרוםחובה")
     if (g == 0) return tr("גן חובה")
     val letters = listOf("א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳", "ט׳", "י׳", "יא׳", "יב׳")
     return tr("כיתה %@", tr(letters[minOf(g, 12) - 1]))

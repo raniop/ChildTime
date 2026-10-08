@@ -51,14 +51,14 @@ fun ActionsSheet(child: Child, state: FamilyState, onDismiss: () -> Unit, onChor
                         com.rani.tofy.ui.location.LocationRepository.beep(child.id, f.deviceID); onDismiss()
                     }
                 }
-                ActionRow("💝", tr("תֵּן דַּקּוֹת מַתָּנָה 💝").removeSuffix(" 💝")) { giftPicker = true }
+                ActionRow("💝", tr("תן דקות מתנה 💝").removeSuffix(" 💝")) { giftPicker = true }
                 if (hasDevice) {
-                    ActionRow("🔒", tr("נְעַל עַכְשָׁיו")) { Commands.lock(child.id); onDismiss() }
-                    ActionRow("↩️", tr("נְעַל וְאַפֵּס דַּקּוֹת מַתָּנָה")) { confirmRevoke = true }
+                    ActionRow("🔒", tr("נעל עכשיו")) { Commands.lock(child.id); onDismiss() }
+                    ActionRow("↩️", tr("נעל ואפס דקות מתנה")) { confirmRevoke = true }
                 }
-                ActionRow("🧹", tr("מַטָּלוֹת"), onClick = onChores)
-                ActionRow("📱", tr("חַבְּרוּ מַכְשִׁיר לְ%@", child.name), onClick = onConnect)
-                if (hasDevice) ActionRow("🗑️", tr("אַפְשֵׁר מְחִיקַת אַפְּלִיקַצְיוֹת (5 דַּק')")) { Commands.allowAppRemoval(child.id); onDismiss() }
+                ActionRow("🧹", tr("מטלות"), onClick = onChores)
+                ActionRow("📱", tr("חברו מכשיר ל%@", child.name), onClick = onConnect)
+                if (hasDevice) ActionRow("🗑️", tr("אפשר מחיקת אפליקציות (5 דק')")) { Commands.allowAppRemoval(child.id); onDismiss() }
                 ActionRow("✏️", tr("עריכת %@", stripNiqqud(child.name)), last = true, onClick = onSettings)
             }
         }
@@ -66,10 +66,10 @@ fun ActionsSheet(child: Child, state: FamilyState, onDismiss: () -> Unit, onChor
     if (confirmRevoke) {
         AlertDialog(
             onDismissRequest = { confirmRevoke = false },
-            title = { Text(tr("לִנְעֹל וּלְאַפֵּס אֶת דַּקּוֹת הַמַּתָּנָה שֶׁל %@?", child.name), fontFamily = Rounded) },
-            text = { Text(tr("הַמַּכְשִׁיר יִנָּעֵל עַכְשָׁיו, וְכָל הַדַּקּוֹת שֶׁנְּתַתֶּם (💝 מַתָּנָה, ❄️ שְׁמוּרוֹת, וְחַלּוֹן פָּתוּחַ שֶׁל מַתָּנָה) יִמָּחֲקוּ. הַדַּקּוֹת שֶׁ%@ מִלְּמִידָה לֹא נִפְגָּעוֹת.",
-                if (child.isGirl) tr("הִיא הִרְוִיחָה") else tr("הוּא הִרְוִיחַ")), fontFamily = Rounded) },
-            confirmButton = { TextButton({ confirmRevoke = false; Commands.lock(child.id, revokeGift = true); onDismiss() }) { Text(tr("נְעַל וְאַפֵּס דַּקּוֹת מַתָּנָה"), color = Ink.weak) } },
+            title = { Text(tr("לנעל ולאפס את דקות המתנה של %@?", child.name), fontFamily = Rounded) },
+            text = { Text(tr("המכשיר ינעל עכשיו, וכל הדקות שנתתם (💝 מתנה, ❄️ שמורות, וחלון פתוח של מתנה) ימחקו. הדקות ש%@ מלמידה לא נפגעות.",
+                if (child.isGirl) tr("היא הרויחה") else tr("הוא הרויח")), fontFamily = Rounded) },
+            confirmButton = { TextButton({ confirmRevoke = false; Commands.lock(child.id, revokeGift = true); onDismiss() }) { Text(tr("נעל ואפס דקות מתנה"), color = Ink.weak) } },
             dismissButton = { TextButton({ confirmRevoke = false }) { Text(tr("בטל")) } },
             containerColor = Ink.sheet,
         )
@@ -91,11 +91,11 @@ private fun ActionRow(emoji: String, title: String, last: Boolean = false, onCli
 /** The gift durations iOS offers, capped at what's left until midnight. */
 @Composable
 private fun GiftPicker(child: Child, onPick: (Int) -> Unit) {
-    val options = listOf(15 to tr("רֶבַע שָׁעָה"), 30 to tr("חֲצִי שָׁעָה"), 60 to tr("שָׁעָה"), 120 to tr("שְׁעָתַיִם"), 240 to tr("4 שָׁעוֹת"))
+    val options = listOf(15 to tr("רבע שעה"), 30 to tr("חצי שעה"), 60 to tr("שעה"), 120 to tr("שעתים"), 240 to tr("4 שעות"))
     val left = Commands.minutesUntilMidnight()
     var chosen by remember { mutableIntStateOf(30) }
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        H(tr("מַתְּנַת דַּקּוֹת"), 19)
+        H(tr("מתנת דקות"), 19)
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             options.forEach { (m, label) ->
                 val on = m == chosen
@@ -106,7 +106,7 @@ private fun GiftPicker(child: Child, onPick: (Int) -> Unit) {
             }
         }
         if (chosen > left) P(tr("ביקשתם %lld — זה המקסימום שנשאר להיום, עד חצות.", chosen), 13f, color = Ink.warn)
-        GoldButton(tr("תֵּן דַּקּוֹת מַתָּנָה 💝"), enabled = left > 0) { onPick(chosen) }
+        GoldButton(tr("תן דקות מתנה 💝"), enabled = left > 0) { onPick(chosen) }
     }
 }
 

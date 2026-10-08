@@ -114,26 +114,26 @@ private fun MainList(
     var remoteNote by remember { mutableStateOf<String?>(null) }
 
     Scroll {
-        PageBar(tr("הַגְדָּרוֹת שֶׁל %@", child.name), onBack)
+        PageBar(tr("הגדרות של %@", child.name), onBack)
 
         // הַיֶּלֶד / הַיַּלְדָּה — the grade drives ALL curriculum content: flag it when missing or child-picked.
         val flagged = child.grade == null || child.gradeSetByChild
         val grade = if (child.grade == null) tr("כיתה לא הוגדרה — הגדירו")
             else gradeName(child.effectiveGrade) + (if (child.gradeSetByChild) " " + tr("· נבחרה ע\"י הילד — בדקו") else "")
         val lang = AppLanguage.of(child.language)
-        SettingsSection(if (girl) tr("הַיַּלְדָּה") else tr("הַיֶּלֶד")) {
-            SettingsRow("✏️", tr("שֵׁם, גִּיל וְכִתָּה"), "${child.name} · ${AgeBracket.of(child.age).label} · $grade",
+        SettingsSection(if (girl) tr("הילדה") else tr("הילד")) {
+            SettingsRow("✏️", tr("שם, גיל וכתה"), "${child.name} · ${AgeBracket.of(child.age).label} · $grade",
                 valueColor = if (flagged) Color(0xFFFF8A3D) else Ink.secondary) { onOpen(Page.PROFILE) }
             RowDivider()
-            SettingsRow("🌍", if (girl) tr("שָׂפָה בַּמַּכְשִׁיר שֶׁלָּהּ") else tr("שָׂפָה בַּמַּכְשִׁיר שֶׁלּוֹ"), lang?.let { "${it.flag} ${it.native}" }) { onOpen(Page.LANGUAGE) }
+            SettingsRow("🌍", if (girl) tr("שפה במכשיר שלה") else tr("שפה במכשיר שלו"), lang?.let { "${it.flag} ${it.native}" }) { onOpen(Page.LANGUAGE) }
         }
 
         val listed = child.listedWorlds()
         val open = listed.count { child.allows(it.topic) }
-        SettingsSection(tr("לְמִידָה")) {
-            SettingsRow("🎚️", tr("רָמַת קֹשִׁי"), difficultySummary(child)) { onOpen(Page.DIFFICULTY) }
+        SettingsSection(tr("למידה")) {
+            SettingsRow("🎚️", tr("רמת קשי"), difficultySummary(child)) { onOpen(Page.DIFFICULTY) }
             RowDivider()
-            SettingsRow("🌐", tr("עוֹלָמוֹת פְּעִילִים"), if (listed.isEmpty()) null else tr("%lld מִתּוֹךְ %lld", open, listed.size)) { onOpen(Page.WORLDS) }
+            SettingsRow("🌐", tr("עולמות פעילים"), if (listed.isEmpty()) null else tr("%lld מתוך %lld", open, listed.size)) { onOpen(Page.WORLDS) }
             RowDivider()
             // 📝 A world opens straight into regular questions, without the game chooser.
             ToggleRow("📝", tr("רק שאלות רגילות"), tr("בלי מסך המשחקים: בחירת עולם מובילה ישר לשאלות"), child.onlyRegularQuestions) {
@@ -167,7 +167,7 @@ private fun MainList(
                     Row(Modifier.fillMaxWidth().padding(vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("${t.emoji} ${t.displayName}", Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, maxLines = 1)
                         st.direction?.let { d ->
-                            Text(if (d == Direction.RAISED) "↑ " + tr("מְאַתְגֵּר יוֹתֵר") else "↓ " + tr("בּוֹנֶה בִּטָּחוֹן"),
+                            Text(if (d == Direction.RAISED) "↑ " + tr("מאתגר יותר") else "↓ " + tr("בונה בטחון"),
                                 color = if (d == Direction.RAISED) Ink.good else Ink.warn, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp, maxLines = 1)
                         }
                         Text(st.served.displayName, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp,
@@ -179,8 +179,8 @@ private fun MainList(
         }
 
         val (capOn, capMin) = child.resolvedCap()
-        SettingsSection(tr("זְמַן מָסָךְ")) {
-            SettingsRow("⏳", tr("זְמַן מָסָךְ יוֹמִי"), if (capOn) tr("%lld דַּקּוֹת", capMin) else tr("לְלֹא הַגְבָּלָה")) { onOpen(Page.SCREEN_TIME) }
+        SettingsSection(tr("זמן מסך")) {
+            SettingsRow("⏳", tr("זמן מסך יומי"), if (capOn) tr("%lld דקות", capMin) else tr("ללא הגבלה")) { onOpen(Page.SCREEN_TIME) }
             // 🏫🌙 Hours when minutes don't open (QuietHours.kt).
             RowDivider()
             SettingsRow("🏫", tr("זמן בית ספר"), quietSummary(child.quietHours, QuietKind.SCHOOL)) { onOpen(Page.SCHOOL) }
@@ -189,11 +189,11 @@ private fun MainList(
             RowDivider()
             // The child's play-protection code — full parental transparency: SEE it, and reset it.
             if (!child.hasPlayPIN) {
-                SettingsRow("🔐", tr("קוֹד הַגָּנַת זְמַן הַמִּשְׂחָק"),
-                    if (girl) tr("%@ עוֹד לֹא בָּחֲרָה קוֹד", child.name) else tr("%@ עוֹד לֹא בָּחַר קוֹד", child.name), chevron = false, onClick = null)
+                SettingsRow("🔐", tr("קוד הגנת זמן המשחק"),
+                    if (girl) tr("%@ עוד לא בחרה קוד", child.name) else tr("%@ עוד לא בחר קוד", child.name), chevron = false, onClick = null)
             } else {
-                SettingsRow("🔐", tr("קוֹד הַגָּנַת זְמַן הַמִּשְׂחָק"),
-                    if (girl) tr("%@ מַזִּינָה אוֹתוֹ כְּדֵי לִפְתֹּחַ אֶת הַדַּקּוֹת שֶׁצָּבְרָה", child.name) else tr("%@ מַזִּין אוֹתוֹ כְּדֵי לִפְתֹּחַ אֶת הַדַּקּוֹת שֶׁצָּבַר", child.name),
+                SettingsRow("🔐", tr("קוד הגנת זמן המשחק"),
+                    if (girl) tr("%@ מזינה אותו כדי לפתח את הדקות שצברה", child.name) else tr("%@ מזין אותו כדי לפתח את הדקות שצבר", child.name),
                     chevron = false, onClick = null, trailing = {
                         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                             Text(child.playPIN ?: "", color = Color.White, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, letterSpacing = 3.sp)
@@ -205,23 +205,23 @@ private fun MainList(
             }
         }
 
-        SettingsSection(null) { SettingsRow("👫", tr("חֲבֵרִים")) { onOpen(Page.FRIENDS) } }
+        SettingsSection(null) { SettingsRow("👫", tr("חברים")) { onOpen(Page.FRIENDS) } }
 
-        SettingsSection(tr("מִתְקַדֵּם")) {
-            SettingsRow("🗑️", tr("לְאַפְשֵׁר מְחִיקַת אַפְּלִיקַצְיוֹת (5 דַּק')"), chevron = false) {
+        SettingsSection(tr("מתקדם")) {
+            SettingsRow("🗑️", tr("לאפשר מחיקת אפליקציות (5 דק')"), chevron = false) {
                 Commands.allowAppRemoval(child.id)
-                remoteNote = if (connected) tr("נִפְתָּח חַלּוֹן שֶׁל 5 דַּקּוֹת לִמְחִיקַת אַפְּלִיקַצְיוֹת בַּמַּכְשִׁיר שֶׁל %@ — מִיָּדִי כְּשֶׁטּוֹפִי פָּתוּחַ שָׁם. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד.", child.name)
-                    else tr("אֵין כָּרֶגַע מַכְשִׁיר מְחֻבָּר לְ%@ — הַחַלּוֹן יִפָּתַח בָּרֶגַע שֶׁהַמַּכְשִׁיר יִתְחַבֵּר.", child.name)
+                remoteNote = if (connected) tr("נפתח חלון של 5 דקות למחיקת אפליקציות במכשיר של %@ — מידי כשטופי פתוח שם. אחר כך הנעילה חוזרת לבד.", child.name)
+                    else tr("אין כרגע מכשיר מחבר ל%@ — החלון יפתח ברגע שהמכשיר יתחבר.", child.name)
             }
             RowDivider()
             // Repair for a device that keeps re-uploading wrong numbers: every device drops its cache.
-            SettingsRow("🔄", tr("רַעֲנוּן נְתוּנִים בְּכָל הַמַּכְשִׁירִים"), chevron = false) {
+            SettingsRow("🔄", tr("רענון נתונים בכל המכשירים"), chevron = false) {
                 scope.launch { note.report(ChildReportRepository.withRetry { Commands.purgeCaches(child.id) }) }
             }
             RowDivider()
-            SettingsRow("↩️", tr("אִפּוּס הִתְקַדְּמוּת"), destructive = true, chevron = false) { confirmReset = true }
+            SettingsRow("↩️", tr("אפוס התקדמות"), destructive = true, chevron = false) { confirmReset = true }
             RowDivider()
-            SettingsRow("🚮", if (girl) tr("מְחִיקַת הַיַּלְדָּה") else tr("מְחִיקַת הַיֶּלֶד"), destructive = true, chevron = false) { confirmDelete = true }
+            SettingsRow("🚮", if (girl) tr("מחיקת הילדה") else tr("מחיקת הילד"), destructive = true, chevron = false) { confirmDelete = true }
         }
     }
 
@@ -235,9 +235,9 @@ private fun MainList(
         tr("אפס קוד"), cancel = tr("בטל"), onConfirm = { write(mapOf("playPIN" to "")) }, onDismiss = { confirmPin = false })
     if (confirmDelete) Confirm(tr("למחוק את %@?", child.name),
         tr("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק."),
-        tr("מְחִיקַת יֶלֶד/ה"), cancel = tr("בטל"),
+        tr("מחיקת ילד/ה"), cancel = tr("בטל"),
         onConfirm = { scope.launch { if (deleteChild(child.id, note)) onDeleted() } }, onDismiss = { confirmDelete = false })
-    remoteNote?.let { Notice(tr("שְׁלִיטָה מֵרָחוֹק"), it) { remoteNote = null } }
+    remoteNote?.let { Notice(tr("שליטה מרחוק"), it) { remoteNote = null } }
 }
 
 /** ChildRepository.deleteChild + the DENIED → reassert → retry rule; honest about a failure. */
@@ -247,7 +247,7 @@ private suspend fun deleteChild(id: String, note: WriteNote): Boolean {
     if ((r.exceptionOrNull() as? FirebaseFirestoreException)?.code == FirebaseFirestoreException.Code.PERMISSION_DENIED) {
         FamilyRepository.reassertMembership(); r = once()
     }
-    if (r.isFailure) note.show(tr("הַמְּחִיקָה לֹא הִצְלִיחָה. בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט וְנַסּוּ שׁוּב."))
+    if (r.isFailure) note.show(tr("המחיקה לא הצליחה. בדקו את חבור האינטרנט ונסו שוב."))
     return r.isSuccess
 }
 
@@ -255,7 +255,7 @@ private suspend fun deleteChild(id: String, note: WriteNote): Boolean {
 private fun difficultySummary(c: Child): String {
     val topics = c.playableTopics.ifEmpty { Topic.entries.toSet() }
     val levels = topics.map { c.difficultyFor(it) }.toSet()
-    return if (levels.size == 1) levels.first().displayName else tr("לְפִי נוֹשֵׂא")
+    return if (levels.size == 1) levels.first().displayName else tr("לפי נושא")
 }
 
 @Composable
@@ -305,8 +305,8 @@ private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String,
     }
 
     Scroll {
-        PageBar(tr("עֲרוֹךְ פְּרוֹפִיל"), onBack) {
-            Text(tr("שְׁמוֹר"), color = if (canSave) Color.White else Color.White.copy(alpha = 0.4f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp,
+        PageBar(tr("ערוך פרופיל"), onBack) {
+            Text(tr("שמור"), color = if (canSave) Color.White else Color.White.copy(alpha = 0.4f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp,
                 modifier = Modifier.clip(RoundedCornerShape(14.dp)).clickable(enabled = canSave) { save() }.padding(horizontal = 10.dp, vertical = 8.dp))
         }
         // The chosen character (picked by the child in the shop) — shown, not edited here, like iOS.
@@ -316,17 +316,17 @@ private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String,
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            FieldLabel(tr("שֵׁם"))
+            FieldLabel(tr("שם"))
             OutlinedTextField(name, { name = it }, Modifier.fillMaxWidth(), singleLine = true,
-                placeholder = { Text(tr("שֵׁם הַיֶּלֶד/ה"), color = Color.White.copy(alpha = 0.5f), fontFamily = Rounded) },
+                placeholder = { Text(tr("שם הילד/ה"), color = Color.White.copy(alpha = 0.5f), fontFamily = Rounded) },
                 textStyle = LocalTextStyle.current.copy(color = Color.White, fontFamily = Rounded, fontSize = 17.sp),
                 shape = RoundedCornerShape(16.dp), colors = glassFieldColors())
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            FieldLabel(tr("יֶלֶד אוֹ יַלְדָּה?"))
+            FieldLabel(tr("ילד או ילדה?"))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                listOf("boy" to ("👦" to tr("יֶלֶד")), "girl" to ("👧" to tr("יַלְדָּה"))).forEach { (raw, v) ->
+                listOf("boy" to ("👦" to tr("ילד")), "girl" to ("👧" to tr("ילדה"))).forEach { (raw, v) ->
                     ChoiceTile(gender == raw, Modifier.weight(1f), onClick = { gender = raw }) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(v.first, fontSize = 22.sp)
@@ -338,7 +338,7 @@ private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String,
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            FieldLabel(tr("בֶּן/בַּת כַּמָּה?"))
+            FieldLabel(tr("בן/בת כמה?"))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 AgeBracket.entries.forEach { a ->
                     ChoiceTile(age == a, Modifier.weight(1f), onClick = {
@@ -354,13 +354,13 @@ private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String,
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            FieldLabel(if (age == AgeBracket.PRE_K) tr("בְּאֵיזֶה גַּן?") else tr("בְּאֵיזוֹ כִּתָּה?"))
+            FieldLabel(if (age == AgeBracket.PRE_K) tr("באיזה גן?") else tr("באיזו כתה?"))
             // The grade pulls the age bracket with it — the content follows the grade.
             val pick = { g: Int -> grade = g; age = AgeBracket.forGrade(g) }
             if (age == AgeBracket.PRE_K) {
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    ChoiceTile(grade == -1, Modifier.weight(1f), onClick = { pick(-1) }) { Text("🧸", fontSize = 22.sp); TileText(tr("טְרוֹם־חוֹבָה")) }
-                    ChoiceTile(grade == 0, Modifier.weight(1f), onClick = { pick(0) }) { Text("🎒", fontSize = 22.sp); TileText(tr("גַּן חוֹבָה")) }
+                    ChoiceTile(grade == -1, Modifier.weight(1f), onClick = { pick(-1) }) { Text("🧸", fontSize = 22.sp); TileText(tr("טרוםחובה")) }
+                    ChoiceTile(grade == 0, Modifier.weight(1f), onClick = { pick(0) }) { Text("🎒", fontSize = 22.sp); TileText(tr("גן חובה")) }
                 }
             } else {
                 val letters = listOf("א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳")
@@ -372,12 +372,12 @@ private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String,
                     }
                 }
             }
-            if (grade == null) P(tr("חוֹבָה לִבְחֹר — כָּךְ טוֹפִי מַתְאִים אֶת הַשְּׁאֵלוֹת לַתָּכְנִית שֶׁל מִשְׂרַד הַחִנּוּךְ, וְכָל 1 בְּסֶפְּטֶמְבֶּר עוֹלִים כִּתָּה אוֹטוֹמָטִית 🎉"),
+            if (grade == null) P(tr("חובה לבחר — כך טופי מתאים את השאלות לתכנית של משרד החנוך, וכל 1 בספטמבר עולים כתה אוטומטית 🎉"),
                 12f, color = Ink.gold2, weight = FontWeight.SemiBold)
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            FieldLabel(tr("רָמַת לְמִידָה הַתְחָלָתִית"))
+            FieldLabel(tr("רמת למידה התחלתית"))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 LearningLevel.entries.forEach { l ->
                     ChoiceTile(level == l, Modifier.weight(1f), onClick = { level = l }) {
@@ -389,7 +389,7 @@ private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String,
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            FieldLabel(tr("תְּחוּמֵי עִנְיָן — מֵהֶם נִבְנוֹת הַשְּׁאֵלוֹת הַמֻּתְאָמוֹת"))
+            FieldLabel(tr("תחומי ענין — מהם נבנות השאלות המתאמות"))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Interests.forEach { i ->
                     val on = interests.contains(i.id)
@@ -403,10 +403,10 @@ private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String,
 
         Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(30.dp)).background(Color.Red.copy(alpha = 0.25f)).clickable { confirmDelete = true }.padding(vertical = 12.dp),
             contentAlignment = Alignment.Center) {
-            Text("🗑 " + tr("מְחַק פְּרוֹפִיל"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+            Text("🗑 " + tr("מחק פרופיל"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
         }
     }
-    if (confirmDelete) Confirm(tr("לִמְחוֹק אֶת הַפְּרוֹפִיל שֶׁל %@?", child.name), null, tr("מְחַק"),
+    if (confirmDelete) Confirm(tr("למחוק את הפרופיל של %@?", child.name), null, tr("מחק"),
         onConfirm = { scope.launch { if (deleteChild(child.id, note)) onDeleted() } }, onDismiss = { confirmDelete = false })
 }
 
@@ -426,10 +426,10 @@ private fun glassFieldColors() = OutlinedTextFieldDefaults.colors(
 private fun LanguageEditor(child: Child, onBack: () -> Unit, write: (Map<String, Any?>) -> Unit) {
     val chosen = AppLanguage.of(child.language)
     Scroll {
-        PageBar(tr("שָׂפָה"), onBack)
-        P(tr("בִּחֲרוּ בְּאֵיזוֹ שָׂפָה טוֹפִי יוֹפִיעַ בַּמַּכְשִׁיר שֶׁל %@. הַשִּׁנּוּי מַגִּיעַ לַמַּכְשִׁיר בַּסִּנְכְרוּן הַבָּא.", child.name), 13f)
-        SettingsSection(tr("שָׂפַת הָאַפְּלִיקַצְיָה אֵצֶל הַיֶּלֶד"),
-            tr("הַשָּׂפָה מְשַׁנָּה גַּם אֶת הַשְּׁאֵלוֹת, לֹא רַק אֶת הַטֶּקְסְטִים. אִם תְּשַׁנּוּ אוֹתָהּ בַּמַּכְשִׁיר שֶׁל הַיֶּלֶד עַצְמוֹ — הַבְּחִירָה הָאַחֲרוֹנָה קוֹבַעַת.")) {
+        PageBar(tr("שפה"), onBack)
+        P(tr("בחרו באיזו שפה טופי יופיע במכשיר של %@. השנוי מגיע למכשיר בסנכרון הבא.", child.name), 13f)
+        SettingsSection(tr("שפת האפליקציה אצל הילד"),
+            tr("השפה משנה גם את השאלות, לא רק את הטקסטים. אם תשנו אותה במכשיר של הילד עצמו — הבחירה האחרונה קובעת.")) {
             AppLanguage.entries.forEachIndexed { i, lang ->
                 Row(Modifier.fillMaxWidth().clickable {
                     // The device's own picker writes the same field, stamped: last press wins.
@@ -452,9 +452,9 @@ private fun LanguageEditor(child: Child, onBack: () -> Unit, write: (Map<String,
 @Composable
 private fun DifficultyEditor(child: Child, onBack: () -> Unit, write: (Map<String, Any?>) -> Unit) {
     Scroll {
-        PageBar(tr("רָמַת קוֹשִׁי"), onBack)
-        P(tr("בִּחֲרוּ רָמַת קוֹשִׁי לְכָל נוֹשֵׂא עֲבוּר %@. הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד.", child.name), 13f)
-        SettingsSection(tr("הָחֵל עַל כָּל הַנּוֹשְׂאִים")) {
+        PageBar(tr("רמת קושי"), onBack)
+        P(tr("בחרו רמת קושי לכל נושא עבור %@. השנוי מסתנכרן אוטומטית למכשיר של הילד.", child.name), 13f)
+        SettingsSection(tr("החל על כל הנושאים")) {
             Row(Modifier.padding(vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Difficulty.entries.forEach { d ->
                     Box(Modifier.weight(1f).clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.14f))
@@ -467,7 +467,7 @@ private fun DifficultyEditor(child: Child, onBack: () -> Unit, write: (Map<Strin
             }
         }
         val topics = Topic.entries.filter { !it.isPack || child.allows(it) }
-        SettingsSection(tr("לְפִי נוֹשֵׂא")) {
+        SettingsSection(tr("לפי נושא")) {
             topics.forEachIndexed { i, t ->
                 Column(Modifier.padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("${t.emoji} ${t.displayName}", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
@@ -495,10 +495,10 @@ private fun DifficultyEditor(child: Child, onBack: () -> Unit, write: (Map<Strin
 private fun WorldsEditor(child: Child, onBack: () -> Unit, write: (Map<String, Any?>) -> Unit) {
     val worlds = child.listedWorlds()
     Scroll {
-        PageBar(tr("עוֹלָמוֹת פְּעִילִים"), onBack)
-        P(tr("בִּחֲרוּ אֵילוּ עוֹלָמוֹת פְּתוּחִים עֲבוּר %@. עוֹלָם כָּבוּי נֶעֱלָם מֵהַמָּסָךְ, וְהַיֶּלֶד לֹא מְקַבֵּל מִמֶּנּוּ שְׁאֵלוֹת. הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד.", child.name), 13f)
-        SettingsSection(tr("עוֹלָמוֹת פְּעִילִים"),
-            tr("\"טוֹפִי טַיים\" תָּמִיד פְּתוּחָה וּמַגִּישָׁה רַק מֵהַנּוֹשְׂאִים הַפְּעִילִים. חַיָּב לְהִשָּׁאֵר לְפָחוֹת עוֹלָם אֶחָד פָּתוּחַ.")) {
+        PageBar(tr("עולמות פעילים"), onBack)
+        P(tr("בחרו אילו עולמות פתוחים עבור %@. עולם כבוי נעלם מהמסך, והילד לא מקבל ממנו שאלות. השנוי מסתנכרן אוטומטית למכשיר של הילד.", child.name), 13f)
+        SettingsSection(tr("עולמות פעילים"),
+            tr("\"טופי טיים\" תמיד פתוחה ומגישה רק מהנושאים הפעילים. חיב להשאר לפחות עולם אחד פתוח.")) {
             worlds.forEachIndexed { i, w ->
                 Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(w.emoji, fontSize = 22.sp)
@@ -553,15 +553,15 @@ private fun ScreenTimeEditor(child: Child, onBack: () -> Unit, write: (Map<Strin
     SideEffect { registerSave(save) }
 
     Scroll {
-        PageBar(tr("זְמַן מָסָךְ יוֹמִי"), onBack)
-        P(tr("בִּחֲרוּ כַּמָּה דַּקּוֹת מָסָךְ בְּיוֹם עֲבוּר %@. הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד.", child.name), 13f)
-        SettingsSection(tr("מַקְסִימוּם זְמַן מָסָךְ יוֹמִי"),
-            tr("הַיֶּלֶד מַרְוִיחַ עַד הַתִּקְרָה הַזּוֹ בִּלְמִידָה. בּוֹנוּסִים מֵהַגַּלְגַּל/קוּפְסָה נִשְׁמָרִים לְמָחָר כְּשֶׁמַּגִּיעִים לַתִּקְרָה.")) {
-            ToggleRow("", tr("הַגְבָּלַת זְמַן יוֹמִית"), null, limited) { limited = it; if (it && minutes < 5) { minutes = 60; text = "60" } }
+        PageBar(tr("זמן מסך יומי"), onBack)
+        P(tr("בחרו כמה דקות מסך ביום עבור %@. השנוי מסתנכרן אוטומטית למכשיר של הילד.", child.name), 13f)
+        SettingsSection(tr("מקסימום זמן מסך יומי"),
+            tr("הילד מרויח עד התקרה הזו בלמידה. בונוסים מהגלגל/קופסה נשמרים למחר כשמגיעים לתקרה.")) {
+            ToggleRow("", tr("הגבלת זמן יומית"), null, limited) { limited = it; if (it && minutes < 5) { minutes = 60; text = "60" } }
             RowDivider()
             if (limited) {
                 Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(tr("דַּקּוֹת בְּיוֹם"), Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontSize = 16.sp)
+                    Text(tr("דקות ביום"), Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontSize = 16.sp)
                     StepButton("−") { minutes = clamped(minutes - 5); text = minutes.toString() }
                     OutlinedTextField(text, { v -> text = v.filter(Char::isDigit).take(3); text.toIntOrNull()?.let { minutes = it } },
                         Modifier.width(84.dp), singleLine = true, shape = RoundedCornerShape(10.dp), colors = glassFieldColors(),
@@ -572,7 +572,7 @@ private fun ScreenTimeEditor(child: Child, onBack: () -> Unit, write: (Map<Strin
                 P(readout(clamped(minutes)), 13f, Modifier.padding(bottom = 8.dp))
             } else {
                 Row(Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
-                    Text(tr("לְלֹא הַגְבָּלָה"), Modifier.weight(1f), color = Ink.secondary, fontFamily = Rounded, fontSize = 16.sp)
+                    Text(tr("ללא הגבלה"), Modifier.weight(1f), color = Ink.secondary, fontFamily = Rounded, fontSize = 16.sp)
                     Text("♾️")
                 }
             }
@@ -589,10 +589,10 @@ private fun StepButton(label: String, onClick: () -> Unit) {
 /** "שעה ו-30 דקות ביום" — the friendly hours:minutes readout (catalog wording in every language). */
 private fun readout(m: Int): String {
     val h = m / 60; val r = m % 60
-    val hWord = if (h == 1) tr("שָׁעָה") else tr("%lld שָׁעוֹת", h)
-    if (h == 0) return tr("%lld דַּקּוֹת בְּיוֹם", r)
-    if (r == 0) return tr("%@ בְּיוֹם", hWord)
-    return tr("%@ וְ-%lld דַּקּוֹת בְּיוֹם", hWord, r)
+    val hWord = if (h == 1) tr("שעה") else tr("%lld שעות", h)
+    if (h == 0) return tr("%lld דקות ביום", r)
+    if (r == 0) return tr("%@ ביום", hWord)
+    return tr("%@ ו-%lld דקות ביום", hWord, r)
 }
 
 // MARK: - ChildFriendsView
@@ -605,23 +605,23 @@ private fun FriendsList(child: Child, onBack: () -> Unit, note: WriteNote) {
     suspend fun reload() {
         loading = true
         val r = ChildReportRepository.friends(child.id)
-        if (r == null) note.show(tr("בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט וְנַסּוּ שׁוּב."))
+        if (r == null) note.show(tr("בדקו את חבור האינטרנט ונסו שוב."))
         friends = r ?: emptyList(); loading = false
     }
     LaunchedEffect(child.id) { reload() }
     Scroll {
-        PageBar(tr("הַחֲבֵרִים שֶׁל %@", child.name), onBack)
+        PageBar(tr("החברים של %@", child.name), onBack)
         SettingsSection(null) {
             val list = friends.orEmpty()
             when {
                 loading -> Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator(Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp) }
-                list.isEmpty() -> P(tr("עֲדַיִן אֵין חֲבֵרִים."), 15f, Modifier.padding(vertical = 12.dp))
+                list.isEmpty() -> P(tr("עדין אין חברים."), 15f, Modifier.padding(vertical = 12.dp))
                 else -> list.forEachIndexed { i, f ->
                     Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         CharacterBadge(f.character3DID, 40.dp)
                         Text(f.displayName, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
                         Text("${f.stars} ⭐", color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
-                        Text(tr("הָסֵר"), color = Ink.weak, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp,
+                        Text(tr("הסר"), color = Ink.weak, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp,
                             modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(Ink.weak.copy(alpha = 0.16f))
                                 .clickable { scope.launch { val out = ChildReportRepository.removeFriend(child.id, f.id); note.report(out); reload() } }
                                 .padding(horizontal = 10.dp, vertical = 6.dp))

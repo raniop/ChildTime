@@ -100,12 +100,12 @@ fun ChildCreateStep(showSteps: Boolean, busy: Boolean, error: Boolean, onCancel:
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Choice(Modifier.weight(1f), gender == "boy", radius = 14.dp, stroke = 2.5f, onClick = { gender = "boy" }) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("👦", fontSize = 22.sp); ChoiceText(stripNiqqud(tr("יֶלֶד")), 17)
+                            Text("👦", fontSize = 22.sp); ChoiceText(stripNiqqud(tr("ילד")), 17)
                         }
                     }
                     Choice(Modifier.weight(1f), gender == "girl", radius = 14.dp, stroke = 2.5f, onClick = { gender = "girl" }) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("👧", fontSize = 22.sp); ChoiceText(stripNiqqud(tr("יַלְדָּה")), 17)
+                            Text("👧", fontSize = 22.sp); ChoiceText(stripNiqqud(tr("ילדה")), 17)
                         }
                     }
                 }
@@ -201,11 +201,11 @@ private fun StepButton(sign: String, onClick: () -> Unit) {
 @Composable
 private fun LevelRow(level: String, onPick: (String) -> Unit) {
     val levels = listOf(
-        Triple("beginner", "🌱", tr("מַתְחִיל")), Triple("developing", "🌿", tr("מִתְפַּתֵּחַ")),
-        Triple("proficient", "🌳", tr("שׁוֹלֵט")), Triple("advanced", "🚀", tr("מִתְקַדֵּם")),
+        Triple("beginner", "🌱", tr("מתחיל")), Triple("developing", "🌿", tr("מתפתח")),
+        Triple("proficient", "🌳", tr("שולט")), Triple("advanced", "🚀", tr("מתקדם")),
     )
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Label(tr("רָמַת לְמִידָה הַתְחָלָתִית"))
+        Label(tr("רמת למידה התחלתית"))
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             levels.forEach { (id, emoji, label) ->
                 Choice(Modifier.weight(1f), level == id, onClick = { onPick(id) }) {
@@ -222,13 +222,13 @@ private fun LevelRow(level: String, onPick: (String) -> Unit) {
 @Composable
 private fun InterestsGrid(selected: Set<String>, onToggle: (String) -> Unit) {
     val all = listOf(
-        Triple("sports", "⚽️", tr("סְפּוֹרְט")), Triple("space", "🚀", tr("חָלָל")), Triple("animals", "🦁", tr("בַּעֲלֵי חַיִּים")),
-        Triple("flags", "🚩", tr("דְּגָלִים")), Triple("music", "🎵", tr("מוּזִיקָה")), Triple("art", "🎨", tr("אָמָנוּת")),
-        Triple("history", "🏛️", tr("הִיסְטוֹרְיָה")), Triple("science", "🔬", tr("מַדָּע")), Triple("english", "🔤", tr("אַנְגְּלִית")),
-        Triple("numbers", "🔢", tr("מִסְפָּרִים")), Triple("puzzles", "🧩", tr("חִידוֹת")), Triple("geography", "🌍", tr("מְדִינוֹת")),
+        Triple("sports", "⚽️", tr("ספורט")), Triple("space", "🚀", tr("חלל")), Triple("animals", "🦁", tr("בעלי חיים")),
+        Triple("flags", "🚩", tr("דגלים")), Triple("music", "🎵", tr("מוזיקה")), Triple("art", "🎨", tr("אמנות")),
+        Triple("history", "🏛️", tr("היסטוריה")), Triple("science", "🔬", tr("מדע")), Triple("english", "🔤", tr("אנגלית")),
+        Triple("numbers", "🔢", tr("מספרים")), Triple("puzzles", "🧩", tr("חידות")), Triple("geography", "🌍", tr("מדינות")),
     )
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Label(tr("תְּחוּמֵי עִנְיָן — מֵהֶם נִבְנוֹת הַשְּׁאֵלוֹת הַמֻּתְאָמוֹת"))
+        Label(tr("תחומי ענין — מהם נבנות השאלות המתאמות"))
         all.chunked(3).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 row.forEach { (id, emoji, label) ->

@@ -89,22 +89,22 @@ fun JoinFamilyScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            H(tr("הִצְטָרְפוּת לְמִשְׁפָּחָה"), 25, align = TextAlign.Center)
+            H(tr("הצטרפות למשפחה"), 25, align = TextAlign.Center)
             Column(Modifier.fillMaxWidth().glassPane().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                P(tr("בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה שֶׁכְּבָר רָשׁוּם:"), 15f, color = Ink.primary, weight = FontWeight.Bold)
-                P("1. " + tr("פִּתְחוּ אֶת טוֹפִי → הַגְדָּרוֹת ⚙️"), 14.5f)
-                P("2. " + tr("הַקִּישׁוּ “הוֹסִיפוּ הוֹרֶה”"), 14.5f)
-                P("3. " + tr("יוֹפִיעַ קוֹד / QR — סִרְקוּ אוֹתוֹ כָּאן אוֹ הַקְלִידוּ:"), 14.5f)
+                P(tr("במכשיר של ההורה שכבר רשום:"), 15f, color = Ink.primary, weight = FontWeight.Bold)
+                P("1. " + tr("פתחו את טופי → הגדרות ⚙️"), 14.5f)
+                P("2. " + tr("הקישו “הוסיפו הורה”"), 14.5f)
+                P("3. " + tr("יופיע קוד / QR — סרקו אותו כאן או הקלידו:"), 14.5f)
             }
             OutlinedTextField(code, { code = it.uppercase().filter { c -> c.isLetterOrDigit() }.take(6); error = null }, Modifier.fillMaxWidth(), singleLine = true,
-                placeholder = { Text(tr("6 תָּוִים"), fontFamily = Rounded, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
+                placeholder = { Text(tr("6 תוים"), fontFamily = Rounded, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
                 textStyle = MaterialTheme.typography.headlineMedium.copy(textAlign = TextAlign.Center, letterSpacing = androidx.compose.ui.unit.TextUnit(6f, androidx.compose.ui.unit.TextUnitType.Sp)))
             error?.let { P(it, 13f, color = Ink.weak, align = TextAlign.Center) }
-            GoldButton(tr("הִצְטָרְפוּ"), enabled = code.length == 6, busy = busy) {
+            GoldButton(tr("הצטרפו"), enabled = code.length == 6, busy = busy) {
                 busy = true; error = null
-                scope.launch { AccountRepository.redeemInvite(code).onFailure { busy = false; error = tr("קוֹד לֹא תָּקִין") } }
+                scope.launch { AccountRepository.redeemInvite(code).onFailure { busy = false; error = tr("קוד לא תקין") } }
             }
-            TextButton(onBack) { Text(tr("בִּטּוּל"), fontFamily = Rounded, color = Ink.secondary) }
+            TextButton(onBack) { Text(tr("בטול"), fontFamily = Rounded, color = Ink.secondary) }
         }
     }
 }
@@ -121,13 +121,13 @@ fun EmailInviteScreen(invite: com.rani.tofy.data.Bootstrap.EmailInvite) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text("👨‍👩‍👧", fontSize = androidx.compose.ui.unit.TextUnit(56f, androidx.compose.ui.unit.TextUnitType.Sp))
-            H(tr("%@ מְחַכָּה לָכֶם!", invite.familyName ?: tr("הַמִּשְׁפָּחָה שֶׁלָּכֶם")), 26, align = TextAlign.Center)
-            P(tr("הֻזְמַנְתֶּם לְהִצְטָרֵף כְּהוֹרֶה — תִּרְאוּ אֶת הַיְלָדִים, הַהִתְקַדְּמוּת וְהַשְּׁלִיטָה, בְּדִיּוּק כְּמוֹ הַהוֹרֶה שֶׁהִזְמִין אֶתְכֶם."), 15f, align = TextAlign.Center)
-            GoldButton(tr("הִצְטָרְפוּ לַמִּשְׁפָּחָה"), busy = busy) {
+            H(tr("%@ מחכה לכם!", invite.familyName ?: tr("המשפחה שלכם")), 26, align = TextAlign.Center)
+            P(tr("הזמנתם להצטרף כהורה — תראו את הילדים, ההתקדמות והשליטה, בדיוק כמו ההורה שהזמין אתכם."), 15f, align = TextAlign.Center)
+            GoldButton(tr("הצטרפו למשפחה"), busy = busy) {
                 busy = true
                 scope.launch { runCatching { AccountRepository.acceptEmailInvite(invite.householdID) }.onFailure { busy = false } }
             }
-            TextButton({ AccountRepository.declineEmailInvite() }) { Text(tr("לֹא הַמִּשְׁפָּחָה שֶׁלִּי — הַתְחִילוּ מֵהַתְחָלָה"), fontFamily = Rounded, color = Ink.secondary) }
+            TextButton({ AccountRepository.declineEmailInvite() }) { Text(tr("לא המשפחה שלי — התחילו מהתחלה"), fontFamily = Rounded, color = Ink.secondary) }
         }
     }
 }

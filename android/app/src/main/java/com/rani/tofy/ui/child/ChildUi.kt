@@ -100,7 +100,7 @@ internal fun RowDivider() = Box(Modifier.fillMaxWidth().height(1.dp).background(
 
 /** A confirmation (iOS .alert with a destructive button), on the sheet's indigo. */
 @Composable
-internal fun Confirm(title: String, message: String?, confirm: String, destructive: Boolean = true, cancel: String = tr("בַּטֵּל"), onConfirm: () -> Unit, onDismiss: () -> Unit) {
+internal fun Confirm(title: String, message: String?, confirm: String, destructive: Boolean = true, cancel: String = tr("בטל"), onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Ink.sheet,
@@ -122,7 +122,7 @@ internal fun Notice(title: String, message: String, onDismiss: () -> Unit) {
         onDismissRequest = onDismiss, containerColor = Ink.sheet,
         title = { Text(title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp) },
         text = { Text(message, color = Ink.secondary, fontFamily = Rounded, fontSize = 14.5.sp) },
-        confirmButton = { TextButton(onDismiss) { Text(tr("הֵבַנְתִּי"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold) } },
+        confirmButton = { TextButton(onDismiss) { Text(tr("הבנתי"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold) } },
     )
 }
 
@@ -137,8 +137,8 @@ class WriteNote {
 
     fun report(out: WriteOutcome) {
         when (out) {
-            WriteOutcome.DENIED -> show(tr("הַשִּׁנּוּי לֹא נִשְׁמַר — אֵין כָּרֶגַע הַרְשָׁאָה לַמִּשְׁפָּחָה הַזּוֹ. נַסּוּ שׁוּב בְּעוֹד רֶגַע."))
-            WriteOutcome.ERROR -> show(tr("הַשִּׁנּוּי לֹא נִשְׁמַר. בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט וְנַסּוּ שׁוּב."))
+            WriteOutcome.DENIED -> show(tr("השנוי לא נשמר — אין כרגע הרשאה למשפחה הזו. נסו שוב בעוד רגע."))
+            WriteOutcome.ERROR -> show(tr("השנוי לא נשמר. בדקו את חבור האינטרנט ונסו שוב."))
             else -> {}
         }
     }

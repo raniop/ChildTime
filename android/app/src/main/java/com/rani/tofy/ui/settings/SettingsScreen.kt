@@ -119,7 +119,7 @@ fun SettingsScreen(onBack: () -> Unit) {
 
     GlassBackdrop {
         Column(Modifier.contentColumn().fillMaxSize().systemBarsPadding().imePadding()) {
-            SettingsTopBar(tr("הַגְדָּרוֹת"), onBack)
+            SettingsTopBar(tr("הגדרות"), onBack)
             LazyColumn(
                 Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 40.dp),
@@ -129,13 +129,13 @@ fun SettingsScreen(onBack: () -> Unit) {
                 // 🌍 Written in both languages, so a parent who switched by mistake finds the way back.
                 item {
                     Section {
-                        SettingsRow("🌍", tr("שָׁפָה · Language"), I18n.language.native, chevron = true) { sheet = SettingsSheet.LANGUAGE }
+                        SettingsRow("🌍", tr("שפה · Language"), I18n.language.native, chevron = true) { sheet = SettingsSheet.LANGUAGE }
                     }
                 }
 
                 // 👪 The family: its name, the parents in it, the order of the kids.
                 item {
-                    Section(tr("שֵׁם הַמִּשְׁפָּחָה"), tr("מוֹפִיעַ בְּמָסַךְ הַהוֹרִים וּבְהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה.")) {
+                    Section(tr("שם המשפחה"), tr("מופיע במסך ההורים ובהודעות — לכל ההורים במשפחה.")) {
                         FamilyNameRow(hh?.familyName)
                     }
                 }
@@ -149,10 +149,10 @@ fun SettingsScreen(onBack: () -> Unit) {
                         SettingsRow("✅", name ?: user?.email ?: tr("מחובר"), sub)
                         linkedParentNames(hh?.parentNames ?: emptyMap()).forEach { p ->
                             RowDivider()
-                            SettingsRow("👥", p, tr("הוֹרֶה בַּמִּשְׁפָּחָה"))
+                            SettingsRow("👥", p, tr("הורה במשפחה"))
                         }
                         RowDivider()
-                        SettingsRow("➕", tr("הוֹסִיפוּ הוֹרֶה לַמִּשְׁפָּחָה"), titleColor = Ink.gold2, chevron = true) { addingParent = true }
+                        SettingsRow("➕", tr("הוסיפו הורה למשפחה"), titleColor = Ink.gold2, chevron = true) { addingParent = true }
                     }
                 }
                 if (state.children.size >= 2) item {
@@ -167,7 +167,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                         if (pushOn) SettingsRow("🔔", tr("התראות פעילות"), titleColor = Ink.good)
                         else SettingsRow("🔕", tr("הפעל התראות חיות"), titleColor = Ink.gold2, chevron = true) { enablePush() }
                         RowDivider()
-                        SettingsRow("⚙️", tr("פִּתְחוּ אֶת הַהַגְדָּרוֹת"), chevron = true) { openNotificationSettings() }
+                        SettingsRow("⚙️", tr("פתחו את ההגדרות"), chevron = true) { openNotificationSettings() }
                         RowDivider()
                         SettingsRow("📨", tr("שלח התראת בדיקה"), testPushMessage) {
                             if (!pushOn) { testPushMessage = tr("צריך לאשר התראות קודם"); enablePush(); return@SettingsRow }
@@ -179,21 +179,21 @@ fun SettingsScreen(onBack: () -> Unit) {
 
                 // 🔐 The family parent code.
                 item {
-                    Section(tr("קוֹד הוֹרֶה")) {
+                    Section(tr("קוד הורה")) {
                         SettingsRow("🔑", tr("שנה קוד הורה"), chevron = true) { sheet = SettingsSheet.PIN }
                     }
                 }
 
                 // 📱 iOS's Screen Time rows are per-device — say where they live instead.
                 item {
-                    Section(tr("אַפְּלִיקַצְיוֹת וּנְעִילָה"), tr("נעילת האפליקציות, הצלילים והתגמול על תשובות נכונות מוגדרים במכשיר של כל ילד: פותחים שם את טופי ונכנסים להגדרות עם קוד ההורה.")) {
-                        SettingsRow("📱", tr("מֻגְדָּר בַּמַּכְשִׁיר שֶׁל כָּל יֶלֶד"))
+                    Section(tr("אפליקציות ונעילה"), tr("נעילת האפליקציות, הצלילים והתגמול על תשובות נכונות מוגדרים במכשיר של כל ילד: פותחים שם את טופי ונכנסים להגדרות עם קוד ההורה.")) {
+                        SettingsRow("📱", tr("מגדר במכשיר של כל ילד"))
                     }
                 }
 
                 // ℹ️ About, support and the legal pages.
                 item {
-                    Section(tr("אוֹדוֹת וּפְרָטִיּוּת")) {
+                    Section(tr("אודות ופרטיות")) {
                         SettingsRow("✨", tr("מה חדש בטופי ✨"), chevron = true) { sheet = SettingsSheet.WHATS_NEW }
                         RowDivider()
                         // Every tour on this device (the parent's home, and a child's
@@ -204,7 +204,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                             titleColor = if (tourResetDone) Ink.good else Ink.primary,
                         ) { if (!tourResetDone) { CoachTours.reset(); tourResetDone = true } }
                         RowDivider()
-                        SettingsRow("💬", tr("פִידְבֶּק וְהַצָּעוֹת"), chevron = true) { sheet = SettingsSheet.FEEDBACK }
+                        SettingsRow("💬", tr("פידבק והצעות"), chevron = true) { sheet = SettingsSheet.FEEDBACK }
                         RowDivider()
                         SettingsRow("🛟", tr("עזרה ותמיכה"), chevron = true) {
                             openUrl(ctx, if (I18n.language.code == "he") "https://tofyapp.com/support" else "https://tofyapp.com/en/support")
@@ -285,13 +285,13 @@ private fun FamilyNameRow(current: String?) {
         OutlinedTextField(
             draft, { draft = it }, Modifier.weight(1f), singleLine = true,
             textStyle = androidx.compose.ui.text.TextStyle(fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = Color.White),
-            placeholder = { Text(tr("לְמָשָׁל: מִשְׁפַּחַת גּוֹלָן"), fontFamily = Rounded, color = Color.White.copy(alpha = 0.6f)) },
+            placeholder = { Text(tr("למשל: משפחת גולן"), fontFamily = Rounded, color = Color.White.copy(alpha = 0.6f)) },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { if (changed) save() else focus.clearFocus() }),
             colors = glassFieldColors(), shape = RoundedCornerShape(12.dp),
         )
         if (changed) Text(
-            tr("שִׁמְרוּ"),
+            tr("שמרו"),
             Modifier.clip(RoundedCornerShape(30.dp)).background(Color.White.copy(alpha = 0.92f)).clickable { save() }.padding(horizontal = 12.dp, vertical = 6.dp),
             color = Ink.indigo, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp,
         )

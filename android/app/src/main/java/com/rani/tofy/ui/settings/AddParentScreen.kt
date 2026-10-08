@@ -84,7 +84,7 @@ fun AddParentScreen(onClose: () -> Unit) {
 
     GlassBackdrop {
         Column(Modifier.contentColumn().fillMaxSize().systemBarsPadding().imePadding()) {
-            SettingsTopBar(tr("הוֹסָפַת הוֹרֶה"), onClose)
+            SettingsTopBar(tr("הוספת הורה"), onClose)
             Column(
                 Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -101,17 +101,17 @@ fun AddParentScreen(onClose: () -> Unit) {
 private fun Content() {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("👨‍👩‍👧‍👦", fontSize = 52.sp)
-        H(tr("הוֹסִיפוּ הוֹרֶה לַמִּשְׁפָּחָה"), 22, align = TextAlign.Center)
-        P(tr("שְׁנֵיכֶם תִּרְאוּ אֶת אוֹתָם הַיְּלָדִים וְאֶת אוֹתָהּ הַהִתְקַדְּמוּת."), 14f, color = Color.White.copy(alpha = 0.8f), align = TextAlign.Center)
+        H(tr("הוסיפו הורה למשפחה"), 22, align = TextAlign.Center)
+        P(tr("שניכם תראו את אותם הילדים ואת אותה ההתקדמות."), 14f, color = Color.White.copy(alpha = 0.8f), align = TextAlign.Center)
     }
     EmailInviteCard()
-    StepsCard(tr("אוֹ — בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה הַשֵּׁנִי:"), listOf(
-        tr("הַתְקִינוּ אֶת אַפְּלִיקַצְיַת טוֹפִי"),
-        tr("בְּמָסַךְ הַפְּתִיחָה הַקִּישׁוּ “כְּבָר יֵשׁ לָכֶם מִשְׁפָּחָה? הִצְטָרְפוּ”"),
-        tr("הִתְחַבְּרוּ, וְסִרְקוּ אֶת הַקּוֹד שֶׁכָּאן (אוֹ הַקְלִידוּ אוֹתוֹ)"),
+    StepsCard(tr("או — במכשיר של ההורה השני:"), listOf(
+        tr("התקינו את אפליקצית טופי"),
+        tr("במסך הפתיחה הקישו “כבר יש לכם משפחה? הצטרפו”"),
+        tr("התחברו, וסרקו את הקוד שכאן (או הקלידו אותו)"),
         // The joiner meets the parent-code gate next — told here, to the
         // person who knows it (verbally, never in a message).
-        tr("בַּכְּנִיסָה יִתְבַּקֵּשׁ קוֹד הַהוֹרֶה — מִסְרוּ לוֹ אֶת הַקּוֹד שֶׁלָּכֶם בְּעַל־פֶּה 🔑"),
+        tr("בכניסה יתבקש קוד ההורה — מסרו לו את הקוד שלכם בעלפה 🔑"),
     ))
     CodeCard()
 }
@@ -123,15 +123,15 @@ private fun EmailInviteCard() {
     var sent by remember { mutableStateOf(false) }
     var inviting by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxWidth().glassPane(20.dp, 0.10f).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        H(tr("✉️ הַדֶּרֶךְ הַקַּלָּה: הַזְמִינוּ בְּאִימֵיל"), 16, align = TextAlign.Center)
-        P(tr("הַהוֹרֶה הַשֵּׁנִי פָּשׁוּט יִתְחַבֵּר עִם הָאִימֵיל הַזֶּה — וְהַמִּשְׁפָּחָה תְּחַכֶּה לוֹ שָׁם, בְּלִי קוֹדִים."), 13f, color = Color.White.copy(alpha = 0.8f), align = TextAlign.Center)
-        if (sent) P("✓ " + tr("הַהַזְמָנָה נִשְׁמְרָה! אֶפְשָׁר לְהַזְמִין עוֹד אִימֵיל"), 13.5f, color = Ink.good, weight = FontWeight.ExtraBold, align = TextAlign.Center)
+        H(tr("✉️ הדרך הקלה: הזמינו באימיל"), 16, align = TextAlign.Center)
+        P(tr("ההורה השני פשוט יתחבר עם האימיל הזה — והמשפחה תחכה לו שם, בלי קודים."), 13f, color = Color.White.copy(alpha = 0.8f), align = TextAlign.Center)
+        if (sent) P("✓ " + tr("ההזמנה נשמרה! אפשר להזמין עוד אימיל"), 13.5f, color = Ink.good, weight = FontWeight.ExtraBold, align = TextAlign.Center)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             // An address reads left-to-right whatever the app language.
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                 OutlinedTextField(
                     email, { email = it.trim() }, Modifier.weight(1f), singleLine = true,
-                    placeholder = { Text(tr("אִימֵיל שֶׁל הַהוֹרֶה הַשֵּׁנִי"), fontFamily = Rounded) },
+                    placeholder = { Text(tr("אימיל של ההורה השני"), fontFamily = Rounded) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, autoCorrectEnabled = false),
                     colors = glassFieldColors(), shape = RoundedCornerShape(12.dp),
                 )
@@ -152,7 +152,7 @@ private fun EmailInviteCard() {
                 contentAlignment = Alignment.Center,
             ) {
                 if (inviting) CircularProgressIndicator(Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
-                else Text(tr("הַזְמִינוּ"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+                else Text(tr("הזמינו"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
             }
         }
     }
@@ -170,7 +170,7 @@ private fun CodeCard() {
         scope.launch {
             code = runCatching { ChildRepository.createInvite() }.getOrNull()
                 ?: run { FamilyRepository.reassertMembership(); runCatching { ChildRepository.createInvite() }.getOrNull() }
-            if (code == null) error = tr("לֹא נִיתָּן לִיצוֹר קוֹד כָּעֵת")
+            if (code == null) error = tr("לא ניתן ליצור קוד כעת")
             working = false
         }
     }
@@ -187,19 +187,19 @@ private fun CodeCard() {
                     Box(
                         Modifier.clip(RoundedCornerShape(30.dp)).background(Color.White.copy(alpha = 0.18f)).clickable {
                             val send = Intent(Intent.ACTION_SEND).setType("text/plain")
-                                .putExtra(Intent.EXTRA_TEXT, tr("הִצְטָרְפוּ אֵלַי בְּטוֹפִי! קוֹד הַמִּשְׁפָּחָה: %@", c))
+                                .putExtra(Intent.EXTRA_TEXT, tr("הצטרפו אלי בטופי! קוד המשפחה: %@", c))
                             ctx.startActivity(Intent.createChooser(send, null))
                         }.padding(horizontal = 16.dp, vertical = 9.dp),
-                    ) { Text("⇪  " + tr("שִׁתּוּף הַקּוֹד"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp) }
+                    ) { Text("⇪  " + tr("שתוף הקוד"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp) }
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                         CircularProgressIndicator(Modifier.size(14.dp), color = Color.White, strokeWidth = 2.dp)
-                        P(tr("מַמְתִּין שֶׁהַהוֹרֶה יִצְטָרֵף…"), 13f, color = Color.White.copy(alpha = 0.7f), weight = FontWeight.SemiBold)
+                        P(tr("ממתין שההורה יצטרף…"), 13f, color = Color.White.copy(alpha = 0.7f), weight = FontWeight.SemiBold)
                     }
                 }
                 working -> CircularProgressIndicator(color = Color.White)
                 error != null -> {
                     P(error!!, 12.5f, color = Color.White.copy(alpha = 0.8f), align = TextAlign.Center)
-                    Text(tr("נַסּוּ שׁוּב"), Modifier.clickable { generate() }.padding(8.dp), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold)
+                    Text(tr("נסו שוב"), Modifier.clickable { generate() }.padding(8.dp), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -210,8 +210,8 @@ private fun CodeCard() {
 private fun JoinedBanner(onClose: () -> Unit) {
     Column(Modifier.padding(top = 40.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("🎉", fontSize = 64.sp)
-        H(tr("הוֹרֶה נוֹסָף לַמִּשְׁפָּחָה!"), 22, align = TextAlign.Center)
-        P(tr("מֵעַכְשָׁיו שְׁנֵיכֶם רוֹאִים אֶת אוֹתָם הַיְּלָדִים."), 14f, color = Color.White.copy(alpha = 0.8f), align = TextAlign.Center)
-        GoldButton(tr("סִיּוּם"), Modifier.padding(top = 6.dp), onClick = onClose)
+        H(tr("הורה נוסף למשפחה!"), 22, align = TextAlign.Center)
+        P(tr("מעכשיו שניכם רואים את אותם הילדים."), 14f, color = Color.White.copy(alpha = 0.8f), align = TextAlign.Center)
+        GoldButton(tr("סיום"), Modifier.padding(top = 6.dp), onClick = onClose)
     }
 }

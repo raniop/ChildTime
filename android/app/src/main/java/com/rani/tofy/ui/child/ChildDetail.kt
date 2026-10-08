@@ -150,7 +150,7 @@ private fun ChildReport(
                         Text("·", color = sub, fontSize = 13.5.sp)
                         PulseDot()
                         val kind = devices.firstOrNull()?.kind ?: ""
-                        Text(tr("%@ עַכְשָׁיו", g(tr("מְשַׂחֵק"), tr("מְשַׂחֶקֶת"))) + (if (kind == "ipad") tr(" בָּאַיְפֵּד") else if (kind == "iphone") tr(" בָּאַיְפוֹן") else ""),
+                        Text(tr("%@ עכשיו", g(tr("משחק"), tr("משחקת"))) + (if (kind == "ipad") tr(" באיפד") else if (kind == "iphone") tr(" באיפון") else ""),
                             color = sub, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.5.sp, maxLines = 1)
                     }
                 }
@@ -160,17 +160,17 @@ private fun ChildReport(
 
         // MARK: top actions — the live banner (lock one tap away) + the actions sheet
         live?.let { LiveBanner(child, it, onLock) }
-        GlassButton(tr("⚡ פְּעֻלּוֹת"), Modifier.fillMaxWidth()) { onActions() }
+        GlassButton(tr("⚡ פעלות"), Modifier.fillMaxWidth()) { onActions() }
 
         // MARK: the four numbers
         val sum = engine.summary(period)
         val (capOn, capMin) = child.resolvedCap()
         val minutes = if (period == ReportPeriod.TODAY) (if (capOn) "${s.minutesEarnedToday}/$capMin" else "${s.minutesEarnedToday}") else "${sum.minutesEarned}"
         Row(Modifier.fillMaxWidth().glassPane(16.dp).padding(vertical = 10.dp)) {
-            Snap(Modifier.weight(1f), "${sum.questions}", tr("שְׁאֵלוֹת"))
-            Snap(Modifier.weight(1f), if (sum.questions > 0) pct(sum.accuracy) else "0%", tr("הַצְלָחָה"))
-            Snap(Modifier.weight(1f), minutes, tr("דַּקּוֹת"))
-            Snap(Modifier.weight(1f), "${s.dayStreak}", if (s.dayStreak == 1) tr("יוֹם רֶצֶף") else tr("יְמֵי רֶצֶף"))
+            Snap(Modifier.weight(1f), "${sum.questions}", tr("שאלות"))
+            Snap(Modifier.weight(1f), if (sum.questions > 0) pct(sum.accuracy) else "0%", tr("הצלחה"))
+            Snap(Modifier.weight(1f), minutes, tr("דקות"))
+            Snap(Modifier.weight(1f), "${s.dayStreak}", if (s.dayStreak == 1) tr("יום רצף") else tr("ימי רצף"))
         }
         // Period filter — drives every card below.
         Row(Modifier.fillMaxWidth().glassPane(12.dp).padding(3.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -198,17 +198,17 @@ private fun ChildReport(
         val deltas = engine.topicDeltas(period)
         val overall = engine.overallDelta(period)
         if (period != ReportPeriod.TODAY && (overall != null || deltas.isNotEmpty())) {
-            ReportCard(tr("הַאִם %@ %@?", child.name, g(tr("מִשְׁתַּפֵּר"), tr("מִשְׁתַּפֶּרֶת")))) {
+            ReportCard(tr("האם %@ %@?", child.name, g(tr("משתפר"), tr("משתפרת")))) {
                 overall?.let { o ->
                     val up = o >= 0
                     // The tab above already names the period — no tab label inside the sentence.
-                    Text(tr("%@ %@ בְּ-%lld%%", if (up) "📈" else "📉", if (up) g(tr("הִשְׁתַּפֵּר"), tr("הִשְׁתַּפְּרָה")) else tr("יָרַד קְצָת"),
+                    Text(tr("%@ %@ ב-%lld%%", if (up) "📈" else "📉", if (up) g(tr("השתפר"), tr("השתפרה")) else tr("ירד קצת"),
                         Math.round(kotlin.math.abs(o)).toInt()),
                         color = if (up) Ink.good else Ink.weak, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    deltas.firstOrNull()?.takeIf { it.deltaPoints > 0 }?.let { TrendChip(tr("הַשִּׁפּוּר הַגָּדוֹל"), it.topic.displayName, it.deltaPoints) }
-                    deltas.lastOrNull()?.takeIf { it.deltaPoints < 0 }?.let { TrendChip(tr("דּוֹרֵשׁ חִזּוּק"), it.topic.displayName, it.deltaPoints) }
+                    deltas.firstOrNull()?.takeIf { it.deltaPoints > 0 }?.let { TrendChip(tr("השפור הגדול"), it.topic.displayName, it.deltaPoints) }
+                    deltas.lastOrNull()?.takeIf { it.deltaPoints < 0 }?.let { TrendChip(tr("דורש חזוק"), it.topic.displayName, it.deltaPoints) }
                 }
             }
         }
@@ -216,16 +216,16 @@ private fun ChildReport(
         // MARK: charts
         val days = if (period == ReportPeriod.MONTH) 30 else 7
         val points = engine.dayPoints(days)
-        ReportCard(tr("מְגַמַּת לְמִידָה"), detail = tr("%lld יָמִים אַחֲרוֹנִים", days)) {
-            if (points.all { it.questions == 0 }) EmptyLine(tr("אֵין עֲדַיִן פְּעִילוּת בַּתְּקוּפָה הַזּוֹ."))
+        ReportCard(tr("מגמת למידה"), detail = tr("%lld ימים אחרונים", days)) {
+            if (points.all { it.questions == 0 }) EmptyLine(tr("אין עדין פעילות בתקופה הזו."))
             else {
                 LearningTrendChart(points, Modifier.fillMaxWidth().height(130.dp))
-                Legend(listOf(tr("שְׁאֵלוֹת") to Color.White.copy(alpha = 0.4f), tr("אֲחוּז הַצְלָחָה") to Color.White))
+                Legend(listOf(tr("שאלות") to Color.White.copy(alpha = 0.4f), tr("אחוז הצלחה") to Color.White))
             }
         }
-        val earnedW = g(tr("הִרְוִיחַ"), tr("הִרְוִיחָה")); val usedW = g(tr("נִצֵּל"), tr("נִצְּלָה"))
-        ReportCard(tr("זְמַן מָסָךְ"), detail = tr("%@ מוּל %@", earnedW, usedW)) {
-            if (points.all { it.earned == 0 && it.used == 0 }) EmptyLine(tr("עוֹד לֹא נִפְתַּח זְמַן מָסָךְ בַּתְּקוּפָה הַזּוֹ."))
+        val earnedW = g(tr("הרויח"), tr("הרויחה")); val usedW = g(tr("נצל"), tr("נצלה"))
+        ReportCard(tr("זמן מסך"), detail = tr("%@ מול %@", earnedW, usedW)) {
+            if (points.all { it.earned == 0 && it.used == 0 }) EmptyLine(tr("עוד לא נפתח זמן מסך בתקופה הזו."))
             else {
                 ScreenTimeChart(points, Modifier.fillMaxWidth().height(120.dp))
                 Legend(listOf(earnedW to Color.White.copy(alpha = 0.4f), usedW to Color(0xFF7CF3FF)))
@@ -236,11 +236,11 @@ private fun ChildReport(
         val done = engine.mastered(period); val todo = engine.toPractice(period)
         if (done.isNotEmpty() || todo.isNotEmpty()) {
             Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ReportCard(tr("✅ כְּבָר %@", g(tr("שׁוֹלֵט"), tr("שׁוֹלֶטֶת"))), Modifier.weight(1f).fillMaxHeight()) {
-                    if (done.isEmpty()) EmptyLine(tr("עוֹד לֹא — בְּקָרוֹב 😊")) else NamedList(done)
+                ReportCard(tr("✅ כבר %@", g(tr("שולט"), tr("שולטת"))), Modifier.weight(1f).fillMaxHeight()) {
+                    if (done.isEmpty()) EmptyLine(tr("עוד לא — בקרוב 😊")) else NamedList(done)
                 }
-                ReportCard(tr("🎯 כְּדַאי לְתַרְגֵּל"), Modifier.weight(1f).fillMaxHeight()) {
-                    if (todo.isEmpty()) EmptyLine(tr("שׁוּם דָּבָר בּוֹלֵט 👏")) else NamedList(todo)
+                ReportCard(tr("🎯 כדאי לתרגל"), Modifier.weight(1f).fillMaxHeight()) {
+                    if (todo.isEmpty()) EmptyLine(tr("שום דבר בולט 👏")) else NamedList(todo)
                 }
             }
         }
@@ -269,9 +269,9 @@ private fun rememberInfiniteTransitionAlpha(): Float {
 private fun LiveBanner(child: Child, live: LiveWindow, onLock: () -> Unit) {
     val girl = child.isGirl
     val kind = live.device?.kind
-    val deviceLabel = if (kind == "ipad") tr("בָּאַיְפֵּד") else if (kind == "iphone") tr("בָּאַיְפוֹן") else tr("בַּמַּכְשִׁיר")
-    val source = if (live.isGift) tr("זְמַן שֶׁנָּתַתֶּם") else if (girl) tr("זְמַן שֶׁהִרְוִיחָה") else tr("זְמַן שֶׁהִרְוִיחַ")
-    val opened = if (girl) tr("פָּתְחָה") else tr("פָּתַח")
+    val deviceLabel = if (kind == "ipad") tr("באיפד") else if (kind == "iphone") tr("באיפון") else tr("במכשיר")
+    val source = if (live.isGift) tr("זמן שנתתם") else if (girl) tr("זמן שהרויחה") else tr("זמן שהרויח")
+    val opened = if (girl) tr("פתחה") else tr("פתח")
     Row(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
             .background(Brush.horizontalGradient(listOf(Color(0xFF22C55E), Color(0xFF16A34A)))).padding(horizontal = 12.dp, vertical = 9.dp),
@@ -279,12 +279,12 @@ private fun LiveBanner(child: Child, live: LiveWindow, onLock: () -> Unit) {
     ) {
         PulseDot()
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-            Text(if (live.isGift) tr("%@ %@ דַּקּוֹת מַתָּנָה %@ 💝", child.name, opened, deviceLabel) else tr("%@ %@ זְמַן מָסָךְ %@ 🎮", child.name, opened, deviceLabel),
+            Text(if (live.isGift) tr("%@ %@ דקות מתנה %@ 💝", child.name, opened, deviceLabel) else tr("%@ %@ זמן מסך %@ 🎮", child.name, opened, deviceLabel),
                 color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
-            Text(tr("נִשְׁאֲרוּ %@ דַּקּוֹת · %@", formatTime(live.secondsLeft), source), color = Color.White.copy(alpha = 0.9f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+            Text(tr("נשארו %@ דקות · %@", formatTime(live.secondsLeft), source), color = Color.White.copy(alpha = 0.9f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
         }
         Box(Modifier.clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.95f)).clickable(onClick = onLock).padding(horizontal = 12.dp, vertical = 7.dp)) {
-            Text("🔒 " + tr("נְעִילָה"), color = Color(0xFF15803D), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+            Text("🔒 " + tr("נעילה"), color = Color(0xFF15803D), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
         }
     }
 }
@@ -309,12 +309,12 @@ private fun InsightCard(i: DailyInsight, period: ReportPeriod) {
     ) {
         // One whole key per period: dropping the TAB label ("This week" / "Эта неделя")
         // into a template read "Insight for This week" / "Вывод о Эта неделя".
-        val title = when (period) { ReportPeriod.TODAY -> tr("💡 תּוֹבְנַת הַיּוֹם"); ReportPeriod.WEEK -> tr("💡 תּוֹבְנַת הַשָּׁבוּעַ"); ReportPeriod.MONTH -> tr("💡 תּוֹבְנַת הַחֹדֶשׁ") }
+        val title = when (period) { ReportPeriod.TODAY -> tr("💡 תובנת היום"); ReportPeriod.WEEK -> tr("💡 תובנת השבוע"); ReportPeriod.MONTH -> tr("💡 תובנת החדש") }
         Text(title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.5.sp)
         Text(i.body, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 13.5.sp)
         i.recommendation?.let {
             Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.35f)))
-            Text(tr("מֻמְלָץ: %@", it), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.5.sp)
+            Text(tr("ממלץ: %@", it), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.5.sp)
         }
     }
 }
@@ -325,8 +325,8 @@ private fun TopicsCard(
     expanded: Topic?, autoCollapsed: Boolean, onToggle: (Topic, Boolean) -> Unit,
 ) {
     val topics = engine.topicReports(period)
-    ReportCard(tr("בִּיצוּעִים לִימוּדִיִּים"), detail = tr("לְפִי נוֹשֵׂא, %@", period.title.lowercase())) {
-        if (topics.isEmpty()) { EmptyLine(tr("עוֹד לֹא נַעֲנוּ שְׁאֵלוֹת %@.", period.title.lowercase())); return@ReportCard }
+    ReportCard(tr("ביצועים לימודיים"), detail = tr("לפי נושא, %@", period.title.lowercase())) {
+        if (topics.isEmpty()) { EmptyLine(tr("עוד לא נענו שאלות %@.", period.title.lowercase())); return@ReportCard }
         // The weakest topic opens on its own; any row toggles on tap.
         val weakest = topics.reversed().firstOrNull { it.verdict == TopicReport.Verdict.WEAK && engine.skillReports(it.topic, period).isNotEmpty() }
             ?: topics.firstOrNull { it.verdict == TopicReport.Verdict.WEAK }
@@ -336,7 +336,7 @@ private fun TopicsCard(
             TopicRow(child, s, extras, t, open == t.topic) { onToggle(t.topic, open == t.topic) }
             if (open == t.topic) {
                 val skills = engine.skillReports(t.topic, period)
-                if (skills.isEmpty()) P(tr("אֵין עֲדַיִן פֵּרוּט לְפִי מְיֻמָּנוּת בְּנוֹשֵׂא זֶה."), 12.5f)
+                if (skills.isEmpty()) P(tr("אין עדין פרוט לפי מימנות בנושא זה."), 12.5f)
                 else skills.forEach { sk ->
                     Row(Modifier.fillMaxWidth().padding(start = 44.dp).glassInset(11.dp).padding(horizontal = 10.dp, vertical = 8.dp)) {
                         Text(sk.name, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp)
@@ -365,14 +365,14 @@ private fun WorldsCard(child: Child, extras: SnapshotExtras) {
     val played = candidates.filter(visited).sortedByDescending(stageOf)
     val notYet = candidates.filterNot(visited).take(2)
     val crowns = played.sumOf { minOf(WorldStage.tier(stageOf(it)), WorldStage.TIER_COUNT) }
-    ReportCard(tr("🏆 הָעוֹלָמוֹת שֶׁל %@", child.name), detail = if (crowns > 0) tr("👑 דַּרְגּוֹת שֶׁהֻשְׁלְמוּ: %lld", crowns) else null) {
-        if (played.isEmpty()) { EmptyLine(g(tr("עוֹד לֹא שִׂחֵק בְּאַף עוֹלָם."), tr("עוֹד לֹא שִׂחֲקָה בְּאַף עוֹלָם."))); return@ReportCard }
+    ReportCard(tr("🏆 העולמות של %@", child.name), detail = if (crowns > 0) tr("👑 דרגות שהשלמו: %lld", crowns) else null) {
+        if (played.isEmpty()) { EmptyLine(g(tr("עוד לא שחק באף עולם."), tr("עוד לא שחקה באף עולם."))); return@ReportCard }
         Column {
             played.forEach { w ->
                 val st = stageOf(w)
                 WorldRow(w, WorldTiers.parentLabel(WorldStage.tier(st), st % 10), WorldTiers.color(WorldStage.tier(st)))
             }
-            notYet.forEach { w -> WorldRow(w, g(tr("עוֹד לֹא בִּקֵּר"), tr("עוֹד לֹא בִּקְּרָה")), null) }
+            notYet.forEach { w -> WorldRow(w, g(tr("עוד לא בקר"), tr("עוד לא בקרה")), null) }
         }
     }
 }
@@ -399,8 +399,8 @@ private fun LearningProfileLines(child: Child, s: Progress, extras: SnapshotExtr
     if (strong.isEmpty() && favorites.isEmpty()) return
     fun g(m: String, f: String) = if (child.isGirl) f else m
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        if (strong.isNotEmpty()) ChipLine("💪 " + g(tr("חָזָק בְּ"), tr("חֲזָקָה בְּ")), strong)
-        if (favorites.isNotEmpty()) ChipLine("❤️ " + g(tr("אוֹהֵב"), tr("אוֹהֶבֶת")), favorites)
+        if (strong.isNotEmpty()) ChipLine("💪 " + g(tr("חזק ב"), tr("חזקה ב")), strong)
+        if (favorites.isNotEmpty()) ChipLine("❤️ " + g(tr("אוהב"), tr("אוהבת")), favorites)
     }
     RowDivider()
 }
@@ -428,21 +428,21 @@ private fun TopicRow(child: Child, s: Progress, extras: SnapshotExtras, t: Topic
                 // The level the adaptive engine serves now, and where it moved from the parent's base.
                 if (hasAdaptiveSignal(s)) {
                     val st = adaptiveState(t.topic, child, extras.adaptive)
-                    val hint = st.direction?.let { if (it == Direction.EASED) "↓ " + tr("בּוֹנֶה בִּטָּחוֹן") else "↑ " + tr("מְאַתְגֵּר יוֹתֵר") }
+                    val hint = st.direction?.let { if (it == Direction.EASED) "↓ " + tr("בונה בטחון") else "↑ " + tr("מאתגר יותר") }
                     Text(st.served.displayName + (hint?.let { " · $it" } ?: ""), maxLines = 1,
                         color = when (st.direction) { Direction.EASED -> Ink.warn; Direction.RAISED -> Ink.good; null -> Ink.secondary },
                         fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 10.5.sp,
                         modifier = Modifier.clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.10f)).padding(horizontal = 7.dp, vertical = 2.dp))
                 }
             }
-            Text(tr("%lld שְׁאֵלוֹת", t.answered) + " · " + tr("%lld נְכוֹנוֹת", t.correct) + (if (t.wrong > 0) tr(" · %lld טְעֻיּוֹת", t.wrong) else ""),
+            Text(tr("%lld שאלות", t.answered) + " · " + tr("%lld נכונות", t.correct) + (if (t.wrong > 0) tr(" · %lld טעיות", t.wrong) else ""),
                 color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 12.sp)
         }
         val (label, color) = when (t.verdict) {
-            TopicReport.Verdict.STRONG -> (if (t.accuracy >= 0.95) tr("חָזָק מְאוֹד") else tr("חָזָק")) to Ink.good
-            TopicReport.Verdict.OK -> tr("בְּסֵדֶר") to Ink.warn
-            TopicReport.Verdict.WEAK -> tr("דּוֹרֵשׁ חִזּוּק") to Ink.weak
-            TopicReport.Verdict.TOO_FEW -> tr("עוֹד מְעַט") to Ink.tertiary
+            TopicReport.Verdict.STRONG -> (if (t.accuracy >= 0.95) tr("חזק מאוד") else tr("חזק")) to Ink.good
+            TopicReport.Verdict.OK -> tr("בסדר") to Ink.warn
+            TopicReport.Verdict.WEAK -> tr("דורש חזוק") to Ink.weak
+            TopicReport.Verdict.TOO_FEW -> tr("עוד מעט") to Ink.tertiary
         }
         Text("${pct(t.accuracy)} · $label", color = color, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 11.5.sp,
             modifier = Modifier.clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.12f))
@@ -491,7 +491,7 @@ private fun NamedList(items: List<Named>) {
 @Composable
 private fun DevicesCard(child: Child, devices: List<ChildDevice>, live: Boolean, onAdd: () -> Unit, onRemove: (ChildDevice) -> Unit) {
     val girl = child.isGirl
-    ReportCard(tr("הַמַּכְשִׁירִים שֶׁל %@", child.name)) {
+    ReportCard(tr("המכשירים של %@", child.name)) {
         devices.forEachIndexed { idx, d ->
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 // Remove (e.g. linked to the wrong child) — confirmed before anything happens.
@@ -508,18 +508,18 @@ private fun DevicesCard(child: Child, devices: List<ChildDevice>, live: Boolean,
                 // "אייפד של נועה" — the kind + the child; a custom device name rides along.
                 val ipad = d.kind == "ipad"
                 val generic = listOf(tr("אייפד"), tr("אייפון"), "iPhone", "iPad", "").contains(d.name)
-                Text(tr("%@ %@ שֶׁל %@", if (ipad) "📲" else "📱", if (ipad) tr("אַיְפֵּד") else tr("אַיְפוֹן"), child.name) + (if (generic) "" else " · ${d.name}"),
+                Text(tr("%@ %@ של %@", if (ipad) "📲" else "📱", if (ipad) tr("איפד") else tr("איפון"), child.name) + (if (generic) "" else " · ${d.name}"),
                     Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.5.sp)
                 val recent = nowSecs() - d.lastSeenAt < 120
                 val (txt, col) = when {
-                    live && recent -> tr("● %@ עַכְשָׁיו", if (girl) tr("מְשַׂחֶקֶת") else tr("מְשַׂחֵק")) to Ink.good
-                    recent -> tr("● מְחֻבָּר") to Ink.good
-                    else -> tr("נִרְאָה %@", relative(d.lastSeenAt)) to Ink.secondary
+                    live && recent -> tr("● %@ עכשיו", if (girl) tr("משחקת") else tr("משחק")) to Ink.good
+                    recent -> tr("● מחבר") to Ink.good
+                    else -> tr("נראה %@", relative(d.lastSeenAt)) to Ink.secondary
                 }
                 Text(txt, color = col, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp)
             }
             if (d.shieldAuthorized == false && d.role != "parent") {
-                Text("🛡️ " + tr("אֵין הַרְשָׁאַת ״זְמַן מָסָךְ״ בַּמַּכְשִׁיר הַזֶּה — נְעִילַת אַפְּלִיקַצְיוֹת לֹא תַּעֲבוֹד בּוֹ. פִּתְחוּ בּוֹ אֶת טוֹפִי ← ⚙️ ← בַּקָּשׁ הַרְשָׁאָה."),
+                Text("🛡️ " + tr("אין הרשאת ״זמן מסך״ במכשיר הזה — נעילת אפליקציות לא תעבוד בו. פתחו בו את טופי ← ⚙️ ← בקש הרשאה."),
                     color = Color(0xFFFF8A3D), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 11.5.sp)
             }
             // The allow-list migration nudge (nil on older devices → say nothing).
@@ -529,12 +529,12 @@ private fun DevicesCard(child: Child, devices: List<ChildDevice>, live: Boolean,
             }
             if (idx != devices.lastIndex) RowDivider()
         }
-        if (devices.isEmpty()) EmptyLine(tr("עוֹד לֹא חֻבַּר מַכְשִׁיר."))
+        if (devices.isEmpty()) EmptyLine(tr("עוד לא חבר מכשיר."))
         Box(
             Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(onClick = onAdd).dashedBorder().padding(vertical = 10.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text("▦ " + if (devices.isEmpty()) tr("+ חַבְּרוּ מַכְשִׁיר") else tr("+ חִבּוּר מַכְשִׁיר נוֹסָף"),
+            Text("▦ " + if (devices.isEmpty()) tr("+ חברו מכשיר") else tr("+ חבור מכשיר נוסף"),
                 color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.5.sp)
         }
     }
@@ -547,9 +547,9 @@ private fun Modifier.dashedBorder() = this.drawBehind {
 
 private fun relative(t: Double): String {
     val m = ((nowSecs() - t) / 60).toInt()
-    if (m < 60) return tr("לִפְנֵי %lld דַּק׳", maxOf(1, m))
-    if (m < 60 * 24) return tr("לִפְנֵי %lld שָׁע׳", m / 60)
-    return tr("לִפְנֵי %lld יָמִים", m / (60 * 24))
+    if (m < 60) return tr("לפני %lld דק׳", maxOf(1, m))
+    if (m < 60 * 24) return tr("לפני %lld שע׳", m / 60)
+    return tr("לפני %lld ימים", m / (60 * 24))
 }
 
 // MARK: - Charts (drawn to scale, no library) — ChildReportView.swift
@@ -563,7 +563,7 @@ private fun DrawScope.label(tm: TextMeasurer, text: String, x: Float, y: Float, 
 @Composable
 private fun LearningTrendChart(points: List<DayPoint>, modifier: Modifier) {
     val tm = rememberTextMeasurer()
-    val qLabel = tr("שְׁאֵלוֹת"); val okLabel = tr("הַצְלָחָה")
+    val qLabel = tr("שאלות"); val okLabel = tr("הצלחה")
     val weekdays = points.map { it.weekday }
     Canvas(modifier) {
         val w = size.width; val h = size.height
@@ -609,7 +609,7 @@ private fun LearningTrendChart(points: List<DayPoint>, modifier: Modifier) {
 @Composable
 private fun ScreenTimeChart(points: List<DayPoint>, modifier: Modifier) {
     val tm = rememberTextMeasurer()
-    val mLabel = tr("דַּקּוֹת")
+    val mLabel = tr("דקות")
     val weekdays = points.map { it.weekday }
     Canvas(modifier) {
         val w = size.width; val h = size.height

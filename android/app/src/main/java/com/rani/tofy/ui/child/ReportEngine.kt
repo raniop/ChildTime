@@ -27,7 +27,7 @@ fun skillName(key: String): String = skillKeys[key]?.let { tr(it) } ?: key
 
 enum class ReportPeriod(val days: Int) {
     TODAY(1), WEEK(7), MONTH(30);
-    val title: String get() = when (this) { TODAY -> tr("הַיּוֹם"); WEEK -> tr("הַשָּׁבוּעַ"); MONTH -> tr("הַחֹדֶשׁ") }
+    val title: String get() = when (this) { TODAY -> tr("היום"); WEEK -> tr("השבוע"); MONTH -> tr("החדש") }
 }
 
 data class TopicReport(val topic: Topic, val answered: Int, val correct: Int) {
@@ -148,7 +148,7 @@ class ReportEngine(history: List<DailyStat>) {
         for (t in topicReports(p).filter { it.answered >= 8 }) {
             val skills = skillReports(t.topic, p)
             for (s in skills) if (s.answered >= 5 && s.accuracy >= 0.85) out += Named(s.name, pct(s.accuracy)) to s.accuracy
-            if (skills.isEmpty() && t.accuracy >= 0.85) out += Named(t.topic.displayName, tr("%@ · %lld שְׁאֵלוֹת", pct(t.accuracy), t.answered)) to t.accuracy
+            if (skills.isEmpty() && t.accuracy >= 0.85) out += Named(t.topic.displayName, tr("%@ · %lld שאלות", pct(t.accuracy), t.answered)) to t.accuracy
         }
         return out.sortedByDescending { it.second }.take(4).map { it.first }
     }
@@ -157,8 +157,8 @@ class ReportEngine(history: List<DailyStat>) {
         val out = mutableListOf<Pair<Named, Double>>()
         for (t in topicReports(p).filter { it.answered >= 6 }) {
             val skills = skillReports(t.topic, p)
-            for (s in skills.take(3)) if (s.answered >= 4 && s.accuracy < 0.7) out += Named(s.name, tr("%@ בְּ%@", pct(s.accuracy), t.topic.displayName)) to s.accuracy
-            if (skills.isEmpty() && t.accuracy < 0.7) out += Named(t.topic.displayName, tr("%@ · %lld טְעֻיּוֹת", pct(t.accuracy), t.wrong)) to t.accuracy
+            for (s in skills.take(3)) if (s.answered >= 4 && s.accuracy < 0.7) out += Named(s.name, tr("%@ ב%@", pct(s.accuracy), t.topic.displayName)) to s.accuracy
+            if (skills.isEmpty() && t.accuracy < 0.7) out += Named(t.topic.displayName, tr("%@ · %lld טעיות", pct(t.accuracy), t.wrong)) to t.accuracy
         }
         return out.sortedBy { it.second }.take(4).map { it.first }
     }
@@ -182,40 +182,40 @@ class ReportEngine(history: List<DailyStat>) {
         val best = topics.firstOrNull(); val worst = topics.lastOrNull()
         if (best != null && worst != null && best.topic != worst.topic && best.accuracy - worst.accuracy >= 0.30 && worst.accuracy < 0.6) {
             val weakSkill = skillReports(worst.topic, p).firstOrNull()
-            val focus = weakSkill?.let { tr(" הַפַּעַר נִפְתָּח בְּעִקָּר בְּ%@.", it.name) } ?: ""
-            return DailyInsight("💡", tr("פַּעַר גָּדוֹל בֵּין נוֹשְׂאִים"),
-                tr("%@ %@ עַל %@ בְּ-%@ לְעֻמַּת %@ בְּ%@ — הַפַּעַר הַגָּדוֹל בְּיוֹתֵר בֵּין הַנּוֹשְׂאִים %@.%@",
-                    name, g(tr("עוֹנֶה"), tr("עוֹנָה")), worst.topic.displayName, pct(worst.accuracy), pct(best.accuracy),
-                    best.topic.displayName, g(tr("שֶׁלּוֹ"), tr("שֶׁלָּהּ")), focus),
-                tr("10 דַּקּוֹת שֶׁל %@ בְּיַחַד, פַּעַם־פַּעֲמַיִם בַּשָּׁבוּעַ. %@ כְּבָר %@ בְּ%@ — יֵשׁ עַל מָה לִבְנוֹת.",
-                    weakSkill?.name ?: worst.topic.displayName, g(tr("הוּא"), tr("הִיא")), g(tr("חָזָק"), tr("חֲזָקָה")), best.topic.displayName))
+            val focus = weakSkill?.let { tr(" הפער נפתח בעקר ב%@.", it.name) } ?: ""
+            return DailyInsight("💡", tr("פער גדול בין נושאים"),
+                tr("%@ %@ על %@ ב-%@ לעמת %@ ב%@ — הפער הגדול ביותר בין הנושאים %@.%@",
+                    name, g(tr("עונה"), tr("עונה")), worst.topic.displayName, pct(worst.accuracy), pct(best.accuracy),
+                    best.topic.displayName, g(tr("שלו"), tr("שלה")), focus),
+                tr("10 דקות של %@ ביחד, פעםפעמים בשבוע. %@ כבר %@ ב%@ — יש על מה לבנות.",
+                    weakSkill?.name ?: worst.topic.displayName, g(tr("הוא"), tr("היא")), g(tr("חזק"), tr("חזקה")), best.topic.displayName))
         }
         deltas.firstOrNull()?.takeIf { it.deltaPoints >= 10 }?.let { up ->
-            return DailyInsight("🌟", tr("%@ הוֹפֶכֶת לְחוֹזְקָה", up.topic.displayName),
-                tr("%@ %@ בְּ%@ בְּ-%lld נְקֻדּוֹת לְעֻמַּת הַתְּקוּפָה הַקּוֹדֶמֶת.", name, g(tr("הִשְׁתַּפֵּר"), tr("הִשְׁתַּפְּרָה")), up.topic.displayName, up.deltaPoints.roundToInt()),
-                tr("שָׁוֶה לְצַיֵּן אֶת זֶה בְּקוֹל — יְלָדִים מַמְשִׁיכִים לְהִשְׁתַּפֵּר בְּמַה שֶׁמְּשַׁבְּחִים אוֹתָם עָלָיו."))
+            return DailyInsight("🌟", tr("%@ הופכת לחוזקה", up.topic.displayName),
+                tr("%@ %@ ב%@ ב-%lld נקדות לעמת התקופה הקודמת.", name, g(tr("השתפר"), tr("השתפרה")), up.topic.displayName, up.deltaPoints.roundToInt()),
+                tr("שוה לצין את זה בקול — ילדים ממשיכים להשתפר במה שמשבחים אותם עליו."))
         }
         deltas.lastOrNull()?.takeIf { it.deltaPoints <= -8 }?.let { down ->
-            return DailyInsight("🔎", tr("יְרִידָה קַלָּה בְּ%@", down.topic.displayName),
-                tr("הַדִּיּוּק שֶׁל %@ בְּ%@ יָרַד בְּ-%lld נְקֻדּוֹת לְעֻמַּת הַתְּקוּפָה הַקּוֹדֶמֶת. לִפְעָמִים זֶה פָּשׁוּט חֹמֶר חָדָשׁ שֶׁנִּכְנַס.", name, down.topic.displayName, abs(down.deltaPoints).roundToInt()),
-                tr("%@ מָה הָיָה קָשֶׁה הַשָּׁבוּעַ — לָרוֹב זוֹ שְׁאֵלָה אַחַת שֶׁפּוֹתַחַת הַכֹּל.", g(tr("שַׁאֲלוּ אוֹתוֹ"), tr("שַׁאֲלוּ אוֹתָהּ"))))
+            return DailyInsight("🔎", tr("ירידה קלה ב%@", down.topic.displayName),
+                tr("הדיוק של %@ ב%@ ירד ב-%lld נקדות לעמת התקופה הקודמת. לפעמים זה פשוט חמר חדש שנכנס.", name, down.topic.displayName, abs(down.deltaPoints).roundToInt()),
+                tr("%@ מה היה קשה השבוע — לרוב זו שאלה אחת שפותחת הכל.", g(tr("שאלו אותו"), tr("שאלו אותה"))))
         }
         val s = summary(p)
         if (s.activeDays >= 5 && p != ReportPeriod.TODAY) {
-            return DailyInsight("🔥", tr("%lld יָמִים שֶׁל לְמִידָה", s.activeDays),
-                tr("%@ %@ בְּ-%lld יָמִים %@, %lld שְׁאֵלוֹת בְּסַךְ הַכֹּל בְּ-%@ הַצְלָחָה.", name, g(tr("לָמַד"), tr("לָמְדָה")), s.activeDays,
-                    if (p == ReportPeriod.WEEK) tr("הַשָּׁבוּעַ") else tr("הַחֹדֶשׁ"), s.questions, pct(s.accuracy)),
-                tr("הָרְצִיפוּת שָׁוָה יוֹתֵר מֵהַכַּמּוּת — גַּם 10 דַּקּוֹת בְּיוֹם שׁוֹמְרוֹת עָלֶיהָ."))
+            return DailyInsight("🔥", tr("%lld ימים של למידה", s.activeDays),
+                tr("%@ %@ ב-%lld ימים %@, %lld שאלות בסך הכל ב-%@ הצלחה.", name, g(tr("למד"), tr("למדה")), s.activeDays,
+                    if (p == ReportPeriod.WEEK) tr("השבוע") else tr("החדש"), s.questions, pct(s.accuracy)),
+                tr("הרציפות שוה יותר מהכמות — גם 10 דקות ביום שומרות עליה."))
         }
         if (s.voluntaryLearningRate >= 0.3 && s.questions >= 20) {
-            return DailyInsight("💛", tr("%@ גַּם בְּלִי פְּרָס", g(tr("לוֹמֵד"), tr("לוֹמֶדֶת"))),
-                tr("%lld%% מֵהַתְּשׁוּבוֹת שֶׁל %@ נִתְּנוּ אַחֲרֵי שֶׁהַדַּקּוֹת שֶׁל הַיּוֹם כְּבָר נִגְמְרוּ — כְּלוֹמַר סְתָם כִּי %@.",
-                    (s.voluntaryLearningRate * 100).roundToInt(), name, g(tr("רָצָה"), tr("רָצְתָה"))), null)
+            return DailyInsight("💛", tr("%@ גם בלי פרס", g(tr("לומד"), tr("לומדת"))),
+                tr("%lld%% מהתשובות של %@ נתנו אחרי שהדקות של היום כבר נגמרו — כלומר סתם כי %@.",
+                    (s.voluntaryLearningRate * 100).roundToInt(), name, g(tr("רצה"), tr("רצתה"))), null)
         }
         if (s.questions <= 0) return null
         val mins = (if (p == ReportPeriod.TODAY) minutesToday else null) ?: s.minutesEarned
-        return DailyInsight("📚", tr("%lld שְׁאֵלוֹת %@", s.questions, p.title.lowercase()),
-            tr("%@ הַצְלָחָה", pct(s.accuracy)) + (if (mins > 0) tr(" · %lld דַּקּוֹת שֶׁ%@", mins, g(tr("הִרְוִיחַ"), tr("הִרְוִיחָה"))) else ""),
+        return DailyInsight("📚", tr("%lld שאלות %@", s.questions, p.title.lowercase()),
+            tr("%@ הצלחה", pct(s.accuracy)) + (if (mins > 0) tr(" · %lld דקות ש%@", mins, g(tr("הרויח"), tr("הרויחה"))) else ""),
             null)
     }
 }
