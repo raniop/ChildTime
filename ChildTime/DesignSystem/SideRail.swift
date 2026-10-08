@@ -415,6 +415,10 @@ extension View {
 
     /// Keep a row in the band clear of the clock on the bar's side only.
     func clearOfBar() -> some View { modifier(BarSidePadding()) }
+    /// `clearOfBar()` only when `active`.
+    @ViewBuilder func clearOfBar(active: Bool) -> some View {
+        if active { modifier(BarSidePadding()) } else { self }
+    }
 
     /// See `ClearOfBarBothSides`.
     func clearOfBarBothSides(active: Bool = true) -> some View { modifier(ClearOfBarBothSides(active: active)) }

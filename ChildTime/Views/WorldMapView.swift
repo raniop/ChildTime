@@ -387,7 +387,8 @@ struct WorldMapView: View {
     /// Total width cap for the world grid (so the 3 cards stay centered on iPad
     /// instead of pushing to one edge).
     private var worldGridMaxWidth: CGFloat {
-        isCompact ? .infinity : 860
+        // The open Duo: the whole glass (its 4 columns are closed-size cards).
+        isCompact || thinTopRow ? .infinity : 860
     }
 
     /// Shared side margin for the header card AND the world grid, so both have the
@@ -562,6 +563,9 @@ struct WorldMapView: View {
                             .coachMark("k.games")
                         }
                     }
+                    // The same right edge as the header above (Rani: on the open Duo
+                    // the worlds stuck out past the card, beside the clock).
+                    .clearOfBar()
                     .frame(maxWidth: worldGridMaxWidth)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.horizontal, homeHPad)
@@ -589,6 +593,9 @@ struct WorldMapView: View {
                 Spacer()
                 bottomCTAs
                     .coachMark("k.minutes")
+                    // Centred on the content on the WIDE glass only — on the closed
+                    // device the extra inset pushed the whole screen off the left edge.
+                    .clearOfBar(active: display.isWideShort)
                     .padding(.horizontal, AppSpacing.lg)
                     .padding(.top, isShort ? 26 : 48)
                     .padding(.bottom, isShort ? AppSpacing.sm : AppSpacing.md)
@@ -1170,7 +1177,10 @@ struct WorldMapView: View {
         #endif
         // Rani (2026-10-08): opening the device must CONTINUE the closed screen —
         // the same pieces in the same order, with room for more worlds.
-        return "c"
+        // …and keep every piece at its CLOSED size: the extra width buys more
+        // worlds (4 across, each the size of a closed-screen card) and lets the
+        // child's card become one row, instead of stretching everything.
+        return "a"
     }
     private var useSidebar: Bool { wideMode == "b" }
     private var thinTopRow: Bool { wideMode == "a" }
@@ -1208,8 +1218,10 @@ struct WorldMapView: View {
                 HStack(spacing: 14) {
                     identityBlock(avatar: 44)
                     walletStats.coachMark("k.wallet")
-                    statsPanel.frame(maxWidth: 420)
+                    Spacer(minLength: 8)
+                    statsPanel.frame(maxWidth: 460)
                 }
+                .frame(maxWidth: .infinity)   // the card spans the grid's edges
             } else if useSidebar {
                 // The column is narrow: who on one line, the wallet under it.
                 HStack { identityBlock(avatar: avatarSize); Spacer(minLength: 0) }
@@ -2223,7 +2235,7 @@ struct WorldMapView: View {
                         .font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.secondary)
                 }
             }
-            .frame(minWidth: 150)
+            .frame(minWidth: isCompact ? 0 : 150)
             .accessibilityLabel(quiet.blockedMessage() ?? "")
         } else if progress.canRedeemNow {
             Button {
@@ -2248,7 +2260,7 @@ struct WorldMapView: View {
             }
             .buttonStyle(.juicy)
             .disabled(isOpening)
-            .frame(minWidth: 150)
+            .frame(minWidth: isCompact ? 0 : 150)
         } else if progress.dailyScreenTimeMaxedOut {
             keyBox {
                 VStack(spacing: 3) {
@@ -2258,7 +2270,7 @@ struct WorldMapView: View {
                         .font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.secondary)
                 }
             }
-            .frame(minWidth: 150)
+            .frame(minWidth: isCompact ? 0 : 150)
         } else {
             keyBox {
                 VStack(spacing: 4) {
@@ -2280,7 +2292,7 @@ struct WorldMapView: View {
                         .font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.secondary)
                 }
             }
-            .frame(minWidth: 150)
+            .frame(minWidth: isCompact ? 0 : 150)
         }
     }
 
