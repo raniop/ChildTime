@@ -89,18 +89,18 @@ struct ChildSettingsView: View {
                     Color.clear.background(GlassBackdrop())
                 }
             }
-            .navigationTitle(profile.map { tr("הַגְדָּרוֹת שֶׁל \($0.name)") } ?? "")
+            .navigationTitle(profile.map { tr("הגדרות של \($0.name)") } ?? "")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
                 if !railHost.hasRail {
                     ToolbarItem(placement: .confirmationAction) {
-                        Button(tr("סִיּוּם")) { dismiss() }
+                        Button(tr("סיום")) { dismiss() }
                     }
                 }
             }
         }
-        .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { dismiss() }
+        .railDismiss(tr("סיום"), systemImage: "checkmark") { dismiss() }
         .environment(\.layoutDirection, .app)
     }
 
@@ -113,7 +113,7 @@ struct ChildSettingsView: View {
             smartDifficultySection(p)
             screenTimeSection(p)
             Section {
-                row("👫", tr("חֲבֵרִים")) { friends = p }
+                row("👫", tr("חברים")) { friends = p }
             }
             .glassRows()
             advancedSection(p)
@@ -132,13 +132,13 @@ struct ChildSettingsView: View {
             : Profile.gradeDisplayName(p.effectiveGrade) + (p.gradeSetByChild ? " " + tr("· נבחרה ע\"י הילד — בדקו") : "")
         let lang = p.language.flatMap(AppLanguage.init(rawValue:))
         return Section {
-            row("✏️", tr("שֵׁם, גִּיל וְכִתָּה"),
+            row("✏️", tr("שם, גיל וכתה"),
                 value: "\(p.name) · \(p.age.label) · \(grade)",
                 valueTint: flagged ? AppColor.flameOrange : GlassInk.secondary) { editing = p }
-            row("🌍", girl ? tr("שָׂפָה בַּמַּכְשִׁיר שֶׁלָּהּ") : tr("שָׂפָה בַּמַּכְשִׁיר שֶׁלּוֹ"),
+            row("🌍", girl ? tr("שפה במכשיר שלה") : tr("שפה במכשיר שלו"),
                 value: lang.map { "\($0.flag) \($0.nativeName)" }) { language = p }
         } header: {
-            Text(girl ? tr("הַיַּלְדָּה") : tr("הַיֶּלֶד"))
+            Text(girl ? tr("הילדה") : tr("הילד"))
         }
         .glassRows()
     }
@@ -147,12 +147,12 @@ struct ChildSettingsView: View {
         let listed = ChildWorldsView.listedWorlds(for: p)
         let open = listed.filter { p.allows($0.topic) }.count
         return Section {
-            row("🎚️", tr("רָמַת קֹשִׁי"), value: difficultySummary(p)) { difficulty = p }
-            row("🌐", tr("עוֹלָמוֹת פְּעִילִים"),
-                value: listed.isEmpty ? nil : tr("\(open) מִתּוֹךְ \(listed.count)")) { worlds = p }
+            row("🎚️", tr("רמת קשי"), value: difficultySummary(p)) { difficulty = p }
+            row("🌐", tr("עולמות פעילים"),
+                value: listed.isEmpty ? nil : tr("\(open) מתוך \(listed.count)")) { worlds = p }
             onlyQuestionsToggle(p)
         } header: {
-            Text(tr("לְמִידָה"))
+            Text(tr("למידה"))
         }
         .glassRows()
     }
@@ -192,7 +192,7 @@ struct ChildSettingsView: View {
         let topics = p.playableTopics.isEmpty ? Set(Topic.allCases) : p.playableTopics
         let levels = Set(topics.map { p.difficulty(for: $0) })
         if levels.count == 1, let only = levels.first { return only.displayName }
-        return tr("לְפִי נוֹשֵׂא")
+        return tr("לפי נושא")
     }
 
     /// "רמת קושי חכמה" — the adaptive engine's current level per practiced
@@ -232,7 +232,7 @@ struct ChildSettingsView: View {
 
     private func directionChip(_ dir: AdaptiveTopicLevel.Direction) -> some View {
         let raised = dir == .raised
-        return Text(raised ? "↑ " + tr("מְאַתְגֵּר יוֹתֵר") : "↓ " + tr("בּוֹנֶה בִּטָּחוֹן"))
+        return Text(raised ? "↑ " + tr("מאתגר יותר") : "↓ " + tr("בונה בטחון"))
             .font(.system(size: 11, weight: .heavy, design: .rounded))
             .foregroundStyle(raised ? GlassInk.good : GlassInk.warn)
             .lineLimit(1).minimumScaleFactor(0.8)
@@ -241,8 +241,8 @@ struct ChildSettingsView: View {
     private func screenTimeSection(_ p: Profile) -> some View {
         let cap = p.resolvedDailyCap(globalEnabled: settings.dailyCapEnabled, globalMax: settings.maxMinutesPerDay)
         return Section {
-            row("⏳", tr("זְמַן מָסָךְ יוֹמִי"),
-                value: cap.enabled ? tr("\(cap.minutes) דַּקּוֹת") : tr("לְלֹא הַגְבָּלָה")) { screenTime = p }
+            row("⏳", tr("זמן מסך יומי"),
+                value: cap.enabled ? tr("\(cap.minutes) דקות") : tr("ללא הגבלה")) { screenTime = p }
             // 🏫🌙 Hours when minutes don't open (QuietHours).
             row("🏫", tr("זמן בית ספר"), value: QuietHoursText.summary(p.quietHours, kind: .school)) {
                 quietEdit = QuietEdit(kind: .school)
@@ -258,12 +258,12 @@ struct ChildSettingsView: View {
                 HStack(spacing: 12) {
                     Text("🔐").font(.system(size: 20)).frame(width: 28)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(tr("קוֹד הַגָּנַת זְמַן הַמִּשְׂחָק"))
+                        Text(tr("קוד הגנת זמן המשחק"))
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundStyle(GlassInk.primary)
                         Text(p.gender == .girl
-                             ? tr("\(p.name) עוֹד לֹא בָּחֲרָה קוֹד")
-                             : tr("\(p.name) עוֹד לֹא בָּחַר קוֹד"))
+                             ? tr("\(p.name) עוד לא בחרה קוד")
+                             : tr("\(p.name) עוד לא בחר קוד"))
                             .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(GlassInk.secondary)
                     }
@@ -273,12 +273,12 @@ struct ChildSettingsView: View {
                 HStack(spacing: 12) {
                     Text("🔐").font(.system(size: 20)).frame(width: 28)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(tr("קוֹד הַגָּנַת זְמַן הַמִּשְׂחָק"))
+                        Text(tr("קוד הגנת זמן המשחק"))
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundStyle(GlassInk.primary)
                         Text(p.gender == .girl
-                             ? tr("\(p.name) מַזִּינָה אוֹתוֹ כְּדֵי לִפְתֹּחַ אֶת הַדַּקּוֹת שֶׁצָּבְרָה")
-                             : tr("\(p.name) מַזִּין אוֹתוֹ כְּדֵי לִפְתֹּחַ אֶת הַדַּקּוֹת שֶׁצָּבַר"))
+                             ? tr("\(p.name) מזינה אותו כדי לפתח את הדקות שצברה")
+                             : tr("\(p.name) מזין אותו כדי לפתח את הדקות שצבר"))
                             .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(GlassInk.secondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -296,25 +296,25 @@ struct ChildSettingsView: View {
                 }
             }
         } header: {
-            Text(tr("זְמַן מָסָךְ"))
+            Text(tr("זמן מסך"))
         }
         .glassRows()
     }
 
     private func advancedSection(_ p: Profile) -> some View {
         Section {
-            row("🗑️", tr("לְאַפְשֵׁר מְחִיקַת אַפְּלִיקַצְיוֹת (5 דַּק')"), chevron: false) { allowAppRemoval(p) }
+            row("🗑️", tr("לאפשר מחיקת אפליקציות (5 דק')"), chevron: false) { allowAppRemoval(p) }
             // Repair for a device that keeps re-uploading wrong numbers: tell
             // every device to drop its cached copy and take the cloud as-is.
-            row("🔄", tr("רַעֲנוּן נְתוּנִים בְּכָל הַמַּכְשִׁירִים"), chevron: false) {
+            row("🔄", tr("רענון נתונים בכל המכשירים"), chevron: false) {
                 Haptic.warning()
                 RemoteSyncManager.shared.purgeChildCaches(childID: p.id)
             }
-            row("↩️", tr("אִפּוּס הִתְקַדְּמוּת"), destructive: true, chevron: false) { confirmReset = true }
-            row("🚮", p.gender == .girl ? tr("מְחִיקַת הַיַּלְדָּה") : tr("מְחִיקַת הַיֶּלֶד"),
+            row("↩️", tr("אפוס התקדמות"), destructive: true, chevron: false) { confirmReset = true }
+            row("🚮", p.gender == .girl ? tr("מחיקת הילדה") : tr("מחיקת הילד"),
                 destructive: true, chevron: false) { confirmDelete = true }
         } header: {
-            Text(tr("מִתְקַדֵּם"))
+            Text(tr("מתקדם"))
         }
         .glassRows()
     }
@@ -360,8 +360,8 @@ struct ChildSettingsView: View {
         household.allowAppRemovalRemotely(toChildID: p.id)
         let connected = (household.devicesByChild[p.id.uuidString]?.isEmpty == false)
         remoteNote = connected
-            ? tr("נִפְתָּח חַלּוֹן שֶׁל 5 דַּקּוֹת לִמְחִיקַת אַפְּלִיקַצְיוֹת בַּמַּכְשִׁיר שֶׁל \(p.name) — מִיָּדִי כְּשֶׁטּוֹפִי פָּתוּחַ שָׁם. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד.")
-            : tr("אֵין כָּרֶגַע מַכְשִׁיר מְחֻבָּר לְ\(p.name) — הַחַלּוֹן יִפָּתַח בָּרֶגַע שֶׁהַמַּכְשִׁיר יִתְחַבֵּר.")
+            ? tr("נפתח חלון של 5 דקות למחיקת אפליקציות במכשיר של \(p.name) — מידי כשטופי פתוח שם. אחר כך הנעילה חוזרת לבד.")
+            : tr("אין כרגע מכשיר מחבר ל\(p.name) — החלון יפתח ברגע שהמכשיר יתחבר.")
     }
 
     // MARK: - Sheets (the same editors the old "⋯" menu opened)
@@ -432,15 +432,15 @@ struct ChildSettingsView: View {
                 Text(tr("הקוד שהילד הגדיר לפתיחת זמן משחק יימחק. הילד יוכל להגדיר קוד חדש מהמכשיר שלו. שימושי כשהקוד נשכח."))
             }
             .alert(tr("למחוק את \(p.name)?"), isPresented: $confirmDelete) {
-                Button(tr("מְחִיקַת יֶלֶד/ה"), role: .destructive) { onDelete(p) }
+                Button(tr("מחיקת ילד/ה"), role: .destructive) { onDelete(p) }
                 Button(tr("בטל"), role: .cancel) {}
             } message: {
                 Text(tr("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק."))
             }
-            .alert(tr("שְׁלִיטָה מֵרָחוֹק"), isPresented: Binding(
+            .alert(tr("שליטה מרחוק"), isPresented: Binding(
                 get: { remoteNote != nil },
                 set: { if !$0 { remoteNote = nil } })) {
-                Button(tr("הֵבַנְתִּי"), role: .cancel) {}
+                Button(tr("הבנתי"), role: .cancel) {}
             } message: {
                 Text(remoteNote ?? "")
             }

@@ -60,23 +60,23 @@ struct PackDetailView: View {
             else if let first = kids.first(where: { !$0.owns(pack) }) { selected = [first.id.uuidString] }
         }
         .fullScreenCover(isPresented: $gateOpen) {
-            ParentGateView(allowClose: true, gateTitle: tr("אֵזוֹר הוֹרִים"),
-                           gateReason: tr("כְּדֵי לִרְכֹּשׁ אֶת הַשְּׁאֵלוֹן — הַזִּינוּ אֶת הַקּוֹד"),
+            ParentGateView(allowClose: true, gateTitle: tr("אזור הורים"),
+                           gateReason: tr("כדי לרכש את השאלון — הזינו את הקוד"),
                            useFaceID: true, respectSession: false) {
                 purchasing
             }
         }
         .fullScreenCover(isPresented: $showTofyPlus) {
-            ParentGateView(allowClose: true, gateTitle: tr("אֵזוֹר הוֹרִים"),
-                           gateReason: tr("כְּדֵי לִפְתּוֹחַ אֶת הַמִּנּוּי לַמִּשְׁפָּחָה — הַזִּינוּ אֶת הַקּוֹד"),
+            ParentGateView(allowClose: true, gateTitle: tr("אזור הורים"),
+                           gateReason: tr("כדי לפתוח את המנוי למשפחה — הזינו את הקוד"),
                            useFaceID: true, respectSession: false) {
                 PaywallView(source: pack.isPass ? "child_request" : "new_world")
                     .environmentObject(subs).environment(\.layoutDirection, .app)
             }
         }
         .onAppear { if pack.isPass, !oneTimeDoorAllowed { choosingTofyPlus = true } }
-        .alert(tr("הָרְכִישָׁה לֹא הֻשְׁלְמָה"), isPresented: Binding(get: { purchaseFailed != nil }, set: { if !$0 { purchaseFailed = nil } })) {
-            Button(tr("סָגוּר"), role: .cancel) {}
+        .alert(tr("הרכישה לא השלמה"), isPresented: Binding(get: { purchaseFailed != nil }, set: { if !$0 { purchaseFailed = nil } })) {
+            Button(tr("סגור"), role: .cancel) {}
         } message: { Text(purchaseFailed ?? "") }
     }
 
@@ -93,7 +93,7 @@ struct PackDetailView: View {
                 }
                 .buttonStyle(.plain)
                 Spacer()
-                Text(pack.isPass ? tr("עוֹלָם בְּסִיסִי · כָּלוּל בְּטוֹפִי+") : tr("כָּלוּל בְּטוֹפִי+ · אוֹ רְכִישָׁה חַד־פַּעֲמִית"))
+                Text(pack.isPass ? tr("עולם בסיסי · כלול בטופי+") : tr("כלול בטופי+ · או רכישה חדפעמית"))
                     .font(.system(size: 11.5, weight: .bold, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .padding(.horizontal, 10).padding(.vertical, 5)
@@ -109,7 +109,7 @@ struct PackDetailView: View {
             Text(pack.tagline)
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
-            Text(tr("מָה הַיֶּלֶד יִלְמַד"))
+            Text(tr("מה הילד ילמד"))
                 .font(.system(size: 14.5, weight: .heavy, design: .rounded))
                 .padding(.top, 6)
             Text(pack.description)
@@ -136,9 +136,9 @@ struct PackDetailView: View {
     /// One row in Hebrew (as designed); longer translations get the third chip
     /// on its own row instead of three truncated ones.
     @ViewBuilder private var chipRows: some View {
-        let first = chip(tr("מֻמְלָץ \(pack.gradesLabel)"))
+        let first = chip(tr("ממלץ \(pack.gradesLabel)"))
         let second = chip(pack.questionsLabel)
-        let third = chip(pack.isPass ? tr("\(pack.durationLabel) · בְּלִי חִדּוּשׁ") : tr("עִדְכּוּנִים חִנָּם"))
+        let third = chip(pack.isPass ? tr("\(pack.durationLabel) · בלי חדוש") : tr("עדכונים חנם"))
         if LanguageStore.shared.current == .he {
             HStack(spacing: 6) { first; second; third }
         } else {
@@ -162,15 +162,15 @@ struct PackDetailView: View {
     private var includedInTofyPlus: some View {
         VStack(spacing: 8) {
             Text("👑").font(.system(size: 40))
-            Text(tr("כָּלוּל בְּטוֹפִי+ — כְּבָר פָּתוּחַ לְכָל הַיְלָדִים"))
+            Text(tr("כלול בטופי+ — כבר פתוח לכל הילדים"))
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .multilineTextAlignment(.center)
-            Text(tr("הָעוֹלָם מְחַכֶּה בַּמָּסָךְ הָרָאשִׁי שֶׁל כָּל יֶלֶד, עִם סִימוּן \"חָדָשׁ\"."))
+            Text(tr("העולם מחכה במסך הראשי של כל ילד, עם סימון \"חדש\"."))
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
                 .multilineTextAlignment(.center)
             Button { Haptic.light(); onClose() } label: {
-                Text(tr("מְעוּלֶה"))
+                Text(tr("מעולה"))
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color(hex: "4B3FBF"))
                     .frame(maxWidth: .infinity)
@@ -189,18 +189,18 @@ struct PackDetailView: View {
         VStack(alignment: .leading, spacing: 8) {
             if pack.isPass, oneTimeDoorAllowed {
                 // 🌍 Two doors: this world for 30 days, or Tofy+ for everything.
-                Text(tr("אֵיךְ לִפְתֹּחַ?"))
+                Text(tr("איך לפתח?"))
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                 // Like the approved mockup: one option above the other, each with
                 // its price and a line that says exactly what it buys.
                 VStack(spacing: 8) {
-                    optionRow(title: tr("רַק הָעוֹלָם הַזֶּה") + (selectedIDs.count == 1 && !choosingTofyPlus ? tr(", לְ\(kids.first { selected.contains($0.id.uuidString) }?.name ?? "")") : ""),
+                    optionRow(title: tr("רק העולם הזה") + (selectedIDs.count == 1 && !choosingTofyPlus ? tr(", לְ\(kids.first { selected.contains($0.id.uuidString) }?.name ?? "")") : ""),
                               price: priceLabel ?? pack.plannedPriceLabel,
-                              line: tr("\(pack.durationLabel) · לְיֶלֶד אֶחָד · בְּלִי מִנּוּי · בְּלִי חִדּוּשׁ אוֹטוֹמָטִי"),
+                              line: tr("\(pack.durationLabel) · לילד אחד · בלי מנוי · בלי חדוש אוטומטי"),
                               selected: !choosingTofyPlus, gold: false) { Haptic.light(); withAnimation(.easeInOut(duration: 0.2)) { choosingTofyPlus = false } }
-                    optionRow(title: tr("👑 טוֹפִי+ לְכָל הַמִּשְׁפָּחָה"),
+                    optionRow(title: tr("👑 טופי+ לכל המשפחה"),
                               price: tofyPlusPrice,
-                              line: tr("כָּל \(WorldPasses.available.count) הָעוֹלָמוֹת, מִשְׂחָקִים, זִירָה וּמַטְלוֹת · לְכָל הַיְלָדִים") + (subs.yearlyIntroEligible ? tr(" · 7 יָמִים חִנָּם") : ""),
+                              line: tr("כל \(WorldPasses.available.count) העולמות, משחקים, זירה ומטלות · לכל הילדים") + (subs.yearlyIntroEligible ? tr(" · 7 ימים חנם") : ""),
                               selected: choosingTofyPlus, gold: true) { Haptic.light(); withAnimation(.easeInOut(duration: 0.2)) { choosingTofyPlus = true } }
                 }
                 .foregroundStyle(GlassInk.primary)
@@ -209,7 +209,7 @@ struct PackDetailView: View {
             if choosingTofyPlus {
                 // The family door: no child to pick — one subscription for everyone.
                 Button { Haptic.light(); showTofyPlus = true } label: {
-                    Text(subs.yearlyIntroEligible ? tr("הַתְחִילוּ 7 יָמִים חִנָּם") : tr("לְכָל הַפְּרָטִים שֶׁל טוֹפִי+"))
+                    Text(subs.yearlyIntroEligible ? tr("התחילו 7 ימים חנם") : tr("לכל הפרטים של טופי+"))
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3FBF"))
                         .frame(maxWidth: .infinity)
@@ -218,13 +218,13 @@ struct PackDetailView: View {
                 }
                 .buttonStyle(.plain)
                 .padding(.top, 4)
-                Text(tr("מֵאֲחוֹרֵי קוֹד הוֹרֶה · Apple ID · נִפְתָּח לְכָל הַיְלָדִים בְּכָל הַמַּכְשִׁירִים"))
+                Text(tr("מאחורי קוד הורה · Apple ID · נפתח לכל הילדים בכל המכשירים"))
                     .font(.system(size: 11.5, weight: .medium, design: .rounded))
                     .foregroundStyle(GlassInk.tertiary)
                     .frame(maxWidth: .infinity)
                     .multilineTextAlignment(.center)
             } else {
-            Text(pack.isPass ? tr("לְמִי?") : tr("לְמִי לִשְׁלֹחַ?"))
+            Text(pack.isPass ? tr("למי?") : tr("למי לשלח?"))
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
             ForEach(kids) { kid in
                 // A pass can be renewed — the child stays selectable.
@@ -250,11 +250,11 @@ struct PackDetailView: View {
                         Text(Profile.gradeDisplayName(kid.effectiveGrade)).font(.system(size: 12.5, weight: .semibold, design: .rounded)).foregroundStyle(GlassInk.secondary)
                         Spacer()
                         if owns {
-                            Text(tr("כְּבָר יֵשׁ ✓")).font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(GlassInk.good)
+                            Text(tr("כבר יש ✓")).font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(GlassInk.good)
                         } else if let daysLeft, kid.owns(pack) {
-                            Text(tr("עוֹד \(daysLeft) יוֹם · חִדּוּשׁ")).font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(GlassInk.good)
+                            Text(tr("עוד \(daysLeft) יום · חדוש")).font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(GlassInk.good)
                         } else if kid.passExpired(pack) {
-                            Text(tr("נִגְמַר · לְהַמְשִׁיךְ")).font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(GlassInk.warn)
+                            Text(tr("נגמר · להמשיך")).font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(GlassInk.warn)
                         }
                     }
                     .padding(.horizontal, 10).padding(.vertical, 8)
@@ -265,8 +265,8 @@ struct PackDetailView: View {
             }
             HStack {
                 Text(pack.isPass
-                     ? (selectedIDs.count > 1 ? tr("לְ־\(selectedIDs.count) יְלָדִים · \(pack.durationLabel)") : tr("לְיֶלֶד אֶחָד · \(pack.durationLabel)"))
-                     : (selectedIDs.count > 1 ? tr("לְ־\(selectedIDs.count) יְלָדִים · פַּעַם אַחַת") : tr("לְיֶלֶד אֶחָד · פַּעַם אַחַת")))
+                     ? (selectedIDs.count > 1 ? tr("ל\(selectedIDs.count) ילדים · \(pack.durationLabel)") : tr("לילד אחד · \(pack.durationLabel)"))
+                     : (selectedIDs.count > 1 ? tr("ל\(selectedIDs.count) ילדים · פעם אחת") : tr("לילד אחד · פעם אחת")))
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                 Spacer()
@@ -276,7 +276,7 @@ struct PackDetailView: View {
             }
             .padding(.top, 6)
             if !pack.isPass, HouseholdManager.shared.householdOwnsPack(pack.id), !selectedIDs.isEmpty {
-                Text(tr("הַמִּשְׁפָּחָה כְּבָר רָכְשָׁה — יֶלֶד נוֹסָף בַּחֲצִי מְחִיר"))
+                Text(tr("המשפחה כבר רכשה — ילד נוסף בחצי מחיר"))
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.good)
             }
@@ -296,7 +296,7 @@ struct PackDetailView: View {
             .disabled(selectedIDs.isEmpty || priceLabel == nil)
             .opacity(selectedIDs.isEmpty || priceLabel == nil ? 0.5 : 1)
             .padding(.top, 4)
-            Text(pack.isPass ? tr("מֵאֲחוֹרֵי קוֹד הוֹרֶה · Apple ID · הָעוֹלָם נִפְתָּח לַיֶּלֶד מִיָּד · בְּלִי חִדּוּשׁ אוֹטוֹמָטִי") : tr("מֵאֲחוֹרֵי קוֹד הוֹרֶה · Apple ID · הַשְּׁאֵלוֹן נִכְנָס לַיֶּלֶד מִיָּד"))
+            Text(pack.isPass ? tr("מאחורי קוד הורה · Apple ID · העולם נפתח לילד מיד · בלי חדוש אוטומטי") : tr("מאחורי קוד הורה · Apple ID · השאלון נכנס לילד מיד"))
                 .font(.system(size: 11.5, weight: .medium, design: .rounded))
                 .foregroundStyle(GlassInk.tertiary)
                 .frame(maxWidth: .infinity)
@@ -314,7 +314,7 @@ struct PackDetailView: View {
     private var tofyPlusPrice: String {
         if store.allLoaded, let m = subs.products.first(where: { $0.id == SubscriptionManager.monthlyID }) { return m.pricePerPeriod }
         #if DEBUG
-        return tr("₪24.90 / חוֹדֶשׁ")
+        return tr("₪24.90 / חודש")
         #else
         return subs.products.first(where: { $0.id == SubscriptionManager.monthlyID })?.pricePerPeriod ?? ""
         #endif
@@ -347,9 +347,9 @@ struct PackDetailView: View {
     private var ctaTitle: String {
         let names = kids.filter { selected.contains($0.id.uuidString) }.map(\.name)
         switch names.count {
-        case 0:  return tr("בַּחֲרוּ יֶלֶד")
-        case 1:  return pack.isPass ? tr("פִּתְחוּ \(pack.durationLabel) לְ\(names[0])") : tr("רִכְשׁוּ וְשִׁלְחוּ לְ\(names[0])")
-        default: return pack.isPass ? tr("פִּתְחוּ \(pack.durationLabel) לְ־\(names.count) יְלָדִים") : tr("רִכְשׁוּ וְשִׁלְחוּ לְ־\(names.count) יְלָדִים")
+        case 0:  return tr("בחרו ילד")
+        case 1:  return pack.isPass ? tr("פתחו \(pack.durationLabel) ל\(names[0])") : tr("רכשו ושלחו ל\(names[0])")
+        default: return pack.isPass ? tr("פתחו \(pack.durationLabel) ל\(names.count) ילדים") : tr("רכשו ושלחו ל\(names.count) ילדים")
         }
     }
 
@@ -359,7 +359,7 @@ struct PackDetailView: View {
             GlassBackdrop()
             VStack(spacing: 14) {
                 Text(pack.emoji).font(.system(size: 54))
-                Text(store.isPurchasing ? tr("מְאַשְּׁרִים מוּל Apple…") : tr("פּוֹתְחִים אֶת הָרְכִישָׁה…"))
+                Text(store.isPurchasing ? tr("מאשרים מול Apple…") : tr("פותחים את הרכישה…"))
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                 ProgressView().tint(.white)
             }
@@ -372,7 +372,7 @@ struct PackDetailView: View {
                 granted = kids.filter { ids.contains($0.id.uuidString) }.map(\.name)
                 Haptic.success()
             } else {
-                purchaseFailed = store.lastError ?? tr("בִּטַּלְתֶּם אֶת הָרְכִישָׁה.")
+                purchaseFailed = store.lastError ?? tr("בטלתם את הרכישה.")
             }
             gateOpen = false
         }
@@ -381,16 +381,16 @@ struct PackDetailView: View {
     private var success: some View {
         VStack(spacing: 10) {
             Text("🎉").font(.system(size: 44))
-            Text(pack.isPass ? tr("✓ \(pack.name) פָּתוּחַ לְ\(ListFormatter.localizedString(byJoining: granted)) לְ־\(pack.durationLabel)") : tr("✓ נִשְׁלַח לְ\(ListFormatter.localizedString(byJoining: granted))"))
+            Text(pack.isPass ? tr("✓ \(pack.name) פתוח ל\(ListFormatter.localizedString(byJoining: granted)) ל\(pack.durationLabel)") : tr("✓ נשלח ל\(ListFormatter.localizedString(byJoining: granted))"))
                 .font(.system(size: 18, weight: .heavy, design: .rounded))
                 .multilineTextAlignment(.center)
-            Text(tr("\(pack.name) כְּבָר מְחַכֶּה בַּמָּסָךְ הָרָאשִׁי שֶׁל הַיֶּלֶד, עִם סִימוּן \"חָדָשׁ\". בַּפְּתִיחָה הַבָּאָה הוּא יְקַבֵּל הַפְתָּעָה קְטַנָּה 🎁"))
+            Text(tr("\(pack.name) כבר מחכה במסך הראשי של הילד, עם סימון \"חדש\". בפתיחה הבאה הוא יקבל הפתעה קטנה 🎁"))
                 .font(.system(size: 13.5, weight: .medium, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
             Button { Haptic.light(); onClose() } label: {
-                Text(tr("סִיַּמְנוּ"))
+                Text(tr("סימנו"))
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color(hex: "4B3FBF"))
                     .frame(maxWidth: .infinity)
@@ -431,7 +431,7 @@ struct PacksHomeSection: View {
             // 🌍 Without Tofy+: every base world, 30 days per child. (A family
             // with Tofy+ already has them all — the shelf disappears.)
             if !subs.isPremium {
-                Text(tr("🌍 הָעוֹלָמוֹת שֶׁל טוֹפִי · כְּלוּלִים בְּטוֹפִי+ · אוֹ 30 יוֹם לְיֶלֶד"))
+                Text(tr("🌍 העולמות של טופי · כלולים בטופי+ · או 30 יום לילד"))
                     .font(.system(size: 13.5, weight: .heavy, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .padding(.horizontal, 4)
@@ -443,7 +443,7 @@ struct PacksHomeSection: View {
                 }
                 if WorldPasses.available.count > 3 {
                     Button { Haptic.light(); withAnimation(.easeInOut(duration: 0.25)) { worldsExpanded.toggle() } } label: {
-                        Text(worldsExpanded ? tr("פָּחוֹת ▴") : tr("+ עוֹד \(WorldPasses.available.count - 3) עוֹלָמוֹת ▾"))
+                        Text(worldsExpanded ? tr("פחות ▴") : tr("+ עוד \(WorldPasses.available.count - 3) עולמות ▾"))
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundStyle(GlassInk.secondary)
                             .frame(maxWidth: .infinity)
@@ -454,7 +454,7 @@ struct PacksHomeSection: View {
             }
             if !packs.isEmpty {
                 HStack {
-                    Text(tr("✨ שְׁאֵלוֹנִים חֲדָשִׁים לַיְלָדִים"))
+                    Text(tr("✨ שאלונים חדשים לילדים"))
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                     Spacer()
@@ -489,7 +489,7 @@ struct PacksHomeSection: View {
                     Text(pack.name).font(.system(size: 15, weight: .heavy, design: .rounded))
                         .lineLimit(1).minimumScaleFactor(0.8)
                     if !pack.isPass {
-                        Text(tr("חָדָשׁ"))
+                        Text(tr("חדש"))
                             .font(.system(size: 10, weight: .heavy, design: .rounded))
                             .foregroundStyle(Color(hex: "3B2E05"))
                             .padding(.horizontal, 7).padding(.vertical, 2)
@@ -510,7 +510,7 @@ struct PacksHomeSection: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 4)
-            Text(pack.isPass ? (owners.isEmpty ? tr("30 יוֹם") : tr("חַדְּשׁוּ")) : (subs.isPremium ? tr("✓ פָּתוּחַ") : (owners.count == profiles.profiles.count && !owners.isEmpty ? "✓" : tr("שִׁלְחוּ לַיֶּלֶד"))))
+            Text(pack.isPass ? (owners.isEmpty ? tr("30 יום") : tr("חדשו")) : (subs.isPremium ? tr("✓ פתוח") : (owners.count == profiles.profiles.count && !owners.isEmpty ? "✓" : tr("שלחו לילד"))))
                 .font(.system(size: 12.5, weight: .heavy, design: .rounded))
                 .foregroundStyle(Color(hex: "4B3FBF"))
                 .padding(.horizontal, 12).padding(.vertical, 8)
@@ -530,7 +530,7 @@ struct PacksHomeSection: View {
             if pack.isPass {
                 let expiredFor = profiles.profiles.filter { $0.passExpired(pack) }.map(\.name)
                 if !expiredFor.isEmpty { return tr("נִגְמַר לְ\(ListFormatter.localizedString(byJoining: expiredFor)) · לְהַמְשִׁיךְ: \(price ?? "")") }
-                return [price.map { tr("\($0) · 30 יוֹם לְיֶלֶד") }].compactMap { $0 }.joined()
+                return [price.map { tr("\($0) · 30 יום לילד") }].compactMap { $0 }.joined()
             }
             return [pack.gradesLabel, price].compactMap { $0 }.joined(separator: " · ")
         }
@@ -538,19 +538,19 @@ struct PacksHomeSection: View {
         if subs.isPremium, !pack.isPass {
             let days = LearningHistoryStore.shared.history(for: first.id)
             let answered = days.reduce(0) { $0 + ($1.perTopic[pack.topic.rawValue]?.answered ?? 0) }
-            return answered > 0 ? tr("כָּלוּל בְּטוֹפִי+ · \(first.name) \(first.gender == .girl ? tr("הִתְחִילָה") : tr("הִתְחִיל")) · \(answered) שְׁאֵלוֹת") : tr("כָּלוּל בְּטוֹפִי+ · פָּתוּחַ לְכָל הַיְלָדִים")
+            return answered > 0 ? tr("כָּלוּל בְּטוֹפִי+ · \(first.name) \(first.gender == .girl ? tr("התחילה") : tr("התחיל")) · \(answered) שְׁאֵלוֹת") : tr("כלול בטופי+ · פתוח לכל הילדים")
         }
         if pack.isPass {
-            let parts = owners.map { o in tr("\(o.name)\(o.passDaysLeft(pack).map { tr(" · עוֹד \($0) יוֹם") } ?? "")") }
+            let parts = owners.map { o in tr("\(o.name)\(o.passDaysLeft(pack).map { tr(" · עוד \($0) יום") } ?? "")") }
             return tr("✓ פָּתוּחַ לְ\(parts.joined(separator: ", "))")
         }
         let days = LearningHistoryStore.shared.history(for: first.id)
         let answered = days.reduce(0) { $0 + ($1.perTopic[pack.topic.rawValue]?.answered ?? 0) }
         let correct = days.reduce(0) { $0 + ($1.perTopic[pack.topic.rawValue]?.correct ?? 0) }
-        var line = tr("✓ נִשְׁלַח לְ\(ListFormatter.localizedString(byJoining: owners.map(\.name)))")
+        var line = tr("✓ נשלח ל\(ListFormatter.localizedString(byJoining: owners.map(\.name)))")
         if answered > 0 {
             let pct = Int((Double(correct) / Double(answered) * 100).rounded())
-            line += tr("\n\(first.gender == .girl ? tr("הִתְחִילָה") : tr("הִתְחִיל")) · \(answered) שְׁאֵלוֹת · \(pct)%")
+            line += tr("\n\(first.gender == .girl ? tr("התחילה") : tr("התחיל")) · \(answered) שְׁאֵלוֹת · \(pct)%")
         }
         return line
     }

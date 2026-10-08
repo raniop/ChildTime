@@ -29,11 +29,11 @@ struct ParentFeedbackView: View {
                     form
                 }
             }
-            .navigationTitle(tr("פִידְבֶּק"))
+            .navigationTitle(tr("פידבק"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(tr("סְגוֹר")) { dismiss() }
+                    Button(tr("סגור")) { dismiss() }
                 }
             }
         }
@@ -42,18 +42,18 @@ struct ParentFeedbackView: View {
     private var form: some View {
         Form {
             Section {
-                Text(tr("נִשְׂמַח לִשְׁמוֹעַ מָה דַּעְתְּכֶם — מָה לְשַׁפֵּר, מָה חָסֵר, אוֹ כָּל רַעְיוֹן שֶׁיֵּשׁ לָכֶם. כָּל מִלָּה עוֹזֶרֶת לָנוּ לְשַׁפֵּר אֶת טוֹפִי לַיְּלָדִים."))
+                Text(tr("נשמח לשמוע מה דעתכם — מה לשפר, מה חסר, או כל רעיון שיש לכם. כל מלה עוזרת לנו לשפר את טופי לילדים."))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
             .glassRows()
-            Section(tr("הַהוֹדָעָה שֶׁלָּכֶם")) {
+            Section(tr("ההודעה שלכם")) {
                 TextEditor(text: $text)
                     .frame(minHeight: 140)
                     .focused($focused)
                     .overlay(alignment: .topLeading) {
                         if text.isEmpty {
-                            Text(tr("כִּתְבוּ כָּאן…"))
+                            Text(tr("כתבו כאן…"))
                                 .foregroundStyle(.secondary)
                                 .padding(.top, 8)
                                 .padding(.leading, 5)
@@ -69,7 +69,7 @@ struct ParentFeedbackView: View {
                     HStack {
                         Spacer()
                         if sending { ProgressView() }
-                        else { Label(tr("שְׁלַח לָנוּ"), systemImage: "paperplane.fill") }
+                        else { Label(tr("שלח לנו"), systemImage: "paperplane.fill") }
                         Spacer()
                     }
                 }
@@ -87,15 +87,15 @@ struct ParentFeedbackView: View {
             Spacer()
             Text("🙏")
                 .font(.system(size: 60))
-            Text(tr("תּוֹדָה רַבָּה!"))
+            Text(tr("תודה רבה!"))
                 .font(.title2.weight(.bold))
-            Text(tr("קִבַּלְנוּ אֶת הַפִידְבֶּק שֶׁלָּכֶם — זֶה מְאוֹד עוֹזֵר לָנוּ."))
+            Text(tr("קבלנו את הפידבק שלכם — זה מאוד עוזר לנו."))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             Spacer()
-            Button(tr("סְגוֹר")) { dismiss() }
+            Button(tr("סגור")) { dismiss() }
                 .buttonStyle(.borderedProminent)
                 .padding(.bottom, 24)
         }

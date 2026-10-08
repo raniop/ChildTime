@@ -142,11 +142,11 @@ struct ParentGateView<Content: View>: View {
                 if loadingTimedOut {
                     // Rani: after a while this must SAY what is wrong, not spin.
                     Text("📡").font(.system(size: 44))
-                    Text(tr("הַמַּכְשִׁיר לֹא הִצְלִיחַ לְהִתְחַבֵּר לַמִּשְׁפָּחָה"))
+                    Text(tr("המכשיר לא הצליח להתחבר למשפחה"))
                         .font(.system(size: 19, weight: .heavy, design: .rounded))
                         .foregroundStyle(GlassInk.primary)
                         .multilineTextAlignment(.center)
-                    Text(tr("בִּדְקוּ שֶׁיֵּשׁ אִינְטֶרְנֶט, וְשֶׁהַמַּכְשִׁיר עֲדַיִן מְקֻשָּׁר לַמִּשְׁפָּחָה בְּלוּחַ הַהוֹרִים."))
+                    Text(tr("בדקו שיש אינטרנט, ושהמכשיר עדין מקשר למשפחה בלוח ההורים."))
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                         .multilineTextAlignment(.center)
@@ -156,7 +156,7 @@ struct ParentGateView<Content: View>: View {
                         household.refreshHouseholdNow()
                         armLoadingTimeout()
                     } label: {
-                        Text(tr("נַסּוּ שׁוּב"))
+                        Text(tr("נסו שוב"))
                             .font(.system(size: 15, weight: .heavy, design: .rounded))
                             .foregroundStyle(Color(hex: "4B3FBF"))
                             .padding(.horizontal, 22).padding(.vertical, 10)
@@ -169,27 +169,27 @@ struct ParentGateView<Content: View>: View {
                     // have a way back to "who uses this device?" without the
                     // owner deleting and reinstalling the app.
                     Button { Haptic.light(); confirmDeviceReset = true } label: {
-                        Text(tr("אַפְּסוּ אֶת הַמַּכְשִׁיר"))
+                        Text(tr("אפסו את המכשיר"))
                             .font(.system(size: 13.5, weight: .semibold, design: .rounded))
                             .foregroundStyle(GlassInk.secondary)
                             .underline()
                     }
                     .buttonStyle(.plain)
                     .padding(.top, 2)
-                    .alert(tr("לְאַפֵּס אֶת הַמַּכְשִׁיר?"), isPresented: $confirmDeviceReset) {
-                        Button(tr("אַפְּסוּ"), role: .destructive) {
+                    .alert(tr("לאפס את המכשיר?"), isPresented: $confirmDeviceReset) {
+                        Button(tr("אפסו"), role: .destructive) {
                             HouseholdManager.shared.resetThisDevice()
                         }
-                        Button(tr("בִּטּוּל"), role: .cancel) {}
+                        Button(tr("בטול"), role: .cancel) {}
                     } message: {
-                        Text(tr("הַמַּכְשִׁיר יַחֲזֹר לְמָסַךְ הַפְּתִיחָה וְיִשְׁאַל שׁוּב מִי מִשְׁתַּמֵּשׁ בּוֹ. הַמִּשְׁפָּחָה וְהַהִתְקַדְּמוּת בֶּעָנָן נִשְׁמָרוֹת."))
+                        Text(tr("המכשיר יחזר למסך הפתיחה וישאל שוב מי משתמש בו. המשפחה וההתקדמות בענן נשמרות."))
                     }
                 } else {
                     ProgressView().scaleEffect(1.4).tint(.white)
-                    Text(tr("טוֹעֲנִים אֶת הַמִּשְׁפָּחָה שֶׁלָּכֶם…"))
+                    Text(tr("טוענים את המשפחה שלכם…"))
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
                         .foregroundStyle(GlassInk.primary)
-                    Text(tr("רֶגַע אֶחָד…"))
+                    Text(tr("רגע אחד…"))
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                 }
@@ -242,11 +242,11 @@ struct ParentGateView<Content: View>: View {
                 Image(systemName: "lock.badge.clock")
                     .font(.system(size: 56))
                     .foregroundStyle(AppColor.starGold)
-                Text(tr("קוֹד הַהוֹרֶה לֹא זָמִין כָּאן"))
+                Text(tr("קוד ההורה לא זמין כאן"))
                     .font(.system(size: 26, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
-                Text(tr("קוֹד הַהוֹרֶה שֶׁל הַמִּשְׁפָּחָה עֲדַיִן לֹא הִגִּיעַ לַמַּכְשִׁיר הַזֶּה (בִּדְקוּ חִבּוּר לָאִינְטֶרְנֶט). אֶפְשָׁר תָּמִיד לְאַפֵּס מִלּוּחַ הַהוֹרִים בַּמַּכְשִׁיר שֶׁל אַבָּא אוֹ אִמָּא."))
+                Text(tr("קוד ההורה של המשפחה עדין לא הגיע למכשיר הזה (בדקו חבור לאינטרנט). אפשר תמיד לאפס מלוח ההורים במכשיר של אבא או אמא."))
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .multilineTextAlignment(.center)
@@ -255,7 +255,7 @@ struct ParentGateView<Content: View>: View {
                     Button {
                         dismiss()
                     } label: {
-                        Text(tr("סְגִירָה"))
+                        Text(tr("סגירה"))
                             .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 34).padding(.vertical, 13)
@@ -298,7 +298,7 @@ struct ParentGateView<Content: View>: View {
                             Haptic.light()
                             settings.deviceRole = .unset
                         } label: {
-                            Label(tr("חֲזָרָה"), systemImage: "chevron.backward")
+                            Label(tr("חזרה"), systemImage: "chevron.backward")
                                 .font(.system(size: 15, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 14).padding(.vertical, 8)
@@ -361,7 +361,7 @@ struct ParentGateView<Content: View>: View {
                         .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
 
                     Text(onboardingSetup ? tr("בוחרים קוד הורה")
-                         : isSetupMode ? tr("בַּחֲרוּ קוֹד הוֹרֶה") : (gateTitle ?? tr("הַגְדָּרוֹת הוֹרֶה")))
+                         : isSetupMode ? tr("בחרו קוד הורה") : (gateTitle ?? tr("הגדרות הורה")))
                         .font(.system(size: display.isShort ? 22 : 30, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
@@ -407,7 +407,7 @@ struct ParentGateView<Content: View>: View {
                             Haptic.light()
                             entered = ""; setupFirst = nil; weakCodeChosen = false; setupMismatch = false
                         } label: {
-                            Label(onboardingSetup ? tr("בחירת קוד אחר") : tr("בְּחִירַת קוֹד אַחֵר"), systemImage: "arrow.uturn.backward")
+                            Label(onboardingSetup ? tr("בחירת קוד אחר") : tr("בחירת קוד אחר"), systemImage: "arrow.uturn.backward")
                                 .font(.system(size: 15, weight: .semibold, design: .rounded))
                                 .foregroundStyle(.white.opacity(0.9))
                         }
@@ -420,7 +420,7 @@ struct ParentGateView<Content: View>: View {
                         Button {
                             Task { await tryBiometric() }
                         } label: {
-                            Label(tr("פִּתְחוּ עִם Face ID"), systemImage: "faceid")
+                            Label(tr("פתחו עם Face ID"), systemImage: "faceid")
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 16)
@@ -530,11 +530,11 @@ struct ParentGateView<Content: View>: View {
         if isSetupMode {
             if setupFirst == nil {
                 return setupMismatch
-                    ? tr("הַקּוֹדִים לֹא תָּאֲמוּ — בַּחֲרוּ קוֹד שׁוּב")
-                    : tr("בַּחֲרוּ קוֹד בֶּן 4 סְפָרוֹת כְּדֵי לְהָגֵן עַל הַהַגְדָּרוֹת")
+                    ? tr("הקודים לא תאמו — בחרו קוד שוב")
+                    : tr("בחרו קוד בן 4 ספרות כדי להגן על ההגדרות")
             }
-            if weakCodeChosen { return tr("⚠️ קוֹד קַל לְנִחוּשׁ — הַיֶּלֶד רוֹאֶה אֶתְכֶם מַקְלִידִים אוֹתוֹ. אֶפְשָׁר לְאַשֵּׁר בְּכָל זֹאת, אוֹ לַחֲזוֹר וְלִבְחֹר אַחֵר.") }
-            return tr("הַזִּינוּ שׁוּב אֶת הַקּוֹד לְאִשּׁוּר")
+            if weakCodeChosen { return tr("⚠️ קוד קל לנחוש — הילד רואה אתכם מקלידים אותו. אפשר לאשר בכל זאת, או לחזור ולבחר אחר.") }
+            return tr("הזינו שוב את הקוד לאשור")
         }
         if let reason = gateReason { return reason }
         // A co-parent's FIRST entry on this device: the family code exists in
@@ -544,11 +544,11 @@ struct ParentGateView<Content: View>: View {
             // The parent who CREATED the family lands here too after reinstalling
             // Tofy — and was told to ask "the parent who invited you", i.e. himself.
             if let hh = household.household, hh.createdBy == AuthManager.shared.userID {
-                return tr("הַזִּינוּ אֶת קוֹד הַהוֹרֶה שֶׁבְּחַרְתֶּם לַמִּשְׁפָּחָה")
+                return tr("הזינו את קוד ההורה שבחרתם למשפחה")
             }
-            return tr("זֶהוּ קוֹד הַהוֹרֶה הַמִּשְׁפַּחְתִּי · בַּקְּשׁוּ אוֹתוֹ מֵהַהוֹרֶה שֶׁהִזְמִין אֶתְכֶם")
+            return tr("זהו קוד ההורה המשפחתי · בקשו אותו מההורה שהזמין אתכם")
         }
-        return tr("הַזִּינוּ קוֹד בֶּן 4 סְפָרוֹת")
+        return tr("הזינו קוד בן 4 ספרות")
     }
 
     /// 1234 / 0000 / 1111 / 4321 and friends: a run or a single repeated digit.
@@ -579,7 +579,7 @@ struct ParentGateView<Content: View>: View {
                     Task { @MainActor in
                         if PINManager.shared.biometryAvailable {
                             let ok = await PINManager.shared.authenticateBiometric(
-                                reason: tr("הַפְעִילוּ פְּתִיחָה מְהִירָה עִם Face ID"))
+                                reason: tr("הפעילו פתיחה מהירה עם Face ID"))
                             if ok { settings.faceIDForParentGate = true }
                         }
                         grantAccess()
@@ -635,7 +635,7 @@ struct ParentGateView<Content: View>: View {
                 Haptic.success()
                 Task { @MainActor in
                     let ok = await PINManager.shared.authenticateBiometric(
-                        reason: tr("הַפְעִילוּ פְּתִיחָה מְהִירָה עִם Face ID"))
+                        reason: tr("הפעילו פתיחה מהירה עם Face ID"))
                     if ok { settings.faceIDForParentGate = true }
                     grantAccess()   // in either case — the code was right
                 }

@@ -21,7 +21,7 @@ struct ChildWorldsView: View {
         NavigationStack {
             Form {
                 Section {
-                    Text(tr("בִּחֲרוּ אֵילוּ עוֹלָמוֹת פְּתוּחִים עֲבוּר \(profile?.name ?? tr("הַיֶּלֶד")). עוֹלָם כָּבוּי נֶעֱלָם מֵהַמָּסָךְ, וְהַיֶּלֶד לֹא מְקַבֵּל מִמֶּנּוּ שְׁאֵלוֹת. הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד."))
+                    Text(tr("בִּחֲרוּ אֵילוּ עוֹלָמוֹת פְּתוּחִים עֲבוּר \(profile?.name ?? tr("הילד")). עוֹלָם כָּבוּי נֶעֱלָם מֵהַמָּסָךְ, וְהַיֶּלֶד לֹא מְקַבֵּל מִמֶּנּוּ שְׁאֵלוֹת. הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד."))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -46,21 +46,21 @@ struct ChildWorldsView: View {
                         }
                     }
                 } header: {
-                    Text(tr("עוֹלָמוֹת פְּעִילִים"))
+                    Text(tr("עולמות פעילים"))
                 } footer: {
-                    Text(tr("\"טוֹפִי טַיים\" תָּמִיד פְּתוּחָה וּמַגִּישָׁה רַק מֵהַנּוֹשְׂאִים הַפְּעִילִים. חַיָּב לְהִשָּׁאֵר לְפָחוֹת עוֹלָם אֶחָד פָּתוּחַ."))
+                    Text(tr("\"טופי טיים\" תמיד פתוחה ומגישה רק מהנושאים הפעילים. חיב להשאר לפחות עולם אחד פתוח."))
                 }
                 .glassRows()
             }
             .readableColumn()
             .glassForm()
-            .navigationTitle(tr("עוֹלָמוֹת פְּעִילִים"))
+            .navigationTitle(tr("עולמות פעילים"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
                 if !railHost.hasRail {
                     ToolbarItem(placement: .confirmationAction) {
-                        Button(tr("סִיּוּם")) { dismiss() }
+                        Button(tr("סיום")) { dismiss() }
                     }
                 }
             }
@@ -68,7 +68,7 @@ struct ChildWorldsView: View {
         // 🎚 Outside the NavigationStack and outside the readable-width
         // cap — otherwise the rail is drawn at the edge of the 600pt
         // column instead of the edge of the glass.
-        .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { dismiss() }
+        .railDismiss(tr("סיום"), systemImage: "checkmark") { dismiss() }
     }
 
     /// The worlds this editor lists — also counted on the child's settings

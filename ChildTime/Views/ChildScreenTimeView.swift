@@ -28,18 +28,18 @@ struct ChildScreenTimeView: View {
         NavigationStack {
             Form {
                 Section {
-                    Text(tr("בִּחֲרוּ כַּמָּה דַּקּוֹת מָסָךְ בְּיוֹם עֲבוּר \(profile?.name ?? tr("הַיֶּלֶד")). הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד."))
+                    Text(tr("בִּחֲרוּ כַּמָּה דַּקּוֹת מָסָךְ בְּיוֹם עֲבוּר \(profile?.name ?? tr("הילד")). הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד."))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
                 .glassRows()
 
                 Section {
-                    Toggle(tr("הַגְבָּלַת זְמַן יוֹמִית"), isOn: $limited)
+                    Toggle(tr("הגבלת זמן יומית"), isOn: $limited)
 
                     if limited {
                         HStack {
-                            Text(tr("דַּקּוֹת בְּיוֹם"))
+                            Text(tr("דקות ביום"))
                             Spacer()
                             TextField("60", value: $minutes, format: .number)
                                 .keyboardType(.numberPad)
@@ -61,40 +61,40 @@ struct ChildScreenTimeView: View {
                             .foregroundStyle(.secondary)
                     } else {
                         HStack {
-                            Text(tr("לְלֹא הַגְבָּלָה"))
+                            Text(tr("ללא הגבלה"))
                             Spacer()
                             Text("♾️")
                         }
                         .foregroundStyle(.secondary)
                     }
                 } header: {
-                    Text(tr("מַקְסִימוּם זְמַן מָסָךְ יוֹמִי"))
+                    Text(tr("מקסימום זמן מסך יומי"))
                 } footer: {
-                    Text(tr("הַיֶּלֶד מַרְוִיחַ עַד הַתִּקְרָה הַזּוֹ בִּלְמִידָה. בּוֹנוּסִים מֵהַגַּלְגַּל/קוּפְסָה נִשְׁמָרִים לְמָחָר כְּשֶׁמַּגִּיעִים לַתִּקְרָה."))
+                    Text(tr("הילד מרויח עד התקרה הזו בלמידה. בונוסים מהגלגל/קופסה נשמרים למחר כשמגיעים לתקרה."))
                 }
                 .glassRows()
             }
             .readableColumn()
             .glassForm()
-            .navigationTitle(tr("זְמַן מָסָךְ יוֹמִי"))
+            .navigationTitle(tr("זמן מסך יומי"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
                 if !railHost.hasRail {
                     ToolbarItem(placement: .confirmationAction) {
-                        Button(tr("סִיּוּם")) { save(); dismiss() }
+                        Button(tr("סיום")) { save(); dismiss() }
                     }
                 }
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button(tr("סִיּוּם")) { minutesFocused = false }
+                    Button(tr("סיום")) { minutesFocused = false }
                 }
             }
         }
         // 🎚 Outside the NavigationStack and outside the readable-width cap —
         // otherwise the rail is drawn at the edge of the 600pt column instead
         // of the edge of the glass.
-        .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { save(); dismiss() }
+        .railDismiss(tr("סיום"), systemImage: "checkmark") { save(); dismiss() }
         .onAppear { loadIfNeeded() }
         // Persist when the sheet closes (covers both typed and stepped values)
         // — keeps Firestore writes to one per edit session, not one per keystroke.
@@ -114,13 +114,13 @@ struct ChildScreenTimeView: View {
         // view itself starts in. Hebrew is untouched; English/Russian keep the
         // catalog's "and"/"и".
         if language.isRightToLeft, language != .he, let span = Self.durationText(minutes: m, locale: language.locale) {
-            return "\u{200F}\u{2067}" + tr("\(span) בְּיוֹם") + "\u{2069}"
+            return "\u{200F}\u{2067}" + tr("\(span) ביום") + "\u{2069}"
         }
         let h = m / 60, r = m % 60
-        let hWord = h == 1 ? tr("שָׁעָה") : tr("\(h) שָׁעוֹת")
-        if h == 0 { return tr("\(r) דַּקּוֹת בְּיוֹם") }
-        if r == 0 { return tr("\(hWord) בְּיוֹם") }
-        return tr("\(hWord) וְ-\(r) דַּקּוֹת בְּיוֹם")
+        let hWord = h == 1 ? tr("שעה") : tr("\(h) שעות")
+        if h == 0 { return tr("\(r) דקות ביום") }
+        if r == 0 { return tr("\(hWord) ביום") }
+        return tr("\(hWord) ו-\(r) דקות ביום")
     }
 
     /// "ساعة و30 دقيقة" — hours + minutes spelled out by the system in `locale`.

@@ -40,7 +40,7 @@ struct KidModeEntryView: View {
             if autoStart && !authFailed {
                 VStack(spacing: AppSpacing.md) {
                     ProgressView().tint(.white).scaleEffect(1.3)
-                    Text(tr("מַעֲבִירִים אֶת הַמַּכְשִׁיר…"))
+                    Text(tr("מעבירים את המכשיר…"))
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
                 }
@@ -77,16 +77,16 @@ struct KidModeEntryView: View {
             selectedChild = selectedChild ?? profiles.activeID ?? profiles.profiles.first?.id
             if autoStart, !didAutoStart { didAutoStart = true; start() }
         }
-        .alert(tr("צָרִיךְ הַרְשָׁאַת Screen Time"), isPresented: $authFailed) {
-            Button(tr("הֵבַנְתִּי"), role: .cancel) {}
+        .alert(tr("צריך הרשאת Screen Time"), isPresented: $authFailed) {
+            Button(tr("הבנתי"), role: .cancel) {}
         } message: {
-            Text(tr("כְּדֵי לִנְעַל אֶת הַטֶּלֶפוֹן בְּמַצַּב יֶלֶד צָרִיךְ לְאַשֵּׁר Screen Time בִּשְׁבִיל טוֹפִי."))
+            Text(tr("כדי לנעל את הטלפון במצב ילד צריך לאשר Screen Time בשביל טופי."))
         }
     }
 
     private var header: some View {
         ZStack {
-            Text(tr("מַצַּב יֶלֶד"))
+            Text(tr("מצב ילד"))
                 .font(.system(size: 24, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: AppColor.starGold.opacity(0.7), radius: 8)
@@ -112,7 +112,7 @@ struct KidModeEntryView: View {
 
     private var childPicker: some View {
         VStack(spacing: AppSpacing.sm) {
-            Text(tr("מִי מְשַׂחֵק?"))
+            Text(tr("מי משחק?"))
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
             ScrollView(.horizontal, showsIndicators: false) {
@@ -146,11 +146,11 @@ struct KidModeEntryView: View {
                     .font(.system(size: 26))
                     .foregroundStyle(AppColor.successMint)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(tr("אַפְּלִיקַצְיוֹת מוּתָּרוֹת"))
+                    Text(tr("אפליקציות מותרות"))
                         .font(.system(size: 17, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                    Text(allowedCount == 0 ? tr("רַק טוֹפִי — הַקִּישׁוּ לִבְחוֹר עוֹד")
-                                           : tr("\(allowedCount) אַפְּלִיקַצְיוֹת + טוֹפִי"))
+                    Text(allowedCount == 0 ? tr("רק טופי — הקישו לבחור עוד")
+                                           : tr("\(allowedCount) אפליקציות + טופי"))
                         .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.75))
                 }
@@ -164,7 +164,7 @@ struct KidModeEntryView: View {
     }
 
     private var explainer: some View {
-        Text(tr("כָּל שְׁאָר הָאַפְּלִיקַצְיוֹת בַּטֶּלֶפוֹן יִנָּעֲלוּ. הַיֶּלֶד יִלְמַד וִישַׂחֵק בְּטוֹפִי, וְיוּכַל לִפְתּוֹחַ אֶת הָאַפְּלִיקַצְיוֹת הַמּוּתָּרוֹת. לִיצִיאָה — קוֹד הוֹרֶה."))
+        Text(tr("כל שאר האפליקציות בטלפון ינעלו. הילד ילמד וישחק בטופי, ויוכל לפתוח את האפליקציות המותרות. ליציאה — קוד הורה."))
             .font(.system(size: 13, weight: .medium, design: .rounded))
             .foregroundStyle(.white.opacity(0.65))
             .multilineTextAlignment(.center)
@@ -189,7 +189,7 @@ struct KidModeEntryView: View {
             HStack(spacing: 8) {
                 if requesting { ProgressView().tint(.white) }
                 Image(systemName: "lock.fill")
-                Text(tr("הַתְחִילוּ מַצַּב יֶלֶד"))
+                Text(tr("התחילו מצב ילד"))
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
             }
             .foregroundStyle(.white)
@@ -213,15 +213,15 @@ struct KidModeExitView: View {
             SparkleField(count: 12, size: 11)
             VStack(spacing: AppSpacing.lg) {
                 Text("🔓").font(.system(size: 72))
-                Text(tr("לָצֵאת מִמַּצַּב יֶלֶד?"))
+                Text(tr("לצאת ממצב ילד?"))
                     .font(.system(size: 24, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text(tr("הַטֶּלֶפוֹן יַחֲזוֹר לְמַצָּב רָגִיל וְהַנְּעִילָה תּוּסַר."))
+                Text(tr("הטלפון יחזור למצב רגיל והנעילה תוסר."))
                     .font(.system(size: 15, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.8))
                     .multilineTextAlignment(.center)
                 Button { onExit() } label: {
-                    Text(tr("כֵּן, צְאוּ"))
+                    Text(tr("כן, צאו"))
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)

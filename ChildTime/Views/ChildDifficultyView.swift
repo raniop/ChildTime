@@ -22,7 +22,7 @@ struct ChildDifficultyView: View {
         NavigationStack {
             Form {
                 Section {
-                    Text(tr("בִּחֲרוּ רָמַת קוֹשִׁי לְכָל נוֹשֵׂא עֲבוּר \(profile?.name ?? tr("הַיֶּלֶד")). הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד."))
+                    Text(tr("בִּחֲרוּ רָמַת קוֹשִׁי לְכָל נוֹשֵׂא עֲבוּר \(profile?.name ?? tr("הילד")). הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד."))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -46,7 +46,7 @@ struct ChildDifficultyView: View {
                         }
                     }
                 } header: {
-                    Text(tr("הָחֵל עַל כָּל הַנּוֹשְׂאִים"))
+                    Text(tr("החל על כל הנושאים"))
                 }
                 .glassRows()
 
@@ -57,7 +57,7 @@ struct ChildDifficultyView: View {
                                 Text(topic.emoji)
                                 Text(topic.displayName)
                             }
-                            Picker(tr("רָמַת קוֹשִׁי"), selection: binding(for: topic)) {
+                            Picker(tr("רמת קושי"), selection: binding(for: topic)) {
                                 ForEach(Difficulty.allCases) { d in
                                     Text(d.displayName).tag(d)
                                 }
@@ -67,19 +67,19 @@ struct ChildDifficultyView: View {
                         .padding(.vertical, 2)
                     }
                 } header: {
-                    Text(tr("לְפִי נוֹשֵׂא"))
+                    Text(tr("לפי נושא"))
                 }
                 .glassRows()
             }
             .readableColumn()
             .glassForm()
-            .navigationTitle(tr("רָמַת קוֹשִׁי"))
+            .navigationTitle(tr("רמת קושי"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
                 if !railHost.hasRail {
                     ToolbarItem(placement: .confirmationAction) {
-                        Button(tr("סִיּוּם")) { dismiss() }
+                        Button(tr("סיום")) { dismiss() }
                     }
                 }
             }
@@ -87,7 +87,7 @@ struct ChildDifficultyView: View {
         // 🎚 Outside the NavigationStack and outside the readable-width
         // cap — otherwise the rail is drawn at the edge of the 600pt
         // column instead of the edge of the glass.
-        .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { dismiss() }
+        .railDismiss(tr("סיום"), systemImage: "checkmark") { dismiss() }
     }
 
     // MARK: - Editing

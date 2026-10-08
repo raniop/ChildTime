@@ -29,7 +29,7 @@ struct ChildLanguageView: View {
         NavigationStack {
             Form {
                 Section {
-                    Text(tr("בִּחֲרוּ בְּאֵיזוֹ שָׂפָה טוֹפִי יוֹפִיעַ בַּמַּכְשִׁיר שֶׁל \(profile?.name ?? tr("הַיֶּלֶד")). הַשִּׁנּוּי מַגִּיעַ לַמַּכְשִׁיר בַּסִּנְכְרוּן הַבָּא."))
+                    Text(tr("בִּחֲרוּ בְּאֵיזוֹ שָׂפָה טוֹפִי יוֹפִיעַ בַּמַּכְשִׁיר שֶׁל \(profile?.name ?? tr("הילד")). הַשִּׁנּוּי מַגִּיעַ לַמַּכְשִׁיר בַּסִּנְכְרוּן הַבָּא."))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -55,21 +55,21 @@ struct ChildLanguageView: View {
                         .accessibilityAddTraits(lang == chosen ? .isSelected : [])
                     }
                 } header: {
-                    Text(tr("שָׂפַת הָאַפְּלִיקַצְיָה אֵצֶל הַיֶּלֶד"))
+                    Text(tr("שפת האפליקציה אצל הילד"))
                 } footer: {
-                    Text(tr("הַשָּׂפָה מְשַׁנָּה גַּם אֶת הַשְּׁאֵלוֹת, לֹא רַק אֶת הַטֶּקְסְטִים. אִם תְּשַׁנּוּ אוֹתָהּ בַּמַּכְשִׁיר שֶׁל הַיֶּלֶד עַצְמוֹ — הַבְּחִירָה הָאַחֲרוֹנָה קוֹבַעַת."))
+                    Text(tr("השפה משנה גם את השאלות, לא רק את הטקסטים. אם תשנו אותה במכשיר של הילד עצמו — הבחירה האחרונה קובעת."))
                 }
                 .glassRows()
             }
             .readableColumn()
             .glassForm()
-            .navigationTitle(tr("שָׂפָה"))
+            .navigationTitle(tr("שפה"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
                 if !railHost.hasRail {
                     ToolbarItem(placement: .confirmationAction) {
-                        Button(tr("סִיּוּם")) { dismiss() }
+                        Button(tr("סיום")) { dismiss() }
                     }
                 }
             }
@@ -77,7 +77,7 @@ struct ChildLanguageView: View {
         // 🎚 Outside the NavigationStack and outside the readable-width
         // cap — otherwise the rail is drawn at the edge of the 600pt
         // column instead of the edge of the glass.
-        .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { dismiss() }
+        .railDismiss(tr("סיום"), systemImage: "checkmark") { dismiss() }
     }
 
     private func pick(_ lang: AppLanguage) {

@@ -51,7 +51,7 @@ struct ParentSettingsView: View {
                                     .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.22)))
                                     .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.32), lineWidth: 1))
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(tr("שָׁפָה · Language")).font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.primary)
+                                    Text(tr("שפה · Language")).font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.primary)
                                     Text(LanguageStore.shared.current.nativeName).font(.system(size: 12.5, weight: .medium, design: .rounded)).foregroundStyle(GlassInk.secondary)
                                 }
                                 Spacer(minLength: 0)
@@ -63,35 +63,35 @@ struct ParentSettingsView: View {
                         }
                         .buttonStyle(.plain)
                     }
-                    menuRow("👪", tr("הַמִּשְׁפָּחָה"), familySummary) {
-                        subScreen(tr("הַמִּשְׁפָּחָה")) { familySection; syncSection }
+                    menuRow("👪", tr("המשפחה"), familySummary) {
+                        subScreen(tr("המשפחה")) { familySection; syncSection }
                     }
                     // 📱 A parent iPad is usually the KID's iPad that got set up
                     // first — offer the one-tap fix (the dashboard behind this
                     // sheet is already behind the root parent gate).
                     if showConvertToChild {
-                        menuRow("🧒", tr("לַהֲפֹךְ אֶת הָאַיְפֵּד הַזֶּה לְמַכְשִׁיר שֶׁל יֶלֶד"),
-                                tr("מֻמְלָץ אִם הַיֶּלֶד מְשַׂחֵק בָּאַיְפֵּד הַזֶּה")) {
+                        menuRow("🧒", tr("להפך את האיפד הזה למכשיר של ילד"),
+                                tr("ממלץ אם הילד משחק באיפד הזה")) {
                             ConvertToChildDeviceView { dismiss() }
                         }
                     }
-                    menuRow("🎮", tr("זְמַן מָסָךְ וּפְרָסִים"), rewardsSummary) {
-                        subScreen(tr("זְמַן מָסָךְ וּפְרָסִים")) { rewardSection; penaltySection; smartFeedSection }
+                    menuRow("🎮", tr("זמן מסך ופרסים"), rewardsSummary) {
+                        subScreen(tr("זמן מסך ופרסים")) { rewardSection; penaltySection; smartFeedSection }
                     }
-                    menuRow("🔔", tr("הַתְרָאוֹת"), notificationsSummary) {
-                        subScreen(tr("הַתְרָאוֹת")) { notificationsSection; insightNotificationsSection }
+                    menuRow("🔔", tr("התראות"), notificationsSummary) {
+                        subScreen(tr("התראות")) { notificationsSection; insightNotificationsSection }
                     }
-                    menuRow("🔐", tr("קוֹד הוֹרֶה"), pinSummary) {
-                        subScreen(tr("קוֹד הוֹרֶה")) { pinSection }
+                    menuRow("🔐", tr("קוד הורה"), pinSummary) {
+                        subScreen(tr("קוד הורה")) { pinSection }
                     }
-                    menuRow("📱", tr("אַפְּלִיקַצְיוֹת וּנְעִילָה"), devicesSummary, soft: true) {
-                        subScreen(tr("אַפְּלִיקַצְיוֹת וּנְעִילָה")) {
+                    menuRow("📱", tr("אפליקציות ונעילה"), devicesSummary, soft: true) {
+                        subScreen(tr("אפליקציות ונעילה")) {
                             if settings.deviceRole != .parent || shields.isAuthorized { authorizationSection }
                             appsSection; soundsSection; deviceSection
                         }
                     }
-                    menuRow("ℹ️", tr("אוֹדוֹת וּפְרָטִיּוּת"), tr("\(AppInfo.versionLine) · יִצּוּא, מְחִיקָה"), soft: true) {
-                        subScreen(tr("אוֹדוֹת וּפְרָטִיּוּת")) { versionSection; privacySection }
+                    menuRow("ℹ️", tr("אודות ופרטיות"), tr("\(AppInfo.versionLine) · יצוא, מחיקה"), soft: true) {
+                        subScreen(tr("אודות ופרטיות")) { versionSection; privacySection }
                     }
                 }
                 .padding(.horizontal, AppSpacing.lg).padding(.top, AppSpacing.sm).padding(.bottom, AppSpacing.xxl)
@@ -99,7 +99,7 @@ struct ParentSettingsView: View {
             }
             .background(GlassBackdrop())
             .environment(\.colorScheme, .dark)
-            .navigationTitle(tr("הַגְדָּרוֹת"))
+            .navigationTitle(tr("הגדרות"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
@@ -149,13 +149,13 @@ struct ParentSettingsView: View {
             HStack {
                 Text("👪")
                 TextField("", text: $familyNameDraft,
-                          prompt: Text(tr("לְמָשָׁל: מִשְׁפַּחַת גּוֹלָן")).foregroundColor(.white.opacity(0.6)))
+                          prompt: Text(tr("למשל: משפחת גולן")).foregroundColor(.white.opacity(0.6)))
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .submitLabel(.done)
                     .onSubmit { household.setFamilyName(familyNameDraft) }
                 if familyNameDraft != (household.familyNameShown ?? "") {
-                    Button(tr("שִׁמְרוּ")) { household.setFamilyName(familyNameDraft) }
+                    Button(tr("שמרו")) { household.setFamilyName(familyNameDraft) }
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3FBF"))
                         .padding(.horizontal, 12).padding(.vertical, 6)
@@ -164,9 +164,9 @@ struct ParentSettingsView: View {
                 }
             }
         } header: {
-            Text(tr("שֵׁם הַמִּשְׁפָּחָה"))
+            Text(tr("שם המשפחה"))
         } footer: {
-            Text(tr("מוֹפִיעַ בְּמָסַךְ הַהוֹרִים וּבְהוֹדָעוֹת — לְכָל הַהוֹרִים בַּמִּשְׁפָּחָה."))
+            Text(tr("מופיע במסך ההורים ובהודעות — לכל ההורים במשפחה."))
         }
         .glassRows()
     }
@@ -215,22 +215,22 @@ struct ParentSettingsView: View {
 
     private var familySummary: String {
         let parents = household.linkedParentSummaries.isEmpty
-            ? (auth.displayName ?? tr("הוֹרֶה")) : household.linkedParentSummaries.joined(separator: ", ")
+            ? (auth.displayName ?? tr("הורה")) : household.linkedParentSummaries.joined(separator: ", ")
         let kids = profiles.profiles.count
-        return tr("\(parents) · \(kids == 1 ? tr("יֶלֶד אֶחָד") : tr("\(kids) יְלָדִים"))")
+        return tr("\(parents) · \(kids == 1 ? tr("ילד אחד") : tr("\(kids) ילדים"))")
     }
     private var rewardsSummary: String {
-        var t = tr("\(settings.batchAnswers) תְּשׁוּבוֹת = \(settings.batchMinutes) דַּקּוֹת")
-        if settings.dailyCapEnabled { t += tr(" · מַקְסִימוּם \(settings.maxMinutesPerDay) דַּק׳ בְּיוֹם") }
+        var t = tr("\(settings.batchAnswers) תשובות = \(settings.batchMinutes) דקות")
+        if settings.dailyCapEnabled { t += tr(" · מקסימום \(settings.maxMinutesPerDay) דק׳ ביום") }
         return t
     }
     private var notificationsSummary: String {
-        let push = PushManager.shared.authorized ? tr("פּוֹעֲלוֹת") : tr("כְּבוּיוֹת")
-        return tr("\(push) · תּוֹבָנוֹת \(freqShortLabel(settings.parentInsightFrequency)) בְּיוֹם")
+        let push = PushManager.shared.authorized ? tr("פועלות") : tr("כבויות")
+        return tr("\(push) · תובנות \(freqShortLabel(settings.parentInsightFrequency)) ביום")
     }
-    private var pinSummary: String { settings.faceIDForParentGate ? tr("Face ID פָּעִיל · שִׁנּוּי קוֹד") : tr("קוֹד בִּלְבַד · שִׁנּוּי קוֹד") }
+    private var pinSummary: String { settings.faceIDForParentGate ? tr("Face ID פעיל · שנוי קוד") : tr("קוד בלבד · שנוי קוד") }
     private var devicesSummary: String {
-        settings.deviceRole == .parent ? tr("מֻגְדָּר בַּמַּכְשִׁיר שֶׁל כָּל יֶלֶד") : tr("אֵילוּ אַפְּלִיקַצְיוֹת נְעוּלוֹת בַּמַּכְשִׁיר הַזֶּה")
+        settings.deviceRole == .parent ? tr("מגדר במכשיר של כל ילד") : tr("אילו אפליקציות נעולות במכשיר הזה")
     }
 
     private var dashboardSection: some View {
@@ -395,7 +395,7 @@ struct ParentSettingsView: View {
     /// design: greeting, child cards, version — nothing else).
     private var insightNotificationsSection: some View {
         Section {
-            Picker(tr("תְּדִירוּת"), selection: $settings.parentInsightFrequency) {
+            Picker(tr("תדירות"), selection: $settings.parentInsightFrequency) {
                 ForEach(ParentSettings.InsightFrequency.allCases) { f in
                     Text(freqShortLabel(f)).tag(f)
                 }
@@ -449,7 +449,7 @@ struct ParentSettingsView: View {
                             .foregroundStyle(AppColor.gemPurple).font(.title3)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(name).font(.headline)
-                            Text(tr("הוֹרֶה בַּמִּשְׁפָּחָה")).font(.caption).foregroundStyle(.secondary)
+                            Text(tr("הורה במשפחה")).font(.caption).foregroundStyle(.secondary)
                         }
                         Spacer()
                     }
@@ -457,7 +457,7 @@ struct ParentSettingsView: View {
                 Button {
                     showFamilyLinking = true
                 } label: {
-                    Label(tr("הוֹסִיפוּ הוֹרֶה לַמִּשְׁפָּחָה"), systemImage: "person.2.badge.plus.fill")
+                    Label(tr("הוסיפו הורה למשפחה"), systemImage: "person.2.badge.plus.fill")
                 }
                 Button(role: .destructive) {
                     showSignOutConfirm = true
@@ -689,7 +689,7 @@ struct ParentSettingsView: View {
             Button {
                 showRolePickerConfirm = true
             } label: {
-                Label(tr("הַחְלֵף תַּפְקִיד מַכְשִׁיר (חֲזָרָה לִבְחִירָה)"), systemImage: "person.2.badge.gearshape")
+                Label(tr("החלף תפקיד מכשיר (חזרה לבחירה)"), systemImage: "person.2.badge.gearshape")
             }
             Button {
                 Haptic.medium()
@@ -698,22 +698,22 @@ struct ParentSettingsView: View {
                 // instantly re-block the deletion this button just allowed.
                 shields.cancelScheduledReshield()
                 shields.setAppRemovalLocked(false)
-                removalNote = tr("נִפְתַּח חַלּוֹן שֶׁל 5 דַּקּוֹת. צְאוּ לְמָסַךְ הַבַּיִת ← לְחִיצָה אֲרוּכָּה עַל טוֹפִי ← \u{201C}הָסֵר אַפְּלִיקַצְיָה\u{201D}. אַחַר כָּךְ הַנְּעִילָה חוֹזֶרֶת לְבַד.")
+                removalNote = tr("נפתח חלון של 5 דקות. צאו למסך הבית ← לחיצה ארוכה על טופי ← \u{201C}הסר אפליקציה\u{201D}. אחר כך הנעילה חוזרת לבד.")
             } label: {
-                Label(tr("אַפְשְׁרוּ מְחִיקַת הָאַפְּלִיקַצְיָה (5 דַּקּוֹת)"), systemImage: "trash")
+                Label(tr("אפשרו מחיקת האפליקציה (5 דקות)"), systemImage: "trash")
             }
             if let removalNote {
                 Text(removalNote).font(.footnote).foregroundStyle(.secondary)
             }
         } header: {
-            Text(tr("מַכְשִׁיר"))
+            Text(tr("מכשיר"))
         } footer: {
-            Text(tr("\"הַחְלֵף תַּפְקִיד\" מַחֲזִיר אֶת הַמַּכְשִׁיר לְמָסַךְ \"מִי מִשְׁתַּמֵּשׁ בַּמַּכְשִׁיר?\" — לְמָשָׁל לְהָפֹךְ מַכְשִׁיר הוֹרֶה בַּחֲזָרָה לְמַכְשִׁיר יֶלֶד. בְּמַכְשִׁיר יֶלֶד הַמְּחִיקָה חֲסוּמָה; הַכַּפְתּוֹר פּוֹתֵחַ חַלּוֹן קָצָר לְהָסָרָה אֲמִתִּית."))
+            Text(tr("\"החלף תפקיד\" מחזיר את המכשיר למסך \"מי משתמש במכשיר?\" — למשל להפך מכשיר הורה בחזרה למכשיר ילד. במכשיר ילד המחיקה חסומה; הכפתור פותח חלון קצר להסרה אמתית."))
         }
         .glassRows()
-        .confirmationDialog(tr("לַחֲזֹר לְמָסַךְ בְּחִירַת הַתַּפְקִיד?"),
+        .confirmationDialog(tr("לחזר למסך בחירת התפקיד?"),
                             isPresented: $showRolePickerConfirm, titleVisibility: .visible) {
-            Button(tr("חֲזֹר לִבְחִירָה")) {
+            Button(tr("חזר לבחירה")) {
                 settings.sessionUnlocked = false   // re-lock the gate after a role switch
                 // Clear the child binding so re-picking "child" starts a FRESH scan
                 // instead of silently dropping back into the previously-bound kid.
@@ -728,9 +728,9 @@ struct ParentSettingsView: View {
                 settings.deviceRole = .unset
                 dismiss()
             }
-            Button(tr("בִּטּוּל"), role: .cancel) {}
+            Button(tr("בטול"), role: .cancel) {}
         } message: {
-            Text(tr("הַמַּכְשִׁיר יַחֲזֹר לְמָסַךְ בְּחִירַת הַתַּפְקִיד. הַנְּתוּנִים בֶּעָנָן נִשְׁמָרִים — אֶפְשָׁר לִבְחֹר יֶלֶד וְלִסְרֹק שׁוּב, אוֹ לְהִשָּׁאֵר הוֹרֶה."))
+            Text(tr("המכשיר יחזר למסך בחירת התפקיד. הנתונים בענן נשמרים — אפשר לבחר ילד ולסרק שוב, או להשאר הורה."))
         }
         .glassRows()
     }

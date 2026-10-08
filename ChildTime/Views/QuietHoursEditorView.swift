@@ -84,12 +84,12 @@ struct QuietHoursEditorView: View {
             .toolbar {
                 if !railHost.hasRail {
                     ToolbarItem(placement: .confirmationAction) {
-                        Button(tr("סִיּוּם")) { save(); dismiss() }
+                        Button(tr("סיום")) { save(); dismiss() }
                     }
                 }
             }
         }
-        .railDismiss(tr("סִיּוּם"), systemImage: "checkmark") { save(); dismiss() }
+        .railDismiss(tr("סיום"), systemImage: "checkmark") { save(); dismiss() }
         .onAppear { load() }
         // One write per editing session, not one per wheel tick.
         .onDisappear { save() }

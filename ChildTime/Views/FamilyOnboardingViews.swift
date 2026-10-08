@@ -150,7 +150,7 @@ struct EmailInviteWelcomeView: View {
     private var familyName: String {
         let names = (household.pendingEmailInvite?.parentNames ?? [:]).values
             .filter { !$0.isEmpty }.sorted()
-        return names.first.map { tr("הַמִּשְׁפָּחָה שֶׁל \($0)") } ?? tr("הַמִּשְׁפָּחָה שֶׁלָּכֶם")
+        return names.first.map { tr("המשפחה של \($0)") } ?? tr("המשפחה שלכם")
     }
 
     var body: some View {
@@ -159,11 +159,11 @@ struct EmailInviteWelcomeView: View {
             SparkleField(count: 12, size: 11)
             VStack(spacing: AppSpacing.xl) {
                 Text("🎉").font(.system(size: 64))
-                Text(tr("\(familyName) מְחַכָּה לָכֶם!"))
+                Text(tr("\(familyName) מחכה לכם!"))
                     .font(.system(size: 27, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
-                Text(tr("הֻזְמַנְתֶּם לְהִצְטָרֵף כְּהוֹרֶה — תִּרְאוּ אֶת הַיְלָדִים, הַהִתְקַדְּמוּת וְהַשְּׁלִיטָה, בְּדִיּוּק כְּמוֹ הַהוֹרֶה שֶׁהִזְמִין אֶתְכֶם."))
+                Text(tr("הזמנתם להצטרף כהורה — תראו את הילדים, ההתקדמות והשליטה, בדיוק כמו ההורה שהזמין אתכם."))
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.88))
                     .multilineTextAlignment(.center)
@@ -180,7 +180,7 @@ struct EmailInviteWelcomeView: View {
                 } label: {
                     HStack(spacing: 10) {
                         if joining { ProgressView().tint(.white) }
-                        Text(tr("הִצְטָרְפוּ לַמִּשְׁפָּחָה"))
+                        Text(tr("הצטרפו למשפחה"))
                             .font(.system(size: 20, weight: .heavy, design: .rounded))
                     }
                     .foregroundStyle(.white)
@@ -196,7 +196,7 @@ struct EmailInviteWelcomeView: View {
                     household.pendingEmailInvite = nil
                     household.needsFamilyChoice = true
                 } label: {
-                    Text(tr("לֹא הַמִּשְׁפָּחָה שֶׁלִּי — הַתְחִילוּ מֵהַתְחָלָה"))
+                    Text(tr("לא המשפחה שלי — התחילו מהתחלה"))
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.75))
                         .underline()

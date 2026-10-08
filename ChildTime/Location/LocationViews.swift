@@ -172,7 +172,7 @@ struct ParentLocationView: View {
             .navigationTitle(tr("איפה הילדים"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) { Button(tr("סִיּוּם")) { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { Button(tr("סיום")) { dismiss() } }
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button { showingPlaces = true } label: { Text(tr("📍 מקומות")) }
                 }
@@ -571,7 +571,7 @@ struct PlacesListView: View {
             .glassForm()
             .navigationTitle(tr("📍 מקומות"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button(tr("סִיּוּם")) { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button(tr("סיום")) { dismiss() } } }
         }
         .sheet(item: $editing) { p in
             PlaceEditorView(place: p).environmentObject(profiles).environment(\.layoutDirection, .app)

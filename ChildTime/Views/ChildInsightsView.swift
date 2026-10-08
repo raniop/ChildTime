@@ -81,9 +81,9 @@ struct ChildInsightsView: View {
         HStack(spacing: 8) {
             snapChip(engine.learningTrend.label, color: engine.learningTrend.color)
             if let s = engine.avgResponseSeconds {
-                snapChip(tr("⏳ \(s) שְׁנִיּוֹת מַעֲנֶה"), color: .secondary)
+                snapChip(tr("⏳ \(s) שניות מענה"), color: .secondary)
             }
-            snapChip(tr("🔥 \(snapshot.dayStreak) יְמֵי רֶצֶף"), color: AppColor.flameOrange)
+            snapChip(tr("🔥 \(snapshot.dayStreak) ימי רצף"), color: AppColor.flameOrange)
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
     }
@@ -98,11 +98,11 @@ struct ChildInsightsView: View {
 
     @ViewBuilder private var interestsSection: some View {
         if !engine.gainedInterest.isEmpty || !engine.lostInterest.isEmpty {
-            card(title: tr("תְּחוּמֵי עִנְיָן")) {
+            card(title: tr("תחומי ענין")) {
                 VStack(alignment: .trailing, spacing: 10) {
-                    topicRow(tr("צוֹבֵר עִנְיָן"), engine.gainedInterest, AppColor.gemPurple, empty: "")
+                    topicRow(tr("צובר ענין"), engine.gainedInterest, AppColor.gemPurple, empty: "")
                     if !engine.lostInterest.isEmpty {
-                        topicRow(tr("אִבֵּד עִנְיָן"), engine.lostInterest, AppColor.flameOrange, empty: "")
+                        topicRow(tr("אבד ענין"), engine.lostInterest, AppColor.flameOrange, empty: "")
                     }
                 }
             }
@@ -111,7 +111,7 @@ struct ChildInsightsView: View {
 
     @ViewBuilder private var learningStyleSection: some View {
         if let style = engine.learningStyle {
-            card(title: tr("סִגְנוֹן לְמִידָה")) {
+            card(title: tr("סגנון למידה")) {
                 labeledRow(style)
             }
         }
@@ -119,7 +119,7 @@ struct ChildInsightsView: View {
 
     @ViewBuilder private var persistenceSection: some View {
         if let p = engine.persistence {
-            card(title: tr("הַתְמָדָה")) {
+            card(title: tr("התמדה")) {
                 labeledRow(p)
             }
         }
@@ -127,7 +127,7 @@ struct ChildInsightsView: View {
 
     @ViewBuilder private var focusSection: some View {
         if let f = snapshot.focusInsight {
-            card(title: tr("רִכּוּז וּשְׁעוֹת שִׂיא")) {
+            card(title: tr("רכוז ושעות שיא")) {
                 labeledRow(InsightsEngine.Labeled(emoji: "⏰", title: f.title, detail: f.detail))
             }
         }

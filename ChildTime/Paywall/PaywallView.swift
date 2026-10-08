@@ -195,10 +195,10 @@ struct PaywallView: View {
         let ending: String
         if giftActive, let until {
             let d = max(0, Int(ceil(until.timeIntervalSinceNow / 86_400)))
-            ending = d == 0 ? tr("הַמַּתָּנָה מִסְתַּיֶּמֶת הַיּוֹם") : d == 1 ? tr("הַמַּתָּנָה מִסְתַּיֶּמֶת מָחָר")
-                : d == 2 ? tr("הַמַּתָּנָה מִסְתַּיֶּמֶת בְּעוֹד יוֹמַיִם") : tr("הַמַּתָּנָה מִסְתַּיֶּמֶת בְּעוֹד \(d) יָמִים")
+            ending = d == 0 ? tr("המתנה מסתימת היום") : d == 1 ? tr("המתנה מסתימת מחר")
+                : d == 2 ? tr("המתנה מסתימת בעוד יומים") : tr("המתנה מסתימת בעוד \(d) ימים")
         } else {
-            ending = tr("הַמַּתָּנָה הִסְתַּיְּמָה · הַהִתְקַדְּמוּת שֶׁל \(p.name) שְׁמוּרָה")
+            ending = tr("המתנה הסתימה · ההתקדמות של \(p.name) שמורה")
         }
         return Pitch(name: p.name, girl: p.gender == .girl,
                      favorite: ranked.first.map { (world: $0.0, questions: $0.1, accuracy: $0.2) },
@@ -211,21 +211,21 @@ struct PaywallView: View {
     private func personalCard(_ p: Pitch) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             if let fav = p.favorite {
-                Text(p.girl ? tr("\(fav.world.emoji) \(p.name) מָצְאָה עוֹלָם שֶׁהִיא אוֹהֶבֶת") : tr("\(fav.world.emoji) \(p.name) מָצָא עוֹלָם שֶׁהוּא אוֹהֵב"))
+                Text(p.girl ? tr("\(fav.world.emoji) \(p.name) מצאה עולם שהיא אוהבת") : tr("\(fav.world.emoji) \(p.name) מצא עולם שהוא אוהב"))
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
-                Text((p.girl ? tr("הִיא עָנְתָה בְּ\(fav.world.name) עַל \(fav.questions) שְׁאֵלוֹת, בְּ\(fav.accuracy)% הַצְלָחָה.") : tr("הוּא עָנָה בְּ\(fav.world.name) עַל \(fav.questions) שְׁאֵלוֹת, בְּ\(fav.accuracy)% הַצְלָחָה."))
-                     + (p.others.isEmpty ? "" : tr(" גַּם \(p.others.map(\.name).joined(separator: tr(" וְ"))) בִּפְנִים.")))
+                Text((p.girl ? tr("היא ענתה ב\(fav.world.name) על \(fav.questions) שאלות, ב\(fav.accuracy)% הצלחה.") : tr("הוא ענה ב\(fav.world.name) על \(fav.questions) שאלות, ב\(fav.accuracy)% הצלחה."))
+                     + (p.others.isEmpty ? "" : tr(" גַּם \(p.others.map(\.name).joined(separator: tr(" ו"))) בִּפְנִים.")))
                     .font(.system(size: 13.5, weight: .medium, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
-                Text(p.girl ? tr("🎉 \(p.name) כְּבָר עָנְתָה עַל \(p.questions) שְׁאֵלוֹת בְּטוֹפִי+") : tr("🎉 \(p.name) כְּבָר עָנָה עַל \(p.questions) שְׁאֵלוֹת בְּטוֹפִי+"))
+                Text(p.girl ? tr("🎉 \(p.name) כבר ענתה על \(p.questions) שאלות בטופי+") : tr("🎉 \(p.name) כבר ענה על \(p.questions) שאלות בטופי+"))
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
             }
             HStack(spacing: 8) {
-                pitchStat("\(p.worlds)", p.worlds == 1 ? tr("עוֹלָם") : tr("עוֹלָמוֹת"))
-                pitchStat("\(p.questions)", tr("שְׁאֵלוֹת"))
-                pitchStat("\(p.accuracy)%", tr("הַצְלָחָה"))
+                pitchStat("\(p.worlds)", p.worlds == 1 ? tr("עולם") : tr("עולמות"))
+                pitchStat("\(p.questions)", tr("שאלות"))
+                pitchStat("\(p.accuracy)%", tr("הצלחה"))
             }
             Text(p.ending)
                 .font(.system(size: 13, weight: .heavy, design: .rounded))
@@ -250,7 +250,7 @@ struct PaywallView: View {
 
     /// What stays free, in one honest line (approved mockup).
     private func freeForeverLine(_ p: Pitch) -> some View {
-        Text(p.girl ? tr("טוֹפִי טַיים וְהַזְּמַן שֶׁ\(p.name) מַרְוִיחָה נִשְׁאָרִים חִנָּם תָּמִיד. מָה שֶׁנִּסְגָּר: הָעוֹלָמוֹת, הַמִּשְׂחָקִים, הַזִּירָה וְהַמַּטְלוֹת.") : tr("טוֹפִי טַיים וְהַזְּמַן שֶׁ\(p.name) מַרְוִיחַ נִשְׁאָרִים חִנָּם תָּמִיד. מָה שֶׁנִּסְגָּר: הָעוֹלָמוֹת, הַמִּשְׂחָקִים, הַזִּירָה וְהַמַּטְלוֹת."))
+        Text(p.girl ? tr("טופי טיים והזמן ש\(p.name) מרויחה נשארים חנם תמיד. מה שנסגר: העולמות, המשחקים, הזירה והמטלות.") : tr("טופי טיים והזמן ש\(p.name) מרויח נשארים חנם תמיד. מה שנסגר: העולמות, המשחקים, הזירה והמטלות."))
             .font(.system(size: 12.5, weight: .medium, design: .rounded))
             .foregroundStyle(.white.opacity(0.8))
             .multilineTextAlignment(.center)
@@ -439,16 +439,16 @@ struct PaywallView: View {
                 ProgressView()
                     .tint(.white)
                     .padding(.vertical, AppSpacing.md)
-                Text(tr("טוֹעֵן מַסְלוּלִים…"))
+                Text(tr("טוען מסלולים…"))
                     .font(.system(size: 13, design: .rounded))
                     .foregroundStyle(.white.opacity(0.7))
             } else {
                 // Finished loading but got nothing — almost always an App Store
                 // setup issue, not an app bug. Give the parent a clear nudge.
-                Text(tr("הַמַּסְלוּלִים לֹא נִטְעֲנוּ"))
+                Text(tr("המסלולים לא נטענו"))
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text(tr("בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט וְנַסּוּ שׁוּב."))
+                Text(tr("בדקו את חבור האינטרנט ונסו שוב."))
                     .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.8))
                     .multilineTextAlignment(.center)
@@ -456,7 +456,7 @@ struct PaywallView: View {
                 Button {
                     Task { await subs.loadProducts() }
                 } label: {
-                    Label(tr("נַסּוּ שׁוּב"), systemImage: "arrow.clockwise")
+                    Label(tr("נסו שוב"), systemImage: "arrow.clockwise")
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 16).padding(.vertical, 8)
