@@ -59,7 +59,8 @@ struct OnboardingStepsBar: View {
                             .fill(n < current ? AppColor.successMint
                                   : n == current ? AppColor.starGold : .white.opacity(0.25))
                             .frame(height: 5)
-                        Text(n < current ? "✓ \(name)" : "\(n) · \(name)")
+                        // The same words on every step; the colour says done / now / next.
+                        Text("\(n) · \(name)")
                             .font(.system(size: 11.5, weight: .heavy, design: .rounded))
                             .foregroundStyle(n < current ? Color(hex: "C9FFE7")
                                              : n == current ? Color(hex: "FFE28A") : .white.opacity(0.6))
@@ -69,14 +70,17 @@ struct OnboardingStepsBar: View {
                 }
             }
             if current <= 4 {
-                Text(note.map { tr("שלב \(current) מתוך 4 · \($0)") } ?? tr("שלב \(current) מתוך 4"))
+                // The same line on every step (Rani: "אחד לאחד") — no per-screen note.
+                Text(tr("שלב \(current) מתוך 4"))
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.8))
             }
         }
+        // ONE bar, identical on every step (Rani: "אחד לאחד") — the family
+        // step's: full width up to 520, clear of the foldable's clock on both
+        // sides. Callers place it at the top of the FULL glass, never inside a
+        // narrowed column.
         .frame(maxWidth: 520)
-        // It heads the page, in the band beside the foldable's clock — kept
-        // clear of it on both sides so it stays centred on the glass.
         .clearOfBarBothSides()
         .environment(\.layoutDirection, .app)
         .accessibilityElement(children: .combine)

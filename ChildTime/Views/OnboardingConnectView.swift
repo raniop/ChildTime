@@ -32,14 +32,20 @@ struct OnboardingConnectView: View {
         ZStack {
             GlassBackdrop().ignoresSafeArea()
             SparkleField(count: 14, size: 12)
-            VStack(spacing: 16) {
+            VStack(spacing: DisplayGeometry.shared.isShort ? 10 : 16) {
+                // The steps bar sits exactly where it sits on every other step…
                 OnboardingStepsBar(current: linked ? 4 : 3)
                     .padding(.top, 8)
-                if linked { linkedBody } else { qrBody }
+                // …and the page under it is ONE column beside the foldable's
+                // clock, everything centred in it (Rani: "עקום").
+                // If the page is taller than the glass it scrolls under the bar —
+                // it never pushes the bar up (the bar sits at the same height on
+                // every step).
+                ViewThatFits(in: .vertical) {
+                    page
+                    ScrollView { page }.scrollIndicators(.hidden)
+                }
             }
-            .padding(.horizontal, OnboardingFooter.sidePadding)
-            .frame(maxWidth: 520)
-            .frame(maxWidth: .infinity)
         }
         .environment(\.layoutDirection, .app)
         .task(id: child.id) {
@@ -72,10 +78,20 @@ struct OnboardingConnectView: View {
         .onDisappear { household.stopWatchingInviteRedemption() }
     }
 
+    private var page: some View {
+        Group { if linked { linkedBody } else { qrBody } }
+            .padding(.horizontal, OnboardingFooter.sidePadding)
+            .frame(maxWidth: 520)
+            .frame(maxWidth: .infinity)
+            .clearOfBar()
+    }
+
     // MARK: ③ — the QR
 
     private var qrBody: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: DisplayGeometry.shared.isShort ? 9 : 14) {
+            // Centred in the middle of the page, like a person would place it.
+            Spacer(minLength: 0)
             Text(tr("מחברים את הטלפון של \(name)"))
                 .font(.system(size: 24, weight: .black, design: .rounded))
                 .foregroundStyle(.white)
@@ -90,7 +106,9 @@ struct OnboardingConnectView: View {
 
             VStack(spacing: 10) {
                 if let code = qrCode {
-                    QRCodeView(text: JoinLink.url(forPayload: code), size: 190)
+                    // A short screen (the closed foldable) takes a smaller code so
+                    // the whole step fits — it was pushed off the top.
+                    QRCodeView(text: JoinLink.url(forPayload: code), size: DisplayGeometry.shared.isShort ? 116 : 190)
                         .padding(12)
                         .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(.white))
                     Text(String(code.split(separator: "|").first ?? ""))
@@ -235,6 +253,9 @@ struct PlayNowOfferView: View {
             .padding(.horizontal, OnboardingFooter.sidePadding)
             .frame(maxWidth: 520)
             .frame(maxWidth: .infinity)
+            // 📐 The foldable: ONE column beside the clock, everything centred in
+            // it — narrowing single rows left the rest off-centre (Rani: "עקום").
+            .clearOfBar()
         }
         .environment(\.layoutDirection, .app)
     }
