@@ -785,11 +785,14 @@ struct WorldMapView: View {
             if world == nil { DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { maybeAutoPresentWheel() } }
         }
         .onChangeCompat(of: progress.stars) { _, new in
-            if new > lastSeenStars {
+            // Stars that arrived by sync were earned on another device — no
+            // cheer (and no sound) here.
+            let local = !progress.changeCameFromSync
+            if new > lastSeenStars, local {
                 companion.cheer()
             }
             lastSeenStars = new
-            checkWorldUnlocks()
+            checkWorldUnlocks(announce: local)
         }
         // A world opens to "how do you want to play?" (Rani, 2026-10-03) — or
         // straight into its questions when the parent switched games off for
@@ -850,7 +853,8 @@ struct WorldMapView: View {
         // 🔥 The daily challenge has no card any more (Rani, 2026-10-08): it runs
         // in the background and, the moment it is done, celebrates itself.
         .onChangeCompat(of: progress.dailyChallengeRewardReady) { _, ready in
-            if ready { celebrateChallengeIfReady() }
+            // Completed on another device → it celebrates there, not here.
+            if ready, !progress.changeCameFromSync { celebrateChallengeIfReady() }
         }
         .onChangeCompat(of: profiles.active?.ownedPacks.count ?? 0) { _, _ in maybeRevealPack() }
         .fullScreenCover(isPresented: $showDailyChest) {
@@ -2796,11 +2800,11 @@ struct WorldMapView: View {
         return true
     }
 
-    private func checkWorldUnlocks() {
+    private func checkWorldUnlocks(announce: Bool = true) {
         for world in Worlds.all where !progress.unlockedWorlds.contains(world.id) {
             if progress.canUnlock(world: world) {
                 progress.unlockWorld(world.id)
-                companion.wow(tr("\(world.emoji) \(world.name) נִפְתַּח!"))
+                if announce { companion.wow(tr("\(world.emoji) \(world.name) נִפְתַּח!")) }
             }
         }
     }

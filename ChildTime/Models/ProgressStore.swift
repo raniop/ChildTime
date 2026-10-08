@@ -2629,7 +2629,16 @@ final class ProgressStore: ObservableObject {
 
     /// Overwrite the store with a snapshot — used when switching profiles
     /// or applying a remote update.
+    /// When a snapshot was last applied (a sync from another device, or a
+    /// profile switch). Reactions that mean "you just did this HERE" — the
+    /// buddy's cheer, a world-unlock "wow", the challenge celebration — skip a
+    /// change that arrived this way: Dan answered on his iPad and his iPhone
+    /// cheered out loud (Rani, 2026-10-08).
+    private(set) var lastSnapshotAppliedAt: Date = .distantPast
+    var changeCameFromSync: Bool { Date().timeIntervalSince(lastSnapshotAppliedAt) < 1.5 }
+
     func apply(_ s: ProgressSnapshot) {
+        lastSnapshotAppliedAt = Date()
         // Loading a snapshot is not a local edit — suppress revision bumps while
         // the fields change, then adopt the snapshot's own version so a later
         // local edit builds on top of it (and outranks what we just received).
