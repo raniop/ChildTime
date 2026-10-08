@@ -47,13 +47,13 @@ private enum class Page { MAIN, PROFILE, LANGUAGE, DIFFICULTY, WORLDS, SCREEN_TI
  * (confirmed, membership self-heal) and says so honestly when it didn't save.
  */
 @Composable
-internal fun ChildSettingsContent(childID: String, onBack: () -> Unit, onDeleted: () -> Unit) {
+internal fun ChildSettingsContent(childID: String, onBack: () -> Unit, onDeleted: () -> Unit, startOnScreenTime: Boolean = false) {
     val state by FamilyRepository.state.collectAsState()
     val child = state.children.firstOrNull { it.id == childID }
     val stateDoc by remember(childID) { ChildReportRepository.stateDoc(childID) }.collectAsState(initial = emptyMap())
     val scope = rememberCoroutineScope()
     val note = remember { WriteNote() }
-    var page by rememberSaveableEnum(Page.MAIN)
+    var page by rememberSaveableEnum(if (startOnScreenTime) Page.SCREEN_TIME else Page.MAIN)
 
     fun write(fields: Map<String, Any?>) { scope.launch { note.report(ChildRepository.update(childID, fields)) } }
 
@@ -61,7 +61,9 @@ internal fun ChildSettingsContent(childID: String, onBack: () -> Unit, onDeleted
     // A plain holder, not state: re-registering every recomposition must not trigger another one.
     val pendingCapSave = remember { arrayOfNulls<() -> Unit>(1) }
     fun back() {
-        if (page == Page.MAIN) onBack() else { pendingCapSave[0]?.invoke(); pendingCapSave[0] = null; page = Page.MAIN }
+        // Opened straight on the screen-time page (from "פעולות") → back leaves the screen.
+        if (page == Page.MAIN) onBack()
+        else { pendingCapSave[0]?.invoke(); pendingCapSave[0] = null; if (startOnScreenTime) onBack() else page = Page.MAIN }
     }
     BackHandler { back() }
 

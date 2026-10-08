@@ -56,6 +56,7 @@ import com.rani.tofy.ui.theme.Rounded
 import com.rani.tofy.ui.theme.glassPane
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import com.rani.tofy.kid.core.ProgressEngine
 
 // ── 🎓 ChildGradePickerView ────────────────────────────────────────────────
@@ -215,9 +216,9 @@ internal fun KidDeviceControls(
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
             Text("⚙️", fontSize = 44.sp)
-            KidTitle(tr("בַּקָּרַת הַמַּכְשִׁיר"), 28)
+            KidTitle(tr("בקרת המכשיר"), 28)
             Column(Modifier.widthIn(max = 520.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                if (kidMode) KidCta(tr("יְצִיאָה מִמַּצַּב יֶלֶד וְשִׁחְרוּר נְעִילַת הַמַּכְשִׁיר"), Color(0xFFFF7A3D), Color(0xFFFF9F1C),
+                if (kidMode) KidCta(tr("יציאה ממצב ילד ושחרור נעילת המכשיר"), Color(0xFFFF7A3D), Color(0xFFFF9F1C),
                     emoji = "🔓", size = 17, onClick = onExitKidMode)
 
                 Row(Modifier.fillMaxWidth().glassPane(22.dp).padding(16.dp), verticalAlignment = Alignment.CenterVertically,
@@ -225,7 +226,7 @@ internal fun KidDeviceControls(
                     CharacterImage(child?.character3DID ?: "fox", Modifier.size(52.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.22f)),
                         contentScale = ContentScale.Crop)
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(tr("הַמַּכְשִׁיר הַזֶּה מְחֻבָּר לְ%@", child?.name ?: ""), color = Color.White, fontFamily = Rounded,
+                        Text(tr("המכשיר הזה מחובר ל%@", child?.name ?: ""), color = Color.White, fontFamily = Rounded,
                             fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
                         Text(KidIdentity.friendlyName, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 13.sp)
                     }
@@ -237,14 +238,17 @@ internal fun KidDeviceControls(
                 ) {
                     Text("🔓", fontSize = 22.sp)
                     Column(Modifier.weight(1f)) {
-                        Text(tr("פָּתוּחַ עַכְשָׁיו"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
-                        Text(tr("נִשְׁאֲרוּ כְּ-%lld דַּקּוֹת", maxOf(1, secondsLeft / 60)), color = Ink.secondary, fontFamily = Rounded, fontSize = 12.sp)
+                        Text(tr("פתוח עכשיו"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                        Text(tr("נשארו כ-%lld דקות", maxOf(1, secondsLeft / 60)), color = Ink.secondary, fontFamily = Rounded, fontSize = 12.sp)
                     }
-                    Text(tr("נְעַל"), Modifier.clip(RoundedCornerShape(50)).background(Color(0xFFFF7A3D).copy(alpha = 0.55f))
+                    Text(tr("נעל"), Modifier.clip(RoundedCornerShape(50)).background(Color(0xFFFF7A3D).copy(alpha = 0.55f))
                         .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(50)).clickable(onClick = onLockNow)
                         .padding(horizontal = 14.dp, vertical = 8.dp),
                         color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
                 }
+
+                // ⏱ The child's daily limit, right here on the child's device (Rani).
+                if (child != null) KidDailyCapRow(child)
 
                 // iOS's "מָה פָּתוּחַ וּמָה נָעוּל" section → Android's guard manage screen.
                 if (!kidMode && onAppLock != null) Row(
@@ -252,22 +256,22 @@ internal fun KidDeviceControls(
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Text("🔒", fontSize = 22.sp)
-                    Text(tr("מָה פָּתוּחַ וּמָה נָעוּל"), Modifier.weight(1f), color = Color.White, fontFamily = Rounded,
+                    Text(tr("מה פתוח ומה נעול"), Modifier.weight(1f), color = Color.White, fontFamily = Rounded,
                         fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
                     Text("›", color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 22.sp,
                         modifier = Modifier.graphicsLayer { scaleX = if (rtl) -1f else 1f })
                 }
 
                 if (!kidMode) Text(
-                    tr("הִתְנַתְּקוּ מֵהַמִּשְׁפָּחָה"),
+                    tr("התנתקו מהמשפחה"),
                     Modifier.fillMaxWidth().clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.12f))
                         .border(1.dp, Ink.weak.copy(alpha = 0.6f), RoundedCornerShape(50)).clickable { confirm = true }.padding(vertical = 14.dp),
                     color = Ink.weak, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 )
             }
-            KidBody(tr("שְׁאָר הַהַגְדָּרוֹת — פְּרָסִים, דּוּחוֹת, רָמַת קוֹשִׁי וְהַתְרָאוֹת — מְנוּהֲלוֹת בְּמַכְשִׁיר הַהוֹרֶה."), 14f, alpha = 0.75f, weight = FontWeight.Medium)
-            Text(tr("סְגִירָה"), Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
+            KidBody(tr("שאר ההגדרות — פרסים, דוחות, רמת קושי והתראות — מנוהלות במכשיר ההורה."), 14f, alpha = 0.75f, weight = FontWeight.Medium)
+            Text(tr("סגירה"), Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
                 .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).clickable(onClick = onClose)
                 .padding(horizontal = 28.dp, vertical = 12.dp),
                 color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
@@ -275,11 +279,49 @@ internal fun KidDeviceControls(
     }
     if (confirm) AlertDialog(
         onDismissRequest = { confirm = false },
-        title = { Text(tr("לְנַתֵּק אֶת הַמַּכְשִׁיר?")) },
-        text = { Text(tr("הַמַּכְשִׁיר יִתְנַתֵּק מֵהַיֶּלֶד וְיַחֲזוֹר לְמַצָּב הַתְחָלָתִי (כְּאִלּוּ הוּתְקַן מֵחָדָשׁ). הַהִתְקַדְּמוּת בֶּעָנָן נִשְׁמֶרֶת — אֶפְשָׁר תָּמִיד לְחַבֵּר שׁוּב בִּסְרִיקַת הַקּוֹד.")) },
-        confirmButton = { TextButton({ confirm = false; onDisconnect() }) { Text(tr("נַתֵּק וְאַפֵּס"), color = Color(0xFFE53950)) } },
-        dismissButton = { TextButton({ confirm = false }) { Text(tr("בִּטּוּל")) } },
+        title = { Text(tr("לנתק את המכשיר?")) },
+        text = { Text(tr("המכשיר יתנתק מהילד ויחזור למצב התחלתי (כאילו הותקן מחדש). ההתקדמות בענן נשמרת — אפשר תמיד לחבר שוב בסריקת הקוד.")) },
+        confirmButton = { TextButton({ confirm = false; onDisconnect() }) { Text(tr("נתק ואפס"), color = Color(0xFFE53950)) } },
+        dismissButton = { TextButton({ confirm = false }) { Text(tr("ביטול")) } },
     )
+}
+
+/** ⏱ Daily screen-time limit on the child's own device — one tap, saved at once. */
+@Composable
+private fun KidDailyCapRow(child: Child) {
+    var cap by remember(child.id) { mutableStateOf(child.dailyCapMinutes) }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    fun set(v: Int) {
+        cap = v
+        scope.launch {
+            runCatching {
+                com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("children").document(child.id)
+                    .set(mapOf("dailyCapMinutes" to v), com.google.firebase.firestore.SetOptions.merge()).await()
+            }
+        }
+    }
+    Column(Modifier.fillMaxWidth().glassPane(18.dp, 0.18f).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text("⏱", fontSize = 22.sp)
+            Column(Modifier.weight(1f)) {
+                Text(tr("זמן מסך יומי"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                Text(cap?.takeIf { it > 0 }?.let { tr("עד %lld דקות ביום", it) } ?: tr("בלי הגבלה יומית"),
+                    color = Ink.secondary, fontFamily = Rounded, fontSize = 13.sp)
+            }
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(30, 60, 90, 120, 0).forEach { v ->
+                val on = (cap ?: -1) == v
+                Text(if (v == 0) tr("ללא הגבלה") else "$v",
+                    Modifier.weight(if (v == 0) 1.6f else 1f).clip(RoundedCornerShape(50))
+                        .background(if (on) Color.White else Color.White.copy(alpha = 0.14f))
+                        .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).clickable { set(v) }
+                        .padding(vertical = 10.dp),
+                    color = if (on) Color(0xFF4B3FBF) else Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold,
+                    fontSize = 15.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 1)
+            }
+        }
+    }
 }
 
 // ── 🔒 Kid Mode: the parent's phone becomes the child's ─────────────────────

@@ -12,6 +12,6 @@ fun ChildDetailScreen(childID: String, onBack: () -> Unit, onSettings: () -> Uni
 
 /** ChildSettingsView: every per-child setting + delete. */
 @Composable
-fun ChildSettingsScreen(childID: String, onBack: () -> Unit, onDeleted: () -> Unit) {
-    ChildSettingsContent(childID, onBack, onDeleted)
+fun ChildSettingsScreen(childID: String, onBack: () -> Unit, onDeleted: () -> Unit, startOnScreenTime: Boolean = false) {
+    ChildSettingsContent(childID, onBack, onDeleted, startOnScreenTime)
 }

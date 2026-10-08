@@ -26,6 +26,7 @@ import com.rani.tofy.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActionsSheet(child: Child, state: FamilyState, onDismiss: () -> Unit, onChores: () -> Unit, onConnect: () -> Unit, onSettings: () -> Unit,
+    onScreenTime: () -> Unit = {},
                  onLocation: () -> Unit = {}) {
     var giftPicker by remember { mutableStateOf(false) }
     var confirmRevoke by remember { mutableStateOf(false) }
@@ -56,6 +57,7 @@ fun ActionsSheet(child: Child, state: FamilyState, onDismiss: () -> Unit, onChor
                     ActionRow("🔒", tr("נעל עכשיו")) { Commands.lock(child.id); onDismiss() }
                     ActionRow("↩️", tr("נעל ואפס דקות מתנה")) { confirmRevoke = true }
                 }
+                ActionRow("⏳", tr("זמן מסך יומי"), onClick = onScreenTime)
                 ActionRow("🧹", tr("מטלות"), onClick = onChores)
                 ActionRow("📱", tr("חברו מכשיר ל%@", child.name), onClick = onConnect)
                 if (hasDevice) ActionRow("🗑️", tr("אפשר מחיקת אפליקציות (5 דק')")) { Commands.allowAppRemoval(child.id); onDismiss() }

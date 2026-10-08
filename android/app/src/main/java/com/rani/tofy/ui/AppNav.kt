@@ -70,6 +70,11 @@ fun AppNav() {
             val id = e.arguments?.getString("id") ?: return@composable
             ChildSettingsScreen(id, onBack = { nav.popBackStack() }, onDeleted = { nav.popBackStack("home", false) })
         }
+        // ⏱ Straight to the daily screen-time limit (from the child's "פעולות").
+        composable("childScreenTime/{id}") { e ->
+            val id = e.arguments?.getString("id") ?: return@composable
+            ChildSettingsScreen(id, onBack = { nav.popBackStack() }, onDeleted = { nav.popBackStack("home", false) }, startOnScreenTime = true)
+        }
         composable("addChild") { AddChildFlow(firstChild = false, onDone = { nav.popBackStack() }, onCancel = { nav.popBackStack() }) }
         composable("chores") { ChoresScreen(onBack = { nav.popBackStack() }) }
         composable("location?child={child}", arguments = listOf(androidx.navigation.navArgument("child") { nullable = true; defaultValue = null })) { e ->
@@ -88,6 +93,7 @@ fun AppNav() {
             onChores = { com.rani.tofy.data.ChoresRepository.focusChildID = c.id; actionsFor = null; nav.navigate("chores") },
             onConnect = { actionsFor = null; connectFor = c.id },
             onSettings = { actionsFor = null; nav.navigate("childSettings/${c.id}") },
+            onScreenTime = { actionsFor = null; nav.navigate("childScreenTime/${c.id}") },
             onLocation = { actionsFor = null; nav.navigate("location?child=${c.id}") })
     }
     connectFor?.let { ConnectDeviceSheet(it, onDismiss = { connectFor = null }) }
