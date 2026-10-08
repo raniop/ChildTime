@@ -199,13 +199,16 @@ struct RailPaddingUnlessSplit: ViewModifier {
 /// safe-area inset through.
 struct BarSidePadding: ViewModifier {
     var active: Bool = true
+    /// How much of the strip is already covered by the margins outside this
+    /// view (a card's own inset from the screen edge) — only the rest is added.
+    var alreadyClear: CGFloat = 0
     @ObservedObject private var display = DisplayGeometry.shared
     @Environment(\.layoutDirection) private var direction
 
     func body(content: Content) -> some View {
         if active && display.hasBarStrip {
             let leading = display.barOnLeft == (direction == .leftToRight)
-            content.padding(leading ? .leading : .trailing, display.barInset)
+            content.padding(leading ? .leading : .trailing, max(0, display.barInset - alreadyClear))
         } else {
             content
         }
@@ -416,6 +419,9 @@ extension View {
 
     /// Keep a row in the band clear of the clock on the bar's side only.
     func clearOfBar() -> some View { modifier(BarSidePadding()) }
+    /// The CONTENT of a full-width card clear of the clock: `alreadyClear` is
+    /// the card's own distance from the screen edge plus its inner padding.
+    func clearOfBar(alreadyClear: CGFloat) -> some View { modifier(BarSidePadding(alreadyClear: alreadyClear)) }
     /// `clearOfBar()` only when `active`.
     @ViewBuilder func clearOfBar(active: Bool) -> some View {
         if active { modifier(BarSidePadding()) } else { self }

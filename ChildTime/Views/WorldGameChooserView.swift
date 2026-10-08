@@ -159,6 +159,8 @@ struct WorldGameChooserView: View {
             .font(.system(size: 12.5, weight: .heavy, design: .rounded))
             .foregroundStyle(.white)
             .monospacedDigit()
+            // ✕ in the corner away from the camera and clock.
+            .awayFromBar(.leading)
 
             HStack(spacing: isCompact ? 12 : 18) {
                 Text(world.emoji)
@@ -198,6 +200,9 @@ struct WorldGameChooserView: View {
             .frame(maxWidth: .infinity)
             .padding(.top, 2)
         }
+        // 📐 The foldable: the card keeps the whole glass, its CONTENT steps out
+        // from under the clock (Rani — the ✕ was hidden beneath "9:41").
+        .clearOfBar(alreadyClear: (isCompact ? AppSpacing.md : AppSpacing.xl) + (isCompact ? 14 : 20) - 8)
         .padding(isCompact ? 14 : 20)
         .glassPane(radius: 16)
     }
