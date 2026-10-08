@@ -28,7 +28,7 @@ struct ChildScreenTimeView: View {
         NavigationStack {
             Form {
                 Section {
-                    Text(tr("בִּחֲרוּ כַּמָּה דַּקּוֹת מָסָךְ בְּיוֹם עֲבוּר \(profile?.name ?? tr("הילד")). הַשִּׁנּוּי מִסְתַּנְכְרֵן אוֹטוֹמָטִית לַמַּכְשִׁיר שֶׁל הַיֶּלֶד."))
+                    Text(tr("בחרו כמה דקות מסך ביום עבור \(profile?.name ?? tr("הילד")). השינוי מסתנכרן אוטומטית למכשיר של הילד."))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

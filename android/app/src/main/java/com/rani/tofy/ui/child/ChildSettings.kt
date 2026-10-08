@@ -210,7 +210,7 @@ private fun MainList(
         SettingsSection(tr("מתקדם")) {
             SettingsRow("🗑️", tr("לאפשר מחיקת אפליקציות (5 דק')"), chevron = false) {
                 Commands.allowAppRemoval(child.id)
-                remoteNote = if (connected) tr("נפתח חלון של 5 דקות למחיקת אפליקציות במכשיר של %@ — מידי כשטופי פתוח שם. אחר כך הנעילה חוזרת לבד.", child.name)
+                remoteNote = if (connected) tr("נפתח חלון של 5 דקות למחיקת אפליקציות במכשיר של %@ — מיידי כשטופי פתוח שם. אחר כך הנעילה חוזרת לבד.", child.name)
                     else tr("אין כרגע מכשיר מחובר ל%@ — החלון ייפתח ברגע שהמכשיר יתחבר.", child.name)
             }
             RowDivider()
@@ -372,7 +372,7 @@ private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String,
                     }
                 }
             }
-            if (grade == null) P(tr("חובה לבחור — כך טופי מתאים את השאלות לתכנית של משרד החינוך, וכל 1 בספטמבר עולים כיתה אוטומטית 🎉"),
+            if (grade == null) P(tr("חובה לבחור — כך טופי מתאים את השאלות לתוכנית של משרד החינוך, וכל 1 בספטמבר עולים כיתה אוטומטית 🎉"),
                 12f, color = Ink.gold2, weight = FontWeight.SemiBold)
         }
 
@@ -496,7 +496,7 @@ private fun WorldsEditor(child: Child, onBack: () -> Unit, write: (Map<String, A
     val worlds = child.listedWorlds()
     Scroll {
         PageBar(tr("עולמות פעילים"), onBack)
-        P(tr("בחרו אילו עולמות פתוחים עבור %@. עולם כיבוי נעלם מהמסך, והילד לא מקבל ממנו שאלות. השינוי מסתנכרן אוטומטית למכשיר של הילד.", child.name), 13f)
+        P(tr("בחרו אילו עולמות פתוחים עבור %@. עולם כבוי נעלם מהמסך, והילד לא מקבל ממנו שאלות. השינוי מסתנכרן אוטומטית למכשיר של הילד.", child.name), 13f)
         SettingsSection(tr("עולמות פעילים"),
             tr("\"טופי טיים\" תמיד פתוחה ומגישה רק מהנושאים הפעילים. חייב להישאר לפחות עולם אחד פתוח.")) {
             worlds.forEachIndexed { i, w ->

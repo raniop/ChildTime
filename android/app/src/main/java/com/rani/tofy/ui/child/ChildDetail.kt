@@ -150,7 +150,7 @@ private fun ChildReport(
                         Text("·", color = sub, fontSize = 13.5.sp)
                         PulseDot()
                         val kind = devices.firstOrNull()?.kind ?: ""
-                        Text(tr("%@ עכשיו", g(tr("משחק"), tr("משחקת"))) + (if (kind == "ipad") tr(" באיפד") else if (kind == "iphone") tr(" באיפון") else ""),
+                        Text(tr("%@ עכשיו", g(tr("משחק"), tr("משחקת"))) + (if (kind == "ipad") tr(" באייפד") else if (kind == "iphone") tr(" באייפון") else ""),
                             color = sub, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.5.sp, maxLines = 1)
                     }
                 }
@@ -223,7 +223,7 @@ private fun ChildReport(
                 Legend(listOf(tr("שאלות") to Color.White.copy(alpha = 0.4f), tr("אחוז הצלחה") to Color.White))
             }
         }
-        val earnedW = g(tr("הרוויח"), tr("הרוויחה")); val usedW = g(tr("ניצל"), tr("נצלה"))
+        val earnedW = g(tr("הרוויח"), tr("הרוויחה")); val usedW = g(tr("ניצל"), tr("ניצלה"))
         ReportCard(tr("זמן מסך"), detail = tr("%@ מול %@", earnedW, usedW)) {
             if (points.all { it.earned == 0 && it.used == 0 }) EmptyLine(tr("עוד לא נפתח זמן מסך בתקופה הזו."))
             else {
@@ -269,7 +269,7 @@ private fun rememberInfiniteTransitionAlpha(): Float {
 private fun LiveBanner(child: Child, live: LiveWindow, onLock: () -> Unit) {
     val girl = child.isGirl
     val kind = live.device?.kind
-    val deviceLabel = if (kind == "ipad") tr("באיפד") else if (kind == "iphone") tr("באיפון") else tr("במכשיר")
+    val deviceLabel = if (kind == "ipad") tr("באייפד") else if (kind == "iphone") tr("באייפון") else tr("במכשיר")
     val source = if (live.isGift) tr("זמן שנתתם") else if (girl) tr("זמן שהרוויחה") else tr("זמן שהרוויח")
     val opened = if (girl) tr("פתחה") else tr("פתח")
     Row(
@@ -336,7 +336,7 @@ private fun TopicsCard(
             TopicRow(child, s, extras, t, open == t.topic) { onToggle(t.topic, open == t.topic) }
             if (open == t.topic) {
                 val skills = engine.skillReports(t.topic, period)
-                if (skills.isEmpty()) P(tr("אין עדיין פרוט לפי מיומנות בנושא זה."), 12.5f)
+                if (skills.isEmpty()) P(tr("אין עדיין פירוט לפי מיומנות בנושא זה."), 12.5f)
                 else skills.forEach { sk ->
                     Row(Modifier.fillMaxWidth().padding(start = 44.dp).glassInset(11.dp).padding(horizontal = 10.dp, vertical = 8.dp)) {
                         Text(sk.name, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp)
@@ -372,7 +372,7 @@ private fun WorldsCard(child: Child, extras: SnapshotExtras) {
                 val st = stageOf(w)
                 WorldRow(w, WorldTiers.parentLabel(WorldStage.tier(st), st % 10), WorldTiers.color(WorldStage.tier(st)))
             }
-            notYet.forEach { w -> WorldRow(w, g(tr("עוד לא ביקר"), tr("עוד לא בקרה")), null) }
+            notYet.forEach { w -> WorldRow(w, g(tr("עוד לא ביקר"), tr("עוד לא ביקרה")), null) }
         }
     }
 }
@@ -508,7 +508,7 @@ private fun DevicesCard(child: Child, devices: List<ChildDevice>, live: Boolean,
                 // "אייפד של נועה" — the kind + the child; a custom device name rides along.
                 val ipad = d.kind == "ipad"
                 val generic = listOf(tr("אייפד"), tr("אייפון"), "iPhone", "iPad", "").contains(d.name)
-                Text(tr("%@ %@ של %@", if (ipad) "📲" else "📱", if (ipad) tr("איפד") else tr("איפון"), child.name) + (if (generic) "" else " · ${d.name}"),
+                Text(tr("%@ %@ של %@", if (ipad) "📲" else "📱", if (ipad) tr("אייפד") else tr("אייפון"), child.name) + (if (generic) "" else " · ${d.name}"),
                     Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.5.sp)
                 val recent = nowSecs() - d.lastSeenAt < 120
                 val (txt, col) = when {

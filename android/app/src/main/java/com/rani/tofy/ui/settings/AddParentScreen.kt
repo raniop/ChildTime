@@ -106,7 +106,7 @@ private fun Content() {
     }
     EmailInviteCard()
     StepsCard(tr("או — במכשיר של ההורה השני:"), listOf(
-        tr("התקינו את אפליקצית טופי"),
+        tr("התקינו את אפליקציית טופי"),
         tr("במסך הפתיחה הקישו “כבר יש לכם משפחה? הצטרפו”"),
         tr("התחברו, וסרקו את הקוד שכאן (או הקלידו אותו)"),
         // The joiner meets the parent-code gate next — told here, to the
@@ -123,15 +123,15 @@ private fun EmailInviteCard() {
     var sent by remember { mutableStateOf(false) }
     var inviting by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxWidth().glassPane(20.dp, 0.10f).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        H(tr("✉️ הדרך הקלה: הזמינו באימיל"), 16, align = TextAlign.Center)
-        P(tr("ההורה השני פשוט יתחבר עם האימיל הזה — והמשפחה תחכה לו שם, בלי קודים."), 13f, color = Color.White.copy(alpha = 0.8f), align = TextAlign.Center)
-        if (sent) P("✓ " + tr("ההזמנה נשמרה! אפשר להזמין עוד אימיל"), 13.5f, color = Ink.good, weight = FontWeight.ExtraBold, align = TextAlign.Center)
+        H(tr("✉️ הדרך הקלה: הזמינו באימייל"), 16, align = TextAlign.Center)
+        P(tr("ההורה השני פשוט יתחבר עם האימייל הזה — והמשפחה תחכה לו שם, בלי קודים."), 13f, color = Color.White.copy(alpha = 0.8f), align = TextAlign.Center)
+        if (sent) P("✓ " + tr("ההזמנה נשמרה! אפשר להזמין עוד אימייל"), 13.5f, color = Ink.good, weight = FontWeight.ExtraBold, align = TextAlign.Center)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             // An address reads left-to-right whatever the app language.
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                 OutlinedTextField(
                     email, { email = it.trim() }, Modifier.weight(1f), singleLine = true,
-                    placeholder = { Text(tr("אימיל של ההורה השני"), fontFamily = Rounded) },
+                    placeholder = { Text(tr("אימייל של ההורה השני"), fontFamily = Rounded) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, autoCorrectEnabled = false),
                     colors = glassFieldColors(), shape = RoundedCornerShape(12.dp),
                 )

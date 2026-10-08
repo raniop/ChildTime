@@ -360,7 +360,7 @@ struct ChildSettingsView: View {
         household.allowAppRemovalRemotely(toChildID: p.id)
         let connected = (household.devicesByChild[p.id.uuidString]?.isEmpty == false)
         remoteNote = connected
-            ? tr("נפתח חלון של 5 דקות למחיקת אפליקציות במכשיר של \(p.name) — מידי כשטופי פתוח שם. אחר כך הנעילה חוזרת לבד.")
+            ? tr("נפתח חלון של 5 דקות למחיקת אפליקציות במכשיר של \(p.name) — מיידי כשטופי פתוח שם. אחר כך הנעילה חוזרת לבד.")
             : tr("אין כרגע מכשיר מחובר ל\(p.name) — החלון ייפתח ברגע שהמכשיר יתחבר.")
     }
 

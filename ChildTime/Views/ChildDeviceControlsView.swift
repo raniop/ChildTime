@@ -19,6 +19,8 @@ struct ChildDeviceControlsView: View {
     @Environment(\.openURL) private var openURL
 
     @State private var showAppPicker = false
+    /// ⏱ The child's daily limit, set right here on the child's own device (Rani).
+    @State private var showScreenTime = false
     @State private var showDisconnect = false
     @State private var selection = SelectionStorage.empty()
     @State private var showAllowPicker = false
@@ -59,6 +61,7 @@ struct ChildDeviceControlsView: View {
                     header
                     if kidMode.active { exitKidModeButton }
                     statusBanner
+                    screenTimeCard
                     quickOpenCard
                     appsCard
                     appleScreenTimeCard
@@ -181,6 +184,48 @@ struct ChildDeviceControlsView: View {
         .buttonStyle(.juicy)
     }
 
+    // MARK: - ⏱ Daily screen time
+
+    /// The child's own daily limit — the same screen the parent opens from the
+    /// child's card, reachable from the child's device too (Rani: the setting was
+    /// too hard to find). Behind the parent gate like everything on this screen.
+    private var screenTimeCard: some View {
+        let cap = profiles.active?.dailyCapMinutes
+        let line: String = {
+            if let cap, cap > 0 { return tr("עד \(cap) דקות ביום") }
+            if cap == 0 { return tr("בלי הגבלה יומית") }
+            return settings.dailyCapEnabled ? tr("עד \(settings.maxMinutesPerDay) דקות ביום") : tr("בלי הגבלה יומית")
+        }()
+        return Button {
+            Haptic.light()
+            showScreenTime = true
+        } label: {
+            HStack(spacing: 12) {
+                Text("⏱").font(.system(size: 26))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(tr("זמן מסך יומי"))
+                        .font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    Text(line)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.8))
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.forward").font(.system(size: 14, weight: .bold)).foregroundStyle(.white.opacity(0.7))
+            }
+            .padding(AppSpacing.lg)
+            .frame(maxWidth: .infinity)
+            .glassPane(radius: 22)
+        }
+        .buttonStyle(.juicy)
+        .sheet(isPresented: $showScreenTime) {
+            if let id = profiles.activeID {
+                ChildScreenTimeView(profileID: id)
+                    .environmentObject(profiles)
+                    .environmentObject(settings)
+                    .environment(\.layoutDirection, .app)
+            }
+        }
+    }
+
     // MARK: - Reusable card + section header
 
     private func controlCard<Content: View>(tint: Color = .white,
@@ -268,7 +313,7 @@ struct ChildDeviceControlsView: View {
         return controlCard(tint: AppColor.starGold) {
             sectionHead(tr("תן דקות מתנה 💝"),
                         capLeft > 0
-                            ? tr("נִכְנָס לַכִּיס 💝 שֶׁל הַיֶּלֶד — \(profileName) \(isGirl ? tr("פותחת") : tr("פותח")) מָתַי שֶׁ\(isGirl ? tr("תרצה") : tr("ירצה")), מִכָּל מַכְשִׁיר. אֶפְשָׁר לָתֵת עוֹד עַד \(capLeft) דַּקּוֹת הַיּוֹם (עַד חֲצוֹת).")
+                            ? tr("נכנס לכיס 💝 של הילד — \(profileName) \(isGirl ? tr("פותחת") : tr("פותח")) מתי ש\(isGirl ? tr("תרצה") : tr("ירצה")), מכל מכשיר. אפשר לתת עוד עד \(capLeft) דקות היום (עד חצות).")
                             : tr("עוד רגע חצות — מיד אחרי חצות אפשר לתת שוב."),
                         icon: "gift.fill", tint: AppColor.starGold)
             // Same five as the parent's own menu — "רבע שעה" was missing here.
@@ -487,7 +532,7 @@ struct ChildDeviceControlsView: View {
             diagnosticRow(tr("פתוחות תמיד"), "\(openCount)", ok: true)
             // Read BACK from iOS, not what we think we sent — the lesson of
             // builds 190–191, where everything we "sent" by name was dropped.
-            diagnosticRow(tr("הנעילה באיפון"),
+            diagnosticRow(tr("הנעילה באייפון"),
                           TofyShield.categoryLockHeld ? tr("פעילה") : tr("כבויה"),
                           ok: TofyShield.categoryLockHeld || isUnlocked)
             diagnosticRow(tr("אפליקציה חדשה"),
@@ -510,7 +555,7 @@ struct ChildDeviceControlsView: View {
                 Haptic.light()
                 diagnostic = shields.applyAndReport()
             } label: {
-                Label(tr("החילו עכשו ובדקו"), systemImage: "arrow.clockwise")
+                Label(tr("החילו עכשיו ובדקו"), systemImage: "arrow.clockwise")
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 11)
@@ -609,7 +654,7 @@ struct ChildDeviceControlsView: View {
                 .init(id: 1, title: tr("\"הגדרות\" ← \"זמן מסך\""),
                       detail: tr("אם אתם מנהלים את הילד מהטלפון שלכם — בטלפון שלכם, ואז השם של הילד.")),
                 .init(id: 2, title: tr("גוללים עד למטה ← \"יישומים עם גישה אל ”זמן מסך”\""), detail: ""),
-                .init(id: 3, title: tr("טופי ← כיבוי"), detail: tr("זה מבטל את כל הנעילות בטלפון.")),
+                .init(id: 3, title: tr("טופי ← כבוי"), detail: tr("זה מבטל את כל הנעילות בטלפון.")),
                 .init(id: 4, title: tr("ואז מוחקים את טופי ממסך הבית כרגיל"), detail: ""),
             ])
             ScreenTimeShowMeButton(pages: ScreenTimeLookalikes.deletion)

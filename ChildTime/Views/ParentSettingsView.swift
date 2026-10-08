@@ -70,8 +70,8 @@ struct ParentSettingsView: View {
                     // first — offer the one-tap fix (the dashboard behind this
                     // sheet is already behind the root parent gate).
                     if showConvertToChild {
-                        menuRow("🧒", tr("להפוך את האיפד הזה למכשיר של ילד"),
-                                tr("מומלץ אם הילד משחק באיפד הזה")) {
+                        menuRow("🧒", tr("להפוך את האייפד הזה למכשיר של ילד"),
+                                tr("מומלץ אם הילד משחק באייפד הזה")) {
                             ConvertToChildDeviceView { dismiss() }
                         }
                     }

@@ -29,7 +29,7 @@ struct ChildLanguageView: View {
         NavigationStack {
             Form {
                 Section {
-                    Text(tr("בִּחֲרוּ בְּאֵיזוֹ שָׂפָה טוֹפִי יוֹפִיעַ בַּמַּכְשִׁיר שֶׁל \(profile?.name ?? tr("הילד")). הַשִּׁנּוּי מַגִּיעַ לַמַּכְשִׁיר בַּסִּנְכְרוּן הַבָּא."))
+                    Text(tr("בחרו באיזו שפה טופי יופיע במכשיר של \(profile?.name ?? tr("הילד")). השינוי מגיע למכשיר בסנכרון הבא."))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

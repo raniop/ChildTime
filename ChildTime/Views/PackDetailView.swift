@@ -194,7 +194,7 @@ struct PackDetailView: View {
                 // Like the approved mockup: one option above the other, each with
                 // its price and a line that says exactly what it buys.
                 VStack(spacing: 8) {
-                    optionRow(title: tr("רק העולם הזה") + (selectedIDs.count == 1 && !choosingTofyPlus ? tr(", לְ\(kids.first { selected.contains($0.id.uuidString) }?.name ?? "")") : ""),
+                    optionRow(title: tr("רק העולם הזה") + (selectedIDs.count == 1 && !choosingTofyPlus ? tr(", ל\(kids.first { selected.contains($0.id.uuidString) }?.name ?? "")") : ""),
                               price: priceLabel ?? pack.plannedPriceLabel,
                               line: tr("\(pack.durationLabel) · לילד אחד · בלי מנוי · בלי חידוש אוטומטי"),
                               selected: !choosingTofyPlus, gold: false) { Haptic.light(); withAnimation(.easeInOut(duration: 0.2)) { choosingTofyPlus = false } }
@@ -529,7 +529,7 @@ struct PacksHomeSection: View {
             let price = store.displayPrice(for: pack)
             if pack.isPass {
                 let expiredFor = profiles.profiles.filter { $0.passExpired(pack) }.map(\.name)
-                if !expiredFor.isEmpty { return tr("נִגְמַר לְ\(ListFormatter.localizedString(byJoining: expiredFor)) · לְהַמְשִׁיךְ: \(price ?? "")") }
+                if !expiredFor.isEmpty { return tr("נגמר ל\(ListFormatter.localizedString(byJoining: expiredFor)) · להמשיך: \(price ?? "")") }
                 return [price.map { tr("\($0) · 30 יום לילד") }].compactMap { $0 }.joined()
             }
             return [pack.gradesLabel, price].compactMap { $0 }.joined(separator: " · ")
@@ -538,11 +538,11 @@ struct PacksHomeSection: View {
         if subs.isPremium, !pack.isPass {
             let days = LearningHistoryStore.shared.history(for: first.id)
             let answered = days.reduce(0) { $0 + ($1.perTopic[pack.topic.rawValue]?.answered ?? 0) }
-            return answered > 0 ? tr("כָּלוּל בְּטוֹפִי+ · \(first.name) \(first.gender == .girl ? tr("התחילה") : tr("התחיל")) · \(answered) שְׁאֵלוֹת") : tr("כלול בטופי+ · פתוח לכל הילדים")
+            return answered > 0 ? tr("כלול בטופי+ · \(first.name) \(first.gender == .girl ? tr("התחילה") : tr("התחיל")) · \(answered) שאלות") : tr("כלול בטופי+ · פתוח לכל הילדים")
         }
         if pack.isPass {
             let parts = owners.map { o in tr("\(o.name)\(o.passDaysLeft(pack).map { tr(" · עוד \($0) יום") } ?? "")") }
-            return tr("✓ פָּתוּחַ לְ\(parts.joined(separator: ", "))")
+            return tr("✓ פתוח ל\(parts.joined(separator: ", "))")
         }
         let days = LearningHistoryStore.shared.history(for: first.id)
         let answered = days.reduce(0) { $0 + ($1.perTopic[pack.topic.rawValue]?.answered ?? 0) }
@@ -550,7 +550,7 @@ struct PacksHomeSection: View {
         var line = tr("✓ נשלח ל\(ListFormatter.localizedString(byJoining: owners.map(\.name)))")
         if answered > 0 {
             let pct = Int((Double(correct) / Double(answered) * 100).rounded())
-            line += tr("\n\(first.gender == .girl ? tr("התחילה") : tr("התחיל")) · \(answered) שְׁאֵלוֹת · \(pct)%")
+            line += tr("\n\(first.gender == .girl ? tr("התחילה") : tr("התחיל")) · \(answered) שאלות · \(pct)%")
         }
         return line
     }

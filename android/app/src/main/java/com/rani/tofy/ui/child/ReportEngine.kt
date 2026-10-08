@@ -209,7 +209,7 @@ class ReportEngine(history: List<DailyStat>) {
         }
         if (s.voluntaryLearningRate >= 0.3 && s.questions >= 20) {
             return DailyInsight("💛", tr("%@ גם בלי פרס", g(tr("לומד"), tr("לומדת"))),
-                tr("%lld%% מהתשובות של %@ נתנו אחרי שהדקות של היום כבר נגמרו — כלומר סתם כי %@.",
+                tr("%lld%% מהתשובות של %@ ניתנו אחרי שהדקות של היום כבר נגמרו — כלומר סתם כי %@.",
                     (s.voluntaryLearningRate * 100).roundToInt(), name, g(tr("רצה"), tr("רצתה"))), null)
         }
         if (s.questions <= 0) return null

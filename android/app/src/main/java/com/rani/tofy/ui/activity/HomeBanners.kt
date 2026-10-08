@@ -162,7 +162,7 @@ private fun ChoreBanner(kid: Child, c: Chore, approving: Boolean, onOpen: () -> 
     ) {
         Text(c.emoji, fontSize = 24.sp)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(if (kid.isGirl) tr("%@ סימה מטלה", kid.name) else tr("%@ סים מטלה", kid.name),
+            Text(if (kid.isGirl) tr("%@ סיימה מטלה", kid.name) else tr("%@ סיים מטלה", kid.name),
                 color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
             P(tr("%@ · מחכה לאישור", c.title), 13f, color = Ink.secondary, maxLines = 2)
         }

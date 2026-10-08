@@ -506,7 +506,7 @@ struct ProfileEditorView: View {
                 }
             }
             if grade == nil {
-                Text(tr("חובה לבחור — כך טופי מתאים את השאלות לתכנית של משרד החינוך, וכל 1 בספטמבר עולים כיתה אוטומטית 🎉"))
+                Text(tr("חובה לבחור — כך טופי מתאים את השאלות לתוכנית של משרד החינוך, וכל 1 בספטמבר עולים כיתה אוטומטית 🎉"))
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
             }

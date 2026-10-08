@@ -198,7 +198,7 @@ struct PaywallView: View {
             ending = d == 0 ? tr("המתנה מסתיימת היום") : d == 1 ? tr("המתנה מסתיימת מחר")
                 : d == 2 ? tr("המתנה מסתיימת בעוד יומיים") : tr("המתנה מסתיימת בעוד \(d) ימים")
         } else {
-            ending = tr("המתנה הסתימה · ההתקדמות של \(p.name) שמורה")
+            ending = tr("המתנה הסתיימה · ההתקדמות של \(p.name) שמורה")
         }
         return Pitch(name: p.name, girl: p.gender == .girl,
                      favorite: ranked.first.map { (world: $0.0, questions: $0.1, accuracy: $0.2) },
@@ -214,7 +214,7 @@ struct PaywallView: View {
                 Text(p.girl ? tr("\(fav.world.emoji) \(p.name) מצאה עולם שהיא אוהבת") : tr("\(fav.world.emoji) \(p.name) מצא עולם שהוא אוהב"))
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                 Text((p.girl ? tr("היא ענתה ב\(fav.world.name) על \(fav.questions) שאלות, ב\(fav.accuracy)% הצלחה.") : tr("הוא ענה ב\(fav.world.name) על \(fav.questions) שאלות, ב\(fav.accuracy)% הצלחה."))
-                     + (p.others.isEmpty ? "" : tr(" גַּם \(p.others.map(\.name).joined(separator: tr(" ו"))) בִּפְנִים.")))
+                     + (p.others.isEmpty ? "" : tr(" גם \(p.others.map(\.name).joined(separator: tr(" ו"))) בפנים.")))
                     .font(.system(size: 13.5, weight: .medium, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .fixedSize(horizontal: false, vertical: true)

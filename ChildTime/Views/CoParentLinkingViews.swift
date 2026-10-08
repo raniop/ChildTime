@@ -62,7 +62,7 @@ struct AddParentView: View {
         emailInviteCard
 
         StepsCard(title: tr("או — במכשיר של ההורה השני:"), steps: [
-            tr("התקינו את אפליקצית טופי"),
+            tr("התקינו את אפליקציית טופי"),
             tr("במסך הפתיחה הקישו \u{201C}כבר יש לכם משפחה? הצטרפו\u{201D}"),
             tr("התחברו, וסרקו את הקוד שכאן (או הקלידו אותו)"),
             // The joiner hits the parent-code gate right after — and nobody
@@ -117,20 +117,20 @@ struct AddParentView: View {
 
     private var emailInviteCard: some View {
         VStack(spacing: AppSpacing.sm) {
-            Text(tr("✉️ הדרך הקלה: הזמינו באימיל"))
+            Text(tr("✉️ הדרך הקלה: הזמינו באימייל"))
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text(tr("ההורה השני פשוט יתחבר עם האימיל הזה — והמשפחה תחכה לו שם, בלי קודים."))
+            Text(tr("ההורה השני פשוט יתחבר עם האימייל הזה — והמשפחה תחכה לו שם, בלי קודים."))
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.8))
                 .multilineTextAlignment(.center)
             if inviteSent {
-                Label(tr("ההזמנה נשמרה! אפשר להזמין עוד אימיל"), systemImage: "checkmark.circle.fill")
+                Label(tr("ההזמנה נשמרה! אפשר להזמין עוד אימייל"), systemImage: "checkmark.circle.fill")
                     .font(.system(size: 13.5, weight: .heavy, design: .rounded))
                     .foregroundStyle(AppColor.successMint)
             }
             HStack(spacing: 8) {
-                TextField(tr("אימיל של ההורה השני"), text: $inviteEmail)
+                TextField(tr("אימייל של ההורה השני"), text: $inviteEmail)
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
@@ -463,7 +463,7 @@ struct JoinConfirmView: View {
                 }
             } else {
                 panel(emoji: "🎮", title: tr("לחבר את המכשיר הזה כמכשיר של ילד?"),
-                      body: tr("המכשיר הזה יהפך למכשיר המשחק של הילד ויתחבר למשפחה. אפשר תמיד לשנות בהגדרות.")) {
+                      body: tr("המכשיר הזה ייהפך למכשיר המשחק של הילד ויתחבר למשפחה. אפשר תמיד לשנות בהגדרות.")) {
                     primaryButton(tr("כן, חברו")) {
                         settings.deviceRole = .child
                         settings.pendingJoinPayload = coord.rawPayload

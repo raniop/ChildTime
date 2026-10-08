@@ -55,6 +55,9 @@ struct ParentDashboardView: View {
     /// name, or ⚡ → עריכה). Its own state: the detail page binds `settingsChild`,
     /// and on the Duo both can be on screen at once.
     @State private var homeSettingsChild: Profile? = nil
+    /// ⏱ The child's daily screen-time limit, straight from the actions menu —
+    /// it was three taps deep in the child's settings (Rani: hard to find).
+    @State private var screenTimeChild: Profile? = nil
     @State private var showFamilyNameEditor = false
     @State private var familyNameDraft = ""
     @State private var showingReorder = false               // manual child order sheet
@@ -741,6 +744,12 @@ struct ParentDashboardView: View {
             .sheet(item: $qrChild) { child in
                 childQRSheet(for: child)
             }
+            .sheet(item: $screenTimeChild) { p in
+                ChildScreenTimeView(profileID: p.id)
+                    .environmentObject(profiles)
+                    .environmentObject(settings)
+                    .environment(\.layoutDirection, .app)
+            }
             .sheet(item: $homeSettingsChild) { p in
                 ChildSettingsView(profileID: p.id,
                                   snapshot: rows.first(where: { $0.profile.id == p.id })?.snapshot ?? ProgressSnapshot(),
@@ -1194,7 +1203,7 @@ struct ParentDashboardView: View {
                     // Numbered steps — parents missed that Tofy must be
                     // DOWNLOADED on the kid's device first (Rani, live E2E).
                     VStack(alignment: .trailing, spacing: 5) {
-                        Text(tr("1️⃣  הורידו את טופי מה־App Store במכשיר של \(child.name) (איפד או איפון)"))
+                        Text(tr("1️⃣  הורידו את טופי מה־App Store במכשיר של \(child.name) (אייפד או אייפון)"))
                         Text(tr("2️⃣  פתחו שם את טופי ובחרו \"המכשיר של הילד\""))
                         Text(tr("3️⃣  סרקו את הקוד — ו\(child.name) נכנס ישירות לשחק 🎉"))
                     }
@@ -1227,8 +1236,8 @@ struct ParentDashboardView: View {
                             convertChild = child
                         } label: {
                             Label(child.gender == .girl
-                                  ? tr("האיפד הזה של \(child.name)? להפוך אותו למכשיר שלה")
-                                  : tr("האיפד הזה של \(child.name)? להפוך אותו למכשיר שלו"),
+                                  ? tr("האייפד הזה של \(child.name)? להפוך אותו למכשיר שלה")
+                                  : tr("האייפד הזה של \(child.name)? להפוך אותו למכשיר שלו"),
                                   systemImage: "ipad")
                                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                                 .foregroundStyle(.white)
@@ -1315,16 +1324,16 @@ struct ParentDashboardView: View {
         let pct = s.answeredToday > 0 ? Int((Double(s.correctToday) / Double(s.answeredToday) * 100).rounded()) : nil
         let hasDevice = childHasDevice(profile)
         let state: String = {
-            if playing { return tr("\(girl ? tr("משחקת") : tr("משחק")) עַכְשָׁיו · נִשְׁאֲרוּ \(formatTime(liveSecs))") }
-            if isChildPlayingNow(profile) { return tr("בְּטוֹפִי עַכְשָׁיו · \(girl ? tr("לומדת") : tr("לומד"))") }
+            if playing { return tr("\(girl ? tr("משחקת") : tr("משחק")) עכשיו · נשארו \(formatTime(liveSecs))") }
+            if isChildPlayingNow(profile) { return tr("בטופי עכשיו · \(girl ? tr("לומדת") : tr("לומד"))") }
             // 🏫🌙 The hours the parent set aside, while they are on.
             if hasDevice, let q = profile.quietHours?.active(at: Date()) {
                 let at = QuietHoursManager.clock(q.end)
                 return q.kind == .school ? tr("🏫 זמן בית ספר עד \(at)") : tr("🌙 שעת שינה עד \(at)")
             }
             // A child with no device of their own still plays in kid mode on this phone.
-            if !hasDevice && s.answeredToday == 0 && s.stars == 0 { return tr("עוֹד לֹא \(girl ? tr("התחילה") : tr("התחיל"))") }
-            return s.answeredToday > 0 ? tr("\(girl ? tr("למדה") : tr("למד")) הַיּוֹם") : tr("לא בטופי היום")
+            if !hasDevice && s.answeredToday == 0 && s.stars == 0 { return tr("עוד לא \(girl ? tr("התחילה") : tr("התחיל"))") }
+            return s.answeredToday > 0 ? tr("\(girl ? tr("למדה") : tr("למד")) היום") : tr("לא בטופי היום")
         }()
         return VStack(spacing: Self.homeRowGap) {
             HStack(spacing: 12) {
@@ -1628,7 +1637,7 @@ struct ParentDashboardView: View {
                 .alert(tr("שם המשפחה"), isPresented: $showFamilyNameEditor) {
                     TextField(tr("משפחת גולן"), text: $familyNameDraft)
                     Button(tr("שמרו")) { household.setFamilyName(familyNameDraft) }
-                    Button(tr("לא עכשו"), role: .cancel) {
+                    Button(tr("לא עכשיו"), role: .cancel) {
                         UserDefaults.standard.set(true, forKey: "family.namePromptOff")
                     }
                 } message: {
@@ -1735,6 +1744,9 @@ struct ParentDashboardView: View {
             Button {
                 homeSettingsChild = profile
             } label: { Label(tr("עריכת \(name)"), systemImage: "pencil") }
+            Button {
+                screenTimeChild = profile
+            } label: { Label(tr("זמן מסך יומי"), systemImage: "hourglass") }
             Divider()
             if !hasDevice {
                 Button {
@@ -1829,12 +1841,12 @@ struct ParentDashboardView: View {
         //    named by its source: gift time (💝) is never dressed up as earned (🎮).
         if let (p, w) = theRows.lazy.compactMap({ r in liveWindow(r.profile).map { (r.profile, $0) } }).first {
             return w.isManual
-                ? tr("\(p.name) \(g(p, tr("פתח"), tr("פתחה"))) דַּקּוֹת מַתָּנָה עַכְשָׁיו 💝")
-                : tr("\(p.name) \(g(p, tr("פתח"), tr("פתחה"))) זְמַן מָסָךְ עַכְשָׁיו 🎮")
+                ? tr("\(p.name) \(g(p, tr("פתח"), tr("פתחה"))) דקות מתנה עכשיו 💝")
+                : tr("\(p.name) \(g(p, tr("פתח"), tr("פתחה"))) זמן מסך עכשיו 🎮")
         }
         // 1b. Someone is inside Tofy right now (learning).
         if let live = theRows.first(where: { isChildPlayingNow($0.profile) }) {
-            return tr("\(live.profile.name) בְּטוֹפִי עַכְשָׁיו — \(g(live.profile, tr("לומד"), tr("לומדת"))) 📚")
+            return tr("\(live.profile.name) בטופי עכשיו — \(g(live.profile, tr("לומד"), tr("לומדת"))) 📚")
         }
         // 2. Best streak in the family (≥3 is worth celebrating).
         if let hot = theRows.max(by: { $0.snapshot.dayStreak < $1.snapshot.dayStreak }),
@@ -1846,7 +1858,7 @@ struct ParentDashboardView: View {
         let idle = theRows.filter { $0.snapshot.answeredToday == 0 }
         if questions > 0, idle.count == 1, theRows.count > 1 {
             let kid = idle[0].profile
-            return tr("\(kid.name) עוֹד לֹא \(g(kid, tr("שחק"), tr("שיחקה"))) הַיּוֹם — אוּלַי לְעוֹדֵד? 💛")
+            return tr("\(kid.name) עוד לא \(g(kid, tr("שיחק"), tr("שיחקה"))) היום — אולי לעודד? 💛")
         }
         if questions > 0 {
             return tr("המשפחה ענתה על \(questions) שאלות היום 👏")
@@ -1900,7 +1912,7 @@ struct ParentDashboardView: View {
         let text: String = {
             // No countdown here — the 🎮/💝 stat below already ticks in green.
             if let live { return live.isManual ? tr("💝 זמן מתנה פתוח") : tr("🎮 זמן מסך פתוח") }
-            if isChildPlayingNow(profile) { return tr("בְּטוֹפִי עַכְשָׁיו · \(girl ? tr("לומדת") : tr("לומד")) 📚") }
+            if isChildPlayingNow(profile) { return tr("בטופי עכשיו · \(girl ? tr("לומדת") : tr("לומד")) 📚") }
             return tr("לא בטופי כרגע")
         }()
         HStack(spacing: 6) {
@@ -1930,7 +1942,7 @@ struct ParentDashboardView: View {
     @ViewBuilder
     private func liveWindowBanner(_ profile: Profile, compact: Bool, onLock: (() -> Void)? = nil) -> some View {
         if let live = liveWindow(profile) {
-            let deviceLabel = live.device.kind == "ipad" ? tr("באיפד") : (live.device.kind == "iphone" ? tr("באיפון") : tr("במכשיר"))
+            let deviceLabel = live.device.kind == "ipad" ? tr("באייפד") : (live.device.kind == "iphone" ? tr("באייפון") : tr("במכשיר"))
             let source = live.isManual ? tr("זמן שנתתם") : (profile.gender == .girl ? tr("זמן שהרוויחה") : tr("זמן שהרוויח"))
             // Authored RTL explicitly (the detail card is forced LTR): the pulse
             // dot leads on the RIGHT, Hebrew text is right-aligned, device icon
@@ -1946,8 +1958,8 @@ struct ParentDashboardView: View {
                 } else {
                     VStack(alignment: .leading, spacing: 1) {
                         Text(live.isManual
-                             ? tr("\(profile.name) \(profile.gender == .girl ? tr("פתחה") : tr("פתח")) דַּקּוֹת מַתָּנָה \(deviceLabel) 💝")
-                             : tr("\(profile.name) \(profile.gender == .girl ? tr("פתחה") : tr("פתח")) זְמַן מָסָךְ \(deviceLabel) 🎮"))
+                             ? tr("\(profile.name) \(profile.gender == .girl ? tr("פתחה") : tr("פתח")) דקות מתנה \(deviceLabel) 💝")
+                             : tr("\(profile.name) \(profile.gender == .girl ? tr("פתחה") : tr("פתח")) זמן מסך \(deviceLabel) 🎮"))
                             .font(.system(size: 14, weight: .heavy, design: .rounded))
                         Text(tr("נשארו \(formatTime(live.secondsLeft)) דקות · \(source)"))
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
