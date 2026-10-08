@@ -105,6 +105,8 @@ object KidSession : LeaseHost {
 
     private var engine: ProgressEngine? = null
     private var childID: String? = null
+    /** Last "used today" written to dailyStats — written only when it moves. */
+    private var lastReportedPlayed = -1
     /** True when a PARENT phone is being the child (Kid Mode). */
     var kidMode: Boolean = false
         private set
@@ -153,6 +155,7 @@ object KidSession : LeaseHost {
         unbind()
         this.childID = childID
         this.kidMode = kidMode
+        lastReportedPlayed = -1
         val saved = prefs?.getString(childID, null)?.let { KidPersistence.decode(it) }
         engine = ProgressEngine(baseSettings, AndroidKidClock, KidIdentity.installID, saved?.first, saved?.second)
         publish()
@@ -223,6 +226,16 @@ object KidSession : LeaseHost {
     private fun afterChange(e: ProgressEngine, seqBefore: Int, windowBefore: Triple<Double?, Boolean, Int>) {
         publish()
         persist()
+        // 📱 Screen time USED today, for the parent's report and the admin — the
+        // engine already knows it exactly (opened − returned). Android never wrote
+        // it at all, so every Android child showed 0 used (Rani, 2026-10-08).
+        childID?.let { cid ->
+            val played = e.minutesPlayedToday
+            if (played != lastReportedPlayed) {
+                lastReportedPlayed = played
+                com.rani.tofy.kid.ui.play.LearningHistoryRecorder.setMinutesUsed(cid, played)
+            }
+        }
         for (ev in e.drainEvents()) {
             _events.tryEmit(KidEvent.Progress(ev))
             when (ev) {

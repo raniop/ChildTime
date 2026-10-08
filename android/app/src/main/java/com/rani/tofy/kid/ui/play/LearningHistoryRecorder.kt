@@ -82,6 +82,9 @@ object LearningHistoryRecorder {
             .collection("dailyStats").document(stat.date).set(stat.toFirestore(), SetOptions.merge())
     }
 
+    /** Today's screen time actually used (opened − returned), set absolutely. */
+    fun setMinutesUsed(childID: String, minutes: Int) = mutateToday(childID) { it.minutesUsed = maxOf(0, minutes) }
+
     /** Every runner session is an Earn-to-Unlock one (see RunnerController). */
     fun recordSessionStart(childID: String, earn: Boolean = true) = mutateToday(childID) {
         it.sessions += 1
