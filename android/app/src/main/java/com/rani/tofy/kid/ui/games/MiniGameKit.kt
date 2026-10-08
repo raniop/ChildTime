@@ -196,7 +196,11 @@ fun MiniGameChip(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, c
 
 @Composable
 fun ChipText(text: String, color: Color = Color.White) =
-    Text(text, color = color, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp, maxLines = 1)
+    // "⭐ 213", emoji first, like iOS — an RTL paragraph flipped it to "213 ⭐"
+    // (Rani: "הכוכבים והיהלומים לא יושבים שם תקין"). A chip holds an emoji and
+    // a number, never a sentence, so it always reads left to right.
+    Text("\u200E" + text, color = color, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp, maxLines = 1,
+        style = androidx.compose.ui.text.TextStyle(textDirection = androidx.compose.ui.text.style.TextDirection.Ltr))
 
 /** The game chip, with "×2" during a surprise round. */
 @Composable
@@ -456,10 +460,12 @@ fun MiniGameRewardChip(emoji: String, text: String, color: Color, shown: Boolean
     val s by animateFloatAsState(if (shown) 1f else 0.4f, spring(dampingRatio = 0.55f), label = "chip")
     val a by animateFloatAsState(if (shown) 1f else 0f, tween(200), label = "chipA")
     Column(
-        modifier.graphicsLayer { scaleX = s; scaleY = s; alpha = a }.height(54.dp)
+        // At least 58dp and growing with its two lines: a fixed 54dp pushed the
+        // "+36 ⭐" line against the top edge on a tablet (Rani's screenshot).
+        modifier.graphicsLayer { scaleX = s; scaleY = s; alpha = a }.heightIn(min = 58.dp)
             .clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-            .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(50)).padding(horizontal = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
+            .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(50)).padding(horizontal = 10.dp, vertical = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterVertically),
     ) {
         Ltr { FitText("$emoji +$text", 21.sp, color = color, weight = FontWeight.ExtraBold, maxLines = 1, minScale = 0.6f) }
         Text(unit ?: " ", color = color.copy(alpha = if (unit == null) 0f else 0.85f), fontFamily = Rounded,
