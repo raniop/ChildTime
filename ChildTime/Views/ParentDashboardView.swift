@@ -2473,6 +2473,34 @@ struct ParentDashboardView: View {
             ScrollView {
               ScrollViewReader { proxy in
                 VStack(spacing: 14) {
+                    // 📐 The foldable: the system draws a bar's buttons in a column
+                    // under the clock, over the page (Rani: English had ‹ and ⚙️ on
+                    // the green banner). Our own row instead, on the side AWAY from
+                    // the camera.
+                    if display.hasBarStrip {
+                        HStack(spacing: 10) {
+                            Button { Haptic.light(); if !navPath.isEmpty { navPath.removeLast() } } label: {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 17, weight: .bold))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 44, height: 44)
+                                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.18)))
+                            }
+                            .accessibilityLabel(tr("חזרה"))
+                            Button { Haptic.light(); settingsChild = row.profile } label: {
+                                Label(tr("הגדרות"), systemImage: "gearshape.fill")
+                                    .labelStyle(.titleAndIcon)
+                                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 14).frame(height: 44)
+                                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.18)))
+                            }
+                            Spacer(minLength: 0)
+                        }
+                        .buttonStyle(.plain)
+                        .environment(\.layoutDirection, display.barOnLeft ? .rightToLeft : .leftToRight)
+                        .clearOfBar()
+                    }
                     ChildReportView(
                         profile: row.profile,
                         snapshot: row.snapshot,
@@ -2539,7 +2567,7 @@ struct ParentDashboardView: View {
                     }
                 }
             }
-            .toolbar(.visible, for: .navigationBar)
+            .toolbar(display.hasBarStrip ? .hidden : .visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
     }
 

@@ -117,6 +117,7 @@ struct ChildReportView: View {
                 Spacer()
                 if isRefreshing { ProgressView().tint(.white) }
             }
+            .clearOfBar()   // the foldable: the avatar never sits under the clock
             if let topActions { topActions }
             // ONE summary card (Rani: "עמוס מדי" — it was a strip + a picker):
             // the period on top, the four numbers under it.
