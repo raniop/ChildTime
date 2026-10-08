@@ -462,14 +462,14 @@ fun MiniGameRewardChip(emoji: String, text: String, color: Color, shown: Boolean
     Column(
         // At least 58dp and growing with its two lines: a fixed 54dp pushed the
         // "+36 ⭐" line against the top edge on a tablet (Rani's screenshot).
-        modifier.graphicsLayer { scaleX = s; scaleY = s; alpha = a }.heightIn(min = 58.dp)
+        modifier.graphicsLayer { scaleX = s; scaleY = s; alpha = a }.heightIn(min = 64.dp)
             .clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
             .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(50)).padding(horizontal = 10.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterVertically),
     ) {
         Ltr { FitText("$emoji +$text", 21.sp, color = color, weight = FontWeight.ExtraBold, maxLines = 1, minScale = 0.6f) }
         Text(unit ?: " ", color = color.copy(alpha = if (unit == null) 0f else 0.85f), fontFamily = Rounded,
-            fontWeight = FontWeight.ExtraBold, fontSize = 10.5.sp, maxLines = 1)
+            fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, maxLines = 1)
     }
 }
 

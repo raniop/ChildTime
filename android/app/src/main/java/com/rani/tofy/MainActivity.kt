@@ -57,6 +57,10 @@ class MainActivity : ComponentActivity() {
                     },
                 ) {
                     val demo = demoGame?.let { g -> com.rani.tofy.kid.ui.games.MiniGameKind.entries.firstOrNull { it.name.equals(g, true) } }
+                    // Be the device's own child, so the ⭐/💎 chips show the real wallet.
+                    if (demo != null) androidx.compose.runtime.LaunchedEffect(Unit) {
+                        com.rani.tofy.DeviceRole.joinedChildID?.let { com.rani.tofy.kid.core.KidSession.bind(it, false) }
+                    }
                     if (demo != null) com.rani.tofy.kid.ui.games.MiniGameScreen(demo, null) { finish() }
                     else Root()
                     ForcedUpdateOverlay()
