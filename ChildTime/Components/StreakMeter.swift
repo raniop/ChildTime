@@ -55,16 +55,16 @@ struct StreakMeter: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 1)
-                    .background(Capsule().fill(color))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(color))
                     .scaleEffect(pulsing ? 1.12 : 1.0)
             }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 4)
         .background(
-            Capsule()
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(color.opacity(0.15))
-                .overlay(Capsule().stroke(color, lineWidth: 1.5))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(color, lineWidth: 1.5))
         )
         .opacity(streak > 0 ? 1 : 0)
         .animation(.spring(response: 0.4, dampingFraction: 0.6), value: streak)

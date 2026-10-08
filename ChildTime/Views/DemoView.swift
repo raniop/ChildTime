@@ -134,7 +134,7 @@ struct DemoView: View {
                 .foregroundStyle(AppColor.starGold)
                 .padding(.horizontal, AppSpacing.xl)
                 .padding(.vertical, AppSpacing.md)
-                .background(.white.opacity(0.1), in: Capsule())
+                .background(.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .shimmer()
         }
     }
@@ -165,7 +165,7 @@ struct DemoView: View {
         Button(title, action: action)
             .padding(.horizontal, AppSpacing.md)
             .padding(.vertical, AppSpacing.sm)
-            .background(.white.opacity(0.18), in: Capsule())
+            .background(.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             .foregroundStyle(.white)
             .font(.system(size: 14, weight: .semibold))
     }

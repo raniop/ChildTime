@@ -95,7 +95,7 @@ struct StarShopView: View {
         }
         .padding(.vertical, AppSpacing.md)
         .frame(maxWidth: .infinity)
-        .glassPane(radius: 22)
+        .glassPane(radius: 16)
     }
 
     // Demo-only static row (no StoreKit product) for screenshots.
@@ -120,12 +120,12 @@ struct StarShopView: View {
                 .font(.system(size: 18, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .padding(.horizontal, 16).padding(.vertical, 9)
-                .background(Capsule().fill(.white.opacity(0.92)))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
                 .foregroundStyle(Color(hex: "4B3FBF"))
         }
         .padding(AppSpacing.md)
         .frame(maxWidth: .infinity)
-        .glassPane(radius: 22, tint: best ? Color(hex: "FFD23F") : nil)
+        .glassPane(radius: 16, tint: best ? Color(hex: "FFD23F") : nil)
     }
 
     private func packRow(_ product: Product) -> some View {
@@ -154,11 +154,11 @@ struct StarShopView: View {
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color(hex: "4B3FBF"))
                     .padding(.horizontal, 16).padding(.vertical, 9)
-                    .background(Capsule().fill(.white.opacity(0.92)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
             }
             .padding(AppSpacing.md)
             .frame(maxWidth: .infinity)
-            .glassPane(radius: 22, tint: best ? Color(hex: "FFD23F") : nil)
+            .glassPane(radius: 16, tint: best ? Color(hex: "FFD23F") : nil)
         }
         .buttonStyle(.plain)
         .disabled(store.isPurchasing)
@@ -193,7 +193,7 @@ struct StarShopView: View {
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 22).padding(.vertical, 10)
-                        .background(Capsule().fill(AppColor.gemPurple))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppColor.gemPurple))
                 }
                 if let err = store.lastError {
                     Text(err)

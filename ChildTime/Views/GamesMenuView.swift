@@ -140,10 +140,10 @@ struct GamesMenuView: View {
             .padding(18)
             .frame(maxWidth: .infinity)
             .background(
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing))
             )
-            .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(.white.opacity(0.45), lineWidth: 1.5))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.45), lineWidth: 1.5))
             .glow(colors[0], radius: 16)
         }
         .buttonStyle(.juicy)

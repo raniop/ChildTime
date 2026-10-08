@@ -59,7 +59,7 @@ struct UnlockedView: View {
                     .padding(.horizontal, AppSpacing.lg)
                     .padding(.vertical, AppSpacing.lg)
                     .frame(maxWidth: 420)
-                    .glassPane(radius: 28)
+                    .glassPane(radius: 16)
                     .task {
                         // Most of the bar fills fast, then it eases off and creeps —
                         // so a slow network never looks stuck, and a fast one still
@@ -79,7 +79,7 @@ struct UnlockedView: View {
                 .padding(.horizontal, AppSpacing.lg)
                 .padding(.vertical, AppSpacing.lg)
                 .frame(maxWidth: 420)
-                .glassPane(radius: 28)
+                .glassPane(radius: 16)
 
                 Text(tr("עַכְשָׁיו אֶפְשָׁר לַעֲבוֹר לָאַפְּלִיקַצְיָה שֶׁ\(Gendered.g(tr("אַתָּה רוֹצֶה"), tr("אַתְּ רוֹצָה"))) לְשַׂחֵק בָּהּ 🚀"))
                     .font(.system(size: 14.5, weight: .semibold, design: .rounded))

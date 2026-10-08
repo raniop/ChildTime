@@ -162,7 +162,7 @@ struct ChoresParentView: View {
                                         Text(e).font(.system(size: 26))
                                             .frame(width: 40, height: 40)
                                             .background(formEmoji == e ? Color.accentColor.opacity(0.25) : .clear,
-                                                        in: RoundedRectangle(cornerRadius: 10))
+                                                        in: RoundedRectangle(cornerRadius: 16))
                                     }
                                     .buttonStyle(.plain)
                                 }
@@ -196,7 +196,7 @@ struct ChoresParentView: View {
                     .scaledToFill()
                     .frame(maxWidth: .infinity)
                     .frame(height: 160)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             let approving = choreStore.approvingIDs.contains(chore.id)
             HStack(spacing: 10) {

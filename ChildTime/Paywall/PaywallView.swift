@@ -235,7 +235,7 @@ struct PaywallView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .multilineTextAlignment(.leading)
         .padding(16)
-        .glassPane(radius: 22)
+        .glassPane(radius: 16)
         .environment(\.layoutDirection, .app)
     }
 
@@ -245,7 +245,7 @@ struct PaywallView: View {
             Text(label).font(.system(size: 11, weight: .semibold, design: .rounded)).foregroundStyle(GlassInk.secondary)
         }
         .frame(maxWidth: .infinity).padding(.vertical, 8)
-        .glassInset(radius: 12)
+        .glassInset(radius: 16)
     }
 
     /// What stays free, in one honest line (approved mockup).
@@ -315,7 +315,7 @@ struct PaywallView: View {
         }
         .padding(.vertical, compactLook ? AppSpacing.sm : AppSpacing.md)
         .padding(.horizontal, compactLook ? AppSpacing.sm : AppSpacing.md)
-        .glassPane(radius: 22)
+        .glassPane(radius: 16)
     }
 
     private func benefitRow(_ emoji: String, _ title: String, _ subtitle: String) -> some View {
@@ -405,7 +405,7 @@ struct PaywallView: View {
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 3)
-                                .background(AppColor.successMint, in: Capsule())
+                                .background(AppColor.successMint, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
                     }
                     Text(product.pricePerPeriod)
@@ -421,10 +421,10 @@ struct PaywallView: View {
             }
             .padding(.horizontal, AppSpacing.md)
             .padding(.vertical, AppSpacing.md)
-            .glassPane(radius: 22, strength: isSelected ? 0.18 : 0.10, tint: isSelected ? Color(hex: "8CFFC4") : nil)
+            .glassPane(radius: 16, strength: isSelected ? 0.18 : 0.10, tint: isSelected ? Color(hex: "8CFFC4") : nil)
             .overlay {
                 if isSelected {
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .strokeBorder(Color(hex: "8CFFC4").opacity(0.9), lineWidth: 2)
                 }
             }
@@ -460,7 +460,7 @@ struct PaywallView: View {
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 16).padding(.vertical, 8)
-                        .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14))).overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                 }
                 .padding(.top, 4)
             }
@@ -468,7 +468,7 @@ struct PaywallView: View {
         }
         .frame(maxWidth: .infinity, minHeight: 120)
         .padding(.vertical, AppSpacing.sm)
-        .glassPane(radius: 22)
+        .glassPane(radius: 16)
     }
 
     // MARK: - Primary CTA
@@ -498,7 +498,7 @@ struct PaywallView: View {
                 .foregroundStyle(Color(hex: "4B3FBF"))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(.white.opacity(0.92)))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
                 .shadow(color: .black.opacity(0.2), radius: 14, y: 8)
             }
             .buttonStyle(.juicy)

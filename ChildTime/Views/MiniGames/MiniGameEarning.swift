@@ -208,7 +208,7 @@ struct MiniGameEarnOverlay: View {
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 16).padding(.vertical, 8)
-                    .background(Capsule().fill((earn.flashPositive ? AppColor.successMint : AppColor.flameOrange).opacity(0.95)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill((earn.flashPositive ? AppColor.successMint : AppColor.flameOrange).opacity(0.95)))
                     .glow(earn.flashPositive ? AppColor.successMint : AppColor.flameOrange, radius: 10)
                     .id(earn.flashID)
                     .transition(.asymmetric(insertion: .scale(scale: 0.5).combined(with: .opacity),
@@ -226,7 +226,7 @@ struct MiniGameEarnOverlay: View {
                     .multilineTextAlignment(.center)
                     .minimumScaleFactor(0.7)
                     .padding(.horizontal, 14).padding(.vertical, 8)
-                    .background(Capsule().fill(AppColor.starGold.opacity(0.9)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppColor.starGold.opacity(0.9)))
                     .padding(.horizontal, AppSpacing.lg)
                     .padding(.top, 150)   // under the top bar and under the flash
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -244,7 +244,7 @@ struct MiniGameEarnBar: View {
     var body: some View {
         EarnedBalanceRow(size: 13)
             .padding(.horizontal, 12).padding(.vertical, 7)
-            .glassPane(radius: 14, shadow: false)
+            .glassPane(radius: 16, shadow: false)
     }
 }
 
@@ -323,7 +323,7 @@ struct MiniGameQuestionCard: View {
         }
         .padding(18)
         .frame(maxWidth: 560)
-        .glassPane(radius: 24)
+        .glassPane(radius: 16)
         .modifier(MiniGameShake(animatableData: shake))
         .onAppear { if options.isEmpty { options = item.shuffledOptions } }
     }
@@ -380,8 +380,8 @@ struct MiniGameNumberPad: View {
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: keyHeight)
-                                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.14)))
-                                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.28), lineWidth: 1))
+                                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.28), lineWidth: 1))
                             }
                             .buttonStyle(.juicy)
                             .accessibilityLabel(key == "⌫" ? tr("מְחִיקָה") : key)

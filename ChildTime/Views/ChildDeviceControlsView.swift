@@ -83,8 +83,8 @@ struct ChildDeviceControlsView: View {
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.85))
                             .padding(.horizontal, 28).padding(.vertical, 12)
-                            .background(Capsule().fill(.white.opacity(0.14)))
-                            .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                     }
                 }
                 .padding(.horizontal, AppSpacing.lg)
@@ -213,7 +213,7 @@ struct ChildDeviceControlsView: View {
             }
             .padding(AppSpacing.lg)
             .frame(maxWidth: .infinity)
-            .glassPane(radius: 22)
+            .glassPane(radius: 16)
         }
         .buttonStyle(.juicy)
         .sheet(isPresented: $showScreenTime) {
@@ -234,7 +234,7 @@ struct ChildDeviceControlsView: View {
         VStack(alignment: .leading, spacing: AppSpacing.md) { content() }
             .padding(AppSpacing.lg)
             .frame(maxWidth: .infinity)
-            .glassPane(radius: 22, tint: tint == .white ? nil : tint)
+            .glassPane(radius: 16, tint: tint == .white ? nil : tint)
     }
 
     private func sectionHead(_ title: String, _ subtitle: String, icon: String, tint: Color) -> some View {
@@ -291,15 +291,15 @@ struct ChildDeviceControlsView: View {
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 14).padding(.vertical, 8)
-                        .background(Capsule().fill(AppColor.flameOrange.opacity(0.55)))
-                        .overlay(Capsule().strokeBorder(.white.opacity(0.4), lineWidth: 1))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppColor.flameOrange.opacity(0.55)))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.4), lineWidth: 1))
                 }
                 .buttonStyle(.juicy)
             }
         }
         .padding(.horizontal, AppSpacing.lg).padding(.vertical, 14)
         .frame(maxWidth: .infinity)
-        .glassPane(radius: 18, tint: open ? AppColor.successMint : Color(hex: "FFD23F"))
+        .glassPane(radius: 16, tint: open ? AppColor.successMint : Color(hex: "FFD23F"))
     }
 
     // MARK: - Quick open (manual, all apps)
@@ -347,7 +347,7 @@ struct ChildDeviceControlsView: View {
                 .foregroundStyle(Color(hex: "4B3FBF"))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
-                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.92)))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
         }
         .buttonStyle(.juicy)
         .disabled(allowed <= 0)
@@ -400,7 +400,7 @@ struct ChildDeviceControlsView: View {
                     .foregroundStyle(Color(hex: "4B3FBF"))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 13)
-                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.92)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
             }
             .buttonStyle(.juicy)
 
@@ -429,8 +429,8 @@ struct ChildDeviceControlsView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.14)))
-                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
             }
             .buttonStyle(.juicy)
 
@@ -498,7 +498,7 @@ struct ChildDeviceControlsView: View {
                 .foregroundStyle(Color(hex: "4B3FBF"))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
-                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.92)))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
         }
         .buttonStyle(.juicy)
     }
@@ -546,8 +546,8 @@ struct ChildDeviceControlsView: View {
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 11)
-                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.14)))
-                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
             }
             .buttonStyle(.juicy)
 
@@ -559,8 +559,8 @@ struct ChildDeviceControlsView: View {
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 11)
-                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.14)))
-                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
             }
             .buttonStyle(.juicy)
 
@@ -627,7 +627,7 @@ struct ChildDeviceControlsView: View {
                     .foregroundStyle(Color(hex: "4B3FBF"))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 13)
-                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.92)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
             }
             .buttonStyle(.juicy)
             Text(tr("נפתח הדף של טופי בהגדרות — חזרו צעד אחד אחורה ובחרו \"זמן מסך\"."))
@@ -670,7 +670,7 @@ struct ChildDeviceControlsView: View {
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(AppColor.flameOrange)
                 .frame(maxWidth: .infinity).padding(.vertical, 13)
-                .glassInset(radius: 14)
+                .glassInset(radius: 16)
         }
         .buttonStyle(.juicy)
     }

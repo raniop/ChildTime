@@ -39,7 +39,7 @@ struct SignInView: View {
                     .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
                     .frame(maxWidth: 360)
                     .frame(height: 50)
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .shadow(color: .black.opacity(0.12), radius: 4, y: 2)
 
                     // Google Sign-In — mirrors Apple's surface choice.

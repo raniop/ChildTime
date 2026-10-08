@@ -47,7 +47,7 @@ struct ParentAssistView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .glassInset(radius: 18)
+                        .glassInset(radius: 16)
                     } else if household.linkedParents.isEmpty {
                         // No named parent on file — every parent device in the family
                         // gets the same interactive request.
@@ -68,7 +68,7 @@ struct ParentAssistView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .glassInset(radius: 18)
+                        .glassInset(radius: 16)
                 }
                 .buttonStyle(.juicy)
                 .disabled(sent)
@@ -76,7 +76,7 @@ struct ParentAssistView: View {
             }
             .padding(AppSpacing.lg)
             .frame(maxWidth: 460)
-            .glassPane(radius: 28)
+            .glassPane(radius: 16)
             .padding(.horizontal, AppSpacing.lg)
         }
         .presentationDetents([.medium, .large])
@@ -171,7 +171,7 @@ struct ParentHelpAnswerView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity)
                     .padding(16)
-                    .glassInset(radius: 20)
+                    .glassInset(radius: 16)
 
                 if done {
                     Text(tr("✅ נשלח! התשובה השגויה ירדה מהמסך"))
@@ -179,7 +179,7 @@ struct ParentHelpAnswerView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .glassInset(radius: 18)
+                        .glassInset(radius: 16)
                 } else {
                     VStack(spacing: 10) {
                         optionButton(request.optionA, other: request.optionB)
@@ -201,7 +201,7 @@ struct ParentHelpAnswerView: View {
             }
             .padding(AppSpacing.lg)
             .frame(maxWidth: 460)
-            .glassPane(radius: 28)
+            .glassPane(radius: 16)
             .padding(.horizontal, AppSpacing.lg)
         }
         .environment(\.layoutDirection, .app)

@@ -97,7 +97,7 @@ struct PackDetailView: View {
                     .font(.system(size: 11.5, weight: .bold, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .padding(.horizontal, 10).padding(.vertical, 5)
-                    .background(Capsule().fill(.white.opacity(0.12)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.12)))
             }
             // On the foldable: ✕ in the corner away from the clock, the badge
             // stopping short of it.
@@ -130,7 +130,7 @@ struct PackDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .glassPane(radius: 22)
+        .glassPane(radius: 16)
     }
 
     /// One row in Hebrew (as designed); longer translations get the third chip
@@ -153,8 +153,8 @@ struct PackDetailView: View {
         Text(t)
             .font(.system(size: 11, weight: .bold, design: .rounded))
             .padding(.horizontal, 9).padding(.vertical, 5)
-            .background(Capsule().fill(.white.opacity(0.10)))
-            .overlay(Capsule().strokeBorder(.white.opacity(0.18), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.10)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.18), lineWidth: 1))
             .lineLimit(1).minimumScaleFactor(0.8)
     }
 
@@ -175,14 +175,14 @@ struct PackDetailView: View {
                     .foregroundStyle(Color(hex: "4B3FBF"))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(.white.opacity(0.92)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
             }
             .buttonStyle(.plain)
             .padding(.top, 4)
         }
         .frame(maxWidth: .infinity)
         .padding(16)
-        .glassPane(radius: 22)
+        .glassPane(radius: 16)
     }
 
     private var chooser: some View {
@@ -214,7 +214,7 @@ struct PackDetailView: View {
                         .foregroundStyle(Color(hex: "4B3FBF"))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(.white.opacity(0.92)))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
                 }
                 .buttonStyle(.plain)
                 .padding(.top, 4)
@@ -258,7 +258,7 @@ struct PackDetailView: View {
                         }
                     }
                     .padding(.horizontal, 10).padding(.vertical, 8)
-                    .glassInset(radius: 12)
+                    .glassInset(radius: 16)
                     .opacity(owns ? 0.75 : 1)
                 }
                 .buttonStyle(.plain)
@@ -290,7 +290,7 @@ struct PackDetailView: View {
                     .foregroundStyle(Color(hex: "4B3FBF"))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(.white.opacity(0.92)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
             }
             .buttonStyle(.plain)
             .disabled(selectedIDs.isEmpty || priceLabel == nil)
@@ -305,7 +305,7 @@ struct PackDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .glassPane(radius: 22, strength: 0.09)
+        .glassPane(radius: 16, strength: 0.09)
     }
 
     /// "₪24.90 / חודש" from StoreKit (planned price in the DEBUG demo).
@@ -335,10 +335,10 @@ struct PackDetailView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 12).padding(.vertical, 10)
-            .background(RoundedRectangle(cornerRadius: 14, style: .continuous)
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(gold ? AnyShapeStyle(LinearGradient(colors: [Color(hex: "FFE082").opacity(0.45), Color(hex: "FFB840").opacity(0.35)], startPoint: .topLeading, endPoint: .bottomTrailing))
                            : AnyShapeStyle(Color.white.opacity(selected ? 0.16 : 0.08))))
-            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .strokeBorder(selected ? Color.white.opacity(0.9) : (gold ? Color(hex: "FFEBAA").opacity(0.7) : Color.white.opacity(0.2)), lineWidth: selected ? 1.5 : 1))
         }
         .buttonStyle(.plain)   // stays enabled — a disabled plain button dims the chosen door
@@ -395,14 +395,14 @@ struct PackDetailView: View {
                     .foregroundStyle(Color(hex: "4B3FBF"))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(.white.opacity(0.92)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
             }
             .buttonStyle(.plain)
             .padding(.top, 4)
         }
         .frame(maxWidth: .infinity)
         .padding(16)
-        .glassPane(radius: 22)
+        .glassPane(radius: 16)
     }
 }
 
@@ -493,7 +493,7 @@ struct PacksHomeSection: View {
                             .font(.system(size: 10, weight: .heavy, design: .rounded))
                             .foregroundStyle(Color(hex: "3B2E05"))
                             .padding(.horizontal, 7).padding(.vertical, 2)
-                            .background(Capsule().fill(Color(hex: "FFD23F")))
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "FFD23F")))
                     }
                 }
                 if owners.isEmpty {
@@ -514,12 +514,12 @@ struct PacksHomeSection: View {
                 .font(.system(size: 12.5, weight: .heavy, design: .rounded))
                 .foregroundStyle(Color(hex: "4B3FBF"))
                 .padding(.horizontal, 12).padding(.vertical, 8)
-                .background(Capsule().fill(.white.opacity(0.92)))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
         }
         .foregroundStyle(GlassInk.primary)
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .glassPane(radius: 18, shadow: false)
+        .glassPane(radius: 16, shadow: false)
     }
 
     /// "כִּתּוֹת ב׳–ו׳ · ₪14.90" before a purchase; after it, what the child did:

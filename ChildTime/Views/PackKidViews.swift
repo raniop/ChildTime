@@ -126,7 +126,7 @@ struct PackRevealView: View {
                             .foregroundStyle(Color(hex: "4B3FBF"))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 17)
-                            .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(.white.opacity(0.94)))
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.94)))
                             .shadow(color: Color(hex: "FFD23F").opacity(ctaPulse ? 0.55 : 0.15), radius: ctaPulse ? 26 : 10, y: 8)
                     }
                     .buttonStyle(.juicy)
@@ -161,8 +161,8 @@ struct PackRevealView: View {
             .font(.system(size: 13, weight: .heavy, design: .rounded))
             .foregroundStyle(.white)
             .padding(.horizontal, 11).padding(.vertical, 7)
-            .background(Capsule().fill(.white.opacity(0.18)))
-            .overlay(Capsule().strokeBorder(.white.opacity(0.35), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.18)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.35), lineWidth: 1))
             .scaleEffect(chipsIn >= order ? 1 : 0.2)
             .opacity(chipsIn >= order ? 1 : 0)
     }
@@ -253,7 +253,7 @@ struct PackAskParentView: View {
                 }
                 .padding(16)
                 .frame(maxWidth: .infinity)
-                .glassPane(radius: 22)
+                .glassPane(radius: 16)
                 Spacer(minLength: 0)
                 Button {
                     guard !sent, !sending else { return }
@@ -269,7 +269,7 @@ struct PackAskParentView: View {
                     .foregroundStyle(Color(hex: "4B3FBF"))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(.white.opacity(0.92)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
                     .shadow(color: .black.opacity(0.2), radius: 14, y: 8)
                 }
                 .buttonStyle(.juicy)

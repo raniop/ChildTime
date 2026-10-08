@@ -40,8 +40,8 @@ struct ChallengeInfoView: View {
                         .font(.system(size: 22, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 22).padding(.vertical, 10)
-                        .background(Capsule().fill(.white.opacity(0.18)))
-                        .overlay(Capsule().stroke(.white.opacity(0.4), lineWidth: 1))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.18)))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.4), lineWidth: 1))
                 }
                 Spacer()
                 Button { onCTA() } label: {
@@ -49,7 +49,7 @@ struct ChallengeInfoView: View {
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
                         .foregroundStyle(AppColor.textOnLight)
                         .frame(maxWidth: .infinity).padding(.vertical, 16)
-                        .background(AppGradient.gold, in: Capsule())
+                        .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .glow(AppColor.starGold, radius: 14)
                 }
                 .buttonStyle(.juicy)

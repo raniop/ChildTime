@@ -183,7 +183,7 @@ struct SortBasketsView: View {
                     MiniGameTimerBar(remaining: remaining, total: roundSeconds)
                 }
                 .padding(.horizontal, 14).padding(.vertical, 12)
-                .glassPane(radius: 22)
+                .glassPane(radius: 16)
             }
 
             Text(preReader ? PreReaderChrome.streak(streak) : (streak >= 2 ? tr("🔥 \(streak) בְּרֶצֶף") : " "))
@@ -305,7 +305,7 @@ struct SortBasketsView: View {
                    : (isCompact ? 140 : 190))
             .miniGameTile(state, tint: tint, radius: 24)
             .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .strokeBorder(.white.opacity(0.55), style: StrokeStyle(lineWidth: 2, dash: [7, 6]))
                     .padding(6)
             )

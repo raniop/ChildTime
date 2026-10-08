@@ -196,13 +196,13 @@ struct LiveGameView: View {
                                             .font(.system(size: 13, weight: .heavy, design: .rounded))
                                             .foregroundStyle(.white)
                                             .padding(.horizontal, 12).padding(.vertical, 6)
-                                            .background(Capsule().fill(nudged.contains(f.id) ? AppColor.successMint.opacity(0.6) : AppColor.gemPurple))
+                                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(nudged.contains(f.id) ? AppColor.successMint.opacity(0.6) : AppColor.gemPurple))
                                     }
                                     .disabled(nudged.contains(f.id))
                                 }
                             }
                             .padding(.horizontal, 14).padding(.vertical, 6)
-                            .glassInset(radius: 14)
+                            .glassInset(radius: 16)
                         }
                     }
                 }
@@ -290,13 +290,13 @@ struct LiveGameView: View {
                 .font(.system(size: 17, weight: .black, design: .rounded))
                 .foregroundStyle(AppColor.starGold)
                 .padding(.horizontal, 14).padding(.vertical, 7)
-                .background(Capsule().fill(.white.opacity(0.14)))
-                .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
             Text(tr("שְׁאֵלָה \(g.questionInRound + 1)/\(g.roundQuestions)"))
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
                 .padding(.horizontal, 14).padding(.vertical, 6)
-                .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14))).overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
         }
     }
 
@@ -312,7 +312,7 @@ struct LiveGameView: View {
             .shadow(color: .black.opacity(0.28), radius: 10, y: 5)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 44).padding(.horizontal, 26)
-            .glassPane(radius: 32)
+            .glassPane(radius: 16)
     }
 
     /// The live "כמה–כמה": a dramatic VS for a 2-player duel (round wins big in
@@ -341,7 +341,7 @@ struct LiveGameView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10).padding(.horizontal, 16)
-            .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14))).overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
         } else if ps.count > 2 {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
@@ -357,7 +357,7 @@ struct LiveGameView: View {
                             }
                         }
                         .padding(.horizontal, 10).padding(.vertical, 6)
-                        .background(Capsule().fill(p.id == meID ? AppColor.starGold.opacity(0.22) : .white.opacity(0.10)))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(p.id == meID ? AppColor.starGold.opacity(0.22) : .white.opacity(0.10)))
                     }
                 }
                 .padding(.horizontal, 2)
@@ -422,7 +422,7 @@ struct LiveGameView: View {
                         .frame(maxWidth: .infinity, minHeight: 118)
                         .padding(.horizontal, 12)
                         .background {
-                            let shape = RoundedRectangle(cornerRadius: 26, style: .continuous)
+                            let shape = RoundedRectangle(cornerRadius: 16, style: .continuous)
                             ZStack {
                                 shape.fill(.white.opacity(0.14))
                                 shape.fill(color.opacity(answered && !mine ? 0.15 : 0.5))
@@ -431,7 +431,7 @@ struct LiveGameView: View {
                             }
                             .shadow(color: .black.opacity(0.22), radius: 14, y: 8)
                         }
-                        .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous)
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .strokeBorder(.white.opacity(mine ? 1 : 0.4), lineWidth: mine ? 3 : 1))
                         .scaleEffect(mine ? 1.04 : 1)
                         .glow(mine ? .white : .clear, radius: 14)
@@ -505,7 +505,7 @@ struct LiveGameView: View {
                             .foregroundStyle(AppColor.starGold)
                     }
                     .padding(.horizontal, 14).padding(.vertical, 8)
-                    .glassPane(radius: 14, strength: 0.10, tint: p.id == meID ? Color(hex: "FFD23F") : nil, shadow: false)
+                    .glassPane(radius: 16, strength: 0.10, tint: p.id == meID ? Color(hex: "FFD23F") : nil, shadow: false)
                 }
                 .buttonStyle(.plain)
             }
@@ -554,7 +554,7 @@ struct LiveGameView: View {
                             .font(.system(size: 15))
                     }
                     .padding(.horizontal, 16).padding(.vertical, 8)
-                    .glassPane(radius: 14, strength: 0.10, tint: p.id == meID ? Color(hex: "FFD23F") : nil, shadow: false)
+                    .glassPane(radius: 16, strength: 0.10, tint: p.id == meID ? Color(hex: "FFD23F") : nil, shadow: false)
                 }
                 .buttonStyle(.plain)
             }
@@ -606,7 +606,7 @@ struct LiveGameView: View {
                                 }
                             }
                             .padding(.horizontal, 14).padding(.vertical, 10)
-                            .glassPane(radius: 20, tint: p.id == meID ? Color(hex: "FFD23F") : nil)
+                            .glassPane(radius: 16, tint: p.id == meID ? Color(hex: "FFD23F") : nil)
                         }
                         .buttonStyle(.plain)
                     }
@@ -617,11 +617,11 @@ struct LiveGameView: View {
             VStack(spacing: 10) {
                 Button { Haptic.light(); Task { await lg.leaveGame(); lg.wantsNewGame = true } } label: {
                     Text(Gendered.g(tr("שַׂחֵק שׁוּב 🔄"), tr("שַׂחֲקִי שׁוּב 🔄"))).font(.system(size: 19, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                        .frame(maxWidth: .infinity).padding(.vertical, 15).background(Capsule().fill(.white.opacity(0.92))).foregroundStyle(Color(hex: "4B3FBF"))
+                        .frame(maxWidth: .infinity).padding(.vertical, 15).background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92))).foregroundStyle(Color(hex: "4B3FBF"))
                 }
                 Button { Task { await lg.leaveGame() } } label: {
                     Text(tr("סִיּוּם")).font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white.opacity(0.9))
-                        .frame(maxWidth: .infinity).padding(.vertical, 13).background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                        .frame(maxWidth: .infinity).padding(.vertical, 13).background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14))).overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                 }
             }
             .padding(.horizontal, AppSpacing.xl).padding(.bottom, AppSpacing.lg)
@@ -646,7 +646,7 @@ struct LiveGameView: View {
             Text("+\(amount)").font(.system(size: 22, weight: .heavy, design: .rounded)).foregroundStyle(tint)
         }
         .frame(width: 96, height: 96)
-        .glassPane(radius: 20, tint: tint)
+        .glassPane(radius: 16, tint: tint)
     }
 
     // MARK: Ended / cancelled
@@ -662,7 +662,7 @@ struct LiveGameView: View {
             Button { Task { await lg.leaveGame() } } label: {
                 Text(tr("סְגִירָה")).font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                     .padding(.horizontal, AppSpacing.xl).padding(.vertical, 14)
-                    .background(Capsule().fill(.white.opacity(0.92))).foregroundStyle(Color(hex: "4B3FBF"))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92))).foregroundStyle(Color(hex: "4B3FBF"))
             }
             .padding(.top, 6)
             Spacer(); Spacer()
@@ -721,7 +721,7 @@ struct PlayerPeekView: View {
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 18).padding(.vertical, 9)
-                        .background(Capsule().fill(.white.opacity(0.92))).foregroundStyle(Color(hex: "4B3FBF"))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92))).foregroundStyle(Color(hex: "4B3FBF"))
                 } else if loading {
                     ProgressView().tint(.white)
                 }
@@ -757,7 +757,7 @@ struct PlayerPeekView: View {
             Text(label).font(.system(size: 12, weight: .heavy, design: .rounded)).foregroundStyle(.white.opacity(0.75))
         }
         .frame(maxWidth: .infinity).padding(.vertical, 14)
-        .glassPane(radius: 20)
+        .glassPane(radius: 16)
     }
 
     @ViewBuilder private var addFriendArea: some View {
@@ -785,7 +785,7 @@ struct PlayerPeekView: View {
                 }
                 .font(.system(size: 18, weight: .black, design: .rounded)).foregroundStyle(.white)
                 .frame(maxWidth: .infinity).padding(.vertical, 14)
-                .background(Capsule().fill(.white.opacity(0.92))).foregroundStyle(Color(hex: "4B3FBF"))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92))).foregroundStyle(Color(hex: "4B3FBF"))
             }
             .disabled(adding)
         }
@@ -912,7 +912,7 @@ struct LiveGameSetupSheet: View {
                     .foregroundStyle(.white).lineLimit(1).minimumScaleFactor(0.7)
             }
             .frame(maxWidth: .infinity).frame(height: 130)
-            .glassPane(radius: 22, tint: Worlds.all.first(where: { $0.topic == t })?.glowColor)
+            .glassPane(radius: 16, tint: Worlds.all.first(where: { $0.topic == t })?.glowColor)
         }
         .disabled(creating)
     }

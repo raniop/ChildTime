@@ -71,7 +71,7 @@ struct AskParentView: View {
                 }
                 .padding(16)
                 .frame(maxWidth: .infinity)
-                .glassPane(radius: 22)
+                .glassPane(radius: 16)
 
                 Spacer(minLength: 0)
 
@@ -90,7 +90,7 @@ struct AskParentView: View {
                     .foregroundStyle(Color(hex: "4B3FBF"))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(.white.opacity(0.92)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
                     .shadow(color: .black.opacity(0.2), radius: 14, y: 8)
                 }
                 .buttonStyle(.juicy)

@@ -49,9 +49,9 @@ struct ScoreBadge: View {
         .padding(.horizontal, compact ? 9 : 12)
         .padding(.vertical, compact ? 5 : 7)
         .background(
-            Capsule()
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(.white.opacity(0.18))
-                .overlay(Capsule().stroke(tint.opacity(0.55), lineWidth: 1.2))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(tint.opacity(0.55), lineWidth: 1.2))
         )
         .glow(tint.opacity(0.5), radius: compact ? 4 : 8)
     }

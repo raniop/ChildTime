@@ -208,7 +208,7 @@ struct DailyChestView: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, AppSpacing.lg)
         .padding(.vertical, AppSpacing.md)
-        .glassPane(radius: 18, tint: glow, shadow: false)
+        .glassPane(radius: 16, tint: glow, shadow: false)
     }
 
     /// A row of dots that fills as the kid taps, so they SEE the chest charging up.

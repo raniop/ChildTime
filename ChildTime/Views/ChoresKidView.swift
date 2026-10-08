@@ -188,7 +188,7 @@ struct ChoresKidView: View {
                 Spacer()
             }
             .padding(AppSpacing.md)
-            .glassPane(radius: 22, tint: Color(hex: "FFD23F"))
+            .glassPane(radius: 16, tint: Color(hex: "FFD23F"))
         }
     }
 
@@ -226,8 +226,8 @@ struct ChoresKidView: View {
                 .foregroundStyle(.white)
                 .lineLimit(1).minimumScaleFactor(0.55)
                 .padding(.horizontal, 9).padding(.vertical, 4)
-                .background(.white.opacity(0.14), in: Capsule())
-                .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                .background(.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
             // Same-day repeat counter — reserved even when absent so every
             // card in a grid row keeps the same height.
             Text(chore.timesPerDay > 1 ? tr("הַיּוֹם: \(chore.doneToday)/\(chore.timesPerDay) ✔️") : " ")
@@ -248,12 +248,12 @@ struct ChoresKidView: View {
                     .minimumScaleFactor(0.8)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
-                    .background(Capsule().fill(.white.opacity(0.92)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
             }
         }
         .padding(AppSpacing.sm)
         .frame(maxWidth: .infinity)
-        .glassPane(radius: 22, tint: Color(hex: "48BFE3"))
+        .glassPane(radius: 16, tint: Color(hex: "48BFE3"))
     }
 
     /// 🎉 "בוצעו היום" card. APPROVED chores become a gendered "champion" card —
@@ -286,7 +286,7 @@ struct ChoresKidView: View {
         .frame(maxWidth: .infinity)
         // Approved → the child's gendered colour fills the card; otherwise the
         // neutral translucent look.
-        .glassPane(radius: 18, strength: approved ? 0.14 : 0.09, tint: approved ? accentColor : nil)
+        .glassPane(radius: 16, strength: approved ? 0.14 : 0.09, tint: approved ? accentColor : nil)
     }
 
     /// The "בוצעו היום 🎉" section under the to-do grid.
@@ -314,7 +314,7 @@ struct ChoresKidView: View {
         }
         .padding(AppSpacing.lg)
         .frame(maxWidth: .infinity)
-        .glassPane(radius: 22, tint: Color(hex: "8CFFC4"))
+        .glassPane(radius: 16, tint: Color(hex: "8CFFC4"))
     }
 
     private func statusCapsule(_ text: String, background: some ShapeStyle) -> some View {
@@ -325,7 +325,7 @@ struct ChoresKidView: View {
             .minimumScaleFactor(0.7)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10)
-            .background(background, in: Capsule())
+            .background(background, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     private func rewardLine(_ c: Chore) -> String {

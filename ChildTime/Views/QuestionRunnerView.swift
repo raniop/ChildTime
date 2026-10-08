@@ -301,7 +301,7 @@ struct QuestionRunnerView: View {
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 16).padding(.vertical, 9)
-                    .background(Capsule().fill((secondsFlashPositive ? AppColor.successMint : AppColor.flameOrange).opacity(0.95)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill((secondsFlashPositive ? AppColor.successMint : AppColor.flameOrange).opacity(0.95)))
                     .glow(secondsFlashPositive ? AppColor.successMint : AppColor.flameOrange, radius: 10)
                     .id(secondsFlashID)
                     .transition(.asymmetric(
@@ -484,8 +484,8 @@ struct QuestionRunnerView: View {
         content()
             .lineLimit(1).minimumScaleFactor(0.7)
             .padding(.horizontal, 12).padding(.vertical, 8)
-            .background(Capsule().fill(.white.opacity(0.14)))
-            .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
     }
 
     /// Only Earn-to-Unlock sessions grow play-time.
@@ -516,8 +516,8 @@ struct QuestionRunnerView: View {
         }
         .padding(.horizontal, isCompact ? 9 : 11)
         .padding(.vertical, 5)
-        .background(Capsule().fill(.white.opacity(0.15)))
-        .overlay(Capsule().stroke(tint.opacity(0.55), lineWidth: 1))
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.15)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(tint.opacity(0.55), lineWidth: 1))
         .animation(.spring(response: 0.35, dampingFraction: 0.6), value: value)
     }
 
@@ -602,8 +602,8 @@ struct QuestionRunnerView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 4)
-        .background(Capsule().fill(.white.opacity(0.15)))
-        .overlay(Capsule().stroke(tint.opacity(0.6), lineWidth: 1))
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.15)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(tint.opacity(0.6), lineWidth: 1))
     }
 
     // MARK: - Question content
@@ -715,10 +715,10 @@ struct QuestionRunnerView: View {
                 .foregroundStyle(GlassInk.secondary)
         }
         .padding(.horizontal, 14).padding(.top, 12).padding(.bottom, 16)
-        .glassPane(radius: 22)
+        .glassPane(radius: 16)
         .overlay {
             if isSuperQuestion || isBonusQuestion || isBonusArena {
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .strokeBorder(AppColor.starGold.opacity(0.9), lineWidth: 2)
             }
         }
@@ -769,7 +769,7 @@ struct QuestionRunnerView: View {
                     .lineLimit(1).minimumScaleFactor(0.7)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 9).padding(.horizontal, 12)
-                    .glassInset(radius: 14)
+                    .glassInset(radius: 16)
                     .padding(.horizontal, AppSpacing.md)
             }
 
@@ -905,8 +905,8 @@ struct QuestionRunnerView: View {
             .minimumScaleFactor(0.6)
             .padding(.horizontal, AppSpacing.md)
             .padding(.vertical, AppSpacing.sm)
-            .background(Capsule().fill(.white.opacity(0.14)))
-            .overlay(Capsule().strokeBorder(AppColor.starGold.opacity(enabled ? 0.7 : 0.3), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(AppColor.starGold.opacity(enabled ? 0.7 : 0.3), lineWidth: 1))
             .opacity(enabled ? 1.0 : 0.45)
         }
         .buttonStyle(.juicy)
@@ -985,8 +985,8 @@ struct QuestionRunnerView: View {
                 .minimumScaleFactor(0.6)
                 .padding(.horizontal, AppSpacing.md)
                 .padding(.vertical, AppSpacing.sm)
-                .background(Capsule().fill(.white.opacity(0.14)))
-                .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
         }
         .buttonStyle(.juicy)
         .transition(.scale.combined(with: .opacity))
@@ -1022,7 +1022,7 @@ struct QuestionRunnerView: View {
                     .font(.system(size: isCompact ? 34 : 44, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 24).padding(.vertical, 10)
-                    .background(Capsule().fill(.black.opacity(0.25)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.black.opacity(0.25)))
 
                 Text(tr("שְׁאֵלָה קָשָׁה בִּמְיוּחָד — עֲנוּ נָכוֹן וְקַבְּלוּ אֶת כָּל הַדַּקּוֹת!"))
                     .font(.system(size: isCompact ? 18 : 24, weight: .bold, design: .rounded))

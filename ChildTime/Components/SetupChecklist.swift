@@ -107,13 +107,13 @@ struct SetupChecklistCard: View {
                     .lineLimit(1).minimumScaleFactor(0.8)
                     .frame(maxWidth: .infinity)
                     .frame(height: 44)
-                    .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                    .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .buttonStyle(.juicy)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .glassPane(radius: 22, tint: AppColor.starGold)
+        .glassPane(radius: 16, tint: AppColor.starGold)
         .environment(\.layoutDirection, .app)
     }
 }
@@ -197,7 +197,7 @@ struct DeviceQuestionView: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .glassPane(radius: 20)
+            .glassPane(radius: 16)
         }
         .buttonStyle(.juicy)
     }

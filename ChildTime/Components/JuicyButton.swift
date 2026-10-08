@@ -32,7 +32,7 @@ struct JuicyButton<Label: View>: View {
             Haptic.light()
             action()
         } label: {
-            let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
+            let shape = RoundedRectangle(cornerRadius: 16, style: .continuous)
             label()
                 .font(.system(size: 20, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)

@@ -160,7 +160,7 @@ struct OnboardingDoneView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity)
-        .glassPane(radius: 22, tint: AppColor.starGold)
+        .glassPane(radius: 16, tint: AppColor.starGold)
     }
 }
 
@@ -198,12 +198,12 @@ struct OnboardingFooter: View {
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
-                .background(AppGradient.gold, in: Capsule())
+                .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .glow(AppColor.starGold, radius: enabled ? 12 : 0)
                 // Dimmed by colour, not by transparency: a see-through button
                 // let the options scrolling underneath show through it (Rani,
                 // on the closed Duo).
-                .overlay(Capsule().fill(Color(hex: "2A1E5C").opacity(enabled ? 0 : 0.35)))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "2A1E5C").opacity(enabled ? 0 : 0.35)))
             }
             .buttonStyle(.juicy)
 

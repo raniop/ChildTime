@@ -70,7 +70,7 @@ struct ImageCropperView: View {
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
-                            .background(.white.opacity(0.18), in: Capsule())
+                            .background(.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
                     Button {
                         Haptic.success()
@@ -81,7 +81,7 @@ struct ImageCropperView: View {
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
-                            .background(AppGradient.gold, in: Capsule())
+                            .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                             .glow(AppColor.starGold, radius: 8)
                     }
                 }

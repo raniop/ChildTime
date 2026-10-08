@@ -177,7 +177,7 @@ struct WorldGameChooserView: View {
                             .font(.system(size: isCompact ? 13 : 15, weight: .heavy, design: .rounded))
                             .foregroundStyle(AppColor.diamondBlue)
                             .padding(.horizontal, 10).padding(.vertical, 4)
-                            .background(Capsule().fill(.white.opacity(0.9)))
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.9)))
                             .transition(.scale.combined(with: .opacity))
                     }
                 }
@@ -199,7 +199,7 @@ struct WorldGameChooserView: View {
             .padding(.top, 2)
         }
         .padding(isCompact ? 14 : 20)
-        .glassPane(radius: 26)
+        .glassPane(radius: 16)
     }
 
     /// "⏱ 12/90 דַּק' הַיּוֹם" — today's minutes against the child's daily cap.
@@ -242,7 +242,7 @@ struct WorldGameChooserView: View {
 
     private func outline(_ pickID: String) -> some View {
         let last = lastPick == pickID
-        return RoundedRectangle(cornerRadius: 24, style: .continuous)
+        return RoundedRectangle(cornerRadius: 16, style: .continuous)
             .strokeBorder(last ? AppColor.starGold : .clear, lineWidth: 2.5)
             // The tag sits ON the gold outline, in the corner away from the
             // title — inside the card it covered the heading (Rani, 2026-10-06).
@@ -252,7 +252,7 @@ struct WorldGameChooserView: View {
                         .font(.system(size: 10.5, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3FBF"))
                         .padding(.horizontal, 9).padding(.vertical, 4)
-                        .background(Capsule().fill(AppColor.starGold))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppColor.starGold))
                         .padding(.trailing, 16)
                         .offset(y: -11)
                 }

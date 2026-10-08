@@ -132,7 +132,7 @@ struct ProfileEditorView: View {
                                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
-                                    .background(Color.red.opacity(0.25), in: Capsule())
+                                    .background(Color.red.opacity(0.25), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                                     .foregroundStyle(.white)
                             }
                             .padding(.top, AppSpacing.md)
@@ -237,7 +237,7 @@ struct ProfileEditorView: View {
                                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 14).padding(.vertical, 8)
-                                .background(Capsule().fill(.white.opacity(0.18)))
+                                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.18)))
                             Spacer()
                         }
                         .environment(\.layoutDirection, .leftToRight)
@@ -259,7 +259,7 @@ struct ProfileEditorView: View {
                         .frame(height: 28)
                         .padding(.horizontal, AppSpacing.md)
                         .padding(.vertical, AppSpacing.sm)
-                        .glassPane(radius: AppRadius.medium, shadow: false)
+                        .glassPane(radius: 16, shadow: false)
                 }
                 .clearOfBar(active: foldTopRow)   // beside the clock: narrower
 
@@ -295,7 +295,7 @@ struct ProfileEditorView: View {
                     }
                     .foregroundStyle(.white.opacity(0.9))
                     .padding(.horizontal, 14).padding(.vertical, 11)
-                    .glassPane(radius: AppRadius.medium, strength: 0.1, shadow: false)
+                    .glassPane(radius: 16, strength: 0.1, shadow: false)
                 }
                 .buttonStyle(.plain)
                 if showMore {
@@ -373,7 +373,7 @@ struct ProfileEditorView: View {
                 .lineLimit(1).minimumScaleFactor(0.7)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 11)
-                .glassPane(radius: AppRadius.medium, strength: selected ? 0.30 : 0.12, shadow: false)
+                .glassPane(radius: 16, strength: selected ? 0.30 : 0.12, shadow: false)
                 .overlay(RoundedRectangle(cornerRadius: AppRadius.medium)
                     .stroke(selected ? AppColor.successMint : .white.opacity(0.18), lineWidth: selected ? 2.2 : 1))
         }
@@ -424,7 +424,7 @@ struct ProfileEditorView: View {
                 .frame(height: 28)
                 .padding(.horizontal, AppSpacing.md)
                 .padding(.vertical, AppSpacing.sm)
-                .glassPane(radius: AppRadius.medium, shadow: false)
+                .glassPane(radius: 16, shadow: false)
         }
     }
 
@@ -458,7 +458,7 @@ struct ProfileEditorView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, AppSpacing.sm)
-            .glassPane(radius: AppRadius.medium, strength: selected ? 0.30 : 0.12, shadow: false)
+            .glassPane(radius: 16, strength: selected ? 0.30 : 0.12, shadow: false)
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.medium)
                     .stroke(selected ? AppColor.successMint : .white.opacity(0.2),
@@ -505,7 +505,7 @@ struct ProfileEditorView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, AppSpacing.sm)
-            .glassPane(radius: AppRadius.medium, strength: selected ? 0.30 : 0.12, shadow: false)
+            .glassPane(radius: 16, strength: selected ? 0.30 : 0.12, shadow: false)
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.medium)
                     .stroke(selected ? AppColor.successMint : .white.opacity(0.18),
@@ -563,7 +563,7 @@ struct ProfileEditorView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, AppSpacing.sm)
-            .glassPane(radius: AppRadius.medium, strength: selected ? 0.30 : 0.12, shadow: false)
+            .glassPane(radius: 16, strength: selected ? 0.30 : 0.12, shadow: false)
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.medium)
                     .stroke(selected ? AppColor.successMint : .white.opacity(0.18),
@@ -594,7 +594,7 @@ struct ProfileEditorView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, AppSpacing.sm)
-                        .glassPane(radius: AppRadius.medium, strength: selected ? 0.30 : 0.12, shadow: false)
+                        .glassPane(radius: 16, strength: selected ? 0.30 : 0.12, shadow: false)
                         .overlay(RoundedRectangle(cornerRadius: AppRadius.medium)
                             .stroke(selected ? AppColor.successMint : .white.opacity(0.18), lineWidth: selected ? 2.2 : 1))
                     }
@@ -626,8 +626,8 @@ struct ProfileEditorView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
-                        .background(Capsule().fill(.white.opacity(selected ? 0.30 : 0.12)))
-                        .overlay(Capsule().stroke(selected ? AppColor.starGold : .white.opacity(0.18),
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(selected ? 0.30 : 0.12)))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(selected ? AppColor.starGold : .white.opacity(0.18),
                                                   lineWidth: selected ? 2 : 1))
                     }
                     .buttonStyle(.juicy)
@@ -693,7 +693,7 @@ struct ProfileEditorView: View {
                         .foregroundStyle(.white)
                         .padding(.horizontal, AppSpacing.md)
                         .padding(.vertical, 10)
-                        .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14))).overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                 }
                 .buttonStyle(.juicy)
                 if photoData != nil {
@@ -705,7 +705,7 @@ struct ProfileEditorView: View {
                             .foregroundStyle(.white.opacity(0.8))
                             .padding(.horizontal, AppSpacing.md)
                             .padding(.vertical, 10)
-                            .background(Color.red.opacity(0.25), in: Capsule())
+                            .background(Color.red.opacity(0.25), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
                     .buttonStyle(.juicy)
                 }

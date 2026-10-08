@@ -52,11 +52,11 @@ struct GlassPane: ViewModifier {
 
 extension View {
     /// The standard glass card.
-    func glassPane(radius: CGFloat = 22, strength: Double = 0.14, tint: Color? = nil, shadow: Bool = true) -> some View {
+    func glassPane(radius: CGFloat = 16, strength: Double = 0.14, tint: Color? = nil, shadow: Bool = true) -> some View {
         modifier(GlassPane(radius: radius, strength: strength, tint: tint, shadow: shadow))
     }
     /// A quieter pane for things INSIDE a glass card (stat tiles, list rows).
-    func glassInset(radius: CGFloat = 12) -> some View {
+    func glassInset(radius: CGFloat = 16) -> some View {
         modifier(GlassPane(radius: radius, strength: 0.09, tint: nil, shadow: false))
     }
 }
@@ -136,9 +136,9 @@ struct GlassBackdrop: View {
 /// each `Section`.
 struct GlassRowBackground: View {
     var body: some View {
-        RoundedRectangle(cornerRadius: 14, style: .continuous)
+        RoundedRectangle(cornerRadius: 16, style: .continuous)
             .fill(Color.white.opacity(0.16))
-            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .strokeBorder(Color.white.opacity(0.24), lineWidth: 1))
     }
 }

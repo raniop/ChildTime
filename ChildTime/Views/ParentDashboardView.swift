@@ -1042,7 +1042,7 @@ struct ParentDashboardView: View {
             }
             .foregroundStyle(GlassInk.primary)
             .padding(14)
-            .glassPane(radius: 20, strength: 0.18, tint: Color(hex: "7A5CFF"))
+            .glassPane(radius: 16, strength: 0.18, tint: Color(hex: "7A5CFF"))
         }
         .buttonStyle(.plain)
     }
@@ -1151,7 +1151,7 @@ struct ParentDashboardView: View {
             .environment(\.layoutDirection, .leftToRight)
             .padding(AppSpacing.md)
             // Glass with a warm whisper — a notice, not a red slab.
-            .glassPane(radius: 18, tint: AppColor.flameOrange)
+            .glassPane(radius: 16, tint: AppColor.flameOrange)
         }
         .buttonStyle(.plain)
     }
@@ -1174,7 +1174,7 @@ struct ParentDashboardView: View {
             .padding(.horizontal, AppSpacing.md)
             .padding(.vertical, 15)
             .frame(maxWidth: .infinity)
-            .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             .glow(AppColor.starGold, radius: 12)
         }
         .buttonStyle(.juicy)
@@ -1215,14 +1215,14 @@ struct ParentDashboardView: View {
                             // can scan it and open Tofy straight into joining.
                             QRCodeView(text: JoinLink.url(forPayload: code), size: 210)
                                 .padding(12)
-                                .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(.white))
+                                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white))
                             Text(String(code.split(separator: "|").first ?? ""))
                                 .font(.system(size: 26, weight: .heavy, design: .monospaced))
                                 .kerning(4)
                                 .foregroundStyle(GlassInk.primary)
                                 .padding(.horizontal, 16).padding(.vertical, 6)
-                                .background(Capsule().fill(.white.opacity(0.14)))
-                                .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                         } else {
                             // Same footprint as the QR card, so the pane doesn't
                             // collapse into a narrow pill while the code loads.
@@ -1230,7 +1230,7 @@ struct ParentDashboardView: View {
                         }
                     }
                     .padding(16)
-                    .glassPane(radius: 24)
+                    .glassPane(radius: 16)
 
                     // Numbered steps — parents missed that Tofy must be
                     // DOWNLOADED on the kid's device first (Rani, live E2E).
@@ -1256,8 +1256,8 @@ struct ParentDashboardView: View {
                             .font(.system(size: 14, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 16).padding(.vertical, 9)
-                            .background(Capsule().fill(.white.opacity(0.14)))
-                            .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                     }
 
                     // 📱 On a parent iPad the "child's device" is very often THIS
@@ -1275,8 +1275,8 @@ struct ParentDashboardView: View {
                                 .foregroundStyle(.white)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 16).padding(.vertical, 9)
-                                .background(Capsule().fill(.white.opacity(0.14)))
-                                .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                         }
                         .buttonStyle(.juicy)
                     }
@@ -1285,7 +1285,7 @@ struct ParentDashboardView: View {
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3FBF"))
                         .padding(.horizontal, 28).padding(.vertical, 12)
-                        .background(Capsule().fill(.white.opacity(0.92)))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
 
                     Text(tr("אפשר לדלג ולחבר את המכשיר אחר כך — מהמסך הראשי."))
                         .font(.system(size: 12, weight: .medium, design: .rounded))
@@ -1421,8 +1421,8 @@ struct ParentDashboardView: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 12).frame(minHeight: 40)
                     .background((fresh ? Color(hex: "06D6A0").opacity(0.22) : Color.white.opacity(0.12)),
-                                in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .strokeBorder(fresh ? Color(hex: "5CFF9D").opacity(0.7) : .clear, lineWidth: 1.5))
                 }
                 .buttonStyle(.plain)
@@ -1497,7 +1497,7 @@ struct ParentDashboardView: View {
         }
         .padding(14)
         .foregroundStyle(GlassInk.primary)
-        .glassPane(radius: AppRadius.large, strength: hasDevice ? 0.14 : 0.09)
+        .glassPane(radius: 16, strength: hasDevice ? 0.14 : 0.09)
         .environment(\.layoutDirection, .app)
     }
 
@@ -1521,7 +1521,7 @@ struct ParentDashboardView: View {
             .lineLimit(1).minimumScaleFactor(0.8)
             .frame(maxWidth: .infinity)
             .frame(height: Self.homeControlHeight)
-            .background(Color.white.opacity(0.92), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+            .background(Color.white.opacity(0.92), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     /// `.btn.ghost` from the mockup: stronger glass, white ink.
@@ -1544,8 +1544,8 @@ struct ParentDashboardView: View {
             .frame(maxWidth: width == nil ? .infinity : nil)
             .frame(height: Self.homeControlHeight)
             .padding(.horizontal, width == nil ? 8 : 0)
-            .background(Color.white.opacity(0.22), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
+            .background(Color.white.opacity(0.22), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
     }
 
     /// Right under the greeting (Rani: "תן לילד לשחק / צור ילד / מטלות — איפה?"):
@@ -1571,7 +1571,7 @@ struct ParentDashboardView: View {
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3BC4"))
                         .padding(.horizontal, 16).frame(minHeight: 40)
-                        .background(.white, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                        .background(.white, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
                 .buttonStyle(.plain)
             }
@@ -1586,7 +1586,7 @@ struct ParentDashboardView: View {
         .multilineTextAlignment(.leading)
         .foregroundStyle(.white)
         .padding(14)
-        .glassPane(radius: 22, shadow: false)
+        .glassPane(radius: 16, shadow: false)
         // The column it sits in is laid out LTR; in Hebrew the pin, the text and
         // the button belong on the RIGHT and ✕ on the left (Rani).
         .environment(\.layoutDirection, .app)
@@ -1776,7 +1776,7 @@ struct ParentDashboardView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.vertical, 8).padding(.horizontal, 6)
-        .glassInset(radius: 12)
+        .glassInset(radius: 16)
     }
 
     /// ⚡ on a card: opens the child's short actions window.
@@ -1797,8 +1797,8 @@ struct ParentDashboardView: View {
                     .lineLimit(1).minimumScaleFactor(0.65)
             }
             .frame(width: width, height: Self.homeControlHeight)
-            .background(Color.white.opacity(0.22), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
+            .background(Color.white.opacity(0.22), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
         }
         .buttonStyle(.plain)
     }
@@ -1976,7 +1976,7 @@ struct ParentDashboardView: View {
         .frame(maxWidth: .infinity)
         .frame(height: 26)
         .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(live != nil
                       ? AnyShapeStyle(LinearGradient(colors: [Color(hex: "22C55E"), Color(hex: "16A34A")],
                                                      startPoint: .leading, endPoint: .trailing))
@@ -2026,7 +2026,7 @@ struct ParentDashboardView: View {
                                 .font(.system(size: 13, weight: .heavy, design: .rounded))
                                 .foregroundStyle(Color(hex: "15803D"))
                                 .padding(.horizontal, 12).padding(.vertical, 7)
-                                .background(Capsule().fill(.white.opacity(0.95)))
+                                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.95)))
                         }
                         .buttonStyle(.plain)
                     } else {
@@ -2453,9 +2453,9 @@ struct ParentDashboardView: View {
         .foregroundStyle(GlassInk.primary)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.vertical, 10).padding(.horizontal, 6)
-        .background(Color.white.opacity(0.22), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
-        .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(Color.white.opacity(0.22), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
+        .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     /// "⚙️ הגדרות של X ›" — the one door to everything that is SET about the

@@ -114,7 +114,7 @@ struct QuickQuizView: View {
                     Text(tr("🔥 קוֹמְבּוֹ ×\(combo)"))
                         .font(.system(size: 14, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                         .padding(.horizontal, 10).padding(.vertical, 4)
-                        .background(Capsule().fill(AppColor.flameOrange))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppColor.flameOrange))
                 }
                 Spacer()
                 Text("⚡️ \(score)").font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(.white)
@@ -145,8 +145,8 @@ struct QuickQuizView: View {
                 .lineLimit(3).minimumScaleFactor(0.6)
                 .frame(maxWidth: .infinity, minHeight: 64)
                 .padding(.horizontal, 8).padding(.vertical, 10)
-                .background(bg, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(.white.opacity(0.3), lineWidth: 1.5))
+                .background(bg, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.3), lineWidth: 1.5))
         }
         .buttonStyle(.juicy)
         .disabled(locked)
@@ -183,8 +183,8 @@ struct QuickQuizView: View {
             Text("+\(value)\(suffix)").font(.system(size: 19, weight: .heavy, design: .rounded)).foregroundStyle(.white)
         }
         .frame(minWidth: 76).padding(.vertical, 12)
-        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(color.opacity(0.25)))
-        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(color, lineWidth: 1.5))
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(color.opacity(0.25)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(color, lineWidth: 1.5))
         .glow(color, radius: revealStep >= step ? 10 : 0)
         .scaleEffect(revealStep >= step ? 1 : 0.3).opacity(revealStep >= step ? 1 : 0)
     }
@@ -193,7 +193,7 @@ struct QuickQuizView: View {
         Text(t).font(.system(size: 19, weight: .heavy, design: .rounded))
             .foregroundStyle(dark ? AppColor.textOnLight : .white)
             .frame(maxWidth: .infinity).padding(.vertical, 14)
-            .background(dark ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(Color.white.opacity(0.18)), in: Capsule())
+            .background(dark ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(Color.white.opacity(0.18)), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     // MARK: - Logic

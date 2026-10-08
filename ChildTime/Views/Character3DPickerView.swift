@@ -82,7 +82,7 @@ struct Character3DPickerView: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
-            .background(Capsule().fill(.white.opacity(0.18)))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.18)))
         }
         .buttonStyle(.plain)
     }

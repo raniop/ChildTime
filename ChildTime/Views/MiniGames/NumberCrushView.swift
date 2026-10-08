@@ -276,9 +276,9 @@ struct NumberCrushView: View {
             .lineLimit(1).minimumScaleFactor(0.5)
             .padding(.horizontal, isCompact ? 16 : 24)
             .padding(.vertical, display.isShort ? 7 : 12)
-            .background(RoundedRectangle(cornerRadius: 20, style: .continuous)
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(AppColor.starGold.opacity(0.20)))
-            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous)
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .strokeBorder(AppColor.starGold.opacity(0.9), lineWidth: 2.5))
             .glow(AppColor.starGold, radius: 10)
             .scaleEffect(targetPop ? 1.08 : 1)
@@ -286,7 +286,7 @@ struct NumberCrushView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 12).padding(.vertical, display.isShort ? 9 : 14)
-        .glassPane(radius: 22)
+        .glassPane(radius: 16)
     }
 
     /// Five objects in the frame still have to fit a phone's width beside the
@@ -452,7 +452,7 @@ struct NumberCrushView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 14).padding(.vertical, 12)
-            .glassPane(radius: 22)
+            .glassPane(radius: 16)
             .modifier(MiniGameShake(animatableData: shake))
 
             Spacer(minLength: 0)

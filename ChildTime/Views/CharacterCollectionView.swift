@@ -76,10 +76,10 @@ struct CharacterCollectionView: View {
             .frame(maxWidth: .infinity)
             // Glass tile with the tier colour glowing through; the equipped one
             // wears gold (same vocabulary as the home's world tiles).
-            .glassPane(radius: 22, tint: selected ? Color(hex: "FFD23F") : tColor)
+            .glassPane(radius: 16, tint: selected ? Color(hex: "FFD23F") : tColor)
             .overlay {
                 if selected {
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .strokeBorder(AppColor.starGold.opacity(0.9), lineWidth: 2)
                 }
             }
@@ -106,8 +106,8 @@ struct CharacterCollectionView: View {
             .foregroundStyle(.white)
             .padding(.horizontal, 9)
             .padding(.vertical, 4)
-            .background(Capsule().fill(color.opacity(0.75)))
-            .overlay(Capsule().strokeBorder(.white.opacity(0.45), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(color.opacity(0.75)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.45), lineWidth: 1))
             .padding(8)
     }
 
@@ -120,8 +120,8 @@ struct CharacterCollectionView: View {
         .foregroundStyle(affordable ? Color(hex: "4B3FBF") : .white)
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .background(Capsule().fill(affordable ? .white.opacity(0.92) : .white.opacity(0.18)))
-        .overlay(Capsule().strokeBorder(.white.opacity(0.35), lineWidth: 1))
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(affordable ? .white.opacity(0.92) : .white.opacity(0.18)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.35), lineWidth: 1))
         .padding(.bottom, 12)
     }
 

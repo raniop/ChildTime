@@ -423,8 +423,8 @@ struct WhatsNewStoryView: View {
                         .font(.system(size: 13, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white.opacity(0.95))
                         .padding(.horizontal, 14).padding(.vertical, 6)
-                        .background(Capsule().fill(.white.opacity(0.16)))
-                        .overlay(Capsule().strokeBorder(.white.opacity(0.32), lineWidth: 1))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.32), lineWidth: 1))
                 }
                 .buttonStyle(.juicy)
             }
@@ -488,7 +488,7 @@ struct WhatsNewStoryView: View {
                     .foregroundStyle(AppColor.textOnLight)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, short ? 13 : 16)
-                    .background(AppGradient.gold, in: Capsule())
+                    .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .glow(AppColor.starGold, radius: 14)
             }
             .buttonStyle(.juicy)
@@ -1055,7 +1055,7 @@ private struct Box: View {
                             Capsule().fill(AppGradient.gold)
                         } else {
                             Capsule().fill(.white.opacity(0.18))
-                                .overlay(Capsule().strokeBorder(.white.opacity(0.34), lineWidth: 1))
+                                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.34), lineWidth: 1))
                         }
                     }
             }
@@ -1128,7 +1128,7 @@ private struct Box: View {
                             .lineLimit(1).minimumScaleFactor(0.6)
                             .padding(.horizontal, font * 0.8)
                             .padding(.vertical, font * 0.38)
-                            .background(Capsule().fill(AppGradient.gold))
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
                     case .bullet:
                         Text(row.value)
                             .font(.system(size: font, weight: .heavy, design: .rounded))
@@ -1194,8 +1194,8 @@ private struct Box: View {
                 .foregroundStyle(.white)
         }
         .padding(.horizontal, font * 0.9).padding(.vertical, font * 0.48)
-        .background(Capsule().fill(.white.opacity(0.2)))
-        .overlay(Capsule().strokeBorder(.white.opacity(0.4), lineWidth: 1))
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.2)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.4), lineWidth: 1))
     }
 
     private func glow(_ color: Color, size: CGFloat) -> some View {

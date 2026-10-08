@@ -161,8 +161,8 @@ struct ParentLocationView: View {
                 VStack(spacing: 14) {
                     FamilyMapView(kids: mapKids, places: places, focus: mapFocus, focusSpan: 0.012, fitAll: focusChildID == nil)
                         .frame(height: 340)
-                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(.white.opacity(0.4), lineWidth: 1))
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.4), lineWidth: 1))
                     ForEach(kids) { p in card(p) }
                 }
                 .padding(16)
@@ -257,7 +257,7 @@ struct ParentLocationView: View {
                     Text("🔋 \(Int((b * 100).rounded()))%")
                         .font(.system(size: 13, weight: .heavy, design: .rounded)).monospacedDigit()
                         .padding(.horizontal, 10).padding(.vertical, 4)
-                        .background(Color.black.opacity(0.18), in: Capsule())
+                        .background(Color.black.opacity(0.18), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
             }
             // "רענון" got no answer within 30 s — say why, instead of nothing.
@@ -288,8 +288,8 @@ struct ParentLocationView: View {
                                 .lineLimit(1).minimumScaleFactor(0.8)
                                 .frame(maxWidth: .infinity, minHeight: 40)
                                 .background(on ? Color.white.opacity(0.32) : Color.black.opacity(0.14),
-                                            in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                                .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                            in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
                                     .strokeBorder(on ? Color.white.opacity(0.7) : .clear, lineWidth: 1.5))
                         }
                         .buttonStyle(.plain)
@@ -320,7 +320,7 @@ struct ParentLocationView: View {
         }
         .foregroundStyle(.white)
         .padding(14)
-        .glassPane(radius: 22, shadow: false)
+        .glassPane(radius: 16, shadow: false)
     }
 
     private func isRefreshing(_ cid: String) -> Bool {
@@ -430,7 +430,7 @@ struct LocationConsentSheet: View {
                         row("🔋", tr("סוללה: מתעדכן כשהטלפון זז או כשמבקשים — בלי GPS שרץ כל הזמן."), last: true)
                     }
                     .padding(.horizontal, 16)
-                    .glassPane(radius: 20, shadow: false)
+                    .glassPane(radius: 16, shadow: false)
                     Text(girl ? tr("בטלפון של \(name) יופיע אישור מיקום, והיא תדע שהמיקום שלה גלוי לכם.")
                               : tr("בטלפון של \(name) יופיע אישור מיקום, והוא ידע שהמיקום שלו גלוי לכם."))
                         .font(.system(size: 13, weight: .medium, design: .rounded))
@@ -448,7 +448,7 @@ struct LocationConsentSheet: View {
                             .font(.system(size: 18, weight: .heavy, design: .rounded))
                             .foregroundStyle(Color(hex: "4B3BC4"))
                             .frame(maxWidth: .infinity, minHeight: 56)
-                            .background(.white, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            .background(.white, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
                     .buttonStyle(.plain)
                     .disabled(saving)
@@ -475,7 +475,7 @@ struct LocationConsentSheet: View {
                     step(3, girl ? tr("זהו — \(name) תופיע כאן על המפה") : tr("זהו — \(name) יופיע כאן על המפה"), last: true)
                 }
                 .padding(.horizontal, 16)
-                .glassPane(radius: 20, shadow: false)
+                .glassPane(radius: 16, shadow: false)
                 Text(tr("שלחנו לטלפון של \(name) התראה שמזכירה לפתוח את טופי."))
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(GlassInk.secondary).multilineTextAlignment(.center)
@@ -484,7 +484,7 @@ struct LocationConsentSheet: View {
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3BC4"))
                         .frame(maxWidth: .infinity, minHeight: 56)
-                        .background(.white, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .background(.white, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
                 .buttonStyle(.plain)
             }
@@ -619,7 +619,7 @@ struct PlaceEditorView: View {
                         TextField(tr("חיפוש כתובת או מקום"), text: $query)
                             .textFieldStyle(.plain)
                             .padding(.horizontal, 14).frame(height: 46)
-                            .background(Color.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                            .background(Color.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                             .onSubmit { search() }
                         Button(tr("חיפוש")) { search() }.font(.system(size: 15, weight: .heavy, design: .rounded))
                     }
@@ -650,7 +650,7 @@ struct PlaceEditorView: View {
                         Text("📍").font(.system(size: 34)).offset(y: -16).allowsHitTesting(false)
                     }
                     .frame(height: 260)
-                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     Text(tr("הזיזו את המפה כך שהסיכה על המקום"))
                         .font(.system(size: 12.5, weight: .medium, design: .rounded)).foregroundStyle(GlassInk.secondary)
 
@@ -660,7 +660,7 @@ struct PlaceEditorView: View {
                             .textFieldStyle(.plain)
                             .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .padding(.horizontal, 14).frame(height: 46)
-                            .background(Color.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                            .background(Color.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         HStack(spacing: 6) {
                             ForEach(Self.emojis, id: \.self) { e in
                                 Button {
@@ -672,7 +672,7 @@ struct PlaceEditorView: View {
                                 } label: {
                                     Text(e).font(.system(size: 22)).frame(maxWidth: .infinity, minHeight: 40)
                                         .background((place.emoji == e ? AppColor.successMint.opacity(0.5) : Color.white.opacity(0.1)),
-                                                    in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                                    in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -684,21 +684,21 @@ struct PlaceEditorView: View {
                                     Text(tr("\(Int(r)) מ׳")).font(.system(size: 15, weight: .heavy, design: .rounded))
                                         .frame(maxWidth: .infinity, minHeight: 42)
                                         .background((place.radius == r ? AppColor.successMint.opacity(0.45) : Color.white.opacity(0.12)),
-                                                    in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                                    in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                                 }
                                 .buttonStyle(.plain)
                             }
                         }
                     }
                     .padding(14)
-                    .glassPane(radius: 20, shadow: false)
+                    .glassPane(radius: 16, shadow: false)
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text(tr("התראות על המקום הזה")).font(.system(size: 13, weight: .bold, design: .rounded)).foregroundStyle(GlassInk.secondary)
                         ForEach(profiles.profiles) { p in alertRow(p) }
                     }
                     .padding(14)
-                    .glassPane(radius: 20, shadow: false)
+                    .glassPane(radius: 16, shadow: false)
 
                     if !isNew {
                         Button(role: .destructive) { save(delete: true) } label: {
@@ -800,7 +800,7 @@ struct KidLocationPermissionSheet: View {
                       : tr("👉 בַּמָּסָךְ הַבָּא הַטֵּלֵפוֹן יִשְׁאַל — לְחַץ עַל הָאִשּׁוּר"))
                 .font(.system(size: 15.5, weight: .bold, design: .rounded))
                 .padding(14).frame(maxWidth: .infinity)
-                .glassPane(radius: 18, shadow: false)
+                .glassPane(radius: 16, shadow: false)
             Spacer()
             Button {
                 Haptic.light()
@@ -811,7 +811,7 @@ struct KidLocationPermissionSheet: View {
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color(hex: "6C4DF0"))
                     .frame(maxWidth: .infinity, minHeight: 58)
-                    .background(.white, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .background(.white, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .buttonStyle(.plain)
         }
@@ -845,7 +845,7 @@ struct KidBeepOverlay: View {
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color(hex: "6C4DF0"))
                     .frame(maxWidth: .infinity, minHeight: 60)
-                    .background(.white, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .background(.white, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .buttonStyle(.plain)
         }

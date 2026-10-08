@@ -122,7 +122,7 @@ struct UpdateAvailableSheet: View {
                         .foregroundStyle(Color(hex: "2B1C04"))
                         .frame(maxWidth: .infinity).padding(.vertical, 16)
                         .background(
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
                                 .fill(LinearGradient(colors: [Color(hex: "FFD66B"), Color(hex: "FFB32E")],
                                                      startPoint: .topLeading, endPoint: .bottomTrailing))
                         )
@@ -179,7 +179,7 @@ struct UpdateKidNotice: View {
                     .foregroundStyle(Color(hex: "2B1C04"))
                     .frame(maxWidth: .infinity).padding(.vertical, 16)
                     .background(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .fill(LinearGradient(colors: [Color(hex: "FFD66B"), Color(hex: "FFB32E")],
                                                  startPoint: .topLeading, endPoint: .bottomTrailing))
                     )

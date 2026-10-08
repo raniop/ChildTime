@@ -67,7 +67,7 @@ struct ScreenTimeLookalikeView: View {
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
-                            .background(Capsule().fill(Color(hex: "6C4CF1")))
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "6C4CF1")))
                     }
                     .buttonStyle(.juicy)
                 }
@@ -105,13 +105,13 @@ struct ScreenTimeLookalikeView: View {
                             }
                         }
                     }
-                    .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(.white))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white))
                 }
             }
         }
         .padding(12)
-        .background(RoundedRectangle(cornerRadius: 30, style: .continuous).fill(Color(hex: "F2F2F7")))
-        .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).strokeBorder(Color(hex: "D1D1D6"), lineWidth: 1.5))
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "F2F2F7")))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color(hex: "D1D1D6"), lineWidth: 1.5))
     }
 
     private func rowView(_ row: ScreenTimeLookalikeRow) -> some View {
@@ -123,7 +123,7 @@ struct ScreenTimeLookalikeView: View {
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(width: 36, height: 36)
-                        .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(tint))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(tint))
                     titles(row)
                     Spacer(minLength: 0)
                     Image(systemName: AppSymbol.forwardChevron)
@@ -133,8 +133,8 @@ struct ScreenTimeLookalikeView: View {
                     Image("LaunchLogo")
                         .resizable().scaledToFill()
                         .frame(width: 36, height: 36)
-                        .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(Color(hex: "B39DFF")))
-                        .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "B39DFF")))
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     titles(row)
                     Spacer(minLength: 0)
                     fakeSwitch
@@ -155,7 +155,7 @@ struct ScreenTimeLookalikeView: View {
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color(hex: "2A1E5C"))
                     .padding(.horizontal, 10).padding(.vertical, 5)
-                    .background(Capsule().fill(AppColor.starGold))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppColor.starGold))
                     .fixedSize(horizontal: false, vertical: true)
             }
         }

@@ -63,8 +63,8 @@ struct SupportFloatingButtons: View {
                 .foregroundStyle(.white)
                 .padding(.horizontal, 6)
                 .frame(minWidth: 22, minHeight: 22)
-                .background(Capsule().fill(Color(hex: "FF3B4E")))
-                .overlay(Capsule().strokeBorder(.white, lineWidth: 1.5))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "FF3B4E")))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white, lineWidth: 1.5))
                 .offset(x: 6, y: -6)
                 .accessibilityHidden(true)
         }
@@ -344,7 +344,7 @@ struct SupportChatView: View {
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
                     .background(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .fill(mine ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(Color.white.opacity(0.93)))
                     )
                     .shadow(color: .black.opacity(0.14), radius: 5, y: 2)
@@ -390,7 +390,7 @@ struct SupportChatView: View {
                     .tint(.white)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 11)
-                    .glassPane(radius: 22, strength: 0.18, shadow: false)
+                    .glassPane(radius: 16, strength: 0.18, shadow: false)
                     .onChangeCompat(of: draft) { _, v in
                         if v.count > SupportChatStore.textLimit { draft = String(v.prefix(SupportChatStore.textLimit)) }
                         if failed { failed = false }
@@ -530,7 +530,7 @@ struct SupportInboxView: View {
                 .padding(.top, 4)
         }
         .padding(14)
-        .glassPane(radius: 18)
+        .glassPane(radius: 16)
         .contentShape(Rectangle())
     }
 

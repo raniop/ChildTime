@@ -71,9 +71,9 @@ struct SessionProgressHUD: View {
         .padding(.horizontal, compact ? 8 : 12)
         .padding(.vertical, compact ? 5 : 7)
         .background(
-            Capsule()
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(.white.opacity(prominent ? 0.22 : 0.12))
-                .overlay(Capsule().stroke(tint.opacity(prominent ? 0.7 : 0.3), lineWidth: prominent ? 2 : 1))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(tint.opacity(prominent ? 0.7 : 0.3), lineWidth: prominent ? 2 : 1))
         )
         .glow(prominent ? tint : .clear, radius: prominent ? 8 : 0)
     }

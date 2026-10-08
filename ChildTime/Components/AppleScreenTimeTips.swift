@@ -63,8 +63,8 @@ struct ScreenTimeShowMeButton: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 11)
-                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.16)))
-                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.35), lineWidth: 1))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.35), lineWidth: 1))
         }
         .buttonStyle(.juicy)
         .sheet(isPresented: $showing) {
@@ -131,7 +131,7 @@ struct AppleScreenTimeTipsSheet: View {
 
                     AppleScreenTimeStepsList(steps: AppleScreenTimeTips.steps)
                         .padding(16)
-                        .glassPane(radius: 20)
+                        .glassPane(radius: 16)
 
                     // A picture of Apple's page — in-app, so allowed on a child's device.
                     ScreenTimeShowMeButton()
@@ -151,7 +151,7 @@ struct AppleScreenTimeTipsSheet: View {
                             .foregroundStyle(Color(hex: "2A1E5C"))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
-                            .background(AppGradient.gold, in: Capsule())
+                            .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
                     .buttonStyle(.juicy)
                 }

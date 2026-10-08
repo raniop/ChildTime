@@ -38,7 +38,7 @@ struct ChildAuthLoadingView: View {
                             .font(.system(size: 18, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 36).padding(.vertical, 14)
-                            .background(AppGradient.gold, in: Capsule())
+                            .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                             .glow(AppColor.starGold, radius: 10)
                     }
                     .buttonStyle(.juicy)
@@ -56,7 +56,7 @@ struct ChildAuthLoadingView: View {
                                 .font(.system(size: 15, weight: .semibold, design: .rounded))
                                 .foregroundStyle(.white.opacity(0.85))
                                 .padding(.horizontal, 20).padding(.vertical, 10)
-                                .background(.white.opacity(0.16), in: Capsule())
+                                .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
                     }
                 } else {
@@ -85,7 +85,7 @@ struct ChildAuthLoadingView: View {
                                 .font(.system(size: 15, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 14).padding(.vertical, 8)
-                                .background(.white.opacity(0.16), in: Capsule())
+                                .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
                         Spacer()
                     }

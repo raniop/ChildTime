@@ -157,14 +157,14 @@ struct VaultGameView: View {
             .lineLimit(2).minimumScaleFactor(0.7)
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 12).padding(.vertical, isCompact ? 7 : 10)
-            .glassPane(radius: 18, shadow: false)
+            .glassPane(radius: 16, shadow: false)
     }
 
     /// The safe: a steel door with the three dials and a handle. When the last
     /// dial clicks in, the door swings open on the treasure behind it.
     private var safe: some View {
         let dial: CGFloat = isCompact ? 76 : 104
-        let shape = RoundedRectangle(cornerRadius: 28, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: 16, style: .continuous)
         return ZStack {
             // Behind the door: the treasure.
             shape.fill(LinearGradient(colors: [Color(hex: "2A1F5C"), Color(hex: "1A1240")],
@@ -253,8 +253,8 @@ struct VaultGameView: View {
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: isCompact ? 44 : 56)
-                            .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.14)))
-                            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.28), lineWidth: 1))
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.28), lineWidth: 1))
                     }
                     .buttonStyle(.juicy)
                 }
@@ -270,7 +270,7 @@ struct VaultGameView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity)
-        .glassPane(radius: 22)
+        .glassPane(radius: 16)
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 

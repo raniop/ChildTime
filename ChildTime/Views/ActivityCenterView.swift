@@ -320,8 +320,8 @@ struct ActivityBellButton: View {
             .foregroundStyle(.white)
             .padding(.horizontal, unread > 9 ? 4 : 0)
             .frame(minWidth: 16, minHeight: 16)
-            .background(Capsule().fill(Color(hex: "FF4D6D")))
-            .overlay(Capsule().strokeBorder(Color.white.opacity(0.85), lineWidth: 1.5))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "FF4D6D")))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.white.opacity(0.85), lineWidth: 1.5))
             .offset(x: 6, y: -5)
             // The count is text — never scaled (a `scaleEffect` on text blurs it
             // on this app's screens); it just appears.

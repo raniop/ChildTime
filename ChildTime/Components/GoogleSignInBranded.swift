@@ -26,7 +26,7 @@ struct GoogleSignInBranded: View {
             .frame(height: 50)
             .background(background)
             .overlay(border)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .shadow(color: .black.opacity(0.18), radius: 4, y: 2)
         }
         .buttonStyle(.juicy)
@@ -65,9 +65,9 @@ struct GoogleSignInBranded: View {
     private var background: some View {
         switch surface {
         case .onColor:
-            RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white)
+            RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white)
         case .onLight:
-            RoundedRectangle(cornerRadius: 14, style: .continuous).fill(GoogleBrand.blue)
+            RoundedRectangle(cornerRadius: 16, style: .continuous).fill(GoogleBrand.blue)
         }
     }
 
@@ -75,7 +75,7 @@ struct GoogleSignInBranded: View {
     private var border: some View {
         switch surface {
         case .onColor:
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(Color.black.opacity(0.10), lineWidth: 0.5)
         case .onLight:
             EmptyView()

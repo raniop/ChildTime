@@ -110,7 +110,7 @@ struct LightningTrueFalseView: View {
         VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
             MiniGameTimerBar(remaining: remaining, total: roundSeconds)
                 .padding(.horizontal, 14).padding(.vertical, 10)
-                .glassPane(radius: 18, shadow: false)
+                .glassPane(radius: 16, shadow: false)
 
             Text(streak >= 2 ? tr("🔥 \(streak) בְּרֶצֶף") : " ")
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
@@ -160,7 +160,7 @@ struct LightningTrueFalseView: View {
         }
         .padding(.horizontal, 16).padding(.vertical, 18)
         .frame(maxWidth: .infinity)
-        .glassPane(radius: 24)
+        .glassPane(radius: 16)
         .modifier(MiniGameShake(animatableData: shake))
         .id(cardID)
         .transition(.asymmetric(insertion: .scale(scale: 0.9).combined(with: .opacity), removal: .opacity))

@@ -65,7 +65,7 @@ struct GiftWelcomeView: View {
                 }
                 .padding(18)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .glassPane(radius: 22)
+                .glassPane(radius: 16)
 
                 Spacer(minLength: 10)
 
@@ -78,7 +78,7 @@ struct GiftWelcomeView: View {
                         .foregroundStyle(Color(hex: "2A1E5C"))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(AppGradient.gold, in: Capsule())
+                        .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .glow(AppColor.starGold, radius: 14)
                 }
                 .buttonStyle(.juicy)

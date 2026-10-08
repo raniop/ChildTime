@@ -224,7 +224,7 @@ struct LoginGateView: View {
             .signInWithAppleButtonStyle(.white)
             .frame(maxWidth: 360)
             .frame(height: 52)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .shadow(color: .black.opacity(0.2), radius: 5, y: 2)
 
             // Google
@@ -247,8 +247,8 @@ struct LoginGateView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: 360)
                     .frame(height: 52)
-                    .background(.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(.white.opacity(0.3), lineWidth: 1))
+                    .background(.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.3), lineWidth: 1))
             }
 
             // "כבר יש לכם משפחה? הצטרפו" REMOVED (Rani): the post-sign-in fork
@@ -283,8 +283,8 @@ struct LoginGateView: View {
         }
         .padding(14)
         .frame(maxWidth: 440)
-        .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
+        .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
             .stroke(AppColor.successMint.opacity(0.5), lineWidth: 1))
     }
 

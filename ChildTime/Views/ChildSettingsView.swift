@@ -250,8 +250,8 @@ struct ChildSettingsView: View {
                             .font(.system(size: 12, weight: .heavy, design: .rounded))
                             .foregroundStyle(GlassInk.primary)
                             .padding(.horizontal, 9).padding(.vertical, 3)
-                            .background(Capsule().fill(.white.opacity(0.16)))
-                            .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
+                            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                     }
                 }
             } header: {

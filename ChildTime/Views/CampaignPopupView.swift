@@ -61,7 +61,7 @@ struct CampaignPopupView: View {
                         .foregroundStyle(Color(hex: "4B3FBF"))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(.white.opacity(0.92)))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
                 }
                 .buttonStyle(.plain)
                 .padding(.top, 4)
@@ -70,8 +70,8 @@ struct CampaignPopupView: View {
                         .font(.system(size: 13.5, weight: .bold, design: .rounded))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(.white.opacity(0.18)))
-                        .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.18)))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
             }
@@ -79,8 +79,8 @@ struct CampaignPopupView: View {
             .padding(16)
             .background(
                 LinearGradient(colors: [Color(hex: "8A63FF"), Color(hex: "5E60CE")], startPoint: .topLeading, endPoint: .bottomTrailing),
-                in: RoundedRectangle(cornerRadius: 26, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).strokeBorder(.white.opacity(0.32), lineWidth: 1))
+                in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.32), lineWidth: 1))
             .shadow(color: .black.opacity(0.35), radius: 24, y: 12)
             .padding(14)
             .frame(maxWidth: 480)
@@ -97,8 +97,8 @@ struct CampaignPopupView: View {
         Text(t)
             .font(.system(size: 10.5, weight: .bold, design: .rounded))
             .padding(.horizontal, 8).padding(.vertical, 4)
-            .background(Capsule().fill(.white.opacity(0.12)))
-            .overlay(Capsule().strokeBorder(.white.opacity(0.2), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.12)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.2), lineWidth: 1))
             .lineLimit(1).minimumScaleFactor(0.8)
     }
 }

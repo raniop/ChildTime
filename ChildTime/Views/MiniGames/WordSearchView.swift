@@ -124,11 +124,11 @@ struct WordSearchView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 14).padding(.vertical, 10)
                 .frame(maxWidth: .infinity)
-                .glassPane(radius: 18, shadow: false)
+                .glassPane(radius: 16, shadow: false)
 
             letterGrid
                 .padding(10)
-                .glassPane(radius: 24)
+                .glassPane(radius: 16)
 
             wordList
             Spacer(minLength: 0)
@@ -222,8 +222,8 @@ struct WordSearchView: View {
                 .foregroundStyle(.white.opacity(isFound ? 0.75 : 1))
                 .padding(.horizontal, 10).padding(.vertical, 8)
                 .frame(maxWidth: .infinity)
-                .background(Capsule().fill(isFound ? Self.palette[i % Self.palette.count].opacity(0.35) : .white.opacity(0.14)))
-                .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(isFound ? Self.palette[i % Self.palette.count].opacity(0.35) : .white.opacity(0.14)))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
                 .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isFound)
             }
         }

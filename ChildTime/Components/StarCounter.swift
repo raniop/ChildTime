@@ -52,7 +52,7 @@ struct StarCounter: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .background(.ultraThinMaterial, in: Capsule())
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .glow(color, radius: 10)
         .onAppear { displayed = value }
         .onChangeCompat(of: value) { _, new in
@@ -79,7 +79,7 @@ struct MinuteCounter: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .background(.ultraThinMaterial, in: Capsule())
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .glow(AppColor.successMint, radius: minutes > 0 ? 12 : 0)
     }
 }

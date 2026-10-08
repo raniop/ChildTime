@@ -15,7 +15,7 @@ struct QRCodeView: View {
                     .resizable()
                     .scaledToFit()
             } else {
-                RoundedRectangle(cornerRadius: 12).fill(Color.gray.opacity(0.3))
+                RoundedRectangle(cornerRadius: 16).fill(Color.gray.opacity(0.3))
             }
         }
         .frame(width: size, height: size)

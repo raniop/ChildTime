@@ -67,10 +67,10 @@ struct WorldCard: View {
                 // 🏆 Silver, gold and champion wear their colour on the rim; a
                 // world never visited gets a dashed invitation.
                 if showTier {
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .strokeBorder(WorldTiers.color(tier: tier).opacity(tier == 0 ? 0.7 : 0.95), lineWidth: 2)
                 } else if newHere {
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .strokeBorder(Color(hex: "FFE28A").opacity(0.95), style: StrokeStyle(lineWidth: 2, dash: [7, 5]))
                 }
             }
@@ -78,7 +78,7 @@ struct WorldCard: View {
                         : (newHere ? Color(hex: "FFE28A").opacity(0.45) : .clear), radius: 10)
             .overlay {
                 if pulse {
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .strokeBorder(Color(hex: "FFD23F").opacity(glow ? 0.95 : 0.25), lineWidth: 2.5)
                 }
             }
@@ -119,17 +119,17 @@ struct HomeTileHeader: View {
                         .font(.system(size: 10.5, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "0B3D2A"))
                         .padding(.horizontal, 9).padding(.vertical, 4)
-                        .background(Capsule().fill(LinearGradient(colors: [badgeTint, badgeTint.opacity(0.8)],
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(LinearGradient(colors: [badgeTint, badgeTint.opacity(0.8)],
                                                                   startPoint: .top, endPoint: .bottom)))
-                        .overlay(Capsule().strokeBorder(.white.opacity(0.7), lineWidth: 1))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.7), lineWidth: 1))
                         .shadow(color: badgeTint.opacity(0.6), radius: 6, y: 2)
                 } else {
                     Text(badge)
                         .font(.system(size: 10.5, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 8).padding(.vertical, 4)
-                        .background(Capsule().fill(.white.opacity(0.24)))
-                        .overlay(Capsule().strokeBorder(.white.opacity(0.32), lineWidth: 1))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.24)))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.32), lineWidth: 1))
                 }
             }
         }
@@ -191,7 +191,7 @@ extension View {
             .padding(.horizontal, 12).padding(.top, 14).padding(.bottom, 12)
             .frame(maxWidth: .infinity)
             .frame(height: compact ? 150 : 176)
-            .glassPane(radius: 22, tint: tint)
+            .glassPane(radius: 16, tint: tint)
     }
 }
 

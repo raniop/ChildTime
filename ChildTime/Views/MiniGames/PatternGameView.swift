@@ -137,7 +137,7 @@ struct PatternGameView: View {
             }
             .padding(.horizontal, 12).padding(.vertical, 18)
             .frame(maxWidth: .infinity)
-            .glassPane(radius: 24)
+            .glassPane(radius: 16)
             .modifier(MiniGameShake(animatableData: shake))
             .id(index)
             .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))

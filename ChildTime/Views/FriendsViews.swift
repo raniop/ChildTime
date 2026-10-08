@@ -163,11 +163,11 @@ struct LeaderboardView: View {
                             .lineLimit(1)
                             .fixedSize()
                             .padding(.horizontal, 12).padding(.vertical, 8)
-                            .background(Capsule().fill(.white.opacity(0.92)))
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
                     }
                     .foregroundStyle(GlassInk.primary)
                     .padding(12)
-                    .glassPane(radius: 18, strength: 0.18, tint: Color(hex: "5CFF9D"), shadow: false)
+                    .glassPane(radius: 16, strength: 0.18, tint: Color(hex: "5CFF9D"), shadow: false)
                 }
                 .buttonStyle(.plain)
             }
@@ -222,7 +222,7 @@ struct LeaderboardView: View {
             tabButton(tr("כָּל הַשַּׂחְקָנִים"), .global)
         }
         .padding(4)
-        .glassInset(radius: 14)
+        .glassInset(radius: 16)
         .padding(.horizontal, AppSpacing.lg)
         .padding(.bottom, AppSpacing.sm)
     }
@@ -237,7 +237,7 @@ struct LeaderboardView: View {
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(active ? Color(hex: "4B3FBF") : .white)
                 .frame(maxWidth: .infinity).padding(.vertical, 9)
-                .background(RoundedRectangle(cornerRadius: 11, style: .continuous).fill(active ? .white.opacity(0.92) : .clear))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(active ? .white.opacity(0.92) : .clear))
         }
     }
 
@@ -296,7 +296,7 @@ struct LeaderboardView: View {
                     .foregroundStyle(AppColor.starGold)
             }
             .frame(maxWidth: .infinity).padding(AppSpacing.md)
-            .glassPane(radius: 22, tint: Color(hex: "FFD23F"))
+            .glassPane(radius: 16, tint: Color(hex: "FFD23F"))
             .padding(.top, AppSpacing.sm)
         }
     }
@@ -352,12 +352,12 @@ struct LeaderboardView: View {
             starsPill(card.stars)
             // Glass steps — gold glows through the winner's, softer for 2 and 3.
             ZStack(alignment: .top) {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(.white.opacity(0.14))
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(LinearGradient(colors: [Color(hex: "FFD23F").opacity(rank == 1 ? 0.55 : 0.25), .clear],
                                          startPoint: .top, endPoint: .bottom))
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .strokeBorder(.white.opacity(0.4), lineWidth: 1)
                 Text(medal).font(.system(size: 26)).padding(.top, 6)
             }
@@ -392,10 +392,10 @@ struct LeaderboardView: View {
             starsPill(card.stars)
         }
         .padding(.horizontal, 14).padding(.vertical, 10)
-        .glassPane(radius: 20, tint: isMe ? Color(hex: "FFD23F") : nil)
+        .glassPane(radius: 16, tint: isMe ? Color(hex: "FFD23F") : nil)
         .overlay {
             if isMe {
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .strokeBorder(AppColor.starGold.opacity(0.8), lineWidth: 1.5)
             }
         }
@@ -410,8 +410,8 @@ struct LeaderboardView: View {
             Text("\(n)").font(.system(size: 15, weight: .heavy, design: .rounded)).foregroundStyle(.white)
         }
         .padding(.horizontal, 10).padding(.vertical, 5)
-        .background(Capsule().fill(.white.opacity(0.14)))
-        .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
     }
 
     private var emptyState: some View {
@@ -428,7 +428,7 @@ struct LeaderboardView: View {
                 Label(tr("הוֹסִיפוּ חָבֵר"), systemImage: "person.badge.plus")
                     .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(Color(hex: "4B3FBF"))
                     .padding(.horizontal, AppSpacing.xl).padding(.vertical, 14)
-                    .background(Capsule().fill(.white.opacity(0.92)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
             }
             .padding(.top, 6)
             Spacer(); Spacer()
@@ -531,7 +531,7 @@ struct AddFriendView: View {
                 .foregroundStyle(.white)
             if !friends.myCode.isEmpty {
                 QRCodeView(text: FriendLink.url(forCode: friends.myCode), size: 170)
-                    .padding(10).background(RoundedRectangle(cornerRadius: 14).fill(.white))
+                    .padding(10).background(RoundedRectangle(cornerRadius: 16).fill(.white))
                 Text(friends.myCode).font(.system(size: 28, weight: .heavy, design: .monospaced))
                     .kerning(5).foregroundStyle(.white)
                 // NO share button: a share sheet leaves the app, which the Kids
@@ -556,7 +556,7 @@ struct AddFriendView: View {
                 Label(tr("סִרְקוּ חָבֵר"), systemImage: "qrcode.viewfinder")
                     .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 14)
-                    .background(AppGradient.purpleDream, in: Capsule())
+                    .background(AppGradient.purpleDream, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             Text(tr("אוֹ הַקְלִידוּ קוֹד שֶׁל חָבֵר")).font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.7))
@@ -566,11 +566,11 @@ struct AddFriendView: View {
                 .multilineTextAlignment(.center)
                 .font(.system(size: 24, weight: .heavy, design: typed.isEmpty ? .rounded : .monospaced))
                 .kerning(typed.isEmpty ? 0 : 5).foregroundStyle(.white)
-                .padding(.vertical, 12).background(RoundedRectangle(cornerRadius: 14).fill(.white.opacity(0.12)))
+                .padding(.vertical, 12).background(RoundedRectangle(cornerRadius: 16).fill(.white.opacity(0.12)))
                 .environment(\.layoutDirection, .leftToRight)
             Button { add(typed) } label: {
                 Text(tr("הוֹסִיפוּ")).font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                    .frame(maxWidth: .infinity).padding(.vertical, 14).background(AppGradient.gold, in: Capsule())
+                    .frame(maxWidth: .infinity).padding(.vertical, 14).background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .disabled(typed.trimmingCharacters(in: .whitespaces).count < 4)
             .opacity(typed.trimmingCharacters(in: .whitespaces).count < 4 ? 0.5 : 1)
@@ -714,7 +714,7 @@ struct FriendProfileView: View {
                             .font(.system(size: 18, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 18).padding(.vertical, 9)
-                            .background(AppGradient.gold, in: Capsule())
+                            .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
                         actionArea.padding(.top, AppSpacing.sm)
                     }
@@ -749,14 +749,14 @@ struct FriendProfileView: View {
                 HStack(spacing: 8) { Image(systemName: "checkmark.circle.fill"); Text(tr("אַשְּׁרוּ בַּקָּשַׁת חֲבֵרוּת")) }
                     .font(.system(size: 18, weight: .black, design: .rounded)).foregroundStyle(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 14)
-                    .background(AppGradient.gold, in: Capsule())
+                    .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
         } else if sent {
             Label(tr("בַּקָּשָׁה נִשְׁלְחָה ⏳"), systemImage: "paperplane.fill")
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
                 .frame(maxWidth: .infinity).padding(.vertical, 14)
-                .background(Capsule().fill(.white.opacity(0.12)))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.12)))
         } else {
             Button {
                 sending = true
@@ -773,7 +773,7 @@ struct FriendProfileView: View {
                 }
                 .font(.system(size: 18, weight: .black, design: .rounded)).foregroundStyle(.white)
                 .frame(maxWidth: .infinity).padding(.vertical, 14)
-                .background(AppGradient.purpleDream, in: Capsule())
+                .background(AppGradient.purpleDream, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .disabled(sending)
         }
@@ -857,13 +857,13 @@ struct FriendRequestsView: View {
                 Text(tr("לֹא עַכְשָׁו")).font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .padding(.horizontal, 12).padding(.vertical, 9)
-                    .background(Capsule().fill(.white.opacity(0.12)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.12)))
             }
             Button { accept(req) } label: {
                 Label(tr("אַשְּׁרוּ"), systemImage: "checkmark")
                     .font(.system(size: 14, weight: .black, design: .rounded)).foregroundStyle(.white)
                     .padding(.horizontal, 14).padding(.vertical, 9)
-                    .background(AppGradient.gold, in: Capsule())
+                    .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
         }
         .padding(.horizontal, 14).padding(.vertical, 10)

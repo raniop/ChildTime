@@ -61,8 +61,8 @@ struct WhatsNewView: View {
                         .monospacedDigit()
                         .foregroundStyle(.white.opacity(0.75))
                         .padding(.horizontal, 12).padding(.vertical, 5)
-                        .background(Capsule().fill(.white.opacity(0.14)))
-                        .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                         .padding(.top, 4)
                 }
                 .padding(.top, 28)
@@ -112,7 +112,7 @@ struct WhatsNewView: View {
                         .foregroundStyle(Color(hex: "4B3FBF"))
                         .frame(maxWidth: 420)
                         .padding(.vertical, 15)
-                        .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(.white.opacity(0.92)))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
                         .shadow(color: .black.opacity(0.2), radius: 14, y: 8)
                 }
                 .buttonStyle(.juicy)
@@ -220,7 +220,7 @@ struct WhatsNewHistoryView: View {
                         .foregroundStyle(Color(hex: "4B3FBF"))
                         .frame(maxWidth: 420)
                         .padding(.vertical, 15)
-                        .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(.white.opacity(0.92)))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
                         .shadow(color: .black.opacity(0.2), radius: 14, y: 8)
                 }
                 .buttonStyle(.juicy)

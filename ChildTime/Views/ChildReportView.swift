@@ -132,14 +132,14 @@ struct ChildReportView: View {
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 7)
                                 .background(period == p ? Color.white.opacity(0.92) : .clear,
-                                            in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                                            in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                                 .foregroundStyle(period == p ? AppColor.dreamyIndigo : .white)
                         }
                         .buttonStyle(.plain)
                     }
                 }
                 .padding(3)
-                .background(Color.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .background(Color.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 // The four numbers that answer "is my kid using it and learning?"
                 HStack(spacing: 0) {
                     snap("\(s.questions)", tr("שאלות"))
@@ -149,7 +149,7 @@ struct ChildReportView: View {
                 }
             }
             .padding(10)
-            .glassPane(radius: 18, shadow: false)
+            .glassPane(radius: 16, shadow: false)
         }
     }
 
@@ -220,8 +220,8 @@ struct ChildReportView: View {
         // The one WARM pane on the page (mockup `.insight`): gold glass so it leads the eye.
         .background(LinearGradient(colors: [Color(hex: "FFE082").opacity(0.66), Color(hex: "FFB840").opacity(0.52)],
                                    startPoint: .topLeading, endPoint: .bottomTrailing),
-                    in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
             .strokeBorder(Color(hex: "FFEBAA").opacity(0.7), lineWidth: 1))
         .shadow(color: .black.opacity(0.22), radius: 14, y: 8)
     }
@@ -272,7 +272,7 @@ struct ChildReportView: View {
                 .font(.system(size: 12, weight: .heavy, design: .rounded))
                 .foregroundStyle(tint == nil ? GlassInk.secondary : Color(hex: "2A1D00"))
                 .padding(.horizontal, 9).padding(.vertical, 4)
-                .background(Capsule().fill(tint ?? .white.opacity(0.18)))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(tint ?? .white.opacity(0.18)))
         }
         .padding(.vertical, 8)
     }
@@ -311,7 +311,7 @@ struct ChildReportView: View {
                                     }
                                     .font(.system(size: 12.5, weight: .semibold, design: .rounded))
                                     .padding(.vertical, 8).padding(.horizontal, 10)
-                                    .glassInset(radius: 11)
+                                    .glassInset(radius: 16)
                                     .padding(.leading, 44).padding(.top, 6)
                                 }
                             }
@@ -327,7 +327,7 @@ struct ChildReportView: View {
                                 .font(.system(size: 13, weight: .heavy, design: .rounded))
                                 .foregroundStyle(GlassInk.primary)
                                 .frame(maxWidth: .infinity).padding(.vertical, 10)
-                                .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
                         .buttonStyle(.plain)
                         .padding(.top, 10)
@@ -399,8 +399,8 @@ struct ChildReportView: View {
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
                             .fixedSize()
                             .padding(.horizontal, 8).padding(.vertical, 3)
-                            .background(Color.white.opacity(0.14), in: Capsule())
-                            .overlay(Capsule().strokeBorder(Color.white.opacity(0.24), lineWidth: 1))
+                            .background(Color.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.white.opacity(0.24), lineWidth: 1))
                     }
                     Spacer(minLength: 0)
                 }
@@ -420,7 +420,7 @@ struct ChildReportView: View {
                 .foregroundStyle(st.direction == .eased ? GlassInk.warn : st.direction == .raised ? GlassInk.good : GlassInk.secondary)
                 .lineLimit(1).minimumScaleFactor(0.7)
                 .padding(.horizontal, 7).padding(.vertical, 2)
-                .background(Color.white.opacity(0.10), in: Capsule())
+                .background(Color.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
     }
 
@@ -438,8 +438,8 @@ struct ChildReportView: View {
             .monospacedDigit()
             .foregroundStyle(color)
             .padding(.horizontal, 9).padding(.vertical, 5)
-            .background(Color.white.opacity(0.12), in: Capsule())
-            .overlay(Capsule().strokeBorder(Color.white.opacity(0.18), lineWidth: 1))
+            .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.white.opacity(0.18), lineWidth: 1))
     }
 
     private func verdictColor(_ v: TopicReport.Verdict) -> Color {
@@ -563,7 +563,7 @@ struct ChildReportView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, 6).padding(.horizontal, 9)
-                .glassInset(radius: 10)
+                .glassInset(radius: 16)
             }
         }
     }
@@ -638,7 +638,7 @@ struct ChildReportView: View {
                         .foregroundStyle(GlassInk.primary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
                             .foregroundStyle(Color.white.opacity(0.45)))
                 }
@@ -680,7 +680,7 @@ struct ChildReportView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .foregroundStyle(GlassInk.primary)
-        .glassPane(radius: 22)
+        .glassPane(radius: 16)
     }
 
     private func empty(_ text: String) -> some View {

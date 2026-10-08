@@ -232,6 +232,6 @@ struct ChildLockSetupView: View {
             .font(.system(size: 14, weight: .heavy, design: .rounded))
             .foregroundStyle(mint ? Color(hex: "053B26") : .white)
             .padding(.horizontal, 14).padding(.vertical, 7)
-            .background(Capsule().fill(mint ? AppColor.successMint : .white.opacity(0.16)))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(mint ? AppColor.successMint : .white.opacity(0.16)))
     }
 }

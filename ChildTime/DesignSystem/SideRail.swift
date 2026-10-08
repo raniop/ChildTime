@@ -68,11 +68,11 @@ struct SideRailButton: View {
             icon
                 .frame(width: 46, height: 46)
                 .background(
-                    RoundedRectangle(cornerRadius: 15, style: .continuous)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(.white.opacity(0.16))
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 15, style: .continuous)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .strokeBorder(.white.opacity(0.3), lineWidth: 1)
                 )
         }

@@ -64,7 +64,7 @@ struct SchoolYearCelebrationView: View {
                         .foregroundStyle(AppColor.textOnLight)
                         .frame(maxWidth: 420)
                         .padding(.vertical, 16)
-                        .background(Capsule().fill(.white.opacity(0.92)))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
                 }
                 .buttonStyle(.juicy)
                 .padding(.horizontal, AppSpacing.xl)
@@ -342,7 +342,7 @@ struct ParentSchoolYearPartyView: View {
                         .foregroundStyle(AppColor.textOnLight)
                         .frame(maxWidth: 420)
                         .padding(.vertical, 16)
-                        .background(Capsule().fill(.white.opacity(0.92)))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
                 }
                 .buttonStyle(.juicy)
                 .padding(.horizontal, AppSpacing.xl)

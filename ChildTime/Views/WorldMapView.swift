@@ -867,7 +867,7 @@ struct WorldMapView: View {
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 18).padding(.vertical, 12)
-                    .background(AppColor.successMint.opacity(0.95), in: Capsule())
+                    .background(AppColor.successMint.opacity(0.95), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .glow(AppColor.successMint, radius: 12)
                     .padding(.top, 60)
                     .transition(.move(edge: .top).combined(with: .opacity))
@@ -1123,7 +1123,7 @@ struct WorldMapView: View {
                 Text(tr("הִצְטָרְפוּ"))
                     .font(.system(size: 14, weight: .heavy, design: .rounded)).foregroundStyle(AppColor.textOnLight)
                     .padding(.horizontal, 18).padding(.vertical, 9)
-                    .background(Capsule().fill(AppColor.starGold))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppColor.starGold))
             }
         }
         .padding(14)
@@ -1155,8 +1155,8 @@ struct WorldMapView: View {
             }
             .foregroundStyle(.white)
             .padding(.horizontal, 22).padding(.vertical, 15)
-            .background(Capsule().fill(Color(hex: "EF4655")))
-            .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "EF4655")))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.3), lineWidth: 1))
             .shadow(color: Color(hex: "EF4655").opacity(0.4), radius: 10, y: 4)
         }
         .buttonStyle(.juicy)
@@ -1248,7 +1248,7 @@ struct WorldMapView: View {
         // buttons on the left with ⚙️ the leftmost; אתגר יומי right, מטלות left.
         .environment(\.layoutDirection, .app)
         .padding(16)
-        .glassPane(radius: 24)
+        .glassPane(radius: 16)
         .padding(.top, AppSpacing.sm)
         .eraseToAnyView()
     }
@@ -1394,8 +1394,8 @@ struct WorldMapView: View {
                         .foregroundStyle(AppColor.textOnLight).lineLimit(1).fixedSize()
                 }
                 .padding(.horizontal, 10).padding(.vertical, 3)
-                .background(AppGradient.gold, in: Capsule())
-                .overlay(Capsule().stroke(.white.opacity(0.7), lineWidth: 1.2))
+                .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.7), lineWidth: 1.2))
                 .glow(AppColor.starGold, radius: challengePulse ? 10 : 5)
             } else {
                 Text(tr("\(done) מִתּוֹךְ \(target)"))
@@ -1662,7 +1662,7 @@ struct WorldMapView: View {
             }
             .environment(\.layoutDirection, .app)
             .padding(.horizontal, 14).padding(.vertical, 4)
-            .glassInset(radius: 18)
+            .glassInset(radius: 16)
             .sheet(item: $infoStat) { stat in
                 statInfoCard(stat)
                     .environment(\.layoutDirection, .app)
@@ -1686,7 +1686,7 @@ struct WorldMapView: View {
         .environment(\.layoutDirection, .app)
         .padding(.vertical, 13)
         .padding(.horizontal, 4)
-        .glassInset(radius: 18)
+        .glassInset(radius: 16)
         // One clean bottom sheet for the stat explanations (a popover floated
         // awkwardly over the header on iPhone).
         .sheet(item: $infoStat) { stat in
@@ -2010,8 +2010,8 @@ struct WorldMapView: View {
                         .font(.system(size: isCompact ? 12 : 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 10).padding(.vertical, 4)
-                        .background(Capsule().fill(.white.opacity(0.2)))
-                        .overlay(Capsule().strokeBorder(.white.opacity(0.35), lineWidth: 1))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.2)))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.35), lineWidth: 1))
                 }
             }
             .opacity(heroAppeared ? 1 : 0)
@@ -2061,7 +2061,7 @@ struct WorldMapView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .glow(AppColor.starGold, radius: 10)
                 }
                 .buttonStyle(.juicy)
@@ -2151,7 +2151,7 @@ struct WorldMapView: View {
                     .foregroundStyle(Color(hex: "2B1C04"))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 14).padding(.vertical, isShort ? 5 : 8)
-                    .background(Capsule().fill(AppColor.starGold.opacity(0.92)))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppColor.starGold.opacity(0.92)))
                     .padding(.top, isShort ? 2 : 4)
                     .accessibilityAddTraits(.isStaticText)
             }
@@ -2178,8 +2178,8 @@ struct WorldMapView: View {
             }
         }
         .padding(8)
-        .background(Color(hex: "2A1E5C").opacity(0.6), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .glassPane(radius: 24, strength: 0.18)
+        .background(Color(hex: "2A1E5C").opacity(0.6), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .glassPane(radius: 16, strength: 0.18)
         .frame(maxWidth: 480)
     }
 
@@ -3073,7 +3073,7 @@ private struct FirstDayGlow: ViewModifier {
         content
             .overlay {
                 if on {
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .strokeBorder(Color(hex: "FFD23F").opacity(glow ? 0.95 : 0.25), lineWidth: 2.5)
                 }
             }
@@ -3092,7 +3092,7 @@ extension View {
     /// The kid's big action buttons on glass: the brand gradient at 85 % over a
     /// blur, a light edge, a soft drop shadow — never an opaque slab (Rani).
     func ctaGlass(_ a: Color, _ b: Color, colour: Double = 0.6) -> some View {
-        let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: 16, style: .continuous)
         return self
             .background {
                 ZStack {

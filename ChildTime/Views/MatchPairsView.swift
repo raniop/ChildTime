@@ -156,8 +156,8 @@ struct MatchPairsView: View {
                 .foregroundStyle(.white)
         }
         .frame(minWidth: 76).padding(.vertical, 12)
-        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(color.opacity(0.25)))
-        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(color, lineWidth: 1.5))
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(color.opacity(0.25)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(color, lineWidth: 1.5))
         .glow(color, radius: revealStep >= step ? 10 : 0)
         .scaleEffect(revealStep >= step ? 1 : 0.3)
         .opacity(revealStep >= step ? 1 : 0)
@@ -167,7 +167,7 @@ struct MatchPairsView: View {
         Text(t).font(.system(size: 19, weight: .heavy, design: .rounded))
             .foregroundStyle(dark ? AppColor.textOnLight : .white)
             .frame(maxWidth: .infinity).padding(.vertical, 14)
-            .background(dark ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(Color.white.opacity(0.18)), in: Capsule())
+            .background(dark ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(Color.white.opacity(0.18)), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     // MARK: - Logic

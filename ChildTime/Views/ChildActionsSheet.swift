@@ -132,7 +132,7 @@ struct ChildActionsSheet: View {
                 .foregroundStyle(Color(hex: "4B3FBF"))
                 .lineLimit(1).minimumScaleFactor(0.8)
                 .frame(maxWidth: .infinity).frame(height: 48)
-                .background(Color.white.opacity(0.92), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .background(Color.white.opacity(0.92), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .buttonStyle(.plain)
     }
@@ -150,7 +150,7 @@ struct ChildActionsSheet: View {
             divider
             row("⚙️", tr("כל ההגדרות של \(name)"), tr("זמן, למידה, שפה ומכשיר")) { run(.settings) }
         }
-        .glassPane(radius: 20)
+        .glassPane(radius: 16)
     }
 
     private var divider: some View {
@@ -176,8 +176,8 @@ struct ChildActionsSheet: View {
             .padding(.horizontal, 6)
             .frame(maxWidth: .infinity, minHeight: 88)
             .background(on ? Color.white.opacity(0.92) : Color.white.opacity(0.18),
-                        in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                        in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
         }
         .buttonStyle(.plain)
     }
@@ -189,7 +189,7 @@ struct ChildActionsSheet: View {
                 .foregroundStyle(destructive ? Color(hex: "C2334D") : Color(hex: "4B3FBF"))
                 .lineLimit(1).minimumScaleFactor(0.75)
                 .frame(maxWidth: .infinity).frame(height: 44)
-                .background(Color.white.opacity(0.92), in: Capsule())
+                .background(Color.white.opacity(0.92), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .buttonStyle(.plain)
     }

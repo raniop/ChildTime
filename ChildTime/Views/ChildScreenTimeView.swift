@@ -50,8 +50,8 @@ struct ChildScreenTimeView: View {
                                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 10).padding(.vertical, 6)
-                                .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(.white.opacity(0.14)))
-                                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                             Stepper("", value: $minutes, in: Self.minMinutes...Self.maxMinutes, step: 5)
                                 .labelsHidden()
                         }

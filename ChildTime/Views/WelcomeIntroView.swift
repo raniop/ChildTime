@@ -28,8 +28,8 @@ struct WelcomeIntroView: View {
             }
             .foregroundStyle(.white)
             .padding(.horizontal, 14).padding(.vertical, 9)
-            .background(Capsule().fill(.white.opacity(0.16)))
-            .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
         }
         .buttonStyle(.plain)
         .padding(.top, 8).padding(.horizontal, AppSpacing.lg)
@@ -121,7 +121,7 @@ struct WelcomeIntroView: View {
                  tr("דּוּחוֹת, חוֹזֶק וְחוּלְשָׁה, וְהַתְרָאוֹת — בְּמַכְשִׁיר נִפְרָד."))
         }
         .padding(AppSpacing.md)
-        .glassPane(radius: AppRadius.large)
+        .glassPane(radius: 16)
     }
 
     private var divider: some View {

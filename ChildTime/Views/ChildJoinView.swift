@@ -36,7 +36,7 @@ struct ChildJoinView: View {
                                 .font(.system(size: 15, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 14).padding(.vertical, 8)
-                                .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14))).overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                         }
                         Spacer()
                     }
@@ -67,7 +67,7 @@ struct ChildJoinView: View {
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 16).padding(.vertical, 10)
-                            .background(AppColor.almostWarm.opacity(0.9), in: Capsule())
+                            .background(AppColor.almostWarm.opacity(0.9), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         Text(Gendered.g(tr("הַהִתְקַדְּמוּת שֶׁלְּךָ שְׁמוּרָה בֶּעָנָן — שׁוּם דָּבָר לֹא אָבַד."), tr("הַהִתְקַדְּמוּת שֶׁלָּךְ שְׁמוּרָה בֶּעָנָן — שׁוּם דָּבָר לֹא אָבַד.")))
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.85))
@@ -111,7 +111,7 @@ struct ChildJoinView: View {
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
                             .padding(.vertical, 12)
-                            .glassPane(radius: 14, shadow: false)
+                            .glassPane(radius: 16, shadow: false)
                             .submitLabel(.go)
                             .focused($codeFocused)
                             .onSubmit { if code.count >= 6 { JoinCoordinator.shared.present(code) } }
@@ -121,7 +121,7 @@ struct ChildJoinView: View {
                                 .foregroundStyle(Color(hex: "2A1E5C"))
                                 .padding(.horizontal, 18)
                                 .padding(.vertical, 14)
-                                .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
                         .buttonStyle(.juicy)
                         .disabled(working || code.count < 6)
@@ -188,7 +188,7 @@ struct ChildJoinView: View {
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.75))
                             .padding(.horizontal, 14).padding(.vertical, 9)
-                            .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14))).overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                     }
                     .buttonStyle(.plain)
                     .padding(.top, 8)
@@ -393,7 +393,7 @@ private struct AppRemovalUnlockView: View {
                     Button { onDone() } label: {
                         Text(tr("סְגִירָה")).font(.system(size: 17, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14)
-                            .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14))).overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                     }.buttonStyle(.juicy).padding(.horizontal, 40)
                 } else {
                     Button {
@@ -409,7 +409,7 @@ private struct AppRemovalUnlockView: View {
                         Label(tr("אַפְשְׁרוּ מְחִיקָה לְ-5 דַּקּוֹת"), systemImage: "trash")
                             .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                             .frame(maxWidth: .infinity).padding(.vertical, 15)
-                            .background(AppColor.flameOrange.opacity(0.9), in: Capsule())
+                            .background(AppColor.flameOrange.opacity(0.9), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }.buttonStyle(.juicy).padding(.horizontal, 32)
                 }
             }

@@ -103,7 +103,7 @@ struct BalanceGameView: View {
             }
             .padding(.horizontal, 14).padding(.vertical, 12)
             .frame(maxWidth: .infinity)
-            .glassPane(radius: 22)
+            .glassPane(radius: 16)
 
             Spacer(minLength: 0)
             scale

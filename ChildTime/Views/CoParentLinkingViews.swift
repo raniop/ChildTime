@@ -89,7 +89,7 @@ struct AddParentView: View {
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 16).padding(.vertical, 9)
-                        .background(.white.opacity(0.18), in: Capsule())
+                        .background(.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
                 HStack(spacing: 6) {
                     ProgressView().tint(.white).scaleEffect(0.8)
@@ -137,7 +137,7 @@ struct AddParentView: View {
                     .font(.system(size: 15))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 12).padding(.vertical, 10)
-                    .background(.white.opacity(0.15), in: RoundedRectangle(cornerRadius: 12))
+                    .background(.white.opacity(0.15), in: RoundedRectangle(cornerRadius: 16))
                     .environment(\.layoutDirection, .leftToRight)
                 Button {
                     guard !inviting else { return }
@@ -158,7 +158,7 @@ struct AddParentView: View {
                     }
                 }
                 .padding(.horizontal, 16).padding(.vertical, 10)
-                .background(AppGradient.gold, in: Capsule())
+                .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .disabled(!inviteEmail.contains("@"))
                 .opacity(inviteEmail.contains("@") ? 1 : 0.5)
             }
@@ -182,7 +182,7 @@ struct AddParentView: View {
                 Text(tr("סיום"))
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14)
-                    .background(AppGradient.success, in: Capsule())
+                    .background(AppGradient.success, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .padding(.top, 6)
         }
@@ -256,7 +256,7 @@ struct JoinFamilyFlowView: View {
                 Label(tr("סרקו קוד QR"), systemImage: "qrcode.viewfinder")
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14)
-                    .background(AppGradient.purpleDream, in: Capsule())
+                    .background(AppGradient.purpleDream, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
 
             Text(tr("או הקלידו את הקוד")).font(.system(size: 13, weight: .medium, design: .rounded))
@@ -273,7 +273,7 @@ struct JoinFamilyFlowView: View {
                 .kerning(joinCode.isEmpty ? 0 : 6)
                 .foregroundStyle(.white)
                 .padding(.vertical, 12)
-                .background(RoundedRectangle(cornerRadius: 14).fill(.white.opacity(0.12)))
+                .background(RoundedRectangle(cornerRadius: 16).fill(.white.opacity(0.12)))
                 .environment(\.layoutDirection, .leftToRight)
 
             Button { JoinCoordinator.shared.present(joinCode) } label: {
@@ -283,7 +283,7 @@ struct JoinFamilyFlowView: View {
                 }
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14)
-                .background(AppGradient.gold, in: Capsule())
+                .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .disabled(working || joinCode.trimmingCharacters(in: .whitespaces).count < 6)
             .opacity(joinCode.trimmingCharacters(in: .whitespaces).count < 6 ? 0.5 : 1)
@@ -319,7 +319,7 @@ struct JoinFamilyFlowView: View {
                 Text(tr("המשיכו"))
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14)
-                    .background(AppGradient.success, in: Capsule())
+                    .background(AppGradient.success, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .padding(.top, 6)
         }
@@ -518,7 +518,7 @@ struct JoinConfirmView: View {
         Button { Haptic.medium(); action() } label: {
             Text(title).font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                 .frame(maxWidth: .infinity).padding(.vertical, 15)
-                .background(AppGradient.gold, in: Capsule()).glow(AppColor.starGold, radius: 10)
+                .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous)).glow(AppColor.starGold, radius: 10)
         }
     }
 
@@ -526,8 +526,8 @@ struct JoinConfirmView: View {
         Button { Haptic.light(); action() } label: {
             Text(title).font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 13)
-                .background(.white.opacity(0.14), in: Capsule())
-                .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
+                .background(.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.3), lineWidth: 1))
         }
     }
 }

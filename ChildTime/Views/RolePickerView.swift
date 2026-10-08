@@ -169,8 +169,8 @@ struct RolePickerView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 13)
-                        .background(Capsule().fill(.white.opacity(0.14)))
-                        .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                 }
                 .buttonStyle(.juicy)
                 ShareLink(item: URL(string: "https://apps.apple.com/app/id6773805449")!) {
@@ -185,11 +185,11 @@ struct RolePickerView: View {
             .padding(.vertical, 18)
             .frame(maxWidth: 440)
             .background(
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(Color(hex: "4A3AB0").opacity(0.97))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .strokeBorder(.white.opacity(0.3), lineWidth: 1)
             )
             .shadow(color: .black.opacity(0.45), radius: 20, y: -10)
@@ -243,8 +243,8 @@ struct RolePickerView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 13)
-                        .background(Capsule().fill(.white.opacity(0.14)))
-                        .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                 }
                 .buttonStyle(.juicy)
             }
@@ -256,7 +256,7 @@ struct RolePickerView: View {
                 RoundedRectangle(cornerRadius: AppRadius.large, style: .continuous)
                     .fill(Color(hex: "4A3AB0").opacity(0.97))
             )
-            .glassPane(radius: AppRadius.large, strength: 0.2)
+            .glassPane(radius: 16, strength: 0.2)
             .padding(.horizontal, AppSpacing.lg)
             .transition(.scale(scale: 0.92).combined(with: .opacity))
         }
@@ -287,7 +287,7 @@ struct RolePickerView: View {
                             .font(.system(size: 12, weight: .heavy, design: .rounded))
                             .foregroundStyle(Color(hex: "2B1C04"))
                             .padding(.horizontal, 10).padding(.vertical, 3)
-                            .background(Capsule().fill(AppGradient.gold))
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
                     }
                     Text(title)
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
@@ -303,7 +303,7 @@ struct RolePickerView: View {
             }
             .padding(AppSpacing.lg)
             .frame(maxWidth: .infinity)
-            .glassPane(radius: AppRadius.large)
+            .glassPane(radius: 16)
         }
         .buttonStyle(.juicy)
     }

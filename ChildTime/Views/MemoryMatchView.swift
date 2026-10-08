@@ -89,7 +89,7 @@ struct MemoryMatchView: View {
         let isUp = isMatched || flipped.contains(card.id)
         return Button { tap(card) } label: {
             ZStack {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(isUp ? AnyShapeStyle(Color.white) : AnyShapeStyle(LinearGradient(
                         colors: [Color(hex: "5B6CFF"), Color(hex: "9B5DE5")], startPoint: .top, endPoint: .bottom)))
                     .shadow(color: .black.opacity(0.18), radius: 5, y: 3)
@@ -106,7 +106,7 @@ struct MemoryMatchView: View {
                 }
             }
             .frame(height: 84)
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(isMatched ? AppColor.successMint : .white.opacity(0.3), lineWidth: isMatched ? 3 : 1))
             .glow(isMatched ? AppColor.successMint : .clear, radius: isMatched ? 8 : 0)
             .opacity(isMatched ? 0.65 : 1)
@@ -147,8 +147,8 @@ struct MemoryMatchView: View {
             Text("+\(value)\(suffix)").font(.system(size: 19, weight: .heavy, design: .rounded)).foregroundStyle(.white)
         }
         .frame(minWidth: 76).padding(.vertical, 12)
-        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(color.opacity(0.25)))
-        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(color, lineWidth: 1.5))
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(color.opacity(0.25)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(color, lineWidth: 1.5))
         .glow(color, radius: revealStep >= step ? 10 : 0)
         .scaleEffect(revealStep >= step ? 1 : 0.3).opacity(revealStep >= step ? 1 : 0)
     }
@@ -157,7 +157,7 @@ struct MemoryMatchView: View {
         Text(t).font(.system(size: 19, weight: .heavy, design: .rounded))
             .foregroundStyle(dark ? AppColor.textOnLight : .white)
             .frame(maxWidth: .infinity).padding(.vertical, 14)
-            .background(dark ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(Color.white.opacity(0.18)), in: Capsule())
+            .background(dark ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(Color.white.opacity(0.18)), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     // MARK: - Logic

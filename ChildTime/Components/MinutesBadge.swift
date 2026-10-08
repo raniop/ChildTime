@@ -34,7 +34,7 @@ struct MinutesBadge: View {
         .padding(.horizontal, compact ? 12 : 18)
         .padding(.vertical, compact ? 8 : 12)
         .background(
-            Capsule()
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(
                     LinearGradient(
                         colors: hasMinutes
@@ -110,10 +110,10 @@ struct EarnedMinutesPopup: View {
         .padding(.horizontal, 28)
         .padding(.vertical, 16)
         .background(
-            RoundedRectangle(cornerRadius: 32, style: .continuous)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(.ultraThinMaterial.opacity(0.7))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 32, style: .continuous)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .stroke(AppColor.successMint, lineWidth: 3)
                 )
         )

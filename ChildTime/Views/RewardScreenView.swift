@@ -279,7 +279,7 @@ struct RewardScreenView: View {
         .padding(.horizontal, AppSpacing.lg)
         .padding(.vertical, 10)
         .background(
-            Capsule()
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(.white.opacity(0.10))
                 .overlay(
                     Capsule()
@@ -311,8 +311,8 @@ struct RewardScreenView: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, AppSpacing.xl)
                     .padding(.vertical, 12)
-                    .background(.white.opacity(0.18), in: Capsule())
-                    .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
+                    .background(.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.3), lineWidth: 1))
             }
             .buttonStyle(.juicy)
         }

@@ -151,11 +151,11 @@ struct Game2048View: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .glassInset(radius: 14)
+                .glassInset(radius: 16)
             }
             MiniGameTimerBar(remaining: remaining, total: roundSeconds)
                 .padding(.horizontal, 14).padding(.vertical, 10)
-                .glassPane(radius: 18, shadow: false)
+                .glassPane(radius: 16, shadow: false)
             Spacer(minLength: 0)
             board
             Text(tr("הַחְלִיקוּ לְכָל כִּוּוּן 👆"))
@@ -182,7 +182,7 @@ struct Game2048View: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
-        .glassInset(radius: 14)
+        .glassInset(radius: 16)
     }
 
     private var board: some View {

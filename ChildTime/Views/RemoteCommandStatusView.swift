@@ -100,7 +100,7 @@ struct RemoteCommandStatusSheet: View {
                 }
             }
             .padding(16)
-            .background(RoundedRectangle(cornerRadius: 18).fill(Color(.secondarySystemBackground)))
+            .background(RoundedRectangle(cornerRadius: 16).fill(Color(.secondarySystemBackground)))
 
             Text(closingHint)
                 .font(.footnote)

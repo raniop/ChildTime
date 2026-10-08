@@ -251,8 +251,8 @@ struct MiniGameChip<Content: View>: View {
         content()
             .lineLimit(1).minimumScaleFactor(0.7)
             .padding(.horizontal, 12).padding(.vertical, 8)
-            .background(Capsule().fill(.white.opacity(0.14)))
-            .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
     }
 }
 
@@ -416,7 +416,7 @@ struct MiniGameGlassButton: View {
                 .lineLimit(1).minimumScaleFactor(0.7)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 13)
-                .glassPane(radius: 24, shadow: false)
+                .glassPane(radius: 16, shadow: false)
         }
         .buttonStyle(.juicy)
     }
@@ -511,7 +511,7 @@ struct PreReaderCueCard: View {
         .padding(.horizontal, compact ? 14 : 20)
         .padding(.vertical, short ? 8 : (compact ? 12 : 16))
         .frame(maxWidth: .infinity)
-        .glassPane(radius: 24)
+        .glassPane(radius: 16)
         // 🖼 A miniature on a story card is a picture of this screen, not this
         // screen: it says nothing out loud.
         .onAppear { if !inertPreview { SpeechReader.shared.speak(cue.spoken) } }
@@ -577,7 +577,7 @@ struct PreReaderIntroCard: View {
         }
         .padding(short ? 16 : (big ? 32 : 24))
         .frame(maxWidth: big ? 540 : 410)
-        .glassPane(radius: 28)
+        .glassPane(radius: 16)
         .padding(.horizontal, AppSpacing.lg)
         .onAppear {
             if !inertPreview { SpeechReader.shared.speak(PreReaderGames.startCue + " " + cue.spoken) }
@@ -670,7 +670,7 @@ struct PreReaderEndCard: View {
         }
         .padding(short ? 14 : (big ? 32 : 22))
         .frame(maxWidth: big ? 540 : 410)
-        .glassPane(radius: 28)
+        .glassPane(radius: 16)
         .padding(.horizontal, AppSpacing.lg)
         .onAppear {
             SpeechReader.shared.speak(spokenPraise)
@@ -746,7 +746,7 @@ struct MiniGameIntroCard: View {
         }
         .padding(big ? 36 : 24)
         .frame(maxWidth: big ? 580 : 440)
-        .glassPane(radius: 28)
+        .glassPane(radius: 16)
         .padding(.horizontal, AppSpacing.lg)
     }
 }
@@ -787,8 +787,8 @@ struct MiniGameRewardChip: View {
             .foregroundStyle(color)
             .padding(.horizontal, 12)
             .frame(minWidth: 104, minHeight: 54)
-            .background(Capsule().fill(.white.opacity(0.14)))
-            .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
             .scaleEffect(shown ? 1 : 0.4)
             .opacity(shown ? 1 : 0)
     }
@@ -870,7 +870,7 @@ struct MiniGameEndCard: View {
         }
         .padding(big ? 36 : 24)
         .frame(maxWidth: big ? 580 : 440)
-        .glassPane(radius: 28)
+        .glassPane(radius: 16)
         .padding(.horizontal, AppSpacing.lg)
         .onAppear {
             for s in 1...3 {
@@ -967,7 +967,7 @@ struct SurpriseRoundIntro: View {
             }
             .padding(24)
             .frame(maxWidth: 440)
-            .glassPane(radius: 28)
+            .glassPane(radius: 16)
             .padding(.horizontal, AppSpacing.lg)
             .scaleEffect(appeared ? 1 : 0.85)
             .opacity(appeared ? 1 : 0)

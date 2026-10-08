@@ -102,7 +102,7 @@ struct FamilyChoiceView: View {
                 .foregroundStyle(.white.opacity(0.6))
         }
         .padding(.horizontal, 16).padding(.vertical, 14)
-        .glassPane(radius: AppRadius.large)
+        .glassPane(radius: 16)
     }
 
     /// The parental consent the separate privacy screen used to take — the

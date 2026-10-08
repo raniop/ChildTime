@@ -152,8 +152,8 @@ struct BossBattleView: View {
                 .font(.system(size: 19, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity).padding(.vertical, 15)
-                .background(bg, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.white.opacity(0.25), lineWidth: 1))
+                .background(bg, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.25), lineWidth: 1))
         }
         .buttonStyle(.juicy)
         .disabled(locked)
@@ -193,8 +193,8 @@ struct BossBattleView: View {
                             .foregroundStyle(.white)
                             .lineLimit(2).multilineTextAlignment(.center)
                             .frame(maxWidth: .infinity).padding(.vertical, 12).padding(.horizontal, 10)
-                            .background(Capsule().fill(.white.opacity(0.14)))
-                            .overlay(Capsule().strokeBorder(.white.opacity(0.4), lineWidth: 1))
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.4), lineWidth: 1))
                     }
                     .buttonStyle(.juicy)
                 }
@@ -247,8 +247,8 @@ struct BossBattleView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12).padding(.horizontal, 14)
-        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(.white.opacity(0.14)))
-        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
             .strokeBorder(WorldTiers.color(tier: next).opacity(0.9), lineWidth: 1.5))
         .padding(.horizontal, 20)
     }
@@ -260,8 +260,8 @@ struct BossBattleView: View {
                 .foregroundStyle(.white)
         }
         .frame(minWidth: 76).padding(.vertical, 12)
-        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(color.opacity(0.25)))
-        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(color, lineWidth: 1.5))
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(color.opacity(0.25)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(color, lineWidth: 1.5))
         .glow(color, radius: revealStep >= step ? 10 : 0)
         .scaleEffect(revealStep >= step ? 1 : 0.3)
         .opacity(revealStep >= step ? 1 : 0)
@@ -272,7 +272,7 @@ struct BossBattleView: View {
             .font(.system(size: 19, weight: .heavy, design: .rounded))
             .foregroundStyle(dark ? AppColor.textOnLight : .white)
             .frame(maxWidth: .infinity).padding(.vertical, 14)
-            .background(dark ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(Color.white.opacity(0.16)), in: Capsule())
+            .background(dark ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(Color.white.opacity(0.16)), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     // MARK: - Logic

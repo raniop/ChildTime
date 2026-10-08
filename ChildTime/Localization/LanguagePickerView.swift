@@ -61,7 +61,7 @@ struct LanguagePickerView: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity)
-            .glassPane(radius: 20, strength: selected ? 0.2 : 0.1)
+            .glassPane(radius: 16, strength: selected ? 0.2 : 0.1)
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected ? .isSelected : [])

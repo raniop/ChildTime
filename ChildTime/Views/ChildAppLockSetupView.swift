@@ -77,7 +77,7 @@ struct ChildAppLockSetupView: View {
                         .lineLimit(1).minimumScaleFactor(0.8)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(.white.opacity(0.92)))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
                         .shadow(color: .black.opacity(0.2), radius: 14, y: 8)
                     }
                     .buttonStyle(.juicy)
@@ -128,7 +128,7 @@ struct ChildAppLockSetupView: View {
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                                 .foregroundStyle(.white.opacity(0.85))
                                 .padding(.horizontal, 28).padding(.vertical, 12)
-                                .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14))).overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                         }
                     }
                 }

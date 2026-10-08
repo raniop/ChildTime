@@ -49,8 +49,8 @@ struct ParentSettingsView: View {
                             HStack(spacing: 12) {
                                 Text("🌍").font(.system(size: 22))
                                     .frame(width: 44, height: 44)
-                                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.22)))
-                                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.32), lineWidth: 1))
+                                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.22)))
+                                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.32), lineWidth: 1))
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(tr("שפה · Language")).font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.primary)
                                     Text(LanguageStore.shared.current.nativeName).font(.system(size: 12.5, weight: .medium, design: .rounded)).foregroundStyle(GlassInk.secondary)
@@ -60,7 +60,7 @@ struct ParentSettingsView: View {
                             }
                             .padding(14)
                             .frame(maxWidth: .infinity)
-                            .glassPane(radius: 22, strength: 0.14)
+                            .glassPane(radius: 16, strength: 0.14)
                         }
                         .buttonStyle(.plain)
                     }
@@ -166,7 +166,7 @@ struct ParentSettingsView: View {
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3FBF"))
                         .padding(.horizontal, 12).padding(.vertical, 6)
-                        .background(Capsule().fill(.white.opacity(0.92)))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
                         .buttonStyle(.plain)
                 }
             }
@@ -222,8 +222,8 @@ struct ParentSettingsView: View {
             HStack(spacing: 12) {
                 Text(emoji).font(.system(size: 22))
                     .frame(width: 44, height: 44)
-                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white.opacity(0.22)))
-                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.32), lineWidth: 1))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.22)))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.32), lineWidth: 1))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title).font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.primary)
                     Text(summary).font(.system(size: 12.5, weight: .medium, design: .rounded)).foregroundStyle(GlassInk.secondary)
@@ -234,7 +234,7 @@ struct ParentSettingsView: View {
             }
             .padding(14)
             .frame(maxWidth: .infinity)
-            .glassPane(radius: 22, strength: soft ? 0.09 : 0.14)
+            .glassPane(radius: 16, strength: soft ? 0.09 : 0.14)
         }
         .buttonStyle(.plain)
     }

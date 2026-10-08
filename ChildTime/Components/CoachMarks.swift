@@ -189,7 +189,7 @@ private struct CoachSpotlight: View {
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 20).padding(.vertical, 9)
-                        .background(Capsule().fill(Color(hex: "6C4CF1")))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "6C4CF1")))
                 }
                 .buttonStyle(.plain)
                 Text(forKid ? tr("\(number) מִתּוֹךְ \(total)") : tr("\(number) מתוך \(total)"))
@@ -209,7 +209,7 @@ private struct CoachSpotlight: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(.white))
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white))
         .shadow(color: .black.opacity(0.3), radius: 18, y: 8)
         .environment(\.layoutDirection, .app)
     }

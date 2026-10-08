@@ -54,7 +54,7 @@ struct ConsentView: View {
                             .foregroundStyle(.white)
                             .frame(maxWidth: 460)
                             .padding(.vertical, 16)
-                            .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                             .glow(AppColor.starGold, radius: 12)
                     }
                     .buttonStyle(.juicy)
@@ -81,7 +81,7 @@ struct ConsentView: View {
                             .font(.system(size: 15, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 14).padding(.vertical, 8)
-                            .background(.white.opacity(0.16), in: Capsule())
+                            .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
                     Spacer()
                 }

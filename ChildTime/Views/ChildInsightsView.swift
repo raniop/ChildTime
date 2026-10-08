@@ -93,7 +93,7 @@ struct ChildInsightsView: View {
             .font(.system(size: 12, weight: .heavy, design: .rounded))
             .foregroundStyle(color)
             .padding(.horizontal, 10).padding(.vertical, 6)
-            .background(Capsule().fill(color.opacity(0.14)))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(color.opacity(0.14)))
     }
 
     @ViewBuilder private var interestsSection: some View {
@@ -180,7 +180,7 @@ struct ChildInsightsView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
-        .glassPane(radius: 14, shadow: false)
+        .glassPane(radius: 16, shadow: false)
     }
 
     @ViewBuilder
@@ -265,8 +265,8 @@ struct ChildInsightsView: View {
                     Text("\(t.emoji) \(t.parentName)")
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                         .padding(.horizontal, 8).padding(.vertical, 3)
-                        .background(Capsule().fill(tint.opacity(0.18)))
-                        .overlay(Capsule().stroke(tint.opacity(0.5), lineWidth: 1))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(tint.opacity(0.18)))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(tint.opacity(0.5), lineWidth: 1))
                 }
             }
             Text("\(label):").font(.system(size: 13, weight: .heavy, design: .rounded))
@@ -318,6 +318,6 @@ struct ChildInsightsView: View {
         }
         .padding(AppSpacing.md)
         .frame(maxWidth: .infinity)
-        .glassPane(radius: AppRadius.large)
+        .glassPane(radius: 16)
     }
 }

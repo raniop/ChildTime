@@ -109,7 +109,7 @@ struct QuietHoursEditorView: View {
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .frame(maxWidth: .infinity, minHeight: 38)
                         .foregroundStyle(on ? Color.white : GlassInk.secondary)
-                        .background(RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .fill(on ? AppColor.successMint.opacity(0.55) : Color.white.opacity(0.10)))
                 }
                 .buttonStyle(.plain)

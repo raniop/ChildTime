@@ -151,8 +151,8 @@ struct ShopView: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(Capsule().fill(.white.opacity(0.14)))
-            .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
             .fixedSize()
         }
         .buttonStyle(.plain)
@@ -196,8 +196,8 @@ struct ShopView: View {
             .foregroundStyle(.white)
             .padding(.horizontal, 16)
             .padding(.vertical, 9)
-            .background(.white.opacity(0.14), in: Capsule())
-            .overlay(Capsule().strokeBorder(.white.opacity(0.30), lineWidth: 1))
+            .background(.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
         }
         .buttonStyle(.plain)
     }

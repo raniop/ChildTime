@@ -136,7 +136,7 @@ struct BuildWordView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 14).padding(.vertical, 14)
-            .glassPane(radius: 22)
+            .glassPane(radius: 16)
             .padding(.horizontal, AppSpacing.sm)
 
             tileGrid

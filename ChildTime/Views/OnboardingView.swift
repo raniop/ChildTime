@@ -221,7 +221,7 @@ struct OnboardingView: View {
                 )
             }
             .padding(.vertical, AppSpacing.sm)
-            .glassPane(radius: AppRadius.large, shadow: false)
+            .glassPane(radius: 16, shadow: false)
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.large)
                     .stroke(.white.opacity(0.18), lineWidth: 1)
@@ -246,7 +246,7 @@ struct OnboardingView: View {
                 }
             }
             .padding(.horizontal, 14).padding(.vertical, 10)
-            .glassPane(radius: AppRadius.large, shadow: false)
+            .glassPane(radius: 16, shadow: false)
             .frame(maxWidth: 560)
             .padding(.horizontal, AppSpacing.lg)
 
@@ -364,7 +364,7 @@ struct OnboardingView: View {
                         .foregroundStyle(.white.opacity(0.85))
                         .padding(.horizontal, AppSpacing.md)
                         .padding(.vertical, 6)
-                        .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14))).overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                 }
             } else {
                 JuicyButton(gradient: AppGradient.castle, glowColor: AppColor.flameOrange) {
@@ -420,8 +420,8 @@ struct OnboardingView: View {
         }
         .padding(.horizontal, AppSpacing.lg)
         .padding(.vertical, 10)
-        .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
-        .overlay(Capsule().stroke(color.opacity(0.5), lineWidth: 1.5))
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14))).overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(color.opacity(0.5), lineWidth: 1.5))
     }
 
     private func errorBubble(message: String) -> some View {
@@ -527,7 +527,7 @@ struct OnboardingView: View {
             .font(.system(size: 28, weight: .bold, design: .monospaced))
             .foregroundStyle(.white)
             .padding()
-            .glassPane(radius: AppRadius.medium, shadow: false)
+            .glassPane(radius: 16, shadow: false)
     }
 
     private func stepperButton(symbol: String, action: @escaping () -> Void) -> some View {

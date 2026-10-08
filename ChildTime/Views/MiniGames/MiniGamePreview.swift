@@ -173,7 +173,7 @@ struct MiniGamePreview: View {
                         .font(.system(size: s * 0.1))
                         .frame(width: s * 0.3, height: s * 0.21)
                         .miniGameTile(.normal, tint: i == 0 ? Self.blue : Self.mint, radius: 12)
-                        .overlay(RoundedRectangle(cornerRadius: 10)
+                        .overlay(RoundedRectangle(cornerRadius: 16)
                             .strokeBorder(.white.opacity(0.6), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
                             .padding(3))
                 }
@@ -371,7 +371,7 @@ struct MiniGamePreview: View {
             }
         }
         .padding(6)
-        .glassInset(radius: 10)
+        .glassInset(radius: 16)
     }
 
     private func lightning(_ s: CGFloat) -> some View {
@@ -397,7 +397,7 @@ struct MiniGamePreview: View {
                         .font(.system(size: s * 0.09))
                         .frame(width: s * 0.3, height: s * 0.2)
                         .miniGameTile(.normal, tint: i == 0 ? Self.blue : Self.pink, radius: 12)
-                        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(.white.opacity(0.6), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3])).padding(3))
+                        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(.white.opacity(0.6), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3])).padding(3))
                 }
             }
         }
@@ -439,7 +439,7 @@ struct MiniGamePreview: View {
             }
         }
         .padding(5)
-        .glassInset(radius: 10)
+        .glassInset(radius: 16)
     }
 
     /// 🔐 The door being typed into, above the clue list that opens it.
@@ -480,7 +480,7 @@ struct MiniGamePreview: View {
                 .font(.system(size: s * 0.07, weight: .heavy, design: .rounded))
                 .foregroundStyle(AppColor.starGold)
                 .padding(.horizontal, 8).padding(.vertical, 3)
-                .background(Capsule().fill(.white.opacity(0.14)))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
             HStack(spacing: s * 0.03) {
                 ForEach(items.indices, id: \.self) { i in
                     VStack(spacing: 1) {

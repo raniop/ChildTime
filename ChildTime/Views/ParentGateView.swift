@@ -160,7 +160,7 @@ struct ParentGateView<Content: View>: View {
                             .font(.system(size: 15, weight: .heavy, design: .rounded))
                             .foregroundStyle(Color(hex: "4B3FBF"))
                             .padding(.horizontal, 22).padding(.vertical, 10)
-                            .background(Capsule().fill(.white.opacity(0.92)))
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
                     }
                     .buttonStyle(.plain)
                     .padding(.top, 4)
@@ -196,7 +196,7 @@ struct ParentGateView<Content: View>: View {
             }
             .padding(24)
             .frame(maxWidth: 360)
-            .glassPane(radius: 24)
+            .glassPane(radius: 16)
             .animation(.easeInOut(duration: 0.25), value: loadingTimedOut)
             // Never a dead end: the child (or parent) can always back out while
             // the family is still streaming down (Rani hit this in the shop).
@@ -259,7 +259,7 @@ struct ParentGateView<Content: View>: View {
                             .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 34).padding(.vertical, 13)
-                            .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14))).overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                     }
                     .buttonStyle(.juicy)
                 }
@@ -302,7 +302,7 @@ struct ParentGateView<Content: View>: View {
                                 .font(.system(size: 15, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 14).padding(.vertical, 8)
-                                .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14))).overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                         }
                     }
                     Spacer()
@@ -425,7 +425,7 @@ struct ParentGateView<Content: View>: View {
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 8)
-                                .background(Capsule().fill(.white.opacity(0.14))).overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14))).overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                         }
                         .padding(.top, 6)
                     }

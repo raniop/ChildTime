@@ -158,7 +158,7 @@ struct KidModeEntryView: View {
                 Image(systemName: AppSymbol.forwardChevron).foregroundStyle(.white.opacity(0.6))
             }
             .padding(AppSpacing.md)
-            .glassPane(radius: AppRadius.large)
+            .glassPane(radius: 16)
         }
         .buttonStyle(.plain)
     }

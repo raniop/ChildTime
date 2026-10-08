@@ -203,12 +203,12 @@ struct GroceryGameView: View {
                         .environment(\.layoutDirection, mode == .english ? .leftToRight : .app)
                 }
                 .padding(.horizontal, 12).padding(.vertical, 7)
-                .background(Capsule().fill(inCart ? AppColor.successMint.opacity(0.25) : .white.opacity(0.12)))
-                .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(inCart ? AppColor.successMint.opacity(0.25) : .white.opacity(0.12)))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
             }
         }
         .padding(14)
-        .glassPane(radius: 22)
+        .glassPane(radius: 16)
     }
 
     private var shelfGrid: some View {
@@ -242,7 +242,7 @@ struct GroceryGameView: View {
         }
         .padding(.horizontal, 12).padding(.vertical, 8)
         .frame(minHeight: 54)
-        .glassInset(radius: 18)
+        .glassInset(radius: 16)
     }
 
     @ViewBuilder private var shoppingNote: some View {
@@ -333,7 +333,7 @@ struct GroceryGameView: View {
         .font(.system(size: isCompact ? 15 : 18, weight: .bold, design: .rounded))
         .foregroundStyle(.white)
         .padding(12)
-        .glassInset(radius: 14)
+        .glassInset(radius: 16)
     }
 
     /// What the change question is actually about: the bill, and the note handed
@@ -356,7 +356,7 @@ struct GroceryGameView: View {
         .foregroundStyle(.white)
         .lineLimit(1).minimumScaleFactor(0.7)
         .padding(12)
-        .glassInset(radius: 14)
+        .glassInset(radius: 16)
     }
 
     private var till: some View {
@@ -399,7 +399,7 @@ struct GroceryGameView: View {
             if isTotal { receipt } else { paid }
         }
         .padding(14)
-        .glassPane(radius: 22)
+        .glassPane(radius: 16)
     }
 
     private var tillAnswer: some View {

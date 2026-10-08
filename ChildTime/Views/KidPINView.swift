@@ -104,7 +104,7 @@ struct KidPINView: View {
                             .font(.system(size: 14.5, weight: .bold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.85))
                             .padding(.horizontal, 16).padding(.vertical, 9)
-                            .background(.white.opacity(0.12), in: Capsule())
+                            .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
                     .buttonStyle(.plain)
                     .padding(.top, display.isShort ? 8 : 16)
@@ -366,7 +366,7 @@ struct PlayPINManageView: View {
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity).padding(.vertical, 14)
-                            .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
                     .buttonStyle(.juicy)
 

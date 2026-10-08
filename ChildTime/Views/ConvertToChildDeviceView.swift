@@ -98,7 +98,7 @@ struct ConvertToChildDeviceView: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity)
-        .glassPane(radius: 22)
+        .glassPane(radius: 16)
     }
 
     private var childPicker: some View {
@@ -143,7 +143,7 @@ struct ConvertToChildDeviceView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .glassPane(radius: 22)
+        .glassPane(radius: 16)
     }
 
     /// No other parent device is registered — after the switch nobody could
@@ -177,7 +177,7 @@ struct ConvertToChildDeviceView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .glassPane(radius: 22, tint: AppColor.almostWarm)
+        .glassPane(radius: 16, tint: AppColor.almostWarm)
     }
 
     private var convertButton: some View {

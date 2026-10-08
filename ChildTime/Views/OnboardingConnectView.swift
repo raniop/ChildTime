@@ -113,7 +113,8 @@ struct OnboardingConnectView: View {
                 step(2, tr("פותחים, בוחרים \"המכשיר של הילד\" וסורקים את הקוד"))
             }
             .padding(12)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            // As wide as its lines, no wider (Rani).
+            .fixedSize(horizontal: false, vertical: true)
             .glassPane(radius: 16)
             // Full width — so it starts below the foldable's clock.
             .padding(.top, DisplayGeometry.shared.hasBarStrip ? 16 : 0)
@@ -124,7 +125,7 @@ struct OnboardingConnectView: View {
                     // the whole step fits — it was pushed off the top.
                     QRCodeView(text: JoinLink.url(forPayload: code), size: DisplayGeometry.shared.isShort ? 116 : 190)
                         .padding(12)
-                        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(.white))
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white))
                     Text(String(code.split(separator: "|").first ?? ""))
                         .font(.system(size: 24, weight: .heavy, design: .monospaced))
                         .kerning(4)
@@ -141,8 +142,9 @@ struct OnboardingConnectView: View {
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 16).padding(.vertical, 10)
-                    .background(Capsule().fill(.white.opacity(0.14)))
-                    .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                    // One corner for every frame on the page (Rani): 16.
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
             }
             Spacer(minLength: 4)
             laterFooter(tr("אחבר אחר כך"))
@@ -199,8 +201,8 @@ struct OnboardingConnectView: View {
                 .foregroundStyle(.white)
         }
         .padding(.horizontal, 14).padding(.vertical, 9)
-        .background(Capsule().fill(.white.opacity(0.16)))
-        .overlay(Capsule().strokeBorder(.white.opacity(0.5), style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.5), style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
     }
 
     /// No gold button while waiting on the other phone — only the link, in

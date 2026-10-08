@@ -91,7 +91,7 @@ struct DailyCapStepView: View {
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .glassPane(radius: AppRadius.medium, strength: selected ? 0.30 : 0.12, shadow: false)
+            .glassPane(radius: 16, strength: selected ? 0.30 : 0.12, shadow: false)
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
                     .stroke(selected ? AppColor.successMint : .white.opacity(0.2), lineWidth: selected ? 2.5 : 1)
@@ -210,7 +210,7 @@ struct DailyCapStepView: View {
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .glassPane(radius: AppRadius.medium, strength: selected ? 0.30 : 0.12, shadow: false)
+            .glassPane(radius: 16, strength: selected ? 0.30 : 0.12, shadow: false)
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.medium, style: .continuous)
                     .stroke(selected ? AppColor.successMint : .white.opacity(0.2),
@@ -307,7 +307,7 @@ struct DailyCapSetupCard: View {
             .buttonStyle(.juicy)
         }
         .padding(AppSpacing.md)
-        .glassPane(radius: 20, tint: AppColor.starGold)
+        .glassPane(radius: 16, tint: AppColor.starGold)
         .environment(\.layoutDirection, .app)
         .alert(tr("כמה דקות ביום?"), isPresented: Binding(get: { customFor != nil },
                                                           set: { if !$0 { customFor = nil } })) {
@@ -375,13 +375,13 @@ struct DailyCapSetupCard: View {
                 .foregroundStyle(.white)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(Capsule().fill(.white.opacity(0.16)))
-                .overlay(Capsule().strokeBorder(.white.opacity(0.35), lineWidth: 1))
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.35), lineWidth: 1))
             }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
-        .glassInset(radius: 14)
+        .glassInset(radius: 16)
     }
 
     private func save() {
