@@ -474,6 +474,8 @@ struct QuestionRunnerView: View {
             .font(.system(size: 12.5, weight: .heavy, design: .rounded))
             .foregroundStyle(.white)
             .monospacedDigit()
+            // ✕ in the corner AWAY from the foldable's camera and clock.
+            .awayFromBar(.leading)
             if earnsTime { earnedTimeBar }
         }
         .padding(.horizontal, AppSpacing.md)
@@ -922,7 +924,10 @@ struct QuestionRunnerView: View {
     /// quiz answer should read: four equal choices, not four different ones.
     private func fillingOptions(for q: Question) -> some View {
         let opts = Array(q.options.enumerated())
-        let rows = stride(from: 0, to: opts.count, by: 2).map { Array(opts[$0..<min($0 + 2, opts.count)]) }
+        // 📐 A wide, short glass (the open foldable): all the answers in ONE row.
+        // Two rows of two ran off the bottom of its 640pt (Rani: 3 and 4 were cut).
+        let perRow = display.isWideShort ? max(1, opts.count) : 2
+        let rows = stride(from: 0, to: opts.count, by: perRow).map { Array(opts[$0..<min($0 + perRow, opts.count)]) }
         return VStack(spacing: AppSpacing.md) {
             ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
                 HStack(spacing: AppSpacing.md) {
