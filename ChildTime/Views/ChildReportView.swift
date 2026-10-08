@@ -94,7 +94,7 @@ struct ChildReportView: View {
                         .foregroundStyle(.white)
                     // "כיתה ג׳ · משחק עכשיו באייפד" — grade, then where the window is open.
                     HStack(spacing: 6) {
-                        Text(Profile.gradeDisplayName(profile.effectiveGrade))
+                        Text(Profile.gradeNameForParent(profile.effectiveGrade))
                         if liveSecondsLeft > 0 {
                             Text("·")
                             LivePulseDot()

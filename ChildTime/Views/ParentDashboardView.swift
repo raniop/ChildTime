@@ -58,6 +58,10 @@ struct ParentDashboardView: View {
     /// ⏱ The child's daily screen-time limit, straight from the actions menu —
     /// it was three taps deep in the child's settings (Rani: hard to find).
     @State private var screenTimeChild: Profile? = nil
+    /// ⚡ The short actions window (replaced the 14-item menu, 2026-10-08).
+    @State private var actionsChild: Profile? = nil
+    /// ✏️ The pencil by the name edits the child — name, photo, grade.
+    @State private var editChild: Profile? = nil
     @State private var showFamilyNameEditor = false
     @State private var familyNameDraft = ""
     @State private var showingReorder = false               // manual child order sheet
@@ -744,6 +748,17 @@ struct ParentDashboardView: View {
             .sheet(item: $qrChild) { child in
                 childQRSheet(for: child)
             }
+            .sheet(item: $actionsChild) { p in actionsSheet(p) }
+            .sheet(item: $editChild) { p in
+                ProfileEditorView(mode: .edit(p)) { updated in
+                    profiles.update(updated)
+                } onDelete: { removed in
+                    editChild = nil
+                    profiles.remove(removed)
+                }
+                .environmentObject(profiles)
+                .environment(\.layoutDirection, .app)
+            }
             .sheet(item: $screenTimeChild) { p in
                 ChildScreenTimeView(profileID: p.id)
                     .environmentObject(profiles)
@@ -757,6 +772,16 @@ struct ParentDashboardView: View {
                                   onDelete: { removed in
                                       homeSettingsChild = nil
                                       profiles.remove(removed)
+                                  },
+                                  onConnectDevice: {
+                                      homeSettingsChild = nil
+                                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { qrCode = nil; qrChild = p }
+                                  },
+                                  onLocation: {
+                                      homeSettingsChild = nil
+                                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                                          locationChild = p.id.uuidString; showingLocation = true
+                                      }
                                   })
                     .environmentObject(profiles)
                     .environmentObject(settings)
@@ -1431,7 +1456,7 @@ struct ParentDashboardView: View {
                 // their page (Rani). That hid exactly the things a parent needs
                 // then: connect a device, or hand them the parent's own phone.
                 HStack(spacing: 6) {
-                    Text(tr("\(Profile.gradeDisplayName(profile.effectiveGrade)) · אין עדיין מכשיר מחובר."))
+                    Text(tr("\(Profile.gradeNameForParent(profile.effectiveGrade)) · אין עדיין מכשיר מחובר."))
                         .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                         .lineLimit(1).minimumScaleFactor(0.7)
@@ -1723,81 +1748,53 @@ struct ParentDashboardView: View {
         .glassInset(radius: 12)
     }
 
-    /// ⋯ on a grid card: remote open / lock now (the two things a parent reaches
-    /// for from the overview), plus open card / reorder / delete.
+    /// ⚡ on a card: opens the child's short actions window.
     private func gridCardMenu(_ profile: Profile) -> some View {
-        let hasDevice = childHasDevice(profile)
-        return Menu {
-            // 📍 Where is the child / 🔔 ring their phone.
-            let cid = profile.id.uuidString
-            let name = Question.stripNiqqud(profile.name)
-            Button {
-                locationChild = cid; showingLocation = true
-            } label: { Label(tr("📍 איפה \(name)"), systemImage: "location.fill") }
-            if let f = location.shownFix(cid) {
-                Button {
-                    Haptic.medium(); location.beep(childID: cid, deviceID: f.deviceID)
-                } label: { Label(tr("🔔 צפצוף לטלפון של \(name)"), systemImage: "bell.and.waves.left.and.right") }
-            }
-            Divider()
-            // ✏️ Then: the thing parents came to this menu looking for.
-            Button {
-                homeSettingsChild = profile
-            } label: { Label(tr("עריכת \(name)"), systemImage: "pencil") }
-            Button {
-                screenTimeChild = profile
-            } label: { Label(tr("זמן מסך יומי"), systemImage: "hourglass") }
-            Divider()
-            if !hasDevice {
-                Button {
-                    Haptic.light(); qrCode = nil; qrChild = profile
-                } label: { Label(tr("חברו מכשיר ל\(profile.name)"), systemImage: "qrcode") }
-                Divider()
-            }
-            Button {
-                kidModeChild = profile
-            } label: { Label(tr("תנו ל\(profile.name) לשחק כאן 🧒"), systemImage: "iphone.and.arrow.forward") }
-            if hasDevice {
-            Divider()
-            Menu {
-                Button(tr("רבע שעה")) { remoteOpen(profile, 15) }
-                Button(tr("חצי שעה")) { remoteOpen(profile, 30) }
-                Button(tr("שעה")) { remoteOpen(profile, 60) }
-                Button(tr("שעתיים")) { remoteOpen(profile, 120) }
-                Button(tr("4 שעות")) { remoteOpen(profile, 240) }
-            } label: {
-                Label(tr("תן דקות מתנה 💝"), systemImage: "gift.fill")
-            }
-            Button {
-                remoteLock(profile)
-            } label: {
-                Label(tr("נעל עכשיו (מרחוק)"), systemImage: "lock.fill")
-            }
-            Button(role: .destructive) {
-                revokeGiftProfile = profile
-            } label: {
-                Label(tr("נעל ואפס דקות מתנה"), systemImage: "gift.circle")
-            }
-            }   // remote controls need a device to reach
-            Divider()
-            Button {
-                navPath.append(profile.id)
-            } label: { Label(tr("פתחו כרטיס"), systemImage: "rectangle.portrait.and.arrow.right") }
-            Button {
-                choresProfile = profile
-            } label: { Label(tr("מטלות הבית 🧹"), systemImage: "checklist") }
-            if rows.count >= 2 {
-                Button {
-                    showingReorder = true
-                } label: { Label(tr("סדר את הילדים"), systemImage: "arrow.up.arrow.down") }
-            }
-            Button(role: .destructive) {
-                gridDeleteProfile = profile
-            } label: { Label(tr("מחיקת ילד/ה"), systemImage: "trash") }
+        Button {
+            Haptic.light()
+            actionsChild = profile
         } label: {
             homeGhostLabel(tr("⚡ פעולות"), width: Self.actionsMenuWidth)
         }
         .buttonStyle(.plain)
+    }
+
+    private func actionsSheet(_ p: Profile) -> some View {
+        let girl = p.gender == .girl
+        let hasDevice = childHasDevice(p)
+        let earned = rows.first(where: { $0.profile.id == p.id })?.snapshot.minutesEarnedToday ?? 0
+        let status: String = liveWindow(p) != nil
+            ? (girl ? tr("משחקת עכשיו") : tr("משחק עכשיו"))
+            : (hasDevice ? tr("\(earned) דקות שהרוויחו היום") : tr("אין עדיין מכשיר מחובר"))
+        let cap = p.resolvedDailyCap(globalEnabled: settings.dailyCapEnabled, globalMax: settings.maxMinutesPerDay)
+        let pending = choreStore.chores(forChild: p.id).filter { $0.isPendingApproval }.count
+        return ChildActionsSheet(
+            profile: p,
+            hasDevice: hasDevice,
+            statusLine: status,
+            screenTimeSummary: cap.enabled ? tr("עד \(cap.minutes) דקות ביום") : tr("בלי הגבלה יומית"),
+            pendingChores: pending
+        ) { action in
+            actionsChild = nil
+            // Run it once the window has gone, so whatever opens next opens
+            // over the home and not over a sheet on its way out.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                switch action {
+                case .gift(let m): remoteOpen(p, m)
+                case .lock: remoteLock(p)
+                case .lockAndRevokeGift: revokeGiftProfile = p
+                case .location: locationChild = p.id.uuidString; showingLocation = true
+                case .connectDevice: qrCode = nil; qrChild = p
+                case .screenTime: screenTimeChild = p
+                case .chores: choresProfile = p
+                case .settings: homeSettingsChild = p
+                }
+            }
+        }
+        .environmentObject(profiles)
+        .environmentObject(settings)
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
     }
 
     /// ⌚️ Send the per-child glance to the paired Apple Watch (no-op without
@@ -2285,7 +2282,7 @@ struct ParentDashboardView: View {
                             if isRoot {
                                 Button {
                                     Haptic.light()
-                                    homeSettingsChild = row.profile
+                                    editChild = row.profile
                                 } label: {
                                     Color.clear
                                         .frame(width: 230, height: 84)
@@ -2473,6 +2470,16 @@ struct ParentDashboardView: View {
                                       settingsChild = nil
                                       profiles.remove(removed)   // removes locally + from the cloud
                                       navPath.removeAll()        // pop back to the family grid
+                                  },
+                                  onConnectDevice: {
+                                      settingsChild = nil
+                                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { qrCode = nil; qrChild = p }
+                                  },
+                                  onLocation: {
+                                      settingsChild = nil
+                                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                                          locationChild = p.id.uuidString; showingLocation = true
+                                      }
                                   })
                     .environmentObject(profiles)
                     .environmentObject(settings)

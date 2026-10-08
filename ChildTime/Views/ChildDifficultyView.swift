@@ -34,7 +34,7 @@ struct ChildDifficultyView: View {
                             Button {
                                 applyToAll(d)
                             } label: {
-                                Text(d.displayName)
+                                Text(d.parentName)
                                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                                     .foregroundStyle(.white)
                                     .frame(maxWidth: .infinity)
@@ -55,11 +55,11 @@ struct ChildDifficultyView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
                                 Text(topic.emoji)
-                                Text(topic.displayName)
+                                Text(topic.parentName)
                             }
                             Picker(tr("רמת קושי"), selection: binding(for: topic)) {
                                 ForEach(Difficulty.allCases) { d in
-                                    Text(d.displayName).tag(d)
+                                    Text(d.parentName).tag(d)
                                 }
                             }
                             .pickerStyle(.segmented)

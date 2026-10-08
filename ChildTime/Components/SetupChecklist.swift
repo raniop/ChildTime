@@ -65,9 +65,12 @@ struct SetupChecklistCard: View {
                 .accessibilityLabel(tr("הסתרה"))
             }
 
-            VStack(alignment: .leading, spacing: 9) {
+            // Two steps per row (Rani: "1 2 / 3 4") — half the height of a list.
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 10, alignment: .leading),
+                                GridItem(.flexible(), spacing: 10, alignment: .leading)],
+                      alignment: .leading, spacing: 10) {
                 ForEach(Array(steps.enumerated()), id: \.element.id) { n, step in
-                    HStack(spacing: 10) {
+                    HStack(spacing: 8) {
                         ZStack {
                             Circle()
                                 .fill(step.done ? AppColor.successMint : .white.opacity(0.16))
@@ -83,8 +86,9 @@ struct SetupChecklistCard: View {
                             }
                         }
                         Text(step.title)
-                            .font(.system(size: 15, weight: step.done ? .semibold : .heavy, design: .rounded))
+                            .font(.system(size: 14, weight: step.done ? .semibold : .heavy, design: .rounded))
                             .foregroundStyle(.white.opacity(step.done ? 0.62 : 1))
+                            .lineLimit(2).minimumScaleFactor(0.85)
                             .fixedSize(horizontal: false, vertical: true)
                         Spacer(minLength: 0)
                     }

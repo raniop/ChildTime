@@ -35,10 +35,10 @@ enum AdaptiveTopicLevel {
     static func sentence(for topics: [Topic], profile: Profile, snapshot s: ProgressSnapshot) -> String? {
         let g: (String, String) -> String = { profile.gender == .girl ? $1 : $0 }
         if let raised = topics.first(where: { state(for: $0, profile: profile, snapshot: s).direction == .raised }) {
-            return tr("\(profile.name) \(g(tr("מתקדם"),tr("מתקדמת"))) יפה ב\(raised.displayName), אז המערכת התחילה להוסיף שאלות מעט מאתגרות יותר.")
+            return tr("\(profile.name) \(g(tr("מתקדם"),tr("מתקדמת"))) יפה ב\(raised.parentName), אז המערכת התחילה להוסיף שאלות מעט מאתגרות יותר.")
         }
         if let eased = topics.first(where: { state(for: $0, profile: profile, snapshot: s).direction == .eased }) {
-            return tr("ב\(eased.displayName) המערכת הורידה מעט את הקושי כדי לבנות ביטחון והצלחה.")
+            return tr("ב\(eased.parentName) המערכת הורידה מעט את הקושי כדי לבנות ביטחון והצלחה.")
         }
         return nil
     }
@@ -64,6 +64,10 @@ struct ChildSettingsView: View {
     var onResetProgress: (Profile) -> Void
     /// Owned by the dashboard: removes the child, closes this sheet and pops the page.
     var onDelete: (Profile) -> Void
+    /// Owned by the dashboard: closes this sheet and opens the QR for a new device.
+    var onConnectDevice: (() -> Void)? = nil
+    /// Owned by the dashboard: closes this sheet and opens the child on the map.
+    var onLocation: (() -> Void)? = nil
 
     @State private var editing: Profile? = nil
     @State private var language: Profile? = nil
@@ -107,38 +111,61 @@ struct ChildSettingsView: View {
     // MARK: - The list
 
     private func form(_ p: Profile) -> some View {
+        // Rani's approved layout (2026-10-08): time · learning · language ·
+        // device and location, and everything rare one tap further in.
         Form {
-            childSection(p)
-            learningSection(p)
-            smartDifficultySection(p)
             screenTimeSection(p)
+            learningSection(p)
+            languageSection(p)
+            deviceSection(p)
+            smartDifficultySection(p)   // read-only and long — after the settings
             Section {
-                row("👫", tr("חברים")) { friends = p }
+                NavigationLink {
+                    morePage(p)
+                } label: {
+                    rowLabel("🛠️", tr("עוד הגדרות"), value: tr("קוד, חברים, איפוס ומחיקה"), chevron: false)
+                }
+            } header: {
+                Text(tr("מתקדם"))
             }
             .glassRows()
-            advancedSection(p)
         }
         .readableColumn()
         .glassForm()
     }
 
-    private func childSection(_ p: Profile) -> some View {
+    private func languageSection(_ p: Profile) -> some View {
         let girl = p.gender == .girl
-        // 🎓 The grade drives ALL curriculum content — flagged when it is missing
-        // or when the CHILD picked it on their own device.
-        let flagged = p.grade == nil || p.gradeSetByChild
-        let grade: String = p.grade == nil
-            ? tr("כיתה לא הוגדרה — הגדירו")
-            : Profile.gradeDisplayName(p.effectiveGrade) + (p.gradeSetByChild ? " " + tr("· נבחרה ע\"י הילד — בדקו") : "")
         let lang = p.language.flatMap(AppLanguage.init(rawValue:))
         return Section {
-            row("✏️", tr("שם, גיל וכיתה"),
-                value: "\(p.name) · \(p.age.label) · \(grade)",
-                valueTint: flagged ? AppColor.flameOrange : GlassInk.secondary) { editing = p }
             row("🌍", girl ? tr("שפה במכשיר שלה") : tr("שפה במכשיר שלו"),
                 value: lang.map { "\($0.flag) \($0.nativeName)" }) { language = p }
         } header: {
-            Text(girl ? tr("הילדה") : tr("הילד"))
+            Text(tr("🌍 שפה"))
+        }
+        .glassRows()
+    }
+
+    /// 📱 The child's own device(s), the app-deletion window, and the map.
+    private func deviceSection(_ p: Profile) -> some View {
+        let devices = household.devicesByChild[p.id.uuidString] ?? []
+        let deviceValue = devices.isEmpty
+            ? (onConnectDevice != nil ? tr("עוד לא חובר — לחצו לחיבור") : tr("עוד לא חובר"))
+            : devices.map(\.name).joined(separator: ", ") + " · " + tr("מחובר")
+        return Section {
+            if devices.isEmpty, let onConnectDevice {
+                row("📱", tr("המכשיר של \(p.name)"), value: deviceValue) { onConnectDevice() }
+            } else {
+                rowLabel("📱", tr("המכשיר של \(p.name)"), value: deviceValue, chevron: false)
+            }
+            if !devices.isEmpty {
+                row("🗑️", tr("לאפשר מחיקת אפליקציות (5 דק')"), chevron: false) { allowAppRemoval(p) }
+            }
+            if let onLocation {
+                row("📍", tr("איפה \(p.name)"), value: tr("מפה, מקומות וצפצוף לטלפון")) { onLocation() }
+            }
+        } header: {
+            Text(tr("📱 מכשיר ומיקום"))
         }
         .glassRows()
     }
@@ -146,13 +173,21 @@ struct ChildSettingsView: View {
     private func learningSection(_ p: Profile) -> some View {
         let listed = ChildWorldsView.listedWorlds(for: p)
         let open = listed.filter { p.allows($0.topic) }.count
+        // 🎓 The grade drives ALL curriculum content — flagged when it is missing
+        // or when the CHILD picked it on their own device.
+        let flagged = p.grade == nil || p.gradeSetByChild
+        let grade: String = p.grade == nil
+            ? tr("כיתה לא הוגדרה — הגדירו")
+            : Profile.gradeNameForParent(p.effectiveGrade) + (p.gradeSetByChild ? " " + tr("· נבחרה ע\"י הילד — בדקו") : "")
         return Section {
+            row("✏️", tr("שם, גיל וכיתה"),
+                value: "\(p.name) · \(p.age.label) · \(grade)",
+                valueTint: flagged ? AppColor.flameOrange : GlassInk.secondary) { editing = p }
             row("🎚️", tr("רמת קושי"), value: difficultySummary(p)) { difficulty = p }
             row("🌐", tr("עולמות פעילים"),
                 value: listed.isEmpty ? nil : tr("\(open) מתוך \(listed.count)")) { worlds = p }
-            onlyQuestionsToggle(p)
         } header: {
-            Text(tr("למידה"))
+            Text(tr("📚 למידה"))
         }
         .glassRows()
     }
@@ -191,7 +226,7 @@ struct ChildSettingsView: View {
     private func difficultySummary(_ p: Profile) -> String {
         let topics = p.playableTopics.isEmpty ? Set(Topic.allCases) : p.playableTopics
         let levels = Set(topics.map { p.difficulty(for: $0) })
-        if levels.count == 1, let only = levels.first { return only.displayName }
+        if levels.count == 1, let only = levels.first { return only.parentName }
         return tr("לפי נושא")
     }
 
@@ -205,13 +240,13 @@ struct ChildSettingsView: View {
                 ForEach(topics) { topic in
                     let st = AdaptiveTopicLevel.state(for: topic, profile: p, snapshot: snapshot)
                     HStack(spacing: 8) {
-                        Text("\(topic.emoji) \(topic.displayName)")
+                        Text("\(topic.emoji) \(topic.parentName)")
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundStyle(GlassInk.primary)
                             .lineLimit(1).minimumScaleFactor(0.8)
                         Spacer(minLength: 4)
                         if let dir = st.direction { directionChip(dir) }
-                        Text(st.served.displayName)
+                        Text(st.served.parentName)
                             .font(.system(size: 12, weight: .heavy, design: .rounded))
                             .foregroundStyle(GlassInk.primary)
                             .padding(.horizontal, 9).padding(.vertical, 3)
@@ -250,73 +285,88 @@ struct ChildSettingsView: View {
             row("🌙", tr("שעת שינה"), value: QuietHoursText.summary(p.quietHours, kind: .bedtime)) {
                 quietEdit = QuietEdit(kind: .bedtime)
             }
-            // The child's play-protection code — full parental transparency: the
-            // parent SEES the code (to remind a forgetful kid) and can reset it.
-            // Always shown (Rani looked for it and couldn't find it): before the
-            // child picks one it says so instead of hiding the row.
-            if !p.hasPlayPIN {
-                HStack(spacing: 12) {
-                    Text("🔐").font(.system(size: 20)).frame(width: 28)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(tr("קוד הגנת זמן המשחק"))
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundStyle(GlassInk.primary)
-                        Text(p.gender == .girl
-                             ? tr("\(p.name) עוד לא בחרה קוד")
-                             : tr("\(p.name) עוד לא בחר קוד"))
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
-                            .foregroundStyle(GlassInk.secondary)
-                    }
-                    Spacer(minLength: 4)
-                }
-            } else {
-                HStack(spacing: 12) {
-                    Text("🔐").font(.system(size: 20)).frame(width: 28)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(tr("קוד הגנת זמן המשחק"))
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundStyle(GlassInk.primary)
-                        Text(p.gender == .girl
-                             ? tr("\(p.name) מזינה אותו כדי לפתוח את הדקות שצברה")
-                             : tr("\(p.name) מזין אותו כדי לפתוח את הדקות שצבר"))
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
-                            .foregroundStyle(GlassInk.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    Spacer(minLength: 4)
-                    Text(p.playPIN ?? "")
-                        .font(.system(size: 19, weight: .heavy, design: .monospaced))
-                        .kerning(3)
-                        .foregroundStyle(GlassInk.primary)
-                        .environment(\.layoutDirection, .leftToRight)
-                    Button(tr("אפס")) { confirmPinReset = true }
-                        .font(.system(size: 13, weight: .heavy, design: .rounded))
-                        .buttonStyle(.bordered)
-                        .tint(.orange)
-                }
-            }
         } header: {
-            Text(tr("זמן מסך"))
+            Text(tr("⏱ זמן"))
         }
         .glassRows()
     }
 
-    private func advancedSection(_ p: Profile) -> some View {
-        Section {
-            row("🗑️", tr("לאפשר מחיקת אפליקציות (5 דק')"), chevron: false) { allowAppRemoval(p) }
-            // Repair for a device that keeps re-uploading wrong numbers: tell
-            // every device to drop its cached copy and take the cloud as-is.
-            row("🔄", tr("רענון נתונים בכל המכשירים"), chevron: false) {
-                Haptic.warning()
-                RemoteSyncManager.shared.purgeChildCaches(childID: p.id)
+    /// "עוד הגדרות" — what a parent needs rarely: the child's play code,
+    /// friends, questions-only, a data refresh, reset and deletion.
+    private func morePage(_ p: Profile) -> some View {
+        Form {
+            Section {
+                pinRow(p)
+                row("👫", tr("חברים")) { friends = p }
+                onlyQuestionsToggle(p)
             }
-            row("↩️", tr("איפוס התקדמות"), destructive: true, chevron: false) { confirmReset = true }
-            row("🚮", p.gender == .girl ? tr("מחיקת הילדה") : tr("מחיקת הילד"),
-                destructive: true, chevron: false) { confirmDelete = true }
-        } header: {
-            Text(tr("מתקדם"))
+            .glassRows()
+            Section {
+                // Repair for a device that keeps re-uploading wrong numbers: tell
+                // every device to drop its cached copy and take the cloud as-is.
+                row("🔄", tr("רענון נתונים בכל המכשירים"), chevron: false) {
+                    Haptic.warning()
+                    RemoteSyncManager.shared.purgeChildCaches(childID: p.id)
+                }
+                row("↩️", tr("איפוס התקדמות"), destructive: true, chevron: false) { confirmReset = true }
+                row("🚮", p.gender == .girl ? tr("מחיקת הילדה") : tr("מחיקת הילד"),
+                    destructive: true, chevron: false) { confirmDelete = true }
+            }
+            .glassRows()
         }
-        .glassRows()
+        .readableColumn()
+        .glassForm()
+        .navigationTitle(tr("עוד הגדרות"))
+        .navigationBarTitleDisplayMode(.inline)
+        .environment(\.layoutDirection, .app)
+    }
+
+    /// 🔐 The child's play-protection code — the parent SEES it (to remind a
+    /// forgetful kid) and can reset it.
+    @ViewBuilder private func pinRow(_ p: Profile) -> some View {
+        // Always shown (Rani looked for it and couldn't find it): before the
+        // child picks one it says so instead of hiding the row.
+        if !p.hasPlayPIN {
+            HStack(spacing: 12) {
+                Text("🔐").font(.system(size: 20)).frame(width: 28)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(tr("קוד הגנת זמן המשחק"))
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundStyle(GlassInk.primary)
+                    Text(p.gender == .girl
+                         ? tr("\(p.name) עוד לא בחרה קוד")
+                         : tr("\(p.name) עוד לא בחר קוד"))
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                }
+                Spacer(minLength: 4)
+            }
+        } else {
+            HStack(spacing: 12) {
+                Text("🔐").font(.system(size: 20)).frame(width: 28)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(tr("קוד הגנת זמן המשחק"))
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundStyle(GlassInk.primary)
+                    Text(p.gender == .girl
+                         ? tr("\(p.name) מזינה אותו כדי לפתוח את הדקות שצברה")
+                         : tr("\(p.name) מזין אותו כדי לפתוח את הדקות שצבר"))
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 4)
+                Text(p.playPIN ?? "")
+                    .font(.system(size: 19, weight: .heavy, design: .monospaced))
+                    .kerning(3)
+                    .foregroundStyle(GlassInk.primary)
+                    .environment(\.layoutDirection, .leftToRight)
+                Button(tr("אפס")) { confirmPinReset = true }
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .buttonStyle(.bordered)
+                    .tint(.orange)
+            }
+        }
     }
 
     private func row(_ emoji: String, _ title: String, value: String? = nil,
@@ -326,29 +376,35 @@ struct ChildSettingsView: View {
             Haptic.light()
             action()
         } label: {
-            HStack(spacing: 12) {
-                Text(emoji).font(.system(size: 20)).frame(width: 28)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundStyle(destructive ? GlassInk.weak : GlassInk.primary)
-                    if let value {
-                        Text(value)
-                            .font(.system(size: 12.5, weight: .medium, design: .rounded))
-                            .foregroundStyle(valueTint)
-                            .lineLimit(2).minimumScaleFactor(0.8)
-                    }
-                }
-                Spacer(minLength: 0)
-                if chevron {
-                    Image(systemName: AppSymbol.forwardChevron)
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(GlassInk.tertiary)
-                }
-            }
-            .contentShape(Rectangle())
+            rowLabel(emoji, title, value: value, valueTint: valueTint, destructive: destructive, chevron: chevron)
         }
         .buttonStyle(.plain)
+    }
+
+    private func rowLabel(_ emoji: String, _ title: String, value: String? = nil,
+                          valueTint: Color = GlassInk.secondary, destructive: Bool = false,
+                          chevron: Bool = true) -> some View {
+        HStack(spacing: 12) {
+            Text(emoji).font(.system(size: 20)).frame(width: 28)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundStyle(destructive ? GlassInk.weak : GlassInk.primary)
+                if let value {
+                    Text(value)
+                        .font(.system(size: 12.5, weight: .medium, design: .rounded))
+                        .foregroundStyle(valueTint)
+                        .lineLimit(2).minimumScaleFactor(0.8)
+                }
+            }
+            Spacer(minLength: 0)
+            if chevron {
+                Image(systemName: AppSymbol.forwardChevron)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(GlassInk.tertiary)
+            }
+        }
+        .contentShape(Rectangle())
     }
 
     // MARK: - Actions

@@ -18,6 +18,7 @@ struct ParentSettingsView: View {
     @State private var allowedSelection = SelectionStorage.empty()
     @State private var showChangePIN = false
     @State private var showWhatsNew = false
+    @State private var showChildOrder = false   // ↕️ moved here from the card's ⚡ menu
     /// 📖 The story version — what the closing card points back to.
     @State private var showWhatsNewStory = false
     @State private var tourResetDone = false
@@ -64,7 +65,7 @@ struct ParentSettingsView: View {
                         .buttonStyle(.plain)
                     }
                     menuRow("👪", tr("המשפחה"), familySummary) {
-                        subScreen(tr("המשפחה")) { familySection; syncSection }
+                        subScreen(tr("המשפחה")) { familySection; childOrderSection; syncSection }
                     }
                     // 📱 A parent iPad is usually the KID's iPad that got set up
                     // first — offer the one-tap fix (the dashboard behind this
@@ -123,6 +124,12 @@ struct ParentSettingsView: View {
                 pickerSelection = SelectionStorage.decode(settings.activitySelectionData)
                 allowedSelection = SelectionStorage.decode(settings.allowedAppsData)
             }
+            .sheet(isPresented: $showChildOrder) {
+                ChildOrderView(profiles: orderedChildren) { ordered in
+                    household.setChildOrder(ordered.map(\.id))
+                }
+                .environment(\.layoutDirection, .app)
+            }
             .sheet(isPresented: $showChangePIN) {
                 ChangePINView()
             }
@@ -169,6 +176,42 @@ struct ParentSettingsView: View {
             Text(tr("מופיע במסך ההורים ובהודעות — לכל ההורים במשפחה."))
         }
         .glassRows()
+    }
+
+    /// The children in the home's manual order (unordered ones after, by name).
+    private var orderedChildren: [Profile] {
+        let order = household.effectiveChildOrder
+        return profiles.profiles.sorted { a, b in
+            let ia = order.firstIndex(of: a.id.uuidString) ?? Int.max
+            let ib = order.firstIndex(of: b.id.uuidString) ?? Int.max
+            return ia != ib ? ia < ib : a.name < b.name
+        }
+    }
+
+    @ViewBuilder private var childOrderSection: some View {
+        if profiles.profiles.count >= 2 {
+            Section {
+                Button {
+                    Haptic.light()
+                    showChildOrder = true
+                } label: {
+                    HStack(spacing: 12) {
+                        Text("↕️")
+                        Text(tr("סדר את הילדים"))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundStyle(GlassInk.primary)
+                        Spacer(minLength: 0)
+                        Image(systemName: AppSymbol.forwardChevron)
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundStyle(GlassInk.tertiary)
+                    }
+                }
+                .buttonStyle(.plain)
+            } footer: {
+                Text(tr("הסדר של הכרטיסים במסך הבית"))
+            }
+            .glassRows()
+        }
     }
 
     // MARK: - Menu

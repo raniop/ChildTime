@@ -7456,6 +7456,28 @@
         }
       }
     },
+    "%lld דקות שהרוויחו היום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld دقيقة اكتُسبت اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld minutes earned today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заработано сегодня: %lld мин"
+          }
+        }
+      }
+    },
     "%lld דק׳" : {
       "localizations" : {
         "ar" : {
@@ -11775,6 +11797,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "+ Подключить устройство"
+          }
+        }
+      }
+    },
+    "+ חברו מכשיר ל%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ اربطوا جهازًا لـ%@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ Connect a device for %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ Подключить устройство для %@"
           }
         }
       }
@@ -20721,6 +20765,28 @@
         }
       }
     },
+    "אין עדיין מכשיר מחובר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد جهاز مرتبط بعد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No device connected yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Устройство ещё не подключено"
+          }
+        }
+      }
+    },
     "אין עדיין שיחות" : {
       "localizations" : {
         "ar" : {
@@ -20850,6 +20916,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Минимальный сбор данных"
+          }
+        }
+      }
+    },
+    "איפה %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أين %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where's %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Где %@"
           }
         }
       }
@@ -27970,6 +28058,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "От 15 до 480 минут"
+          }
+        }
+      }
+    },
+    "בינוני" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "متوسط"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medium"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Средне"
           }
         }
       }
@@ -45825,6 +45935,28 @@
         }
       }
     },
+    "המכשיר של %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جهاز %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Устройство: %@"
+          }
+        }
+      }
+    },
     "המכשיר של %@ אישר את המחיקה." : {
       "localizations" : {
         "ar" : {
@@ -47178,6 +47310,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Шаг за шагом, с рисунками экранов iPhone: как задать код «Экранного времени» и как удалить Tofy"
+          }
+        }
+      }
+    },
+    "הסדר של הכרטיסים במסך הבית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ترتيب البطاقات في الشاشة الرئيسية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The order of the cards on the home screen"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порядок карточек на главном экране"
           }
         }
       }
@@ -52160,6 +52314,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "время, которое вы дали"
+          }
+        }
+      }
+    },
+    "זמן, למידה, שפה ומכשיר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوقت والتعلّم واللغة والجهاز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time, learning, language and device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Время, учёба, язык и устройство"
           }
         }
       }
@@ -65752,6 +65928,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Все приложения будут заблокированы, пока ребёнок не заработает время, — кроме тех, которые вы отметите как «разрешённые». Tofy обязательно должен быть в списке."
+          }
+        }
+      }
+    },
+    "כל ההגדרות של %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل إعدادات %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All of %@'s settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все настройки: %@"
           }
         }
       }
@@ -80887,6 +81085,28 @@
         }
       }
     },
+    "מחכות לאישור: %lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بانتظار الموافقة: %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for approval: %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ждут подтверждения: %lld"
+          }
+        }
+      }
+    },
     "מחכים לאישור בטלפון של %@…" : {
       "localizations" : {
         "ar" : {
@@ -82343,6 +82563,28 @@
         }
       }
     },
+    "מפה, מקומות וצפצוף לטלפון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخريطة والأماكن ورنين الهاتف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Map, places and ring the phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карта, места и звонок на телефон"
+          }
+        }
+      }
+    },
     "מפעילים את המתג ומאשרים" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -82856,6 +83098,28 @@
         }
       }
     },
+    "משחק עכשיו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يلعب الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playing now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас играет"
+          }
+        }
+      }
+    },
     "משחקת" : {
       "localizations" : {
         "ar" : {
@@ -82878,6 +83142,28 @@
         }
       }
     },
+    "משחקת עכשיו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تلعب الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playing now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас играет"
+          }
+        }
+      }
+    },
     "משימה: %@" : {
       "localizations" : {
         "ar" : {
@@ -82896,6 +83182,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Задание: %@"
+          }
+        }
+      }
+    },
+    "משימות ופרסים בבית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مهام ومكافآت في البيت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tasks and rewards at home"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Задания и награды дома"
           }
         }
       }
@@ -93738,6 +94046,28 @@
         }
       }
     },
+    "עוד הגדרות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إعدادات أخرى"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Другие настройки"
+          }
+        }
+      }
+    },
     "עוד הגדרות (לא חובה) — רמה ותחומי עניין" : {
       "localizations" : {
         "ar" : {
@@ -93823,6 +94153,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ещё не выполнено"
+          }
+        }
+      }
+    },
+    "עוד לא חובר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "غير مرتبط بعد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not connected yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё не подключено"
+          }
+        }
+      }
+    },
+    "עוד לא חובר — לחצו לחיבור" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "غير مرتبط بعد — اضغطوا للربط"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not connected yet — tap to connect"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё не подключено — нажмите, чтобы подключить"
           }
         }
       }
@@ -102201,6 +102575,28 @@
         }
       }
     },
+    "קוד, חברים, איפוס ומחיקה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرمز والأصدقاء وإعادة الضبط والحذف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code, friends, reset and delete"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код, друзья, сброс и удаление"
+          }
+        }
+      }
+    },
     "קודם המסך הזה הראה את כל מה שנוסף אי פעם, בכל פעם מחדש. עכשיו הוא מראה רק את מה שהגיע מאז העדכון האחרון שראיתם" : {
       "localizations" : {
         "ar" : {
@@ -102333,6 +102729,28 @@
         }
       }
     },
+    "קל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سهل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Easy"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Легко"
+          }
+        }
+      }
+    },
     "קראו את מדיניות הפרטיות המלאה" : {
       "localizations" : {
         "ar" : {
@@ -102395,6 +102813,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Бой с боссом засчитывается"
+          }
+        }
+      }
+    },
+    "קשה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "صعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hard"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сложно"
           }
         }
       }
@@ -112991,6 +113431,28 @@
         }
       }
     },
+    "⏱ זמן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏱ الوقت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏱ Time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏱ Время"
+          }
+        }
+      }
+    },
     "⏱ זמן מסך" : {
       "localizations" : {
         "ar" : {
@@ -115330,6 +115792,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🌍 Миры Tofy · входят в Tofy+ · или 30 дней на ребёнка"
+          }
+        }
+      }
+    },
+    "🌍 שפה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌍 اللغة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌍 Language"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌍 Язык"
           }
         }
       }
@@ -119133,6 +119617,28 @@
         }
       }
     },
+    "📚 למידה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📚 التعلّم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📚 Learning"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📚 Учёба"
+          }
+        }
+      }
+    },
     "📝" : {
 
     },
@@ -119271,6 +119777,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "📱 Телефон"
+          }
+        }
+      }
+    },
+    "📱 מכשיר ומיקום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📱 الجهاز والموقع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📱 Device and location"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📱 Устройство и местоположение"
           }
         }
       }

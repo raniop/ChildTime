@@ -38,7 +38,7 @@ struct ChildWorldsView: View {
                                 Text(world.emoji).font(.title3)
                                 VStack(alignment: .leading, spacing: 1) {
                                     Text(world.name)
-                                    Text(world.topic.displayName)
+                                    Text(world.topic.parentName)
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                 }

@@ -71,6 +71,17 @@ enum Topic: String, CaseIterable, Codable, Identifiable {
         }
     }
 
+    /// The parent side's spelling — the kid's name without niqqud, with the
+    /// letters full spelling needs once the marks are gone.
+    var parentName: String {
+        let plain = Question.stripNiqqud(displayName)
+        switch plain {
+        case "חנוך פיננסי": return "חינוך פיננסי"
+        case "מטבח ומדע של אכל": return "מטבח ומדע של אוכל"
+        default: return plain
+        }
+    }
+
     var emoji: String {
         switch self {
         case .math:      return "🧮"
@@ -112,6 +123,15 @@ enum Difficulty: String, CaseIterable, Codable, Identifiable {
         case .easy: return tr("קַל")
         case .medium: return tr("בֵּינוֹנִי")
         case .hard: return tr("קָשֶׁה")
+        }
+    }
+
+    /// The parent side's spelling — no niqqud (Rani: "כל המסכים בצד הורה בלי ניקוד").
+    var parentName: String {
+        switch self {
+        case .easy: return tr("קל")
+        case .medium: return tr("בינוני")
+        case .hard: return tr("קשה")
         }
     }
 }
