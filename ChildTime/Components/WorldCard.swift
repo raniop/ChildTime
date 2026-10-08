@@ -184,14 +184,32 @@ struct HomeTileFoot: View {
     }
 }
 
+/// 📐 The closed foldable is a phone that is ~280pt shorter: a little lower
+/// tiles there keep two whole rows above the toolbar instead of one and a half.
+struct HomeTileShortKey: EnvironmentKey { static let defaultValue = false }
+extension EnvironmentValues {
+    var homeTileShort: Bool {
+        get { self[HomeTileShortKey.self] }
+        set { self[HomeTileShortKey.self] = newValue }
+    }
+}
+
+private struct HomeTileChrome: ViewModifier {
+    let tint: Color, compact: Bool
+    @Environment(\.homeTileShort) private var short
+    func body(content: Content) -> some View {
+        content
+            .padding(.horizontal, 12).padding(.top, short ? 10 : 14).padding(.bottom, short ? 10 : 12)
+            .frame(maxWidth: .infinity)
+            .frame(height: short ? 134 : (compact ? 150 : 176))
+            .glassPane(radius: 16, tint: tint)
+    }
+}
+
 extension View {
     /// The tile's glass shell — fixed height so every tile in the grid is a twin.
     func homeTileChrome(tint: Color, compact: Bool) -> some View {
-        self
-            .padding(.horizontal, 12).padding(.top, 14).padding(.bottom, 12)
-            .frame(maxWidth: .infinity)
-            .frame(height: compact ? 150 : 176)
-            .glassPane(radius: 16, tint: tint)
+        modifier(HomeTileChrome(tint: tint, compact: compact))
     }
 }
 

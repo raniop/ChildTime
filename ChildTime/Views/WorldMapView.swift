@@ -394,6 +394,8 @@ struct WorldMapView: View {
     /// Shared side margin for the header card AND the world grid, so both have the
     /// exact same gap from the screen edges (and the same width on iPad).
     private var homeHPad: CGFloat { isCompact ? AppSpacing.sm : AppSpacing.lg }
+    /// The foldable held shut: a phone-wide glass beside the clock strip, shorter than any iPhone.
+    private var closedFoldable: Bool { display.hasBarStrip && !display.isWideShort }
 
     var body: some View {
         ZStack {
@@ -563,9 +565,12 @@ struct WorldMapView: View {
                             .coachMark("k.games")
                         }
                     }
+                    .environment(\.homeTileShort, closedFoldable)
                     // The same right edge as the header above (Rani: on the open Duo
-                    // the worlds stuck out past the card, beside the clock).
-                    .clearOfBar()
+                    // the worlds stuck out past the card, beside the clock). Closed,
+                    // the worlds are below the clock's band: the whole glass (Rani:
+                    // "לא משתמשים בכל הרוחב").
+                    .clearOfBar(active: !closedFoldable)
                     .frame(maxWidth: worldGridMaxWidth)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.horizontal, homeHPad)
@@ -597,10 +602,10 @@ struct WorldMapView: View {
                 Spacer()
                 bottomCTAs
                     .coachMark("k.minutes")
-                    // Centred on the content on the WIDE glass only — on the closed
-                    // device the extra inset pushed the whole screen off the left edge.
+                    // Centred on the content on the WIDE glass only. Closed, the bar
+                    // is far below the clock: the whole glass, like the worlds.
                     .clearOfBar(active: display.isWideShort)
-                    .padding(.horizontal, AppSpacing.lg)
+                    .padding(.horizontal, closedFoldable ? homeHPad : AppSpacing.lg)
                     .padding(.top, isShort ? 26 : 48)
                     .padding(.bottom, isShort ? AppSpacing.sm : AppSpacing.md)
                     .background(
@@ -2242,7 +2247,7 @@ struct WorldMapView: View {
                         .font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.secondary)
                 }
             }
-            .frame(minWidth: isCompact ? 0 : 150)
+            .frame(minWidth: isCompact || display.hasBarStrip ? 0 : 150)
             .accessibilityLabel(quiet.blockedMessage() ?? "")
         } else if progress.canRedeemNow {
             Button {
@@ -2267,7 +2272,7 @@ struct WorldMapView: View {
             }
             .buttonStyle(.juicy)
             .disabled(isOpening)
-            .frame(minWidth: isCompact ? 0 : 150)
+            .frame(minWidth: isCompact || display.hasBarStrip ? 0 : 150)
         } else if progress.dailyScreenTimeMaxedOut {
             keyBox {
                 VStack(spacing: 3) {
@@ -2277,7 +2282,7 @@ struct WorldMapView: View {
                         .font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.secondary)
                 }
             }
-            .frame(minWidth: isCompact ? 0 : 150)
+            .frame(minWidth: isCompact || display.hasBarStrip ? 0 : 150)
         } else {
             keyBox {
                 VStack(spacing: 4) {
@@ -2299,7 +2304,7 @@ struct WorldMapView: View {
                         .font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.secondary)
                 }
             }
-            .frame(minWidth: isCompact ? 0 : 150)
+            .frame(minWidth: isCompact || display.hasBarStrip ? 0 : 150)
         }
     }
 
