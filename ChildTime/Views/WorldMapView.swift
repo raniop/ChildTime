@@ -1157,17 +1157,29 @@ struct WorldMapView: View {
         // twin insets (daily challenge · chores). Forced LTR so the avatar sits
         // on the left and the buttons on the right, matching the mockup.
         _ = btnSize
+        // 📐 Wide and short (the open Duo, an iPad on its side): ONE row — who,
+        // the wallet, and today — so the worlds get the height (Rani: open, it
+        // was "עמוס מדי וקשה לעיין").
+        let oneRow = display.isWideShort
         return VStack(spacing: 12) {
-            HStack(alignment: .center, spacing: 10) {
-                identityBlock(avatar: avatarSize)
-                Spacer(minLength: 6)
-                walletStats.coachMark("k.wallet")
-            }
+            if oneRow {
+                HStack(alignment: .center, spacing: 14) {
+                    identityBlock(avatar: avatarSize)
+                    walletStats.coachMark("k.wallet")
+                    statsPanel.frame(maxWidth: 460)
+                }
+            } else {
+                HStack(alignment: .center, spacing: 10) {
+                    identityBlock(avatar: avatarSize)
+                    Spacer(minLength: 6)
+                    walletStats.coachMark("k.wallet")
+                }
 
-            // The challenge + chores cards are gone (Rani: "עמוס מדי"): the
-            // chores are the strip's third number, and the daily challenge runs
-            // in the background and celebrates itself when it is done.
-            statsPanel
+                // The challenge + chores cards are gone (Rani: "עמוס מדי"): the
+                // chores are the strip's third number, and the daily challenge runs
+                // in the background and celebrates itself when it is done.
+                statsPanel
+            }
         }
         // RTL like the mockup (Rani): avatar + name on the RIGHT, the round
         // buttons on the left with ⚙️ the leftmost; אתגר יומי right, מטלות left.
@@ -1231,10 +1243,8 @@ struct WorldMapView: View {
         HStack(spacing: isCompact ? 12 : 18) {
             walletStat("⭐ " + progress.stars.currencyShort, tr("כּוֹכָבִים")) { infoStat = .stars }
             walletStat("💎 " + progress.diamonds.currencyShort, tr("יַהֲלוֹמִים")) { infoStat = .diamonds }
-            if !isCompact {
-                walletStat("💝 \(progress.parentGiftMinutes)", tr("דַּקּ׳ מַתָּנָה")) { infoStat = .gift }
-                walletStat("⏱ \(progress.pendingMinutes)", tr("דַּקּ׳ לְשַׂחֵק")) { infoStat = .minutes }
-            }
+            // The gift and play minutes used to sit here on wide screens; the
+            // toolbar at the bottom carries both now, so they are not repeated.
         }
         .environment(\.layoutDirection, .app)
         .eraseToAnyView()
