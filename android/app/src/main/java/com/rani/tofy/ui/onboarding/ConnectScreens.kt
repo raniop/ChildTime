@@ -193,7 +193,7 @@ fun OnboardingConnectScreen(childID: String, name: String, girl: Boolean, onLock
         ) {
             StepsHeader(step = if (linked) 4 else 3)
             if (!linked) {
-                H(tr("מחברים את הטלפון של %@", name), 24, align = TextAlign.Center)
+                H(tr("חיבור הטלפון של %@", name), 24, align = TextAlign.Center)
                 Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(12.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                     NumberedStep(1, tr("בטלפון של %@: מורידים את טופי מה-App Store או מ-Google Play", name))
                     NumberedStep(2, tr("פותחים, בוחרים \"המכשיר של הילד\" וסורקים את הקוד"))

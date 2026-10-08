@@ -78,12 +78,20 @@ struct OnboardingConnectView: View {
         .onDisappear { household.stopWatchingInviteRedemption() }
     }
 
+    /// How far the column's centre sits from the glass's centre on the
+    /// foldable, as an offset in the CURRENT layout direction.
+    static var glassCentreShift: CGFloat {
+        let d = DisplayGeometry.shared
+        guard d.hasBarStrip else { return 0 }
+        let physical = (d.barOnLeft ? -1 : 1) * d.barInset / 2      // + = toward the right
+        return LayoutDirection.app == .rightToLeft ? -physical : physical
+    }
+
     private var page: some View {
         Group { if linked { linkedBody } else { qrBody } }
             .padding(.horizontal, OnboardingFooter.sidePadding)
             .frame(maxWidth: 520)
             .frame(maxWidth: .infinity)
-            .clearOfBar()
     }
 
     // MARK: ③ — the QR
@@ -92,10 +100,14 @@ struct OnboardingConnectView: View {
         VStack(spacing: DisplayGeometry.shared.isShort ? 9 : 14) {
             // Centred in the middle of the page, like a person would place it.
             Spacer(minLength: 0)
-            Text(tr("מחברים את הטלפון של \(name)"))
+            Text(tr("חיבור הטלפון של \(name)"))
                 .font(.system(size: 24, weight: .black, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
+                .lineLimit(1).minimumScaleFactor(0.8)
+                // Everything centred on the whole glass, like the lock step (Rani).
+                .padding(.horizontal, DisplayGeometry.shared.hasBarStrip ? DisplayGeometry.shared.barInset : 0)
+                .padding(.top, DisplayGeometry.shared.isShort ? 18 : 0)
             VStack(alignment: .leading, spacing: 7) {
                 step(1, tr("בטלפון של \(name): מורידים את טופי מה-App Store"))
                 step(2, tr("פותחים, בוחרים \"המכשיר של הילד\" וסורקים את הקוד"))
@@ -103,6 +115,8 @@ struct OnboardingConnectView: View {
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .glassPane(radius: 16)
+            // Full width — so it starts below the foldable's clock.
+            .padding(.top, DisplayGeometry.shared.hasBarStrip ? 16 : 0)
 
             VStack(spacing: 10) {
                 if let code = qrCode {

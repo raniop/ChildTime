@@ -58370,6 +58370,28 @@
         }
       }
     },
+    "חיבור הטלפון של %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ربط هاتف %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connect %@'s phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключаем телефон %@"
+          }
+        }
+      }
+    },
     "חיבור וחסור" : {
       "localizations" : {
         "ar" : {
