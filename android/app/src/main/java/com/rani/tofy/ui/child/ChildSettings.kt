@@ -47,13 +47,16 @@ private enum class Page { MAIN, PROFILE, LANGUAGE, DIFFICULTY, WORLDS, SCREEN_TI
  * (confirmed, membership self-heal) and says so honestly when it didn't save.
  */
 @Composable
-internal fun ChildSettingsContent(childID: String, onBack: () -> Unit, onDeleted: () -> Unit, startOnScreenTime: Boolean = false) {
+internal fun ChildSettingsContent(childID: String, onBack: () -> Unit, onDeleted: () -> Unit, startOnScreenTime: Boolean = false,
+                                  startOnProfile: Boolean = false, onConnect: (() -> Unit)? = null, onLocation: (() -> Unit)? = null) {
     val state by FamilyRepository.state.collectAsState()
     val child = state.children.firstOrNull { it.id == childID }
     val stateDoc by remember(childID) { ChildReportRepository.stateDoc(childID) }.collectAsState(initial = emptyMap())
     val scope = rememberCoroutineScope()
     val note = remember { WriteNote() }
-    var page by rememberSaveableEnum(if (startOnScreenTime) Page.SCREEN_TIME else Page.MAIN)
+    var page by rememberSaveableEnum(if (startOnScreenTime) Page.SCREEN_TIME else if (startOnProfile) Page.PROFILE else Page.MAIN)
+    // Opened straight on one editor (⏳ from "פעולות", ✏️ from the card) → leaving it leaves the screen.
+    val direct = startOnScreenTime || startOnProfile
 
     fun write(fields: Map<String, Any?>) { scope.launch { note.report(ChildRepository.update(childID, fields)) } }
 
@@ -63,7 +66,7 @@ internal fun ChildSettingsContent(childID: String, onBack: () -> Unit, onDeleted
     fun back() {
         // Opened straight on the screen-time page (from "פעולות") → back leaves the screen.
         if (page == Page.MAIN) onBack()
-        else { pendingCapSave[0]?.invoke(); pendingCapSave[0] = null; if (startOnScreenTime) onBack() else page = Page.MAIN }
+        else { pendingCapSave[0]?.invoke(); pendingCapSave[0] = null; if (direct) onBack() else page = Page.MAIN }
     }
     BackHandler { back() }
 
@@ -76,8 +79,9 @@ internal fun ChildSettingsContent(childID: String, onBack: () -> Unit, onDeleted
         val extras = remember(stateDoc) { SnapshotExtras.from(stateDoc) }
         Box(Modifier.contentColumn().fillMaxSize().systemBarsPadding().imePadding()) {
             when (page) {
-                Page.MAIN -> MainList(child, progress, extras, state.devicesOf(childID).isNotEmpty(), note, ::back, onOpen = { page = it }, write = ::write, onDeleted = onDeleted)
-                Page.PROFILE -> ProfileEditor(child, ::back, onSave = { f -> if (f.isNotEmpty()) write(f); page = Page.MAIN }, onDeleted = onDeleted, note = note)
+                Page.MAIN -> MainList(child, progress, extras, state.devicesOf(childID).isNotEmpty(), note, ::back, onOpen = { page = it }, write = ::write, onDeleted = onDeleted,
+                    onConnect = onConnect, onLocation = onLocation)
+                Page.PROFILE -> ProfileEditor(child, ::back, onSave = { f -> if (f.isNotEmpty()) write(f); if (direct) onBack() else page = Page.MAIN }, onDeleted = onDeleted, note = note)
                 Page.LANGUAGE -> LanguageEditor(child, ::back, ::write)
                 Page.DIFFICULTY -> DifficultyEditor(child, ::back, ::write)
                 Page.WORLDS -> WorldsEditor(child, ::back, ::write)
@@ -107,6 +111,7 @@ private val AppLanguage.flag get() = when (this) { AppLanguage.HE -> "🇮🇱";
 private fun MainList(
     child: Child, s: Progress, extras: SnapshotExtras, connected: Boolean, note: WriteNote, onBack: () -> Unit,
     onOpen: (Page) -> Unit, write: (Map<String, Any?>) -> Unit, onDeleted: () -> Unit,
+    onConnect: (() -> Unit)? = null, onLocation: (() -> Unit)? = null,
 ) {
     val scope = rememberCoroutineScope()
     val girl = child.isGirl
@@ -114,28 +119,35 @@ private fun MainList(
     var confirmReset by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     var remoteNote by remember { mutableStateOf<String?>(null) }
+    var more by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    BackHandler(enabled = more) { more = false }
 
     Scroll {
-        PageBar(tr("הגדרות של %@", child.name), onBack)
+        if (!more) PageBar(tr("הגדרות של %@", child.name), onBack)
 
-        // הַיֶּלֶד / הַיַּלְדָּה — the grade drives ALL curriculum content: flag it when missing or child-picked.
-        val flagged = child.grade == null || child.gradeSetByChild
-        val grade = if (child.grade == null) tr("כיתה לא הוגדרה — הגדירו")
-            else gradeName(child.effectiveGrade) + (if (child.gradeSetByChild) " " + tr("· נבחרה ע\"י הילד — בדקו") else "")
-        val lang = AppLanguage.of(child.language)
-        SettingsSection(if (girl) tr("הילדה") else tr("הילד")) {
-            SettingsRow("✏️", tr("שם, גיל וכיתה"), "${child.name} · ${AgeBracket.of(child.age).label} · $grade",
-                valueColor = if (flagged) Color(0xFFFF8A3D) else Ink.secondary) { onOpen(Page.PROFILE) }
+        if (more) {
+        // "עוד הגדרות" — what a parent needs rarely: the play code, friends,
+        // questions-only, a data refresh, reset and deletion.
+        PageBar(tr("עוד הגדרות"), { more = false })
+        SettingsSection(null) {
+            // The child's play-protection code — full parental transparency: SEE it, and reset it.
+            if (!child.hasPlayPIN) {
+                SettingsRow("🔐", tr("קוד הגנת זמן המשחק"),
+                    if (girl) tr("%@ עוד לא בחרה קוד", child.name) else tr("%@ עוד לא בחר קוד", child.name), chevron = false, onClick = null)
+            } else {
+                SettingsRow("🔐", tr("קוד הגנת זמן המשחק"),
+                    if (girl) tr("%@ מזינה אותו כדי לפתוח את הדקות שצברה", child.name) else tr("%@ מזין אותו כדי לפתוח את הדקות שצבר", child.name),
+                    chevron = false, onClick = null, trailing = {
+                        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                            Text(child.playPIN ?: "", color = Color.White, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, letterSpacing = 3.sp)
+                        }
+                        Text(tr("אפס"), color = Color(0xFFFFA94D), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp,
+                            modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(Color(0xFFFFA94D).copy(alpha = 0.18f)).clickable { confirmPin = true }
+                                .padding(horizontal = 10.dp, vertical = 6.dp))
+                    })
+            }
             RowDivider()
-            SettingsRow("🌍", if (girl) tr("שפה במכשיר שלה") else tr("שפה במכשיר שלו"), lang?.let { "${it.flag} ${it.native}" }) { onOpen(Page.LANGUAGE) }
-        }
-
-        val listed = child.listedWorlds()
-        val open = listed.count { child.allows(it.topic) }
-        SettingsSection(tr("למידה")) {
-            SettingsRow("🎚️", tr("רמת קושי"), difficultySummary(child)) { onOpen(Page.DIFFICULTY) }
-            RowDivider()
-            SettingsRow("🌐", tr("עולמות פעילים"), if (listed.isEmpty()) null else tr("%lld מתוך %lld", open, listed.size)) { onOpen(Page.WORLDS) }
+            SettingsRow("👫", tr("חברים")) { onOpen(Page.FRIENDS) }
             RowDivider()
             // 📝 A world opens straight into regular questions, without the game chooser.
             ToggleRow("📝", tr("רק שאלות רגילות"), tr("בלי מסך המשחקים: בחירת עולם מובילה ישר לשאלות"), child.onlyRegularQuestions) {
@@ -150,6 +162,64 @@ private fun MainList(
                     write(mapOf("friendsEnabled" to on))
                     if (!on) scope.launch { runCatching { com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("friendCards").document(child.id).delete() } }
                 }
+            }
+        }
+        SettingsSection(null) {
+            // Repair for a device that keeps re-uploading wrong numbers: every device drops its cache.
+            SettingsRow("🔄", tr("רענון נתונים בכל המכשירים"), chevron = false) {
+                scope.launch { note.report(ChildReportRepository.withRetry { Commands.purgeCaches(child.id) }) }
+            }
+            RowDivider()
+            SettingsRow("↩️", tr("איפוס התקדמות"), destructive = true, chevron = false) { confirmReset = true }
+            RowDivider()
+            SettingsRow("🚮", if (girl) tr("מחיקת הילדה") else tr("מחיקת הילד"), destructive = true, chevron = false) { confirmDelete = true }
+        }
+        } else {
+        // הַיֶּלֶד / הַיַּלְדָּה — the grade drives ALL curriculum content: flag it when missing or child-picked.
+        val flagged = child.grade == null || child.gradeSetByChild
+        val grade = if (child.grade == null) tr("כיתה לא הוגדרה — הגדירו")
+            else gradeName(child.effectiveGrade) + (if (child.gradeSetByChild) " " + tr("· נבחרה ע\"י הילד — בדקו") else "")
+        val lang = AppLanguage.of(child.language)
+        val (capOn, capMin) = child.resolvedCap()
+        SettingsSection(tr("⏱ זמן")) {
+            SettingsRow("⏳", tr("זמן מסך יומי"), if (capOn) tr("%lld דקות", capMin) else tr("ללא הגבלה")) { onOpen(Page.SCREEN_TIME) }
+            // 🏫🌙 Hours when minutes don't open (QuietHours.kt).
+            RowDivider()
+            SettingsRow("🏫", tr("זמן בית ספר"), quietSummary(child.quietHours, QuietKind.SCHOOL)) { onOpen(Page.SCHOOL) }
+            RowDivider()
+            SettingsRow("🌙", tr("שעת שינה"), quietSummary(child.quietHours, QuietKind.BEDTIME)) { onOpen(Page.BEDTIME) }
+        }
+
+        val listed = child.listedWorlds()
+        val open = listed.count { child.allows(it.topic) }
+        SettingsSection(tr("📚 למידה")) {
+            SettingsRow("✏️", tr("שם, גיל וכיתה"), "${child.name} · ${AgeBracket.of(child.age).label} · $grade",
+                valueColor = if (flagged) Color(0xFFFF8A3D) else Ink.secondary) { onOpen(Page.PROFILE) }
+            RowDivider()
+            SettingsRow("🎚️", tr("רמת קושי"), difficultySummary(child)) { onOpen(Page.DIFFICULTY) }
+            RowDivider()
+            SettingsRow("🌐", tr("עולמות פעילים"), if (listed.isEmpty()) null else tr("%lld מתוך %lld", open, listed.size)) { onOpen(Page.WORLDS) }
+        }
+        SettingsSection(tr("🌍 שפה")) {
+            SettingsRow("🌍", if (girl) tr("שפה במכשיר שלה") else tr("שפה במכשיר שלו"), lang?.let { "${it.flag} ${it.native}" }) { onOpen(Page.LANGUAGE) }
+        }
+
+        // 📱 The child's own device, the app-deletion window, and the map.
+        SettingsSection(tr("📱 מכשיר ומיקום")) {
+            SettingsRow("📱", tr("המכשיר של %@", child.name),
+                if (connected) tr("מחובר") else if (onConnect != null) tr("עוד לא חובר — לחצו לחיבור") else tr("עוד לא חובר"),
+                chevron = !connected && onConnect != null, onClick = if (!connected && onConnect != null) onConnect else null)
+            if (connected) {
+                RowDivider()
+                SettingsRow("🗑️", tr("לאפשר מחיקת אפליקציות (5 דק')"), chevron = false) {
+                    Commands.allowAppRemoval(child.id)
+                    remoteNote = if (connected) tr("נפתח חלון של 5 דקות למחיקת אפליקציות במכשיר של %@ — מיידי כשטופי פתוח שם. אחר כך הנעילה חוזרת לבד.", child.name)
+                        else tr("אין כרגע מכשיר מחובר ל%@ — החלון ייפתח ברגע שהמכשיר יתחבר.", child.name)
+                }
+            }
+            if (onLocation != null) {
+                RowDivider()
+                SettingsRow("📍", tr("איפה %@", child.name), tr("מפה, מקומות וצפצוף לטלפון")) { onLocation() }
             }
         }
 
@@ -180,50 +250,9 @@ private fun MainList(
             }
         }
 
-        val (capOn, capMin) = child.resolvedCap()
-        SettingsSection(tr("זמן מסך")) {
-            SettingsRow("⏳", tr("זמן מסך יומי"), if (capOn) tr("%lld דקות", capMin) else tr("ללא הגבלה")) { onOpen(Page.SCREEN_TIME) }
-            // 🏫🌙 Hours when minutes don't open (QuietHours.kt).
-            RowDivider()
-            SettingsRow("🏫", tr("זמן בית ספר"), quietSummary(child.quietHours, QuietKind.SCHOOL)) { onOpen(Page.SCHOOL) }
-            RowDivider()
-            SettingsRow("🌙", tr("שעת שינה"), quietSummary(child.quietHours, QuietKind.BEDTIME)) { onOpen(Page.BEDTIME) }
-            RowDivider()
-            // The child's play-protection code — full parental transparency: SEE it, and reset it.
-            if (!child.hasPlayPIN) {
-                SettingsRow("🔐", tr("קוד הגנת זמן המשחק"),
-                    if (girl) tr("%@ עוד לא בחרה קוד", child.name) else tr("%@ עוד לא בחר קוד", child.name), chevron = false, onClick = null)
-            } else {
-                SettingsRow("🔐", tr("קוד הגנת זמן המשחק"),
-                    if (girl) tr("%@ מזינה אותו כדי לפתוח את הדקות שצברה", child.name) else tr("%@ מזין אותו כדי לפתוח את הדקות שצבר", child.name),
-                    chevron = false, onClick = null, trailing = {
-                        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                            Text(child.playPIN ?: "", color = Color.White, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, letterSpacing = 3.sp)
-                        }
-                        Text(tr("אפס"), color = Color(0xFFFFA94D), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp,
-                            modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(Color(0xFFFFA94D).copy(alpha = 0.18f)).clickable { confirmPin = true }
-                                .padding(horizontal = 10.dp, vertical = 6.dp))
-                    })
-            }
-        }
-
-        SettingsSection(null) { SettingsRow("👫", tr("חברים")) { onOpen(Page.FRIENDS) } }
-
         SettingsSection(tr("מתקדם")) {
-            SettingsRow("🗑️", tr("לאפשר מחיקת אפליקציות (5 דק')"), chevron = false) {
-                Commands.allowAppRemoval(child.id)
-                remoteNote = if (connected) tr("נפתח חלון של 5 דקות למחיקת אפליקציות במכשיר של %@ — מיידי כשטופי פתוח שם. אחר כך הנעילה חוזרת לבד.", child.name)
-                    else tr("אין כרגע מכשיר מחובר ל%@ — החלון ייפתח ברגע שהמכשיר יתחבר.", child.name)
-            }
-            RowDivider()
-            // Repair for a device that keeps re-uploading wrong numbers: every device drops its cache.
-            SettingsRow("🔄", tr("רענון נתונים בכל המכשירים"), chevron = false) {
-                scope.launch { note.report(ChildReportRepository.withRetry { Commands.purgeCaches(child.id) }) }
-            }
-            RowDivider()
-            SettingsRow("↩️", tr("איפוס התקדמות"), destructive = true, chevron = false) { confirmReset = true }
-            RowDivider()
-            SettingsRow("🚮", if (girl) tr("מחיקת הילדה") else tr("מחיקת הילד"), destructive = true, chevron = false) { confirmDelete = true }
+            SettingsRow("🛠️", tr("עוד הגדרות"), tr("קוד, חברים, איפוס ומחיקה")) { more = true }
+        }
         }
     }
 

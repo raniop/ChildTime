@@ -228,30 +228,37 @@ private fun ChildCard(
         }
         // 📍 Where the child is, one tap from the map.
         LocationLine(child, onLocation)
-        if (hasDevice) {
+        // 📊 The tiles for every child who plays — on a device of their own OR in
+        // kid mode on this phone (Rani: Uri played here and his card showed nothing).
+        val showStats = hasDevice || s.answeredToday > 0 || s.totalAnswered > 0
+        if (showStats) {
             val cap = child.dailyCapMinutes?.takeIf { it > 0 }
             RowSpaced {
                 Stat(Modifier.weight(1f), "${s.minutesEarnedToday}" + (cap?.let { "/$it" } ?: ""), if (child.isGirl) tr("דקות שהרוויחה היום") else tr("דקות שהרוויח היום"))
                 Stat(Modifier.weight(1f), "${s.answeredToday}", tr("שאלות היום"))
                 Stat(Modifier.weight(1f), "${s.correctToday}", tr("נכונות"))
             }
-            RowSpaced {
-                WhiteButton(tr("מידע נוסף ←"), Modifier.weight(2f)) { onOpen() }
-                GlassButton(tr("⚡ פעולות"), Modifier.weight(1f).coachMark("p.actions", marked)) { onActions() }
-            }
-            // 🧒 Kid Mode: this phone becomes the child's for a while (screen-pinned).
-            GlassButton(tr("תנו ל%@ לשחק כאן 🧒", child.name), Modifier.fillMaxWidth().coachMark("p.playHere", marked)) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
         } else {
             P(tr("%@ · אין עדיין מכשיר מחובר.", gradeName(child.effectiveGrade)), 13f)
-            // מידע נוסף · חברו מכשיר · פעולות — side by side, in one row (Rani:
-            // connecting used to REPLACE "מידע נוסף", and a row of its own grew the card).
-            RowSpaced {
-                CardButton(tr("מידע נוסף ←"), white = true, Modifier.weight(1.1f)) { onOpen() }
-                CardButton(tr("+ חברו מכשיר"), white = false, Modifier.weight(1.1f).coachMark("p.connect", markConnect)) { onConnect() }
-                CardButton(tr("⚡ פעולות"), white = false, Modifier.weight(0.9f).coachMark("p.actions", marked)) { onActions() }
-            }
-            GlassButton(tr("תנו ל%@ לשחק כאן 🧒", child.name), Modifier.fillMaxWidth().coachMark("p.playHere", marked)) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
         }
+        // The buttons sit on the tiles' grid (Rani): with a device, "מידע נוסף"
+        // spans two tiles and the gap between them and ⚡ is exactly the third;
+        // without one, three equal columns — ⚡ in the same place on every card.
+        androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val gap = 8.dp
+            val t = (maxWidth - gap * 2) / 3
+            Row(horizontalArrangement = Arrangement.spacedBy(gap), verticalAlignment = Alignment.CenterVertically) {
+                if (hasDevice) {
+                    CardButton(tr("מידע נוסף ←"), white = true, Modifier.width(t * 2 + gap)) { onOpen() }
+                } else {
+                    CardButton(tr("מידע נוסף ←"), white = true, Modifier.width(t)) { onOpen() }
+                    CardButton(tr("+ חברו מכשיר"), white = false, Modifier.width(t).coachMark("p.connect", markConnect)) { onConnect() }
+                }
+                CardButton(tr("⚡ פעולות"), white = false, Modifier.width(t).coachMark("p.actions", marked)) { onActions() }
+            }
+        }
+        // 🧒 Kid Mode: this phone becomes the child's for a while (screen-pinned).
+        WhiteButton(tr("תנו ל%@ לשחק כאן 🧒", child.name), Modifier.fillMaxWidth().coachMark("p.playHere", marked)) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
     }
 }
 

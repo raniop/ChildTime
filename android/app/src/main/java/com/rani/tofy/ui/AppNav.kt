@@ -47,7 +47,8 @@ fun AppNav() {
             HomeScreen(
                 state = state,
                 onOpenChild = { nav.navigate("child/${it.id}") },
-                onChildSettings = { nav.navigate("childSettings/${it.id}") },
+                // ✏️ The pencil by the name edits the child (name, photo, grade).
+                onChildSettings = { nav.navigate("childEdit/${it.id}") },
                 onActions = { actionsFor = it },
                 onAddChild = { nav.navigate("addChild") },
                 onChores = { nav.navigate("chores") },
@@ -68,7 +69,12 @@ fun AppNav() {
         }
         composable("childSettings/{id}") { e ->
             val id = e.arguments?.getString("id") ?: return@composable
-            ChildSettingsScreen(id, onBack = { nav.popBackStack() }, onDeleted = { nav.popBackStack("home", false) })
+            ChildSettingsScreen(id, onBack = { nav.popBackStack() }, onDeleted = { nav.popBackStack("home", false) },
+                onConnect = { connectFor = id }, onLocation = { nav.navigate("location?child=$id") })
+        }
+        composable("childEdit/{id}") { e ->
+            val id = e.arguments?.getString("id") ?: return@composable
+            ChildSettingsScreen(id, onBack = { nav.popBackStack() }, onDeleted = { nav.popBackStack("home", false) }, startOnProfile = true)
         }
         // ⏱ Straight to the daily screen-time limit (from the child's "פעולות").
         composable("childScreenTime/{id}") { e ->
