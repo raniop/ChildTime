@@ -23,6 +23,8 @@ struct ParentDashboardView: View {
     /// When true this is the device's HOME screen (parent device), not a sheet —
     /// so there's no "Done" button and we expose Settings via a gear instead.
     var isRoot: Bool = false
+    /// Demo/screenshots only: push the first child's page on appear.
+    var demoOpenFirstChild: Bool = false
 
     @EnvironmentObject var profiles: ProfileStore
     @EnvironmentObject var settings: ParentSettings
@@ -579,6 +581,11 @@ struct ParentDashboardView: View {
             }
             // Push a full child page when a grid card is tapped (path-based so a
             // delete inside the page can pop back to the grid on its own).
+            .onAppear {
+                if demoOpenFirstChild, navPath.isEmpty, let first = rows.first?.profile.id {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { navPath = [first] }
+                }
+            }
             .navigationDestination(for: UUID.self) { id in
                 childDetailScreen(for: id)
             }
@@ -2464,6 +2471,7 @@ struct ParentDashboardView: View {
 
     private func childDetailPage(_ row: (profile: Profile, snapshot: ProgressSnapshot)) -> some View {
             ScrollView {
+              ScrollViewReader { proxy in
                 VStack(spacing: 14) {
                     ChildReportView(
                         profile: row.profile,
@@ -2479,6 +2487,15 @@ struct ParentDashboardView: View {
                 .padding(AppSpacing.lg)
                 .frame(maxWidth: 720)
                 .containerWidthLock()
+                #if DEBUG
+                // DEMO_REPORT_SCROLL=topics|worlds — website screenshots.
+                .onAppear {
+                    if let to = ProcessInfo.processInfo.environment["DEMO_REPORT_SCROLL"] {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { proxy.scrollTo(to, anchor: .top) }
+                    }
+                }
+                #endif
+              }
             }
             .sheet(item: $settingsChild) { p in
                 ChildSettingsView(profileID: p.id,

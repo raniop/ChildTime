@@ -464,6 +464,8 @@ struct ChildTimeApp: App {
             MiniGameDemoHost(screen: name)
         case "wheel":    LuckyWheelView(onClose: {})
         case "dashboard": ParentDashboardView(isRoot: true)
+        // DEMO_SCREEN=childreport [DEMO_REPORT_PERIOD=week] [DEMO_REPORT_SCROLL=topics|worlds]
+        case "childreport": ParentDashboardView(isRoot: true, demoOpenFirstChild: true)
             .onAppear {
                 if let id = ProfileStore.shared.activeID {
                     HouseholdManager.shared.seedDemoLiveWindow(childID: id)

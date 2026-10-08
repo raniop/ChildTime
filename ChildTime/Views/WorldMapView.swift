@@ -124,7 +124,7 @@ struct WorldMapView: View {
     }
 
     private var worldGridColumns: [GridItem] {
-        let count = isCompact || useSidebar ? 2 : 3
+        let count = thinTopRow ? 4 : (isCompact || useSidebar ? 2 : 3)
         return Array(
             repeating: GridItem(.flexible(), spacing: AppSpacing.md),
             count: count
@@ -1161,7 +1161,19 @@ struct WorldMapView: View {
     /// "עמוס מדי וקשה לעיין"). Here everything about the CHILD sits in a fixed
     /// column on the side — the way Apple's iPad apps keep a sidebar — and the
     /// worlds get the whole height of the rest.
-    private var useSidebar: Bool { display.isWideShort }
+    /// 🧪 DEMO_WIDE=a|b|c — three layouts for the open Duo, side by side for Rani:
+    /// a = one thin row on top, b = two halves like a book, c = the phone's.
+    private var wideMode: String {
+        guard display.isWideShort else { return "" }
+        #if DEBUG
+        if let m = ProcessInfo.processInfo.environment["DEMO_WIDE"] { return m }
+        #endif
+        // Rani (2026-10-08): opening the device must CONTINUE the closed screen —
+        // the same pieces in the same order, with room for more worlds.
+        return "c"
+    }
+    private var useSidebar: Bool { wideMode == "b" }
+    private var thinTopRow: Bool { wideMode == "a" }
 
     private var kidSidebar: some View {
         VStack(spacing: 14) {
@@ -1175,7 +1187,8 @@ struct WorldMapView: View {
         }
         .padding(.horizontal, AppSpacing.md)
         .padding(.vertical, AppSpacing.sm)
-        .frame(width: 400)
+        // ½ — the two halves of the open device, split at the fold.
+        .frame(width: max(380, display.safeSize.width / 2))
         .clearOfBar()
     }
 
@@ -1190,7 +1203,19 @@ struct WorldMapView: View {
         // on the left and the buttons on the right, matching the mockup.
         _ = btnSize
         return VStack(spacing: 12) {
-            if false {
+            if thinTopRow {
+                // a · everything about the child in ONE thin row.
+                HStack(spacing: 14) {
+                    identityBlock(avatar: 44)
+                    walletStats.coachMark("k.wallet")
+                    statsPanel.frame(maxWidth: 420)
+                }
+            } else if useSidebar {
+                // The column is narrow: who on one line, the wallet under it.
+                HStack { identityBlock(avatar: avatarSize); Spacer(minLength: 0) }
+                walletStats.coachMark("k.wallet")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                statsPanel
             } else {
                 HStack(alignment: .center, spacing: 10) {
                     identityBlock(avatar: avatarSize)
@@ -1249,7 +1274,7 @@ struct WorldMapView: View {
             Spacer(minLength: 6)
             // 🎚 On the foldable these three live in the bar's strip instead —
             // see `.sideRail` on the body.
-            if !display.hasRail { navButtonsRow(size: isCompact ? 44 : 50) }
+            if !display.hasRail { navButtonsRow(size: useSidebar ? 40 : (isCompact ? 44 : 50)) }
         }
         .environment(\.layoutDirection, .app)
         // Beside the foldable's clock: stop short of it.
@@ -1607,7 +1632,30 @@ struct WorldMapView: View {
         let minutesMax: String? = cap.enabled ? "/\(cap.max)" : nil
         // The approved header: ⏱ minutes today · ✅ correct today · ⭐ level
         // (stars and diamonds moved up beside the name).
-        return HStack(spacing: 0) {
+        // 📐 In the sidebar the three numbers stand one under the other, big —
+        // they fill the column instead of leaving a hole under the card.
+        if useSidebar {
+            return AnyView(VStack(spacing: 0) {
+                statRow(value: minutes, suffix: minutesMax, label: Gendered.g(tr("⏱ הִרְוַחְתָּ הַיּוֹם"), tr("⏱ הִרְוַחַתְּ הַיּוֹם"))) { infoStat = .today }
+                Divider().overlay(Color.white.opacity(0.16))
+                statRow(value: "\(progress.correctToday)", suffix: progress.answeredToday > 0 ? "/\(progress.answeredToday)" : nil,
+                        label: tr("✅ נְכוֹנוֹת הַיּוֹם")) { infoStat = .correct }
+                Divider().overlay(Color.white.opacity(0.16))
+                let all = profiles.activeID.map { choreStore.chores(forChild: $0) } ?? []
+                statRow(value: "\(all.filter { $0.approvedToday }.count)", suffix: all.isEmpty ? nil : "/\(all.count)",
+                        label: tr("🧹 מְטָלוֹת הַיּוֹם")) { requirePremium { showingChores = true } }
+            }
+            .environment(\.layoutDirection, .app)
+            .padding(.horizontal, 14).padding(.vertical, 4)
+            .glassInset(radius: 18)
+            .sheet(item: $infoStat) { stat in
+                statInfoCard(stat)
+                    .environment(\.layoutDirection, .app)
+                    .presentationDetents([.height(stat == .minutes || stat == .today ? 460 : 400)])
+                    .presentationDragIndicator(.visible)
+            })
+        }
+        return AnyView(HStack(spacing: 0) {
             statColumn(value: minutes, suffix: minutesMax, label: Gendered.g(tr("⏱ הִרְוַחְתָּ הַיּוֹם"), tr("⏱ הִרְוַחַתְּ הַיּוֹם"))) { infoStat = .today }
             statDivider
             // Out of how many, so all three read the same way (Rani).
@@ -1632,7 +1680,7 @@ struct WorldMapView: View {
                 .presentationDetents([.height(stat == .minutes || stat == .today ? 460 : 400)])
                 .presentationDragIndicator(.visible)
         }
-        .eraseToAnyView()
+        .eraseToAnyView())
     }
 
     private var choresStat: some View {
@@ -1651,6 +1699,31 @@ struct WorldMapView: View {
 
     private var statDivider: some View {
         Rectangle().fill(.white.opacity(0.16)).frame(width: 1, height: 36)
+    }
+
+    /// One "today" number as a tall row (sidebar): the label on one side, the
+    /// number big on the other.
+    private func statRow(value: String, suffix: String?, label: String, action: @escaping () -> Void) -> some View {
+        Button { Haptic.light(); action() } label: {
+            HStack {
+                Text(label)
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
+                    .lineLimit(1).minimumScaleFactor(0.7)
+                Spacer(minLength: 8)
+                HStack(alignment: .firstTextBaseline, spacing: 0) {
+                    Text(value).font(.system(size: 30, weight: .black, design: .rounded)).foregroundStyle(GlassInk.primary)
+                    if let suffix {
+                        Text(suffix).font(.system(size: 18, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.tertiary)
+                    }
+                }
+                .monospacedDigit()
+                .environment(\.layoutDirection, .leftToRight)
+            }
+            .padding(.vertical, 12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private func statColumn(value: String, suffix: String? = nil, label: String,
@@ -2649,6 +2722,8 @@ struct WorldMapView: View {
     }
 
     private func greetIfNeeded() {
+        // No speech bubble on screenshot runs — it landed on the store images.
+        guard !AppInfo.isDemoRun else { return }
         if progress.dayStreak == 0 {
             companion.cheer(tr("הֵיי! יַאלְלָה לְהַרְפַּתְקָה 🌟"))
         } else if progress.dayStreak == 1 {

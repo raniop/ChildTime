@@ -26,7 +26,11 @@ struct ChildReportView: View {
 
     @EnvironmentObject private var settings: ParentSettings
     @ObservedObject private var historyStore = LearningHistoryStore.shared
+    #if DEBUG
+    @State private var period: ReportPeriod = ProcessInfo.processInfo.environment["DEMO_REPORT_PERIOD"] == "week" ? .week : .today
+    #else
     @State private var period: ReportPeriod = .today
+    #endif
     @State private var expandedTopic: Topic? = nil
     @State private var autoCollapsed = false
     @State private var isRefreshing = false
@@ -53,8 +57,8 @@ struct ChildReportView: View {
             if insight != nil || tip != nil {
                 insightCard(insight, tip: tip)
             }
-            topicsCard
-            worldsCard
+            topicsCard.id("topics")
+            worldsCard.id("worlds")
             improvementCard
             learningTrendCard
             screenTimeCard
