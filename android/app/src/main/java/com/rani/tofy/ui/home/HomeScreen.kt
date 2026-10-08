@@ -237,18 +237,18 @@ private fun ChildCard(
             }
             RowSpaced {
                 WhiteButton(tr("מידע נוסף ←"), Modifier.weight(2f)) { onOpen() }
-                GlassButton(tr("⚡ פעלות"), Modifier.weight(1f).coachMark("p.actions", marked)) { onActions() }
+                GlassButton(tr("⚡ פעולות"), Modifier.weight(1f).coachMark("p.actions", marked)) { onActions() }
             }
             // 🧒 Kid Mode: this phone becomes the child's for a while (screen-pinned).
             GlassButton(tr("תנו ל%@ לשחק כאן 🧒", child.name), Modifier.fillMaxWidth().coachMark("p.playHere", marked)) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
         } else {
-            P(tr("%@ · אין עדין מכשיר מחבר.", gradeName(child.effectiveGrade)), 13f)
+            P(tr("%@ · אין עדיין מכשיר מחובר.", gradeName(child.effectiveGrade)), 13f)
             // מידע נוסף · חברו מכשיר · פעולות — side by side, in one row (Rani:
             // connecting used to REPLACE "מידע נוסף", and a row of its own grew the card).
             RowSpaced {
                 CardButton(tr("מידע נוסף ←"), white = true, Modifier.weight(1.1f)) { onOpen() }
                 CardButton(tr("+ חברו מכשיר"), white = false, Modifier.weight(1.1f).coachMark("p.connect", markConnect)) { onConnect() }
-                CardButton(tr("⚡ פעלות"), white = false, Modifier.weight(0.9f).coachMark("p.actions", marked)) { onActions() }
+                CardButton(tr("⚡ פעולות"), white = false, Modifier.weight(0.9f).coachMark("p.actions", marked)) { onActions() }
             }
             GlassButton(tr("תנו ל%@ לשחק כאן 🧒", child.name), Modifier.fillMaxWidth().coachMark("p.playHere", marked)) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
         }
@@ -281,16 +281,16 @@ private fun Stat(modifier: Modifier, value: String, label: String) {
 /** Profile.gradeDisplayName — same keys as iOS. */
 fun gradeName(grade: Int?): String {
     val g = grade ?: return ""
-    if (g < 0) return tr("גן טרוםחובה")
+    if (g < 0) return tr("גן טרום־חובה")
     if (g == 0) return tr("גן חובה")
     val letters = listOf("א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳", "ט׳", "י׳", "יא׳", "יב׳")
-    return tr("כתה %@", tr(letters[minOf(g, 12) - 1]))
+    return tr("כיתה %@", tr(letters[minOf(g, 12) - 1]))
 }
 
 /** Profile.gradeNameForParent — the parent's spelling, no niqqud. */
 fun gradeNameForParent(grade: Int?): String {
     val g = grade ?: return ""
-    if (g < 0) return tr("גן טרוםחובה")
+    if (g < 0) return tr("גן טרום־חובה")
     if (g == 0) return tr("גן חובה")
     val letters = listOf("א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳", "ט׳", "י׳", "יא׳", "יב׳")
     return tr("כיתה %@", tr(letters[minOf(g, 12) - 1]))

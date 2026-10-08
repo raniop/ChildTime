@@ -97,14 +97,14 @@ fun JoinFamilyScreen(onBack: () -> Unit) {
                 P("3. " + tr("יופיע קוד / QR — סרקו אותו כאן או הקלידו:"), 14.5f)
             }
             OutlinedTextField(code, { code = it.uppercase().filter { c -> c.isLetterOrDigit() }.take(6); error = null }, Modifier.fillMaxWidth(), singleLine = true,
-                placeholder = { Text(tr("6 תוים"), fontFamily = Rounded, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
+                placeholder = { Text(tr("6 תווים"), fontFamily = Rounded, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
                 textStyle = MaterialTheme.typography.headlineMedium.copy(textAlign = TextAlign.Center, letterSpacing = androidx.compose.ui.unit.TextUnit(6f, androidx.compose.ui.unit.TextUnitType.Sp)))
             error?.let { P(it, 13f, color = Ink.weak, align = TextAlign.Center) }
             GoldButton(tr("הצטרפו"), enabled = code.length == 6, busy = busy) {
                 busy = true; error = null
                 scope.launch { AccountRepository.redeemInvite(code).onFailure { busy = false; error = tr("קוד לא תקין") } }
             }
-            TextButton(onBack) { Text(tr("בטול"), fontFamily = Rounded, color = Ink.secondary) }
+            TextButton(onBack) { Text(tr("ביטול"), fontFamily = Rounded, color = Ink.secondary) }
         }
     }
 }
@@ -122,7 +122,7 @@ fun EmailInviteScreen(invite: com.rani.tofy.data.Bootstrap.EmailInvite) {
         ) {
             Text("👨‍👩‍👧", fontSize = androidx.compose.ui.unit.TextUnit(56f, androidx.compose.ui.unit.TextUnitType.Sp))
             H(tr("%@ מחכה לכם!", invite.familyName ?: tr("המשפחה שלכם")), 26, align = TextAlign.Center)
-            P(tr("הזמנתם להצטרף כהורה — תראו את הילדים, ההתקדמות והשליטה, בדיוק כמו ההורה שהזמין אתכם."), 15f, align = TextAlign.Center)
+            P(tr("הוזמנתם להצטרף כהורה — תראו את הילדים, ההתקדמות והשליטה, בדיוק כמו ההורה שהזמין אתכם."), 15f, align = TextAlign.Center)
             GoldButton(tr("הצטרפו למשפחה"), busy = busy) {
                 busy = true
                 scope.launch { runCatching { AccountRepository.acceptEmailInvite(invite.householdID) }.onFailure { busy = false } }

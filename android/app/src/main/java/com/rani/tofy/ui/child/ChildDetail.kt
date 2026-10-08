@@ -160,7 +160,7 @@ private fun ChildReport(
 
         // MARK: top actions — the live banner (lock one tap away) + the actions sheet
         live?.let { LiveBanner(child, it, onLock) }
-        GlassButton(tr("⚡ פעלות"), Modifier.fillMaxWidth()) { onActions() }
+        GlassButton(tr("⚡ פעולות"), Modifier.fillMaxWidth()) { onActions() }
 
         // MARK: the four numbers
         val sum = engine.summary(period)
@@ -207,8 +207,8 @@ private fun ChildReport(
                         color = if (up) Ink.good else Ink.weak, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    deltas.firstOrNull()?.takeIf { it.deltaPoints > 0 }?.let { TrendChip(tr("השפור הגדול"), it.topic.displayName, it.deltaPoints) }
-                    deltas.lastOrNull()?.takeIf { it.deltaPoints < 0 }?.let { TrendChip(tr("דורש חזוק"), it.topic.displayName, it.deltaPoints) }
+                    deltas.firstOrNull()?.takeIf { it.deltaPoints > 0 }?.let { TrendChip(tr("השיפור הגדול"), it.topic.displayName, it.deltaPoints) }
+                    deltas.lastOrNull()?.takeIf { it.deltaPoints < 0 }?.let { TrendChip(tr("דורש חיזוק"), it.topic.displayName, it.deltaPoints) }
                 }
             }
         }
@@ -217,13 +217,13 @@ private fun ChildReport(
         val days = if (period == ReportPeriod.MONTH) 30 else 7
         val points = engine.dayPoints(days)
         ReportCard(tr("מגמת למידה"), detail = tr("%lld ימים אחרונים", days)) {
-            if (points.all { it.questions == 0 }) EmptyLine(tr("אין עדין פעילות בתקופה הזו."))
+            if (points.all { it.questions == 0 }) EmptyLine(tr("אין עדיין פעילות בתקופה הזו."))
             else {
                 LearningTrendChart(points, Modifier.fillMaxWidth().height(130.dp))
                 Legend(listOf(tr("שאלות") to Color.White.copy(alpha = 0.4f), tr("אחוז הצלחה") to Color.White))
             }
         }
-        val earnedW = g(tr("הרויח"), tr("הרויחה")); val usedW = g(tr("נצל"), tr("נצלה"))
+        val earnedW = g(tr("הרוויח"), tr("הרוויחה")); val usedW = g(tr("ניצל"), tr("נצלה"))
         ReportCard(tr("זמן מסך"), detail = tr("%@ מול %@", earnedW, usedW)) {
             if (points.all { it.earned == 0 && it.used == 0 }) EmptyLine(tr("עוד לא נפתח זמן מסך בתקופה הזו."))
             else {
@@ -270,7 +270,7 @@ private fun LiveBanner(child: Child, live: LiveWindow, onLock: () -> Unit) {
     val girl = child.isGirl
     val kind = live.device?.kind
     val deviceLabel = if (kind == "ipad") tr("באיפד") else if (kind == "iphone") tr("באיפון") else tr("במכשיר")
-    val source = if (live.isGift) tr("זמן שנתתם") else if (girl) tr("זמן שהרויחה") else tr("זמן שהרויח")
+    val source = if (live.isGift) tr("זמן שנתתם") else if (girl) tr("זמן שהרוויחה") else tr("זמן שהרוויח")
     val opened = if (girl) tr("פתחה") else tr("פתח")
     Row(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
@@ -309,12 +309,12 @@ private fun InsightCard(i: DailyInsight, period: ReportPeriod) {
     ) {
         // One whole key per period: dropping the TAB label ("This week" / "Эта неделя")
         // into a template read "Insight for This week" / "Вывод о Эта неделя".
-        val title = when (period) { ReportPeriod.TODAY -> tr("💡 תובנת היום"); ReportPeriod.WEEK -> tr("💡 תובנת השבוע"); ReportPeriod.MONTH -> tr("💡 תובנת החדש") }
+        val title = when (period) { ReportPeriod.TODAY -> tr("💡 תובנת היום"); ReportPeriod.WEEK -> tr("💡 תובנת השבוע"); ReportPeriod.MONTH -> tr("💡 תובנת החודש") }
         Text(title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.5.sp)
         Text(i.body, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 13.5.sp)
         i.recommendation?.let {
             Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.35f)))
-            Text(tr("ממלץ: %@", it), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.5.sp)
+            Text(tr("מומלץ: %@", it), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.5.sp)
         }
     }
 }
@@ -336,7 +336,7 @@ private fun TopicsCard(
             TopicRow(child, s, extras, t, open == t.topic) { onToggle(t.topic, open == t.topic) }
             if (open == t.topic) {
                 val skills = engine.skillReports(t.topic, period)
-                if (skills.isEmpty()) P(tr("אין עדין פרוט לפי מימנות בנושא זה."), 12.5f)
+                if (skills.isEmpty()) P(tr("אין עדיין פרוט לפי מיומנות בנושא זה."), 12.5f)
                 else skills.forEach { sk ->
                     Row(Modifier.fillMaxWidth().padding(start = 44.dp).glassInset(11.dp).padding(horizontal = 10.dp, vertical = 8.dp)) {
                         Text(sk.name, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp)
@@ -365,14 +365,14 @@ private fun WorldsCard(child: Child, extras: SnapshotExtras) {
     val played = candidates.filter(visited).sortedByDescending(stageOf)
     val notYet = candidates.filterNot(visited).take(2)
     val crowns = played.sumOf { minOf(WorldStage.tier(stageOf(it)), WorldStage.TIER_COUNT) }
-    ReportCard(tr("🏆 העולמות של %@", child.name), detail = if (crowns > 0) tr("👑 דרגות שהשלמו: %lld", crowns) else null) {
-        if (played.isEmpty()) { EmptyLine(g(tr("עוד לא שחק באף עולם."), tr("עוד לא שחקה באף עולם."))); return@ReportCard }
+    ReportCard(tr("🏆 העולמות של %@", child.name), detail = if (crowns > 0) tr("👑 דרגות שהושלמו: %lld", crowns) else null) {
+        if (played.isEmpty()) { EmptyLine(g(tr("עוד לא שיחק באף עולם."), tr("עוד לא שיחקה באף עולם."))); return@ReportCard }
         Column {
             played.forEach { w ->
                 val st = stageOf(w)
                 WorldRow(w, WorldTiers.parentLabel(WorldStage.tier(st), st % 10), WorldTiers.color(WorldStage.tier(st)))
             }
-            notYet.forEach { w -> WorldRow(w, g(tr("עוד לא בקר"), tr("עוד לא בקרה")), null) }
+            notYet.forEach { w -> WorldRow(w, g(tr("עוד לא ביקר"), tr("עוד לא בקרה")), null) }
         }
     }
 }
@@ -428,20 +428,20 @@ private fun TopicRow(child: Child, s: Progress, extras: SnapshotExtras, t: Topic
                 // The level the adaptive engine serves now, and where it moved from the parent's base.
                 if (hasAdaptiveSignal(s)) {
                     val st = adaptiveState(t.topic, child, extras.adaptive)
-                    val hint = st.direction?.let { if (it == Direction.EASED) "↓ " + tr("בונה בטחון") else "↑ " + tr("מאתגר יותר") }
+                    val hint = st.direction?.let { if (it == Direction.EASED) "↓ " + tr("בונה ביטחון") else "↑ " + tr("מאתגר יותר") }
                     Text(st.served.displayName + (hint?.let { " · $it" } ?: ""), maxLines = 1,
                         color = when (st.direction) { Direction.EASED -> Ink.warn; Direction.RAISED -> Ink.good; null -> Ink.secondary },
                         fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 10.5.sp,
                         modifier = Modifier.clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.10f)).padding(horizontal = 7.dp, vertical = 2.dp))
                 }
             }
-            Text(tr("%lld שאלות", t.answered) + " · " + tr("%lld נכונות", t.correct) + (if (t.wrong > 0) tr(" · %lld טעיות", t.wrong) else ""),
+            Text(tr("%lld שאלות", t.answered) + " · " + tr("%lld נכונות", t.correct) + (if (t.wrong > 0) tr(" · %lld טעויות", t.wrong) else ""),
                 color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 12.sp)
         }
         val (label, color) = when (t.verdict) {
             TopicReport.Verdict.STRONG -> (if (t.accuracy >= 0.95) tr("חזק מאוד") else tr("חזק")) to Ink.good
             TopicReport.Verdict.OK -> tr("בסדר") to Ink.warn
-            TopicReport.Verdict.WEAK -> tr("דורש חזוק") to Ink.weak
+            TopicReport.Verdict.WEAK -> tr("דורש חיזוק") to Ink.weak
             TopicReport.Verdict.TOO_FEW -> tr("עוד מעט") to Ink.tertiary
         }
         Text("${pct(t.accuracy)} · $label", color = color, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 11.5.sp,
@@ -513,7 +513,7 @@ private fun DevicesCard(child: Child, devices: List<ChildDevice>, live: Boolean,
                 val recent = nowSecs() - d.lastSeenAt < 120
                 val (txt, col) = when {
                     live && recent -> tr("● %@ עכשיו", if (girl) tr("משחקת") else tr("משחק")) to Ink.good
-                    recent -> tr("● מחבר") to Ink.good
+                    recent -> tr("● מחובר") to Ink.good
                     else -> tr("נראה %@", relative(d.lastSeenAt)) to Ink.secondary
                 }
                 Text(txt, color = col, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp)
@@ -529,12 +529,12 @@ private fun DevicesCard(child: Child, devices: List<ChildDevice>, live: Boolean,
             }
             if (idx != devices.lastIndex) RowDivider()
         }
-        if (devices.isEmpty()) EmptyLine(tr("עוד לא חבר מכשיר."))
+        if (devices.isEmpty()) EmptyLine(tr("עוד לא חובר מכשיר."))
         Box(
             Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(onClick = onAdd).dashedBorder().padding(vertical = 10.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text("▦ " + if (devices.isEmpty()) tr("+ חברו מכשיר") else tr("+ חבור מכשיר נוסף"),
+            Text("▦ " + if (devices.isEmpty()) tr("+ חברו מכשיר") else tr("+ חיבור מכשיר נוסף"),
                 color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.5.sp)
         }
     }

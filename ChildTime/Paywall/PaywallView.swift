@@ -195,8 +195,8 @@ struct PaywallView: View {
         let ending: String
         if giftActive, let until {
             let d = max(0, Int(ceil(until.timeIntervalSinceNow / 86_400)))
-            ending = d == 0 ? tr("המתנה מסתימת היום") : d == 1 ? tr("המתנה מסתימת מחר")
-                : d == 2 ? tr("המתנה מסתימת בעוד יומים") : tr("המתנה מסתימת בעוד \(d) ימים")
+            ending = d == 0 ? tr("המתנה מסתיימת היום") : d == 1 ? tr("המתנה מסתיימת מחר")
+                : d == 2 ? tr("המתנה מסתיימת בעוד יומיים") : tr("המתנה מסתיימת בעוד \(d) ימים")
         } else {
             ending = tr("המתנה הסתימה · ההתקדמות של \(p.name) שמורה")
         }
@@ -250,7 +250,7 @@ struct PaywallView: View {
 
     /// What stays free, in one honest line (approved mockup).
     private func freeForeverLine(_ p: Pitch) -> some View {
-        Text(p.girl ? tr("טופי טיים והזמן ש\(p.name) מרויחה נשארים חנם תמיד. מה שנסגר: העולמות, המשחקים, הזירה והמטלות.") : tr("טופי טיים והזמן ש\(p.name) מרויח נשארים חנם תמיד. מה שנסגר: העולמות, המשחקים, הזירה והמטלות."))
+        Text(p.girl ? tr("טופי טיים והזמן ש\(p.name) מרוויחה נשארים חינם תמיד. מה שנסגר: העולמות, המשחקים, הזירה והמטלות.") : tr("טופי טיים והזמן ש\(p.name) מרוויח נשארים חינם תמיד. מה שנסגר: העולמות, המשחקים, הזירה והמטלות."))
             .font(.system(size: 12.5, weight: .medium, design: .rounded))
             .foregroundStyle(.white.opacity(0.8))
             .multilineTextAlignment(.center)
@@ -448,7 +448,7 @@ struct PaywallView: View {
                 Text(tr("המסלולים לא נטענו"))
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text(tr("בדקו את חבור האינטרנט ונסו שוב."))
+                Text(tr("בדקו את חיבור האינטרנט ונסו שוב."))
                     .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.8))
                     .multilineTextAlignment(.center)

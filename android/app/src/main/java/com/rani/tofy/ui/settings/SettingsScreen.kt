@@ -187,7 +187,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                 // 📱 iOS's Screen Time rows are per-device — say where they live instead.
                 item {
                     Section(tr("אפליקציות ונעילה"), tr("נעילת האפליקציות, הצלילים והתגמול על תשובות נכונות מוגדרים במכשיר של כל ילד: פותחים שם את טופי ונכנסים להגדרות עם קוד ההורה.")) {
-                        SettingsRow("📱", tr("מגדר במכשיר של כל ילד"))
+                        SettingsRow("📱", tr("מוגדר במכשיר של כל ילד"))
                     }
                 }
 

@@ -111,7 +111,7 @@ private fun Content() {
         tr("התחברו, וסרקו את הקוד שכאן (או הקלידו אותו)"),
         // The joiner meets the parent-code gate next — told here, to the
         // person who knows it (verbally, never in a message).
-        tr("בכניסה יתבקש קוד ההורה — מסרו לו את הקוד שלכם בעלפה 🔑"),
+        tr("בכניסה יתבקש קוד ההורה — מסרו לו את הקוד שלכם בעל־פה 🔑"),
     ))
     CodeCard()
 }
@@ -190,7 +190,7 @@ private fun CodeCard() {
                                 .putExtra(Intent.EXTRA_TEXT, tr("הצטרפו אלי בטופי! קוד המשפחה: %@", c))
                             ctx.startActivity(Intent.createChooser(send, null))
                         }.padding(horizontal = 16.dp, vertical = 9.dp),
-                    ) { Text("⇪  " + tr("שתוף הקוד"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp) }
+                    ) { Text("⇪  " + tr("שיתוף הקוד"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp) }
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                         CircularProgressIndicator(Modifier.size(14.dp), color = Color.White, strokeWidth = 2.dp)
                         P(tr("ממתין שההורה יצטרף…"), 13f, color = Color.White.copy(alpha = 0.7f), weight = FontWeight.SemiBold)

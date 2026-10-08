@@ -489,12 +489,12 @@ struct ProfileEditorView: View {
     /// September promotion). preK → gan types; otherwise כיתות א׳–ח׳.
     private var gradeRow: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(age == .preK ? tr("באיזה גן?") : tr("באיזו כתה?"))
+            Text(age == .preK ? tr("באיזה גן?") : tr("באיזו כיתה?"))
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             if age == .preK {
                 HStack(spacing: 6) {
-                    gradeOption(-1, label: tr("טרוםחובה"), emoji: "🧸")
+                    gradeOption(-1, label: tr("טרום־חובה"), emoji: "🧸")
                     gradeOption(0, label: tr("גן חובה"), emoji: "🎒")
                 }
             } else {
@@ -506,7 +506,7 @@ struct ProfileEditorView: View {
                 }
             }
             if grade == nil {
-                Text(tr("חובה לבחר — כך טופי מתאים את השאלות לתכנית של משרד החנוך, וכל 1 בספטמבר עולים כתה אוטומטית 🎉"))
+                Text(tr("חובה לבחור — כך טופי מתאים את השאלות לתכנית של משרד החינוך, וכל 1 בספטמבר עולים כיתה אוטומטית 🎉"))
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
             }
@@ -576,7 +576,7 @@ struct ProfileEditorView: View {
 
     private var interestsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(tr("תחומי ענין — מהם נבנות השאלות המתאמות"))
+            Text(tr("תחומי עניין — מהם נבנות השאלות המותאמות"))
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {

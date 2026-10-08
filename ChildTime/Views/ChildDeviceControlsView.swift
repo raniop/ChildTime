@@ -128,9 +128,9 @@ struct ChildDeviceControlsView: View {
                 HouseholdManager.shared.resetAsRemovedDevice()
                 dismiss()
             }
-            Button(tr("בטול"), role: .cancel) {}
+            Button(tr("ביטול"), role: .cancel) {}
         } message: {
-            Text(tr("המכשיר יתנתק מהילד ויחזור למצב התחלתי (כאלו הותקן מחדש). ההתקדמות בענן נשמרת — אפשר תמיד לחבר שוב בסריקת הקוד."))
+            Text(tr("המכשיר יתנתק מהילד ויחזור למצב התחלתי (כאילו הותקן מחדש). ההתקדמות בענן נשמרת — אפשר תמיד לחבר שוב בסריקת הקוד."))
         }
     }
 
@@ -220,7 +220,7 @@ struct ChildDeviceControlsView: View {
                    detail: tr("השאר נעולות\(allowEndText)"),
                    open: true, lock: { Haptic.medium(); cancelAllowException() })
         } else {
-            banner(title: tr("הכל נעול"),
+            banner(title: tr("הכול נעול"),
                    detail: newAppsLocked
                        ? tr("כולל אפליקציות חדשות")
                        : tr("אפליקציות חדשות לא נעולות"),
@@ -276,7 +276,7 @@ struct ChildDeviceControlsView: View {
                 durationPill(tr("רבע שעה"), minutes: 15, capLeft: capLeft)
                 durationPill(tr("חצי שעה"), minutes: 30, capLeft: capLeft)
                 durationPill(tr("שעה"), minutes: 60, capLeft: capLeft)
-                durationPill(tr("שעתים"), minutes: 120, capLeft: capLeft)
+                durationPill(tr("שעתיים"), minutes: 120, capLeft: capLeft)
                 durationPill(tr("4 שעות"), minutes: 240, capLeft: capLeft)
             }
             if progress.parentGiftMinutes > 0 {
@@ -335,8 +335,8 @@ struct ChildDeviceControlsView: View {
         controlCard(tint: newAppsLocked ? AppColor.successMint : AppColor.flameOrange) {
             sectionHead(tr("מה פתוח ומה נעול"),
                         newAppsLocked
-                            ? tr("הכל נעול עד שמרויחים זמן — גם אפליקציה שתתקן מחר. טופי תמיד פתוח. רוצים שעוד משהו ישאר פתוח? בחרו אותו כאן.")
-                            : tr("בחרו מה נשאר פתוח וסמנו גם את טופי. כל השאר ינעל — גם אפליקציה שתתקן מחר."),
+                            ? tr("הכול נעול עד שמרוויחים זמן — גם אפליקציה שתותקן מחר. טופי תמיד פתוח. רוצים שעוד משהו יישאר פתוח? בחרו אותו כאן.")
+                            : tr("בחרו מה נשאר פתוח וסמנו גם את טופי. כל השאר יינעל — גם אפליקציה שתותקן מחר."),
                         icon: newAppsLocked ? "lock.shield.fill" : "exclamationmark.triangle.fill",
                         tint: newAppsLocked ? AppColor.successMint : AppColor.flameOrange)
 
@@ -393,7 +393,7 @@ struct ChildDeviceControlsView: View {
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
                     allowDurationPill(tr("חצי שעה"), minutes: 30)
                     allowDurationPill(tr("שעה"), minutes: 60)
-                    allowDurationPill(tr("שעתים"), minutes: 120)
+                    allowDurationPill(tr("שעתיים"), minutes: 120)
                     allowDurationPill(tr("עד סוף היום"), minutes: minutesUntilEndOfDay())
                 }
             }
@@ -477,12 +477,12 @@ struct ChildDeviceControlsView: View {
     /// empty (so new apps are not covered).
     private var lockDiagnosticsCard: some View {
         controlCard(tint: AppColor.companionGlow) {
-            sectionHead(tr("מה נעול בפעל"),
-                        tr("זה מה ש-iOS קבל מאתנו ברגע זה."),
+            sectionHead(tr("מה נעול בפועל"),
+                        tr("זה מה ש-iOS קיבל מאיתנו ברגע זה."),
                         icon: "stethoscope", tint: AppColor.companionGlow)
 
             diagnosticRow(tr("הרשאת זמן מסך"),
-                          shields.isAuthorized ? tr("יש") : tr("אין — שום נעילה לא תעבד"),
+                          shields.isAuthorized ? tr("יש") : tr("אין — שום נעילה לא תעבוד"),
                           ok: shields.isAuthorized)
             diagnosticRow(tr("פתוחות תמיד"), "\(openCount)", ok: true)
             // Read BACK from iOS, not what we think we sent — the lesson of
@@ -497,7 +497,7 @@ struct ChildDeviceControlsView: View {
             Button {
                 openPicker { showAppPicker = true }
             } label: {
-                Label(tr("סמון מחדש של כל האפליקציות"), systemImage: "square.grid.3x3.fill")
+                Label(tr("סימון מחדש של כל האפליקציות"), systemImage: "square.grid.3x3.fill")
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 11)
@@ -603,13 +603,13 @@ struct ChildDeviceControlsView: View {
     private var allowDeleteCard: some View {
         controlCard(tint: AppColor.flameOrange) {
             sectionHead(tr("מחיקת האפליקציה"),
-                        tr("כדי למחק את טופי מהטלפון הזה:"),
+                        tr("כדי למחוק את טופי מהטלפון הזה:"),
                         icon: "trash", tint: AppColor.flameOrange)
             AppleScreenTimeStepsList(steps: [
                 .init(id: 1, title: tr("\"הגדרות\" ← \"זמן מסך\""),
                       detail: tr("אם אתם מנהלים את הילד מהטלפון שלכם — בטלפון שלכם, ואז השם של הילד.")),
                 .init(id: 2, title: tr("גוללים עד למטה ← \"יישומים עם גישה אל ”זמן מסך”\""), detail: ""),
-                .init(id: 3, title: tr("טופי ← כבוי"), detail: tr("זה מבטל את כל הנעילות בטלפון.")),
+                .init(id: 3, title: tr("טופי ← כיבוי"), detail: tr("זה מבטל את כל הנעילות בטלפון.")),
                 .init(id: 4, title: tr("ואז מוחקים את טופי ממסך הבית כרגיל"), detail: ""),
             ])
             ScreenTimeShowMeButton(pages: ScreenTimeLookalikes.deletion)

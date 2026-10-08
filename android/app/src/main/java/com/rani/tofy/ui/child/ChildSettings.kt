@@ -122,7 +122,7 @@ private fun MainList(
             else gradeName(child.effectiveGrade) + (if (child.gradeSetByChild) " " + tr("· נבחרה ע\"י הילד — בדקו") else "")
         val lang = AppLanguage.of(child.language)
         SettingsSection(if (girl) tr("הילדה") else tr("הילד")) {
-            SettingsRow("✏️", tr("שם, גיל וכתה"), "${child.name} · ${AgeBracket.of(child.age).label} · $grade",
+            SettingsRow("✏️", tr("שם, גיל וכיתה"), "${child.name} · ${AgeBracket.of(child.age).label} · $grade",
                 valueColor = if (flagged) Color(0xFFFF8A3D) else Ink.secondary) { onOpen(Page.PROFILE) }
             RowDivider()
             SettingsRow("🌍", if (girl) tr("שפה במכשיר שלה") else tr("שפה במכשיר שלו"), lang?.let { "${it.flag} ${it.native}" }) { onOpen(Page.LANGUAGE) }
@@ -131,7 +131,7 @@ private fun MainList(
         val listed = child.listedWorlds()
         val open = listed.count { child.allows(it.topic) }
         SettingsSection(tr("למידה")) {
-            SettingsRow("🎚️", tr("רמת קשי"), difficultySummary(child)) { onOpen(Page.DIFFICULTY) }
+            SettingsRow("🎚️", tr("רמת קושי"), difficultySummary(child)) { onOpen(Page.DIFFICULTY) }
             RowDivider()
             SettingsRow("🌐", tr("עולמות פעילים"), if (listed.isEmpty()) null else tr("%lld מתוך %lld", open, listed.size)) { onOpen(Page.WORLDS) }
             RowDivider()
@@ -167,7 +167,7 @@ private fun MainList(
                     Row(Modifier.fillMaxWidth().padding(vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("${t.emoji} ${t.displayName}", Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, maxLines = 1)
                         st.direction?.let { d ->
-                            Text(if (d == Direction.RAISED) "↑ " + tr("מאתגר יותר") else "↓ " + tr("בונה בטחון"),
+                            Text(if (d == Direction.RAISED) "↑ " + tr("מאתגר יותר") else "↓ " + tr("בונה ביטחון"),
                                 color = if (d == Direction.RAISED) Ink.good else Ink.warn, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp, maxLines = 1)
                         }
                         Text(st.served.displayName, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp,
@@ -193,7 +193,7 @@ private fun MainList(
                     if (girl) tr("%@ עוד לא בחרה קוד", child.name) else tr("%@ עוד לא בחר קוד", child.name), chevron = false, onClick = null)
             } else {
                 SettingsRow("🔐", tr("קוד הגנת זמן המשחק"),
-                    if (girl) tr("%@ מזינה אותו כדי לפתח את הדקות שצברה", child.name) else tr("%@ מזין אותו כדי לפתח את הדקות שצבר", child.name),
+                    if (girl) tr("%@ מזינה אותו כדי לפתוח את הדקות שצברה", child.name) else tr("%@ מזין אותו כדי לפתוח את הדקות שצבר", child.name),
                     chevron = false, onClick = null, trailing = {
                         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                             Text(child.playPIN ?: "", color = Color.White, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, letterSpacing = 3.sp)
@@ -211,7 +211,7 @@ private fun MainList(
             SettingsRow("🗑️", tr("לאפשר מחיקת אפליקציות (5 דק')"), chevron = false) {
                 Commands.allowAppRemoval(child.id)
                 remoteNote = if (connected) tr("נפתח חלון של 5 דקות למחיקת אפליקציות במכשיר של %@ — מידי כשטופי פתוח שם. אחר כך הנעילה חוזרת לבד.", child.name)
-                    else tr("אין כרגע מכשיר מחבר ל%@ — החלון יפתח ברגע שהמכשיר יתחבר.", child.name)
+                    else tr("אין כרגע מכשיר מחובר ל%@ — החלון ייפתח ברגע שהמכשיר יתחבר.", child.name)
             }
             RowDivider()
             // Repair for a device that keeps re-uploading wrong numbers: every device drops its cache.
@@ -219,7 +219,7 @@ private fun MainList(
                 scope.launch { note.report(ChildReportRepository.withRetry { Commands.purgeCaches(child.id) }) }
             }
             RowDivider()
-            SettingsRow("↩️", tr("אפוס התקדמות"), destructive = true, chevron = false) { confirmReset = true }
+            SettingsRow("↩️", tr("איפוס התקדמות"), destructive = true, chevron = false) { confirmReset = true }
             RowDivider()
             SettingsRow("🚮", if (girl) tr("מחיקת הילדה") else tr("מחיקת הילד"), destructive = true, chevron = false) { confirmDelete = true }
         }
@@ -247,7 +247,7 @@ private suspend fun deleteChild(id: String, note: WriteNote): Boolean {
     if ((r.exceptionOrNull() as? FirebaseFirestoreException)?.code == FirebaseFirestoreException.Code.PERMISSION_DENIED) {
         FamilyRepository.reassertMembership(); r = once()
     }
-    if (r.isFailure) note.show(tr("המחיקה לא הצליחה. בדקו את חבור האינטרנט ונסו שוב."))
+    if (r.isFailure) note.show(tr("המחיקה לא הצליחה. בדקו את חיבור האינטרנט ונסו שוב."))
     return r.isSuccess
 }
 
@@ -354,12 +354,12 @@ private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String,
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            FieldLabel(if (age == AgeBracket.PRE_K) tr("באיזה גן?") else tr("באיזו כתה?"))
+            FieldLabel(if (age == AgeBracket.PRE_K) tr("באיזה גן?") else tr("באיזו כיתה?"))
             // The grade pulls the age bracket with it — the content follows the grade.
             val pick = { g: Int -> grade = g; age = AgeBracket.forGrade(g) }
             if (age == AgeBracket.PRE_K) {
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    ChoiceTile(grade == -1, Modifier.weight(1f), onClick = { pick(-1) }) { Text("🧸", fontSize = 22.sp); TileText(tr("טרוםחובה")) }
+                    ChoiceTile(grade == -1, Modifier.weight(1f), onClick = { pick(-1) }) { Text("🧸", fontSize = 22.sp); TileText(tr("טרום־חובה")) }
                     ChoiceTile(grade == 0, Modifier.weight(1f), onClick = { pick(0) }) { Text("🎒", fontSize = 22.sp); TileText(tr("גן חובה")) }
                 }
             } else {
@@ -372,7 +372,7 @@ private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String,
                     }
                 }
             }
-            if (grade == null) P(tr("חובה לבחר — כך טופי מתאים את השאלות לתכנית של משרד החנוך, וכל 1 בספטמבר עולים כתה אוטומטית 🎉"),
+            if (grade == null) P(tr("חובה לבחור — כך טופי מתאים את השאלות לתכנית של משרד החינוך, וכל 1 בספטמבר עולים כיתה אוטומטית 🎉"),
                 12f, color = Ink.gold2, weight = FontWeight.SemiBold)
         }
 
@@ -389,7 +389,7 @@ private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String,
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            FieldLabel(tr("תחומי ענין — מהם נבנות השאלות המתאמות"))
+            FieldLabel(tr("תחומי עניין — מהם נבנות השאלות המותאמות"))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Interests.forEach { i ->
                     val on = interests.contains(i.id)
@@ -427,7 +427,7 @@ private fun LanguageEditor(child: Child, onBack: () -> Unit, write: (Map<String,
     val chosen = AppLanguage.of(child.language)
     Scroll {
         PageBar(tr("שפה"), onBack)
-        P(tr("בחרו באיזו שפה טופי יופיע במכשיר של %@. השנוי מגיע למכשיר בסנכרון הבא.", child.name), 13f)
+        P(tr("בחרו באיזו שפה טופי יופיע במכשיר של %@. השינוי מגיע למכשיר בסנכרון הבא.", child.name), 13f)
         SettingsSection(tr("שפת האפליקציה אצל הילד"),
             tr("השפה משנה גם את השאלות, לא רק את הטקסטים. אם תשנו אותה במכשיר של הילד עצמו — הבחירה האחרונה קובעת.")) {
             AppLanguage.entries.forEachIndexed { i, lang ->
@@ -453,7 +453,7 @@ private fun LanguageEditor(child: Child, onBack: () -> Unit, write: (Map<String,
 private fun DifficultyEditor(child: Child, onBack: () -> Unit, write: (Map<String, Any?>) -> Unit) {
     Scroll {
         PageBar(tr("רמת קושי"), onBack)
-        P(tr("בחרו רמת קושי לכל נושא עבור %@. השנוי מסתנכרן אוטומטית למכשיר של הילד.", child.name), 13f)
+        P(tr("בחרו רמת קושי לכל נושא עבור %@. השינוי מסתנכרן אוטומטית למכשיר של הילד.", child.name), 13f)
         SettingsSection(tr("החל על כל הנושאים")) {
             Row(Modifier.padding(vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Difficulty.entries.forEach { d ->
@@ -496,9 +496,9 @@ private fun WorldsEditor(child: Child, onBack: () -> Unit, write: (Map<String, A
     val worlds = child.listedWorlds()
     Scroll {
         PageBar(tr("עולמות פעילים"), onBack)
-        P(tr("בחרו אילו עולמות פתוחים עבור %@. עולם כבוי נעלם מהמסך, והילד לא מקבל ממנו שאלות. השנוי מסתנכרן אוטומטית למכשיר של הילד.", child.name), 13f)
+        P(tr("בחרו אילו עולמות פתוחים עבור %@. עולם כיבוי נעלם מהמסך, והילד לא מקבל ממנו שאלות. השינוי מסתנכרן אוטומטית למכשיר של הילד.", child.name), 13f)
         SettingsSection(tr("עולמות פעילים"),
-            tr("\"טופי טיים\" תמיד פתוחה ומגישה רק מהנושאים הפעילים. חיב להשאר לפחות עולם אחד פתוח.")) {
+            tr("\"טופי טיים\" תמיד פתוחה ומגישה רק מהנושאים הפעילים. חייב להישאר לפחות עולם אחד פתוח.")) {
             worlds.forEachIndexed { i, w ->
                 Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(w.emoji, fontSize = 22.sp)
@@ -554,9 +554,9 @@ private fun ScreenTimeEditor(child: Child, onBack: () -> Unit, write: (Map<Strin
 
     Scroll {
         PageBar(tr("זמן מסך יומי"), onBack)
-        P(tr("בחרו כמה דקות מסך ביום עבור %@. השנוי מסתנכרן אוטומטית למכשיר של הילד.", child.name), 13f)
+        P(tr("בחרו כמה דקות מסך ביום עבור %@. השינוי מסתנכרן אוטומטית למכשיר של הילד.", child.name), 13f)
         SettingsSection(tr("מקסימום זמן מסך יומי"),
-            tr("הילד מרויח עד התקרה הזו בלמידה. בונוסים מהגלגל/קופסה נשמרים למחר כשמגיעים לתקרה.")) {
+            tr("הילד מרוויח עד התקרה הזו בלמידה. בונוסים מהגלגל/קופסה נשמרים למחר כשמגיעים לתקרה.")) {
             ToggleRow("", tr("הגבלת זמן יומית"), null, limited) { limited = it; if (it && minutes < 5) { minutes = 60; text = "60" } }
             RowDivider()
             if (limited) {
@@ -605,7 +605,7 @@ private fun FriendsList(child: Child, onBack: () -> Unit, note: WriteNote) {
     suspend fun reload() {
         loading = true
         val r = ChildReportRepository.friends(child.id)
-        if (r == null) note.show(tr("בדקו את חבור האינטרנט ונסו שוב."))
+        if (r == null) note.show(tr("בדקו את חיבור האינטרנט ונסו שוב."))
         friends = r ?: emptyList(); loading = false
     }
     LaunchedEffect(child.id) { reload() }
@@ -615,7 +615,7 @@ private fun FriendsList(child: Child, onBack: () -> Unit, note: WriteNote) {
             val list = friends.orEmpty()
             when {
                 loading -> Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator(Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp) }
-                list.isEmpty() -> P(tr("עדין אין חברים."), 15f, Modifier.padding(vertical = 12.dp))
+                list.isEmpty() -> P(tr("עדיין אין חברים."), 15f, Modifier.padding(vertical = 12.dp))
                 else -> list.forEachIndexed { i, f ->
                     Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         CharacterBadge(f.character3DID, 40.dp)

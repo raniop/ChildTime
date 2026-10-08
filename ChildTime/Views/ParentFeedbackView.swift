@@ -42,7 +42,7 @@ struct ParentFeedbackView: View {
     private var form: some View {
         Form {
             Section {
-                Text(tr("נשמח לשמוע מה דעתכם — מה לשפר, מה חסר, או כל רעיון שיש לכם. כל מלה עוזרת לנו לשפר את טופי לילדים."))
+                Text(tr("נשמח לשמוע מה דעתכם — מה לשפר, מה חסר, או כל רעיון שיש לכם. כל מילה עוזרת לנו לשפר את טופי לילדים."))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -89,7 +89,7 @@ struct ParentFeedbackView: View {
                 .font(.system(size: 60))
             Text(tr("תודה רבה!"))
                 .font(.title2.weight(.bold))
-            Text(tr("קבלנו את הפידבק שלכם — זה מאוד עוזר לנו."))
+            Text(tr("קיבלנו את הפידבק שלכם — זה מאוד עוזר לנו."))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

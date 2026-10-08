@@ -66,9 +66,9 @@ fun ActionsSheet(child: Child, state: FamilyState, onDismiss: () -> Unit, onChor
     if (confirmRevoke) {
         AlertDialog(
             onDismissRequest = { confirmRevoke = false },
-            title = { Text(tr("לנעל ולאפס את דקות המתנה של %@?", child.name), fontFamily = Rounded) },
-            text = { Text(tr("המכשיר ינעל עכשיו, וכל הדקות שנתתם (💝 מתנה, ❄️ שמורות, וחלון פתוח של מתנה) ימחקו. הדקות ש%@ מלמידה לא נפגעות.",
-                if (child.isGirl) tr("היא הרויחה") else tr("הוא הרויח")), fontFamily = Rounded) },
+            title = { Text(tr("לנעול ולאפס את דקות המתנה של %@?", child.name), fontFamily = Rounded) },
+            text = { Text(tr("המכשיר יינעל עכשיו, וכל הדקות שנתתם (💝 מתנה, ❄️ שמורות, וחלון פתוח של מתנה) יימחקו. הדקות ש%@ מלמידה לא נפגעות.",
+                if (child.isGirl) tr("היא הרוויחה") else tr("הוא הרוויח")), fontFamily = Rounded) },
             confirmButton = { TextButton({ confirmRevoke = false; Commands.lock(child.id, revokeGift = true); onDismiss() }) { Text(tr("נעל ואפס דקות מתנה"), color = Ink.weak) } },
             dismissButton = { TextButton({ confirmRevoke = false }) { Text(tr("בטל")) } },
             containerColor = Ink.sheet,
@@ -91,7 +91,7 @@ private fun ActionRow(emoji: String, title: String, last: Boolean = false, onCli
 /** The gift durations iOS offers, capped at what's left until midnight. */
 @Composable
 private fun GiftPicker(child: Child, onPick: (Int) -> Unit) {
-    val options = listOf(15 to tr("רבע שעה"), 30 to tr("חצי שעה"), 60 to tr("שעה"), 120 to tr("שעתים"), 240 to tr("4 שעות"))
+    val options = listOf(15 to tr("רבע שעה"), 30 to tr("חצי שעה"), 60 to tr("שעה"), 120 to tr("שעתיים"), 240 to tr("4 שעות"))
     val left = Commands.minutesUntilMidnight()
     var chosen by remember { mutableIntStateOf(30) }
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {

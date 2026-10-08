@@ -132,7 +132,7 @@ struct ChildSettingsView: View {
             : Profile.gradeDisplayName(p.effectiveGrade) + (p.gradeSetByChild ? " " + tr("· נבחרה ע\"י הילד — בדקו") : "")
         let lang = p.language.flatMap(AppLanguage.init(rawValue:))
         return Section {
-            row("✏️", tr("שם, גיל וכתה"),
+            row("✏️", tr("שם, גיל וכיתה"),
                 value: "\(p.name) · \(p.age.label) · \(grade)",
                 valueTint: flagged ? AppColor.flameOrange : GlassInk.secondary) { editing = p }
             row("🌍", girl ? tr("שפה במכשיר שלה") : tr("שפה במכשיר שלו"),
@@ -147,7 +147,7 @@ struct ChildSettingsView: View {
         let listed = ChildWorldsView.listedWorlds(for: p)
         let open = listed.filter { p.allows($0.topic) }.count
         return Section {
-            row("🎚️", tr("רמת קשי"), value: difficultySummary(p)) { difficulty = p }
+            row("🎚️", tr("רמת קושי"), value: difficultySummary(p)) { difficulty = p }
             row("🌐", tr("עולמות פעילים"),
                 value: listed.isEmpty ? nil : tr("\(open) מתוך \(listed.count)")) { worlds = p }
             onlyQuestionsToggle(p)
@@ -232,7 +232,7 @@ struct ChildSettingsView: View {
 
     private func directionChip(_ dir: AdaptiveTopicLevel.Direction) -> some View {
         let raised = dir == .raised
-        return Text(raised ? "↑ " + tr("מאתגר יותר") : "↓ " + tr("בונה בטחון"))
+        return Text(raised ? "↑ " + tr("מאתגר יותר") : "↓ " + tr("בונה ביטחון"))
             .font(.system(size: 11, weight: .heavy, design: .rounded))
             .foregroundStyle(raised ? GlassInk.good : GlassInk.warn)
             .lineLimit(1).minimumScaleFactor(0.8)
@@ -277,8 +277,8 @@ struct ChildSettingsView: View {
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundStyle(GlassInk.primary)
                         Text(p.gender == .girl
-                             ? tr("\(p.name) מזינה אותו כדי לפתח את הדקות שצברה")
-                             : tr("\(p.name) מזין אותו כדי לפתח את הדקות שצבר"))
+                             ? tr("\(p.name) מזינה אותו כדי לפתוח את הדקות שצברה")
+                             : tr("\(p.name) מזין אותו כדי לפתוח את הדקות שצבר"))
                             .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(GlassInk.secondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -310,7 +310,7 @@ struct ChildSettingsView: View {
                 Haptic.warning()
                 RemoteSyncManager.shared.purgeChildCaches(childID: p.id)
             }
-            row("↩️", tr("אפוס התקדמות"), destructive: true, chevron: false) { confirmReset = true }
+            row("↩️", tr("איפוס התקדמות"), destructive: true, chevron: false) { confirmReset = true }
             row("🚮", p.gender == .girl ? tr("מחיקת הילדה") : tr("מחיקת הילד"),
                 destructive: true, chevron: false) { confirmDelete = true }
         } header: {
@@ -361,7 +361,7 @@ struct ChildSettingsView: View {
         let connected = (household.devicesByChild[p.id.uuidString]?.isEmpty == false)
         remoteNote = connected
             ? tr("נפתח חלון של 5 דקות למחיקת אפליקציות במכשיר של \(p.name) — מידי כשטופי פתוח שם. אחר כך הנעילה חוזרת לבד.")
-            : tr("אין כרגע מכשיר מחבר ל\(p.name) — החלון יפתח ברגע שהמכשיר יתחבר.")
+            : tr("אין כרגע מכשיר מחובר ל\(p.name) — החלון ייפתח ברגע שהמכשיר יתחבר.")
     }
 
     // MARK: - Sheets (the same editors the old "⋯" menu opened)

@@ -40,7 +40,7 @@ object WorldTiers {
             0 -> tr("⭐ ארד") + " · " + where
             1 -> tr("⭐⭐ כסף") + " · " + where
             2 -> tr("⭐⭐⭐ זהב") + " · " + where
-            else -> tr("👑 השלם")
+            else -> tr("👑 הושלם")
         }
     }
 }

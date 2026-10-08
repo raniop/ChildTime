@@ -95,7 +95,7 @@ fun ParentGate(
             ) {
                 Text("🔐", fontSize = 56.sp)
                 KidTitle(tr("קוד ההורה לא זמין כאן"), 26)
-                KidBody(tr("קוד ההורה של המשפחה עדין לא הגיע למכשיר הזה (בדקו חבור לאינטרנט). אפשר תמיד לאפס מלוח ההורים במכשיר של אבא או אמא."), 16f, alpha = 0.85f)
+                KidBody(tr("קוד ההורה של המשפחה עדיין לא הגיע למכשיר הזה (בדקו חיבור לאינטרנט). אפשר תמיד לאפס מלוח ההורים במכשיר של אבא או אמא."), 16f, alpha = 0.85f)
                 Text(tr("סגירה"), Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
                     .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).clickable(onClick = onClose)
                     .padding(horizontal = 34.dp, vertical = 13.dp),
@@ -133,7 +133,7 @@ private fun FamilyLoadingGate() {
             if (timedOut) {
                 Text("📡", fontSize = 44.sp)
                 KidTitle(tr("המכשיר לא הצליח להתחבר למשפחה"), 19)
-                KidBody(tr("בדקו שיש אינטרנט, ושהמכשיר עדין מקשר למשפחה בלוח ההורים."), 14f, weight = FontWeight.Medium)
+                KidBody(tr("בדקו שיש אינטרנט, ושהמכשיר עדיין מקושר למשפחה בלוח ההורים."), 14f, weight = FontWeight.Medium)
             } else {
                 CircularProgressIndicator(color = Color.White)
                 KidTitle(tr("טוענים את המשפחה שלכם…"), 20)

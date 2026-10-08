@@ -17,7 +17,7 @@ struct ParentDashboardView: View {
     /// chain too slow for the type checker.
     private var revokeGiftTitle: String {
         guard let p = revokeGiftProfile else { return "" }
-        return tr("לנעל ולאפס את דקות המתנה של \(p.name)?")
+        return tr("לנעול ולאפס את דקות המתנה של \(p.name)?")
     }
 
     /// When true this is the device's HOME screen (parent device), not a sheet —
@@ -1194,7 +1194,7 @@ struct ParentDashboardView: View {
                     // Numbered steps — parents missed that Tofy must be
                     // DOWNLOADED on the kid's device first (Rani, live E2E).
                     VStack(alignment: .trailing, spacing: 5) {
-                        Text(tr("1️⃣  הורידו את טופי מהApp Store במכשיר של \(child.name) (איפד או איפון)"))
+                        Text(tr("1️⃣  הורידו את טופי מה־App Store במכשיר של \(child.name) (איפד או איפון)"))
                         Text(tr("2️⃣  פתחו שם את טופי ובחרו \"המכשיר של הילד\""))
                         Text(tr("3️⃣  סרקו את הקוד — ו\(child.name) נכנס ישירות לשחק 🎉"))
                     }
@@ -1227,8 +1227,8 @@ struct ParentDashboardView: View {
                             convertChild = child
                         } label: {
                             Label(child.gender == .girl
-                                  ? tr("האיפד הזה של \(child.name)? להפך אותו למכשיר שלה")
-                                  : tr("האיפד הזה של \(child.name)? להפך אותו למכשיר שלו"),
+                                  ? tr("האיפד הזה של \(child.name)? להפוך אותו למכשיר שלה")
+                                  : tr("האיפד הזה של \(child.name)? להפוך אותו למכשיר שלו"),
                                   systemImage: "ipad")
                                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                                 .foregroundStyle(.white)
@@ -1422,7 +1422,7 @@ struct ParentDashboardView: View {
                 // their page (Rani). That hid exactly the things a parent needs
                 // then: connect a device, or hand them the parent's own phone.
                 HStack(spacing: 6) {
-                    Text(tr("\(Profile.gradeDisplayName(profile.effectiveGrade)) · אין עדין מכשיר מחבר."))
+                    Text(tr("\(Profile.gradeDisplayName(profile.effectiveGrade)) · אין עדיין מכשיר מחובר."))
                         .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                         .lineLimit(1).minimumScaleFactor(0.7)
@@ -1751,7 +1751,7 @@ struct ParentDashboardView: View {
                 Button(tr("רבע שעה")) { remoteOpen(profile, 15) }
                 Button(tr("חצי שעה")) { remoteOpen(profile, 30) }
                 Button(tr("שעה")) { remoteOpen(profile, 60) }
-                Button(tr("שעתים")) { remoteOpen(profile, 120) }
+                Button(tr("שעתיים")) { remoteOpen(profile, 120) }
                 Button(tr("4 שעות")) { remoteOpen(profile, 240) }
             } label: {
                 Label(tr("תן דקות מתנה 💝"), systemImage: "gift.fill")
@@ -1783,7 +1783,7 @@ struct ParentDashboardView: View {
                 gridDeleteProfile = profile
             } label: { Label(tr("מחיקת ילד/ה"), systemImage: "trash") }
         } label: {
-            homeGhostLabel(tr("⚡ פעלות"), width: Self.actionsMenuWidth)
+            homeGhostLabel(tr("⚡ פעולות"), width: Self.actionsMenuWidth)
         }
         .buttonStyle(.plain)
     }
@@ -1846,14 +1846,14 @@ struct ParentDashboardView: View {
         let idle = theRows.filter { $0.snapshot.answeredToday == 0 }
         if questions > 0, idle.count == 1, theRows.count > 1 {
             let kid = idle[0].profile
-            return tr("\(kid.name) עוֹד לֹא \(g(kid, tr("שחק"), tr("שחקה"))) הַיּוֹם — אוּלַי לְעוֹדֵד? 💛")
+            return tr("\(kid.name) עוֹד לֹא \(g(kid, tr("שחק"), tr("שיחקה"))) הַיּוֹם — אוּלַי לְעוֹדֵד? 💛")
         }
         if questions > 0 {
             return tr("המשפחה ענתה על \(questions) שאלות היום 👏")
         }
         // 4. Quiet day.
         let hour = Calendar.current.component(.hour, from: Date())
-        return hour < 12 ? tr("יום חדש, הרפתקאות חדשות ✨") : tr("שקט היום — הכל בסדר 🌤️")
+        return hour < 12 ? tr("יום חדש, הרפתקאות חדשות ✨") : tr("שקט היום — הכול בסדר 🌤️")
     }
 
     // MARK: - Live play window (what's happening RIGHT NOW)
@@ -1931,7 +1931,7 @@ struct ParentDashboardView: View {
     private func liveWindowBanner(_ profile: Profile, compact: Bool, onLock: (() -> Void)? = nil) -> some View {
         if let live = liveWindow(profile) {
             let deviceLabel = live.device.kind == "ipad" ? tr("באיפד") : (live.device.kind == "iphone" ? tr("באיפון") : tr("במכשיר"))
-            let source = live.isManual ? tr("זמן שנתתם") : (profile.gender == .girl ? tr("זמן שהרויחה") : tr("זמן שהרויח"))
+            let source = live.isManual ? tr("זמן שנתתם") : (profile.gender == .girl ? tr("זמן שהרוויחה") : tr("זמן שהרוויח"))
             // Authored RTL explicitly (the detail card is forced LTR): the pulse
             // dot leads on the RIGHT, Hebrew text is right-aligned, device icon
             // trails on the LEFT.
@@ -2174,7 +2174,7 @@ struct ParentDashboardView: View {
         // "Lock + revoke gift" confirmation — a real consequence, so it asks.
         // Presented from either menu (root grid ⋯ / detail ⋯).
         .alert(
-            revokeGiftProfile.map { tr("לנעל ולאפס את דקות המתנה של \($0.name)?") } ?? "",
+            revokeGiftProfile.map { tr("לנעול ולאפס את דקות המתנה של \($0.name)?") } ?? "",
             isPresented: Binding(get: { revokeGiftProfile != nil && navPath.isEmpty },
                                  set: { if !$0 { revokeGiftProfile = nil } }),
             presenting: revokeGiftProfile
@@ -2374,7 +2374,7 @@ struct ParentDashboardView: View {
                     Button(tr("רבע שעה")) { remoteOpen(profile, 15) }
                     Button(tr("חצי שעה")) { remoteOpen(profile, 30) }
                     Button(tr("שעה")) { remoteOpen(profile, 60) }
-                    Button(tr("שעתים")) { remoteOpen(profile, 120) }
+                    Button(tr("שעתיים")) { remoteOpen(profile, 120) }
                     Button(tr("4 שעות")) { remoteOpen(profile, 240) }
                 } label: {
                     quickActionLabel("💝", tr("מתנת דקות"))
@@ -2675,8 +2675,8 @@ struct ParentDashboardView: View {
     /// minutes are the child's own — untouched (an open earned window is
     /// stopped-and-banked). Confirmed first — this one IS a consequence.
     private func revokeGiftMessage(_ p: Profile) -> String {
-        let earned = p.gender == .girl ? tr("היא הרויחה") : tr("הוא הרויח")
-        return tr("המכשיר ינעל עכשיו, וכל הדקות שנתתם (💝 מתנה, ❄️ שמורות, וחלון פתוח של מתנה) ימחקו. הדקות ש\(earned) מלמידה לא נפגעות.")
+        let earned = p.gender == .girl ? tr("היא הרוויחה") : tr("הוא הרוויח")
+        return tr("המכשיר יינעל עכשיו, וכל הדקות שנתתם (💝 מתנה, ❄️ שמורות, וחלון פתוח של מתנה) יימחקו. הדקות ש\(earned) מלמידה לא נפגעות.")
     }
 
     private func lockAndRevokeGift(_ profile: Profile) {

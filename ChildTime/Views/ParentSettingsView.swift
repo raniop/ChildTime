@@ -70,8 +70,8 @@ struct ParentSettingsView: View {
                     // first — offer the one-tap fix (the dashboard behind this
                     // sheet is already behind the root parent gate).
                     if showConvertToChild {
-                        menuRow("🧒", tr("להפך את האיפד הזה למכשיר של ילד"),
-                                tr("ממלץ אם הילד משחק באיפד הזה")) {
+                        menuRow("🧒", tr("להפוך את האיפד הזה למכשיר של ילד"),
+                                tr("מומלץ אם הילד משחק באיפד הזה")) {
                             ConvertToChildDeviceView { dismiss() }
                         }
                     }
@@ -90,7 +90,7 @@ struct ParentSettingsView: View {
                             appsSection; soundsSection; deviceSection
                         }
                     }
-                    menuRow("ℹ️", tr("אודות ופרטיות"), tr("\(AppInfo.versionLine) · יצוא, מחיקה"), soft: true) {
+                    menuRow("ℹ️", tr("אודות ופרטיות"), tr("\(AppInfo.versionLine) · ייצוא, מחיקה"), soft: true) {
                         subScreen(tr("אודות ופרטיות")) { versionSection; privacySection }
                     }
                 }
@@ -228,9 +228,9 @@ struct ParentSettingsView: View {
         let push = PushManager.shared.authorized ? tr("פועלות") : tr("כבויות")
         return tr("\(push) · תובנות \(freqShortLabel(settings.parentInsightFrequency)) ביום")
     }
-    private var pinSummary: String { settings.faceIDForParentGate ? tr("Face ID פעיל · שנוי קוד") : tr("קוד בלבד · שנוי קוד") }
+    private var pinSummary: String { settings.faceIDForParentGate ? tr("Face ID פעיל · שינוי קוד") : tr("קוד בלבד · שינוי קוד") }
     private var devicesSummary: String {
-        settings.deviceRole == .parent ? tr("מגדר במכשיר של כל ילד") : tr("אילו אפליקציות נעולות במכשיר הזה")
+        settings.deviceRole == .parent ? tr("מוגדר במכשיר של כל ילד") : tr("אילו אפליקציות נעולות במכשיר הזה")
     }
 
     private var dashboardSection: some View {
@@ -708,12 +708,12 @@ struct ParentSettingsView: View {
         } header: {
             Text(tr("מכשיר"))
         } footer: {
-            Text(tr("\"החלף תפקיד\" מחזיר את המכשיר למסך \"מי משתמש במכשיר?\" — למשל להפך מכשיר הורה בחזרה למכשיר ילד. במכשיר ילד המחיקה חסומה; הכפתור פותח חלון קצר להסרה אמתית."))
+            Text(tr("\"החלף תפקיד\" מחזיר את המכשיר למסך \"מי משתמש במכשיר?\" — למשל להפוך מכשיר הורה בחזרה למכשיר ילד. במכשיר ילד המחיקה חסומה; הכפתור פותח חלון קצר להסרה אמיתית."))
         }
         .glassRows()
-        .confirmationDialog(tr("לחזר למסך בחירת התפקיד?"),
+        .confirmationDialog(tr("לחזור למסך בחירת התפקיד?"),
                             isPresented: $showRolePickerConfirm, titleVisibility: .visible) {
-            Button(tr("חזר לבחירה")) {
+            Button(tr("חזור לבחירה")) {
                 settings.sessionUnlocked = false   // re-lock the gate after a role switch
                 // Clear the child binding so re-picking "child" starts a FRESH scan
                 // instead of silently dropping back into the previously-bound kid.
@@ -728,9 +728,9 @@ struct ParentSettingsView: View {
                 settings.deviceRole = .unset
                 dismiss()
             }
-            Button(tr("בטול"), role: .cancel) {}
+            Button(tr("ביטול"), role: .cancel) {}
         } message: {
-            Text(tr("המכשיר יחזר למסך בחירת התפקיד. הנתונים בענן נשמרים — אפשר לבחר ילד ולסרק שוב, או להשאר הורה."))
+            Text(tr("המכשיר יחזור למסך בחירת התפקיד. הנתונים בענן נשמרים — אפשר לבחור ילד ולסרוק שוב, או להישאר הורה."))
         }
         .glassRows()
     }

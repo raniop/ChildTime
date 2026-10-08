@@ -163,7 +163,7 @@ struct EmailInviteWelcomeView: View {
                     .font(.system(size: 27, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
-                Text(tr("הזמנתם להצטרף כהורה — תראו את הילדים, ההתקדמות והשליטה, בדיוק כמו ההורה שהזמין אתכם."))
+                Text(tr("הוזמנתם להצטרף כהורה — תראו את הילדים, ההתקדמות והשליטה, בדיוק כמו ההורה שהזמין אתכם."))
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.88))
                     .multilineTextAlignment(.center)

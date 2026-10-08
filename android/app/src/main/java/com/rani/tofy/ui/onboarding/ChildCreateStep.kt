@@ -228,7 +228,7 @@ private fun InterestsGrid(selected: Set<String>, onToggle: (String) -> Unit) {
         Triple("numbers", "🔢", tr("מספרים")), Triple("puzzles", "🧩", tr("חידות")), Triple("geography", "🌍", tr("מדינות")),
     )
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Label(tr("תחומי ענין — מהם נבנות השאלות המתאמות"))
+        Label(tr("תחומי עניין — מהם נבנות השאלות המותאמות"))
         all.chunked(3).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 row.forEach { (id, emoji, label) ->

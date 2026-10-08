@@ -327,7 +327,7 @@ fun ConnectDeviceSheet(childID: String, onDismiss: () -> Unit) {
                 H(tr("חברו את המכשיר של %@", name), 24, align = TextAlign.Center)
                 Box(Modifier.glassPane(24.dp).padding(16.dp)) { QRBlock(childID, code, 210, tr("נסו שוב"), retry) }
                 Column(Modifier.fillMaxWidth().glassInset(16.dp).padding(14.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                    P(tr("1️⃣  הורידו את טופי במכשיר של %@ — מהApp Store או מGoogle Play", name), 14f, color = Color.White, weight = FontWeight.SemiBold)
+                    P(tr("1️⃣  הורידו את טופי במכשיר של %@ — מה־App Store או מ־Google Play", name), 14f, color = Color.White, weight = FontWeight.SemiBold)
                     P(tr("2️⃣  פתחו שם את טופי ובחרו \"המכשיר של הילד\""), 14f, color = Color.White, weight = FontWeight.SemiBold)
                     P(tr("3️⃣  סרקו את הקוד — ו%@ נכנס ישירות לשחק 🎉", name), 14f, color = Color.White, weight = FontWeight.SemiBold)
                 }

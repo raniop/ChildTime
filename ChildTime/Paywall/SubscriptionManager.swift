@@ -144,7 +144,7 @@ final class SubscriptionManager: ObservableObject {
             case .userCancelled:
                 return false
             case .pending:
-                lastError = tr("ההזמנה נשלחה לאשור. היא תכנס לתקף ברגע שתאשר.")
+                lastError = tr("ההזמנה נשלחה לאישור. היא תיכנס לתוקף ברגע שתאושר.")
                 return false
             @unknown default:
                 return false
@@ -293,14 +293,14 @@ final class SubscriptionManager: ObservableObject {
         if let skError = error as? StoreKitError {
             switch skError {
             case .networkError:
-                return tr("אין חבור לאינטרנט. בדקו את החבור ונסו שוב.")
+                return tr("אין חיבור לאינטרנט. בדקו את החיבור ונסו שוב.")
             case .userCancelled:
                 return ""
             default:
                 break
             }
         }
-        return tr("לא הצלחנו להשלים את הרכישה כרגע. נסו שוב בעוד רגע — לא חיבתם.")
+        return tr("לא הצלחנו להשלים את הרכישה כרגע. נסו שוב בעוד רגע — לא חויבתם.")
     }
 
     private static func verify<T>(_ result: VerificationResult<T>) throws -> T {

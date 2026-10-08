@@ -68,7 +68,7 @@ struct AddParentView: View {
             // The joiner hits the parent-code gate right after — and nobody
             // told them a code exists. Say it here, to the person who KNOWS it
             // (verbally — a gate code doesn't belong in a WhatsApp message).
-            tr("בכניסה יתבקש קוד ההורה — מסרו לו את הקוד שלכם בעלפה 🔑"),
+            tr("בכניסה יתבקש קוד ההורה — מסרו לו את הקוד שלכם בעל־פה 🔑"),
         ])
 
         codeCard
@@ -85,7 +85,7 @@ struct AddParentView: View {
                     .kerning(6)
                     .foregroundStyle(.white)
                 ShareLink(item: tr("הצטרפו אלי בטופי! קוד המשפחה: \(code)")) {
-                    Label(tr("שתוף הקוד"), systemImage: "square.and.arrow.up")
+                    Label(tr("שיתוף הקוד"), systemImage: "square.and.arrow.up")
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 16).padding(.vertical, 9)
@@ -239,7 +239,7 @@ struct JoinFamilyFlowView: View {
     @ViewBuilder private var content: some View {
         VStack(spacing: 8) {
             Text("🔗").font(.system(size: 52))
-            Text(tr("הצטרפו למשפחה קימת"))
+            Text(tr("הצטרפו למשפחה קיימת"))
                 .font(.system(size: 22, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
         }
@@ -262,7 +262,7 @@ struct JoinFamilyFlowView: View {
             Text(tr("או הקלידו את הקוד")).font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.7))
 
-            TextField("", text: $joinCode, prompt: Text(tr("6 תוים")).foregroundColor(.white.opacity(0.5)))
+            TextField("", text: $joinCode, prompt: Text(tr("6 תווים")).foregroundColor(.white.opacity(0.5)))
                 .textInputAutocapitalization(.characters)
                 .autocorrectionDisabled()
                 .keyboardType(.asciiCapable)   // Latin code on a Hebrew-only keyboard (see ChildJoinView)
@@ -331,7 +331,7 @@ struct JoinFamilyFlowView: View {
             QRScannerView { scanned in showScanner = false; JoinCoordinator.shared.present(scanned) }
                 .ignoresSafeArea()
                 .navigationTitle(tr("סריקת קוד")).navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button(tr("בטול")) { showScanner = false } } }
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button(tr("ביטול")) { showScanner = false } } }
         }
     }
 
@@ -469,7 +469,7 @@ struct JoinConfirmView: View {
                         settings.pendingJoinPayload = coord.rawPayload
                         coord.dismiss()
                     }
-                    secondaryButton(tr("בטול")) { coord.dismiss() }
+                    secondaryButton(tr("ביטול")) { coord.dismiss() }
                 }
             }
         } else if settings.deviceRole == .child {
@@ -485,7 +485,7 @@ struct JoinConfirmView: View {
             panel(emoji: "👨‍👩‍👧‍👦", title: tr("להצטרף למשפחה כהורה?"),
                   body: tr("תהיו הורה נוסף במשפחה ותראו את אותם הילדים ואת אותה ההתקדמות.")) {
                 primaryButton(tr("כן, הצטרפו")) { joinAsCoParent() }
-                secondaryButton(tr("בטול")) { coord.dismiss() }
+                secondaryButton(tr("ביטול")) { coord.dismiss() }
             }
         }
     }

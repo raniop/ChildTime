@@ -98,11 +98,11 @@ struct ChildInsightsView: View {
 
     @ViewBuilder private var interestsSection: some View {
         if !engine.gainedInterest.isEmpty || !engine.lostInterest.isEmpty {
-            card(title: tr("תחומי ענין")) {
+            card(title: tr("תחומי עניין")) {
                 VStack(alignment: .trailing, spacing: 10) {
-                    topicRow(tr("צובר ענין"), engine.gainedInterest, AppColor.gemPurple, empty: "")
+                    topicRow(tr("צובר עניין"), engine.gainedInterest, AppColor.gemPurple, empty: "")
                     if !engine.lostInterest.isEmpty {
-                        topicRow(tr("אבד ענין"), engine.lostInterest, AppColor.flameOrange, empty: "")
+                        topicRow(tr("איבד עניין"), engine.lostInterest, AppColor.flameOrange, empty: "")
                     }
                 }
             }
@@ -127,7 +127,7 @@ struct ChildInsightsView: View {
 
     @ViewBuilder private var focusSection: some View {
         if let f = snapshot.focusInsight {
-            card(title: tr("רכוז ושעות שיא")) {
+            card(title: tr("ריכוז ושעות שיא")) {
                 labeledRow(InsightsEngine.Labeled(emoji: "⏰", title: f.title, detail: f.detail))
             }
         }

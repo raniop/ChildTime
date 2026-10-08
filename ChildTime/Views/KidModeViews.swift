@@ -80,7 +80,7 @@ struct KidModeEntryView: View {
         .alert(tr("צריך הרשאת Screen Time"), isPresented: $authFailed) {
             Button(tr("הבנתי"), role: .cancel) {}
         } message: {
-            Text(tr("כדי לנעל את הטלפון במצב ילד צריך לאשר Screen Time בשביל טופי."))
+            Text(tr("כדי לנעול את הטלפון במצב ילד צריך לאשר Screen Time בשביל טופי."))
         }
     }
 
@@ -164,7 +164,7 @@ struct KidModeEntryView: View {
     }
 
     private var explainer: some View {
-        Text(tr("כל שאר האפליקציות בטלפון ינעלו. הילד ילמד וישחק בטופי, ויוכל לפתוח את האפליקציות המותרות. ליציאה — קוד הורה."))
+        Text(tr("כל שאר האפליקציות בטלפון יינעלו. הילד ילמד וישחק בטופי, ויוכל לפתוח את האפליקציות המותרות. ליציאה — קוד הורה."))
             .font(.system(size: 13, weight: .medium, design: .rounded))
             .foregroundStyle(.white.opacity(0.65))
             .multilineTextAlignment(.center)

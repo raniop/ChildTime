@@ -137,8 +137,8 @@ class WriteNote {
 
     fun report(out: WriteOutcome) {
         when (out) {
-            WriteOutcome.DENIED -> show(tr("השנוי לא נשמר — אין כרגע הרשאה למשפחה הזו. נסו שוב בעוד רגע."))
-            WriteOutcome.ERROR -> show(tr("השנוי לא נשמר. בדקו את חבור האינטרנט ונסו שוב."))
+            WriteOutcome.DENIED -> show(tr("השינוי לא נשמר — אין כרגע הרשאה למשפחה הזו. נסו שוב בעוד רגע."))
+            WriteOutcome.ERROR -> show(tr("השינוי לא נשמר. בדקו את חיבור האינטרנט ונסו שוב."))
             else -> {}
         }
     }

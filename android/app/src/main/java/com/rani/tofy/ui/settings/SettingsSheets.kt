@@ -108,7 +108,7 @@ fun LanguageSheet(onDismiss: () -> Unit) {
                 }
             }
         }
-        P(tr("השפה משתנה מיד בכל האפליקציה: טקסטים, כוון, הקראה ושאלות."), 12.5f, Modifier.padding(14.dp), color = Ink.tertiary)
+        P(tr("השפה משתנה מיד בכל האפליקציה: טקסטים, כיוון, הקראה ושאלות."), 12.5f, Modifier.padding(14.dp), color = Ink.tertiary)
     }
 }
 
@@ -251,12 +251,12 @@ fun FeedbackSheet(onDismiss: () -> Unit) {
             Column(Modifier.fillMaxWidth().padding(vertical = 30.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Text("🙏", fontSize = 60.sp)
                 H(tr("תודה רבה!"), 22, align = TextAlign.Center)
-                P(tr("קבלנו את הפידבק שלכם — זה מאוד עוזר לנו."), 15f, Modifier.padding(horizontal = 24.dp), align = TextAlign.Center)
+                P(tr("קיבלנו את הפידבק שלכם — זה מאוד עוזר לנו."), 15f, Modifier.padding(horizontal = 24.dp), align = TextAlign.Center)
                 GoldButton(tr("סגור"), Modifier.padding(top = 10.dp), onClick = onDismiss)
             }
         } else {
             Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                P(tr("נשמח לשמוע מה דעתכם — מה לשפר, מה חסר, או כל רעיון שיש לכם. כל מלה עוזרת לנו לשפר את טופי לילדים."), 13f)
+                P(tr("נשמח לשמוע מה דעתכם — מה לשפר, מה חסר, או כל רעיון שיש לכם. כל מילה עוזרת לנו לשפר את טופי לילדים."), 13f)
                 P(tr("ההודעה שלכם"), 13f, color = Ink.tertiary, weight = FontWeight.Bold)
                 OutlinedTextField(
                     text, { text = it }, Modifier.fillMaxWidth().heightIn(min = 140.dp),

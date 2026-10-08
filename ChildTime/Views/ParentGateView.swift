@@ -146,7 +146,7 @@ struct ParentGateView<Content: View>: View {
                         .font(.system(size: 19, weight: .heavy, design: .rounded))
                         .foregroundStyle(GlassInk.primary)
                         .multilineTextAlignment(.center)
-                    Text(tr("בדקו שיש אינטרנט, ושהמכשיר עדין מקשר למשפחה בלוח ההורים."))
+                    Text(tr("בדקו שיש אינטרנט, ושהמכשיר עדיין מקושר למשפחה בלוח ההורים."))
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                         .multilineTextAlignment(.center)
@@ -180,9 +180,9 @@ struct ParentGateView<Content: View>: View {
                         Button(tr("אפסו"), role: .destructive) {
                             HouseholdManager.shared.resetThisDevice()
                         }
-                        Button(tr("בטול"), role: .cancel) {}
+                        Button(tr("ביטול"), role: .cancel) {}
                     } message: {
-                        Text(tr("המכשיר יחזר למסך הפתיחה וישאל שוב מי משתמש בו. המשפחה וההתקדמות בענן נשמרות."))
+                        Text(tr("המכשיר יחזור למסך הפתיחה וישאל שוב מי משתמש בו. המשפחה וההתקדמות בענן נשמרות."))
                     }
                 } else {
                     ProgressView().scaleEffect(1.4).tint(.white)
@@ -246,7 +246,7 @@ struct ParentGateView<Content: View>: View {
                     .font(.system(size: 26, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
-                Text(tr("קוד ההורה של המשפחה עדין לא הגיע למכשיר הזה (בדקו חבור לאינטרנט). אפשר תמיד לאפס מלוח ההורים במכשיר של אבא או אמא."))
+                Text(tr("קוד ההורה של המשפחה עדיין לא הגיע למכשיר הזה (בדקו חיבור לאינטרנט). אפשר תמיד לאפס מלוח ההורים במכשיר של אבא או אמא."))
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.85))
                     .multilineTextAlignment(.center)
@@ -533,8 +533,8 @@ struct ParentGateView<Content: View>: View {
                     ? tr("הקודים לא תאמו — בחרו קוד שוב")
                     : tr("בחרו קוד בן 4 ספרות כדי להגן על ההגדרות")
             }
-            if weakCodeChosen { return tr("⚠️ קוד קל לנחוש — הילד רואה אתכם מקלידים אותו. אפשר לאשר בכל זאת, או לחזור ולבחר אחר.") }
-            return tr("הזינו שוב את הקוד לאשור")
+            if weakCodeChosen { return tr("⚠️ קוד קל לניחוש — הילד רואה אתכם מקלידים אותו. אפשר לאשר בכל זאת, או לחזור ולבחור אחר.") }
+            return tr("הזינו שוב את הקוד לאישור")
         }
         if let reason = gateReason { return reason }
         // A co-parent's FIRST entry on this device: the family code exists in

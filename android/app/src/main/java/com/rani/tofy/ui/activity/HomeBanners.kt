@@ -164,7 +164,7 @@ private fun ChoreBanner(kid: Child, c: Chore, approving: Boolean, onOpen: () -> 
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(if (kid.isGirl) tr("%@ סימה מטלה", kid.name) else tr("%@ סים מטלה", kid.name),
                 color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
-            P(tr("%@ · מחכה לאשור", c.title), 13f, color = Ink.secondary, maxLines = 2)
+            P(tr("%@ · מחכה לאישור", c.title), 13f, color = Ink.secondary, maxLines = 2)
         }
         Box(
             Modifier.height(38.dp).clip(RoundedCornerShape(12.dp)).background(Color.White.copy(alpha = 0.92f))
@@ -189,7 +189,7 @@ internal fun packLabel(id: String): Pair<String, String>? = when (id) {
     "animals" -> "🐾" to tr("עולם החיות")
     "sea" -> "🌊" to tr("מעמקי הים")
     "gifted" -> "🧠" to tr("הכנה למחוננים")
-    "food" -> "🍳" to tr("מטבח ומדע של אכל")
+    "food" -> "🍳" to tr("מטבח ומדע של אוכל")
     "israel" -> "🏛️" to tr("ישראל שלי")
     "tishrei" -> "🍎" to tr("חגי תשרי")
     "music" -> "🎵" to tr("מוזיקה")
@@ -204,7 +204,7 @@ internal fun packLabel(id: String): Pair<String, String>? = when (id) {
     "history" -> "🏛️" to tr("מוזיאון ההיסטוריה")
     "geography" -> "🌍" to tr("מסע סביב העולם")
     "money" -> "💰" to tr("שוק הכסף")
-    "reading" -> "📖" to tr("יער הספורים")
+    "reading" -> "📖" to tr("יער הסיפורים")
     "holidays" -> "🎊" to tr("החגים")
     else -> null
 }
