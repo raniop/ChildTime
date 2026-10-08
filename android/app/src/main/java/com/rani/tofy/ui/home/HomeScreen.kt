@@ -281,7 +281,9 @@ private fun CardButton(text: String, white: Boolean, modifier: Modifier, onClick
 private fun Stat(modifier: Modifier, value: String, label: String) {
     Column(modifier.glassInset(14.dp).padding(vertical = 9.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(value, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-        Text(label, color = Ink.secondary, fontFamily = Rounded, fontSize = 12.sp)
+        // Always one line — "דקות שהרוויחה היום" wrapped on a narrow phone (Rani); it shrinks instead.
+        com.rani.tofy.kid.ui.play.FitText(label, 12.sp, color = Ink.secondary, weight = FontWeight.Normal, maxLines = 1, minScale = 0.7f,
+            modifier = Modifier.padding(horizontal = 4.dp))
     }
 }
 

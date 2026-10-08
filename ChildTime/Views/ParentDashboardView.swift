@@ -1753,7 +1753,10 @@ struct ParentDashboardView: View {
             }
             .monospacedDigit()
             .environment(\.layoutDirection, .leftToRight)   // "60/90" is a number — it rendered as "/900" in RTL
+            // Always one line (Rani: "דקות שהרוויחה היום" wrapped on a narrower
+            // iPhone and made the three tiles uneven) — it shrinks a little instead.
             Text(label).font(.system(size: 10.5, weight: .semibold, design: .rounded)).foregroundStyle(GlassInk.secondary)
+                .lineLimit(1).minimumScaleFactor(0.7)
             if let progress {
                 GeometryReader { g in
                     ZStack(alignment: .leading) {
