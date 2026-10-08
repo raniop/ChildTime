@@ -125,6 +125,14 @@ final class KidModeManager: ObservableObject {
         if let s = defaults.string(forKey: Key.prevID), let id = UUID(uuidString: s) {
             ProfileStore.shared.setActiveID(id)
         }
+        // The parent just authenticated to get here (every exit is gated), and
+        // the phone is the parent's again — so that ONE Face ID also opens the
+        // parent screen. In Kid Mode the gate deliberately doesn't remember an
+        // unlock (the kid holds the phone), which made the dashboard ask a
+        // second time right after leaving (Rani).
+        if ParentSettings.shared.deviceRole != .child {
+            ParentSettings.shared.sessionUnlocked = true
+        }
         Haptic.light()
     }
 

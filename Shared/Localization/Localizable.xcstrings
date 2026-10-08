@@ -32243,7 +32243,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "دانا"
+            "value" : "دانة"
           }
         },
         "en" : {
@@ -59883,6 +59883,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Появится код / QR — отсканируйте его здесь или введите:"
+          }
+        }
+      }
+    },
+    "יואב" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يوآف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yoav"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Йоав"
           }
         }
       }

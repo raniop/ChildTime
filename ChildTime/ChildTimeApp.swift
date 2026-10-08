@@ -204,9 +204,9 @@ struct ChildTimeApp: App {
     private static func seedDemo() {
         if ProfileStore.shared.profiles.isEmpty {
             // Grades set, so the kid-facing grade picker never covers a demo screen.
-            let dana = Profile(name: tr("דָּנָה"), gender: .girl, age: .grade1, grade: 3)
+            let dana = Profile(name: tr("דנה"), gender: .girl, age: .grade1, grade: 3)
             ProfileStore.shared.add(dana)
-            let yoav = Profile(name: tr("יוֹאָב"), gender: .boy, age: .grade1, grade: 1)
+            let yoav = Profile(name: tr("יואב"), gender: .boy, age: .grade1, grade: 1)
             ProfileStore.shared.add(yoav)
             ProfileStore.shared.setActive(dana)
             UserDefaults.standard.set([dana.id.uuidString, yoav.id.uuidString],
@@ -508,7 +508,7 @@ struct ChildTimeApp: App {
                 .onAppear { ParentSettings.shared.deviceRole = .parent }   // demo: age / grade rows are parent-only
         case "dailycapstep":                            // DEMO_SCREEN=dailycapstep — create child: ⏱ the last step
             DailyCapStepDemo(profile: ProfileStore.shared.active
-                             ?? Profile(name: tr("דָּנָה"), gender: .girl, age: .grade1, grade: 3))
+                             ?? Profile(name: tr("דנה"), gender: .girl, age: .grade1, grade: 3))
                 .onAppear { ParentSettings.shared.deviceRole = .parent }
         case "dailycapcard":                            // DEMO_SCREEN=dailycapcard — parent home: ⏱ the one-time card
             ParentDashboardView(isRoot: true)
@@ -768,8 +768,8 @@ struct ChildTimeApp: App {
                              onPlay: {}, onLater: {})
         case "devicequestion":                             // DEMO_SCREEN=devicequestion — asked right after a child is added
             DeviceQuestionView(child: ProcessInfo.processInfo.environment["DEMO_BOY"] == "1"
-                               ? Profile(name: tr("יוֹאָב"), gender: .boy, age: .grade1, grade: 1)
-                               : Profile(name: tr("דָּנָה"), gender: .girl, age: .grade1, grade: 3),
+                               ? Profile(name: tr("יואב"), gender: .boy, age: .grade1, grade: 1)
+                               : Profile(name: tr("דנה"), gender: .girl, age: .grade1, grade: 3),
                                onOwnDevice: {}, onPlaysHere: {})
         case "giftwelcome": GiftWelcomeView(until: Date().addingTimeInterval(30 * 86_400 - 60)) {}   // DEMO_SCREEN=giftwelcome
         case "joinguard":                                  // parent-scans-child-code block dialog

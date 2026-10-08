@@ -1348,6 +1348,7 @@ struct ParentDashboardView: View {
         let playing = liveSecs > 0
         let pct = s.answeredToday > 0 ? Int((Double(s.correctToday) / Double(s.answeredToday) * 100).rounded()) : nil
         let hasDevice = childHasDevice(profile)
+        let showStats = hasDevice || s.totalAnswered > 0 || s.answeredToday > 0
         let state: String = {
             if playing { return tr("\(girl ? tr("משחקת") : tr("משחק")) עכשיו · נשארו \(formatTime(liveSecs))") }
             if isChildPlayingNow(profile) { return tr("בטופי עכשיו · \(girl ? tr("לומדת") : tr("לומד"))") }
@@ -1419,7 +1420,10 @@ struct ParentDashboardView: View {
                 }
                 .buttonStyle(.plain)
             }
-            if hasDevice {
+            // 📊 The tiles for every child who plays — on a device of their own
+            // OR in kid mode on this phone (Rani: Uri played here and his card
+            // showed nothing).
+            if showStats {
                 HStack(spacing: 8) {
                     // "דקות היום" meant two different numbers on the two screens —
                     // here minutes EARNED by learning today, on the kid's own home
@@ -1435,18 +1439,20 @@ struct ParentDashboardView: View {
                     overviewStat(value: "\(s.correctToday)", suffix: nil, label: tr("נכונות"), progress: nil)
                 }
                 .fixedSize(horizontal: false, vertical: true)   // all three tiles as tall as the one with the bar (Rani)
-                HStack(spacing: 8) {
-                    // The whole card is a NavigationLink; this echoes it as the
-                    // primary control. The ⚡ menu is overlaid by the grid into
-                    // the reserved slot on its left (a Menu inside a link would
-                    // swallow the tap).
-                    // 🧒 Handing the phone over is the thing parents could not
-                    // find, so it is the WIDE control now and says what it does
-                    // in a full sentence. "מידע נוסף" takes the narrow slot —
-                    // the whole card is already a link to that page.
-                    homePrimaryLabel(tr("מידע נוסף ←"))
-                    Color.clear.frame(width: Self.actionsMenuWidth, height: 1)
+            }
+            if hasDevice {
+                // The buttons sit on the tiles' grid (Rani): "מידע נוסף" spans
+                // the first two tiles and the gap between them, ⚡ (overlaid
+                // by the grid — a Menu inside a link would swallow the tap) is
+                // exactly the third tile.
+                GeometryReader { g in
+                    let t = Self.tileWidth(innerWidth: g.size.width)
+                    HStack(spacing: Self.tileGap) {
+                        homePrimaryLabel(tr("מידע נוסף ←")).frame(width: t * 2 + Self.tileGap)
+                        Color.clear.frame(width: t, height: 1)
+                    }
                 }
+                .frame(height: Self.homeControlHeight)
                 // 🧒 Its own full-width row, in a whole sentence: this is the
                 // thing parents wrote in about and it earns the space (Rani).
                 Color.clear.frame(maxWidth: .infinity).frame(height: Self.homeControlHeight)
@@ -1455,6 +1461,7 @@ struct ParentDashboardView: View {
                 // a child without a device had NO actions menu and no way into
                 // their page (Rani). That hid exactly the things a parent needs
                 // then: connect a device, or hand them the parent's own phone.
+                if !showStats {
                 HStack(spacing: 6) {
                     Text(tr("\(Profile.gradeNameForParent(profile.effectiveGrade)) · אין עדיין מכשיר מחובר."))
                         .font(.system(size: 13, weight: .medium, design: .rounded))
@@ -1462,15 +1469,22 @@ struct ParentDashboardView: View {
                         .lineLimit(1).minimumScaleFactor(0.7)
                     Spacer(minLength: 0)
                 }
+                }
                 // מידע נוסף · חברו מכשיר · פעולות, side by side (Rani): connecting
                 // used to REPLACE "מידע נוסף", and a row of its own grew the card.
                 // "חברו מכשיר" and ⚡ are overlaid into their slots by the grid
                 // (a Button inside the NavigationLink would swallow the tap).
-                HStack(spacing: 8) {
-                    homePrimaryLabel(tr("מידע נוסף ←"))
-                    Color.clear.frame(width: Self.connectButtonWidth, height: 1)
-                    Color.clear.frame(width: Self.actionsMenuWidth, height: 1)
+                // Three columns on the same grid as the tiles of a card with a
+                // device, so ⚡ sits in the same place on every card.
+                GeometryReader { g in
+                    let t = Self.tileWidth(innerWidth: g.size.width)
+                    HStack(spacing: Self.tileGap) {
+                        homePrimaryLabel(tr("מידע נוסף ←")).frame(width: t)
+                        Color.clear.frame(width: t, height: 1)
+                        Color.clear.frame(width: t, height: 1)
+                    }
                 }
+                .frame(height: Self.homeControlHeight)
                 Color.clear.frame(maxWidth: .infinity).frame(height: Self.homeControlHeight)
             }
         }
@@ -1480,9 +1494,12 @@ struct ParentDashboardView: View {
         .environment(\.layoutDirection, .app)
     }
 
-    private static let actionsMenuWidth: CGFloat = 112
-    /// "+ חברו מכשיר" between מידע נוסף and ⚡ on a card with no device yet.
-    private static let connectButtonWidth: CGFloat = 112
+    /// The three stat tiles' grid, which the buttons under them follow.
+    static let tileGap: CGFloat = 8
+    static let cardPadding: CGFloat = 14
+    static func tileWidth(innerWidth w: CGFloat) -> CGFloat { max(0, (w - tileGap * 2) / 3) }
+    /// The same column, measured from the whole card (the overlays see the card).
+    static func tileWidth(cardWidth w: CGFloat) -> CGFloat { tileWidth(innerWidth: w - cardPadding * 2) }
 
 
     private func childHasDevice(_ profile: Profile) -> Bool {
@@ -1749,12 +1766,12 @@ struct ParentDashboardView: View {
     }
 
     /// ⚡ on a card: opens the child's short actions window.
-    private func gridCardMenu(_ profile: Profile) -> some View {
+    private func gridCardMenu(_ profile: Profile, width: CGFloat) -> some View {
         Button {
             Haptic.light()
             actionsChild = profile
         } label: {
-            homeGhostLabel(tr("⚡ פעולות"), width: Self.actionsMenuWidth)
+            homeGhostLabel(tr("⚡ פעולות"), width: width)
         }
         .buttonStyle(.plain)
     }
@@ -2301,11 +2318,14 @@ struct ParentDashboardView: View {
                     // ⚡ quick actions overlaid INTO the slot the card reserves
                     // (a Menu inside the NavigationLink would swallow the tap).
                     // The grid is RTL, so `.bottomTrailing` is the bottom-LEFT.
-                    .overlay(alignment: .bottomTrailing) {
-                        gridCardMenu(row.profile)
-                            .coachMark("p.actions", if: row.profile.id == rows.first?.profile.id)
-                            .padding(14)
-                            .padding(.bottom, Self.homeControlHeight + Self.homeRowGap)
+                    .overlay {
+                        GeometryReader { g in
+                            gridCardMenu(row.profile, width: Self.tileWidth(cardWidth: g.size.width))
+                                .coachMark("p.actions", if: row.profile.id == rows.first?.profile.id)
+                                .padding(Self.cardPadding)
+                                .padding(.bottom, Self.homeControlHeight + Self.homeRowGap)
+                                .frame(width: g.size.width, height: g.size.height, alignment: .bottomTrailing)
+                        }
                     }
                     // 🧒 One tap hands THIS device to THIS child. Parents wrote in
                     // that they could not find Kid Mode at all when it lived only
@@ -2328,22 +2348,26 @@ struct ParentDashboardView: View {
                         }
                     }
                     // 📱 No device yet → "+ חברו מכשיר", between מידע נוסף and ⚡.
-                    .overlay(alignment: .bottomTrailing) {
+                    .overlay {
                         if isRoot, !childHasDevice(row.profile) {
+                          GeometryReader { g in
+                            let t = Self.tileWidth(cardWidth: g.size.width)
                             Button {
                                 Haptic.light()
                                 qrCode = nil
                                 qrChild = row.profile
                             } label: {
-                                homeGhostLabel(tr("+ חברו מכשיר"), width: Self.connectButtonWidth)
+                                homeGhostLabel(tr("+ חברו מכשיר"), width: t)
                             }
                             .buttonStyle(.borderless)
                             .coachMark("p.connect", if: row.profile.id == rows.first(where: { !childHasDevice($0.profile) })?.profile.id)
-                            .padding(.bottom, 14 + Self.homeControlHeight + Self.homeRowGap)
+                            .padding(.bottom, Self.cardPadding + Self.homeControlHeight + Self.homeRowGap)
                             // Its slot sits between מידע נוסף and the ⚡ menu (the grid is RTL:
                             // `.bottomTrailing` is the bottom-LEFT, where ⚡ lives).
-                            .padding(.trailing, 14 + Self.actionsMenuWidth + 8)
-                            .environment(\.layoutDirection, .app)
+                            .padding(.trailing, Self.cardPadding + t + Self.tileGap)
+                            .frame(width: g.size.width, height: g.size.height, alignment: .bottomTrailing)
+                          }
+                          .environment(\.layoutDirection, .app)
                         }
                     }
                     .contextMenu {
