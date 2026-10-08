@@ -115,6 +115,10 @@
     .ftable tr.frow td[data-l="ילדים"]{grid-column:1/2}
     .ftable tr.frow td[data-l="פעילות"]{grid-column:2/3}
     .ftable tr.frow td[data-l="שאלות היום"],.ftable tr.frow td[data-l="הצטרפו"]{display:none}
+    .ftable tr.frow td[data-l="בטופי"]{grid-row:3;grid-column:1/2}
+    .ftable tr.frow td[data-l="מסך"]{grid-row:3;grid-column:2/4}
+    .ftable tr.frow td[data-l="בטופי"]::before{content:"🧠 בטופי "}
+    .ftable tr.frow td[data-l="מסך"]::before{content:"📱 מסך "}
     .ftable tr.fdet{display:block;margin:-6px 0 10px} .ftable tr.fdet[hidden]{display:none}
     .ftable tr.fdet td{display:block;border-radius:0 0 14px 14px}
   }
@@ -197,7 +201,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261008090504";
+const PAGE_STAMP = "20261008104259";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -392,6 +396,13 @@ async function families() {
   const isInactive = (f) => {
     if ((f.j.state || "free_new") === "inactive") return true;
     const w = famWhen(f).days;
+    // 😴 Moved here by hand — until a child plays AFTER that moment (Rani).
+    // Day granularity: anything up to and including the day it was moved keeps
+    // it here; a child playing on a LATER day brings the family back.
+    if (f.adminInactiveAt) {
+      const flaggedDaysAgo = Math.floor((Date.now() / 1000 - f.adminInactiveAt) / 86400);
+      if (w >= flaggedDaysAgo) return true;
+    }
     // Played, but not for more than a week → inactive until they play again (Rani).
     if (w !== 99999) return w > QUIET_AFTER_DAYS;
     const born = f.createdAt || famStats(f).joined || 0;     // seconds
@@ -416,6 +427,8 @@ async function families() {
       case "state": return STATE_ORDER[(f.j.state || "free_new")] ?? 9;
       case "kids": return st.kids;
       case "today": return st.today;
+      case "play": return st.playMin;
+      case "screen": return st.screenMin;
       case "joined": return st.joined;
       default: return st.when.days;
     }
@@ -487,9 +500,14 @@ function famWhen(f) {
 /// Everything the table needs about one family, computed once.
 function famStats(f) {
   const kids = f.children || [];
-  const today = kids.reduce((n, k) => n + ((((J && J.children && J.children[k.fullId || k.id]) || {}).today || {}).questions || 0), 0);
+  const tdy = (k) => (((J && J.children && J.children[k.fullId || k.id]) || {}).today || {});
+  const today = kids.reduce((n, k) => n + (tdy(k).questions || 0), 0);
+  // ⏱ Today, for the whole family: minutes spent answering in Tofy, and minutes
+  // of screen time actually used (what was opened minus what came back).
+  const playMin = Math.round(kids.reduce((n, k) => n + (tdy(k).learningSeconds || 0), 0) / 60);
+  const screenMin = kids.reduce((n, k) => n + (tdy(k).minutesUsed || 0), 0);
   const joined = Math.min(...kids.map((k) => k.createdAt || Infinity).concat([Infinity]));
-  return { kids: kids.length, today, joined: isFinite(joined) ? joined : 0, when: famWhen(f) };
+  return { kids: kids.length, today, playMin, screenMin, joined: isFinite(joined) ? joined : 0, when: famWhen(f) };
 }
 
 function famStateChip(f) {
@@ -531,6 +549,8 @@ function famCard(f) {
     <td class="num" data-l="ילדים">${fmt(st.kids)}</td>
     <td class="${st.when.cls}" data-l="פעילות">${st.when.text}</td>
     <td class="num" data-l="שאלות היום">${st.today ? fmt(st.today) : "—"}</td>
+    <td class="num" data-l="בטופי">${st.playMin ? fmt(st.playMin) + " דק׳" : "—"}</td>
+    <td class="num" data-l="מסך">${st.screenMin ? fmt(st.screenMin) + " דק׳" : "—"}</td>
     <td class="num" data-l="הצטרפו">${st.joined ? dateShort(st.joined) : "—"}</td>
     <td class="menucell"><button class="dots" type="button" data-menu aria-label="פעולות">⋯</button>
       <div class="rowmenu">
@@ -541,16 +561,17 @@ function famCard(f) {
         <a href="families.html">🧒 פרטי הילדים</a>
         <button data-label="${esc(f.hh)}" data-cur="${esc(f.label || "")}">🏷 תווית</button>
         <div class="sep"></div>
+        <button data-quiet="${esc(f.hh)}" data-on="${f.adminInactiveAt ? "1" : ""}">${f.adminInactiveAt ? "↩︎ החזר לפעילות" : "😴 העבר ללא פעילות"}</button>
         <button data-demo="${esc(f.hh)}" data-on="${f.isDemo ? "1" : ""}">${f.isDemo ? "↩︎ בטל דמו" : "🧪 סמן כדמו"}</button>
         <button class="danger" data-del="${esc(f.hh)}" data-name="${esc(famName(f))}">🗑 מחיקת המשפחה</button>
       </div></td>
   </tr>
-  <tr class="fdet" data-det="${esc(f.hh)}" hidden><td colspan="8"><div class="pills">${kidPills}${devPills}${source}</div></td></tr>`;
+  <tr class="fdet" data-det="${esc(f.hh)}" hidden><td colspan="10"><div class="pills">${kidPills}${devPills}${source}</div></td></tr>`;
 }
 
 /// The table around the rows — the header cells are the sort control.
 const FAM_COLS = [["name", "משפחה"], ["state", "מצב"], ["", "מכשירים"], ["kids", "ילדים"], ["active", "פעילות אחרונה"],
-  ["today", "שאלות היום"], ["joined", "הצטרפו"], ["", ""]];
+  ["today", "שאלות היום"], ["play", "בטופי היום"], ["screen", "זמן מסך היום"], ["joined", "הצטרפו"], ["", ""]];
 function famTable(rows) {
   const head = FAM_COLS.map(([k, l]) => k
     ? `<th class="${famSort.key === k ? "on" : ""}" data-sort="${k}">${l}${famSort.key === k ? (famSort.dir > 0 ? " ↑" : " ↓") : ""}</th>`
@@ -601,6 +622,7 @@ function wireFam() {
 
   document.querySelectorAll("[data-gift]").forEach((b) => b.onclick = async () => { const n = Number(prompt("כמה ימי טופי+ במתנה? (מוסיף על מה שיש)", "14")); if (!n) return; try { const r = await call("adminGiftHousehold", { householdID: b.dataset.gift, days: n }); toast("המתנה נפתחה ל־" + n + " ימים"); patchFam(b.dataset.gift, (f, j) => { f.premiumUntil = r.premiumUntil || f.premiumUntil; if (j) { j.state = "gift"; j.premiumUntil = r.premiumUntil || j.premiumUntil; j.daysLeft = Math.max(0, Math.round(((r.premiumUntil || 0) - Date.now() / 1000) / 86400)); } }); } catch (e) { toast("נכשל: " + e.message); } });
   document.querySelectorAll("[data-endgift]").forEach((b) => b.onclick = async () => { if (!confirm("לסיים עכשיו את המתנה של המשפחה הזאת? טופי+ ייסגר להם מיד.")) return; try { await call("adminEndGift", { householdID: b.dataset.endgift }); toast("המתנה הסתיימה"); patchFam(b.dataset.endgift, (f, j) => { f.premiumUntil = null; if (j) { j.state = "returned"; j.premiumUntil = null; j.daysLeft = 0; } }); } catch (e) { toast("נכשל: " + e.message); } });
+  document.querySelectorAll("[data-quiet]").forEach((b) => b.onclick = async () => { const on = !b.dataset.on; try { const res = await call("adminSetInactiveFlag", { householdID: b.dataset.quiet, inactive: on }); toast(on ? "הועברה ללא פעילות 😴" : "חזרה לפעילות"); patchFam(b.dataset.quiet, (f) => { f.adminInactiveAt = on ? (res && res.at) || Date.now() / 1000 : null; }); } catch (e) { toast("נכשל: " + e.message); } });
   document.querySelectorAll("[data-demo]").forEach((b) => b.onclick = async () => { const on = !b.dataset.on; try { await call("adminSetDemoFlag", { householdID: b.dataset.demo, demo: on }); toast(on ? "סומנה כדמו" : "כבר לא דמו"); patchFam(b.dataset.demo, (f) => { f.isDemo = on; }); } catch (e) { toast("נכשל: " + e.message); } });
   document.querySelectorAll("[data-world]").forEach((b) => b.onclick = async () => {
     const items = [...Object.entries(PACKS).map(([id, p]) => [id, p.emoji + " " + p.name]), ...Object.entries(BASE).map(([t, l]) => [t, l + " (עולם בסיס)"])];

@@ -2683,6 +2683,9 @@ exports.adminFamiliesOverview = onCall(
         familyName: d.familyName || null,   // the parent-set name (Settings → שם המשפחה)
         premiumUntil: d.premiumUntil || null,   // Tofy+ for the whole family (epoch seconds)
         isDemo,
+        // 😴 Moved to "inactive" by hand in the admin. Stays there until the
+        // family plays again AFTER that moment — then it is active again.
+        adminInactiveAt: d.adminInactiveAt ? d.adminInactiveAt.toMillis() / 1000 : null,
         parents,
         tombstones: tombsByHH[h.id] || 0,
         children: kids,
@@ -2843,6 +2846,23 @@ exports.adminSetDemoFlag = onCall(
     await ref.update({ demo });
     console.log("[adminSetDemoFlag]", email, hhID, "→ demo:", demo);
     return { ok: true, demo };
+  }
+);
+
+// 😴 Move a family to (or out of) "inactive" by hand — Rani, 2026-10-08. A
+// timestamp, not a boolean: the family comes back by itself the moment a child
+// plays after it (the admin compares it with the last activity).
+exports.adminSetInactiveFlag = onCall(
+  { timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    requireAdmin(request);
+    const hhID = String(request.data && request.data.householdID || "");
+    if (!/^[0-9A-Fa-f-]{36}$/.test(hhID)) throw new HttpsError("invalid-argument", "householdID must be a UUID.");
+    const on = request.data && request.data.inactive === true;
+    const ref = db.collection("households").doc(hhID);
+    if (!(await ref.get()).exists) throw new HttpsError("not-found", "Household not found.");
+    await ref.update({ adminInactiveAt: on ? admin.firestore.Timestamp.now() : admin.firestore.FieldValue.delete() });
+    return { ok: true, inactive: on, at: on ? Date.now() / 1000 : null };
   }
 );
 
@@ -3624,7 +3644,9 @@ async function computeJourney() {
         name: d.name || "", householdID: d.householdID, grade: (d.grade === 0 || d.grade) ? d.grade : null, gender: d.gender || null,
         activeDays30: activeDays.length, questions30, everQuestions: everQ, everActiveDays: everDays,
         lastActive: activeDays.map((x) => x.date).sort().slice(-1)[0] || null,
-        today: { questions: today.questionsAnswered || 0, correct: today.correct || 0, minutesEarned: today.minutesEarned || 0, minutesUsed: today.minutesUsed || 0 },
+        today: { questions: today.questionsAnswered || 0, correct: today.correct || 0, minutesEarned: today.minutesEarned || 0, minutesUsed: today.minutesUsed || 0,
+          // ⏱ Time spent IN Tofy answering (the admin's "בטופי" column).
+          learningSeconds: today.learningSeconds || 0 },
         series14: last14.map((dk) => { const x = days.find((y) => y.date === dk); return x && (x.questionsAnswered || 0) > 0 ? 1 : 0; }),
         activated: everDays >= cfg.activationDays && everQ >= cfg.activationQuestions,
         favorite: fav ? { topic: fav[0], label: TOPIC_LABEL[fav[0]] || fav[0], questions: fav[1].q, days: fav[1].days, accuracy: fav[1].q ? Math.round(100 * fav[1].c / fav[1].q) : 0 } : null,
