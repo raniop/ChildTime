@@ -55,6 +55,17 @@ enum WhatsNewContent {
     /// notes were dated — the first release, as one entry.
     static let releases: [Release] = [
 
+        Release(build: 211, version: "2026.10.8", headline: tr("כספת חדשה, ותשובות שנצבעות מיד"), items: [
+            Item(emoji: "🔐", title: tr("כספת חדשה, פשוטה יותר"),
+                 line: tr("במשחק הכספת כל תשובה נכונה מסובבת גלגל, ובשלושה גלגלים הכספת נפתחת")),
+            Item(emoji: "⚡", title: tr("תשובה נצבעת מיד"),
+                 line: tr("בלחיצה על תשובה הכרטיס נצבע מיד, בלי השהיה — מורגש במיוחד בטאבלטים")),
+            Item(emoji: "🔢", title: tr("מספרים משמאל לימין"),
+                 line: tr("קוד ההורה, קוד הילד וגלגלי הכספת מתמלאים משמאל לימין, כמו כל מספר")),
+            Item(emoji: "📱", title: tr("מותאם ל-iPhone Duo"),
+                 line: tr("כל מסך מנצל את כל הרוחב ויושב באמצע המכשיר, סגור ופתוח")),
+        ]),
+
         Release(build: 208, version: "2026.10.7", headline: tr("איפה הילדים, במבט אחד"), items: [
             Item(emoji: "🏠", title: tr("איפה הילדים, במבט אחד"),
                  line: tr("בכרטיס של כל ילד כתוב עכשיו בבית, בבית הספר או אצל סבתא, עם הסמל של המקום")),

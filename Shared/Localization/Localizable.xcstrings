@@ -24849,6 +24849,28 @@
         }
       }
     },
+    "בלחיצה על תשובה הכרטיס נצבע מיד, בלי השהיה — מורגש במיוחד בטאבלטים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اضغطوا على إجابة وستتلوّن بطاقتها فورًا دون تأخير — يُلاحظ ذلك خاصة في الأجهزة اللوحية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap an answer and its card lights up right away, with no delay — most noticeable on tablets"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите на ответ — карточка сразу подсветится, без задержки. Особенно заметно на планшетах"
+          }
+        }
+      }
+    },
     "בלי זה לא נוכל לחסום אפליקציות" : {
       "localizations" : {
         "ar" : {
@@ -25021,6 +25043,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "На иврите Tofy теперь обращается к девочке в женском роде на всех её экранах — в наградах, подсказках и играх"
+          }
+        }
+      }
+    },
+    "במשחק הכספת כל תשובה נכונה מסובבת גלגל, ובשלושה גלגלים הכספת נפתחת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في لعبة الخزنة كل إجابة صحيحة تدير قرصًا، وثلاثة أقراص تفتح الخزنة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In the safe game every right answer turns a dial, and three dials open the safe"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В игре «Сейф» каждый правильный ответ поворачивает диск, а три диска открывают сейф"
           }
         }
       }
@@ -58311,6 +58355,28 @@
         }
       }
     },
+    "כל מסך מנצל את כל הרוחב ויושב באמצע המכשיר, סגור ופתוח" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل شاشة تستخدم العرض الكامل وتتوسّط الجهاز، مطويًا ومفتوحًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every screen uses the full width and sits in the middle of the device, folded and unfolded"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждый экран использует всю ширину и стоит по центру устройства — в сложенном и раскрытом виде"
+          }
+        }
+      }
+    },
     "כל מסך עבר לעיצוב זכוכית שקוף על רקע המותג: מסך הבית של הילד, השאלות, גלגל המזל, החנות, המטלות, הדירוג והטורניר — וגם מסך ההורים, הדוח לכל ילד, ההגדרות ומסך הרכישה. הכפתורים והכרטיסים אחידים, קריאים ורגועים יותר" : {
       "localizations" : {
         "ar" : {
@@ -59101,6 +59167,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Войти в Tofy"
+          }
+        }
+      }
+    },
+    "כספת חדשה, ותשובות שנצבעות מיד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خزنة جديدة وإجابات تتلوّن فورًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new safe, and answers that light up instantly"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новый сейф и ответы, которые подсвечиваются сразу"
+          }
+        }
+      }
+    },
+    "כספת חדשה, פשוטה יותר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خزنة جديدة وأبسط"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new, simpler safe"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новый, более простой сейф"
           }
         }
       }
@@ -70745,6 +70855,28 @@
         }
       }
     },
+    "מותאם ל-iPhone Duo" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مهيّأ لـ iPhone Duo"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Made for iPhone Duo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Адаптировано для iPhone Duo"
+          }
+        }
+      }
+    },
     "מותאם לגיל" : {
       "localizations" : {
         "ar" : {
@@ -72088,6 +72220,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отметьте постоянные места, например дом и школу, и получайте сообщение, когда ребёнок приходит или уходит"
+          }
+        }
+      }
+    },
+    "מספרים משמאל לימין" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأرقام من اليسار إلى اليمين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Numbers left to right"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Числа слева направо"
           }
         }
       }
@@ -89898,6 +90052,28 @@
         }
       }
     },
+    "קוד ההורה, קוד הילד וגלגלי הכספת מתמלאים משמאל לימין, כמו כל מספר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رمز الوالد ورمز الطفل وأقراص الخزنة تُملأ من اليسار إلى اليمين، مثل أي رقم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The parent code, the child's code and the safe's dials fill left to right, like any number"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код родителя, код ребёнка и диски сейфа заполняются слева направо, как любое число"
+          }
+        }
+      }
+    },
     "קוד ההורים הוזן במכשיר של הילד" : {
       "localizations" : {
         "ar" : {
@@ -98928,6 +99104,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Правильный ответ в игре"
+          }
+        }
+      }
+    },
+    "תשובה נצבעת מיד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإجابة تتلوّن فورًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Answers light up instantly"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ответ подсвечивается сразу"
           }
         }
       }
