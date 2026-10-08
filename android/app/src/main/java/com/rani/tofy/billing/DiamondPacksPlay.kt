@@ -105,7 +105,7 @@ fun DiamondPacksPlay(onDone: () -> Unit = {}) {
                 Text(com.rani.tofy.kid.ui.social.SocialMe.g(tr("נַסֵּה שׁוּב בְּעוֹד רֶגַע."), tr("נַסִּי שׁוּב בְּעוֹד רֶגַע.")), color = Color.White.copy(alpha = 0.7f), fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 13.sp)
                 Text(
                     com.rani.tofy.kid.ui.social.SocialMe.g(tr("נַסֵּה שׁוּב"), tr("נַסִּי שׁוּב")),
-                    Modifier.clip(RoundedCornerShape(50)).background(KidColor.gemPurple).clickable { scope.launch { PlayDiamonds.load(ctx) } }
+                    Modifier.clip(RoundedCornerShape(16.dp)).background(KidColor.gemPurple).clickable { scope.launch { PlayDiamonds.load(ctx) } }
                         .padding(horizontal = 22.dp, vertical = 10.dp),
                     color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp,
                 )
@@ -129,7 +129,7 @@ fun DiamondPacksPlay(onDone: () -> Unit = {}) {
 private fun PackRow(d: ProductDetails, best: Boolean, enabled: Boolean, onBuy: () -> Unit) {
     val diamonds = ProductIds.diamonds(d.productId)
     Row(
-        Modifier.fillMaxWidth().then(if (best) Modifier.tintedPane(Color(0xFFFFD23F)) else Modifier.glassPane(22.dp))
+        Modifier.fillMaxWidth().then(if (best) Modifier.tintedPane(Color(0xFFFFD23F)) else Modifier.glassPane(16.dp))
             .alpha(if (enabled) 1f else 0.6f).clickable(enabled = enabled, onClick = onBuy).padding(12.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -142,7 +142,7 @@ private fun PackRow(d: ProductDetails, best: Boolean, enabled: Boolean, onBuy: (
         }
         Text(
             d.oneTimePurchaseOfferDetails?.formattedPrice ?: "",
-            Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.92f)).padding(horizontal = 16.dp, vertical = 9.dp),
+            Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.92f)).padding(horizontal = 16.dp, vertical = 9.dp),
             color = Color(0xFF4B3FBF), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, maxLines = 1,
         )
     }

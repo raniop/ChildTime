@@ -154,7 +154,7 @@ internal fun AskParent(child: Child?, childID: String, householdID: String?, wor
                     ?: tr("הַמִּשְׂחָקִים, הַזִּירָה, הַמַּטְלוֹת וְכָל הָעוֹלָמוֹת נִפְתָּחִים לְכָל הַמִּשְׁפָּחָה — וְאַבָּא אוֹ אִמָּא פּוֹתְחִים אֶת זֶה מֵהַטֶּלֶפוֹן שֶׁלָּהֶם."),
                 16f, alpha = 0.9f,
             )
-            Column(Modifier.widthIn(max = 520.dp).fillMaxWidth().glassPane(22.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(Modifier.widthIn(max = 520.dp).fillMaxWidth().glassPane(16.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 listOf(
                     "🎮" to tr("מִשְׂחָקִים וְזִירַת הָעֲנָקִים"), "🌍" to tr("כָּל הָעוֹלָמוֹת — בְּלִי גְּבוּלוֹת"),
                     "🧹" to tr("מַטְלוֹת הַבַּיִת עִם פְּרָסִים"), "👨‍👩‍👧" to tr("פַּעַם אַחַת — לְכָל הַמַּכְשִׁירִים בַּמִּשְׁפָּחָה"),
@@ -166,7 +166,7 @@ internal fun AskParent(child: Child?, childID: String, householdID: String?, wor
                 }
             }
             Row(
-                Modifier.widthIn(max = 520.dp).fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(Color.White.copy(alpha = 0.92f))
+                Modifier.widthIn(max = 520.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.92f))
                     .clickable(enabled = !sent && !sending) {
                         sending = true
                         scope.launch {
@@ -221,7 +221,7 @@ internal fun KidDeviceControls(
                 if (kidMode) KidCta(tr("יציאה ממצב ילד ושחרור נעילת המכשיר"), Color(0xFFFF7A3D), Color(0xFFFF9F1C),
                     emoji = "🔓", size = 17, onClick = onExitKidMode)
 
-                Row(Modifier.fillMaxWidth().glassPane(22.dp).padding(16.dp), verticalAlignment = Alignment.CenterVertically,
+                Row(Modifier.fillMaxWidth().glassPane(16.dp).padding(16.dp), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     CharacterImage(child?.character3DID ?: "fox", Modifier.size(52.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.22f)),
                         contentScale = ContentScale.Crop)
@@ -233,7 +233,7 @@ internal fun KidDeviceControls(
                 }
 
                 if (windowOpen) Row(
-                    Modifier.fillMaxWidth().glassPane(18.dp, 0.18f).padding(horizontal = 16.dp, vertical = 14.dp),
+                    Modifier.fillMaxWidth().glassPane(16.dp, 0.18f).padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Text("🔓", fontSize = 22.sp)
@@ -241,8 +241,8 @@ internal fun KidDeviceControls(
                         Text(tr("פתוח עכשיו"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
                         Text(tr("נשארו כ-%lld דקות", maxOf(1, secondsLeft / 60)), color = Ink.secondary, fontFamily = Rounded, fontSize = 12.sp)
                     }
-                    Text(tr("נעל"), Modifier.clip(RoundedCornerShape(50)).background(Color(0xFFFF7A3D).copy(alpha = 0.55f))
-                        .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(50)).clickable(onClick = onLockNow)
+                    Text(tr("נעל"), Modifier.clip(RoundedCornerShape(16.dp)).background(Color(0xFFFF7A3D).copy(alpha = 0.55f))
+                        .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(16.dp)).clickable(onClick = onLockNow)
                         .padding(horizontal = 14.dp, vertical = 8.dp),
                         color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
                 }
@@ -252,7 +252,7 @@ internal fun KidDeviceControls(
 
                 // iOS's "מָה פָּתוּחַ וּמָה נָעוּל" section → Android's guard manage screen.
                 if (!kidMode && onAppLock != null) Row(
-                    Modifier.fillMaxWidth().glassPane(18.dp, 0.18f).clickable(onClick = onAppLock).padding(horizontal = 16.dp, vertical = 14.dp),
+                    Modifier.fillMaxWidth().glassPane(16.dp, 0.18f).clickable(onClick = onAppLock).padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Text("🔒", fontSize = 22.sp)
@@ -264,15 +264,15 @@ internal fun KidDeviceControls(
 
                 if (!kidMode) Text(
                     tr("התנתקו מהמשפחה"),
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.12f))
-                        .border(1.dp, Ink.weak.copy(alpha = 0.6f), RoundedCornerShape(50)).clickable { confirm = true }.padding(vertical = 14.dp),
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.12f))
+                        .border(1.dp, Ink.weak.copy(alpha = 0.6f), RoundedCornerShape(16.dp)).clickable { confirm = true }.padding(vertical = 14.dp),
                     color = Ink.weak, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 )
             }
             KidBody(tr("שאר ההגדרות — פרסים, דוחות, רמת קושי והתראות — מנוהלות במכשיר ההורה."), 14f, alpha = 0.75f, weight = FontWeight.Medium)
-            Text(tr("סגירה"), Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-                .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).clickable(onClick = onClose)
+            Text(tr("סגירה"), Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+                .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).clickable(onClick = onClose)
                 .padding(horizontal = 28.dp, vertical = 12.dp),
                 color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
         }
@@ -300,7 +300,7 @@ private fun KidDailyCapRow(child: Child) {
             }
         }
     }
-    Column(Modifier.fillMaxWidth().glassPane(18.dp, 0.18f).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(Modifier.fillMaxWidth().glassPane(16.dp, 0.18f).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("⏱", fontSize = 22.sp)
             Column(Modifier.weight(1f)) {
@@ -313,9 +313,9 @@ private fun KidDailyCapRow(child: Child) {
             listOf(30, 60, 90, 120, 0).forEach { v ->
                 val on = (cap ?: -1) == v
                 Text(if (v == 0) tr("ללא הגבלה") else "$v",
-                    Modifier.weight(if (v == 0) 1.6f else 1f).clip(RoundedCornerShape(50))
+                    Modifier.weight(if (v == 0) 1.6f else 1f).clip(RoundedCornerShape(16.dp))
                         .background(if (on) Color.White else Color.White.copy(alpha = 0.14f))
-                        .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).clickable { set(v) }
+                        .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).clickable { set(v) }
                         .padding(vertical = 10.dp),
                     color = if (on) Color(0xFF4B3FBF) else Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold,
                     fontSize = 15.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 1)
@@ -344,7 +344,7 @@ internal fun KidModeIntro(child: Child?, onStart: () -> Unit, onCancel: () -> Un
             CharacterImage(child?.character3DID ?: "fox", Modifier.size(84.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.2f))
                 .border(3.dp, GoldBrush, CircleShape), contentScale = ContentScale.Crop)
             if (child != null) Text(child.name, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
-            Column(Modifier.widthIn(max = 480.dp).fillMaxWidth().glassPane(22.dp).padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(Modifier.widthIn(max = 480.dp).fillMaxWidth().glassPane(16.dp).padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("📌", fontSize = 34.sp)
                 KidBody(tr("הַמָּסָךְ נִנְעָל עַל טוֹפִי — הַיֶּלֶד לוֹמֵד וּמְשַׂחֵק רַק בְּטוֹפִי. כְּדֵי לָצֵאת: קוֹד הוֹרֶה."), 15f, alpha = 0.9f)
             }
@@ -382,7 +382,7 @@ internal fun LevelInfo(level: Int, untilNext: Int, onClose: () -> Unit) {
         Text("⭐", fontSize = 54.sp)
         KidTitle(tr("רָמַת טוֹפִי"), 28)
         KidBody(tr("כָּל תְּשׁוּבָה נְכוֹנָה נוֹתֶנֶת נְקוּדּוֹת. כְּשֶׁהַפַּס מִתְמַלֵּא עוֹלִים רָמָה — וּמְקַבְּלִים 💎 בּוֹנוּס לַחֲנוּת (10 עַל כָּל רָמָה). מֵרָמָה 5 הָאַוָּטָאר מְקַבֵּל מִסְגֶּרֶת בְּרוֹנְזָה, מֵ־10 כֶּסֶף, וּמֵ־20 זָהָב!"), 16f, alpha = 0.92f)
-        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.12f)).padding(14.dp),
+        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.12f)).padding(14.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(tr("רָמָה נוֹכְחִית: %lld", level), color = Ink.gold2, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
             KidBody(tr("עוֹד %lld תְּשׁוּבוֹת נְכוֹנוֹת לָרָמָה הַבָּאָה", untilNext), 15f, alpha = 0.85f)

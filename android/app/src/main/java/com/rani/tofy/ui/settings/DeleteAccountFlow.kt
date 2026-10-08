@@ -80,7 +80,7 @@ private fun ConfirmDialog(onCancel: () -> Unit, onConfirm: () -> Unit) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 P(tr("פעולה זו תמחק את כל הילדים, ההתקדמות וההיסטוריה מהמכשיר ומהענן, ותנתק את החשבון. לא ניתן לבטל."), 14.5f)
                 P(tr("כדי לאשר, הקלידו: %@", word), 14f, color = Ink.primary, weight = FontWeight.Bold)
-                OutlinedTextField(typed, { typed = it }, Modifier.fillMaxWidth(), singleLine = true, colors = glassFieldColors(), shape = RoundedCornerShape(12.dp))
+                OutlinedTextField(typed, { typed = it }, Modifier.fillMaxWidth(), singleLine = true, colors = glassFieldColors(), shape = RoundedCornerShape(16.dp))
             }
         },
         confirmButton = {
@@ -123,7 +123,7 @@ private fun ReauthDialog(onCancel: () -> Unit, onDone: () -> Unit) {
                         placeholder = { Text(tr("סיסמה"), fontFamily = Rounded) },
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        colors = glassFieldColors(), shape = RoundedCornerShape(12.dp),
+                        colors = glassFieldColors(), shape = RoundedCornerShape(16.dp),
                     )
                     GlassButton(tr("התחבר"), Modifier.fillMaxWidth()) {
                         if (busy || password.isEmpty()) return@GlassButton

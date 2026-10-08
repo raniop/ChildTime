@@ -44,7 +44,7 @@ fun CommandStatusSheet(s: CommandStatus, state: FamilyState, onDismiss: () -> Un
                 else -> tr("🔒 נעילה מרחוק — %@", name)
             }
             H(title, 20, align = TextAlign.Center)
-            Column(Modifier.fillMaxWidth().glassInset(18.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.fillMaxWidth().glassInset(16.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 when (s.kind) {
                     CommandStatus.Kind.GIFT -> {
                         when {

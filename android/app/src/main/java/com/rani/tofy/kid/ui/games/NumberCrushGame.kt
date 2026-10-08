@@ -238,7 +238,7 @@ fun NumberCrushGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?
                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     // The goal drawn as the THING ITSELF, in a gold frame — "find the card that looks like this".
-                    Column(Modifier.fillMaxWidth().glassPane(22.dp).padding(horizontal = 12.dp, vertical = if (m.short) 9.dp else 14.dp),
+                    Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(horizontal = 12.dp, vertical = if (m.short) 9.dp else 14.dp),
                         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(if (m.short) 7.dp else 12.dp)) {
                         LaunchedEffect(c.cue.spoken) { GameEnv.speak(c.cue.spoken) }
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp, Alignment.CenterHorizontally)) {
@@ -249,8 +249,8 @@ fun NumberCrushGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?
                         val base = if (m.short) 40f else if (m.compact) 62f else 92f
                         val glyph = when { c.target <= 2 -> base; c.target == 3 -> base * 0.92f; c.target == 4 -> base * 0.84f; else -> base * 0.76f }
                         val s by animateFloatAsState(if (targetPop) 1.08f else 1f, spring(dampingRatio = 0.55f), label = "goal")
-                        Row(Modifier.graphicsLayer { scaleX = s; scaleY = s }.clip(RoundedCornerShape(20.dp)).background(KidColor.starGold.copy(alpha = 0.2f))
-                            .border(2.5.dp, KidColor.starGold.copy(alpha = 0.9f), RoundedCornerShape(20.dp))
+                        Row(Modifier.graphicsLayer { scaleX = s; scaleY = s }.clip(RoundedCornerShape(16.dp)).background(KidColor.starGold.copy(alpha = 0.2f))
+                            .border(2.5.dp, KidColor.starGold.copy(alpha = 0.9f), RoundedCornerShape(16.dp))
                             .padding(horizontal = if (m.compact) 16.dp else 24.dp, vertical = if (m.short) 7.dp else 12.dp),
                             horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                             repeat(maxOf(1, c.target)) { Text(c.emoji, fontSize = glyph.sp) }
@@ -299,7 +299,7 @@ fun NumberCrushGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?
                         }
                         MiniGameText.ltr(rules.expression(pickedValues) + " = " + tt)
                     }
-                    Column(Modifier.fillMaxWidth().graphicsLayer { translationX = dx * density }.glassPane(22.dp).padding(horizontal = 14.dp, vertical = 12.dp),
+                    Column(Modifier.fillMaxWidth().graphicsLayer { translationX = dx * density }.glassPane(16.dp).padding(horizontal = 14.dp, vertical = 12.dp),
                         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         val ts by animateFloatAsState(if (targetPop) 1.25f else 1f, spring(dampingRatio = 0.5f), label = "target")
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {

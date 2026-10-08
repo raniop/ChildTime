@@ -120,7 +120,7 @@ internal fun LeaderboardScreen(onExit: () -> Unit, onStartGame: () -> Unit, onJo
                 TournamentBlock(lg.invites, onJoin = { haptics.success(); onJoinGame(it) }, onStart = { haptics.light(); onStartGame() })
             }
             // Tabs: my friends vs. everyone in the app.
-            Row(Modifier.padding(horizontal = 16.dp).padding(bottom = 8.dp).fillMaxWidth().glassInset(14.dp).padding(4.dp),
+            Row(Modifier.padding(horizontal = 16.dp).padding(bottom = 8.dp).fillMaxWidth().glassInset(16.dp).padding(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 TabButton(tr("הַחֲבֵרִים שֶׁלִּי"), !global, Modifier.weight(1f)) { global = false }
                 TabButton(tr("כָּל הַשַּׂחְקָנִים"), global, Modifier.weight(1f)) { global = true; scope.launch { f.loadGlobal() } }
@@ -184,7 +184,7 @@ private fun TournamentBlock(invites: List<LiveGameInvite>, onJoin: (String) -> U
     Column(Modifier.fillMaxWidth().widthIn(max = 560.dp).padding(top = 2.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         invites.forEach { inv ->
             Row(
-                Modifier.fillMaxWidth().glassPane(18.dp, 0.18f).background(Ink.live.copy(alpha = 0.12f))
+                Modifier.fillMaxWidth().glassPane(16.dp, 0.18f).background(Ink.live.copy(alpha = 0.12f))
                     .clickable { onJoin(inv.id) }.padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
@@ -196,15 +196,15 @@ private fun TournamentBlock(invites: List<LiveGameInvite>, onJoin: (String) -> U
                     Text(tr("הַמִּשְׂחָק מַתְחִיל עַכְשָׁו — לַחֲצוּ לְהִצְטָרֵף"), color = Ink.secondary, fontFamily = Rounded,
                         fontWeight = FontWeight.SemiBold, fontSize = 12.sp, maxLines = 2)
                 }
-                Text(tr("הִצְטָרְפוּ"), Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.92f))
+                Text(tr("הִצְטָרְפוּ"), Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.92f))
                     .padding(horizontal = 12.dp, vertical = 8.dp),
                     color = SocialColor.indigo, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, maxLines = 1)
             }
         }
         Row(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp))
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
                 .background(Brush.horizontalGradient(listOf(Color(0xFFEF476F).copy(alpha = 0.55f), Color(0xFF9B5DE5).copy(alpha = 0.55f))))
-                .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(22.dp))
+                .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
                 .clickable(onClick = onStart).padding(12.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
@@ -222,7 +222,7 @@ private fun TournamentBlock(invites: List<LiveGameInvite>, onJoin: (String) -> U
 @Composable
 private fun TabButton(title: String, active: Boolean, modifier: Modifier, onClick: () -> Unit) {
     Box(
-        modifier.clip(RoundedCornerShape(11.dp)).background(if (active) Color.White.copy(alpha = 0.92f) else Color.Transparent)
+        modifier.clip(RoundedCornerShape(16.dp)).background(if (active) Color.White.copy(alpha = 0.92f) else Color.Transparent)
             .clickable(onClick = onClick).padding(vertical = 9.dp),
         contentAlignment = Alignment.Center,
     ) { Text(title, color = if (active) SocialColor.indigo else Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, maxLines = 1) }
@@ -233,7 +233,7 @@ private fun TabButton(title: String, active: Boolean, modifier: Modifier, onClic
 private fun MyRankBanner(rank: Int?) {
     rank ?: return
     Column(
-        Modifier.fillMaxWidth().padding(top = 8.dp).glassPane(22.dp).background(SocialColor.starGold.copy(alpha = 0.14f)).padding(12.dp),
+        Modifier.fillMaxWidth().padding(top = 8.dp).glassPane(16.dp).background(SocialColor.starGold.copy(alpha = 0.14f)).padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         Text(SocialMe.g(tr("הַמָּקוֹם שֶׁלְּךָ בְּכָל הָעוֹלָם"), tr("הַמָּקוֹם שֶׁלָּךְ בְּכָל הָעוֹלָם")), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
@@ -266,9 +266,9 @@ private fun Podium(board: List<FriendCard>, meID: String?, onTap: (FriendCard) -
                 // Glass steps — gold glows through the winner's, softer for 2 and 3.
                 Box(
                     Modifier.fillMaxWidth().height(if (rank == 1) 96.dp else if (rank == 2) 70.dp else 54.dp)
-                        .clip(RoundedCornerShape(14.dp)).background(Color.White.copy(alpha = 0.14f))
+                        .clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
                         .background(Brush.verticalGradient(listOf(SocialColor.starGold.copy(alpha = if (rank == 1) 0.55f else 0.25f), Color.Transparent)))
-                        .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(14.dp)),
+                        .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.TopCenter,
                 ) { Text(if (rank == 1) "🥇" else if (rank == 2) "🥈" else "🥉", Modifier.padding(top = 6.dp), fontSize = 26.sp) }
             }
@@ -280,8 +280,8 @@ private fun Podium(board: List<FriendCard>, meID: String?, onTap: (FriendCard) -
 @Composable
 private fun BoardRow(rank: Int, card: FriendCard, isMe: Boolean, onTap: () -> Unit, onLong: (() -> Unit)?) {
     Row(
-        Modifier.fillMaxWidth().glassPane(20.dp)
-            .then(if (isMe) Modifier.background(SocialColor.starGold.copy(alpha = 0.16f)).border(1.5.dp, SocialColor.starGold.copy(alpha = 0.8f), RoundedCornerShape(20.dp)) else Modifier)
+        Modifier.fillMaxWidth().glassPane(16.dp)
+            .then(if (isMe) Modifier.background(SocialColor.starGold.copy(alpha = 0.16f)).border(1.5.dp, SocialColor.starGold.copy(alpha = 0.8f), RoundedCornerShape(16.dp)) else Modifier)
             .combinedClickable(onClick = onTap, onLongClick = onLong).padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -362,7 +362,7 @@ private fun AddFriendCover(onClose: () -> Unit) {
                     // My code — always LTR (a Latin code + QR).
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                         Column(
-                            Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Color.White.copy(alpha = 0.10f)).padding(16.dp),
+                            Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.10f)).padding(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             Text(tr("הַקּוֹד שֶׁלִּי"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
@@ -375,13 +375,13 @@ private fun AddFriendCover(onClose: () -> Unit) {
                         }
                     }
                     Column(
-                        Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Color.White.copy(alpha = 0.10f)).padding(16.dp),
+                        Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.10f)).padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         BrushCapsule("📷 " + tr("סִרְקוּ חָבֵר"), SocialColor.purpleDream, Modifier.fillMaxWidth()) { scanner = true }
                         Text(tr("אוֹ הַקְלִידוּ קוֹד שֶׁל חָבֵר"), color = Color.White.copy(alpha = 0.7f), fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 13.sp)
                         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                            Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color.White.copy(alpha = 0.12f)).padding(vertical = 12.dp),
+                            Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.12f)).padding(vertical = 12.dp),
                                 contentAlignment = Alignment.Center) {
                                 if (typed.isEmpty()) Text(tr("קוֹד"), color = Color.White.copy(alpha = 0.5f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
                                 BasicTextField(
@@ -433,7 +433,7 @@ private fun FriendProfileSheet(card: FriendCard, onClose: () -> Unit) {
         ) {
             Portrait(card.character3DID, 140.dp, glow = true)
             Text(card.displayName.ifEmpty { tr("שַׂחְקָן") }, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 32.sp)
-            Text("⭐ " + tr("%lld כּוֹכָבִים", card.stars), Modifier.clip(RoundedCornerShape(50)).background(SocialColor.gold).padding(horizontal = 18.dp, vertical = 9.dp),
+            Text("⭐ " + tr("%lld כּוֹכָבִים", card.stars), Modifier.clip(RoundedCornerShape(16.dp)).background(SocialColor.gold).padding(horizontal = 18.dp, vertical = 9.dp),
                 color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
             Box(Modifier.fillMaxWidth().padding(top = 8.dp), contentAlignment = Alignment.Center) {
                 when {
@@ -442,7 +442,7 @@ private fun FriendProfileSheet(card: FriendCard, onClose: () -> Unit) {
                     incoming != null -> BrushCapsule("✓ " + tr("אַשְּׁרוּ בַּקָּשַׁת חֲבֵרוּת"), SocialColor.gold, Modifier.fillMaxWidth(), size = 18) {
                         scope.launch { f.acceptRequest(incoming); haptics.success(); onClose() }
                     }
-                    sent -> Text("📨 " + tr("בַּקָּשָׁה נִשְׁלְחָה ⏳"), Modifier.fillMaxWidth().clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.12f)).padding(vertical = 14.dp),
+                    sent -> Text("📨 " + tr("בַּקָּשָׁה נִשְׁלְחָה ⏳"), Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.12f)).padding(vertical = 14.dp),
                         color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, textAlign = TextAlign.Center)
                     else -> BrushCapsule("➕ " + tr("שִׁלְחוּ בַּקָּשַׁת חֲבֵרוּת"), SocialColor.purpleDream, Modifier.fillMaxWidth(), size = 18, busy = sending) {
                         sending = true
@@ -493,7 +493,7 @@ private fun FriendRequestsCover(onClose: () -> Unit) {
                     Column(Modifier.widthIn(max = 460.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         f.incomingRequests.forEach { req ->
                             Row(
-                                Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Color.White.copy(alpha = 0.10f))
+                                Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.10f))
                                     .padding(horizontal = 14.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
                             ) {
@@ -502,10 +502,10 @@ private fun FriendRequestsCover(onClose: () -> Unit) {
                                     Text(req.displayName.ifEmpty { tr("שַׂחְקָן") }, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, maxLines = 1)
                                     Text("${req.stars} ⭐", color = Color.White.copy(alpha = 0.75f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
                                 }
-                                Text(tr("לֹא עַכְשָׁו"), Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.12f))
+                                Text(tr("לֹא עַכְשָׁו"), Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.12f))
                                     .clickable { haptics.light(); scope.launch { f.declineRequest(req) } }.padding(horizontal = 12.dp, vertical = 9.dp),
                                     color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, maxLines = 1)
-                                Text("✓ " + tr("אַשְּׁרוּ"), Modifier.clip(RoundedCornerShape(50)).background(SocialColor.gold)
+                                Text("✓ " + tr("אַשְּׁרוּ"), Modifier.clip(RoundedCornerShape(16.dp)).background(SocialColor.gold)
                                     .clickable {
                                         scope.launch {
                                             f.acceptRequest(req)

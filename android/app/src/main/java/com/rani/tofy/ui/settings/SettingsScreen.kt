@@ -288,11 +288,11 @@ private fun FamilyNameRow(current: String?) {
             placeholder = { Text(tr("למשל: משפחת גולן"), fontFamily = Rounded, color = Color.White.copy(alpha = 0.6f)) },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { if (changed) save() else focus.clearFocus() }),
-            colors = glassFieldColors(), shape = RoundedCornerShape(12.dp),
+            colors = glassFieldColors(), shape = RoundedCornerShape(16.dp),
         )
         if (changed) Text(
             tr("שמרו"),
-            Modifier.clip(RoundedCornerShape(30.dp)).background(Color.White.copy(alpha = 0.92f)).clickable { save() }.padding(horizontal = 12.dp, vertical = 6.dp),
+            Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.92f)).clickable { save() }.padding(horizontal = 12.dp, vertical = 6.dp),
             color = Ink.indigo, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp,
         )
     }

@@ -418,8 +418,8 @@ private fun CoachCard(
             Column(
                 Modifier
                     .fillMaxWidth()
-                    .shadow(18.dp, RoundedCornerShape(20.dp))
-                    .clip(RoundedCornerShape(20.dp))
+                    .shadow(18.dp, RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .background(Color.White)
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -433,7 +433,7 @@ private fun CoachCard(
                 ) {
                     Box(
                         Modifier
-                            .clip(RoundedCornerShape(50))
+                            .clip(RoundedCornerShape(16.dp))
                             .background(Color(0xFF6C4CF1))
                             .clickable(onClick = onNext)
                             .padding(horizontal = 20.dp, vertical = 9.dp),
@@ -451,7 +451,7 @@ private fun CoachCard(
                     Spacer(Modifier.weight(1f))
                     if (!last) Text(
                         if (forKid) tr("דַּלְּגוּ") else tr("דלג"),
-                        Modifier.clip(RoundedCornerShape(50)).clickable(onClick = onSkip).padding(horizontal = 8.dp, vertical = 4.dp),
+                        Modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = onSkip).padding(horizontal = 8.dp, vertical = 4.dp),
                         color = ink.copy(alpha = 0.55f), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 14.sp,
                     )
                 }

@@ -170,7 +170,7 @@ fun BuildWordGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, 
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(if (m.short) 8.dp else 24.dp, Alignment.CenterVertically),
             ) {
                 val dir = if (script.rtl) LayoutDirection.Rtl else LayoutDirection.Ltr
-                Column(Modifier.fillMaxWidth().glassPane(22.dp).padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally,
+                Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(tr("בְּנוּ אֶת הַמִּלָּה"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp)
                     val s = if (pop) 1.12f else 1f

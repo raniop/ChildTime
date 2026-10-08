@@ -83,8 +83,8 @@ fun CharacterImage(id: String?, modifier: Modifier = Modifier, contentScale: Con
 @Composable
 fun BackCapsule(onClick: () -> Unit) {
     Row(
-        Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50))
+        Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
             .clickable(onClick = onClick).padding(horizontal = 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
@@ -110,9 +110,9 @@ fun KidCta(
     busy: Boolean = false, enabled: Boolean = true, size: Int = 20, onClick: () -> Unit,
 ) {
     Row(
-        modifier.fillMaxWidth().widthIn(max = 480.dp).clip(RoundedCornerShape(30.dp))
+        modifier.fillMaxWidth().widthIn(max = 480.dp).clip(RoundedCornerShape(16.dp))
             .background(Brush.horizontalGradient(listOf(a, b)))
-            .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(30.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
             .clickable(enabled = enabled && !busy, onClick = onClick)
             .padding(horizontal = 20.dp, vertical = 15.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
@@ -152,7 +152,7 @@ fun BuddyBubble(line: String?, modifier: Modifier = Modifier) {
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             CharacterImage("fox", Modifier.size(58.dp).graphicsLayer { translationY = bob })
             Box(
-                Modifier.padding(bottom = 22.dp).clip(RoundedCornerShape(18.dp)).background(Color.White.copy(alpha = 0.95f))
+                Modifier.padding(bottom = 22.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.95f))
                     .padding(horizontal = 14.dp, vertical = 10.dp),
             ) {
                 Text(line ?: "", color = Ink.deep, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, lineHeight = 20.sp)
@@ -174,8 +174,8 @@ fun KidBottomCard(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> 
         )
         Column(
             Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(12.dp).widthIn(max = 440.dp).fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp)).background(Ink.sheet.copy(alpha = 0.97f))
-                .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape(16.dp)).background(Ink.sheet.copy(alpha = 0.97f))
+                .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
                 .clickable(remember { MutableInteractionSource() }, null) {}
                 .padding(horizontal = 16.dp, vertical = 18.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -195,8 +195,8 @@ fun KidCenterCard(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> 
         )
         Column(
             Modifier.padding(20.dp).widthIn(max = 440.dp).fillMaxWidth()
-                .clip(RoundedCornerShape(26.dp)).background(Ink.sheet.copy(alpha = 0.97f))
-                .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(26.dp))
+                .clip(RoundedCornerShape(16.dp)).background(Ink.sheet.copy(alpha = 0.97f))
+                .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
                 .clickable(remember { MutableInteractionSource() }, null) {}
                 .padding(22.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

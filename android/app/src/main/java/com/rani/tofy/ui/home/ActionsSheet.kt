@@ -88,7 +88,7 @@ fun ActionsSheet(child: Child, state: FamilyState, onDismiss: () -> Unit, onChor
             } else {
                 WhiteButton(tr("+ חברו מכשיר ל%@", name), Modifier.fillMaxWidth(), onClick = onConnect)
             }
-            Column(Modifier.fillMaxWidth().glassPane(20.dp, shadow = false)) {
+            Column(Modifier.fillMaxWidth().glassPane(16.dp, shadow = false)) {
                 ActionRow("⏳", tr("זמן מסך יומי"), if (capOn) tr("עד %lld דקות ביום", capMin) else tr("בלי הגבלה יומית"), onClick = onScreenTime)
                 ActionRow("🧹", tr("מטלות הבית"), tr("משימות ופרסים בבית"), onClick = onChores)
                 ActionRow("⚙️", tr("כל ההגדרות של %@", name), tr("זמן, למידה, שפה ומכשיר"), last = true, onClick = onSettings)
@@ -110,10 +110,10 @@ fun ActionsSheet(child: Child, state: FamilyState, onDismiss: () -> Unit, onChor
 
 @Composable
 private fun Tile(emoji: String, title: String, on: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(18.dp)
+    val shape = RoundedCornerShape(16.dp)
     Column(
         modifier.fillMaxHeight().heightIn(min = 88.dp).clip(shape)
-            .then(if (on) Modifier.background(Color.White.copy(alpha = 0.92f)) else Modifier.glassPane(18.dp, 0.18f, shadow = false))
+            .then(if (on) Modifier.background(Color.White.copy(alpha = 0.92f)) else Modifier.glassPane(16.dp, 0.18f, shadow = false))
             .clickable(onClick = onClick).padding(horizontal = 6.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
     ) {
@@ -124,7 +124,7 @@ private fun Tile(emoji: String, title: String, on: Boolean, modifier: Modifier, 
 
 @Composable
 private fun Chip(label: String, modifier: Modifier, destructive: Boolean = false, onClick: () -> Unit) {
-    Box(modifier.height(44.dp).clip(RoundedCornerShape(14.dp)).background(Color.White.copy(alpha = 0.92f)).clickable(onClick = onClick),
+    Box(modifier.height(44.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.92f)).clickable(onClick = onClick),
         contentAlignment = Alignment.Center) {
         Text(label, color = if (destructive) Color(0xFFC2334D) else Ink.indigo, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.5.sp, maxLines = 1)
     }

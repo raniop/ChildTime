@@ -178,7 +178,7 @@ private val optionTints = listOf(Color(0xFF8CFFC4), Color(0xFFB7ABFF), Color(0xF
 fun OptionCard(text: String, feedback: OptionFeedback, index: Int, minHeight: Dp, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val longest = text.split(" ").maxOfOrNull { it.length } ?: text.length
     val fontSize = when { longest >= 11 -> 19.sp; longest >= 8 -> 25.sp; text.length >= 16 -> 23.sp; else -> 30.sp }
-    val shape = RoundedCornerShape(20.dp)
+    val shape = RoundedCornerShape(16.dp)
     val scale by animateFloatAsState(
         when (feedback) {
             OptionFeedback.CORRECT, OptionFeedback.REVEALED -> 1.05f; OptionFeedback.WRONG -> 0.97f
@@ -235,8 +235,8 @@ fun OptionCard(text: String, feedback: OptionFeedback, index: Int, minHeight: Dp
 @Composable
 fun QuizChip(text: String, color: Color = Color.White, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     Box(
-        modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-            .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(50))
+        modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+            .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(16.dp))
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 12.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center,
@@ -274,8 +274,8 @@ fun EarnedMinutesPopup(minutes: Int, trigger: Int, modifier: Modifier = Modifier
     if (a.value > 0.01f) Box(modifier.graphicsLayer { translationY = y.value * density; alpha = a.value; scaleX = s.value; scaleY = s.value }) {
         Text(
             "+$minutes ${com.rani.tofy.i18n.tr("דַּקּוֹת")} 🎮", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 34.sp,
-            modifier = Modifier.clip(RoundedCornerShape(32.dp)).background(Ink.deep.copy(alpha = 0.7f))
-                .border(3.dp, KidColor.successMint, RoundedCornerShape(32.dp)).padding(horizontal = 24.dp, vertical = 14.dp),
+            modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(Ink.deep.copy(alpha = 0.7f))
+                .border(3.dp, KidColor.successMint, RoundedCornerShape(16.dp)).padding(horizontal = 24.dp, vertical = 14.dp),
         )
     }
 }
@@ -341,7 +341,7 @@ fun BoxScope.Scrim(color: Color) {
 fun GlassLine(text: String, modifier: Modifier = Modifier) {
     Text(
         text, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp, maxLines = 1,
-        textAlign = TextAlign.Center, modifier = modifier.fillMaxWidth().glassInset(14.dp).padding(vertical = 9.dp, horizontal = 12.dp),
+        textAlign = TextAlign.Center, modifier = modifier.fillMaxWidth().glassInset(16.dp).padding(vertical = 9.dp, horizontal = 12.dp),
     )
 }
 

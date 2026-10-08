@@ -155,7 +155,7 @@ fun BalanceGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, on
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(if (m.short) 8.dp else 12.dp),
             ) {
                 val p = puzzle
-                Column(Modifier.fillMaxWidth().glassPane(22.dp).padding(horizontal = 14.dp, vertical = 12.dp),
+                Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(horizontal = 14.dp, vertical = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(tr("מָה מֵבִיא אֶת הַמֹּאזְנַיִם לְאִזּוּן?"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = (if (m.compact) 15 else 19).sp)
                     p?.question?.let { GameText(it, (if (m.compact) 21 else 27).sp, maxLines = 4, minScale = 0.6f) }

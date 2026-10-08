@@ -181,7 +181,7 @@ internal fun BossBattle(world: PlayWorld, onClose: () -> Unit) {
                         q.options.forEachIndexed { idx, opt ->
                             val show = picked != null
                             val bg = if (show && idx == q.correctIndex) KidColor.successMint else if (show && picked == idx) hexColor("EF476F") else Color.White.copy(alpha = 0.14f)
-                            Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(bg).border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(18.dp))
+                            Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(bg).border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
                                 .juicyClick(!locked) { pick(idx) }.padding(vertical = 15.dp, horizontal = 10.dp), contentAlignment = Alignment.Center) {
                                 GameText(opt, 19.sp, maxLines = 2)
                             }
@@ -226,8 +226,8 @@ internal fun BossBattle(world: PlayWorld, onClose: () -> Unit) {
                         val next = suggested
                         if (win && done != null && next != null) Text(
                             tr("אוֹ עוֹלָם חָדָשׁ: %@ ✨ +%lld 💎", next.name, WorldStage.FIRST_VISIT_DIAMONDS),
-                            Modifier.fillMaxWidth().clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-                                .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(50))
+                            Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+                                .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
                                 .juicyClick { h.light(); WorldRouter.pending.value = next.id }
                                 .padding(vertical = 12.dp, horizontal = 10.dp),
                             color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 15.sp,
@@ -257,9 +257,9 @@ private fun TierUnlockCard(done: Int, girl: Boolean) {
             else tr("עָבַרְתָּ אֶת כָּל הַדַּרְגּוֹת! אֶפְשָׁר לְהַמְשִׁיךְ לְשַׂחֵק כָּאן תָּמִיד"))
     }
     Column(
-        Modifier.padding(horizontal = 20.dp).widthIn(max = 460.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp))
+        Modifier.padding(horizontal = 20.dp).widthIn(max = 460.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp))
             .background(Color.White.copy(alpha = 0.14f))
-            .border(1.5.dp, WorldTiers.color(next).copy(alpha = 0.9f), RoundedCornerShape(18.dp))
+            .border(1.5.dp, WorldTiers.color(next).copy(alpha = 0.9f), RoundedCornerShape(16.dp))
             .padding(vertical = 12.dp, horizontal = 14.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {

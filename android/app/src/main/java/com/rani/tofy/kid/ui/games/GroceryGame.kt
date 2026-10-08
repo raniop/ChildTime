@@ -201,7 +201,7 @@ fun GroceryGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, on
             1 -> {
                 val t = trip
                 val listPane = @Composable {
-                    Column(Modifier.fillMaxWidth().glassPane(22.dp).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp),
+                    Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp),
                         horizontalAlignment = Alignment.CenterHorizontally) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(tr("רְשִׁימַת קְנִיּוֹת"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = (if (m.compact) 18 else 22).sp)
@@ -214,8 +214,8 @@ fun GroceryGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, on
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             (t?.list ?: emptyList()).forEach { item ->
                                 val inCart = cart.any { it.id == item.id }
-                                Row(Modifier.clip(RoundedCornerShape(50)).background(if (inCart) KidColor.successMint.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.12f))
-                                    .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).padding(horizontal = 12.dp, vertical = 7.dp),
+                                Row(Modifier.clip(RoundedCornerShape(16.dp)).background(if (inCart) KidColor.successMint.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.12f))
+                                    .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).padding(horizontal = 12.dp, vertical = 7.dp),
                                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                     Text(if (inCart) "✓" else "○", color = if (inCart) KidColor.successMint else Color.White.copy(alpha = 0.7f), fontWeight = FontWeight.Black, fontSize = 16.sp)
                                     Ltr(mode == "english") { Text(listName(item.product), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = (if (m.compact) 17 else 21).sp) }
@@ -250,7 +250,7 @@ fun GroceryGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, on
                     }
                 }
                 val side = @Composable {
-                    Row(Modifier.fillMaxWidth().heightIn(min = 54.dp).glassInset(18.dp).padding(horizontal = 12.dp, vertical = 8.dp),
+                    Row(Modifier.fillMaxWidth().heightIn(min = 54.dp).glassInset(16.dp).padding(horizontal = 12.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("🛒", fontSize = 26.sp)
                         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -279,14 +279,14 @@ fun GroceryGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, on
                 val t = trip
                 val isTotal = phase == 2
                 val question = @Composable {
-                    Column(Modifier.fillMaxWidth().glassPane(22.dp).padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally,
+                    Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(if (m.short) 6.dp else 10.dp)) {
                         // Two questions at the till, and the child is told which one this is.
                         Text(tr("שְׁאֵלָה %lld מִתּוֹךְ 2", if (isTotal) 1 else 2), color = KidColor.starGold, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = (if (m.compact) 13 else 15).sp)
                         TitleText(if (isTotal) tr("כַּמָּה עוֹלֶה הַכֹּל?") else tr("כַּמָּה עֹדֶף נְקַבֵּל?"), (if (m.compact) 22 else 28).sp)
                         SubText(if (isTotal) tr("מְחַבְּרִים אֶת כָּל הַמְּחִירִים שֶׁבַּקַּבָּלָה") else tr("הָעֹדֶף הוּא מַה שֶׁנָּתַנּוּ פָּחוֹת מַה שֶׁהַקְּנִיּוֹת עָלוּ"), (if (m.compact) 13 else 15).sp)
                         val fs = (if (m.compact) 15 else 18).sp
-                        Column(Modifier.fillMaxWidth().glassInset(14.dp).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Column(Modifier.fillMaxWidth().glassInset(16.dp).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             if (isTotal) cart.forEach { item ->
                                 // The bill shows what the till charges — a sale line strikes the sticker price.
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {

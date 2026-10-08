@@ -36,7 +36,7 @@ import com.rani.tofy.ui.theme.glassPane
 @Composable
 fun GoldButton(text: String, modifier: Modifier = Modifier, enabled: Boolean = true, busy: Boolean = false, onClick: () -> Unit) {
     Box(
-        modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(30.dp))
+        modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(16.dp))
             .background(if (enabled) GoldBrush else androidx.compose.ui.graphics.SolidColor(Color.White.copy(alpha = 0.25f)))
             .clickable(enabled = enabled && !busy, onClick = onClick),
         contentAlignment = Alignment.Center,
@@ -50,7 +50,7 @@ fun GoldButton(text: String, modifier: Modifier = Modifier, enabled: Boolean = t
 @Composable
 fun WhiteButton(text: String, modifier: Modifier = Modifier, height: Dp = 46.dp, onClick: () -> Unit) {
     Box(
-        modifier.height(height).clip(RoundedCornerShape(14.dp)).background(Color.White.copy(alpha = 0.92f)).clickable(onClick = onClick),
+        modifier.height(height).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.92f)).clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) { Text(text, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, color = Ink.indigo, textAlign = TextAlign.Center, maxLines = 1) }
 }
@@ -77,7 +77,7 @@ fun CircleIconButton(emoji: String, badge: Int = 0, onClick: () -> Unit) {
             Text(emoji, fontSize = 19.sp)
         }
         if (badge > 0) Box(
-            Modifier.align(Alignment.TopStart).clip(RoundedCornerShape(10.dp)).background(Color(0xFFFF4D5E)).padding(horizontal = 6.dp, vertical = 1.dp),
+            Modifier.align(Alignment.TopStart).clip(RoundedCornerShape(16.dp)).background(Color(0xFFFF4D5E)).padding(horizontal = 6.dp, vertical = 1.dp),
         ) { Text("$badge", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
     }
 }

@@ -200,7 +200,7 @@ fun Game2048(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, onClo
                 ) {
                     Row(Modifier.widthIn(max = if (m.compact) 520.dp else 680.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         @Composable fun box(label: String, value: String, color: Color) {
-                            Column(Modifier.weight(1f).glassInset(14.dp).padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(Modifier.weight(1f).glassInset(16.dp).padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(label, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp)
                                 Text(value, color = color, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 20.sp)
                             }
@@ -209,7 +209,7 @@ fun Game2048(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, onClo
                         box(tr("שִׂיא"), "${maxOf(best, score)}", Color.White)
                         box(tr("בּוֹנוּס בְּעוֹד"), "${movesPerBonus - moves % movesPerBonus}", KidColor.starGold)
                     }
-                    Column(Modifier.widthIn(max = if (m.compact) 520.dp else 680.dp).fillMaxWidth().glassPane(18.dp).padding(horizontal = 14.dp, vertical = 10.dp)) {
+                    Column(Modifier.widthIn(max = if (m.compact) 520.dp else 680.dp).fillMaxWidth().glassPane(16.dp).padding(horizontal = 14.dp, vertical = 10.dp)) {
                         MiniGameTimerBar(remaining, roundSeconds)
                     }
                     // The board is geometry, not text: left stays left in every language.

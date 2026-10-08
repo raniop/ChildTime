@@ -84,8 +84,8 @@ internal fun Portrait(characterID: String?, size: Dp, glow: Boolean = false) {
 @Composable
 internal fun StarsPill(n: Int) {
     Row(
-        Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).padding(horizontal = 10.dp, vertical = 5.dp),
+        Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).padding(horizontal = 10.dp, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp),
     ) {
         Text("⭐", fontSize = 13.sp)
@@ -114,7 +114,7 @@ internal fun HeaderCircle(emoji: String, badge: Int = 0, onClick: () -> Unit) {
 @Composable
 internal fun WhiteCapsule(text: String, modifier: Modifier = Modifier, size: Int = 17, enabled: Boolean = true, onClick: () -> Unit) {
     Box(
-        modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = if (enabled) 0.92f else 0.5f))
+        modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = if (enabled) 0.92f else 0.5f))
             .clickable(enabled = enabled, onClick = onClick).padding(horizontal = 22.dp, vertical = 14.dp),
         contentAlignment = Alignment.Center,
     ) { Text(text, color = SocialColor.indigo, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = size.sp, maxLines = 2) }
@@ -124,7 +124,7 @@ internal fun WhiteCapsule(text: String, modifier: Modifier = Modifier, size: Int
 @Composable
 internal fun BrushCapsule(text: String, brush: Brush, modifier: Modifier = Modifier, size: Int = 17, enabled: Boolean = true, busy: Boolean = false, onClick: () -> Unit) {
     Box(
-        modifier.clip(RoundedCornerShape(50)).background(brush).then(if (enabled) Modifier else Modifier.background(Color.Black.copy(alpha = 0.3f)))
+        modifier.clip(RoundedCornerShape(16.dp)).background(brush).then(if (enabled) Modifier else Modifier.background(Color.Black.copy(alpha = 0.3f)))
             .clickable(enabled = enabled && !busy, onClick = onClick).padding(horizontal = 20.dp, vertical = 14.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -200,7 +200,7 @@ internal fun FriendQrScanner(title: String, onScanned: (String) -> Unit, onCance
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(title, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 17.sp)
-            Text(tr("בִּטּוּל"), Modifier.clip(RoundedCornerShape(50)).border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(50))
+            Text(tr("בִּטּוּל"), Modifier.clip(RoundedCornerShape(16.dp)).border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
                 .clickable(onClick = onCancel).padding(horizontal = 14.dp, vertical = 6.dp),
                 color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 15.sp)
         }

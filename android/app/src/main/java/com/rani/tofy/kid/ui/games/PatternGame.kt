@@ -144,7 +144,7 @@ fun PatternGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, on
             ) {
                 val r = round
                 val dx = shakeOffset(shake)
-                Column(Modifier.fillMaxWidth().graphicsLayer { translationX = dx * density }.glassPane(24.dp).padding(horizontal = 12.dp, vertical = 18.dp),
+                Column(Modifier.fillMaxWidth().graphicsLayer { translationX = dx * density }.glassPane(16.dp).padding(horizontal = 12.dp, vertical = 18.dp),
                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     if (preReader) PreReaderCueCard(PreReaderGames.patternCue, m.compact)
                     else TitleText(tr("מָה מַשְׁלִים אֶת הַתַּבְנִית?"), (if (m.compact) 20 else 26).sp)

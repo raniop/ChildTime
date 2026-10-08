@@ -247,7 +247,7 @@ private fun ProminentDisclosureBody() {
     H(tr("לפני שמפעילים את הנעילה"), 26, align = TextAlign.Center)
     P(tr("כדי לנעול את שאר האפליקציות עד שהילד מרוויח זמן, טופי משתמש בשירות הנגישות של אנדרואיד."), 16f,
         color = Color.White.copy(alpha = 0.92f), weight = FontWeight.SemiBold, align = TextAlign.Center)
-    Column(Modifier.fillMaxWidth().glassPane(18.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         P(tr("מה טופי עושה עם זה"), 15f, color = Color.White, weight = FontWeight.ExtraBold)
         Bullet("👀", tr("רואה רק איזו אפליקציה נפתחת עכשיו — כדי לדעת אם היא פתוחה או נעולה"))
         Bullet("🔒", tr("מציג את מסך הנעילה של טופי מעל אפליקציה נעולה, ומחזיר למסך הבית"))
@@ -328,17 +328,17 @@ private fun ManageBody(
     Text("🛡️", fontSize = 44.sp)
     H(tr("נעילת האפליקציות"), 28, align = TextAlign.Center)
     if (guardOn) Pill(tr("✓ הנעילה פועלת"), mint = true)
-    else Column(Modifier.fillMaxWidth().glassPane(18.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp),
+    else Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally) {
         P(tr("הנעילה כבויה"), 16f, color = Ink.warn, weight = FontWeight.ExtraBold)
         GoldButton(tr("פתיחת הגדרות הנגישות"), onClick = onGuard)
     }
-    if (guardOn && !usageOn) Column(Modifier.fillMaxWidth().glassPane(18.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    if (guardOn && !usageOn) Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         P(tr("הגישה לנתוני שימוש כבויה — מומלץ להפעיל"), 14.5f, color = Color.White, weight = FontWeight.Bold)
         GlassButton(tr("פתיחת ההגדרות"), Modifier.fillMaxWidth(), onClick = onUsage)
     }
     AppsButton(openCount, onApps)
-    Column(Modifier.fillMaxWidth().glassPane(18.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         P(tr("הגדרות המכשיר נעולות לילד, כדי שלא יוכל לכבות את טופי. צריכים אותן? פותחים לכמה דקות:"), 14f, color = Color.White)
         GlassButton(tr("פתיחת הגדרות המכשיר ל-10 דקות"), Modifier.fillMaxWidth(), onClick = onDeviceSettings)
     }
@@ -367,7 +367,7 @@ fun AlwaysOpenAppsPicker(initial: Set<String>, onSave: (Set<String>) -> Unit, on
             Box(Modifier.weight(1f).widthIn(max = 520.dp).fillMaxWidth()) {
                 val list = apps
                 if (list == null) CircularProgressIndicator(Modifier.align(Alignment.Center), color = Color.White)
-                else LazyColumn(Modifier.fillMaxSize().glassPane(20.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                else LazyColumn(Modifier.fillMaxSize().glassPane(16.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     items(list, key = { it.pkg }) { app ->
                         val on = app.pkg in sel
                         Row(
@@ -376,8 +376,8 @@ fun AlwaysOpenAppsPicker(initial: Set<String>, onSave: (Set<String>) -> Unit, on
                             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             val bmp = remember(app.pkg) { runCatching { app.icon?.toBitmap(96, 96)?.asImageBitmap() }.getOrNull() }
-                            if (bmp != null) Image(bmp, null, Modifier.size(36.dp).clip(RoundedCornerShape(9.dp)))
-                            else Box(Modifier.size(36.dp).clip(RoundedCornerShape(9.dp)).background(Color.White.copy(alpha = 0.2f)))
+                            if (bmp != null) Image(bmp, null, Modifier.size(36.dp).clip(RoundedCornerShape(16.dp)))
+                            else Box(Modifier.size(36.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.2f)))
                             Text(app.label, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold,
                                 fontSize = 15.5.sp, maxLines = 1)
                             Box(
@@ -400,7 +400,7 @@ fun AlwaysOpenAppsPicker(initial: Set<String>, onSave: (Set<String>) -> Unit, on
 
 @Composable
 private fun Pill(text: String, mint: Boolean) {
-    Text(text, Modifier.clip(RoundedCornerShape(50)).background(if (mint) Color(0xFF2ED6A1) else Color.White.copy(alpha = 0.16f))
+    Text(text, Modifier.clip(RoundedCornerShape(16.dp)).background(if (mint) Color(0xFF2ED6A1) else Color.White.copy(alpha = 0.16f))
         .padding(horizontal = 14.dp, vertical = 7.dp),
         color = if (mint) Color(0xFF053B26) else Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
 }

@@ -142,7 +142,7 @@ fun PackPurchaseScreen(packID: String, preselectedChildID: String? = null, onClo
                 when {
                     premium && !pack.isPass -> IncludedInTofyPlus(onClose)
                     granted.isEmpty() -> Column(
-                        Modifier.fillMaxWidth().glassPane(22.dp, 0.09f).padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp),
+                        Modifier.fillMaxWidth().glassPane(16.dp, 0.09f).padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         if (pack.isPass && oneTimeDoorAllowed) {
                             // 🌍 Two doors: this world for 30 days, or Tofy+ for everything.
@@ -225,7 +225,7 @@ private fun joinNames(names: List<String>): String =
 
 @Composable
 private fun Header(pack: PlayPack, onClose: () -> Unit) {
-    Column(Modifier.fillMaxWidth().glassPane(22.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier.size(36.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.18f)).clickable(onClick = onClose),
@@ -234,12 +234,12 @@ private fun Header(pack: PlayPack, onClose: () -> Unit) {
             Spacer(Modifier.weight(1f))
             Text(
                 if (pack.isPass) tr("עוֹלָם בְּסִיסִי · כָּלוּל בְּטוֹפִי+") else tr("כָּלוּל בְּטוֹפִי+ · אוֹ רְכִישָׁה חַד־פַּעֲמִית"),
-                Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.12f)).padding(horizontal = 10.dp, vertical = 5.dp),
+                Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.12f)).padding(horizontal = 10.dp, vertical = 5.dp),
                 color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 11.5.sp,
             )
         }
         Box(
-            Modifier.fillMaxWidth().height(110.dp).clip(RoundedCornerShape(18.dp))
+            Modifier.fillMaxWidth().height(110.dp).clip(RoundedCornerShape(16.dp))
                 .background(Brush.linearGradient(listOf(Color(0xFF8CFFC4).copy(alpha = 0.55f), Color(0xFF37E2D5).copy(alpha = 0.35f)))),
             contentAlignment = Alignment.Center,
         ) { Text(pack.emoji, fontSize = 54.sp) }
@@ -250,7 +250,7 @@ private fun Header(pack: PlayPack, onClose: () -> Unit) {
 /** A Tofy+ family: nothing to buy — it's already open for every child. */
 @Composable
 private fun IncludedInTofyPlus(onClose: () -> Unit) {
-    Column(Modifier.fillMaxWidth().glassPane(22.dp).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("👑", fontSize = 40.sp)
         Text(tr("כָּלוּל בְּטוֹפִי+ — כְּבָר פָּתוּחַ לְכָל הַיְלָדִים"), color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, textAlign = TextAlign.Center)
         Text(tr("הָעוֹלָם מְחַכֶּה בַּמָּסָךְ הָרָאשִׁי שֶׁל כָּל יֶלֶד, עִם סִימוּן \"חָדָשׁ\"."), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 13.sp, textAlign = TextAlign.Center)
@@ -264,7 +264,7 @@ private fun KidRow(kid: Child, pack: PlayPack, isSelected: Boolean, onToggle: ()
     val owns = kid.ownsPlayPack(pack) && !pack.isPass
     val daysLeft = kid.passDaysLeft(pack)
     Row(
-        Modifier.fillMaxWidth().glassInset(12.dp).alpha(if (owns) 0.75f else 1f).clickable(enabled = !owns, onClick = onToggle)
+        Modifier.fillMaxWidth().glassInset(16.dp).alpha(if (owns) 0.75f else 1f).clickable(enabled = !owns, onClick = onToggle)
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -287,7 +287,7 @@ private fun KidRow(kid: Child, pack: PlayPack, isSelected: Boolean, onToggle: ()
 
 @Composable
 private fun OptionRow(title: String, price: String, line: String, selected: Boolean, gold: Boolean, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(14.dp)
+    val shape = RoundedCornerShape(16.dp)
     Column(
         Modifier.fillMaxWidth().clip(shape)
             .background(if (gold) Brush.linearGradient(listOf(Color(0xFFFFE082).copy(alpha = 0.45f), Color(0xFFFFB840).copy(alpha = 0.35f)))
@@ -315,7 +315,7 @@ private fun FinePrint(text: String) =
 @Composable
 private fun Cta(text: String, enabled: Boolean, onClick: () -> Unit) {
     Box(
-        Modifier.fillMaxWidth().padding(top = 4.dp).alpha(if (enabled) 1f else 0.5f).clip(RoundedCornerShape(13.dp))
+        Modifier.fillMaxWidth().padding(top = 4.dp).alpha(if (enabled) 1f else 0.5f).clip(RoundedCornerShape(16.dp))
             .background(Color.White.copy(alpha = 0.92f)).clickable(enabled = enabled, onClick = onClick).padding(vertical = 12.dp),
         contentAlignment = Alignment.Center,
     ) { Text(text, color = Ink.indigo, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, textAlign = TextAlign.Center) }
@@ -342,7 +342,7 @@ private fun Purchasing(pack: PlayPack, childIDs: List<String>, onDone: (PlayPack
 
 @Composable
 private fun Success(pack: PlayPack, granted: List<String>, durationLabel: String, onClose: () -> Unit) {
-    Column(Modifier.fillMaxWidth().glassPane(22.dp).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text("🎉", fontSize = 44.sp)
         val names = joinNames(granted)
         Text(

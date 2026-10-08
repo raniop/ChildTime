@@ -206,8 +206,8 @@ internal fun KidHome(
                         val crowns = WorldStage.totalCrowns(snap.worldStage, snap.worldProgress)
                         if (crowns > 0) Text(
                             tr("👑 כְּתָרִים: %lld", crowns),
-                            Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.2f))
-                                .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(50))
+                            Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.2f))
+                                .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
                                 .padding(horizontal = 10.dp, vertical = 4.dp),
                             color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, maxLines = 1,
                         )
@@ -375,7 +375,7 @@ private fun NavButton(emoji: String, badge: Boolean, modifier: Modifier = Modifi
 private fun KidExitBar(onClick: () -> Unit) {
     Box(Modifier.fillMaxWidth().padding(top = 4.dp), contentAlignment = Alignment.Center) {
         Row(
-            Modifier.clip(RoundedCornerShape(50)).background(Color(0xFFEF4655)).border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50))
+            Modifier.clip(RoundedCornerShape(16.dp)).background(Color(0xFFEF4655)).border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
                 .clickable(onClick = onClick).padding(horizontal = 22.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp),
         ) {
@@ -407,7 +407,7 @@ private fun HeaderPane(
 ) {
     // iOS sizes, one set for the phone (compact) and one for the tablet (iPad).
     val compact = !isWideScreen()
-    Column(Modifier.fillMaxWidth().padding(top = 6.dp).glassPane(24.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(Modifier.fillMaxWidth().padding(top = 6.dp).glassPane(16.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             // The ring says the level tier: bronze from 5, silver from 10, gold from 20.
             val tier = RewardEngine.levelTier(RewardEngine.level(xp))
@@ -446,7 +446,7 @@ private fun HeaderPane(
 
 @Composable
 private fun WalletStat(value: String, label: String, compact: Boolean, onClick: () -> Unit) {
-    Column(Modifier.clip(RoundedCornerShape(10.dp)).clickable(onClick = onClick), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Column(Modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = onClick), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
             TightText(value, if (compact) 14.5f else 16f, if (compact) 22 else 26, Color.White, FontWeight.Black)
         }
@@ -480,7 +480,7 @@ private fun StatsPanel(engine: ProgressEngine?, onLevelInfo: () -> Unit, onStatI
     val cap = engine?.settings?.dailyCap
     val minutes = if (cap?.enabled == true) "${snap?.minutesEarnedToday ?: 0}" else "${engine?.pendingMinutes ?: 0}"
     val suffix = if (cap?.enabled == true) "/${cap.max}" else null
-    Row(Modifier.fillMaxWidth().glassInset(18.dp).padding(vertical = 13.dp, horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().glassInset(16.dp).padding(vertical = 13.dp, horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         StatColumn(minutes, suffix, SocialMe.g(tr("⏱ הִרְוַחְתָּ הַיּוֹם"), tr("⏱ הִרְוַחַתְּ הַיּוֹם")), { onStatInfo(StatInfoKind.TODAY) }, compact)
         StatDivider()
         StatColumn("${snap?.correctToday ?: 0}", null, tr("✅ נְכוֹנוֹת הַיּוֹם"), { onStatInfo(StatInfoKind.CORRECT) }, compact)
@@ -539,7 +539,7 @@ private fun ChallengeCard(engine: ProgressEngine?, onClick: () -> Unit, modifier
             when {
                 claimed -> Text(tr("כָּל הַכָּבוֹד! נִפְגָּשִׁים מָחָר 🌙"), color = Color.White.copy(alpha = 0.88f), fontFamily = Rounded,
                     fontWeight = FontWeight.Bold, fontSize = 11.5.sp, maxLines = 1)
-                ready -> Text("🎁 " + tr("פִּתְחוּ!"), Modifier.clip(RoundedCornerShape(50)).background(Brush.horizontalGradient(listOf(Ink.gold1, Ink.gold2)))
+                ready -> Text("🎁 " + tr("פִּתְחוּ!"), Modifier.clip(RoundedCornerShape(16.dp)).background(Brush.horizontalGradient(listOf(Ink.gold1, Ink.gold2)))
                     .padding(horizontal = 10.dp, vertical = 3.dp), color = Ink.deep, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 12.sp)
                 else -> Text(tr("%lld מִתּוֹךְ %lld", done, target), color = Color.White.copy(alpha = 0.88f), fontFamily = Rounded,
                     fontWeight = FontWeight.Bold, fontSize = 11.5.sp, maxLines = 1)
@@ -581,8 +581,8 @@ private fun ChoresCard(e: HomeExtras, onClick: () -> Unit, modifier: Modifier = 
 
 @Composable
 fun Track(frac: Float, modifier: Modifier = Modifier, fill: Color = Color.White) {
-    Box(modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))) {
-        if (frac > 0f) Box(Modifier.fillMaxWidth(frac.coerceIn(0.06f, 1f)).height(10.dp).clip(RoundedCornerShape(50)).background(fill))
+    Box(modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))) {
+        if (frac > 0f) Box(Modifier.fillMaxWidth(frac.coerceIn(0.06f, 1f)).height(10.dp).clip(RoundedCornerShape(16.dp)).background(fill))
     }
 }
 
@@ -634,7 +634,7 @@ private fun FeatureTile(
             Spacer(Modifier.weight(1f))
             if (badge != null) Text(
                 badge,
-                Modifier.clip(RoundedCornerShape(50)).background(badgeTint?.copy(alpha = 0.9f) ?: Color.White.copy(alpha = 0.22f))
+                Modifier.clip(RoundedCornerShape(16.dp)).background(badgeTint?.copy(alpha = 0.9f) ?: Color.White.copy(alpha = 0.22f))
                     .padding(horizontal = 8.dp, vertical = 3.dp),
                 color = if (badgeTint != null) Ink.deep else Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 10.5.sp, maxLines = 1,
             )
@@ -693,8 +693,8 @@ private fun ColumnScope.BottomCtas(c: HomeCtaModel, onOpenEarned: () -> Unit, on
 @Composable
 private fun PlayPinChip(hasPin: Boolean, onClick: () -> Unit) {
     Text((if (hasPin) "🔒 " + tr("הַדַּקּוֹת שֶׁלִּי מוּגָנוֹת בְּקוֹד") else "🔓 " + tr("קוֹד סוֹדִי לַדַּקּוֹת שֶׁלִּי")),
-        Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.16f))
-            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).clickable(onClick = onClick)
+        Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.16f))
+            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 8.dp),
         color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.5.sp, maxLines = 1)
 }

@@ -131,7 +131,7 @@ fun UpdateAvailableSheet(onUpdate: () -> Unit, onLater: () -> Unit, onDismiss: (
                 }
             }
             GoldButton(tr("עַדְכְּנוּ עַכְשָׁיו"), onClick = onUpdate)
-            Text(tr("אַחַר כָּךְ"), Modifier.clip(RoundedCornerShape(12.dp)).clickable(onClick = onLater)
+            Text(tr("אַחַר כָּךְ"), Modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = onLater)
                 .padding(horizontal = 16.dp).padding(top = 12.dp, bottom = 6.dp),
                 color = Color.White.copy(alpha = 0.80f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
             Text(tr("מֻתְקָן אֶצְלְכֶם: %@ (%@)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE.toString()),

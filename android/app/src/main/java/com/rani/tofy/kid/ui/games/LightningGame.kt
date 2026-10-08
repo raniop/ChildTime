@@ -119,12 +119,12 @@ fun LightningGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, 
                 Modifier.weight(1f).widthIn(max = if (m.compact) 640.dp else 780.dp).fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(if (m.short) 8.dp else 12.dp),
             ) {
-                Column(Modifier.fillMaxWidth().glassPane(18.dp).padding(horizontal = 14.dp, vertical = 10.dp)) { MiniGameTimerBar(remaining, roundSeconds) }
+                Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(horizontal = 14.dp, vertical = 10.dp)) { MiniGameTimerBar(remaining, roundSeconds) }
                 Text(if (streak >= 2) tr("🔥 %lld בְּרֶצֶף", streak) else " ", color = KidColor.starGold, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
                 Spacer(Modifier.weight(1f))
                 val s = statement
                 val dx = shakeOffset(shake)
-                Column(Modifier.fillMaxWidth().graphicsLayer { translationX = dx * density }.glassPane(24.dp).padding(horizontal = 16.dp, vertical = 18.dp),
+                Column(Modifier.fillMaxWidth().graphicsLayer { translationX = dx * density }.glassPane(16.dp).padding(horizontal = 16.dp, vertical = 18.dp),
                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(tr("נָכוֹן אוֹ לֹא נָכוֹן?"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
                     s?.prompt?.let { GameText(it, if (m.compact) 20.sp else 26.sp, color = Color.White.copy(alpha = 0.92f), weight = FontWeight.Bold, maxLines = 4, minScale = 0.6f) }

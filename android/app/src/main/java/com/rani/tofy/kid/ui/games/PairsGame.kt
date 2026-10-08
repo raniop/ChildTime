@@ -185,7 +185,7 @@ fun PairsGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, onCl
                     if (preReader && c != null) {
                         PreReaderCueCard(c, m.compact); pips()
                     } else {
-                        Column(Modifier.fillMaxWidth().glassPane(22.dp).padding(horizontal = 14.dp, vertical = 12.dp),
+                        Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(horizontal = 14.dp, vertical = 12.dp),
                             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             TitleText(tr("חַבְּרוּ אֶת הַזּוּגוֹת 🔗"), if (m.compact) 26.sp else 32.sp, maxLines = 1)
                             Text(subtitle, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)

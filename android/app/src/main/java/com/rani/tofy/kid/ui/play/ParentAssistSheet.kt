@@ -77,7 +77,7 @@ fun ParentAssistSheet(r: RunnerController, question: Question, topic: Topic, onD
                 when {
                     sent -> Text(
                         "💌 " + tr("שָׁלַחְנוּ בַּקָּשַׁת עֶזְרָה!"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold,
-                        fontSize = 19.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().glassInset(18.dp).padding(vertical = 16.dp),
+                        fontSize = 19.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().glassInset(16.dp).padding(vertical = 16.dp),
                     )
                     // No named parent on file — every parent device gets the same request.
                     parents.isEmpty() -> AssistButton(if (girl) tr("👨‍👩‍👧 בַּקְּשִׁי עֶזְרָה מֵאַבָּא אוֹ אִמָּא") else tr("👨‍👩‍👧 בַּקֵּשׁ עֶזְרָה מֵאַבָּא אוֹ אִמָּא")) { ask("all") }
@@ -89,7 +89,7 @@ fun ParentAssistSheet(r: RunnerController, question: Question, topic: Topic, onD
             Text(
                 tr("🚀 אַמְשִׁיךְ לְבַד"), color = Color.White.copy(alpha = if (sent) 0.5f else 1f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold,
                 fontSize = 17.sp, textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().glassInset(18.dp).clickable(enabled = !sent) { onDismiss() }.padding(vertical = 14.dp),
+                modifier = Modifier.fillMaxWidth().glassInset(16.dp).clickable(enabled = !sent) { onDismiss() }.padding(vertical = 14.dp),
             )
         }
     }
@@ -98,7 +98,7 @@ fun ParentAssistSheet(r: RunnerController, question: Question, topic: Topic, onD
 @Composable
 private fun AssistButton(title: String, onClick: () -> Unit) {
     Box(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp))
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
             .background(Brush.horizontalGradient(listOf(Color(0xFF5E60CE), Color(0xFF3E8BF0))))
             .clickable(onClick = onClick).padding(vertical = 15.dp),
         contentAlignment = Alignment.Center,

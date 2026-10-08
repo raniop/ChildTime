@@ -186,8 +186,8 @@ fun MiniGameBackdrop(content: @Composable BoxScope.() -> Unit) {
 @Composable
 fun MiniGameChip(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, content: @Composable () -> Unit) {
     Box(
-        modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-            .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(50))
+        modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+            .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(16.dp))
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 12.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center,
@@ -231,7 +231,7 @@ fun MiniGameTopBar(onClose: () -> Unit, earn: MiniGameEarnSession? = null, gameC
 /** The runner's earned-time bar: the child's REAL balance, to the second (each "+24 שניות" lands in it). */
 @Composable
 fun MiniGameEarnBar() {
-    EarnedBalanceRow(Modifier.fillMaxWidth().glassPane(14.dp).padding(horizontal = 12.dp, vertical = 7.dp), size = 13f)
+    EarnedBalanceRow(Modifier.fillMaxWidth().glassPane(16.dp).padding(horizontal = 12.dp, vertical = 7.dp), size = 13f)
 }
 
 /**
@@ -259,8 +259,8 @@ fun EarnedBalanceRow(modifier: Modifier = Modifier, size: Float = 14f) {
 /** A capsule track with a gold fill (start → end in the app's direction). */
 @Composable
 fun GoldBar(frac: Float, modifier: Modifier = Modifier, colors: List<Color> = listOf(Color(0xFFFFD23F), Color(0xFFFF9F1C))) {
-    Box(modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.18f))) {
-        Box(Modifier.fillMaxHeight().fillMaxWidth(frac.coerceIn(0.02f, 1f)).clip(RoundedCornerShape(50)).background(Brush.horizontalGradient(colors)))
+    Box(modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.18f))) {
+        Box(Modifier.fillMaxHeight().fillMaxWidth(frac.coerceIn(0.02f, 1f)).clip(RoundedCornerShape(16.dp)).background(Brush.horizontalGradient(colors)))
     }
 }
 
@@ -328,8 +328,8 @@ fun Modifier.juicyClick(enabled: Boolean = true, onClick: () -> Unit): Modifier 
 fun MiniGameGoldButton(title: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val h = rememberHaptics()
     Box(
-        modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(GoldBrush)
-            .border(1.dp, Color.White.copy(alpha = 0.45f), RoundedCornerShape(24.dp))
+        modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(GoldBrush)
+            .border(1.dp, Color.White.copy(alpha = 0.45f), RoundedCornerShape(16.dp))
             .juicyClick { h.medium(); onClick() }.padding(vertical = 15.dp, horizontal = 12.dp),
         contentAlignment = Alignment.Center,
     ) { FitText(title, 21.sp, color = Color.White, weight = FontWeight.ExtraBold, maxLines = 1, minScale = 0.7f) }
@@ -340,7 +340,7 @@ fun MiniGameGoldButton(title: String, modifier: Modifier = Modifier, onClick: ()
 fun MiniGameGlassButton(title: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val h = rememberHaptics()
     Box(
-        modifier.fillMaxWidth().glassPane(24.dp).juicyClick { h.light(); onClick() }.padding(vertical = 13.dp, horizontal = 12.dp),
+        modifier.fillMaxWidth().glassPane(16.dp).juicyClick { h.light(); onClick() }.padding(vertical = 13.dp, horizontal = 12.dp),
         contentAlignment = Alignment.Center,
     ) { FitText(title, 18.sp, color = Color.White, weight = FontWeight.ExtraBold, maxLines = 1, minScale = 0.7f) }
 }
@@ -350,7 +350,7 @@ fun MiniGameGlassButton(title: String, modifier: Modifier = Modifier, onClick: (
 fun GameCard(modifier: Modifier = Modifier, maxWidth: Dp = 440.dp, padding: Dp = 24.dp, spacing: Dp = 14.dp,
              content: @Composable ColumnScope.() -> Unit) {
     Column(
-        modifier.padding(horizontal = 20.dp).widthIn(max = maxWidth).fillMaxWidth().glassPane(28.dp).padding(padding),
+        modifier.padding(horizontal = 20.dp).widthIn(max = maxWidth).fillMaxWidth().glassPane(16.dp).padding(padding),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(spacing), content = content,
     )
 }
@@ -383,7 +383,7 @@ fun PreReaderCueCard(cue: PreReaderCue, compact: Boolean = true) {
     val m = gameMetrics()
     LaunchedEffect(cue.spoken) { GameEnv.speak(cue.spoken) }
     Column(
-        Modifier.fillMaxWidth().glassPane(24.dp).padding(horizontal = if (compact) 14.dp else 20.dp, vertical = if (m.short) 8.dp else 12.dp),
+        Modifier.fillMaxWidth().glassPane(16.dp).padding(horizontal = if (compact) 14.dp else 20.dp, vertical = if (m.short) 8.dp else 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(if (m.short) 6.dp else 9.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp, Alignment.CenterHorizontally),
@@ -463,8 +463,8 @@ fun MiniGameRewardChip(emoji: String, text: String, color: Color, shown: Boolean
         // At least 58dp and growing with its two lines: a fixed 54dp pushed the
         // "+36 ⭐" line against the top edge on a tablet (Rani's screenshot).
         modifier.graphicsLayer { scaleX = s; scaleY = s; alpha = a }.heightIn(min = 64.dp)
-            .clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-            .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(50)).padding(horizontal = 10.dp, vertical = 6.dp),
+            .clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+            .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(16.dp)).padding(horizontal = 10.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterVertically),
     ) {
         Ltr { FitText("$emoji +$text", 21.sp, color = color, weight = FontWeight.ExtraBold, maxLines = 1, minScale = 0.6f) }
@@ -605,14 +605,14 @@ fun BoxScope.MiniGameEarnOverlay(earn: MiniGameEarnSession) {
             earn.flashText?.let { last = it }
             val c = if (earn.flashPositive) KidColor.successMint else KidColor.flameOrange
             Text(last, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp,
-                modifier = Modifier.clip(RoundedCornerShape(50)).background(c.copy(alpha = 0.95f)).padding(horizontal = 16.dp, vertical = 8.dp))
+                modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(c.copy(alpha = 0.95f)).padding(horizontal = 16.dp, vertical = 8.dp))
         }
         // ⏰ Today's time is full — the child keeps playing and keeps earning ⭐/💎, so say that.
         AnimatedVisibility(earn.capReached, Modifier.align(Alignment.TopCenter).padding(top = 150.dp, start = 24.dp, end = 24.dp),
             enter = fadeIn(), exit = fadeOut()) {
             Text(tr("אָסַפְתֶּם אֶת כָּל הַזְּמַן לְהַיּוֹם! מַמְשִׁיכִים לֶאֱסֹף כּוֹכָבִים ⭐"), color = Color.White, fontFamily = Rounded,
                 fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, textAlign = TextAlign.Center,
-                modifier = Modifier.clip(RoundedCornerShape(50)).background(KidColor.starGold.copy(alpha = 0.9f)).padding(horizontal = 14.dp, vertical = 8.dp))
+                modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(KidColor.starGold.copy(alpha = 0.9f)).padding(horizontal = 14.dp, vertical = 8.dp))
         }
     }
 }
@@ -630,7 +630,7 @@ fun MiniGameQuestionCard(item: GameItem, header: String, onDone: (Boolean) -> Un
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     Column(
         Modifier.padding(horizontal = 16.dp).widthIn(max = 560.dp).fillMaxWidth().graphicsLayer { translationX = 0f }
-            .glassPane(24.dp).padding(18.dp),
+            .glassPane(16.dp).padding(18.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         val dx = shakeOffset(shake)
@@ -677,8 +677,8 @@ fun MiniGameNumberPad(decimal: Boolean = false, keyHeight: Dp = 52.dp, onKey: (S
                     row.forEach { key ->
                         if (key.isEmpty()) Spacer(Modifier.weight(1f).height(keyHeight))
                         else Box(
-                            Modifier.weight(1f).height(keyHeight).clip(RoundedCornerShape(14.dp)).background(Color.White.copy(alpha = 0.14f))
-                                .border(1.dp, Color.White.copy(alpha = 0.28f), RoundedCornerShape(14.dp))
+                            Modifier.weight(1f).height(keyHeight).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+                                .border(1.dp, Color.White.copy(alpha = 0.28f), RoundedCornerShape(16.dp))
                                 .juicyClick { h.light(); onKey(key) },
                             contentAlignment = Alignment.Center,
                         ) {
@@ -736,7 +736,7 @@ fun SurpriseRoundIntro(plan: SurprisePlan, onStart: () -> Unit, onSkip: () -> Un
                 MiniGameChip { Text("×2 ⭐ 💎", color = KidColor.starGold, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 18.sp) }
                 MiniGameGoldButton(tr("יַאלְלָה! 🚀"), onClick = onStart)
                 Text(tr("דִּלּוּג"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 16.sp,
-                    modifier = Modifier.clip(RoundedCornerShape(50)).clickable { h.light(); onSkip() }.padding(horizontal = 20.dp, vertical = 6.dp))
+                    modifier = Modifier.clip(RoundedCornerShape(16.dp)).clickable { h.light(); onSkip() }.padding(horizontal = 20.dp, vertical = 6.dp))
             }
         }
         ConfettiOverlay(confetti)
@@ -787,7 +787,7 @@ internal fun nowSecs(): Double = System.nanoTime() / 1e9
 /** A full-width capsule for a small status line. */
 @Composable
 fun StatusPill(text: String, color: Color = Color.White, modifier: Modifier = Modifier) {
-    Text(text, modifier.glassInset(14.dp).padding(horizontal = 12.dp, vertical = 6.dp), color = color, fontFamily = Rounded,
+    Text(text, modifier.glassInset(16.dp).padding(horizontal = 12.dp, vertical = 6.dp), color = color, fontFamily = Rounded,
         fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, textAlign = TextAlign.Center)
 }
 

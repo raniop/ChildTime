@@ -84,7 +84,7 @@ fun GlassBackdrop(modifier: Modifier = Modifier, maxContentWidth: Dp? = 900.dp, 
  * No elevation shadow by default — on a translucent pane Android draws the
  * shadow THROUGH the glass as a grey inner slab.
  */
-fun Modifier.glassPane(radius: Dp = 22.dp, strength: Float = 0.14f, shadow: Boolean = false): Modifier {
+fun Modifier.glassPane(radius: Dp = 16.dp, strength: Float = 0.14f, shadow: Boolean = false): Modifier {
     val shape = RoundedCornerShape(radius)
     return this
         .then(if (shadow) Modifier.shadow(14.dp, shape, ambientColor = Color.Black.copy(alpha = 0.28f), spotColor = Color.Black.copy(alpha = 0.28f)) else Modifier)
@@ -94,6 +94,6 @@ fun Modifier.glassPane(radius: Dp = 22.dp, strength: Float = 0.14f, shadow: Bool
         .border(1.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.5f), Color.White.copy(alpha = 0.22f))), shape)
 }
 
-fun Modifier.glassInset(radius: Dp = 12.dp) = glassPane(radius, 0.09f, shadow = false)
+fun Modifier.glassInset(radius: Dp = 16.dp) = glassPane(radius, 0.09f, shadow = false)
 
 val GoldBrush = Brush.horizontalGradient(listOf(Ink.gold1, Ink.gold2))

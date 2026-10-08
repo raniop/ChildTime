@@ -168,7 +168,7 @@ internal fun KidChoresContent(onClose: () -> Unit) {
                     Column(Modifier.widthIn(max = if (cols == 3) 860.dp else 560.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         // 🏆 Lifetime earnings — "how much have I made, ever".
                         val minutes = childID?.let { store.totals(it).minutes } ?: 0
-                        if (minutes > 0) Row(Modifier.fillMaxWidth().glassPane(22.dp).background(SocialColor.starGold.copy(alpha = 0.14f)).padding(12.dp),
+                        if (minutes > 0) Row(Modifier.fillMaxWidth().glassPane(16.dp).background(SocialColor.starGold.copy(alpha = 0.14f)).padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text("🏆", fontSize = 30.sp)
                             Column(Modifier.weight(1f)) {
@@ -187,7 +187,7 @@ internal fun KidChoresContent(onClose: () -> Unit) {
                             }
                             else -> {
                                 if (todo.isNotEmpty()) Grid(todo, cols) { c -> ActiveCard(c) { haptics.success(); pending = c } }
-                                else Column(Modifier.fillMaxWidth().glassPane(22.dp).background(Color(0xFF8CFFC4).copy(alpha = 0.14f)).padding(16.dp),
+                                else Column(Modifier.fillMaxWidth().glassPane(16.dp).background(Color(0xFF8CFFC4).copy(alpha = 0.14f)).padding(16.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     Text("🎉", fontSize = 46.sp)
                                     Text(SocialMe.g(tr("כָּל הַכָּבוֹד! סִיַּמְתָּ הַכֹּל לְהַיּוֹם"), tr("כָּל הַכָּבוֹד! סִיַּמְתְּ הַכֹּל לְהַיּוֹם")),
@@ -245,19 +245,19 @@ private fun Grid(items: List<Chore>, cols: Int, cell: @Composable (Chore) -> Uni
 /** A chore the kid can DO now: emoji, name, ONE reward line, the same-day counter, "עשיתי!". */
 @Composable
 private fun ActiveCard(c: Chore, onDone: () -> Unit) {
-    Column(Modifier.fillMaxWidth().glassPane(22.dp).background(Color(0xFF48BFE3).copy(alpha = 0.12f)).padding(10.dp),
+    Column(Modifier.fillMaxWidth().glassPane(16.dp).background(Color(0xFF48BFE3).copy(alpha = 0.12f)).padding(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(c.emoji, fontSize = 38.sp)
         Box(Modifier.heightIn(min = 38.dp), contentAlignment = Alignment.Center) {
             Text(c.title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, textAlign = TextAlign.Center, maxLines = 2, lineHeight = 19.sp)
         }
-        Text(tr("🎮 %lld דַּקּוֹת מִשְׂחָק", maxOf(c.rewardMinutes, 0)), Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).padding(horizontal = 9.dp, vertical = 4.dp),
+        Text(tr("🎮 %lld דַּקּוֹת מִשְׂחָק", maxOf(c.rewardMinutes, 0)), Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).padding(horizontal = 9.dp, vertical = 4.dp),
             color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
         // Reserved even when absent so every card in a row keeps the same height.
         Text(if (c.timesPerDay > 1) tr("הַיּוֹם: %lld/%lld ✔️", c.doneToday, c.timesPerDay) else " ", Modifier.heightIn(min = 20.dp),
             color = Color.White.copy(alpha = 0.8f), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 10.5.sp, lineHeight = 16.sp, maxLines = 1)
-        Text(tr("עָשִׂיתִי! ✅"), Modifier.fillMaxWidth().clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.92f)).clickable(onClick = onDone)
+        Text(tr("עָשִׂיתִי! ✅"), Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.92f)).clickable(onClick = onDone)
             .padding(vertical = 10.dp), color = SocialColor.indigo, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp,
             textAlign = TextAlign.Center, maxLines = 1)
     }
@@ -268,7 +268,7 @@ private fun ActiveCard(c: Chore, onDone: () -> Unit) {
 private fun DoneCard(c: Chore, isSending: Boolean, accent: Color) {
     val approved = c.isDaily && c.approvedToday
     val waiting = !approved && !isSending
-    Column(Modifier.fillMaxWidth().glassPane(18.dp, if (approved) 0.14f else 0.09f).then(if (approved) Modifier.background(accent.copy(alpha = 0.35f)) else Modifier).padding(10.dp),
+    Column(Modifier.fillMaxWidth().glassPane(16.dp, if (approved) 0.14f else 0.09f).then(if (approved) Modifier.background(accent.copy(alpha = 0.35f)) else Modifier).padding(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(if (approved) "👑" else c.emoji, fontSize = 30.sp)
         Text(c.title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.sp, textAlign = TextAlign.Center, maxLines = 1)
@@ -283,7 +283,7 @@ private fun DoneCard(c: Chore, isSending: Boolean, accent: Color) {
 
 @Composable
 private fun StatusCapsule(text: String, bg: Color) {
-    Text(text, Modifier.fillMaxWidth().clip(RoundedCornerShape(50)).background(bg).padding(vertical = 10.dp), color = Color.White,
+    Text(text, Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(bg).padding(vertical = 10.dp), color = Color.White,
         fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.sp, textAlign = TextAlign.Center, maxLines = 1)
 }
 

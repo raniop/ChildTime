@@ -206,7 +206,7 @@ private fun ChildCard(
         pct >= 60 -> Ink.warn
         else -> Ink.weak
     }
-    Column(Modifier.fillMaxWidth().coachMark("p.card", marked).glassPane(26.dp).clickable(onClick = onOpen).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(Modifier.fillMaxWidth().coachMark("p.card", marked).glassPane(16.dp).clickable(onClick = onOpen).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             // ✏️ Avatar + name open this child's settings in one tap — the rest of
             // the card opens their page (iOS: "מאוד מסובך להגיע למצב של עריכת ילד").
@@ -265,10 +265,10 @@ private fun ChildCard(
 /** A card button whose label shrinks to fit — three of them share one row. */
 @Composable
 private fun CardButton(text: String, white: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(14.dp)
+    val shape = RoundedCornerShape(16.dp)
     Box(
         modifier.height(46.dp).clip(shape)
-            .then(if (white) Modifier.background(Color.White.copy(alpha = 0.92f)) else Modifier.glassPane(14.dp, 0.18f, shadow = false))
+            .then(if (white) Modifier.background(Color.White.copy(alpha = 0.92f)) else Modifier.glassPane(16.dp, 0.18f, shadow = false))
             .clickable(onClick = onClick).padding(horizontal = 6.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -279,7 +279,7 @@ private fun CardButton(text: String, white: Boolean, modifier: Modifier, onClick
 
 @Composable
 private fun Stat(modifier: Modifier, value: String, label: String) {
-    Column(modifier.glassInset(14.dp).padding(vertical = 9.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier.glassInset(16.dp).padding(vertical = 9.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(value, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
         // Always one line — "דקות שהרוויחה היום" wrapped on a narrow phone (Rani); it shrinks instead.
         com.rani.tofy.kid.ui.play.FitText(label, 12.sp, color = Ink.secondary, weight = FontWeight.Normal, maxLines = 1, minScale = 0.7f,
@@ -316,9 +316,9 @@ private fun LocationLine(child: Child, onOpen: () -> Unit) {
     val state by com.rani.tofy.data.FamilyRepository.state.collectAsState()
     val f = com.rani.tofy.ui.location.LocationRepository.shownFix(child) ?: return
     val fresh = System.currentTimeMillis() / 1000.0 - f.at < 600
-    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
+    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
         .background(if (fresh) Color(0xFF06D6A0).copy(alpha = 0.22f) else Color.White.copy(alpha = 0.12f))
-        .border(1.5.dp, if (fresh) Color(0xFF5CFF9D).copy(alpha = 0.7f) else Color.Transparent, RoundedCornerShape(14.dp))
+        .border(1.5.dp, if (fresh) Color(0xFF5CFF9D).copy(alpha = 0.7f) else Color.Transparent, RoundedCornerShape(16.dp))
         .clickable(onClick = onOpen).padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         val (icon, where) = com.rani.tofy.ui.location.LocationRepository.whereParts(ctx, f, state.household?.places ?: emptyList())
@@ -340,7 +340,7 @@ private fun showLocationIntro(state: FamilyState): Boolean {
 private fun LocationIntroCard(onOpen: () -> Unit) {
     var shown by remember { mutableStateOf(true) }
     if (!shown) return
-    Row(Modifier.fillMaxWidth().glassPane(22.dp).padding(14.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    Row(Modifier.fillMaxWidth().glassPane(16.dp).padding(14.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("📍", fontSize = 30.sp)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(tr("חדש: לדעת איפה הילדים"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 17.sp)

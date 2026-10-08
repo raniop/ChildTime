@@ -247,8 +247,8 @@ private fun promptSize(prompt: String, passage: Boolean): Float {
 private fun QuestionHeader(r: RunnerController, q: Question) {
     val golden = r.isSuperQuestion || r.isBonusQuestion || r.isArena
     Column(
-        Modifier.fillMaxWidth().padding(horizontal = 8.dp).glassPane(22.dp)
-            .then(if (golden) Modifier.border(2.dp, KidColor.starGold.copy(alpha = 0.9f), RoundedCornerShape(22.dp)) else Modifier)
+        Modifier.fillMaxWidth().padding(horizontal = 8.dp).glassPane(16.dp)
+            .then(if (golden) Modifier.border(2.dp, KidColor.starGold.copy(alpha = 0.9f), RoundedCornerShape(16.dp)) else Modifier)
             .padding(start = 14.dp, end = 14.dp, top = 12.dp, bottom = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -356,9 +356,9 @@ private fun HintPill(r: RunnerController, q: Question, modifier: Modifier = Modi
 @Composable
 private fun Pill(text: String, enabled: Boolean, gold: Boolean = false, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Box(
-        modifier.widthIn(max = 170.dp).graphicsLayer { alpha = if (enabled) 1f else 0.45f }.clip(RoundedCornerShape(50))
+        modifier.widthIn(max = 170.dp).graphicsLayer { alpha = if (enabled) 1f else 0.45f }.clip(RoundedCornerShape(16.dp))
             .background(Color.White.copy(alpha = 0.14f))
-            .border(1.dp, if (gold) KidColor.starGold.copy(alpha = if (enabled) 0.7f else 0.3f) else Color.White.copy(alpha = 0.3f), RoundedCornerShape(50))
+            .border(1.dp, if (gold) KidColor.starGold.copy(alpha = if (enabled) 0.7f else 0.3f) else Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
             .clickable(enabled = enabled, onClick = onClick).padding(horizontal = 14.dp, vertical = 9.dp),
     ) { FitText(text, 16.sp, weight = FontWeight.ExtraBold, maxLines = 1, minScale = 0.6f) }
 }
@@ -375,7 +375,7 @@ private fun SecondsFlash(r: RunnerController) {
             last?.let { (text, positive) ->
                 Text(
                     text, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp,
-                    modifier = Modifier.clip(RoundedCornerShape(50))
+                    modifier = Modifier.clip(RoundedCornerShape(16.dp))
                         .background((if (positive) KidColor.successMint else KidColor.flameOrange).copy(alpha = 0.95f))
                         .padding(horizontal = 16.dp, vertical = 9.dp),
                 )
@@ -394,7 +394,7 @@ private fun BonusIntro() {
             Text("💫", fontSize = 110.sp, modifier = Modifier.scale(s))
             Text(tr("שְׁאֵלַת עֲנָק!"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 36.sp, textAlign = TextAlign.Center)
             Text(tr("🎮 +%lld דַּקּוֹת", RewardEngine.bonusQuestionMinutes), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 34.sp,
-                modifier = Modifier.clip(RoundedCornerShape(50)).background(Color.Black.copy(alpha = 0.25f)).padding(horizontal = 24.dp, vertical = 10.dp))
+                modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(Color.Black.copy(alpha = 0.25f)).padding(horizontal = 24.dp, vertical = 10.dp))
             Text(tr("שְׁאֵלָה קָשָׁה בִּמְיוּחָד — עֲנוּ נָכוֹן וְקַבְּלוּ אֶת כָּל הַדַּקּוֹת!"), color = Color.White, fontFamily = Rounded,
                 fontWeight = FontWeight.Bold, fontSize = 18.sp, textAlign = TextAlign.Center)
         }

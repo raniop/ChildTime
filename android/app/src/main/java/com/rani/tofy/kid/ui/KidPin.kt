@@ -65,7 +65,7 @@ internal fun KidPinVerify(playPIN: String, onSuccess: () -> Unit, onCancel: () -
             }
             Text(
                 tr("שָׁכַחְתִּי אֶת הַקּוֹד 🤔"),
-                Modifier.padding(top = 8.dp).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.12f))
+                Modifier.padding(top = 8.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.12f))
                     .clickable(onClick = onForgot).padding(horizontal = 16.dp, vertical = 9.dp),
                 color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 14.5.sp,
             )
@@ -165,7 +165,7 @@ internal fun KidPinManage(onChange: () -> Unit, onRemove: () -> Unit, onClose: (
             Column(Modifier.widthIn(max = 340.dp), verticalArrangement = Arrangement.spacedBy(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 KidCta(tr("הַחְלָפַת הַקּוֹד"), Color(0xFF5E60CE), Color(0xFF3E8BF0), emoji = "🔁", size = 17, onClick = onChange)
                 KidCta(tr("הֲסָרַת הַקּוֹד"), Color.White.copy(alpha = 0.16f), Color.White.copy(alpha = 0.16f), emoji = "🔓", size = 16, onClick = onRemove)
-                Text(tr("סְגִירָה"), Modifier.clip(RoundedCornerShape(50)).clickable(onClick = onClose).padding(horizontal = 16.dp, vertical = 8.dp),
+                Text(tr("סְגִירָה"), Modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = onClose).padding(horizontal = 16.dp, vertical = 8.dp),
                     color = Color.White.copy(alpha = 0.8f), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 15.sp)
             }
         }

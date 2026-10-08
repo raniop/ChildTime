@@ -55,7 +55,7 @@ import com.rani.tofy.ui.theme.glassPane
 fun SettingsSection(header: String? = null, footer: String? = null, content: @Composable ColumnScope.() -> Unit) {
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         header?.let { P(it, 13f, Modifier.padding(horizontal = 14.dp), color = Ink.tertiary, weight = FontWeight.Bold) }
-        Column(Modifier.fillMaxWidth().glassPane(20.dp), content = content)
+        Column(Modifier.fillMaxWidth().glassPane(16.dp), content = content)
         footer?.let { P(it, 12.5f, Modifier.padding(horizontal = 14.dp), color = Ink.tertiary) }
     }
 }
@@ -92,8 +92,8 @@ fun SettingsRow(
 @Composable
 fun EmojiTile(emoji: String, size: Dp = 40.dp) {
     Box(
-        Modifier.size(size).clip(RoundedCornerShape(13.dp)).background(Color.White.copy(alpha = 0.22f))
-            .border(1.dp, Color.White.copy(alpha = 0.32f), RoundedCornerShape(13.dp)),
+        Modifier.size(size).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.22f))
+            .border(1.dp, Color.White.copy(alpha = 0.32f), RoundedCornerShape(16.dp)),
         contentAlignment = Alignment.Center,
     ) { Text(emoji, fontSize = 20.sp) }
 }
@@ -130,7 +130,7 @@ fun QrImage(text: String, size: Dp) {
 /** CoParentLinkingViews.StepsCard: gold numbered circles beside each step. */
 @Composable
 fun StepsCard(title: String, steps: List<String>) {
-    Column(Modifier.fillMaxWidth().glassPane(20.dp, 0.10f).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(Modifier.fillMaxWidth().glassPane(16.dp, 0.10f).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         P(title, 15f, color = Ink.gold2, weight = FontWeight.ExtraBold)
         steps.forEachIndexed { i, s ->
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {

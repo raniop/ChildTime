@@ -86,8 +86,8 @@ private fun shareJoinLink(ctx: Context, url: String) {
 private fun ShareCapsule(text: String, onClick: () -> Unit) {
     Text(
         "⤴︎  $text",
-        Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).clickable(onClick = onClick)
+        Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 10.dp),
         color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, textAlign = TextAlign.Center,
     )
@@ -129,7 +129,7 @@ fun DeviceQuestionScreen(name: String, girl: Boolean, showSteps: Boolean, onOwnD
             P(if (girl) tr("זה מגדיר באיזה מכשיר %@ משחקת", name) else tr("זה מגדיר באיזה מכשיר %@ משחק", name),
                 16f, color = Color.White.copy(alpha = 0.85f), weight = FontWeight.SemiBold, align = TextAlign.Center)
             Row(
-                Modifier.fillMaxWidth().glassPane(20.dp).clickable(onClick = onOwnDevice).padding(16.dp),
+                Modifier.fillMaxWidth().glassPane(16.dp).clickable(onClick = onOwnDevice).padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 Text("📱", fontSize = 30.sp)
@@ -142,7 +142,7 @@ fun DeviceQuestionScreen(name: String, girl: Boolean, showSteps: Boolean, onOwnD
             // "plays on my phone" → Kid Mode here (screen pinning), the Android
             // counterpart of iOS's Kid Mode.
             Row(
-                Modifier.fillMaxWidth().glassPane(20.dp).clickable(onClick = onPlaysHere).padding(16.dp),
+                Modifier.fillMaxWidth().glassPane(16.dp).clickable(onClick = onPlaysHere).padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 Text("🧒", fontSize = 30.sp)
@@ -205,7 +205,7 @@ fun OnboardingConnectScreen(childID: String, name: String, girl: Boolean, onLock
                 OnboardingFooter(null, link = tr("אחבר אחר כך"), onLink = later)
             } else {
                 Spacer(Modifier.height(24.dp))
-                Text("✓", Modifier.size(96.dp).clip(RoundedCornerShape(50)).background(Ink.good).wrapContentSize(),
+                Text("✓", Modifier.size(96.dp).clip(RoundedCornerShape(16.dp)).background(Ink.good).wrapContentSize(),
                     color = Ink.deep, fontWeight = FontWeight.Black, fontSize = 56.sp)
                 H(if (girl) tr("%@ מחוברת!", name) else tr("%@ מחובר!", name), 30, align = TextAlign.Center)
                 P(tr("צעד אחרון, בטלפון של %@:\nלאשר זמן מסך כדי שהנעילה תעבוד", name), 16f, color = Color.White.copy(alpha = 0.9f),
@@ -239,7 +239,7 @@ fun OnboardingDoneScreen(name: String, girl: Boolean, onDone: () -> Unit) {
               else tr("הטלפון של %@ נעול, והוא מרוויח זמן מסך על כל תשובה נכונה", name),
                 16f, color = Color.White.copy(alpha = 0.9f), weight = FontWeight.SemiBold, align = TextAlign.Center)
             if (gift) Column(
-                Modifier.fillMaxWidth().glassPane(22.dp, 0.18f).border(1.dp, Ink.gold2.copy(alpha = 0.5f), RoundedCornerShape(22.dp)).padding(16.dp),
+                Modifier.fillMaxWidth().glassPane(16.dp, 0.18f).border(1.dp, Ink.gold2.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text("🎁", fontSize = 38.sp)
@@ -273,7 +273,7 @@ fun GiftWelcomeScreen(until: Double, onDone: () -> Unit) {
                 Text(if (daysLeft >= 29) tr("ימים של כל העולמות") else tr("ימים נשארו במתנה"),
                     color = Color.White.copy(alpha = 0.92f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
             }
-            Column(Modifier.fillMaxWidth().glassPane(22.dp).padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Perk("🌍", tr("כל העולמות פתוחים לכל הילדים במשפחה"))
                 Perk("💳", tr("בלי כרטיס אשראי, ולא מתחדש אוטומטית"))
                 Perk("📅", tr("המתנה מסתיימת ב-%@", endDate))
@@ -319,13 +319,13 @@ fun ConnectDeviceSheet(childID: String, onDismiss: () -> Unit) {
         ) {
             if (linked) {
                 Spacer(Modifier.height(30.dp))
-                Text("✓", Modifier.size(96.dp).clip(RoundedCornerShape(50)).background(Ink.good).wrapContentSize(),
+                Text("✓", Modifier.size(96.dp).clip(RoundedCornerShape(16.dp)).background(Ink.good).wrapContentSize(),
                     color = Ink.deep, fontWeight = FontWeight.Black, fontSize = 56.sp)
                 H(tr("המכשיר של %@ חובר! 🎉", name), 24, align = TextAlign.Center)
                 Spacer(Modifier.height(30.dp))
             } else {
                 H(tr("חברו את המכשיר של %@", name), 24, align = TextAlign.Center)
-                Box(Modifier.glassPane(24.dp).padding(16.dp)) { QRBlock(childID, code, 210, tr("נסו שוב"), retry) }
+                Box(Modifier.glassPane(16.dp).padding(16.dp)) { QRBlock(childID, code, 210, tr("נסו שוב"), retry) }
                 Column(Modifier.fillMaxWidth().glassInset(16.dp).padding(14.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                     P(tr("1️⃣  הורידו את טופי במכשיר של %@ — מה־App Store או מ־Google Play", name), 14f, color = Color.White, weight = FontWeight.SemiBold)
                     P(tr("2️⃣  פתחו שם את טופי ובחרו \"המכשיר של הילד\""), 14f, color = Color.White, weight = FontWeight.SemiBold)

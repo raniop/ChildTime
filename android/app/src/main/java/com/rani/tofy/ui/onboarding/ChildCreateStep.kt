@@ -76,7 +76,7 @@ fun ChildCreateStep(showSteps: Boolean, busy: Boolean, error: Boolean, onCancel:
     GlassBackdrop {
         Column(Modifier.contentColumn().fillMaxSize().systemBarsPadding().imePadding()) {
             if (onCancel != null) Row(Modifier.fillMaxWidth().padding(start = 12.dp, top = 6.dp)) {
-                Text(tr("ביטול"), Modifier.clip(RoundedCornerShape(50)).clickable(onClick = onCancel).padding(10.dp),
+                Text(tr("ביטול"), Modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = onCancel).padding(10.dp),
                     color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
             Column(
@@ -88,7 +88,7 @@ fun ChildCreateStep(showSteps: Boolean, busy: Boolean, error: Boolean, onCancel:
 
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Label(tr("שם"))
-                    Box(Modifier.fillMaxWidth().glassPane(14.dp).padding(horizontal = 16.dp, vertical = 14.dp)) {
+                    Box(Modifier.fillMaxWidth().glassPane(16.dp).padding(horizontal = 16.dp, vertical = 14.dp)) {
                         if (name.isEmpty()) Text(tr("השם של הילד"), color = Ink.tertiary, fontFamily = Rounded, fontSize = 17.sp)
                         BasicTextField(name, { name = it }, Modifier.fillMaxWidth(), singleLine = true,
                             textStyle = TextStyle(color = Color.White, fontFamily = Rounded, fontSize = 17.sp, fontWeight = FontWeight.SemiBold),
@@ -147,7 +147,7 @@ fun ChildCreateStep(showSteps: Boolean, busy: Boolean, error: Boolean, onCancel:
                 }
 
                 Row(
-                    Modifier.fillMaxWidth().glassPane(14.dp, 0.1f).clickable { showMore = !showMore }.padding(horizontal = 14.dp, vertical = 11.dp),
+                    Modifier.fillMaxWidth().glassPane(16.dp, 0.1f).clickable { showMore = !showMore }.padding(horizontal = 14.dp, vertical = 11.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(tr("עוד הגדרות (לא חובה) — רמה ותחומי עניין"), Modifier.weight(1f), color = Color.White.copy(alpha = 0.9f),
@@ -234,8 +234,8 @@ private fun InterestsGrid(selected: Set<String>, onToggle: (String) -> Unit) {
                 row.forEach { (id, emoji, label) ->
                     val on = id in selected
                     Row(
-                        Modifier.weight(1f).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = if (on) 0.30f else 0.12f))
-                            .border(if (on) 2.dp else 1.dp, if (on) Ink.gold2 else Color.White.copy(alpha = 0.18f), RoundedCornerShape(50))
+                        Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = if (on) 0.30f else 0.12f))
+                            .border(if (on) 2.dp else 1.dp, if (on) Ink.gold2 else Color.White.copy(alpha = 0.18f), RoundedCornerShape(16.dp))
                             .clickable { onToggle(id) }.padding(vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically,
                     ) {

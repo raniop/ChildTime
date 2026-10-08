@@ -119,7 +119,7 @@ private fun ChildAuthLoading(timedOut: Boolean, canGoBack: Boolean, onRetry: () 
                 KidBody(tr("בִּדְקוּ אֶת חִבּוּר הָאִינְטֶרְנֶט וְנַסּוּ שׁוּב."), 15f)
                 GoldButton(tr("נַסּוּ שׁוּב"), Modifier.widthIn(max = 260.dp), onClick = onRetry)
                 if (canGoBack) Text(
-                    tr("הַחְלִיפוּ סוּג מַכְשִׁיר"), Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.16f))
+                    tr("הַחְלִיפוּ סוּג מַכְשִׁיר"), Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.16f))
                         .clickable(onClick = onBack).padding(horizontal = 20.dp, vertical = 10.dp),
                     color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 15.sp,
                 )
@@ -188,7 +188,7 @@ private fun ChildJoin(justDisconnected: Boolean, canGoBack: Boolean, onJoined: (
                     KidTitle(tr("הַמַּכְשִׁיר נוּתַּק"), 30)
                     Text(
                         "▣ " + tr("סִרְקוּ שׁוּב אֶת קוֹד הַהוֹרֶה כְּדֵי לְהַמְשִׁיךְ"),
-                        Modifier.clip(RoundedCornerShape(50)).background(Color(0xFFFF9F43).copy(alpha = 0.9f)).padding(horizontal = 16.dp, vertical = 10.dp),
+                        Modifier.clip(RoundedCornerShape(16.dp)).background(Color(0xFFFF9F43).copy(alpha = 0.9f)).padding(horizontal = 16.dp, vertical = 10.dp),
                         color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, textAlign = TextAlign.Center,
                     )
                     KidBody(com.rani.tofy.kid.ui.social.SocialMe.g(tr("הַהִתְקַדְּמוּת שֶׁלְּךָ שְׁמוּרָה בֶּעָנָן — שׁוּם דָּבָר לֹא אָבַד."), tr("הַהִתְקַדְּמוּת שֶׁלָּךְ שְׁמוּרָה בֶּעָנָן — שׁוּם דָּבָר לֹא אָבַד.")), 14f, alpha = 0.85f)
@@ -202,7 +202,7 @@ private fun ChildJoin(justDisconnected: Boolean, canGoBack: Boolean, onJoined: (
                 // The code row: Latin letters + digits — an ASCII keyboard, so a phone
                 // set to Hebrew/Russian/Arabic can type it (iOS asciiCapable).
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.weight(1f).height(52.dp).glassPane(14.dp), contentAlignment = Alignment.Center) {
+                    Box(Modifier.weight(1f).height(52.dp).glassPane(16.dp), contentAlignment = Alignment.Center) {
                         if (code.isEmpty()) Text(tr("אוֹ מַקְלִידִים אֶת הַקּוֹד"), color = Color.White.copy(alpha = 0.75f),
                             fontFamily = Rounded, fontSize = 17.sp, textAlign = TextAlign.Center)
                         BasicTextField(
@@ -218,7 +218,7 @@ private fun ChildJoin(justDisconnected: Boolean, canGoBack: Boolean, onJoined: (
                     }
                     val ready = code.length >= 6 && !working
                     Box(
-                        Modifier.height(52.dp).clip(RoundedCornerShape(14.dp)).background(GoldBrush)
+                        Modifier.height(52.dp).clip(RoundedCornerShape(16.dp)).background(GoldBrush)
                             .then(if (ready) Modifier else Modifier.background(Color.Black.copy(alpha = 0.25f)))
                             .clickable(enabled = ready) { join(code) }.padding(horizontal = 18.dp),
                         contentAlignment = Alignment.Center,
@@ -315,7 +315,7 @@ private fun QrScannerCover(onScanned: (String) -> Unit, onCancel: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(tr("סריקת קוד"), Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 17.sp)
-            Text(tr("ביטול"), Modifier.clip(RoundedCornerShape(50)).border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(50))
+            Text(tr("ביטול"), Modifier.clip(RoundedCornerShape(16.dp)).border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
                 .clickable(onClick = onCancel).padding(horizontal = 14.dp, vertical = 6.dp),
                 color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 15.sp)
         }

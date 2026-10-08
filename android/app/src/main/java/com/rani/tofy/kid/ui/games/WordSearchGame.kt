@@ -155,9 +155,9 @@ fun WordSearchGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?,
                 else tr("👆 מַנִּיחִים אֶצְבַּע עַל הָאוֹת הָרִאשׁוֹנָה שֶׁל הַמִּלָּה וּמַחְלִיקִים עַד הָאוֹת הָאַחֲרוֹנָה"),
                     color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = (if (m.compact) 15 else 18).sp,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().glassPane(18.dp).padding(horizontal = 14.dp, vertical = 10.dp))
+                    modifier = Modifier.fillMaxWidth().glassPane(16.dp).padding(horizontal = 14.dp, vertical = 10.dp))
                 val b = board
-                if (b != null) Box(Modifier.widthIn(max = if (m.compact) 400.dp else 620.dp).fillMaxWidth().aspectRatio(1f).glassPane(24.dp).padding(10.dp)) {
+                if (b != null) Box(Modifier.widthIn(max = if (m.compact) 400.dp else 620.dp).fillMaxWidth().aspectRatio(1f).glassPane(16.dp).padding(10.dp)) {
                     // The grid is laid out left-to-right and mirrored by hand for RTL scripts.
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                         BoxWithConstraints(Modifier.fillMaxWidth().aspectRatio(1f)) {
@@ -221,9 +221,9 @@ fun WordSearchGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?,
                             chunk.forEachIndexed { k, w ->
                                 val i = row * perRow + k
                                 val isFound = w.word in found
-                                Row(Modifier.weight(1f).clip(RoundedCornerShape(50))
+                                Row(Modifier.weight(1f).clip(RoundedCornerShape(16.dp))
                                     .background(if (isFound) palette[i % palette.size].copy(alpha = 0.35f) else Color.White.copy(alpha = 0.14f))
-                                    .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).padding(horizontal = 10.dp, vertical = 8.dp),
+                                    .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).padding(horizontal = 10.dp, vertical = 8.dp),
                                     horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) {
                                     if (w.emoji.isNotEmpty() && w.emoji.graphemes() <= 2) Text(w.emoji, fontSize = 18.sp)
                                     CompositionLocalProvider(LocalLayoutDirection provides if (b?.script?.rtl == true) LayoutDirection.Rtl else LayoutDirection.Ltr) {

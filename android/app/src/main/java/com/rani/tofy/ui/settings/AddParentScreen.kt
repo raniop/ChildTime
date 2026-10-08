@@ -122,7 +122,7 @@ private fun EmailInviteCard() {
     var email by remember { mutableStateOf("") }
     var sent by remember { mutableStateOf(false) }
     var inviting by remember { mutableStateOf(false) }
-    Column(Modifier.fillMaxWidth().glassPane(20.dp, 0.10f).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(Modifier.fillMaxWidth().glassPane(16.dp, 0.10f).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         H(tr("✉️ הדרך הקלה: הזמינו באימייל"), 16, align = TextAlign.Center)
         P(tr("ההורה השני פשוט יתחבר עם האימייל הזה — והמשפחה תחכה לו שם, בלי קודים."), 13f, color = Color.White.copy(alpha = 0.8f), align = TextAlign.Center)
         if (sent) P("✓ " + tr("ההזמנה נשמרה! אפשר להזמין עוד אימייל"), 13.5f, color = Ink.good, weight = FontWeight.ExtraBold, align = TextAlign.Center)
@@ -133,12 +133,12 @@ private fun EmailInviteCard() {
                     email, { email = it.trim() }, Modifier.weight(1f), singleLine = true,
                     placeholder = { Text(tr("אימייל של ההורה השני"), fontFamily = Rounded) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, autoCorrectEnabled = false),
-                    colors = glassFieldColors(), shape = RoundedCornerShape(12.dp),
+                    colors = glassFieldColors(), shape = RoundedCornerShape(16.dp),
                 )
             }
             val ok = email.contains("@")
             Box(
-                Modifier.clip(RoundedCornerShape(30.dp)).background(if (ok) GoldBrush else androidx.compose.ui.graphics.SolidColor(Color.White.copy(alpha = 0.25f)))
+                Modifier.clip(RoundedCornerShape(16.dp)).background(if (ok) GoldBrush else androidx.compose.ui.graphics.SolidColor(Color.White.copy(alpha = 0.25f)))
                     .clickable(enabled = ok && !inviting) {
                         inviting = true; sent = false
                         scope.launch {
@@ -178,14 +178,14 @@ private fun CodeCard() {
 
     // The code and QR read left-to-right in every language (iOS forces .leftToRight).
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        Column(Modifier.fillMaxWidth().glassPane(20.dp, 0.10f).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.fillMaxWidth().glassPane(16.dp, 0.10f).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
             val c = code
             when {
                 c != null -> {
                     QrImage(c, 190.dp)
                     Text(c, color = Color.White, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.ExtraBold, fontSize = 32.sp, letterSpacing = 6.sp)
                     Box(
-                        Modifier.clip(RoundedCornerShape(30.dp)).background(Color.White.copy(alpha = 0.18f)).clickable {
+                        Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.18f)).clickable {
                             val send = Intent(Intent.ACTION_SEND).setType("text/plain")
                                 .putExtra(Intent.EXTRA_TEXT, tr("הצטרפו אלי בטופי! קוד המשפחה: %@", c))
                             ctx.startActivity(Intent.createChooser(send, null))

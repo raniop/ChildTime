@@ -150,7 +150,7 @@ private fun LiveGameSetup(onClose: () -> Unit) {
                         pair.forEach { t ->
                             val glow = worlds.firstOrNull { it.topic == t }?.glow
                             Column(
-                                Modifier.weight(1f).height(130.dp).glassPane(22.dp)
+                                Modifier.weight(1f).height(130.dp).glassPane(16.dp)
                                     .then(if (glow != null) Modifier.background(glow.copy(alpha = 0.16f)) else Modifier)
                                     .clickable(enabled = !creating) {
                                         haptics.medium(); KidSounds.play(AppSound.UI_TAP)
@@ -281,7 +281,7 @@ private fun Lobby(g: LiveGame, meID: String?, onExit: () -> Unit, onPeek: (LiveG
                         fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         friends.forEach { f ->
-                            Row(Modifier.fillMaxWidth().glassInset(14.dp).padding(horizontal = 14.dp, vertical = 6.dp),
+                            Row(Modifier.fillMaxWidth().glassInset(16.dp).padding(horizontal = 14.dp, vertical = 6.dp),
                                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                 Portrait(f.character3DID, 36.dp)
                                 Text(f.name, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, maxLines = 1)
@@ -290,7 +290,7 @@ private fun Lobby(g: LiveGame, meID: String?, onExit: () -> Unit, onPeek: (LiveG
                                 } else {
                                     val sent = f.id in nudged
                                     Text((if (sent) "📨 " else "🔔 ") + (if (sent) tr("נִשְׁלַח") else tr("הַזְמִינוּ")),
-                                        Modifier.clip(RoundedCornerShape(50)).background(if (sent) SocialColor.successMint.copy(alpha = 0.6f) else SocialColor.gemPurple)
+                                        Modifier.clip(RoundedCornerShape(16.dp)).background(if (sent) SocialColor.successMint.copy(alpha = 0.6f) else SocialColor.gemPurple)
                                             .clickable(enabled = !sent) { haptics.light(); nudged = nudged + f.id; scope.launch { lg.invite(f.id) } }
                                             .padding(horizontal = 12.dp, vertical = 6.dp),
                                         color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
@@ -302,9 +302,9 @@ private fun Lobby(g: LiveGame, meID: String?, onExit: () -> Unit, onPeek: (LiveG
             }
             if (isHost) {
                 // NO share button: a share sheet leaves the app (Kids Category 1.3) — invites go in-app above.
-                Box(Modifier.padding(horizontal = 24.dp).fillMaxWidth().widthIn(max = 520.dp).clip(RoundedCornerShape(30.dp))
+                Box(Modifier.padding(horizontal = 24.dp).fillMaxWidth().widthIn(max = 520.dp).clip(RoundedCornerShape(16.dp))
                     .background(Brush.horizontalGradient(listOf(Color(0xFF5E60CE), Color(0xFF3E8BF0))))
-                    .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(30.dp))
+                    .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
                     .clickable(enabled = canStart) { lg.startGame() }.padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
                     Text(if (canStart) tr("מַתְחִילִים! 🚀") else tr("מְחַכִּים לְעוֹד שַׂחְקָן אֶחָד לְפָחוֹת…"),
                         color = Color.White.copy(alpha = if (canStart) 1f else 0.55f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, textAlign = TextAlign.Center)
@@ -347,7 +347,7 @@ private fun QuestionView(g: LiveGame, meID: String?) {
             }
             HeadToHead(lg.players, meID)
             Spacer(Modifier.weight(1f))
-            Text(q?.prompt ?: "", Modifier.padding(horizontal = 16.dp).fillMaxWidth().glassPane(32.dp).padding(horizontal = 26.dp, vertical = 40.dp),
+            Text(q?.prompt ?: "", Modifier.padding(horizontal = 16.dp).fillMaxWidth().glassPane(16.dp).padding(horizontal = 26.dp, vertical = 40.dp),
                 color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 34.sp, textAlign = TextAlign.Center, lineHeight = 42.sp)
             Spacer(Modifier.weight(1f))
             val answered = lg.myChoiceIndex != null
@@ -358,9 +358,9 @@ private fun QuestionView(g: LiveGame, meID: String?) {
                         val color = answerColors[idx % answerColors.size]
                         val scale by animateFloatAsState(if (mine) 1.04f else 1f, label = "ans")
                         Box(
-                            Modifier.weight(1f).heightIn(min = 118.dp).scale(scale).clip(RoundedCornerShape(26.dp))
+                            Modifier.weight(1f).heightIn(min = 118.dp).scale(scale).clip(RoundedCornerShape(16.dp))
                                 .background(Color.White.copy(alpha = 0.14f)).background(color.copy(alpha = if (answered && !mine) 0.15f else 0.5f))
-                                .border(if (mine) 3.dp else 1.dp, Color.White.copy(alpha = if (mine) 1f else 0.4f), RoundedCornerShape(26.dp))
+                                .border(if (mine) 3.dp else 1.dp, Color.White.copy(alpha = if (mine) 1f else 0.4f), RoundedCornerShape(16.dp))
                                 .clickable(enabled = !answered) { haptics.light(); scope.launch { lg.submitAnswer(idx) } }.padding(horizontal = 12.dp),
                             contentAlignment = Alignment.Center,
                         ) { Text(text, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 26.sp, maxLines = 2, textAlign = TextAlign.Center) }
@@ -376,7 +376,7 @@ private fun QuestionView(g: LiveGame, meID: String?) {
 
 @Composable
 private fun Pill(text: String, color: Color, size: Int) {
-    Text(text, Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f)).border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50))
+    Text(text, Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f)).border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
         .padding(horizontal = 14.dp, vertical = 6.dp), color = color, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = size.sp)
 }
 
@@ -406,8 +406,8 @@ private fun HeadToHead(ps: List<LiveGamePlayer>, meID: String?) {
         // Me on the start side (RTL: right) when I'm playing.
         val ordered = if (ps.any { it.id == meID }) ps.sortedByDescending { if (it.id == meID) 1 else 0 } else ps
         val a = ordered[0]; val b = ordered[1]
-        Row(Modifier.padding(horizontal = 16.dp).fillMaxWidth().clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).padding(vertical = 10.dp, horizontal = 16.dp),
+        Row(Modifier.padding(horizontal = 16.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).padding(vertical = 10.dp, horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             VsSide(a, meID, Modifier.weight(1f))
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -419,7 +419,7 @@ private fun HeadToHead(ps: List<LiveGamePlayer>, meID: String?) {
     } else if (ps.size > 2) {
         Row(Modifier.padding(horizontal = 16.dp).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ps.forEach { p ->
-                Row(Modifier.clip(RoundedCornerShape(50)).background(if (p.id == meID) SocialColor.starGold.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.10f))
+                Row(Modifier.clip(RoundedCornerShape(16.dp)).background(if (p.id == meID) SocialColor.starGold.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.10f))
                     .padding(horizontal = 10.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Portrait(p.character3DID, 30.dp)
                     Column {
@@ -457,7 +457,7 @@ private fun RevealView(g: LiveGame, meID: String?, onPeek: (LiveGamePlayer) -> U
         Column(Modifier.widthIn(max = 600.dp).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             (g.currentQuestion?.options ?: emptyList()).forEachIndexed { idx, text ->
                 val isCorrect = idx == correct; val isMine = idx == mine
-                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp))
+                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
                     .background(if (isCorrect) SocialColor.successMint.copy(alpha = 0.9f) else if (isMine) SocialColor.almostWarm.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.10f))
                     .padding(horizontal = 18.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(text, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, maxLines = 2)
@@ -471,7 +471,7 @@ private fun RevealView(g: LiveGame, meID: String?, onPeek: (LiveGamePlayer) -> U
             horizontalAlignment = Alignment.CenterHorizontally) {
             Text(tr("הַנִּקּוּד"), color = Color.White.copy(alpha = 0.8f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
             lg.players.take(6).forEachIndexed { i, p ->
-                Row(Modifier.fillMaxWidth().glassPane(14.dp, 0.10f).then(if (p.id == meID) Modifier.background(SocialColor.starGold.copy(alpha = 0.16f)) else Modifier)
+                Row(Modifier.fillMaxWidth().glassPane(16.dp, 0.10f).then(if (p.id == meID) Modifier.background(SocialColor.starGold.copy(alpha = 0.16f)) else Modifier)
                     .clickable { onPeek(p) }.padding(horizontal = 14.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("${i + 1}", Modifier.width(20.dp), color = Color.White.copy(alpha = 0.7f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
@@ -507,7 +507,7 @@ private fun byWins(ps: List<LiveGamePlayer>) = ps.sortedWith(compareByDescending
 private fun RoundWinsTally(ps: List<LiveGamePlayer>, meID: String?, onPeek: (LiveGamePlayer) -> Unit) {
     Column(Modifier.widthIn(max = 520.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         byWins(ps).forEach { p ->
-            Row(Modifier.fillMaxWidth().glassPane(14.dp, 0.10f).then(if (p.id == meID) Modifier.background(SocialColor.starGold.copy(alpha = 0.16f)) else Modifier)
+            Row(Modifier.fillMaxWidth().glassPane(16.dp, 0.10f).then(if (p.id == meID) Modifier.background(SocialColor.starGold.copy(alpha = 0.16f)) else Modifier)
                 .clickable { onPeek(p) }.padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Portrait(p.character3DID, 36.dp)
@@ -539,7 +539,7 @@ private fun FinalView(g: LiveGame, meID: String?, onExit: () -> Unit, onPlayAgai
             Column(Modifier.weight(1f).widthIn(max = 560.dp).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 byWins(lg.players).forEachIndexed { idx, p ->
-                    Row(Modifier.fillMaxWidth().glassPane(20.dp).then(if (p.id == meID) Modifier.background(SocialColor.starGold.copy(alpha = 0.16f)) else Modifier)
+                    Row(Modifier.fillMaxWidth().glassPane(16.dp).then(if (p.id == meID) Modifier.background(SocialColor.starGold.copy(alpha = 0.16f)) else Modifier)
                         .clickable { onPeek(p) }.padding(horizontal = 14.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(when (idx) { 0 -> "🥇"; 1 -> "🥈"; 2 -> "🥉"; else -> "${idx + 1}" }, Modifier.width(32.dp), color = Color.White,
@@ -555,8 +555,8 @@ private fun FinalView(g: LiveGame, meID: String?, onExit: () -> Unit, onPlayAgai
             }
             Column(Modifier.widthIn(max = 520.dp).padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 WhiteCapsule(SocialMe.g(tr("שַׂחֵק שׁוּב 🔄"), tr("שַׂחֲקִי שׁוּב 🔄")), Modifier.fillMaxWidth(), size = 19) { haptics.light(); onPlayAgain() }
-                Text(tr("סִיּוּם"), Modifier.fillMaxWidth().clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-                    .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).clickable(onClick = onExit).padding(vertical = 13.dp),
+                Text(tr("סִיּוּם"), Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+                    .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).clickable(onClick = onExit).padding(vertical = 13.dp),
                     color = Color.White.copy(alpha = 0.9f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, textAlign = TextAlign.Center)
             }
         }
@@ -566,7 +566,7 @@ private fun FinalView(g: LiveGame, meID: String?, onExit: () -> Unit, onPlayAgai
 
 @Composable
 private fun PrizePill(emoji: String, amount: Int, tint: Color) {
-    Column(Modifier.size(96.dp).glassPane(20.dp).background(tint.copy(alpha = 0.14f)), horizontalAlignment = Alignment.CenterHorizontally,
+    Column(Modifier.size(96.dp).glassPane(16.dp).background(tint.copy(alpha = 0.14f)), horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(3.dp, Alignment.CenterVertically)) {
         Text(emoji, fontSize = 36.sp)
         Text("+$amount", color = tint, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
@@ -607,7 +607,7 @@ private fun PlayerPeekSheet(player: LiveGamePlayer, onClose: () -> Unit) {
             Portrait(player.character3DID, 140.dp, glow = true)
             Text(player.name.ifEmpty { tr("שַׂחְקָן") }, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 34.sp)
             val stars = card?.stars
-            if (stars != null) Text("⭐ " + tr("%lld כּוֹכָבִים", stars), Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.92f))
+            if (stars != null) Text("⭐ " + tr("%lld כּוֹכָבִים", stars), Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.92f))
                 .padding(horizontal = 18.dp, vertical = 9.dp), color = SocialColor.indigo, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
             else if (loading) CircularProgressIndicator(color = Color.White)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -633,7 +633,7 @@ private fun PlayerPeekSheet(player: LiveGamePlayer, onClose: () -> Unit) {
 
 @Composable
 private fun StatTile(emoji: String, value: String, label: String, modifier: Modifier) {
-    Column(modifier.glassPane(20.dp).padding(vertical = 14.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(modifier.glassPane(16.dp).padding(vertical = 14.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(emoji, fontSize = 26.sp)
         Text(value, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 24.sp)
         Text(label, color = Color.White.copy(alpha = 0.75f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp)
@@ -672,15 +672,15 @@ internal fun InviteBanner(onJoin: (String) -> Unit) {
     androidx.compose.animation.AnimatedVisibility(visible && invite != null && lg.game == null,
         enter = androidx.compose.animation.slideInVertically { -it } + androidx.compose.animation.fadeIn(),
         exit = androidx.compose.animation.slideOutVertically { -it } + androidx.compose.animation.fadeOut()) {
-        Row(Modifier.padding(horizontal = 12.dp, vertical = 4.dp).widthIn(max = 520.dp).fillMaxWidth().clip(RoundedCornerShape(24.dp))
-            .background(SocialColor.gemPurple).border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(24.dp)).padding(14.dp),
+        Row(Modifier.padding(horizontal = 12.dp, vertical = 4.dp).widthIn(max = 520.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp))
+            .background(SocialColor.gemPurple).border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(16.dp)).padding(14.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("🎮", fontSize = 30.sp)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(tr("הַזְמָנָה מִ%@!", invite?.hostName ?: ""), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, maxLines = 2)
                 Text(tr("מִשְׂחָק חִידוֹן נֶגֶד חֲבֵרִים"), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
             }
-            Text(tr("הִצְטָרְפוּ"), Modifier.clip(RoundedCornerShape(50)).background(SocialColor.starGold)
+            Text(tr("הִצְטָרְפוּ"), Modifier.clip(RoundedCornerShape(16.dp)).background(SocialColor.starGold)
                 .clickable { haptics.medium(); visible = false; invite?.let { onJoin(it.id) } }.padding(horizontal = 18.dp, vertical = 9.dp),
                 color = Color(0xFF2B2D42), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, maxLines = 1)
         }

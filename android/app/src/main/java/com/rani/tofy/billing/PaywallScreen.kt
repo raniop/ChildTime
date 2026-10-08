@@ -181,7 +181,7 @@ private fun PaywallBody(source: String, onClose: () -> Unit) {
                 val disabled = plans.isEmpty() || purchasing
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Box(
-                        Modifier.widthIn(max = 480.dp).fillMaxWidth().clip(RoundedCornerShape(22.dp))
+                        Modifier.widthIn(max = 480.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp))
                             .background(Color.White.copy(alpha = if (disabled) 0.5f else 0.92f))
                             .clickable(enabled = !disabled) {
                                 val plan = selected ?: return@clickable
@@ -252,7 +252,7 @@ private fun FooterLink(text: String, url: String) {
 
 @Composable
 private fun BenefitsCard() {
-    Column(Modifier.fillMaxWidth().glassPane(22.dp).padding(horizontal = 10.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+    Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(horizontal = 10.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
         val rows = listOf(
             Triple("🧠", tr("כל הנושאים"), tr("מתמטיקה, עברית, אנגלית, מדעים ועוד")),
             Triple("🌍", tr("כל העולמות"), tr("כולל כל עולם חדש שנוסיף")),
@@ -279,11 +279,11 @@ private fun BenefitsCard() {
 
 @Composable
 private fun PlanCard(plan: PlaySubscriptions.Plan, selected: Boolean, introEligible: Boolean, onSelect: () -> Unit) {
-    val shape = RoundedCornerShape(22.dp)
+    val shape = RoundedCornerShape(16.dp)
     Row(
         Modifier.fillMaxWidth()
-            .then(if (selected) Modifier.glassPane(22.dp, 0.18f).background(Mint.copy(alpha = 0.10f)).border(2.dp, Mint.copy(alpha = 0.9f), shape)
-                  else Modifier.glassPane(22.dp, 0.10f))
+            .then(if (selected) Modifier.glassPane(16.dp, 0.18f).background(Mint.copy(alpha = 0.10f)).border(2.dp, Mint.copy(alpha = 0.9f), shape)
+                  else Modifier.glassPane(16.dp, 0.10f))
             .clickable(onClick = onSelect).padding(16.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -295,7 +295,7 @@ private fun PlanCard(plan: PlaySubscriptions.Plan, selected: Boolean, introEligi
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(plan.name, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp)
                 PlaySubscriptions.savingsBadge(plan)?.let {
-                    Text(it, Modifier.clip(RoundedCornerShape(50)).background(SuccessMint).padding(horizontal = 8.dp, vertical = 3.dp),
+                    Text(it, Modifier.clip(RoundedCornerShape(16.dp)).background(SuccessMint).padding(horizontal = 8.dp, vertical = 3.dp),
                         color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 11.sp)
                 }
             }
@@ -310,7 +310,7 @@ private fun PlanCard(plan: PlaySubscriptions.Plan, selected: Boolean, introEligi
 @Composable
 private fun PlaceholderPlans(loading: Boolean, retry: () -> Unit) {
     Column(
-        Modifier.fillMaxWidth().heightIn(min = 120.dp).glassPane(22.dp).padding(vertical = 12.dp),
+        Modifier.fillMaxWidth().heightIn(min = 120.dp).glassPane(16.dp).padding(vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
     ) {
         if (loading) {
@@ -323,8 +323,8 @@ private fun PlaceholderPlans(loading: Boolean, retry: () -> Unit) {
                 fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 12.sp, textAlign = TextAlign.Center)
             Text(
                 "↻ " + tr("נַסּוּ שׁוּב"),
-                Modifier.padding(top = 4.dp).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-                    .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).clickable(onClick = retry)
+                Modifier.padding(top = 4.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+                    .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).clickable(onClick = retry)
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp,
             )
@@ -408,7 +408,7 @@ private fun rememberPitch(family: FamilyState): Pitch? {
 
 @Composable
 private fun PersonalCard(p: Pitch) {
-    Column(Modifier.fillMaxWidth().glassPane(22.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         val fav = p.favorite
         if (fav != null) {
             val (world, questions, accuracy) = fav
@@ -437,7 +437,7 @@ private fun PersonalCard(p: Pitch) {
 
 @Composable
 private fun androidx.compose.foundation.layout.RowScope.PitchStat(value: String, label: String) {
-    Column(Modifier.weight(1f).glassInset(12.dp).padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(Modifier.weight(1f).glassInset(16.dp).padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(value, color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
         Text(label, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
     }

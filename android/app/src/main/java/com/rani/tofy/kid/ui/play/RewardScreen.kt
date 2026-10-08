@@ -246,8 +246,8 @@ fun RewardScreen(
             if (stage == ChestStage.REVEALED) {
                 Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
                     Text((if (isGirl) tr("הַמְשִׁיכִי") else tr("הַמְשֵׁךְ")), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 18.sp,
-                        modifier = Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.18f))
-                            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50))
+                        modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.18f))
+                            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
                             .clickable { haptics.light(); proceed() }.padding(horizontal = 40.dp, vertical = 12.dp))
                 }
             }
@@ -268,9 +268,9 @@ fun RewardScreen(
 private fun RewardPill(shown: Boolean, emoji: String, value: String, label: String, color: Color) {
     AnimatedVisibility(shown, enter = scaleIn(initialScale = 0.5f) + fadeIn() + slideInVertically { it / 2 }) {
         Row(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(50))
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
                 .background(Brush.horizontalGradient(listOf(color.copy(alpha = 0.35f), color.copy(alpha = 0.15f))))
-                .border(2.dp, color.copy(alpha = 0.85f), RoundedCornerShape(50)).padding(horizontal = 24.dp, vertical = 10.dp),
+                .border(2.dp, color.copy(alpha = 0.85f), RoundedCornerShape(16.dp)).padding(horizontal = 24.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(emoji, fontSize = 26.sp)
@@ -557,9 +557,9 @@ fun WorldUnlockScreen(world: PlayWorld, onContinue: () -> Unit) {
 @Composable
 private fun CtaGlass(text: String, visible: Boolean, onClick: () -> Unit) {
     Box(
-        Modifier.widthIn(max = 420.dp).fillMaxWidth().graphicsLayer { alpha = if (visible) 1f else 0f }.clip(RoundedCornerShape(22.dp))
+        Modifier.widthIn(max = 420.dp).fillMaxWidth().graphicsLayer { alpha = if (visible) 1f else 0f }.clip(RoundedCornerShape(16.dp))
             .background(Brush.horizontalGradient(listOf(Color(0xFF5E60CE), Color(0xFF3E8BF0))))
-            .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(22.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
             .clickable(enabled = visible, onClick = onClick).padding(vertical = 16.dp),
         contentAlignment = Alignment.Center,
     ) { Text(text, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 22.sp) }

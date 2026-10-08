@@ -85,7 +85,7 @@ private fun StarShopScreen(onClose: () -> Unit) {
             ) {
                 // Balance card.
                 Row(
-                    Modifier.fillMaxWidth().glassPane(22.dp).padding(vertical = 16.dp),
+                    Modifier.fillMaxWidth().glassPane(16.dp).padding(vertical = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text("💎", fontSize = 26.sp)
@@ -104,7 +104,7 @@ private fun StarShopScreen(onClose: () -> Unit) {
 @Composable
 private fun PackRow(diamonds: Int, best: Boolean) {
     Row(
-        Modifier.fillMaxWidth().then(if (best) Modifier.tintedPane(KidColor.starGold) else Modifier.glassPane(22.dp)).padding(12.dp)
+        Modifier.fillMaxWidth().then(if (best) Modifier.tintedPane(KidColor.starGold) else Modifier.glassPane(16.dp)).padding(12.dp)
             .graphicsLayer { alpha = 0.75f },
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -118,8 +118,8 @@ private fun PackRow(diamonds: Int, best: Boolean) {
         // Disabled — no Play Billing on Android yet.
         Text(
             tr("בְּקָרוֹב בְּאַנְדְּרוֹאִיד"),
-            Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.18f))
-                .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).padding(horizontal = 12.dp, vertical = 8.dp),
+            Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.18f))
+                .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).padding(horizontal = 12.dp, vertical = 8.dp),
             color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, textAlign = TextAlign.Center, maxLines = 2,
         )
     }

@@ -202,7 +202,7 @@ fun SortBasketsGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?
             ) {
                 val c = cue
                 if (preReader && c != null) PreReaderCueCard(c, m.compact)
-                else Column(Modifier.fillMaxWidth().glassPane(22.dp).padding(horizontal = 14.dp, vertical = 12.dp),
+                else Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(horizontal = 14.dp, vertical = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     TitleText(if (current?.detail != null) tr("נָכוֹן אוֹ לֹא נָכוֹן? גִּרְרוּ לַסַּל") else tr("גִּרְרוּ כָּל פְּרִיט לַסַּל הַמַּתְאִים"),
                         (if (m.compact) 16 else 20).sp)

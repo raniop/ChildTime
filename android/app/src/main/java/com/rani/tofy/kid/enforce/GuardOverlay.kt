@@ -191,8 +191,8 @@ private fun LockCard(c: GuardStateSource.LockCopy, onOpenTofy: () -> Unit, onDis
             Text(subtitle, color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold,
                 fontSize = 17.sp, textAlign = TextAlign.Center, lineHeight = 24.sp)
             Box(
-                Modifier.padding(top = 10.dp).widthIn(max = 420.dp).fillMaxWidth().clip(RoundedCornerShape(30.dp))
-                    .background(Color.White).border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(30.dp))
+                Modifier.padding(top = 10.dp).widthIn(max = 420.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp))
+                    .background(Color.White).border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
                     .clickable { if (opensTofy) onOpenTofy() else onDismiss() }
                     .padding(vertical = 17.dp),
                 contentAlignment = Alignment.Center,

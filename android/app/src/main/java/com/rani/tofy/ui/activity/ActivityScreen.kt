@@ -93,7 +93,7 @@ fun ActivityScreen(onBack: () -> Unit) {
                 if (offers.isNotEmpty()) {
                     item { Header(tr("מטופי")) }
                     item {
-                        Column(Modifier.fillMaxWidth().glassPane(18.dp)) {
+                        Column(Modifier.fillMaxWidth().glassPane(16.dp)) {
                             offers.forEachIndexed { i, o ->
                                 if (i > 0) RowDivider()
                                 OfferRow(o, if (o.id == "offer.notifications") askNotifications else null)
@@ -108,7 +108,7 @@ fun ActivityScreen(onBack: () -> Unit) {
                 days.forEach { (title, rows) ->
                     item(key = "h-$title") { Header(title) }
                     item(key = "d-$title") {
-                        Column(Modifier.fillMaxWidth().glassPane(18.dp)) {
+                        Column(Modifier.fillMaxWidth().glassPane(16.dp)) {
                             rows.forEachIndexed { i, it ->
                                 if (i > 0) RowDivider()
                                 FeedRow(it, kids[it.childID ?: ""], it.at > readMark)

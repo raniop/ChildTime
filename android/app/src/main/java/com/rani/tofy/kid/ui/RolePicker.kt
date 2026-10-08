@@ -133,8 +133,8 @@ private fun RolePicker(onParent: () -> Unit, onChild: () -> Unit) {
                     if (hasNoFamilyHere) childNeedsCode = true else choose("child")
                 }
                 Box(
-                    Modifier.fillMaxWidth().height(50.dp).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-                        .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50))
+                    Modifier.fillMaxWidth().height(50.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+                        .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
                         .clickable { confirmParentOnTablet = false; choose("parent") },
                     contentAlignment = Alignment.Center,
                 ) { Text(tr("זֶה הַטַּאבְּלֶט שֶׁלִּי, לְהַמְשִׁיךְ כְּהוֹרֶה"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 15.sp) }
@@ -149,8 +149,8 @@ private fun RolePicker(onParent: () -> Unit, onChild: () -> Unit) {
                 KidBody(tr("הַמַּכְשִׁיר שֶׁל הַיֶּלֶד מִתְחַבֵּר לְקוֹד שֶׁנּוֹצָר בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה. יֵשׁ לָכֶם כְּבָר קוֹד?"), 15f)
                 GoldButton(tr("יֵשׁ לִי קוֹד — לְהַמְשִׁיךְ"), Modifier.padding(top = 4.dp)) { childNeedsCode = false; choose("child") }
                 Box(
-                    Modifier.fillMaxWidth().height(50.dp).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-                        .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50))
+                    Modifier.fillMaxWidth().height(50.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+                        .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
                         .clickable { childNeedsCode = false; choose("parent") },
                     contentAlignment = Alignment.Center,
                 ) { Text(tr("עוֹד לֹא — נַתְחִיל כָּאן כְּהוֹרֶה"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 15.sp) }
@@ -171,7 +171,7 @@ private fun RolePicker(onParent: () -> Unit, onChild: () -> Unit) {
 @Composable
 private fun RoleCard(emoji: String, title: String, subtitle: String, glow: Color, badge: String?, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().glassPane(26.dp).clickable(onClick = onClick).padding(18.dp),
+        Modifier.fillMaxWidth().glassPane(16.dp).clickable(onClick = onClick).padding(18.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Box(
@@ -182,7 +182,7 @@ private fun RoleCard(emoji: String, title: String, subtitle: String, glow: Color
         ) { Text(emoji, fontSize = 34.sp) }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             if (badge != null) Text(
-                badge, Modifier.clip(RoundedCornerShape(50)).background(GoldBrush).padding(horizontal = 10.dp, vertical = 3.dp),
+                badge, Modifier.clip(RoundedCornerShape(16.dp)).background(GoldBrush).padding(horizontal = 10.dp, vertical = 3.dp),
                 color = Color(0xFF2B1C04), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp,
             )
             Text(title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
@@ -208,8 +208,8 @@ private fun WelcomeIntro(onStart: () -> Unit) {
             Box(Modifier.fillMaxWidth()) {
                 Box(Modifier.align(Alignment.TopEnd)) {
                     Row(
-                        Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.16f))
-                            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50))
+                        Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.16f))
+                            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
                             .clickable { showLanguages = true }.padding(horizontal = 14.dp, vertical = 9.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -226,7 +226,7 @@ private fun WelcomeIntro(onStart: () -> Unit) {
             CharacterImage("lion", Modifier.size(104.dp))
             Text(tr("טופי"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 42.sp)
             KidBody(tr("לוֹמְדִים, מַרְוִיחִים זְמַן מָסָךְ —\nוְהַהוֹרִים תָּמִיד בַּתְּמוּנָה."), 16f, alpha = 0.92f)
-            Column(Modifier.widthIn(max = 520.dp).fillMaxWidth().glassPane(26.dp).padding(16.dp)) {
+            Column(Modifier.widthIn(max = 520.dp).fillMaxWidth().glassPane(16.dp).padding(16.dp)) {
                 WelcomeStep("🧠", Color(0xFF9B5DE5), tr("הַיֶּלֶד לוֹמֵד וּמְשַׂחֵק"),
                     tr("שְׁאֵלוֹת מַתְאִימוֹת לְגִיל — חֶשְׁבּוֹן, עִבְרִית, אַנְגְּלִית, מַדָּע וְעוֹד."))
                 StepDivider()

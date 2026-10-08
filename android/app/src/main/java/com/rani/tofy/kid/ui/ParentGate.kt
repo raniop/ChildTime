@@ -96,8 +96,8 @@ fun ParentGate(
                 Text("🔐", fontSize = 56.sp)
                 KidTitle(tr("קוד ההורה לא זמין כאן"), 26)
                 KidBody(tr("קוד ההורה של המשפחה עדיין לא הגיע למכשיר הזה (בדקו חיבור לאינטרנט). אפשר תמיד לאפס מלוח ההורים במכשיר של אבא או אמא."), 16f, alpha = 0.85f)
-                Text(tr("סגירה"), Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-                    .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(50)).clickable(onClick = onClose)
+                Text(tr("סגירה"), Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+                    .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).clickable(onClick = onClose)
                     .padding(horizontal = 34.dp, vertical = 13.dp),
                     color = Color.White, fontFamily = com.rani.tofy.ui.theme.Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
             }
@@ -127,7 +127,7 @@ private fun FamilyLoadingGate() {
     LaunchedEffect(Unit) { delay(10_000); timedOut = true }
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
-            Modifier.padding(24.dp).widthIn(max = 360.dp).glassPane(24.dp).padding(24.dp),
+            Modifier.padding(24.dp).widthIn(max = 360.dp).glassPane(16.dp).padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (timedOut) {

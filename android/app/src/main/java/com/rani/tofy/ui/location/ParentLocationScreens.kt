@@ -167,11 +167,11 @@ fun ParentLocationScreen(focusChildID: String?, onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(14.dp)) {
             PageBar(tr("איפה הילדים"), onBack) {
                 Text(tr("📍 מקומות"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp,
-                    modifier = Modifier.clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.22f))
+                    modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.22f))
                         .clickable { page = "places" }.padding(horizontal = 14.dp, vertical = 9.dp))
             }
-            FamilyMap(mapKids, places, Modifier.fillMaxWidth().height(320.dp).clip(RoundedCornerShape(24.dp))
-                .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(24.dp)), center = focus)
+            FamilyMap(mapKids, places, Modifier.fillMaxWidth().height(320.dp).clip(RoundedCornerShape(16.dp))
+                .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(16.dp)), center = focus)
             for (c in kids) KidCard(ctx, c, places, picked, beeps[c.id]) { consentFor = c }
         }
     }
@@ -193,7 +193,7 @@ private fun KidCard(ctx: Context, c: Child, places: List<FamilyPlace>, picked: M
         current == null -> tr("מחכה לאישור בטלפון של %@ — פותחים בו את טופי", name)
         else -> LocationRepository.whereLine(ctx, current, places)
     }
-    Column(Modifier.fillMaxWidth().glassPane(22.dp, 0.16f, shadow = false).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(Modifier.fillMaxWidth().glassPane(16.dp, 0.16f, shadow = false).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             ChildAvatar(c, 48.dp)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
@@ -209,7 +209,7 @@ private fun KidCard(ctx: Context, c: Child, places: List<FamilyPlace>, picked: M
             }
             if (devices.size < 2) current?.battery?.let {
                 Text("🔋 ${(it * 100).toInt()}%", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp,
-                    modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.18f)).padding(horizontal = 10.dp, vertical = 4.dp))
+                    modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(Color.Black.copy(alpha = 0.18f)).padding(horizontal = 10.dp, vertical = 4.dp))
             }
         }
         // "רענון" got no answer within 30 s — the honest reason, not silence.
@@ -229,9 +229,9 @@ private fun KidCard(ctx: Context, c: Child, places: List<FamilyPlace>, picked: M
                 val on = f.deviceID == current.deviceID
                 val label = LocationRepository.deviceName(f.kind) + (f.battery?.let { " · 🔋 ${(it * 100).toInt()}%" } ?: "")
                 Text(label, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, textAlign = TextAlign.Center,
-                    maxLines = 1, modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp))
+                    maxLines = 1, modifier = Modifier.weight(1f).clip(RoundedCornerShape(16.dp))
                         .background(if (on) Color.White.copy(alpha = 0.32f) else Color.Black.copy(alpha = 0.14f))
-                        .border(1.5.dp, if (on) Color.White.copy(alpha = 0.7f) else Color.Transparent, RoundedCornerShape(12.dp))
+                        .border(1.5.dp, if (on) Color.White.copy(alpha = 0.7f) else Color.Transparent, RoundedCornerShape(16.dp))
                         .clickable { picked[c.id] = f.deviceID }.padding(vertical = 10.dp))
             }
         }
@@ -267,7 +267,7 @@ private fun ConsentPage(c: Child, onDone: () -> Unit) {
             Text("📍", fontSize = 44.sp)
             Text(tr("לדעת איפה %@ — בלי לשאול", name), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black,
                 fontSize = 22.sp, textAlign = TextAlign.Center)
-            Column(Modifier.fillMaxWidth().glassPane(20.dp, 0.16f, shadow = false).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.fillMaxWidth().glassPane(16.dp, 0.16f, shadow = false).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 listOf(
                     "🗺️" to (if (c.isGirl) tr("מה נשמר: המיקום האחרון של הטלפון שלה, והגעה או יציאה מהמקומות שסימנתם. לא מסלול של כל היום.")
                              else tr("מה נשמר: המיקום האחרון של הטלפון שלו, והגעה או יציאה מהמקומות שסימנתם. לא מסלול של כל היום.")),
@@ -284,7 +284,7 @@ private fun ConsentPage(c: Child, onDone: () -> Unit) {
                  else tr("בטלפון של %@ יופיע אישור מיקום, והוא ידע שהמיקום שלו גלוי לכם.", name),
                 color = Ink.secondary, fontFamily = Rounded, fontSize = 13.sp)
             Text(tr("אישור והפעלת מיקום"), color = Color(0xFF4B3BC4), fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 18.sp,
-                textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.White)
+                textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White)
                     .clickable(enabled = !saving) {
                         saving = true
                         scope.launch { LocationRepository.setSharing(c.id, true); saving = false; enabled = true }
@@ -303,7 +303,7 @@ private fun NextStepPage(name: String, girl: Boolean, onDone: () -> Unit) {
             Text("📱", fontSize = 48.sp)
             Text(tr("עוד צעד אחד — בטלפון של %@", name), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black,
                 fontSize = 23.sp, textAlign = TextAlign.Center)
-            Column(Modifier.fillMaxWidth().glassPane(20.dp, 0.16f, shadow = false).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Column(Modifier.fillMaxWidth().glassPane(16.dp, 0.16f, shadow = false).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 listOf(tr("פותחים את טופי בטלפון של %@", name),
                     tr("לוחצים \"ממשיכים\" ומאשרים מיקום — ואם שואלים, בוחרים \"תמיד\""),
                     if (girl) tr("זהו — %@ תופיע כאן על המפה", name) else tr("זהו — %@ יופיע כאן על המפה", name),
@@ -318,7 +318,7 @@ private fun NextStepPage(name: String, girl: Boolean, onDone: () -> Unit) {
             Text(tr("שלחנו לטלפון של %@ התראה שמזכירה לפתוח את טופי.", name), color = Ink.secondary, fontFamily = Rounded,
                 fontSize = 13.sp, textAlign = TextAlign.Center)
             Text(tr("הבנתי"), color = Color(0xFF4B3BC4), fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 18.sp,
-                textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.White)
+                textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White)
                     .clickable(onClick = onDone).padding(vertical = 16.dp))
         }
     }
@@ -339,7 +339,7 @@ private fun PlacesPage(kids: List<Child>, places: List<FamilyPlace>, onEdit: (Fa
     GlassBackdrop {
         Column(Modifier.fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             PageBar(tr("📍 מקומות"), onBack)
-            Column(Modifier.fillMaxWidth().glassPane(20.dp, 0.16f, shadow = false).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(Modifier.fillMaxWidth().glassPane(16.dp, 0.16f, shadow = false).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(tr("מקומות קבועים"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 if (places.isEmpty()) Text(tr("עוד אין מקומות. הוסיפו את הבית ואת בית הספר, ותקבלו התראה כשהילדים מגיעים ויוצאים."),
                     color = Ink.secondary, fontFamily = Rounded, fontSize = 14.5.sp)
@@ -353,7 +353,7 @@ private fun PlacesPage(kids: List<Child>, places: List<FamilyPlace>, onEdit: (Fa
                     modifier = Modifier.clickable(onClick = onNew).padding(vertical = 8.dp))
             }
             val sharingKids = kids.filter { LocationRepository.sharingOn(it) }
-            if (sharingKids.isNotEmpty()) Column(Modifier.fillMaxWidth().glassPane(20.dp, 0.16f, shadow = false).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            if (sharingKids.isNotEmpty()) Column(Modifier.fillMaxWidth().glassPane(16.dp, 0.16f, shadow = false).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(tr("שיתוף מיקום"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 for (c in sharingKids) Text(tr("כיבוי המיקום של %@", stripNiqqud(c.name)), color = Color(0xFFFFB4C8), fontFamily = Rounded,
                     fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.clickable { confirmStop = c }.padding(vertical = 6.dp))
@@ -396,12 +396,12 @@ private fun PlaceEditor(start: FamilyPlace, kids: List<Child>, places: List<Fami
         Column(Modifier.fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             PageBar(if (isNew) tr("מקום חדש") else place.name, onDone) {
                 Text(tr("שמירה"), color = Color(0xFF4B3BC4), fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 15.sp,
-                    modifier = Modifier.clip(RoundedCornerShape(20.dp)).background(Color.White)
+                    modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White)
                         .clickable(enabled = !saving && place.name.isNotBlank()) { save(false) }.padding(horizontal = 16.dp, vertical = 9.dp))
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(query, { query = it }, Modifier.weight(1f), singleLine = true,
-                    placeholder = { Text(tr("חיפוש כתובת או מקום")) }, shape = RoundedCornerShape(14.dp))
+                    placeholder = { Text(tr("חיפוש כתובת או מקום")) }, shape = RoundedCornerShape(16.dp))
                 Text(tr("חיפוש"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 15.sp,
                     modifier = Modifier.clickable { search() }.padding(8.dp))
             }
@@ -413,7 +413,7 @@ private fun PlaceEditor(start: FamilyPlace, kids: List<Child>, places: List<Fami
                         center = GeoPoint(a.latitude, a.longitude); results = emptyList()
                     }.padding(vertical = 10.dp))
             }
-            Box(Modifier.fillMaxWidth().height(260.dp).clip(RoundedCornerShape(22.dp)), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxWidth().height(260.dp).clip(RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) {
                 FamilyMap(emptyList(), listOf(place), Modifier.fillMaxSize(), center = center, zoom = 17.0) { g ->
                     place = place.copy(lat = g.latitude, lng = g.longitude)
                 }
@@ -421,13 +421,13 @@ private fun PlaceEditor(start: FamilyPlace, kids: List<Child>, places: List<Fami
             }
             Text(tr("הזיזו את המפה כך שהסיכה על המקום"), color = Ink.secondary, fontFamily = Rounded, fontSize = 12.5.sp,
                 modifier = Modifier.align(Alignment.CenterHorizontally))
-            Column(Modifier.fillMaxWidth().glassPane(20.dp, 0.16f, shadow = false).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(Modifier.fillMaxWidth().glassPane(16.dp, 0.16f, shadow = false).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(tr("שם המקום"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 OutlinedTextField(place.name, { place = place.copy(name = it) }, Modifier.fillMaxWidth(), singleLine = true,
-                    placeholder = { Text(tr("למשל: בית הספר")) }, shape = RoundedCornerShape(14.dp))
+                    placeholder = { Text(tr("למשל: בית הספר")) }, shape = RoundedCornerShape(16.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     for (e in listOf("🏠", "🏫", "⚽", "🎨", "🎵", "👵", "🏊", "📍")) Text(e, fontSize = 22.sp, textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
+                        modifier = Modifier.weight(1f).clip(RoundedCornerShape(16.dp))
                             .background(if (place.emoji == e) Mint.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.1f))
                             .clickable {
                                 // An empty name takes the obvious one, in the app's language.
@@ -439,12 +439,12 @@ private fun PlaceEditor(start: FamilyPlace, kids: List<Child>, places: List<Fami
                 Text(tr("גודל האזור"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     for (r in FamilyPlace.RADII) Text(tr("%lld מ׳", r.toLong()), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black,
-                        fontSize = 15.sp, textAlign = TextAlign.Center, modifier = Modifier.weight(1f).clip(RoundedCornerShape(14.dp))
+                        fontSize = 15.sp, textAlign = TextAlign.Center, modifier = Modifier.weight(1f).clip(RoundedCornerShape(16.dp))
                             .background(if (place.radius == r) Mint.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.12f))
                             .clickable { place = place.copy(radius = r) }.padding(vertical = 11.dp))
                 }
             }
-            Column(Modifier.fillMaxWidth().glassPane(20.dp, 0.16f, shadow = false).padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(Modifier.fillMaxWidth().glassPane(16.dp, 0.16f, shadow = false).padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(tr("התראות על המקום הזה"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 // Two plain switches per child, each a whole sentence (Rani: "התראה כש… — לא מובן").
                 for (c in kids) {

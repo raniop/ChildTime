@@ -263,7 +263,7 @@ fun BalloonPopGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?,
                 val c = cue
                 if (preReader && c != null) Box(Modifier.padding(horizontal = 16.dp)) { PreReaderCueCard(c, m.compact) }
                 else Column(
-                    Modifier.padding(horizontal = 16.dp).fillMaxWidth().glassPane(22.dp).padding(horizontal = 14.dp, vertical = 12.dp),
+                    Modifier.padding(horizontal = 16.dp).fillMaxWidth().glassPane(16.dp).padding(horizontal = 14.dp, vertical = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     if (current != null) {

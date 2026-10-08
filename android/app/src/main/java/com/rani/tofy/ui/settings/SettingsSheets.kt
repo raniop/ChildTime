@@ -97,7 +97,7 @@ private fun SheetBar(title: String, cancel: String? = null, onCancel: () -> Unit
 fun LanguageSheet(onDismiss: () -> Unit) {
     Sheet(onDismiss) {
         SheetBar(tr("שפה · Language"))
-        Column(Modifier.fillMaxWidth().glassPane(20.dp)) {
+        Column(Modifier.fillMaxWidth().glassPane(16.dp)) {
             AppLanguage.entries.forEachIndexed { i, lang ->
                 if (i > 0) RowDivider()
                 SettingsRow(null, lang.native, trailing = {
@@ -137,7 +137,7 @@ fun ChildOrderSheet(children: List<Child>, onDismiss: () -> Unit) {
                 onDismiss()
             }
         }
-        Column(Modifier.fillMaxWidth().glassPane(20.dp)) {
+        Column(Modifier.fillMaxWidth().glassPane(16.dp)) {
             working.forEachIndexed { i, c ->
                 key(c.id) {
                     val isDragged = dragging == c.id
@@ -234,7 +234,7 @@ private fun PinField(value: String, label: String, onChange: (String) -> Unit) {
         placeholder = { Text(label, fontFamily = Rounded) },
         visualTransformation = PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-        colors = glassFieldColors(), shape = RoundedCornerShape(12.dp),
+        colors = glassFieldColors(), shape = RoundedCornerShape(16.dp),
     )
 }
 
@@ -261,7 +261,7 @@ fun FeedbackSheet(onDismiss: () -> Unit) {
                 OutlinedTextField(
                     text, { text = it }, Modifier.fillMaxWidth().heightIn(min = 140.dp),
                     placeholder = { Text(tr("כתבו כאן…"), fontFamily = Rounded) },
-                    colors = glassFieldColors(), shape = RoundedCornerShape(14.dp),
+                    colors = glassFieldColors(), shape = RoundedCornerShape(16.dp),
                 )
                 GoldButton("✈️  " + tr("שלח לנו"), enabled = canSend) {
                     SettingsRepository.submitFeedback(text.trim())
@@ -293,7 +293,7 @@ fun WhatsNewSheet(onDismiss: () -> Unit) {
         SheetBar(tr("מה חדש בטופי ✨"), cancel = tr("סיום"), onCancel = onDismiss)
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             WhatsNewAndroid.items.forEach { item ->
-                Row(Modifier.fillMaxWidth().glassPane(20.dp).padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(Modifier.fillMaxWidth().glassPane(16.dp).padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     EmojiTile(item.emoji, 44.dp)
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(item.title, color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)

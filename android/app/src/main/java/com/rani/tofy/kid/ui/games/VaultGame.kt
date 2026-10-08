@@ -176,7 +176,7 @@ fun VaultGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, onCl
                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(if (m.short) 10.dp else 16.dp),
                 ) {
                     FitText(tr("🔑 עוֹנִים נָכוֹן ← 🎡 גַּלְגַּל מִסְתּוֹבֵב ← 🔓 הַכַּסֶּפֶת נִפְתַּחַת"), (if (m.compact) 14 else 18).sp,
-                        Modifier.fillMaxWidth().glassPane(18.dp).padding(horizontal = 12.dp, vertical = if (m.compact) 7.dp else 10.dp),
+                        Modifier.fillMaxWidth().glassPane(16.dp).padding(horizontal = 12.dp, vertical = if (m.compact) 7.dp else 10.dp),
                         weight = FontWeight.ExtraBold, maxLines = 2, minScale = 0.7f)
                     Safe(code, opened, cracked, doorOpen, rtl, shake, if (m.compact) 76f else 104f)
                     val r = riddle
@@ -208,7 +208,7 @@ private fun Safe(code: List<Int>, opened: Int, cracked: Boolean, doorOpen: Boole
         spring(dampingRatio = 0.75f, stiffness = Spring.StiffnessLow), label = "door")
     val handle by animateFloatAsState(if (cracked) -35f else 0f, label = "handle")
     val dx = shakeOffset(shake)
-    val shape = RoundedCornerShape(28.dp)
+    val shape = RoundedCornerShape(16.dp)
     Box(Modifier.fillMaxWidth().height((dial * 1.25f + if (dial > 90f) 110f else 80f).dp)) {
         // Behind the door: the treasure.
         Box(Modifier.fillMaxSize().clip(shape)
@@ -238,7 +238,7 @@ private fun Safe(code: List<Int>, opened: Int, cracked: Boolean, doorOpen: Boole
             }
             Box(Modifier.width((if (dial > 90f) 120 else 90).dp).height(14.dp)
                 .graphicsLayer { rotationZ = handle }
-                .clip(RoundedCornerShape(50))
+                .clip(RoundedCornerShape(16.dp))
                 .background(Brush.verticalGradient(listOf(Color(0xFFE9E4FF), Color(0xFF9A93C9)))))
         }
     }
@@ -263,7 +263,7 @@ private fun DialView(digit: Int?, set: Boolean, next: Boolean, size: Float) {
 /** ה׳+: the exercise for the dial just earned, and the nine digits. */
 @Composable
 private fun RiddlePanel(text: String, miss: Boolean, compact: Boolean, onDigit: (Int) -> Unit) {
-    Column(Modifier.fillMaxWidth().glassPane(22.dp).padding(14.dp),
+    Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(14.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
         FitText(tr("🎡 סוֹבְבוּ אֶת הַגַּלְגַּל לַתְּשׁוּבָה:"), (if (compact) 14 else 17).sp, color = KidColor.starGold, weight = FontWeight.ExtraBold, maxLines = 1)
         FitText(MiniGameText.ltr("$text = ?"), (if (compact) 26 else 34).sp, weight = FontWeight.Black, maxLines = 1, minScale = 0.6f)
@@ -272,8 +272,8 @@ private fun RiddlePanel(text: String, miss: Boolean, compact: Boolean, onDigit: 
                 for (row in 0 until 3) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     for (col in 1..3) {
                         val d = row * 3 + col
-                        Box(Modifier.weight(1f).height(if (compact) 44.dp else 56.dp).clip(RoundedCornerShape(14.dp))
-                            .background(Color.White.copy(alpha = 0.14f)).border(1.dp, Color.White.copy(alpha = 0.28f), RoundedCornerShape(14.dp))
+                        Box(Modifier.weight(1f).height(if (compact) 44.dp else 56.dp).clip(RoundedCornerShape(16.dp))
+                            .background(Color.White.copy(alpha = 0.14f)).border(1.dp, Color.White.copy(alpha = 0.28f), RoundedCornerShape(16.dp))
                             .juicyClick { onDigit(d) }, contentAlignment = Alignment.Center) {
                             Text("$d", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = (if (compact) 22 else 28).sp)
                         }

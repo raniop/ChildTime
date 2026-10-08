@@ -50,7 +50,7 @@ fun LoginScreen() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterVertically),
         ) {
-            Box(Modifier.glassPane(18.dp).padding(horizontal = 18.dp, vertical = 10.dp)) { H(tr("היי! אני טופי 💫"), 20) }
+            Box(Modifier.glassPane(16.dp).padding(horizontal = 18.dp, vertical = 10.dp)) { H(tr("היי! אני טופי 💫"), 20) }
             Image(painterResource(R.drawable.char_fox), null, Modifier.size(170.dp))
             H(tr("היכנסו כדי להתחיל"), 26, align = TextAlign.Center)
             Column(Modifier.fillMaxWidth().glassPane().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {

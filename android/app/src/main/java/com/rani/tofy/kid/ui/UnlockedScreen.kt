@@ -78,7 +78,7 @@ internal fun UnlockedScreen(
             Text(if (gift) "💝" else "🎮", fontSize = 96.sp, modifier = Modifier.graphicsLayer { translationY = bob * density })
             KidTitle(if (preparing) (if (isGirl) tr("הַזְּמַן שֶׁלָּךְ בַּדֶּרֶךְ!") else tr("הַזְּמַן שֶׁלְּךָ בַּדֶּרֶךְ!")) else tr("זְמַן מִשְׂחָק!"), 42)
             Column(
-                Modifier.widthIn(max = 420.dp).fillMaxWidth().glassPane(28.dp).padding(22.dp),
+                Modifier.widthIn(max = 420.dp).fillMaxWidth().glassPane(16.dp).padding(22.dp),
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 if (preparing) {
@@ -111,8 +111,8 @@ private fun OpeningBar() {
         fill.animateTo(0.95f, tween(6000))
     }
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        Box(Modifier.widthIn(max = 260.dp).fillMaxWidth().padding(vertical = 10.dp).height(14.dp).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.22f))) {
-            Box(Modifier.fillMaxWidth(fill.value.coerceAtLeast(0.05f)).height(14.dp).clip(RoundedCornerShape(50))
+        Box(Modifier.widthIn(max = 260.dp).fillMaxWidth().padding(vertical = 10.dp).height(14.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.22f))) {
+            Box(Modifier.fillMaxWidth(fill.value.coerceAtLeast(0.05f)).height(14.dp).clip(RoundedCornerShape(16.dp))
                 .background(Brush.horizontalGradient(listOf(Ink.gold2, Ink.good))))
         }
     }

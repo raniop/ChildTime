@@ -102,7 +102,7 @@ internal fun ChildDetailContent(childID: String, onBack: () -> Unit, onSettings:
         LazyColumn(Modifier.contentColumn().fillMaxSize().systemBarsPadding(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             item {
                 PageBar("", onBack) {
-                    Row(Modifier.clip(RoundedCornerShape(20.dp)).clickable(onClick = onSettings).padding(horizontal = 10.dp, vertical = 8.dp),
+                    Row(Modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = onSettings).padding(horizontal = 10.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text("⚙️", fontSize = 16.sp)
                         Text(tr("הגדרות"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
@@ -168,12 +168,12 @@ private fun ChildReport(
         val minutes = if (period == ReportPeriod.TODAY) (if (capOn) "${s.minutesEarnedToday}/$capMin" else "${s.minutesEarnedToday}") else "${sum.minutesEarned}"
         // ONE summary card (Rani: "עמוס מדי" — it was a strip + a picker):
         // the period on top, the four numbers under it.
-        Column(Modifier.fillMaxWidth().glassPane(18.dp).padding(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color.White.copy(alpha = 0.10f)).padding(3.dp),
+        Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.10f)).padding(3.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 ReportPeriod.entries.forEach { p ->
                     val on = period == p
-                    Box(Modifier.weight(1f).clip(RoundedCornerShape(9.dp)).background(if (on) Color.White.copy(alpha = 0.92f) else Color.Transparent)
+                    Box(Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(if (on) Color.White.copy(alpha = 0.92f) else Color.Transparent)
                         .clickable { period = p; expanded = null }.padding(vertical = 7.dp), contentAlignment = Alignment.Center) {
                         Text(p.title, color = if (on) Ink.indigo else Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.5.sp)
                     }
@@ -287,7 +287,7 @@ private fun LiveBanner(child: Child, live: LiveWindow, onLock: () -> Unit) {
                 color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
             Text(tr("נשארו %@ דקות · %@", formatTime(live.secondsLeft), source), color = Color.White.copy(alpha = 0.9f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
         }
-        Box(Modifier.clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.95f)).clickable(onClick = onLock).padding(horizontal = 12.dp, vertical = 7.dp)) {
+        Box(Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.95f)).clickable(onClick = onLock).padding(horizontal = 12.dp, vertical = 7.dp)) {
             Text("🔒 " + tr("נעילה"), color = Color(0xFF15803D), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
         }
     }
@@ -304,7 +304,7 @@ private fun Snap(modifier: Modifier, value: String, label: String) {
 /** The one WARM pane on the page — gold glass so it leads the eye. */
 @Composable
 private fun InsightCard(i: DailyInsight, period: ReportPeriod) {
-    val shape = RoundedCornerShape(22.dp)
+    val shape = RoundedCornerShape(16.dp)
     Column(
         Modifier.fillMaxWidth().clip(shape)
             .background(Brush.linearGradient(listOf(Color(0xFFFFE082).copy(alpha = 0.66f), Color(0xFFFFB840).copy(alpha = 0.52f))))
@@ -352,7 +352,7 @@ private fun TopicsCard(
                 val skills = engine.skillReports(t.topic, period)
                 if (skills.isEmpty()) P(tr("אין עדיין פירוט לפי מיומנות בנושא זה."), 12.5f)
                 else skills.forEach { sk ->
-                    Row(Modifier.fillMaxWidth().padding(start = 44.dp).glassInset(11.dp).padding(horizontal = 10.dp, vertical = 8.dp)) {
+                    Row(Modifier.fillMaxWidth().padding(start = 44.dp).glassInset(16.dp).padding(horizontal = 10.dp, vertical = 8.dp)) {
                         Text(sk.name, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp)
                         Text(pct(sk.accuracy), color = if (sk.accuracy >= 0.65) Ink.good else Ink.weak, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp)
                     }
@@ -361,7 +361,7 @@ private fun TopicsCard(
             if (idx != shown.lastIndex) RowDivider()
         }
         if (topics.size > 3) {
-            Box(Modifier.fillMaxWidth().padding(top = 10.dp).clip(RoundedCornerShape(12.dp)).background(Color.White.copy(alpha = 0.12f))
+            Box(Modifier.fillMaxWidth().padding(top = 10.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.12f))
                 .clickable { all = !all }.padding(vertical = 10.dp), contentAlignment = Alignment.Center) {
                 Text(if (all) tr("הצג פחות ▲") else tr("הצג את כל %lld הנושאים ▼", topics.size),
                     color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
@@ -403,7 +403,7 @@ private fun WorldRow(w: World, label: String, tint: Color?) {
     Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(w.emoji, fontSize = 20.sp)
         Text(w.name, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.5.sp, maxLines = 2, lineHeight = 18.sp)
-        Text(label, Modifier.clip(RoundedCornerShape(50)).background(tint ?: Color.White.copy(alpha = 0.18f)).padding(horizontal = 9.dp, vertical = 4.dp),
+        Text(label, Modifier.clip(RoundedCornerShape(16.dp)).background(tint ?: Color.White.copy(alpha = 0.18f)).padding(horizontal = 9.dp, vertical = 4.dp),
             color = if (tint == null) Ink.secondary else Color(0xFF2A1D00), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, maxLines = 1)
     }
 }
@@ -433,8 +433,8 @@ private fun ChipLine(label: String, topics: List<Topic>) {
         Text(label, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp, modifier = Modifier.align(Alignment.CenterVertically))
         topics.forEach { t ->
             Text("${t.emoji} ${t.displayName}", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.sp,
-                modifier = Modifier.clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.14f))
-                    .border(1.dp, Color.White.copy(alpha = 0.24f), RoundedCornerShape(20.dp)).padding(horizontal = 8.dp, vertical = 3.dp))
+                modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+                    .border(1.dp, Color.White.copy(alpha = 0.24f), RoundedCornerShape(16.dp)).padding(horizontal = 8.dp, vertical = 3.dp))
         }
     }
 }
@@ -453,7 +453,7 @@ private fun TopicRow(child: Child, s: Progress, extras: SnapshotExtras, t: Topic
                     Text(st.served.displayName + (hint?.let { " · $it" } ?: ""), maxLines = 1,
                         color = when (st.direction) { Direction.EASED -> Ink.warn; Direction.RAISED -> Ink.good; null -> Ink.secondary },
                         fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 10.5.sp,
-                        modifier = Modifier.clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.10f)).padding(horizontal = 7.dp, vertical = 2.dp))
+                        modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.10f)).padding(horizontal = 7.dp, vertical = 2.dp))
                 }
             }
             Text(tr("%lld שאלות", t.answered) + " · " + tr("%lld נכונות", t.correct) + (if (t.wrong > 0) tr(" · %lld טעויות", t.wrong) else ""),
@@ -466,8 +466,8 @@ private fun TopicRow(child: Child, s: Progress, extras: SnapshotExtras, t: Topic
             TopicReport.Verdict.TOO_FEW -> tr("עוד מעט") to Ink.tertiary
         }
         Text("${pct(t.accuracy)} · $label", color = color, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 11.5.sp,
-            modifier = Modifier.clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.12f))
-                .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(20.dp)).padding(horizontal = 9.dp, vertical = 5.dp))
+            modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.12f))
+                .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(16.dp)).padding(horizontal = 9.dp, vertical = 5.dp))
     }
 }
 
@@ -499,7 +499,7 @@ private fun Legend(items: List<Pair<String, Color>>) {
 private fun NamedList(items: List<Named>) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         items.forEach {
-            Column(Modifier.fillMaxWidth().glassInset(10.dp).padding(horizontal = 9.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(1.dp)) {
+            Column(Modifier.fillMaxWidth().glassInset(16.dp).padding(horizontal = 9.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(1.dp)) {
                 Text(it.name, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
                 Text(it.detail, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 11.5.sp)
             }
@@ -552,7 +552,7 @@ private fun DevicesCard(child: Child, devices: List<ChildDevice>, live: Boolean,
         }
         if (devices.isEmpty()) EmptyLine(tr("עוד לא חובר מכשיר."))
         Box(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(onClick = onAdd).dashedBorder().padding(vertical = 10.dp),
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).clickable(onClick = onAdd).dashedBorder().padding(vertical = 10.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text("▦ " + if (devices.isEmpty()) tr("+ חברו מכשיר") else tr("+ חיבור מכשיר נוסף"),

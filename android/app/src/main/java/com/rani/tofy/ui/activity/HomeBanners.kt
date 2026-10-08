@@ -80,7 +80,7 @@ fun ColumnScope.HomeBanners(state: FamilyState, onChores: () -> Unit, onPaywall:
 @Composable
 private fun HelpBanner(req: HelpRequest, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().glassPane(20.dp, 0.18f).background(Color(0xFF7A5CFF).copy(alpha = 0.18f))
+        Modifier.fillMaxWidth().glassPane(16.dp, 0.18f).background(Color(0xFF7A5CFF).copy(alpha = 0.18f))
             .clickable(onClick = onClick).padding(14.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -113,17 +113,17 @@ private fun HelpAnswerSheetHost() {
         ) {
             H(if (r.isGirl) tr("%@ מבקשת עזרה 🧠", r.childName) else tr("%@ מבקש עזרה 🧠", r.childName), 22, align = TextAlign.Center)
             P(tr("איזו תשובה נכונה? הלחיצה שלכם מורידה את התשובה השגויה מהמסך של %@.", r.childName), 14f, color = Color.White.copy(alpha = 0.85f), align = TextAlign.Center)
-            Box(Modifier.fillMaxWidth().glassInset(20.dp).padding(16.dp), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxWidth().glassInset(16.dp).padding(16.dp), contentAlignment = Alignment.Center) {
                 Text(r.question, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 20.sp, textAlign = TextAlign.Center)
             }
             if (done) {
-                Box(Modifier.fillMaxWidth().glassInset(18.dp).padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
+                Box(Modifier.fillMaxWidth().glassInset(16.dp).padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
                     Text(tr("✅ נשלח! התשובה השגויה ירדה מהמסך"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, textAlign = TextAlign.Center)
                 }
             } else {
                 listOf(r.optionA to r.optionB, r.optionB to r.optionA).forEach { (opt, other) ->
                     Box(
-                        Modifier.fillMaxWidth().height(58.dp).clip(RoundedCornerShape(18.dp))
+                        Modifier.fillMaxWidth().height(58.dp).clip(RoundedCornerShape(16.dp))
                             .background(Brush.horizontalGradient(listOf(Color(0xFF5E60CE), Color(0xFF3E8BF0))))
                             .clickable(enabled = sending == null) {
                                 sending = opt
@@ -155,8 +155,8 @@ private fun HelpAnswerSheetHost() {
 private fun ChoreBanner(kid: Child, c: Chore, approving: Boolean, onOpen: () -> Unit, onApprove: () -> Unit) {
     val green = Color(0xFF2EE59D)
     Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(green.copy(alpha = 0.25f))
-            .border(1.dp, green.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(green.copy(alpha = 0.25f))
+            .border(1.dp, green.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
             .clickable(onClick = onOpen).padding(horizontal = 13.dp, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -167,7 +167,7 @@ private fun ChoreBanner(kid: Child, c: Chore, approving: Boolean, onOpen: () -> 
             P(tr("%@ · מחכה לאישור", c.title), 13f, color = Ink.secondary, maxLines = 2)
         }
         Box(
-            Modifier.height(38.dp).clip(RoundedCornerShape(12.dp)).background(Color.White.copy(alpha = 0.92f))
+            Modifier.height(38.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.92f))
                 .clickable(enabled = !approving, onClick = onApprove).padding(horizontal = 14.dp),
             contentAlignment = Alignment.Center,
         ) {
@@ -247,7 +247,7 @@ private fun RequestBanners(state: FamilyState, onPaywall: () -> Unit, onPack: (S
 
 @Composable
 private fun RequestBanner(emoji: String, title: String, onOpen: () -> Unit, onDismiss: () -> Unit) {
-    Column(Modifier.fillMaxWidth().glassPane(20.dp, 0.18f).background(Ink.gold2.copy(alpha = 0.14f)).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(Modifier.fillMaxWidth().glassPane(16.dp, 0.18f).background(Ink.gold2.copy(alpha = 0.14f)).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(emoji, fontSize = 26.sp)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -300,7 +300,7 @@ private fun NotificationsBanner() {
 @Composable
 private fun NoticeBanner(emoji: String, title: String, detail: String?, tint: Color, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().glassPane(18.dp, 0.16f).background(tint.copy(alpha = 0.16f)).clickable(onClick = onClick).padding(14.dp),
+        Modifier.fillMaxWidth().glassPane(16.dp, 0.16f).background(tint.copy(alpha = 0.16f)).clickable(onClick = onClick).padding(14.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Text(emoji, fontSize = 22.sp)

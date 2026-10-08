@@ -87,7 +87,7 @@ internal fun RewardPill(emoji: String, value: Int, color: Color, shown: Boolean,
     val s by animateFloatAsState(if (shown) 1f else 0.3f, spring(dampingRatio = 0.5f), label = "pill")
     Column(
         Modifier.graphicsLayer { scaleX = s; scaleY = s; alpha = if (shown) 1f else 0f }.widthIn(min = 76.dp)
-            .clip(RoundedCornerShape(18.dp)).background(color.copy(alpha = 0.25f)).border(1.5.dp, color, RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(16.dp)).background(color.copy(alpha = 0.25f)).border(1.5.dp, color, RoundedCornerShape(16.dp))
             .padding(vertical = 12.dp, horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
@@ -98,7 +98,7 @@ internal fun RewardPill(emoji: String, value: Int, color: Color, shown: Boolean,
 
 @Composable
 internal fun ClassicCta(text: String, dark: Boolean, onClick: () -> Unit) {
-    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(50)).then(if (dark) Modifier.background(GoldBrush) else Modifier.background(Color.White.copy(alpha = 0.18f)))
+    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).then(if (dark) Modifier.background(GoldBrush) else Modifier.background(Color.White.copy(alpha = 0.18f)))
         .juicyClick(onClick = onClick).padding(vertical = 14.dp), contentAlignment = Alignment.Center) {
         Text(text, color = if (dark) textOnLight else Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp)
     }
@@ -142,7 +142,7 @@ internal fun RaceHeader(index: Int, total: Int, combo: Int, score: Int, frac: Fl
             if (combo >= 2) {
                 val s by animateFloatAsState(if (pop) 1.15f else 1f, label = "combo")
                 Text(tr("🔥 קוֹמְבּוֹ ×%lld", combo), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp,
-                    modifier = Modifier.graphicsLayer { scaleX = s; scaleY = s }.clip(RoundedCornerShape(50)).background(KidColor.flameOrange).padding(horizontal = 10.dp, vertical = 4.dp))
+                    modifier = Modifier.graphicsLayer { scaleX = s; scaleY = s }.clip(RoundedCornerShape(16.dp)).background(KidColor.flameOrange).padding(horizontal = 10.dp, vertical = 4.dp))
             }
             Spacer(Modifier.weight(1f))
             Text("⚡️ $score", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
@@ -245,8 +245,8 @@ fun TrueFalseRace(onClose: () -> Unit) {
                     Text(tr("הַתְּשׁוּבָה הִיא…"), color = Color.White.copy(alpha = 0.7f), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                     val s by animateFloatAsState(if (cardPop) 1.06f else 1f, spring(dampingRatio = 0.45f), label = "card")
                     val ring = lastResult?.let { if (it) KidColor.successMint else hexColor("EF476F") }
-                    Box(Modifier.graphicsLayer { scaleX = s; scaleY = s }.glassPane(24.dp, 0.18f)
-                        .then(if (ring != null) Modifier.border(6.dp, ring, RoundedCornerShape(24.dp)) else Modifier)
+                    Box(Modifier.graphicsLayer { scaleX = s; scaleY = s }.glassPane(16.dp, 0.18f)
+                        .then(if (ring != null) Modifier.border(6.dp, ring, RoundedCornerShape(16.dp)) else Modifier)
                         .padding(horizontal = 28.dp, vertical = 18.dp)) {
                         GameText(it0.candidate, 34.sp, maxLines = 3)
                     }
@@ -256,8 +256,8 @@ fun TrueFalseRace(onClose: () -> Unit) {
             Row(Modifier.padding(horizontal = 18.dp).padding(bottom = 28.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 listOf(false to "EF476F", true to "06D6A0").forEach { (said, hex) ->
                     val c = hexColor(hex)
-                    Column(Modifier.weight(1f).clip(RoundedCornerShape(26.dp)).background(Brush.verticalGradient(listOf(c, c.copy(alpha = 0.78f))))
-                        .border(1.5.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(26.dp)).juicyClick(!answered) { answer(said) }.padding(vertical = 24.dp),
+                    Column(Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(Brush.verticalGradient(listOf(c, c.copy(alpha = 0.78f))))
+                        .border(1.5.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).juicyClick(!answered) { answer(said) }.padding(vertical = 24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(if (said) "✓" else "✕", color = Color.White, fontWeight = FontWeight.Black, fontSize = 34.sp)
                         Text(if (said) tr("נָכוֹן") else tr("לֹא נָכוֹן"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 21.sp)
@@ -345,8 +345,8 @@ fun QuickQuiz(onClose: () -> Unit) {
                                 val idx = row * 2 + k
                                 val show = picked != null
                                 val bg = if (show && idx == q.correctIndex) KidColor.successMint else if (show && picked == idx) hexColor("EF476F") else Color.White.copy(alpha = 0.16f)
-                                Box(Modifier.weight(1f).heightIn(min = 64.dp).clip(RoundedCornerShape(20.dp)).background(bg)
-                                    .border(1.5.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(20.dp)).juicyClick(!locked) { pick(idx) }
+                                Box(Modifier.weight(1f).heightIn(min = 64.dp).clip(RoundedCornerShape(16.dp)).background(bg)
+                                    .border(1.5.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).juicyClick(!locked) { pick(idx) }
                                     .padding(horizontal = 8.dp, vertical = 10.dp), contentAlignment = Alignment.Center) {
                                     GameText(opt, 19.sp, maxLines = 3, minScale = 0.6f)
                                 }
@@ -523,9 +523,9 @@ fun MemoryMatch(onClose: () -> Unit) {
                             val isUp = isMatched || card.id in flipped
                             val rot by animateFloatAsState(if (isUp) 0f else 180f, label = "flip")
                             Box(Modifier.weight(1f).height(84.dp).graphicsLayer { rotationY = rot; cameraDistance = 12 * density; alpha = if (isMatched) 0.65f else 1f }
-                                .clip(RoundedCornerShape(18.dp))
+                                .clip(RoundedCornerShape(16.dp))
                                 .background(if (rot < 90f) Brush.linearGradient(listOf(Color.White, Color.White)) else Brush.verticalGradient(listOf(hexColor("5B6CFF"), hexColor("9B5DE5"))))
-                                .border(if (isMatched) 3.dp else 1.dp, if (isMatched) KidColor.successMint else Color.White.copy(alpha = 0.3f), RoundedCornerShape(18.dp))
+                                .border(if (isMatched) 3.dp else 1.dp, if (isMatched) KidColor.successMint else Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
                                 .juicyClick(!isMatched && !busy) { tap(card) }, contentAlignment = Alignment.Center) {
                                 if (rot < 90f) FitText(card.face, (if (card.face.graphemes() <= 2) 40 else 20).sp, Modifier.padding(4.dp), color = textOnLight,
                                     weight = FontWeight.ExtraBold, maxLines = 1, minScale = 0.5f)

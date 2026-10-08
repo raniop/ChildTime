@@ -192,8 +192,8 @@ fun WheelScreenImpl(onExit: () -> Unit) {
                         enabled = !(spinning && winner == null)) { if (winner != null || !canSpin) onExit() else spin() }
                     if (winner == null && canSpin) Text(
                         SocialMe.g(tr("דַּלֵּג הַפַּעַם"), tr("דַּלְּגִי הַפַּעַם")),
-                        Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-                            .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(50))
+                        Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+                            .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(16.dp))
                             .clickable(enabled = !spinning) { haptics.light(); onExit() }.padding(horizontal = 16.dp, vertical = 9.dp),
                         color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.5.sp,
                     )

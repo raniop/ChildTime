@@ -52,7 +52,7 @@ internal fun PageBar(title: String, onBack: () -> Unit, trailing: @Composable Ro
 /** ChildReportView.card: a titled glass pane. */
 @Composable
 internal fun ReportCard(title: String, modifier: Modifier = Modifier, detail: String? = null, content: @Composable ColumnScope.() -> Unit) {
-    Column(modifier.fillMaxWidth().glassPane(22.dp).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(modifier.fillMaxWidth().glassPane(16.dp).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(title, Modifier.weight(1f), color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
             detail?.let { Text(it, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 12.sp) }
@@ -69,7 +69,7 @@ internal fun EmptyLine(text: String) = P(text, 13f, Modifier.fillMaxWidth())
 internal fun SettingsSection(header: String?, footer: String? = null, content: @Composable ColumnScope.() -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         header?.let { Text(it, Modifier.padding(horizontal = 8.dp), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.sp) }
-        Column(Modifier.fillMaxWidth().glassPane(18.dp).padding(horizontal = 14.dp, vertical = 4.dp)) { content() }
+        Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(horizontal = 14.dp, vertical = 4.dp)) { content() }
         footer?.let { P(it, 12.5f, Modifier.padding(horizontal = 8.dp)) }
     }
 }

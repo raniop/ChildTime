@@ -142,7 +142,7 @@ private fun MainList(
                             Text(child.playPIN ?: "", color = Color.White, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, letterSpacing = 3.sp)
                         }
                         Text(tr("אפס"), color = Color(0xFFFFA94D), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp,
-                            modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(Color(0xFFFFA94D).copy(alpha = 0.18f)).clickable { confirmPin = true }
+                            modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(Color(0xFFFFA94D).copy(alpha = 0.18f)).clickable { confirmPin = true }
                                 .padding(horizontal = 10.dp, vertical = 6.dp))
                     })
             }
@@ -243,8 +243,8 @@ private fun MainList(
                                 color = if (d == Direction.RAISED) Ink.good else Ink.warn, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp, maxLines = 1)
                         }
                         Text(st.served.displayName, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp,
-                            modifier = Modifier.clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.16f))
-                                .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(20.dp)).padding(horizontal = 9.dp, vertical = 3.dp))
+                            modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.16f))
+                                .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).padding(horizontal = 9.dp, vertical = 3.dp))
                     }
                 }
             }
@@ -338,7 +338,7 @@ private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String,
     Scroll {
         PageBar(tr("ערוך פרופיל"), onBack) {
             Text(tr("שמור"), color = if (canSave) Color.White else Color.White.copy(alpha = 0.4f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp,
-                modifier = Modifier.clip(RoundedCornerShape(14.dp)).clickable(enabled = canSave) { save() }.padding(horizontal = 10.dp, vertical = 8.dp))
+                modifier = Modifier.clip(RoundedCornerShape(16.dp)).clickable(enabled = canSave) { save() }.padding(horizontal = 10.dp, vertical = 8.dp))
         }
         // The chosen character (picked by the child in the shop) — shown, not edited here, like iOS.
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -425,14 +425,14 @@ private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String,
                 Interests.forEach { i ->
                     val on = interests.contains(i.id)
                     Text("${i.emoji} ${i.label}", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
-                        modifier = Modifier.clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = if (on) 0.30f else 0.12f))
-                            .border(if (on) 2.dp else 1.dp, if (on) Ink.gold2 else Color.White.copy(alpha = 0.18f), RoundedCornerShape(20.dp))
+                        modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = if (on) 0.30f else 0.12f))
+                            .border(if (on) 2.dp else 1.dp, if (on) Ink.gold2 else Color.White.copy(alpha = 0.18f), RoundedCornerShape(16.dp))
                             .clickable { interests = if (on) interests - i.id else interests + i.id }.padding(horizontal = 14.dp, vertical = 8.dp))
                 }
             }
         }
 
-        Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(30.dp)).background(Color.Red.copy(alpha = 0.25f)).clickable { confirmDelete = true }.padding(vertical = 12.dp),
+        Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.Red.copy(alpha = 0.25f)).clickable { confirmDelete = true }.padding(vertical = 12.dp),
             contentAlignment = Alignment.Center) {
             Text("🗑 " + tr("מחק פרופיל"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
         }
@@ -488,8 +488,8 @@ private fun DifficultyEditor(child: Child, onBack: () -> Unit, write: (Map<Strin
         SettingsSection(tr("החל על כל הנושאים")) {
             Row(Modifier.padding(vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Difficulty.entries.forEach { d ->
-                    Box(Modifier.weight(1f).clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.14f))
-                        .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
+                    Box(Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+                        .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
                         .clickable { write(mapOf("difficultyByTopic" to Topic.entries.associate { it.raw to d.raw })) }.padding(vertical = 9.dp),
                         contentAlignment = Alignment.Center) {
                         Text(d.displayName, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
@@ -503,7 +503,7 @@ private fun DifficultyEditor(child: Child, onBack: () -> Unit, write: (Map<Strin
                 Column(Modifier.padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("${t.emoji} ${t.displayName}", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
                     val cur = child.difficultyFor(t)
-                    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(Color.White.copy(alpha = 0.12f)).padding(2.dp)) {
+                    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.12f)).padding(2.dp)) {
                         Difficulty.entries.forEach { d ->
                             val on = d == cur
                             // Merge-writes just this topic's key inside the map.
@@ -595,7 +595,7 @@ private fun ScreenTimeEditor(child: Child, onBack: () -> Unit, write: (Map<Strin
                     Text(tr("דקות ביום"), Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontSize = 16.sp)
                     StepButton("−") { minutes = clamped(minutes - 5); text = minutes.toString() }
                     OutlinedTextField(text, { v -> text = v.filter(Char::isDigit).take(3); text.toIntOrNull()?.let { minutes = it } },
-                        Modifier.width(84.dp), singleLine = true, shape = RoundedCornerShape(10.dp), colors = glassFieldColors(),
+                        Modifier.width(84.dp), singleLine = true, shape = RoundedCornerShape(16.dp), colors = glassFieldColors(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         textStyle = LocalTextStyle.current.copy(color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, textAlign = TextAlign.Center))
                     StepButton("+") { minutes = clamped(minutes + 5); text = minutes.toString() }
@@ -653,7 +653,7 @@ private fun FriendsList(child: Child, onBack: () -> Unit, note: WriteNote) {
                         Text(f.displayName, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
                         Text("${f.stars} ⭐", color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
                         Text(tr("הסר"), color = Ink.weak, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp,
-                            modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(Ink.weak.copy(alpha = 0.16f))
+                            modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(Ink.weak.copy(alpha = 0.16f))
                                 .clickable { scope.launch { val out = ChildReportRepository.removeFriend(child.id, f.id); note.report(out); reload() } }
                                 .padding(horizontal = 10.dp, vertical = 6.dp))
                     }
@@ -727,7 +727,7 @@ private fun QuietEditor(child: Child, kind: QuietKind, onBack: () -> Unit, write
                 Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     for (d in 1..7) {
                         val on = d in days
-                        Box(Modifier.weight(1f).height(38.dp).clip(RoundedCornerShape(10.dp))
+                        Box(Modifier.weight(1f).height(38.dp).clip(RoundedCornerShape(16.dp))
                             .background(if (on) Color(0xFF06D6A0).copy(alpha = 0.55f) else Color.White.copy(alpha = 0.10f))
                             .clickable { days = if (on) days - d else days + d },
                             contentAlignment = Alignment.Center) {

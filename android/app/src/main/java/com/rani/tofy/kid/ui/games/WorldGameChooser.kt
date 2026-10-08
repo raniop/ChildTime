@@ -161,7 +161,7 @@ internal fun WorldGameChooserScreen(world: PlayWorld, onPlayQuestions: () -> Uni
         ) {
             val inner = Modifier.widthIn(max = 1000.dp).fillMaxWidth()
             // ── Header ──
-            Column(inner.glassPane(26.dp).padding(if (m.compact) 14.dp else 20.dp), verticalArrangement = Arrangement.spacedBy(if (m.compact) 10.dp else 14.dp)) {
+            Column(inner.glassPane(16.dp).padding(if (m.compact) 14.dp else 20.dp), verticalArrangement = Arrangement.spacedBy(if (m.compact) 10.dp else 14.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     MiniGameChip(onClick = onExit) { Text("✕", color = Color.White, fontWeight = FontWeight.Black, fontSize = 13.sp) }
                     Spacer(Modifier.weight(1f))
@@ -180,8 +180,8 @@ internal fun WorldGameChooserScreen(world: PlayWorld, onPlayQuestions: () -> Uni
                             align = TextAlign.Start)
                         val room = KidSession.engine()?.progress(world.id) ?: 0
                         val frac = minOf(room, WORLD_ROOMS).toFloat() / WORLD_ROOMS
-                        Box(Modifier.width(if (m.compact) 150.dp else 220.dp).height(7.dp).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.2f))) {
-                            Box(Modifier.fillMaxWidth(maxOf(0.04f, frac)).height(7.dp).clip(RoundedCornerShape(50)).background(GoldBrush))
+                        Box(Modifier.width(if (m.compact) 150.dp else 220.dp).height(7.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.2f))) {
+                            Box(Modifier.fillMaxWidth(maxOf(0.04f, frac)).height(7.dp).clip(RoundedCornerShape(16.dp)).background(GoldBrush))
                         }
                         // "חֶדֶר 3 מִתּוֹךְ 10", with the 🏆 tier in front from silver on.
                         val tier = KidSession.engine()?.worldTier(world.id) ?: 0
@@ -195,7 +195,7 @@ internal fun WorldGameChooserScreen(world: PlayWorld, onPlayQuestions: () -> Uni
                             enter = androidx.compose.animation.scaleIn(spring(dampingRatio = 0.6f)) + androidx.compose.animation.fadeIn()) {
                             Text(tr("✨ בִּקּוּר רִאשׁוֹן: +%lld 💎", firstVisitPaid), color = KidColor.diamondBlue, fontFamily = Rounded,
                                 fontWeight = FontWeight.ExtraBold, fontSize = (if (m.compact) 13 else 15).sp,
-                                modifier = Modifier.clip(RoundedCornerShape(50))
+                                modifier = Modifier.clip(RoundedCornerShape(16.dp))
                                     .background(Color.White.copy(alpha = 0.9f)).padding(horizontal = 10.dp, vertical = 4.dp))
                         }
                     }
@@ -270,7 +270,7 @@ internal fun WorldGameChooserScreen(world: PlayWorld, onPlayQuestions: () -> Uni
 @Composable
 private fun ChooserCard(modifier: Modifier, tint: Color, last: Boolean, girl: Boolean, content: @Composable () -> Unit) {
     Box(modifier) {
-        Box(Modifier.fillMaxWidth().miniGameTile(TileState.NORMAL, tint, 24.dp).then(if (last) Modifier.border(2.5.dp, KidColor.starGold, RoundedCornerShape(24.dp)) else Modifier)) {
+        Box(Modifier.fillMaxWidth().miniGameTile(TileState.NORMAL, tint, 24.dp).then(if (last) Modifier.border(2.5.dp, KidColor.starGold, RoundedCornerShape(16.dp)) else Modifier)) {
             content()
         }
         // The tag sits ON the gold outline, in the corner away from the title —
@@ -279,7 +279,7 @@ private fun ChooserCard(modifier: Modifier, tint: Color, last: Boolean, girl: Bo
         if (last) Text(if (girl) tr("שִׂחַקְתְּ לָאַחֲרוֹנָה") else tr("שִׂחַקְתָּ לָאַחֲרוֹנָה"), color = Color(0xFF4B3FBF), fontFamily = Rounded,
             fontWeight = FontWeight.ExtraBold, fontSize = 10.5.sp,
             modifier = Modifier.align(Alignment.TopEnd).padding(end = 16.dp).offset(y = (-11).dp)
-                .clip(RoundedCornerShape(50)).background(KidColor.starGold).padding(horizontal = 9.dp, vertical = 4.dp))
+                .clip(RoundedCornerShape(16.dp)).background(KidColor.starGold).padding(horizontal = 9.dp, vertical = 4.dp))
     }
 }
 
@@ -393,9 +393,9 @@ private fun MenuCard(emoji: String, title: String, subtitle: String, colors: Lis
     val h = rememberHaptics()
     val s by animateFloatAsState(if (appeared) 1f else 0.85f, spring(dampingRatio = 0.7f), label = "menu")
     Row(
-        Modifier.fillMaxWidth().graphicsLayer { scaleX = s; scaleY = s; alpha = if (appeared) 1f else 0f }.clip(RoundedCornerShape(28.dp))
+        Modifier.fillMaxWidth().graphicsLayer { scaleX = s; scaleY = s; alpha = if (appeared) 1f else 0f }.clip(RoundedCornerShape(16.dp))
             .background(androidx.compose.ui.graphics.Brush.linearGradient(colors.map { hexColor(it) }))
-            .border(1.5.dp, Color.White.copy(alpha = 0.45f), RoundedCornerShape(28.dp)).juicyClick { h.light(); onClick() }.padding(18.dp),
+            .border(1.5.dp, Color.White.copy(alpha = 0.45f), RoundedCornerShape(16.dp)).juicyClick { h.light(); onClick() }.padding(18.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // Text first → in RTL it sits flush against the right edge; the medallion on the left.

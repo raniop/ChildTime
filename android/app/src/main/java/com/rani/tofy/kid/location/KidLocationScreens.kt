@@ -132,7 +132,7 @@ fun KidLocationPermissionScreen(isGirl: Boolean, onDone: () -> Unit) {
                  else tr("כְּשֶׁהַטֵּלֵפוֹן זָז, הַהוֹרִים שֶׁלְּךָ יוֹדְעִים שֶׁהִגַּעְתָּ בְּשָׁלוֹם — לְבֵית הַסֵּפֶר, הַבַּיְתָה אוֹ לַחוּג."),
                 color = Color.White, fontFamily = Rounded, fontSize = 17.sp, textAlign = TextAlign.Center)
             Spacer(Modifier.height(16.dp))
-            Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color.White.copy(alpha = 0.16f)).padding(14.dp)) {
+            Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.16f)).padding(14.dp)) {
                 Text(if (isGirl) tr("👉 בַּמָּסָךְ הַבָּא הַטֵּלֵפוֹן יִשְׁאַל — לִחְצִי עַל הָאִשּׁוּר")
                      else tr("👉 בַּמָּסָךְ הַבָּא הַטֵּלֵפוֹן יִשְׁאַל — לְחַץ עַל הָאִשּׁוּר"),
                     color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 15.5.sp)

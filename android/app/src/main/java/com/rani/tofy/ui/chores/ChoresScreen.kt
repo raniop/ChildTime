@@ -95,7 +95,7 @@ fun ChoresScreen(onBack: () -> Unit) {
                             val waiting = ChoresRepository.choresFor(k.id, all).any { it.isPendingApproval }
                             val on = k.id == child.id
                             Box(
-                                Modifier.clip(RoundedCornerShape(20.dp))
+                                Modifier.clip(RoundedCornerShape(16.dp))
                                     .background(if (on) Color.White.copy(alpha = 0.92f) else Color.White.copy(alpha = 0.16f))
                                     .clickable { selectedID = k.id; editing = null }
                                     .padding(horizontal = 16.dp, vertical = 9.dp),
@@ -144,7 +144,7 @@ fun ChoresScreen(onBack: () -> Unit) {
 
                 item { SectionTitle(tr("מטלה חדשה ➕")) }
                 item(key = "new-${child.id}") {
-                    Column(Modifier.fillMaxWidth().glassPane(18.dp).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         ChoreForm(null) { title, emoji, minutes, times ->
                             scope.launch { ChoresRepository.addChore(child.id, title, emoji, minutes, times) }
                         }
@@ -198,7 +198,7 @@ private fun SectionTitle(text: String) =
 
 @Composable
 private fun PendingRow(c: Chore, approving: Boolean, onApprove: () -> Unit, onReturn: () -> Unit) {
-    Column(Modifier.fillMaxWidth().glassPane(18.dp).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("${c.emoji} ${c.title}", Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
             P(tr("🎮 %lld דק׳ משחק", c.rewardMinutes), 12.5f)
@@ -206,7 +206,7 @@ private fun PendingRow(c: Chore, approving: Boolean, onApprove: () -> Unit, onRe
         ProofPhoto(c)
         RowSpaced {
             Box(
-                Modifier.weight(1f).height(46.dp).clip(RoundedCornerShape(14.dp)).background(Color(0xFF2EBD6B))
+                Modifier.weight(1f).height(46.dp).clip(RoundedCornerShape(16.dp)).background(Color(0xFF2EBD6B))
                     .clickable(enabled = !approving, onClick = onApprove),
                 contentAlignment = Alignment.Center,
             ) {
@@ -225,7 +225,7 @@ private fun PendingRow(c: Chore, approving: Boolean, onApprove: () -> Unit, onRe
 private fun ProofPhoto(c: Chore) {
     val bytes = c.photo
     val bmp = remember(c.id, bytes?.size) { bytes?.let { runCatching { BitmapFactory.decodeByteArray(it, 0, it.size) }.getOrNull() } }
-    val mod = Modifier.fillMaxWidth().height(160.dp).clip(RoundedCornerShape(12.dp))
+    val mod = Modifier.fillMaxWidth().height(160.dp).clip(RoundedCornerShape(16.dp))
     if (bmp != null) {
         Image(bmp.asImageBitmap(), null, mod, contentScale = ContentScale.Crop)
     } else if (c.photoToken != null) {
@@ -291,7 +291,7 @@ private fun ChoreForm(editing: Chore?, onSave: (title: String, emoji: String, mi
                 placeholder = { Text(tr("מה המטלה? (למשל: לשטוף את האוטו)"), color = Ink.tertiary) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.White.copy(alpha = 0.12f), unfocusedContainerColor = Color.White.copy(alpha = 0.12f),
                     focusedTextColor = Color.White, unfocusedTextColor = Color.White, cursorColor = Color.White,
@@ -301,7 +301,7 @@ private fun ChoreForm(editing: Chore?, onSave: (title: String, emoji: String, mi
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 EMOJI_OPTIONS.forEach { e ->
                     Box(
-                        Modifier.size(42.dp).clip(RoundedCornerShape(10.dp))
+                        Modifier.size(42.dp).clip(RoundedCornerShape(16.dp))
                             .background(if (emoji == e) Color.White.copy(alpha = 0.3f) else Color.Transparent)
                             .clickable { emoji = e },
                         contentAlignment = Alignment.Center,
@@ -325,7 +325,7 @@ private fun ChoreForm(editing: Chore?, onSave: (title: String, emoji: String, mi
 private fun Stepper(label: String, canDec: Boolean, canInc: Boolean, onDec: () -> Unit, onInc: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         P(label, 14.5f, Modifier.weight(1f), color = Color.White, weight = FontWeight.SemiBold)
-        Row(Modifier.glassInset(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.glassInset(16.dp), verticalAlignment = Alignment.CenterVertically) {
             StepBtn("−", canDec, onDec)
             Box(Modifier.width(1.dp).height(22.dp).background(Color.White.copy(alpha = 0.3f)))
             StepBtn("+", canInc, onInc)

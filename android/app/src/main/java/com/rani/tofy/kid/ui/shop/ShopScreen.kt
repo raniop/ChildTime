@@ -206,7 +206,7 @@ internal fun CollectionGrid(col: CollectionState, diamonds: Int, ownedIDs: List<
 @Composable
 private fun CharacterCard(c: ShopCharacter, selected: Boolean, owned: Boolean, affordable: Boolean, onTap: () -> Unit) {
     val tier = c.tier
-    val shape = RoundedCornerShape(22.dp)
+    val shape = RoundedCornerShape(16.dp)
     Box(
         Modifier.fillMaxWidth().tintedPane(if (selected) KidColor.starGold else tier.color)
             .then(if (selected) Modifier.border(2.dp, KidColor.starGold.copy(alpha = 0.9f), shape) else Modifier)
@@ -215,8 +215,8 @@ private fun CharacterCard(c: ShopCharacter, selected: Boolean, owned: Boolean, a
         ShopCharImage(c.id, Modifier.align(Alignment.Center).padding(vertical = 8.dp).height(170.dp).fillMaxWidth(), owned)
         // Rarity badge (top-start).
         Text(
-            tier.label, Modifier.align(Alignment.TopStart).padding(8.dp).clip(RoundedCornerShape(50)).background(tier.color.copy(alpha = 0.75f))
-                .border(1.dp, Color.White.copy(alpha = 0.45f), RoundedCornerShape(50)).padding(horizontal = 9.dp, vertical = 4.dp),
+            tier.label, Modifier.align(Alignment.TopStart).padding(8.dp).clip(RoundedCornerShape(16.dp)).background(tier.color.copy(alpha = 0.75f))
+                .border(1.dp, Color.White.copy(alpha = 0.45f), RoundedCornerShape(16.dp)).padding(horizontal = 9.dp, vertical = 4.dp),
             color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp,
         )
         if (selected) Box(
@@ -225,9 +225,9 @@ private fun CharacterCard(c: ShopCharacter, selected: Boolean, owned: Boolean, a
         ) { Text("✓", color = KidColor.starGold, fontWeight = FontWeight.Black, fontSize = 17.sp) }
         // A price tag, never a lock (no lock language for the child).
         if (!owned) Row(
-            Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp).clip(RoundedCornerShape(50))
+            Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp).clip(RoundedCornerShape(16.dp))
                 .background(Color.White.copy(alpha = if (affordable) 0.92f else 0.18f))
-                .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(50)).padding(horizontal = 12.dp, vertical = 6.dp),
+                .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(16.dp)).padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text("${c.priceDiamonds}", color = if (affordable) Color(0xFF4B3FBF) else Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
@@ -264,8 +264,8 @@ internal fun CollectionDialogs(col: CollectionState, onBuyDiamonds: () -> Unit) 
 @Composable
 internal fun CancelLink(text: String, onClick: () -> Unit) {
     Text(
-        text, Modifier.widthIn(min = 120.dp).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-            .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(50)).clickable(onClick = onClick)
+        text, Modifier.widthIn(min = 120.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+            .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(16.dp)).clickable(onClick = onClick)
             .padding(horizontal = 18.dp, vertical = 10.dp),
         color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, textAlign = TextAlign.Center,
     )

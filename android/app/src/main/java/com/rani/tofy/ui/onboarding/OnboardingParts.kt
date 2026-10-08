@@ -157,8 +157,8 @@ fun OnboardingFooter(title: String?, enabled: Boolean = true, busy: Boolean = fa
 @Composable
 fun WaitingPill(text: String) {
     Row(
-        Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.16f))
-            .border(1.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(50)).padding(horizontal = 14.dp, vertical = 9.dp),
+        Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.16f))
+            .border(1.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(horizontal = 14.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         CircularProgressIndicator(Modifier.size(14.dp), color = Color.White, strokeWidth = 2.dp)
@@ -185,7 +185,7 @@ fun NumberedStep(n: Int, text: String) {
  */
 @Composable
 fun JoinQRCard(text: String?, size: Dp) {
-    Box(Modifier.clip(RoundedCornerShape(18.dp)).background(Color.White).padding(12.dp), contentAlignment = Alignment.Center) {
+    Box(Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White).padding(12.dp), contentAlignment = Alignment.Center) {
         if (text == null) {
             Box(Modifier.size(size), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = Ink.indigo) }
         } else {

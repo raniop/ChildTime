@@ -98,8 +98,8 @@ internal fun BobbingCharacter(id: String, modifier: Modifier = Modifier) {
 @Composable
 internal fun DiamondPill(diamonds: Int, onClick: () -> Unit) {
     Row(
-        Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.14f))
-            .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(50))
+        Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
+            .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(16.dp))
             .clickable(onClick = onClick).padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
