@@ -498,6 +498,8 @@ struct ChildTimeApp: App {
         case "splash": SplashScreenView { }             // DEMO_SCREEN=splash
         case "welcome": WelcomeIntroView()              // DEMO_SCREEN=welcome
         case "rolepicker": RolePickerView()             // DEMO_SCREEN=rolepicker
+        case "agegateyear": AgeGateYearView(onAnswer: { _ in }, onCancel: {})      // DEMO_SCREEN=agegateyear
+        case "agegateminor": AgeGateMinorView(onHaveCode: {}, onClose: {})         // DEMO_SCREEN=agegateminor
         case "onboarding": OnboardingView()             // DEMO_SCREEN=onboarding — parent sign-up
         case "childjoin": ChildJoinView()               // DEMO_SCREEN=childjoin
         case "familychoice": FamilyChoiceView()         // DEMO_SCREEN=familychoice

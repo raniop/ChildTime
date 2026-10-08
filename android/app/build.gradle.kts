@@ -99,6 +99,8 @@ dependencies {
 
     // Google Play Billing (billing/): Tofy+, question packs / world passes, 💎 packs.
     implementation("com.android.billingclient:billing-ktx:8.0.0")
+    // 🧒🚫 Google's age range before a device becomes a parent device (AgeGate.kt).
+    implementation("com.google.android.play:age-signals:0.0.4")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")

@@ -18346,6 +18346,28 @@
         }
       }
     },
+    "אֶת הַמִּשְׁפָּחָה בְּטוֹפִי פּוֹתְחִים מֵהַטֶּלֶפוֹן שֶׁל אַבָּא אוֹ אִמָּא — וּמִשָּׁם מְחַבְּרִים גַּם אֶת הַמַּכְשִׁיר הַזֶּה, וּמַתְחִילִים לְשַׂחֵק וּלְהַרְוִיחַ דַּקּוֹת!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تُنشأ العائلة في Tofy من هاتف أبي أو أمي — ومن هناك يُربط هذا الجهاز أيضاً، فتبدأ اللعب وكسب الدقائق!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Tofy family is started on Mom's or Dad's phone — and from there they connect this device too, so you can start playing and earning minutes!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Семью в Tofy создают на телефоне мамы или папы — оттуда подключают и это устройство, и можно играть и зарабатывать минуты!"
+          }
+        }
+      }
+    },
     "אֶת הַמִּשְׁפָּחָה מְנַהֲלִים בְּדֶרֶךְ כְּלָל מֵהַטֶּלֶפוֹן שֶׁלָּכֶם" : {
       "localizations" : {
         "ar" : {
@@ -42440,6 +42462,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Эта неделя"
+          }
+        }
+      }
+    },
+    "הַשָּׁנָה לֹא נִשְׁמֶרֶת וְלֹא נִשְׁלַחַת לְשׁוּם מָקוֹם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا تُحفظ السنة ولا تُرسل إلى أي مكان"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The year isn't saved or sent anywhere"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Год нигде не сохраняется и никуда не отправляется"
           }
         }
       }
@@ -82006,6 +82050,28 @@
         }
       }
     },
+    "מָה שְׁנַת הַלֵּידָה שֶׁלָּכֶם?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في أي سنة وُلدت؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What year were you born?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В каком году вы родились?"
+          }
+        }
+      }
+    },
     "מָה תָּמִיד פָּתוּחַ" : {
       "localizations" : {
         "ar" : {
@@ -88295,6 +88361,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Счёт"
+          }
+        }
+      }
+    },
+    "נִרְאֶה שֶׁזֶּה הַמַּכְשִׁיר שֶׁל הַיֶּלֶד 😊" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يبدو أن هذا جهاز الطفل 😊"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Looks like this is the child's device 😊"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Похоже, это устройство ребёнка 😊"
           }
         }
       }
@@ -110390,6 +110478,28 @@
         }
       }
     },
+    "שְׁאֵלָה קְטַנָּה לִפְנֵי שֶׁמַּתְחִילִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سؤال صغير قبل أن نبدأ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One quick question before we start"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Один короткий вопрос перед началом"
+          }
+        }
+      }
+    },
     "שְׁאֵלָה קָשָׁה בִּמְיוּחָד — עֲנוּ נָכוֹן וְקַבְּלוּ אֶת כָּל הַדַּקּוֹת!" : {
       "localizations" : {
         "ar" : {
@@ -111114,6 +111224,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вы оба будете видеть одних и тех же детей и один и тот же прогресс."
+          }
+        }
+      }
+    },
+    "שְׁנַת לֵידָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سنة الميلاد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Year of birth"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Год рождения"
           }
         }
       }
@@ -124918,6 +125050,28 @@
         }
       }
     },
+    "📨 לִשְׁלֹחַ קִשּׁוּר לְאַבָּא אוֹ לְאִמָּא" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📨 أرسل رابطاً إلى أمي أو أبي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📨 Send a link to Mom or Dad"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📨 Отправить ссылку маме или папе"
+          }
+        }
+      }
+    },
     "📭" : {
 
     },
@@ -125361,6 +125515,28 @@
     },
     "🔑" : {
 
+    },
+    "🔑 יֵשׁ לִי קוֹד מֵהַהוֹרֶה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔑 لديّ رمز من أحد الوالدين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔑 I have a code from my parent"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔑 У меня есть код от родителя"
+          }
+        }
+      }
     },
     "🔑 לַשְּׁאֵלָה הַבָּאָה" : {
       "localizations" : {

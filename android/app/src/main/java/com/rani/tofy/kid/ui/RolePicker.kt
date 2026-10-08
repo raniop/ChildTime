@@ -35,6 +35,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -89,6 +91,35 @@ private fun RolePicker(onParent: () -> Unit, onChild: () -> Unit) {
         if (role == "parent") onParent() else onChild()
     }
 
+    // 🧒🚫 Every way to "parent" comes through here (AgeGate.kt): Google's age
+    // range first, then the year wheel; a child gets the friendly screen instead.
+    var ageStep by remember { mutableStateOf<String?>(null) }   // "year" | "minor"
+    val scope = rememberCoroutineScope()
+    fun requestParent() {
+        when (AgeGate.verdict(ctx)) {
+            AgeGate.Verdict.ADULT -> choose("parent")
+            AgeGate.Verdict.MINOR -> ageStep = "minor"
+            null -> scope.launch {
+                val v = AgeGate.askGoogle(ctx)
+                if (v == null) ageStep = "year"
+                else { AgeGate.record(ctx, v); if (v == AgeGate.Verdict.ADULT) choose("parent") else ageStep = "minor" }
+            }
+        }
+    }
+    when (ageStep) {
+        "year" -> {
+            AgeGateYear(onAnswer = { v ->
+                AgeGate.record(ctx, v)
+                if (v == AgeGate.Verdict.ADULT) { ageStep = null; choose("parent") } else ageStep = "minor"
+            }, onCancel = { ageStep = null })
+            return
+        }
+        "minor" -> {
+            AgeGateMinor(onHaveCode = { ageStep = null; choose("child") }, onClose = { ageStep = null })
+            return
+        }
+    }
+
     val isTablet = androidx.compose.ui.platform.LocalConfiguration.current.smallestScreenWidthDp >= 600
     var confirmParentOnTablet by remember { mutableStateOf(false) }
 
@@ -109,7 +140,7 @@ private fun RolePicker(onParent: () -> Unit, onChild: () -> Unit) {
                 val parentCard = @Composable {
                     RoleCard("👨‍👩‍👧", tr("הַמַּכְשִׁיר שֶׁלִּי (הוֹרֶה)"), tr("מַעֲקָב, דּוּחוֹת וְנִיהוּל"), Ink.gold2,
                         if (isTablet) null else tr("מַתְחִילִים כָּאן")) {
-                        if (isTablet) confirmParentOnTablet = true else choose("parent")
+                        if (isTablet) confirmParentOnTablet = true else requestParent()
                     }
                 }
                 val childCard = @Composable {
@@ -135,7 +166,7 @@ private fun RolePicker(onParent: () -> Unit, onChild: () -> Unit) {
                 Box(
                     Modifier.fillMaxWidth().height(50.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
                         .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
-                        .clickable { confirmParentOnTablet = false; choose("parent") },
+                        .clickable { confirmParentOnTablet = false; requestParent() },
                     contentAlignment = Alignment.Center,
                 ) { Text(tr("זֶה הַטַּאבְּלֶט שֶׁלִּי, לְהַמְשִׁיךְ כְּהוֹרֶה"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 15.sp) }
             }
@@ -151,7 +182,7 @@ private fun RolePicker(onParent: () -> Unit, onChild: () -> Unit) {
                 Box(
                     Modifier.fillMaxWidth().height(50.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
                         .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
-                        .clickable { childNeedsCode = false; choose("parent") },
+                        .clickable { childNeedsCode = false; requestParent() },
                     contentAlignment = Alignment.Center,
                 ) { Text(tr("עוֹד לֹא — נַתְחִיל כָּאן כְּהוֹרֶה"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 15.sp) }
                 // The App Store link on iOS; the Android build shares the site, which links both stores.

@@ -15,6 +15,9 @@ struct RolePickerView: View {
     /// while no code existed anywhere in the world, and the only way out was
     /// deleting the app. Now it asks first, with three ways forward.
     @State private var childNeedsCode = false
+    /// 🧒🚫 The age check on the way to "parent" (see `AgeGate`).
+    @State private var ageStep: AgeStep?
+    enum AgeStep: String, Identifiable { case year, minor; var id: String { rawValue } }
     @ObservedObject private var profiles = ProfileStore.shared
 
     private var isCompact: Bool { hsc == .compact }
@@ -67,6 +70,18 @@ struct RolePickerView: View {
             if confirmParentOnPad { padParentConfirm }
             if childNeedsCode { childCodeSheet }
         }
+        .fullScreenCover(item: $ageStep) { step in
+            switch step {
+            case .year:
+                AgeGateYearView(onAnswer: { verdict in
+                    AgeGate.verdict = verdict
+                    if verdict == .adult { ageStep = nil; choose(.parent) } else { ageStep = .minor }
+                }, onCancel: { ageStep = nil })
+            case .minor:
+                AgeGateMinorView(onHaveCode: { ageStep = nil; choose(.child) },
+                                 onClose: { ageStep = nil })
+            }
+        }
         .opacity(appeared ? 1 : 0)
         .onAppear {
             withAnimation(.easeOut(duration: 0.4)) { appeared = true }
@@ -104,7 +119,7 @@ struct RolePickerView: View {
                 Haptic.light()
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { confirmParentOnPad = true }
             } else {
-                choose(.parent)
+                requestParent()
             }
         }
     }
@@ -162,7 +177,7 @@ struct RolePickerView: View {
                 .padding(.top, 4)
                 Button {
                     childNeedsCode = false
-                    choose(.parent)
+                    requestParent()
                 } label: {
                     Text(tr("עוֹד לֹא — נַתְחִיל כָּאן כְּהוֹרֶה"))
                         .font(.system(size: 15, weight: .bold, design: .rounded))
@@ -236,7 +251,7 @@ struct RolePickerView: View {
                 .padding(.top, 4)
                 Button {
                     confirmParentOnPad = false
-                    choose(.parent)
+                    requestParent()
                 } label: {
                     Text(tr("זֶה הָאַיְפֵּד שֶׁלִּי, לְהַמְשִׁיךְ כְּהוֹרֶה"))
                         .font(.system(size: 15, weight: .bold, design: .rounded))
@@ -306,6 +321,31 @@ struct RolePickerView: View {
             .glassPane(radius: 16)
         }
         .buttonStyle(.juicy)
+    }
+
+    /// 🧒🚫 Every way to "parent" comes through here: Apple's age range first,
+    /// then the year wheel, and a child gets the friendly screen instead.
+    private func requestParent() {
+        Haptic.light()
+        #if DEBUG
+        if let forced = ProcessInfo.processInfo.environment["DEMO_AGE"] {   // DEMO_AGE=year|minor
+            ageStep = forced == "minor" ? .minor : .year
+            return
+        }
+        #endif
+        switch AgeGate.verdict {
+        case .adult?: choose(.parent)
+        case .minor?: ageStep = .minor
+        case nil:
+            Task { @MainActor in
+                if let verdict = await AgeGate.askApple() {
+                    AgeGate.verdict = verdict
+                    if verdict == .adult { choose(.parent) } else { ageStep = .minor }
+                } else {
+                    ageStep = .year
+                }
+            }
+        }
     }
 
     private func choose(_ role: ParentSettings.DeviceRole) {

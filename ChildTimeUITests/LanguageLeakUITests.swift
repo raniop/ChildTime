@@ -32,7 +32,7 @@ final class LanguageLeakUITests: XCTestCase {
         "mathgrade", "onboarding", "opening", "openinggift", "packask", "packdetail",
         "packnew", "packoffer", "packowned", "packrequest", "packreveal", "parentassist",
         "parenthelp", "parenthome", "parentsettings", "paywall", "paywallgift", "question",
-        "rolepicker", "shop", "starshop", "unlocked", "welcome", "whatsnew", "wheel",
+        "agegateminor", "agegateyear", "rolepicker", "shop", "starshop", "unlocked", "welcome", "whatsnew", "wheel",
         "worldpass", "worldshelf", "worldunlock",
     ]
 
