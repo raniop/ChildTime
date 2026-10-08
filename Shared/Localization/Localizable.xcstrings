@@ -119633,28 +119633,6 @@
         }
       }
     },
-    "📍 איפה הילדים" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "📍 أين الأطفال"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "📍 Where the kids are"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "📍 Где дети"
-          }
-        }
-      }
-    },
     "📍 הפעלת מיקום ל%@" : {
       "localizations" : {
         "ar" : {
@@ -119717,6 +119695,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "📍 Ищем адрес…"
+          }
+        }
+      }
+    },
+    "📍 מיקום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 الموقع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Location"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Где дети"
           }
         }
       }

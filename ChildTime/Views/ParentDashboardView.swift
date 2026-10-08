@@ -286,7 +286,7 @@ struct ParentDashboardView: View {
                 }
                 SideRailButton(systemImage: "person.badge.plus", label: tr("＋ צרו ילד/ה")) { showingCreateChild = true }
                 SideRailButton(emoji: "🧹", label: tr("🧹 מטלות")) { openChores() }
-                SideRailButton(emoji: "📍", label: tr("📍 איפה הילדים")) { showingLocation = true }
+                SideRailButton(emoji: "📍", label: tr("📍 מיקום")) { showingLocation = true }
                 if !rows.isEmpty {
                     SideRailDivider()
                     ScrollView {
@@ -1603,7 +1603,7 @@ struct ParentDashboardView: View {
                 .buttonStyle(.plain)
                 .coachMark("p.chores")
             // 📍 Where the children are — map, places, beep.
-            Button { Haptic.light(); showingLocation = true } label: { homeGhostLabel(tr("📍 איפה הילדים")).frame(maxWidth: .infinity) }
+            Button { Haptic.light(); showingLocation = true } label: { homeGhostLabel(tr("📍 מיקום")).frame(maxWidth: .infinity) }
                 .buttonStyle(.plain)
             // 📱 "🧒 מצב ילד" lived here until every child's card got its own
             // "תנו ל… לשחק כאן" — the same thing, already aimed at the right

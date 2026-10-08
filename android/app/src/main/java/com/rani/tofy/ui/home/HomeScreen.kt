@@ -107,7 +107,7 @@ fun HomeScreen(
                     RowSpaced {
                         GlassButton(tr("＋ צרו ילד/ה"), Modifier.weight(1f).coachMark("p.newChild")) { onAddChild() }
                         GlassButton(tr("🧹 מטלות"), Modifier.weight(1f).coachMark("p.chores")) { onChores() }
-                        GlassButton(tr("📍 איפה הילדים"), Modifier.weight(1f)) { onLocation(null) }
+                        GlassButton(tr("📍 מיקום"), Modifier.weight(1f)) { onLocation(null) }
                     }
                 }
                 items(state.orderedChildren, key = { it.id }) { child ->
