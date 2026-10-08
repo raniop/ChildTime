@@ -568,7 +568,7 @@ struct ParentDashboardView: View {
             .toolbar(isRoot ? .hidden : .visible, for: .navigationBar)
             .navigationTitle(tr("כל הילדים"))   // hidden here; it becomes the pushed page's back label
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .barSafeTopTrailing) {
                     if isRoot {
                         Button { showingSettings = true } label: {
                             Image(systemName: "gearshape.fill")
@@ -583,7 +583,9 @@ struct ParentDashboardView: View {
             // delete inside the page can pop back to the grid on its own).
             .onAppear {
                 if demoOpenFirstChild, navPath.isEmpty, let first = rows.first?.profile.id {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { navPath = [first] }
+                    // selectChild: open, the child fills the revealed half — a push
+                    // there drew the same page in BOTH halves.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { selectChild(first) }
                 }
             }
             .navigationDestination(for: UUID.self) { id in
@@ -1303,7 +1305,7 @@ struct ParentDashboardView: View {
                     closeQRSheet()
                 }
                 .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
+                    ToolbarItem(placement: .barSafeTopTrailing) {
                         Button(tr("סגור")) { convertChild = nil }
                     }
                 }
@@ -2555,7 +2557,7 @@ struct ParentDashboardView: View {
             // difficulty, worlds, cap, PIN, friends, reset, delete…) — in the
             // page's header now, not a row at the very bottom of a long report.
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .barSafeTopTrailing) {
                     Button {
                         Haptic.light()
                         settingsChild = row.profile
@@ -2822,10 +2824,10 @@ struct ChildOrderView: View {
             .navigationTitle(tr("סדר הילדים"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+                ToolbarItem(placement: .barSafeCancellation) {
                     Button(tr("ביטול")) { dismiss() }
                 }
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .barSafeConfirmation) {
                     Button(tr("שמור")) {
                         Haptic.success()
                         onSave(working)

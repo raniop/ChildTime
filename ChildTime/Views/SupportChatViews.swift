@@ -212,7 +212,7 @@ struct SupportChatView: View {
         .toolbar {
             ToolbarItem(placement: .principal) { header }
             if showsClose {
-                ToolbarItem(placement: .cancellationAction) {
+                ToolbarItem(placement: .awayFromBar(.cancellationAction, leading: true)) {
                     Button(tr("סגירה")) { dismiss() }
                         .foregroundStyle(.white)
                 }
@@ -482,7 +482,7 @@ struct SupportInboxView: View {
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+                ToolbarItem(placement: .awayFromBar(.cancellationAction, leading: true)) {
                     Button(tr("סגירה")) { dismiss() }
                         .foregroundStyle(.white)
                 }

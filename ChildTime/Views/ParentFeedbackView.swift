@@ -32,7 +32,7 @@ struct ParentFeedbackView: View {
             .navigationTitle(tr("פידבק"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+                ToolbarItem(placement: .awayFromBar(.cancellationAction, leading: true)) {
                     Button(tr("סגור")) { dismiss() }
                 }
             }

@@ -430,3 +430,26 @@ extension View {
     /// See `ClearOfBarBothSides`.
     func clearOfBarBothSides(active: Bool = true) -> some View { modifier(ClearOfBarBothSides(active: active)) }
 }
+
+// MARK: - 🧭 Navigation-bar buttons away from the camera
+
+extension ToolbarItemPlacement {
+    /// `placement`, unless it would put the button in the foldable's camera-and-
+    /// clock corner (Rani: nothing tappable there) — then the opposite corner.
+    /// `leading` says which corner `placement` means. Everywhere else: unchanged.
+    static func awayFromBar(_ placement: ToolbarItemPlacement, leading: Bool) -> ToolbarItemPlacement {
+        let display = DisplayGeometry.shared
+        guard display.hasBarStrip else { return placement }
+        let leadingIsBar = display.leadingIsBarSide(layout: .app)
+        if leading, leadingIsBar { return .topBarTrailing }
+        if !leading, !leadingIsBar { return .topBarLeading }
+        return placement
+    }
+}
+
+extension ToolbarItemPlacement {
+    /// Pre-resolved corners, for views whose bodies are already heavy to type-check.
+    static var barSafeTopTrailing: ToolbarItemPlacement { .awayFromBar(.topBarTrailing, leading: false) }
+    static var barSafeCancellation: ToolbarItemPlacement { .awayFromBar(.cancellationAction, leading: true) }
+    static var barSafeConfirmation: ToolbarItemPlacement { .awayFromBar(.confirmationAction, leading: false) }
+}

@@ -83,7 +83,7 @@ struct QuietHoursEditorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if !railHost.hasRail {
-                    ToolbarItem(placement: .confirmationAction) {
+                    ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) {
                         Button(tr("סיום")) { save(); dismiss() }
                     }
                 }

@@ -172,8 +172,8 @@ struct ParentLocationView: View {
             .navigationTitle(tr("איפה הילדים"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) { Button(tr("סיום")) { dismiss() } }
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) { Button(tr("סיום")) { dismiss() } }
+                ToolbarItem(placement: .awayFromBar(.navigationBarLeading, leading: true)) {
                     Button { showingPlaces = true } label: { Text(tr("📍 מקומות")) }
                 }
             }
@@ -458,7 +458,7 @@ struct LocationConsentSheet: View {
                 .readableColumn()
             }
             .background(GlassBackdrop())
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button(tr("ביטול")) { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .awayFromBar(.cancellationAction, leading: true)) { Button(tr("ביטול")) { dismiss() } } }
             }
         }
     }
@@ -571,7 +571,7 @@ struct PlacesListView: View {
             .glassForm()
             .navigationTitle(tr("📍 מקומות"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button(tr("סיום")) { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) { Button(tr("סיום")) { dismiss() } } }
         }
         .sheet(item: $editing) { p in
             PlaceEditorView(place: p).environmentObject(profiles).environment(\.layoutDirection, .app)
@@ -716,8 +716,8 @@ struct PlaceEditorView: View {
             .navigationTitle(isNew ? tr("מקום חדש") : place.name)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button(tr("ביטול")) { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .awayFromBar(.cancellationAction, leading: true)) { Button(tr("ביטול")) { dismiss() } }
+                ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) {
                     Button(tr("שמירה")) { save(delete: false) }
                         .disabled(saving || place.name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }

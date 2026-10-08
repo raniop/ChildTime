@@ -37,7 +37,7 @@ struct ActivityCenterView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .awayFromBar(.topBarTrailing, leading: false)) {
                     Button(tr("סיום")) { dismiss() }
                         .foregroundStyle(.white)
                 }

@@ -107,7 +107,7 @@ struct EmailAuthView: View {
             .navigationTitle(tr("חשבון הורה"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) { Button(tr("בטל")) { dismiss() } }
+                ToolbarItem(placement: .awayFromBar(.topBarLeading, leading: true)) { Button(tr("בטל")) { dismiss() } }
             }
             .onChangeCompat(of: auth.isSignedIn) { _, signedIn in
                 if signedIn { dismiss() }

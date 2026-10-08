@@ -250,7 +250,7 @@ struct DailyCapStepDemo: View {
             .navigationTitle(tr("פְּרוֹפִיל חָדָשׁ"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) { Button(tr("חזרה")) {} }
+                ToolbarItem(placement: .awayFromBar(.topBarLeading, leading: true)) { Button(tr("חזרה")) {} }
             }
         }
         .environment(\.layoutDirection, .app)

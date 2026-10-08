@@ -105,7 +105,7 @@ struct ParentSettingsView: View {
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
                 if !railHost.hasRail {
-                    ToolbarItem(placement: .topBarTrailing) {
+                    ToolbarItem(placement: .awayFromBar(.topBarTrailing, leading: false)) {
                         Button(tr("סיום")) { dismiss() }
                     }
                 }
@@ -970,7 +970,7 @@ struct ChangePINView: View {
             .navigationTitle(tr("שינוי קוד הורה"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .awayFromBar(.topBarLeading, leading: true)) {
                     Button(tr("ביטול")) { dismiss() }
                 }
             }

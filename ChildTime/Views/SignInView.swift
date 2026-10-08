@@ -72,7 +72,7 @@ struct SignInView: View {
             .navigationTitle(tr("חיבור חשבון"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .awayFromBar(.topBarLeading, leading: true)) {
                     Button(tr("סגור")) { dismiss() }
                 }
             }

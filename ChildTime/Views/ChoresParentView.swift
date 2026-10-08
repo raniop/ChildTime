@@ -126,7 +126,7 @@ struct ChoresParentView: View {
                     .glassForm()
                     .navigationTitle(tr("עריכת מטלה"))
                     .navigationBarTitleDisplayMode(.inline)
-                    .toolbar { ToolbarItem(placement: .cancellationAction) { Button(tr("ביטול")) { showEditor = false } } }
+                    .toolbar { ToolbarItem(placement: .awayFromBar(.cancellationAction, leading: true)) { Button(tr("ביטול")) { showEditor = false } } }
                 }
                 .environment(\.layoutDirection, .app)
                 .presentationDetents([.medium, .large])
@@ -134,7 +134,7 @@ struct ChoresParentView: View {
             .navigationTitle(tr("מטלות הבית · \(profile.name)"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) { Button(tr("סגור")) { dismiss() } }
+                ToolbarItem(placement: .awayFromBar(.topBarLeading, leading: true)) { Button(tr("סגור")) { dismiss() } }
             }
             .onAppear { choreStore.startIfNeeded() }
             .onChangeCompat(of: selectedID) { _, _ in clearForm() }

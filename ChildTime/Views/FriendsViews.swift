@@ -598,7 +598,7 @@ struct AddFriendView: View {
             QRScannerView { scanned in showScanner = false; add(scanned) }
                 .ignoresSafeArea()
                 .navigationTitle(tr("סְרִיקַת חָבֵר")).navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button(tr("בִּטּוּל")) { showScanner = false } } }
+                .toolbar { ToolbarItem(placement: .awayFromBar(.topBarTrailing, leading: false)) { Button(tr("בִּטּוּל")) { showScanner = false } } }
         }
     }
 
@@ -660,7 +660,7 @@ struct ChildFriendsView: View {
             }
             .navigationTitle(tr("הַחֲבֵרִים שֶׁל \(childName)"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button(tr("סִיּוּם")) { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .awayFromBar(.topBarTrailing, leading: false)) { Button(tr("סִיּוּם")) { dismiss() } } }
         }
         .task { await reload() }
     }

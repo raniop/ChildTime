@@ -59,7 +59,7 @@ struct ChildWorldsView: View {
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
                 if !railHost.hasRail {
-                    ToolbarItem(placement: .confirmationAction) {
+                    ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) {
                         Button(tr("סיום")) { dismiss() }
                     }
                 }

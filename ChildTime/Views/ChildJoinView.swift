@@ -211,7 +211,7 @@ struct ChildJoinView: View {
                 .ignoresSafeArea()
                 .navigationTitle(tr("סריקת קוד"))
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button(tr("ביטול")) { showScanner = false } } }
+                .toolbar { ToolbarItem(placement: .awayFromBar(.topBarTrailing, leading: false)) { Button(tr("ביטול")) { showScanner = false } } }
             }
         }
         .sheet(isPresented: $showRemovalGate) {
