@@ -197,7 +197,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261008083907";
+const PAGE_STAMP = "20261008090504";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -357,7 +357,7 @@ async function dashboard() {
 
 // ---------------- 2 · families ----------------
 let famFilter = "all", famQuery = "", famPlatform = "all";
-let famSort = { key: "active", dir: -1 };   // quiet families first is the default question
+let famSort = { key: "active", dir: 1 };   // whoever played most recently on top (Rani)
 /// 🍎/🤖 Which platforms a family uses: the parents' phones (push tokens + the
 /// iPhone-only parent rows) and every child device. Rani: "הפרדה בין אפל לאנדרואיד".
 function famPlatforms(f) {
@@ -423,6 +423,8 @@ async function families() {
   const bySort = (a, b) => {
     const x = sortKey(a), y = sortKey(b);
     const c = typeof x === "string" ? x.localeCompare(y, "he") : (x - y);
+    // Same day: the family that answered more today comes first.
+    if (!c && famSort.key === "active") return famStats(b).today - famStats(a).today;
     return famSort.dir > 0 ? c : -c;
   };
   // On "הכל" the demo families are not hidden — they sit in their own section
@@ -585,7 +587,7 @@ function wireFam() {
   // A header cell sorts by its column; clicking the same one again flips it.
   document.querySelectorAll("[data-sort]").forEach((th) => th.onclick = () => {
     const k = th.dataset.sort;
-    famSort = { key: k, dir: famSort.key === k ? -famSort.dir : (k === "name" ? 1 : -1) };
+    famSort = { key: k, dir: famSort.key === k ? -famSort.dir : (k === "name" || k === "active" ? 1 : -1) };
     redrawList();
   });
   // A row opens its children and devices underneath, without leaving the table.
