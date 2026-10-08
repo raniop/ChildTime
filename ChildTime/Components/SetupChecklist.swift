@@ -99,12 +99,15 @@ struct SetupChecklistCard: View {
                 Haptic.light()
                 onContinue()
             } label: {
+                // The same shape and height as every other button on the home
+                // (Rani: a capsule here "looked different all of a sudden").
                 Text(continueTitle)
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color(hex: "2A1E5C"))
+                    .lineLimit(1).minimumScaleFactor(0.8)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 13)
-                    .background(AppGradient.gold, in: Capsule())
+                    .frame(height: 44)
+                    .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
             }
             .buttonStyle(.juicy)
         }
