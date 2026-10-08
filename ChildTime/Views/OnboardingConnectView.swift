@@ -30,6 +30,9 @@ struct OnboardingConnectView: View {
 
     /// The title's width — the instructions card is never wider (Rani).
     @State private var titleWidth: CGFloat = 0
+    /// ONE width for every frame on the page: a little wider than the title
+    /// (Rani: "קצת יותר גדול … שכל המסגרות יהיו אותו גודל").
+    private var frameWidth: CGFloat { titleWidth > 0 ? titleWidth + 48 : 300 }
 
     var body: some View {
         ZStack {
@@ -118,7 +121,7 @@ struct OnboardingConnectView: View {
             }
             .padding(12)
             // No wider than the title above it (Rani) — the lines wrap inside.
-            .frame(maxWidth: titleWidth > 0 ? titleWidth : .infinity)
+            .frame(width: frameWidth, alignment: .leading)
             .fixedSize(horizontal: false, vertical: true)
             .glassPane(radius: 16)
             // Full width — so it starts below the foldable's clock.
@@ -146,7 +149,7 @@ struct OnboardingConnectView: View {
                 Label(tr("שליחת טופי לטלפון של \(name)"), systemImage: "square.and.arrow.up")
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                    .frame(width: 300, height: 44)
+                    .frame(width: frameWidth, height: 44)
                     // One corner for every frame on the page (Rani): 16.
                     .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
                     .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
@@ -207,7 +210,7 @@ struct OnboardingConnectView: View {
         }
         // A plain frame like every other on the page (no dashes), as wide and
         // as tall as the share button under it (Rani).
-        .frame(width: 300, height: 44)
+        .frame(width: frameWidth, height: 44)
         .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
     }
