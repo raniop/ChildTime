@@ -21,8 +21,11 @@ struct SplashScreenView: View {
 
     var body: some View {
         ZStack {
+            // Opaque from the very first frame. It used to fade in over 0.5s,
+            // and the app underneath showed through it — on a child's device
+            // the kid home's buddy and bottom bar flashed up before the splash
+            // (Rani). Only the sparkles fade in now.
             GlassBackdrop()
-                .opacity(bgIn ? 1 : 0)
             SparkleField(count: 12, size: 11)
                 .opacity(bgIn ? 1 : 0)
 
