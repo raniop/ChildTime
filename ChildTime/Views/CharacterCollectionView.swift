@@ -16,6 +16,7 @@ struct CharacterCollectionView: View {
     @ObservedObject private var characters = CharacterStore.shared
     @ObservedObject private var progress = ProgressStore.shared
     @Environment(\.horizontalSizeClass) private var hsc
+    @ObservedObject private var display = DisplayGeometry.shared
 
     @State private var pendingPurchase: Character3D?
     @State private var shortBy: Int?
@@ -25,7 +26,8 @@ struct CharacterCollectionView: View {
     }
 
     private var columns: [GridItem] {
-        [GridItem(.adaptive(minimum: hsc == .compact ? 150 : 200), spacing: AppSpacing.md)]
+        // The open foldable shares its row with the hero: four smaller cards, not three huge ones.
+        [GridItem(.adaptive(minimum: hsc == .compact || display.isWideShort ? 150 : 200), spacing: AppSpacing.md)]
     }
 
     var body: some View {

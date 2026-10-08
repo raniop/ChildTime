@@ -27,6 +27,23 @@ struct ShopView: View {
 
             VStack(spacing: 0) {
                 topBar
+                if display.isWideShort, let active = profiles.active {
+                    // 📐 The open foldable: the hero beside the shelf, not above it —
+                    // stacked, the big character took the whole glass and the
+                    // characters for sale started below the fold (Rani).
+                    HStack(alignment: .center, spacing: AppSpacing.lg) {
+                        hero
+                            .frame(width: 260)
+                        ScrollView {
+                            CharacterCollectionView(profileID: active.id,
+                                                    showStarShop: $showStarShop)
+                                .padding(.vertical, AppSpacing.sm)
+                                .padding(.bottom, AppSpacing.xxl)
+                        }
+                        .scrollIndicators(.hidden)
+                    }
+                    .padding(.horizontal, AppSpacing.lg)
+                } else {
                 ScrollView {
                     VStack(spacing: AppSpacing.lg) {
                         hero
@@ -39,6 +56,7 @@ struct ShopView: View {
                     .padding(.bottom, AppSpacing.xxxl)
                     .frame(maxWidth: 820)
                     .frame(maxWidth: .infinity)
+                }
                 }
             }
         }
