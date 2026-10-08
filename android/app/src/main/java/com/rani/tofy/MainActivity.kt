@@ -37,6 +37,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         // A tapped push / opened link (iOS onOpenURL + PushManager tap) — once, not on recreation.
         if (savedInstanceState == null) { com.rani.tofy.kid.ui.home.KidDeepLinks.handle(intent); openPlacePush(intent) }
+        // 🧪 Debug builds only: `adb shell am start -n com.rani.tofy/.MainActivity
+        // --es demoGame VAULT [--es demoGrade 6]` opens one mini-game on its own,
+        // so a game can be checked without walking the whole app to it.
+        val demoGame = if (BuildConfig.DEBUG) intent?.getStringExtra("demoGame") else null
+        if (BuildConfig.DEBUG) intent?.getStringExtra("demoGrade")?.toIntOrNull()?.let {
+            com.rani.tofy.kid.ui.games.MiniGameLevel.debugGrade = it
+        }
         setContent {
             TofyTheme {
                 // Tap anywhere outside a field to put the keyboard away. A child's
@@ -49,7 +56,9 @@ class MainActivity : ComponentActivity() {
                         detectTapGestures { focus.clearFocus() }
                     },
                 ) {
-                    Root()
+                    val demo = demoGame?.let { g -> com.rani.tofy.kid.ui.games.MiniGameKind.entries.firstOrNull { it.name.equals(g, true) } }
+                    if (demo != null) com.rani.tofy.kid.ui.games.MiniGameScreen(demo, null) { finish() }
+                    else Root()
                     ForcedUpdateOverlay()
                 }
             }

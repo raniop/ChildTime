@@ -67,6 +67,7 @@ fun HomeScreen(
     val firstChild = state.orderedChildren.firstOrNull()
     val connectFirst = state.orderedChildren.firstOrNull { !state.hasDevice(it) }
     var tour by remember { mutableStateOf(false) }
+    var whatsNew by remember { mutableStateOf(false) }
     // 🔔 Parents NEED push (ParentDashboardView: ask automatically, but only
     // once there's a child to hear about and onboarding is over). Android 13+
     // asks once per install; a decline leaves the banner as the manual path.
@@ -84,7 +85,11 @@ fun HomeScreen(
             askNotifications()
             while (!notifAsked) delay(200)
         }
-        if (CoachTours.isDone(CoachTours.PARENT_HOME)) return@LaunchedEffect
+        if (CoachTours.isDone(CoachTours.PARENT_HOME)) {
+            // ✨ After an update: what's new, once (iOS shows its list the same way).
+            if (com.rani.tofy.ui.settings.WhatsNewOnce.shouldShow(ctx)) { delay(700); whatsNew = true }
+            return@LaunchedEffect
+        }
         delay(900)
         tour = true
     }
@@ -127,6 +132,7 @@ fun HomeScreen(
                 }
             }
         }
+        if (whatsNew && !sheetOpen) com.rani.tofy.ui.settings.WhatsNewSheet { whatsNew = false }
         CoachTour(
             steps = parentTourSteps(stripNiqqud(firstChild?.name.orEmpty())),
             active = tour,

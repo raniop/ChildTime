@@ -274,19 +274,51 @@ fun FeedbackSheet(onDismiss: () -> Unit) {
 
 // MARK: - What's new
 
-/** iOS's notes describe iPhone builds; this one says what Android parents got. */
+/** ✨ What this Android version brought — the same list a parent sees on iOS
+ *  (WhatsNewView), opened from the settings and once by itself after an
+ *  update (see [WhatsNewOnce]). Parent-facing: no niqqud. */
+object WhatsNewAndroid {
+    data class Item(val emoji: String, val title: String, val line: String)
+    val items: List<Item> get() = listOf(
+        Item("📍", tr("לדעת איפה הילדים"), tr("מפה עם הילדים, התראה כשמגיעים לבית הספר או הביתה, וצפצוף לטלפון שהלך לאיבוד. רק אם תפעילו, ורק ההורים רואים")),
+        Item("🏠", tr("איפה הילדים, במבט אחד"), tr("בכרטיס של כל ילד כתוב עכשיו בבית, בבית הספר או אצל סבתא, עם הסמל של המקום")),
+        Item("🏫", tr("זמן בית ספר ושעת שינה"), tr("בהגדרות של כל ילד בוחרים ימים ושעות שבהם אי אפשר לפתוח דקות משחק. משחק פתוח נעצר, והדקות שנשארו חוזרות לארנק")),
+        Item("🔐", tr("כספת חדשה, פשוטה יותר"), tr("במשחק הכספת כל תשובה נכונה מסובבת גלגל, ובשלושה גלגלים הכספת נפתחת")),
+    )
+}
+
 @Composable
 fun WhatsNewSheet(onDismiss: () -> Unit) {
     Sheet(onDismiss) {
         SheetBar(tr("מה חדש בטופי ✨"), cancel = tr("סיום"), onCancel = onDismiss)
-        Row(Modifier.fillMaxWidth().glassPane(20.dp).padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            EmojiTile("🤖", 44.dp)
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(tr("טופי להורים — עכשיו גם באנדרואיד"), color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
-                P(tr("מנהלים את הילדים, את זמן המסך, את המטלות ואת ההתראות ישירות מטלפון האנדרואיד שלכם."), 13.5f)
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            WhatsNewAndroid.items.forEach { item ->
+                Row(Modifier.fillMaxWidth().glassPane(20.dp).padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    EmojiTile(item.emoji, 44.dp)
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(item.title, color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                        P(item.line, 13.5f)
+                    }
+                }
             }
         }
         P(SettingsRepository.versionLine, 13f, Modifier.fillMaxWidth().padding(top = 14.dp), color = Ink.tertiary, align = TextAlign.Center)
+    }
+}
+
+/** Shows [WhatsNewSheet] once after an update — never on a fresh install (that
+ *  parent has onboarding and the tour), never twice for the same build. */
+object WhatsNewOnce {
+    private const val KEY = "whatsNew.seenCode"
+    fun shouldShow(ctx: Context): Boolean {
+        val prefs = ctx.getSharedPreferences("tofy", Context.MODE_PRIVATE)
+        val current = com.rani.tofy.BuildConfig.VERSION_CODE
+        val seen = prefs.getInt(KEY, -1)
+        if (seen >= current) return false
+        prefs.edit().putInt(KEY, current).apply()
+        // First run with this key: an existing family updating shows it; a
+        // brand-new install (tour not done yet) just records the build.
+        return seen != -1 || com.rani.tofy.ui.common.CoachTours.isDone(com.rani.tofy.ui.common.CoachTours.PARENT_HOME)
     }
 }
 

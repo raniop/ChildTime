@@ -189,8 +189,12 @@ object GameContent {
  * [GameEnv.activeChildIsPreReader] — never this.
  */
 object MiniGameLevel {
+    /** 🧪 Debug builds: a grade forced from the launch intent (see MainActivity `demoGrade`). */
+    var debugGrade: Int? = null
+
     /** The child's grade, one step up or down when the adaptive level has clearly moved. */
     fun grade(topic: Topic?): Int {
+        if (com.rani.tofy.BuildConfig.DEBUG) debugGrade?.let { return it }
         val base = max(1, GameEnv.source.grade ?: 2)
         if (topic == null || GameEnv.source.grade == null) return base
         val anchor = GameEnv.source.difficulty(topic)
