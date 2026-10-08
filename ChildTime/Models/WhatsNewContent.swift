@@ -57,13 +57,17 @@ enum WhatsNewContent {
 
         // 2026.10.8 in one list, the most important first (Rani approved the
         // order; 211 and 212 were TestFlight-only builds of the same version).
-        Release(build: 213, version: "2026.10.8", headline: tr("פעולות פשוטות יותר, וזמן מסך מדויק"), items: [
+        Release(build: 214, version: "2026.10.8", headline: tr("פעולות פשוטות יותר, וזמן מסך מדויק"), items: [
             Item(emoji: "⚡", title: tr("כל הפעולות במקום אחד"),
                  line: tr("בכפתור ״פעולות״ של כל ילד: מתנת דקות, נעילה ואיפה הילד בלחיצה אחת, ומשם זמן מסך, מטלות וכל ההגדרות")),
+            Item(emoji: "🧒", title: tr("מסך בית רגוע יותר לילד"),
+                 line: tr("סרגל אחד למטה למתנה, לדקות ולקוד הסודי, ו״היום שלי״ עם המטלות — יותר מקום לעולמות")),
             Item(emoji: "⏱", title: tr("זמן המסך נספר נכון"),
                  line: tr("דקות שחזרו לארנק כשחלון משחק נסגר מוקדם לא נספרות יותר כאילו שוחקו, גם בדוח להורה")),
             Item(emoji: "✏️", title: tr("עריכה בלחיצה על העיפרון"),
                  line: tr("העיפרון ליד שם הילד פותח ישר את השם, התמונה והכיתה")),
+            Item(emoji: "⌚️", title: tr("פעולות מהשעון"),
+                 line: tr("באפל ווטש: מתנת דקות, נעילה וצפצוף לטלפון של כל ילד, ישר מהיד")),
             Item(emoji: "🔐", title: tr("כספת חדשה, פשוטה יותר"),
                  line: tr("במשחק הכספת כל תשובה נכונה מסובבת גלגל, ובשלושה גלגלים הכספת נפתחת")),
             Item(emoji: "⚡", title: tr("תשובה נצבעת מיד"),

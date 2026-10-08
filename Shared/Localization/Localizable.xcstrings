@@ -28394,6 +28394,28 @@
         }
       }
     },
+    "באפל ווטש: מתנת דקות, נעילה וצפצוף לטלפון של כל ילד, ישר מהיד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "على Apple Watch: دقائق هدية وقفل ورنين هاتف كل طفل، مباشرة من معصمك"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On Apple Watch: gift minutes, lock and ring each child's phone, right from your wrist"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На Apple Watch: подарить минуты, заблокировать и позвонить на телефон ребёнка — прямо с руки"
+          }
+        }
+      }
+    },
     "בבית" : {
       "localizations" : {
         "ar" : {
@@ -85636,6 +85658,28 @@
         }
       }
     },
+    "מסך בית רגוע יותר לילד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شاشة رئيسية أهدأ للطفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A calmer home screen for kids"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Более спокойный главный экран для ребёнка"
+          }
+        }
+      }
+    },
     "מסך הורים חדש — במבט של כמה שניות" : {
       "localizations" : {
         "ar" : {
@@ -93799,6 +93843,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Расскажите %@ о празднике, который любит ваша семья: что на столе и какая за ним история."
+          }
+        }
+      }
+    },
+    "סרגל אחד למטה למתנה, לדקות ולקוד הסודי, ו״היום שלי״ עם המטלות — יותר מקום לעולמות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شريط واحد في الأسفل للهدية والدقائق والرمز السري، و«يومي» مع المهام — مساحة أكبر للعوالم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One bar at the bottom for the gift, the minutes and the secret code, and “My day” with the chores — more room for the worlds"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Одна панель внизу для подарка, минут и секретного кода, и «Мой день» с делами — больше места для миров"
           }
         }
       }
@@ -102166,6 +102232,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Действия"
+          }
+        }
+      }
+    },
+    "פעולות מהשעון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إجراءات من الساعة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actions from the watch"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Действия с часов"
           }
         }
       }
