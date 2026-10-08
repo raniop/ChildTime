@@ -33,7 +33,7 @@ struct KidPINView: View {
     /// a tap. Short screens get smaller keys; a wide short one puts the header
     /// beside the keypad.
     @ObservedObject private var display = DisplayGeometry.shared
-    private var keySize: CGFloat { display.isShort ? 56 : 76 }
+    private var keySize: CGFloat { display.isWideShort ? 64 : (display.isShort ? 56 : 76) }
     private var keyGap: CGFloat { display.isShort ? 9 : 14 }
 
     private var isSetMode: Bool { mode == .setNew }
@@ -80,14 +80,13 @@ struct KidPINView: View {
                 .awayFromBar()
 
                 if display.isWideShort {
-                    HStack(alignment: .center, spacing: 28) {
-                        header.frame(maxWidth: .infinity)
-                        keypad
-                    }
-                    .padding(.top, 4)
-                    .environment(\.layoutDirection, .leftToRight)
-                    // Open, the keypad's top row reached under the clock.
-                    .clearOfBar()
+                    // 📐 The open foldable: the phone's layout — the title over the
+                    // keypad, both in the middle of the glass (Rani rejected the
+                    // side-by-side split: the keypad sat off by the clock).
+                    Spacer(minLength: 0)
+                    header
+                    Color.clear.frame(height: 18)
+                    keypad
                 } else {
                     header
                         .padding(.top, display.isShort ? 4 : 10)

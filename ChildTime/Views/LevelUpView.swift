@@ -10,7 +10,11 @@ struct LevelUpView: View {
     @State private var scale: CGFloat = 0.3
     @State private var titleVisible = false
 
-    private var isCompact: Bool { hsc == .compact }
+    @ObservedObject private var display = DisplayGeometry.shared
+
+    /// A short glass (the open foldable) sizes like a phone — the iPad sizes put
+    /// the "continue" button off the bottom of the screen.
+    private var isCompact: Bool { hsc == .compact || display.isShort }
     private var companionSize: CGFloat { isCompact ? 120 : 160 }
     private var titleFontSize: CGFloat { isCompact ? 46 : 64 }
     private var levelFontSize: CGFloat { isCompact ? 28 : 36 }
@@ -23,7 +27,7 @@ struct LevelUpView: View {
                 FancyConfetti(trigger: confettiTrigger)
 
                 ScrollView {
-                    VStack(spacing: AppSpacing.xl) {
+                    VStack(spacing: display.isShort ? AppSpacing.md : AppSpacing.xl) {
                         Spacer(minLength: AppSpacing.lg)
 
                         CompanionView(controller: companion, size: companionSize)
