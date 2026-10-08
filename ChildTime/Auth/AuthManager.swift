@@ -64,7 +64,8 @@ final class AuthManager: ObservableObject {
     ///
     /// So: no local marker + a live session means the app was reinstalled. Drop
     /// the session and let the device be set up from scratch, which is what
-    /// deleting an app is universally understood to mean.
+    /// deleting an app is universally understood to mean — for a child device
+    /// AND for a parent (the parent's family stays in the cloud).
     /// This install is being set up on purpose (a parent device converting
     /// itself into a child one) — not a reinstall. Without this, the first
     /// child launch found no marker beside a live anonymous session and pulled
@@ -80,9 +81,17 @@ final class AuthManager: ObservableObject {
         guard !d.bool(forKey: Self.installMarkKey) else { return }
         d.set(true, forKey: Self.installMarkKey)
         guard let user = Auth.auth().currentUser else { return }
-        // Only an ANONYMOUS session is dropped. A parent signed in with Apple or
-        // Google reinstalled the app expecting to find their family waiting.
-        guard user.isAnonymous else { return }
+        // A parent account (Apple / Google / email) is signed OUT too (Rani,
+        // 2026-10-08: "מוחקים ומתקינים מחדש — משתמש חדש לגמרי מ-0"). Nothing is
+        // deleted in the cloud: their family stays, and signing in again with
+        // the same account brings it back — by their choice, not by itself.
+        // The parent code is local to the Keychain, so it goes too.
+        guard user.isAnonymous else {
+            TofyLink("reinstall detected — signing the parent account out, starting fresh")
+            PINManager.shared.deletePIN()
+            signOut()
+            return
+        }
         TofyLink("reinstall detected — leaving the old family and dropping the session")
         // Clean up in the CLOUD first, while we still have permission to: leave
         // the household and delete this install's device rows. Otherwise the

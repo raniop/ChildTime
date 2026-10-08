@@ -147,11 +147,12 @@ struct HomeTileText: View {
                 .foregroundStyle(GlassInk.primary)
                 .lineLimit(2).minimumScaleFactor(0.8)
                 .multilineTextAlignment(.leading)
-            // One line (Rani: the home felt too busy) — a long one ends in "…".
+            // One line (Rani: the home felt too busy) — and never cut with "…"
+            // (Rani: "חתוכה!"): a long one shrinks until it fits whole.
             Text(subtitle)
                 .font(.system(size: hsc == .compact ? 11 : 12.5, weight: .semibold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
-                .lineLimit(1).truncationMode(.tail).minimumScaleFactor(0.85)
+                .lineLimit(1).minimumScaleFactor(0.55)
                 .multilineTextAlignment(.leading)
         }
         .padding(.top, 8)
