@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct UnlockedView: View {
+    /// One width for every frame on the screen — the countdown, the hint and the button.
+    static let paneWidth: CGFloat = 480
     @EnvironmentObject var progress: ProgressStore
     @Environment(\.horizontalSizeClass) private var hsc
     @Environment(\.scenePhase) private var scenePhase
@@ -58,7 +60,8 @@ struct UnlockedView: View {
                     }
                     .padding(.horizontal, AppSpacing.lg)
                     .padding(.vertical, AppSpacing.lg)
-                    .frame(maxWidth: 420)
+                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: Self.paneWidth)
                     .glassPane(radius: 16)
                     .task {
                         // Most of the bar fills fast, then it eases off and creeps —
@@ -78,7 +81,9 @@ struct UnlockedView: View {
                 }
                 .padding(.horizontal, AppSpacing.lg)
                 .padding(.vertical, AppSpacing.lg)
-                .frame(maxWidth: 420)
+                // Every frame on this screen is one width (Rani).
+                .frame(maxWidth: .infinity)
+                .frame(maxWidth: Self.paneWidth)
                 .glassPane(radius: 16)
 
                 Text(tr("עַכְשָׁיו אֶפְשָׁר לַעֲבוֹר לָאַפְּלִיקַצְיָה שֶׁ\(Gendered.g(tr("אַתָּה רוֹצֶה"), tr("אַתְּ רוֹצָה"))) לְשַׂחֵק בָּהּ 🚀"))
@@ -86,7 +91,8 @@ struct UnlockedView: View {
                     .foregroundStyle(GlassInk.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, AppSpacing.lg).padding(.vertical, 10)
-                    .frame(maxWidth: 480)
+                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: Self.paneWidth)
                     .glassInset(radius: 16)
                 }
 
@@ -109,7 +115,7 @@ struct UnlockedView: View {
                         .ctaGlass(Color(hex: "5E60CE"), Color(hex: "3E8BF0"))
                 }
                 .buttonStyle(.juicy)
-                .frame(maxWidth: 480)
+                .frame(maxWidth: Self.paneWidth)
                 .padding(.bottom, AppSpacing.xxl)
                 }
             }
