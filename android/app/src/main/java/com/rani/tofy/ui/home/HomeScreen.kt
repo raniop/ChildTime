@@ -198,7 +198,7 @@ private fun ChildCard(
         // A child with no device of their own still plays in kid mode on this phone.
         !hasDevice && s.answeredToday == 0 && s.stars == 0 -> tr("עוד לא %@", if (girl) tr("התחילה") else tr("התחיל"))
         s.answeredToday > 0 -> tr("%@ היום", if (girl) tr("למדה") else tr("למד"))
-        else -> tr("לא בטופי היום")
+        else -> if (child.isGirl) tr("לא הייתה בטופי היום") else tr("לא היה בטופי היום")
     }
     val pctColor = when {
         pct >= 80 && s.answeredToday > 0 -> Ink.good
@@ -231,7 +231,7 @@ private fun ChildCard(
         if (hasDevice) {
             val cap = child.dailyCapMinutes?.takeIf { it > 0 }
             RowSpaced {
-                Stat(Modifier.weight(1f), "${s.minutesEarnedToday}" + (cap?.let { "/$it" } ?: ""), tr("דקות שהרוויחו היום"))
+                Stat(Modifier.weight(1f), "${s.minutesEarnedToday}" + (cap?.let { "/$it" } ?: ""), if (child.isGirl) tr("דקות שהרוויחה היום") else tr("דקות שהרוויח היום"))
                 Stat(Modifier.weight(1f), "${s.answeredToday}", tr("שאלות היום"))
                 Stat(Modifier.weight(1f), "${s.correctToday}", tr("נכונות"))
             }

@@ -1359,7 +1359,7 @@ struct ParentDashboardView: View {
             }
             // A child with no device of their own still plays in kid mode on this phone.
             if !hasDevice && s.answeredToday == 0 && s.stars == 0 { return tr("עוד לא \(girl ? tr("התחילה") : tr("התחיל"))") }
-            return s.answeredToday > 0 ? tr("\(girl ? tr("למדה") : tr("למד")) היום") : tr("לא בטופי היום")
+            return s.answeredToday > 0 ? tr("\(girl ? tr("למדה") : tr("למד")) היום") : (girl ? tr("לא הייתה בטופי היום") : tr("לא היה בטופי היום"))
         }()
         return VStack(spacing: Self.homeRowGap) {
             HStack(spacing: 12) {
@@ -1433,7 +1433,7 @@ struct ParentDashboardView: View {
                                  suffix: cap.enabled ? "/\(cap.minutes)" : nil,
                                  // "Earned", said out loud: a parent read "60/60 דקות היום"
                                  // as "played 60 of 60" (Ben David, 2026-10-08).
-                                 label: tr("דקות שהרוויחו היום"),
+                                 label: girl ? tr("דקות שהרוויחה היום") : tr("דקות שהרוויח היום"),
                                  progress: nil)   // no filling bar (Rani)
                     overviewStat(value: "\(s.answeredToday)", suffix: nil, label: tr("שאלות היום"), progress: nil)
                     overviewStat(value: "\(s.correctToday)", suffix: nil, label: tr("נכונות"), progress: nil)
@@ -1795,7 +1795,7 @@ struct ParentDashboardView: View {
         let earned = rows.first(where: { $0.profile.id == p.id })?.snapshot.minutesEarnedToday ?? 0
         let status: String = liveWindow(p) != nil
             ? (girl ? tr("משחקת עכשיו") : tr("משחק עכשיו"))
-            : (hasDevice ? tr("\(earned) דקות שהרוויחו היום") : tr("אין עדיין מכשיר מחובר"))
+            : (hasDevice ? (girl ? tr("\(earned) דקות שהרוויחה היום") : tr("\(earned) דקות שהרוויח היום")) : tr("אין עדיין מכשיר מחובר"))
         let cap = p.resolvedDailyCap(globalEnabled: settings.dailyCapEnabled, globalMax: settings.maxMinutesPerDay)
         let pending = choreStore.chores(forChild: p.id).filter { $0.isPendingApproval }.count
         return ChildActionsSheet(

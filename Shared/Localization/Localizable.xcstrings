@@ -7456,6 +7456,50 @@
         }
       }
     },
+    "%lld דקות שהרוויח היום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld دقيقة كسبها اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld minutes earned today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заработал сегодня: %lld мин"
+          }
+        }
+      }
+    },
+    "%lld דקות שהרוויחה היום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld دقيقة كسبتها اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld minutes earned today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заработала сегодня: %lld мин"
+          }
+        }
+      }
+    },
     "%lld דקות שהרוויחו היום" : {
       "localizations" : {
         "ar" : {
@@ -32536,6 +32580,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Минуты, которые вы подарили и которые ещё не открыты, — хранятся полностью отдельно от минут, заработанных ребёнком, и одинаковы на каждом устройстве. Ребёнок открывает их когда хочет, и пока подарок открыт — обратный отсчёт показывается здесь (а не в 🎮). За один раз можно дать столько, сколько осталось до полуночи; неиспользованное остаётся на завтра."
+          }
+        }
+      }
+    },
+    "דקות שהרוויח היום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دقائق كسبها اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minutes earned today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заработал сегодня, мин"
+          }
+        }
+      }
+    },
+    "דקות שהרוויחה היום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دقائق كسبتها اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minutes earned today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заработала сегодня, мин"
           }
         }
       }
@@ -70924,6 +71012,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сейчас не в Tofy"
+          }
+        }
+      }
+    },
+    "לא היה בטופי היום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يكن في Tofy اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wasn't in Tofy today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сегодня не был в Tofy"
+          }
+        }
+      }
+    },
+    "לא הייתה בטופי היום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم تكن في Tofy اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wasn't in Tofy today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сегодня не была в Tofy"
           }
         }
       }
