@@ -4201,6 +4201,28 @@
         }
       }
     },
+    "%@ בקופה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ في الحصالة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ saved"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В копилке %@"
+          }
+        }
+      }
+    },
     "%@ ברצף של %lld ימים 🔥" : {
       "localizations" : {
         "ar" : {
@@ -5921,6 +5943,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ ждёт вас!"
+          }
+        }
+      }
+    },
+    "%@ משחק עכשיו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ يلعب الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is playing now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ сейчас играет"
+          }
+        }
+      }
+    },
+    "%@ משחקת עכשיו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ تلعب الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is playing now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ сейчас играет"
           }
         }
       }
@@ -9807,6 +9873,50 @@
         }
       }
     },
+    "%lld ילדים · שקט עכשיו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld أطفال · هدوء الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kids · all quiet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Детей: %lld · сейчас тихо"
+          }
+        }
+      }
+    },
+    "%lld ילדים משחקים עכשיו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld أطفال يلعبون الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kids playing now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас играют: %lld"
+          }
+        }
+      }
+    },
     "%lld ימים אחרונים" : {
       "localizations" : {
         "ar" : {
@@ -10767,6 +10877,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%lld מטלות מחכות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld مهام بالانتظار"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld chores waiting"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ждут дел: %lld"
           }
         }
       }
@@ -21120,6 +21252,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Может, позже"
+          }
+        }
+      }
+    },
+    "אורי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أوري"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uri"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ури"
           }
         }
       }
@@ -43684,6 +43838,28 @@
         }
       }
     },
+    "האייפון לא זמין כרגע" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الآيفون غير متاح الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The iPhone isn't available right now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone сейчас недоступен"
+          }
+        }
+      }
+    },
     "האימייל או הסיסמה לא נכונים — נסו שוב, או הקישו \"שכחתי סיסמה\"" : {
       "localizations" : {
         "ar" : {
@@ -62740,6 +62916,28 @@
         }
       }
     },
+    "יישלח כשהאייפון יתחבר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سيُرسل عند اتصال الآيفون"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Will send when the iPhone connects"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отправится, когда iPhone подключится"
+          }
+        }
+      }
+    },
     "ילד" : {
       "localizations" : {
         "ar" : {
@@ -62824,6 +63022,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Один ребёнок"
+          }
+        }
+      }
+    },
+    "ילד אחד · אף אחד לא משחק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "طفل واحد · لا أحد يلعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One kid · nobody playing"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Один ребёнок · никто не играет"
           }
         }
       }
@@ -73779,6 +73999,28 @@
         }
       }
     },
+    "לא הצליח — נסו מהאייפון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم ينجح — جرّبوا من الآيفون"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Didn't work — try from the iPhone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не получилось — попробуйте с iPhone"
+          }
+        }
+      }
+    },
     "לא ידוע" : {
       "localizations" : {
         "ar" : {
@@ -73797,6 +74039,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Неизвестно"
+          }
+        }
+      }
+    },
+    "לא משחק כרגע" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يلعب الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not playing right now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас не играет"
+          }
+        }
+      }
+    },
+    "לא משחקת כרגע" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا تلعب الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not playing right now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас не играет"
           }
         }
       }
@@ -75961,6 +76247,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Блокировать новые приложения"
+          }
+        }
+      }
+    },
+    "לנעול את %@ עכשיו?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قفل %@ الآن؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock %@ now?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заблокировать %@ сейчас?"
           }
         }
       }
@@ -84378,6 +84686,28 @@
         }
       }
     },
+    "מטלה מחכה לאישור" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مهمة بانتظار الموافقة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A chore waits for approval"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дело ждёт подтверждения"
+          }
+        }
+      }
+    },
     "מטלה מחכה לאישור שלכם" : {
       "localizations" : {
         "ar" : {
@@ -86896,6 +87226,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Подарить минуты"
+          }
+        }
+      }
+    },
+    "מתנת דקות ל%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دقائق هدية لـ%@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gift minutes for %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подарить минуты: %@"
           }
         }
       }
@@ -91082,6 +91434,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Остаётся открытым"
+          }
+        }
+      }
+    },
+    "נשלח ✓" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أُرسل ✓"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sent ✓"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отправлено ✓"
+          }
+        }
+      }
+    },
+    "נשלח ✓ · %lld דק׳ — עד חצות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أُرسل ✓ · %lld د — حتى منتصف الليل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sent ✓ · %lld min — until midnight"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отправлено ✓ · %lld мин — до полуночи"
           }
         }
       }
@@ -98110,6 +98506,28 @@
         }
       }
     },
+    "עודכן %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تحديث %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updated %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обновлено %@"
+          }
+        }
+      }
+    },
     "עולם" : {
       "localizations" : {
         "ar" : {
@@ -102566,6 +102984,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Откройте чат в приложении и попробуйте снова."
+          }
+        }
+      }
+    },
+    "פתחו את טופי באייפון פעם אחת — והמשפחה תופיע כאן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "افتحوا توفي على الآيفون مرة واحدة — وستظهر العائلة هنا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Tofy on your iPhone once — and the family appears here"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Откройте Tofy на iPhone один раз — и семья появится здесь"
           }
         }
       }
@@ -114922,6 +115362,28 @@
         }
       }
     },
+    "שני ילדים · שקט עכשיו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "طفلان · هدوء الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Two kids · all quiet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Двое детей · сейчас тихо"
+          }
+        }
+      }
+    },
     "שניכם תראו את אותם הילדים ואת אותה ההתקדמות." : {
       "localizations" : {
         "ar" : {
@@ -125956,6 +126418,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🦁 Tofy"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🦁 Tofy"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🦁 Tofy"
+          }
+        }
+      }
+    },
+    "🦁 טופי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🦁 توفي"
           }
         },
         "en" : {

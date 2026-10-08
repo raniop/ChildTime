@@ -17,6 +17,12 @@ final class WatchBridge: NSObject, WCSessionDelegate {
         let playingNow: Bool
         let pendingChores: Int
         let moneyBalance: Int
+        /// For the watch's wording ("משחקת" / "משחק").
+        var girl: Bool = false
+        /// A device of their own — the remote actions need one to reach.
+        var hasDevice: Bool = false
+        /// "🏠 בבית · לפני 3 דק׳" when location sharing is on.
+        var whereText: String? = nil
     }
 
     private var started = false
@@ -43,7 +49,10 @@ final class WatchBridge: NSObject, WCSessionDelegate {
                                     "earnedToday": $0.earnedToday,
                                     "playingNow": $0.playingNow,
                                     "pendingChores": $0.pendingChores,
-                                    "moneyBalance": $0.moneyBalance] },
+                                    "moneyBalance": $0.moneyBalance,
+                                    "girl": $0.girl,
+                                    "hasDevice": $0.hasDevice,
+                                    "where": $0.whereText ?? ""] },
         ]
         // 🌍 The watch can't read the phone's App Group — it follows the language
         // the phone sends with every snapshot.
@@ -75,6 +84,44 @@ final class WatchBridge: NSObject, WCSessionDelegate {
     }
 
     func flushAfterActivation() { flush() }
+
+    // MARK: - ⚡ Actions from the watch (Rani, 2026-10-08)
+
+    /// The watch has no Firebase: it asks the phone, and the phone does exactly
+    /// what "⚡ פעולות" does — the same gift, lock and beep calls.
+    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any],
+                             replyHandler: @escaping ([String: Any]) -> Void) {
+        DispatchQueue.main.async { replyHandler(WatchBridge.shared.perform(message)) }
+    }
+
+    /// Queued while the phone was out of reach (transferUserInfo) — run on arrival.
+    nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
+        DispatchQueue.main.async { _ = WatchBridge.shared.perform(userInfo) }
+    }
+
+    @discardableResult
+    func perform(_ m: [String: Any]) -> [String: Any] {
+        guard let action = m["action"] as? String,
+              let cid = m["childID"] as? String, let id = UUID(uuidString: cid) else { return ["ok": false] }
+        switch action {
+        case "gift":
+            // Each give is capped at what is left until midnight — like the phone.
+            let want = m["minutes"] as? Int ?? 0
+            let allowed = min(want, ProgressStore.minutesUntilMidnight())
+            guard allowed > 0 else { return ["ok": false, "reason": "midnight"] }
+            RemoteSyncManager.shared.giftChildMinutes(childID: id, minutes: allowed)
+            return ["ok": true, "minutes": allowed]
+        case "lock":
+            HouseholdManager.shared.lockRemoteScreenTime(toChildID: id)
+            return ["ok": true]
+        case "beep":
+            let fix = LocationSharing.shared.shownFix(cid)
+            LocationSharing.shared.beep(childID: cid, deviceID: fix?.deviceID)
+            return ["ok": true]
+        default:
+            return ["ok": false]
+        }
+    }
     nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
     nonisolated func sessionDidDeactivate(_ session: WCSession) { session.activate() }
 }

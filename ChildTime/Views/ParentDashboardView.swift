@@ -1842,14 +1842,22 @@ struct ParentDashboardView: View {
             let playing = liveWindow(row.profile) != nil
             let pending = choreStore.chores(forChild: row.profile.id)
                 .filter { $0.isPendingApproval }.count
+            let cid = row.profile.id.uuidString
+            let place = location.shownFix(cid).map { f -> String in
+                let p = location.whereParts(f)
+                return "\(p.icon) \(p.text) · \(ParentLocationView.relative(f.at, now: Date()))"
+            }
             return WatchBridge.ChildGlance(
-                id: row.profile.id.uuidString,
-                name: row.profile.name,
+                id: cid,
+                name: Question.stripNiqqud(row.profile.name),
                 emoji: row.profile.gender == .girl ? "👧" : "👦",
                 earnedToday: s.minutesEarnedToday,
                 playingNow: playing,
                 pendingChores: pending,
-                moneyBalance: 0)
+                moneyBalance: 0,
+                girl: row.profile.gender == .girl,
+                hasDevice: childHasDevice(row.profile),
+                whereText: place)
         }
         WatchBridge.shared.pushFamilyGlance(glances)
     }
