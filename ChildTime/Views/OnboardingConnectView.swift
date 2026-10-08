@@ -28,6 +28,9 @@ struct OnboardingConnectView: View {
     }
     private var lockApproved: Bool { childDevices.contains { $0.shieldAuthorized == true } }
 
+    /// The title's width — the instructions card is never wider (Rani).
+    @State private var titleWidth: CGFloat = 0
+
     var body: some View {
         ZStack {
             GlassBackdrop().ignoresSafeArea()
@@ -101,6 +104,7 @@ struct OnboardingConnectView: View {
             // Centred in the middle of the page, like a person would place it.
             Spacer(minLength: 0)
             Text(tr("חיבור הטלפון של \(name)"))
+                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { titleWidth = $0 }
                 .font(.system(size: 24, weight: .black, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
@@ -113,7 +117,8 @@ struct OnboardingConnectView: View {
                 step(2, tr("פותחים, בוחרים \"המכשיר של הילד\" וסורקים את הקוד"))
             }
             .padding(12)
-            // As wide as its lines, no wider (Rani).
+            // No wider than the title above it (Rani) — the lines wrap inside.
+            .frame(maxWidth: titleWidth > 0 ? titleWidth : .infinity)
             .fixedSize(horizontal: false, vertical: true)
             .glassPane(radius: 16)
             // Full width — so it starts below the foldable's clock.
@@ -141,7 +146,7 @@ struct OnboardingConnectView: View {
                 Label(tr("שליחת טופי לטלפון של \(name)"), systemImage: "square.and.arrow.up")
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                    .padding(.horizontal, 16).padding(.vertical, 10)
+                    .frame(width: 300, height: 44)
                     // One corner for every frame on the page (Rani): 16.
                     .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
                     .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
@@ -200,9 +205,11 @@ struct OnboardingConnectView: View {
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
         }
-        .padding(.horizontal, 14).padding(.vertical, 9)
-        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.5), style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
+        // A plain frame like every other on the page (no dashes), as wide and
+        // as tall as the share button under it (Rani).
+        .frame(width: 300, height: 44)
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
     }
 
     /// No gold button while waiting on the other phone — only the link, in
