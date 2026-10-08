@@ -89,6 +89,33 @@
   .fdet .pills{display:flex;gap:6px;flex-wrap:wrap}
   .fdet .pills span{background:var(--card);border:1px solid var(--line);border-radius:99px;padding:4px 10px;font-size:12px;white-space:nowrap}
   .fdet .pills span.quiet{color:var(--muted)}
+  .plat{display:inline-flex;gap:3px;font-size:15px} .plat i{font-style:normal}
+  .filters.platf{margin:-4px 0 12px}
+  /* 📱 Phone: each family is a card, not a squeezed 8-column row (Rani: the
+     state chip wrapped into a tower of "עוד / 27 / ימים"). Name on top, the
+     state and platform beside it, then one line of facts. */
+  @media (max-width:640px){
+    .ftable,.ftable tbody{display:block;border:0;background:none}
+    .ftable thead{display:none}
+    .ftable tr.frow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px 10px;align-items:center;
+      background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 12px 10px;margin-bottom:8px}
+    .ftable tr.frow td{display:block;padding:0;border:0;background:none !important}
+    .ftable tr.frow td.cname{grid-column:1/2;grid-row:1}
+    .ftable tr.frow td.cstate{grid-column:2/3;grid-row:1;white-space:nowrap}
+    .ftable tr.frow td.cplat{grid-column:3/4;grid-row:1}
+    .ftable tr.frow td.menucell{display:block;grid-column:3/4;grid-row:2;width:auto}
+    .ftable tr.frow td[data-l]{grid-row:2;font-size:12px;color:var(--muted);white-space:nowrap}
+    .ftable tr.frow td[data-l]::before{content:attr(data-l) " ";font-weight:500}
+    .ftable tr.frow td.live,.ftable tr.frow td.cold{font-weight:700}
+    .ftable tr.frow td.live{color:var(--good)} .ftable tr.frow td.cold{color:var(--bad)}
+    .ftable tr.frow .fmail{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .ftable tr.frow{grid-template-areas:none}
+    .ftable tr.frow td[data-l="ילדים"]{grid-column:1/2}
+    .ftable tr.frow td[data-l="פעילות"]{grid-column:2/3}
+    .ftable tr.frow td[data-l="שאלות היום"],.ftable tr.frow td[data-l="הצטרפו"]{display:none}
+    .ftable tr.fdet{display:block;margin:-6px 0 10px} .ftable tr.fdet[hidden]{display:none}
+    .ftable tr.fdet td{display:block;border-radius:0 0 14px 14px}
+  }
   .dots{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:var(--card);
     font:700 15px/1 Rubik,sans-serif;cursor:pointer;color:var(--ink)}
   .dots:hover{background:var(--indigo);color:#fff;border-color:transparent}
@@ -149,7 +176,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261006195914";
+const PAGE_STAMP = "20261008083311";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -308,12 +335,33 @@ async function dashboard() {
 }
 
 // ---------------- 2 · families ----------------
-let famFilter = "all", famQuery = "";
+let famFilter = "all", famQuery = "", famPlatform = "all";
 let famSort = { key: "active", dir: -1 };   // quiet families first is the default question
+/// 🍎/🤖 Which platforms a family uses: the parents' phones (push tokens + the
+/// iPhone-only parent rows) and every child device. Rani: "הפרדה בין אפל לאנדרואיד".
+function famPlatforms(f) {
+  const out = new Set(f.parentPlatforms || []);
+  const kd = f.kidDevices || {};
+  if (kd.ios) out.add("ios");
+  if (kd.android) out.add("android");
+  (f.children || []).forEach((k) => (k.deviceRows || []).forEach((d) => out.add(d.platform === "android" ? "android" : "ios")));
+  if (!out.size && (f.parentDevices || []).length) out.add("ios");
+  return out;
+}
+function platBadge(f) {
+  const p = famPlatforms(f);
+  if (!p.size) return '<span class="m">—</span>';
+  return `<span class="plat">${p.has("ios") ? '<i title="אפל">🍎</i>' : ""}${p.has("android") ? '<i title="אנדרואיד">🤖</i>' : ""}</span>`;
+}
+const PLATFORMS = [["all", "📱 כל המכשירים"], ["ios", "🍎 אפל"], ["android", "🤖 אנדרואיד"]];
 const FILTERS = [["all", "הכל"], ["gift", "במתנה"], ["gift_expiring", "מסתיימת"], ["plus", "טופי+"], ["returned", "חזרו לחינם"], ["inactive", "לא פעילות"], ["demo", "🧪 דמו"]];
 async function families() {
   if (!FAM) { $("main").innerHTML = '<div class="empty"><span class="spin"></span> טוען משפחות…</div>'; try { FAM = await call("adminFamiliesOverview"); FAM_AT = Date.now(); } catch (e) { return $("main").innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; } }
-  const fams = (FAM.families || []).map((f) => ({ ...f, hh: f.fullId || f.householdID || f.id, j: (J && J.households && J.households[f.fullId || f.householdID || f.id]) || {} }));
+  const famsAll = (FAM.families || []).map((f) => ({ ...f, hh: f.fullId || f.householdID || f.id, j: (J && J.households && J.households[f.fullId || f.householdID || f.id]) || {} }));
+  const platCount = (k) => k === "all" ? famsAll.filter((f) => !f.isDemo).length : famsAll.filter((f) => !f.isDemo && famPlatforms(f).has(k)).length;
+  // The platform is a second, independent filter: every count and list below
+  // works on the families of the chosen platform.
+  const fams = famPlatform === "all" ? famsAll : famsAll.filter((f) => famPlatforms(f).has(famPlatform));
   const q = famQuery.trim();
   const hay = (f) => [f.familyName, f.label, f.name, ...(f.parents || []).map((p) => (p.email || "") + " " + (p.name || "")), ...(f.children || []).map((k) => k.name)].join(" ");
   // "לא פעילה" by the journey state, OR registered over a week ago and never
@@ -377,8 +425,10 @@ async function families() {
   };
   $("main").innerHTML = `
     <div class="top"><h3>${famFilter === "all" ? "משפחות פעילות" : "משפחות"} · ${fmt(fams.filter((f) => !f.isDemo && (famFilter !== "all" || !isInactive(f))).length)}${famFilter === "all" && fams.some((f) => !f.isDemo && isInactive(f)) ? ` <span class="m" style="font-weight:400">· ${fmt(fams.filter((f) => !f.isDemo && isInactive(f)).length)} לא פעילות</span>` : ""}${fams.some((f) => f.isDemo) ? ` <span class="m" style="font-weight:400">· ${fmt(fams.filter((f) => f.isDemo).length)} דמו</span>` : ""}</h3><div class="filters">${FILTERS.map(([k, l]) => `<span class="chip ${famFilter === k ? "on" : ""}" data-f="${k}">${l} <b>${fmt(countFor(k))}</b></span>`).join("")}<span class="chip search">🔎 <input id="famSearch" placeholder="חיפוש" value="${esc(famQuery)}"></span></div></div>
+    <div class="filters platf">${PLATFORMS.map(([k, l]) => `<span class="chip ${famPlatform === k ? "on" : ""}" data-p="${k}">${l} <b>${fmt(platCount(k))}</b></span>`).join("")}</div>
     <div id="famList">${listHTML()}</div>`;
   document.querySelectorAll("[data-f]").forEach((c) => c.onclick = () => { famFilter = c.dataset.f; families(); });
+  document.querySelectorAll("[data-p]").forEach((c) => c.onclick = () => { famPlatform = c.dataset.p; families(); });
   const inp = $("famSearch"); inp.oninput = () => { famQuery = inp.value; redrawList(); };
   // Re-render ONLY the list. Every action used to null FAM and rebuild the whole
   // tab — a heavy refetch that also threw away the scroll position.
@@ -447,17 +497,18 @@ function famCard(f) {
   }).join("");
   const devPills = (f.children || []).flatMap((k) => (k.deviceRows || []).map((d) => {
     const age = d.lastSeenAt ? (Date.now() / 1000 - d.lastSeenAt < 86400 ? "פעיל" : "לפני " + Math.round((Date.now() / 1000 - d.lastSeenAt) / 86400) + " ימים") : "";
-    return `<span class="quiet">📱 ${esc(k.name)} · ${d.kind === "ipad" ? "אייפד" : d.kind === "iphone" ? "אייפון" : esc(d.name || "מכשיר")}${age ? " · " + age : ""}${d.appVersion ? " · גרסה " + esc(String(d.appVersion).replace(/^.*\((\d+)\)$/, "$1")) : ""}</span>`;
+    return `<span class="quiet">${d.platform === "android" ? "🤖" : "🍎"} ${esc(k.name)} · ${d.kind === "ipad" ? "אייפד" : d.kind === "iphone" ? "אייפון" : esc(d.name || "מכשיר")}${age ? " · " + age : ""}${d.appVersion ? " · גרסה " + esc(String(d.appVersion).replace(/^.*\((\d+)\)$/, "$1")) : ""}</span>`;
   })).join("");
   const source = j.purchaseSource ? `<span class="quiet">💳 ${esc(SOURCE[j.purchaseSource] || j.purchaseSource)}</span>` : "";
 
   return `<tr class="frow" data-row="${esc(f.hh)}">
-    <td><div class="fname">${esc(famName(f))}${label}${demo}</div><div class="fmail">${esc(who)}${parents.length > 1 ? " · " + parents.length + " הורים" : ""}</div></td>
-    <td>${famStateChip(f)}</td>
-    <td class="num">${fmt(st.kids)}</td>
-    <td class="${st.when.cls}">${st.when.text}</td>
-    <td class="num">${st.today ? fmt(st.today) : "—"}</td>
-    <td class="num">${st.joined ? dateShort(st.joined) : "—"}</td>
+    <td class="cname"><div class="fname">${esc(famName(f))}${label}${demo}</div><div class="fmail">${esc(who)}${parents.length > 1 ? " · " + parents.length + " הורים" : ""}</div></td>
+    <td class="cstate">${famStateChip(f)}</td>
+    <td class="cplat">${platBadge(f)}</td>
+    <td class="num" data-l="ילדים">${fmt(st.kids)}</td>
+    <td class="${st.when.cls}" data-l="פעילות">${st.when.text}</td>
+    <td class="num" data-l="שאלות היום">${st.today ? fmt(st.today) : "—"}</td>
+    <td class="num" data-l="הצטרפו">${st.joined ? dateShort(st.joined) : "—"}</td>
     <td class="menucell"><button class="dots" type="button" data-menu aria-label="פעולות">⋯</button>
       <div class="rowmenu">
         <button data-gift="${esc(f.hh)}">🎁 הארך מתנה</button>
@@ -471,16 +522,16 @@ function famCard(f) {
         <button class="danger" data-del="${esc(f.hh)}" data-name="${esc(famName(f))}">🗑 מחיקת המשפחה</button>
       </div></td>
   </tr>
-  <tr class="fdet" data-det="${esc(f.hh)}" hidden><td colspan="7"><div class="pills">${kidPills}${devPills}${source}</div></td></tr>`;
+  <tr class="fdet" data-det="${esc(f.hh)}" hidden><td colspan="8"><div class="pills">${kidPills}${devPills}${source}</div></td></tr>`;
 }
 
 /// The table around the rows — the header cells are the sort control.
-const FAM_COLS = [["name", "משפחה"], ["state", "מצב"], ["kids", "ילדים"], ["active", "פעילות אחרונה"],
+const FAM_COLS = [["name", "משפחה"], ["state", "מצב"], ["", "מכשירים"], ["kids", "ילדים"], ["active", "פעילות אחרונה"],
   ["today", "שאלות היום"], ["joined", "הצטרפו"], ["", ""]];
 function famTable(rows) {
   const head = FAM_COLS.map(([k, l]) => k
     ? `<th class="${famSort.key === k ? "on" : ""}" data-sort="${k}">${l}${famSort.key === k ? (famSort.dir > 0 ? " ↑" : " ↓") : ""}</th>`
-    : '<th class="plain"></th>').join("");
+    : `<th class="plain">${l}</th>`).join("");
   return `<div class="tblwrap"><table class="ftable"><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 // One ⋯ menu open at a time; a click anywhere else, a scroll or Esc closes it.
