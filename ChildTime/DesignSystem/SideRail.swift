@@ -374,11 +374,12 @@ private struct AwayFromBar: ViewModifier {
 private struct FillsTopBand: ViewModifier {
     /// What already sits above the header (the safe area's 16pt, a padding…).
     let above: CGFloat
+    var alignment: Alignment = .center
     @ObservedObject private var display = DisplayGeometry.shared
 
     func body(content: Content) -> some View {
         if display.hasBarStrip {
-            content.frame(minHeight: max(0, display.barStripTop - above), alignment: .center)
+            content.frame(minHeight: max(0, display.barStripTop - above), alignment: alignment)
         } else {
             content
         }
@@ -409,8 +410,8 @@ extension View {
     }
 
     /// See `FillsTopBand`. `above` is what the header already sits below.
-    func fillsTopBand(above: CGFloat = DisplayProbeView.minimumTopMargin) -> some View {
-        modifier(FillsTopBand(above: above))
+    func fillsTopBand(above: CGFloat = DisplayProbeView.minimumTopMargin, alignment: Alignment = .center) -> some View {
+        modifier(FillsTopBand(above: above, alignment: alignment))
     }
 
     /// Keep a row in the band clear of the clock on the bar's side only.

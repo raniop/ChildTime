@@ -29,8 +29,10 @@ struct LuckyWheelView: View {
         GeometryReader { proxy in
             let landscape = proxy.size.width > proxy.size.height
             // Fit the wheel to the space — never let it crowd out the prize/buttons.
+            // Once the prize card shows, the wheel steps back so the card and the
+            // button fit on a short screen too (the closed Duo cut the card off).
             let wheelSize = min(isCompact ? 380 : 480,
-                                proxy.size.height * (landscape ? 0.80 : 0.56),
+                                proxy.size.height * (landscape ? 0.80 : (winner == nil ? 0.56 : 0.40)),
                                 proxy.size.width * (landscape ? 0.46 : 0.98))
             ZStack {
                 GlassBackdrop()
@@ -159,10 +161,12 @@ struct LuckyWheelView: View {
                             let flick = hypot(v.predictedEndTranslation.width - v.translation.width,
                                               v.predictedEndTranslation.height - v.translation.height)
                             let turned = abs(dragOffset)
+                            let way = dragOffset >= 0
                             dragStartAngle = nil
                             withAnimation(.easeOut(duration: 0.25)) { dragOffset = 0 }
                             // A real flick, or a decent pull — spin. A tiny nudge just settles back.
-                            if flick > 80 || turned > 40 { spin() }
+                            // …in the direction the finger went (Rani: both ways).
+                            if flick > 80 || turned > 40 { spin(clockwise: way) }
                         }
                 )
 
@@ -261,7 +265,7 @@ struct LuckyWheelView: View {
 
     // MARK: - Spin logic
 
-    private func spin() {
+    private func spin(clockwise: Bool = true) {
         guard !isSpinning, winner == nil else { return }
         // No wedges → nothing to spin (and `Int.random(in: 0..<0)` / ÷0 would crash).
         guard !wedges.isEmpty else { return }
@@ -278,7 +282,9 @@ struct LuckyWheelView: View {
         // the indicator.
         let extraTurns = 5.0 * 360.0
         let targetCenterAngle = Double(winningIndex) * degreesPerWedge + degreesPerWedge / 2
-        let landingRotation = extraTurns + (360 - targetCenterAngle)
+        // Counter-clockwise lands on the same wedge: −(turns + centre) ≡ 360 − centre.
+        let landingRotation = clockwise ? extraTurns + (360 - targetCenterAngle)
+                                        : -(extraTurns + targetCenterAngle)
         rotation = landingRotation
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {

@@ -222,8 +222,11 @@ struct QuestionRunnerView: View {
             background
 
             VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
-                // Beside the foldable's clock: stop short of it.
+                // Beside the foldable's clock: the top rows stop short of it, and
+                // the question starts BELOW the clock (Rani: "תוריד קצת את
+                // השאלות למטה") — full width, never under the Wi-Fi.
                 topBar.clearOfBar()
+                    .fillsTopBand(above: DisplayProbeView.minimumTopMargin, alignment: .top)
                 if let q = current {
                     // 📐 Laid out plainly when it fits; when it doesn't (a reading
                     // passage with long answers — in English they run to four lines),

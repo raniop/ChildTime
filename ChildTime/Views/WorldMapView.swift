@@ -584,6 +584,10 @@ struct WorldMapView: View {
                 }
             }
             }
+            // 📐 Drawn once the glass is measured: on the foldable the first frame
+            // came up full width and then jumped in beside the clock (Rani).
+            .opacity(display.screenSize.width > 0 ? 1 : 0)
+            .animation(.easeIn(duration: 0.15), value: display.screenSize.width > 0)
 
             // Bottom CTAs floating panel — over a soft scrim, so the tiles
             // scrolling underneath fade out instead of showing through the glass.
