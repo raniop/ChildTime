@@ -142,6 +142,8 @@ struct KidPINView: View {
                         .frame(width: 24, height: 24)
                 }
             }
+            // A code fills left to right, like every number (Rani).
+            .environment(\.layoutDirection, .leftToRight)
             .padding(.top, 2)
             .offset(x: shake ? -10 : 0)
             .animation(shake ? .default.repeatCount(3, autoreverses: true).speed(6) : .default, value: shake)

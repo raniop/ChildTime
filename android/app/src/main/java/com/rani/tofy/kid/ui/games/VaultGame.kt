@@ -204,7 +204,7 @@ fun VaultGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, onCl
 /** The safe: a steel door with three dials and a handle; it swings open on the treasure. */
 @Composable
 private fun Safe(code: List<Int>, opened: Int, cracked: Boolean, doorOpen: Boolean, rtl: Boolean, shake: Int, dial: Float) {
-    val swing by animateFloatAsState(if (doorOpen) (if (rtl) -75f else 75f) else 0f,
+    val swing by animateFloatAsState(if (doorOpen) 75f else 0f,
         spring(dampingRatio = 0.75f, stiffness = Spring.StiffnessLow), label = "door")
     val handle by animateFloatAsState(if (cracked) -35f else 0f, label = "handle")
     val dx = shakeOffset(shake)
@@ -222,7 +222,7 @@ private fun Safe(code: List<Int>, opened: Int, cracked: Boolean, doorOpen: Boole
                 .graphicsLayer {
                     rotationY = swing
                     cameraDistance = 12f * density
-                    transformOrigin = TransformOrigin(if (rtl) 1f else 0f, 0.5f)
+                    transformOrigin = TransformOrigin(0f, 0.5f)
                 }
                 .clip(shape)
                 .background(Brush.linearGradient(listOf(Color(0xFF8E86C9), Color(0xFF5B5196))))
@@ -230,8 +230,8 @@ private fun Safe(code: List<Int>, opened: Int, cracked: Boolean, doorOpen: Boole
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(if (dial > 90f) 20.dp else 14.dp, Alignment.CenterVertically),
         ) {
-            // The first dial is on the reading side: in Hebrew, the right.
-            Ltr(!rtl) {
+            // A number reads left to right in every language (Rani): first dial on the LEFT.
+            Ltr {
                 Row(Modifier.graphicsLayer { translationX = dx * density }, horizontalArrangement = Arrangement.spacedBy(if (dial > 90f) 18.dp else 12.dp)) {
                     for (i in 0 until 3) DialView(code.getOrNull(i), set = i < opened, next = i == opened && !cracked, size = dial)
                 }

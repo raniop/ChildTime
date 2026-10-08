@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -136,10 +137,13 @@ fun ParentPinSetupScreen(onDone: () -> Unit) {
                     weight = FontWeight.SemiBold, align = TextAlign.Center,
                 )
                 P(if (error) tr("נסו שוב") else subtitle, 16f, color = if (error) Ink.warn else Color.White.copy(alpha = 0.8f), align = TextAlign.Center)
-                Row(Modifier.offset(x = shake.value.dp).padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-                    repeat(4) { i ->
-                        Box(Modifier.size(26.dp).clip(CircleShape).background(if (i < entered.length) Color.White else Color.Transparent)
-                            .border(2.dp, Color.White.copy(alpha = 0.7f), CircleShape))
+                // A code fills left to right, like every number (Rani).
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    Row(Modifier.offset(x = shake.value.dp).padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+                        repeat(4) { i ->
+                            Box(Modifier.size(26.dp).clip(CircleShape).background(if (i < entered.length) Color.White else Color.Transparent)
+                                .border(2.dp, Color.White.copy(alpha = 0.7f), CircleShape))
+                        }
                     }
                 }
                 // Always laid out (hidden until the confirm step) so the keypad never jumps under the thumb.

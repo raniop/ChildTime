@@ -146,12 +146,15 @@ private fun FamilyLoadingGate() {
 /** The four code dots. */
 @Composable
 fun PinDots(count: Int, modifier: Modifier = Modifier) {
-    Row(modifier, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-        repeat(4) { i ->
-            Box(
-                Modifier.size(26.dp).clip(CircleShape).background(if (i < count) Color.White else Color.Transparent)
-                    .border(2.dp, Color.White.copy(alpha = 0.7f), CircleShape),
-            )
+    // A code fills left to right, like every number (Rani).
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Row(modifier, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+            repeat(4) { i ->
+                Box(
+                    Modifier.size(26.dp).clip(CircleShape).background(if (i < count) Color.White else Color.Transparent)
+                        .border(2.dp, Color.White.copy(alpha = 0.7f), CircleShape),
+                )
+            }
         }
     }
 }

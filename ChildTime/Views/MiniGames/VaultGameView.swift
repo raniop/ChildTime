@@ -72,7 +72,6 @@ struct VaultGameView: View {
     /// A numbers world asks the lock's own dial exercises as well as its bank.
     private var mathWorld: Bool { topic == nil || [.math, .money, .logic, .gifted].contains(topic!) }
     private var recordTopic: Topic { topic ?? .logic }
-    private var codeRTL: Bool { LanguageStore.shared.current.isRightToLeft }
 
     var body: some View {
         ZStack {
@@ -181,8 +180,9 @@ struct VaultGameView: View {
                 HStack(spacing: isCompact ? 12 : 18) {
                     ForEach(0..<Self.dials, id: \.self) { i in dialView(i, size: dial) }
                 }
-                // The first dial is on the reading side: in Hebrew, the right.
-                .environment(\.layoutDirection, codeRTL ? .rightToLeft : .leftToRight)
+                // A number reads left to right in every language (Rani): the
+                // first dial is on the LEFT, in Hebrew as in English.
+                .environment(\.layoutDirection, .leftToRight)
                 .modifier(MiniGameShake(animatableData: shake))
                 Capsule()
                     .fill(LinearGradient(colors: [Color(hex: "E9E4FF"), Color(hex: "9A93C9")],
@@ -197,9 +197,9 @@ struct VaultGameView: View {
                                                   startPoint: .topLeading, endPoint: .bottomTrailing)))
             .overlay(shape.strokeBorder(.white.opacity(0.4), lineWidth: 2))
             .shadow(color: .black.opacity(0.35), radius: 16, y: 8)
-            .rotation3DEffect(.degrees(doorOpen ? (codeRTL ? 75 : -75) : 0),
+            .rotation3DEffect(.degrees(doorOpen ? -75 : 0),
                               axis: (x: 0, y: 1, z: 0),
-                              anchor: codeRTL ? .trailing : .leading,
+                              anchor: .leading,
                               perspective: 0.5)
         }
         .frame(height: dial * 1.25 + (isCompact ? 80 : 110))

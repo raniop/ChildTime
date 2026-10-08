@@ -392,6 +392,8 @@ struct ParentGateView<Content: View>: View {
                                 .frame(width: 26, height: 26)
                         }
                     }
+                    // A code fills left to right, like every number (Rani).
+                    .environment(\.layoutDirection, .leftToRight)
                     .padding(.top, 4)
                     .offset(x: shake ? -10 : 0)
                     .animation(shake ? .default.repeatCount(3, autoreverses: true).speed(6) : .default, value: shake)
