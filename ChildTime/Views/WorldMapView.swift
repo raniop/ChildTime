@@ -30,6 +30,8 @@ struct WorldMapView: View {
     @ObservedObject private var campaignTracker = CampaignTracker.shared
     @State private var showDailyChest = false
     @State private var challengeCelebration: String? = nil
+    /// 🎉 Fires the confetti when the daily challenge completes on its own.
+    @State private var challengeConfetti = 0
     @State private var infoSheet: InfoSheet? = nil
 
     /// Which home-card explainer is open (daily challenge / topic-of-the-day).
@@ -568,7 +570,8 @@ struct WorldMapView: View {
                     // margin — 360 left a huge dead gap after the last row
                     // (Rani, on-device). The companion floats and never needs
                     // scroll room of its own.
-                    .padding(.bottom, isShort && bottomPanelHeight > 0
+                    // The toolbar is one bar now, so the room is what it measures.
+                    .padding(.bottom, bottomPanelHeight > 0
                              ? bottomPanelHeight + 8
                              : (isCompact ? 220 : 190))
                 }
@@ -619,7 +622,8 @@ struct WorldMapView: View {
                 topInset: isShort && headerBottom > 0
                     ? max(headerBottom + companionSize * 0.35, 120)   // + the gift riding on its head
                     : (isCompact ? 300 : 230),
-                bottomInset: isShort && bottomPanelHeight > 0 ? bottomPanelHeight : (isCompact ? 220 : 200),
+                // 🦊 Down to the toolbar (Rani: the bar is smaller, let it roam lower).
+                bottomInset: bottomPanelHeight > 0 ? bottomPanelHeight : (isCompact ? 220 : 200),
                 horizontalInset: AppSpacing.lg
             )
             }
@@ -682,6 +686,7 @@ struct WorldMapView: View {
         .onChangeCompat(of: progress.openWindowMessage) { _, _ in
             speakOpenWindowMessageIfNeeded()
         }
+        .onAppear { celebrateChallengeIfReady() }
         .onAppear {
             lastSeenStars = progress.stars
             speakOpenWindowMessageIfNeeded()
@@ -824,9 +829,19 @@ struct WorldMapView: View {
                campaignTracker.popup == nil, !storyPending { showUpdateNotice = true }
         }
         .onChangeCompat(of: CampaignTracker.shared.pendingPackID) { _, _ in consumeCampaignLanding() }
+        // 🔥 The daily challenge has no card any more (Rani, 2026-10-08): it runs
+        // in the background and, the moment it is done, celebrates itself.
+        .onChangeCompat(of: progress.dailyChallengeRewardReady) { _, ready in
+            if ready { celebrateChallengeIfReady() }
+        }
         .onChangeCompat(of: profiles.active?.ownedPacks.count ?? 0) { _, _ in maybeRevealPack() }
         .fullScreenCover(isPresented: $showDailyChest) {
             DailyChestView()
+        }
+        .overlay {
+            FancyConfetti(trigger: challengeConfetti)
+                .allowsHitTesting(false)
+                .ignoresSafeArea()
         }
         .overlay(alignment: .top) {
             if let msg = challengeCelebration {
@@ -1148,12 +1163,11 @@ struct WorldMapView: View {
                 Spacer(minLength: 6)
                 walletStats.coachMark("k.wallet")
             }
+
+            // The challenge + chores cards are gone (Rani: "עמוס מדי"): the
+            // chores are the strip's third number, and the daily challenge runs
+            // in the background and celebrates itself when it is done.
             statsPanel
-            HStack(spacing: 10) {
-                dailyChallengeCard.coachMark("k.challenge")
-                choresTopCard.coachMark("k.chores")
-            }
-            .fixedSize(horizontal: false, vertical: true)   // twins: same height, from content
         }
         // RTL like the mockup (Rani): avatar + name on the RIGHT, the round
         // buttons on the left with ⚙️ the leftmost; אתגר יומי right, מטלות left.
@@ -1245,26 +1259,35 @@ struct WorldMapView: View {
         .buttonStyle(.plain)
     }
 
-    /// One horizontal twin card: the ring on the right, the title, one status
-    /// line and the track — both header cards use it so they read as twins.
+    /// One horizontal twin card: the icon with its progress drawn as a ring
+    /// AROUND it, the title, and one status line. (Rani, 2026-10-08: the two
+    /// cards were "עמוסים מדי" — a separate track under the text made each one
+    /// three rows tall; the ring carries the same progress in the icon's place.)
     private func twinCard<Ring: View, Status: View>(ring: Ring, title: String, status: Status, frac: CGFloat) -> some View {
         HStack(spacing: 10) {
-            ring.frame(width: 40, height: 40)
-            VStack(alignment: .leading, spacing: 2) {
+            ZStack {
+                Circle().stroke(Color.white.opacity(0.18), lineWidth: 3.5)
+                Circle()
+                    .trim(from: 0, to: max(0.001, min(frac, 1)))
+                    .stroke(Color.white, style: StrokeStyle(lineWidth: 3.5, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .opacity(frac > 0 ? 1 : 0)
+                ring.frame(width: 36, height: 36)
+            }
+            .frame(width: 46, height: 46)
+            // Geometry is drawn LTR — rotation mirrors under RTL.
+            .environment(\.layoutDirection, .leftToRight)
+            VStack(alignment: .leading, spacing: 3) {
                 Text(title)
-                    .font(.system(size: isCompact ? 13.5 : 15, weight: .black, design: .rounded))
+                    .font(.system(size: isCompact ? 14 : 15.5, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
                     .lineLimit(1).minimumScaleFactor(0.7)
                 status
-                headerTrack(frac: frac,
-                            fill: LinearGradient(colors: [.white, .white], startPoint: .leading, endPoint: .trailing),
-                            glowColor: .clear, tip: nil)
-                    .padding(.top, 4)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 9)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .glassInset(radius: 16)
     }
@@ -1351,13 +1374,26 @@ struct WorldMapView: View {
         .frame(height: 10)
     }
 
+    /// Done today → claim it and celebrate, without a tap (Tofy+ only, like the
+    /// card it replaced). Called when the goal flips to met, and on arrival.
+    private func celebrateChallengeIfReady() {
+        guard progress.dailyChallengeRewardReady, subs.isPremium, !storyPending else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            guard progress.dailyChallengeRewardReady else { return }
+            claimChallenge()
+            challengeConfetti += 1
+        }
+    }
+
     /// Claim the daily-challenge prize (called from the explainer's CTA).
     private func claimChallenge() {
         let grant = progress.claimDailyChallenge()
         Haptic.success()
         SoundPlayer.shared.play(.streakUp)
         let total = grant.addedToday + grant.bankedForTomorrow
-        challengeCelebration = tr("🎉 כָּל הַכָּבוֹד! +\(15 + min(progress.dayStreak, 7) * 2) 💎") + (total > 0 ? tr(" וְ-\(total) דַּקּוֹת") : "")
+        let prize = 15 + min(progress.dayStreak, 7) * 2
+        challengeCelebration = Gendered.g(tr("🔥 הִשְׁלַמְתָּ אֶת הָאֶתְגָּר הַיּוֹמִי! +\(prize) 💎"),
+                                          tr("🔥 הִשְׁלַמְתְּ אֶת הָאֶתְגָּר הַיּוֹמִי! +\(prize) 💎")) + (total > 0 ? tr(" וְ-\(total) דַּקּוֹת") : "")
         companion.hype(Gendered.g(tr("שָׁמַרְתָּ עַל הָרֶצֶף! 🔥"), tr("שָׁמַרְתְּ עַל הָרֶצֶף! 🔥")))
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) { challengeCelebration = nil }
     }
@@ -1541,9 +1577,15 @@ struct WorldMapView: View {
         return HStack(spacing: 0) {
             statColumn(value: minutes, suffix: minutesMax, label: Gendered.g(tr("⏱ הִרְוַחְתָּ הַיּוֹם"), tr("⏱ הִרְוַחַתְּ הַיּוֹם"))) { infoStat = .today }
             statDivider
-            statColumn(value: "\(progress.correctToday)", label: tr("✅ נְכוֹנוֹת הַיּוֹם")) { infoStat = .correct }
+            // Out of how many, so all three read the same way (Rani).
+            statColumn(value: "\(progress.correctToday)",
+                       suffix: progress.answeredToday > 0 ? "/\(progress.answeredToday)" : nil,
+                       label: tr("✅ נְכוֹנוֹת הַיּוֹם")) { infoStat = .correct }
             statDivider
-            statColumn(value: "\(progress.companionLevel)", label: tr("⭐ רָמָה")) { showLevelInfo = true }
+            // 🧹 The chores done today, in place of the level (it lives in the
+            // avatar's ring and the line under the name). A dot = one waits
+            // for a parent's OK.
+            choresStat
         }
         .environment(\.layoutDirection, .app)
         .padding(.vertical, 13)
@@ -1558,6 +1600,20 @@ struct WorldMapView: View {
                 .presentationDragIndicator(.visible)
         }
         .eraseToAnyView()
+    }
+
+    private var choresStat: some View {
+        let all = profiles.activeID.map { choreStore.chores(forChild: $0) } ?? []
+        let done = all.filter { $0.approvedToday }.count
+        return statColumn(value: "\(done)", suffix: all.isEmpty ? nil : "/\(all.count)", label: tr("🧹 מְטָלוֹת הַיּוֹם")) {
+            requirePremium { showingChores = true }
+        }
+        .overlay(alignment: .topTrailing) {
+            if all.contains(where: { $0.isPendingApproval }) {
+                Circle().fill(Color(hex: "FF4D6D")).frame(width: 9, height: 9).offset(x: -18, y: 0)
+            }
+        }
+        .coachMark("k.chores")
     }
 
     private var statDivider: some View {
@@ -1905,47 +1961,6 @@ struct WorldMapView: View {
     @ViewBuilder
     private var bottomCTAs: some View {
         VStack(spacing: AppSpacing.sm) {
-            // The daily gift now lives as a lively beacon in the top bar (see
-            // DailyGiftBeacon) instead of a full-width bottom button. Every world
-            // & Smart Adventure earns minutes, so the only bottom CTA left is the
-            // "redeem my minutes" button below.
-            // 💝 ONE button for everything the PARENTS gave: the gift pocket plus
-            // any frozen leftover of an earlier parent window (the kid tapped "עצור
-            // ושמור"). Both are parent time — never blurred with earned minutes.
-            // Opens both together as one fixed manual window (outside the cap).
-            if (giftOpenableSeconds > 0 || progress.hasPausedManualTime) && !progress.isUnlocked
-                && peerWindow == nil {
-                Button {
-                    requestUnlock { redeemGift() }
-                } label: {
-                    HStack(spacing: 10) {
-                        if isOpening {
-                            ProgressView().tint(.white).scaleEffect(0.9)
-                            Text(Gendered.g(tr("פּוֹתְחִים לְךָ… ✨"), tr("פּוֹתְחִים לָךְ… ✨")))
-                                .font(.system(size: 20, weight: .heavy, design: .rounded))
-                        } else {
-                            Text("💝").font(.system(size: isShort ? 19 : 22))
-                            Text(giftButtonTitle)
-                                .font(.system(size: isShort ? 18 : 20, weight: .heavy, design: .rounded))
-                                .minimumScaleFactor(0.7).lineLimit(1)
-                        }
-                    }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, AppSpacing.xl)
-                    .padding(.vertical, isShort ? 11 : 16)
-                    .frame(maxWidth: .infinity)
-                    .ctaGlass(Color(hex: "FF5FA8"), Color(hex: "FFA53A"), colour: 0.82)
-                }
-                .buttonStyle(.juicy)
-                .disabled(isOpening)
-                .frame(maxWidth: 480)
-                .padding(.bottom, isShort ? 0 : 6)
-            }
-
-            // Another device of THIS child has the window open — say so instead of
-            // showing a "redeem" button that would be refused on tap, and offer
-            // the TRANSFER: lock it THERE (stop-and-save, nothing lost), wait for
-            // the honest confirmation, then the regular open buttons return here.
             if let other = peerWindow {
                 let where_ = other.kindLabel == "ipad" ? tr("בָּאַיְפֵּד") : (other.kindLabel == "iphone" ? tr("בָּאַיְפוֹן") : tr("בְּמַכְשִׁיר אַחֵר"))
                 VStack(spacing: 10) {
@@ -2000,77 +2015,8 @@ struct WorldMapView: View {
                         .frame(maxWidth: 480)
                     }
                 }
-            } else if quiet.current != nil, let line = quiet.blockedMessage() {
-                // 🏫🌙 School time / bedtime: the minutes wait, and the line says
-                // until when — in place of the open button.
-                bottomHint(line)
-            } else if progress.canRedeemNow {
-                Button {
-                    requestUnlock { redeemMinutes() }
-                } label: {
-                    HStack(spacing: 10) {
-                        // Claiming the lease is a round-trip to the server. Without
-                        // this the button looked dead for 2–3 seconds (Rani).
-                        if isOpening {
-                            ProgressView().tint(.white).scaleEffect(0.9)
-                            Text(Gendered.g(tr("פּוֹתְחִים לְךָ… ✨"), tr("פּוֹתְחִים לָךְ… ✨")))
-                                .font(.system(size: 20, weight: .heavy, design: .rounded))
-                        } else {
-                            Image(systemName: "gamecontroller.fill")
-                                .font(.system(size: isShort ? 21 : 24))
-                            Text(tr("פִּתְחוּ לִי \(Self.timeLabel(progress.redeemableSecondsNow)) דַּקּוֹת לְשַׂחֵק"))
-                                .font(.system(size: isShort ? 18 : 20, weight: .heavy, design: .rounded))
-                                .minimumScaleFactor(0.7).lineLimit(1)
-                        }
-                    }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, AppSpacing.xl)
-                    .padding(.vertical, isShort ? 11 : 16)
-                    .frame(maxWidth: .infinity)
-                    .ctaGlass(Color(hex: "5E60CE"), Color(hex: "3E8BF0"))
-                }
-                .buttonStyle(.juicy)
-                .disabled(isOpening)
-                .frame(maxWidth: 480)
-            } else if progress.dailyScreenTimeMaxedOut {
-                // Wallet has minutes, but today's screen-time cap is used up — they
-                // wait for tomorrow. Say so clearly (don't tell them to earn more).
-                bottomHint(Gendered.g(tr("שִׂחַקְתָּ הַיּוֹם \(progress.minutesPlayedToday) מִתּוֹךְ \(progress.dailyCap.max) דַּקּוֹת 🌙 — \(progress.pendingMinutes) שְׁמוּרוֹת לְמָחָר"), tr("שִׂחַקְתְּ הַיּוֹם \(progress.minutesPlayedToday) מִתּוֹךְ \(progress.dailyCap.max) דַּקּוֹת 🌙 — \(progress.pendingMinutes) שְׁמוּרוֹת לְמָחָר")))
-            } else if progress.redeemableMinutesNow > 0 {
-                // Has some minutes but below the 15-min minimum we can enforce.
-                // Say all three numbers — what they have, where opening starts, how
-                // many more — or "12 דק' לשחק" above and "עוד 3" here read as a
-                // contradiction (Rani, on the iPad).
-                let have = progress.redeemableMinutesNow, from = progress.minimumUnlockMinutes
-                bottomHint(tr("\(have) דַּקּ׳ לְשַׂחֵק · פּוֹתְחִים מִ־\(from) — עוֹד \(max(0, from - have))! 🎮"))
             } else {
-                // Empty wallet (nothing earned / all opened). Nudge to earn instead
-                // of leaving the spot blank.
-                bottomHint(tr("עֲנוּ עַל שְׁאֵלוֹת כְּדֵי לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק 🎮"))
-            }
-
-            // "Protect my time" — the child's own code on the unlock buttons, so a
-            // sibling/friend holding the device can't spend the earned minutes.
-            // Discreet: a small text button, only where it's relevant (there's
-            // something to protect, or a code already exists to manage).
-            if let p = profiles.active,
-               p.hasPlayPIN || progress.pendingMinutes > 0 || progress.hasPausedManualTime {
-                Button {
-                    Haptic.light()
-                    playPINSheet = p.hasPlayPIN ? .manage : .setNew
-                } label: {
-                    // Rani (2026-09-07): "הגנו על הזמן שלכם בקוד" read like a parent
-                    // setting; this is the child's own secret code for their minutes.
-                    Label(p.hasPlayPIN ? tr("הַדַּקּוֹת שֶׁלִּי מוּגָנוֹת בְּקוֹד") : tr("קוֹד סוֹדִי לַדַּקּוֹת שֶׁלִּי"),
-                          systemImage: p.hasPlayPIN ? "lock.fill" : "lock.open")
-                        .font(.system(size: isShort ? 12.5 : 13.5, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.85))
-                        .padding(.horizontal, 14).padding(.vertical, isShort ? 5 : 8)
-                        .background(Capsule().fill(.white.opacity(0.16)))
-                        .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
-                }
-                .buttonStyle(.plain)
-                .padding(.top, isShort ? 0 : 2)
+                kidToolbar
             }
 
             // 🛡 Screen Time was never granted on this device, so nothing here can
@@ -2090,6 +2036,165 @@ struct WorldMapView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .center)
+    }
+
+    // MARK: - 🧭 The kid toolbar (Rani approved, 2026-10-08)
+
+    /// ONE glass bar with three separate keys — the parents' gift, the play
+    /// minutes (middle, widest), and the child's own code — instead of three
+    /// full-width pieces stacked over the worlds. Every state the old buttons
+    /// had lives in a key: open now, almost there, school/bed time, done for
+    /// today, nothing yet.
+    private var kidToolbar: some View {
+        HStack(spacing: 8) {
+            if (giftOpenableSeconds > 0 || progress.hasPausedManualTime) && !progress.isUnlocked {
+                giftKey
+            }
+            minutesKey
+            if let p = profiles.active,
+               p.hasPlayPIN || progress.pendingMinutes > 0 || progress.hasPausedManualTime {
+                codeKey(p)
+            }
+        }
+        .padding(8)
+        .background(Color(hex: "2A1E5C").opacity(0.6), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .glassPane(radius: 24, strength: 0.18)
+        .frame(maxWidth: 480)
+    }
+
+    private func keyBox<C: View>(@ViewBuilder _ content: () -> C) -> some View {
+        content()
+            .foregroundStyle(.white)
+            .lineLimit(1).minimumScaleFactor(0.7)
+            .frame(maxWidth: .infinity, minHeight: isShort ? 52 : 58)
+            .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.25), lineWidth: 1))
+    }
+
+    /// 💝 "10 דק׳ · מתנה · פתחו!" — opens the parents' gift (and any frozen leftover).
+    private var giftKey: some View {
+        let frozen = progress.pausedManualMinutes
+        let title = giftOpenableSeconds > 0 ? tr("\(Self.timeLabel(giftOpenableSeconds)) דַּקּ׳") : "❄️ \(frozen)"
+        return Button {
+            requestUnlock { redeemGift() }
+        } label: {
+            VStack(spacing: 3) {
+                if isOpening {
+                    ProgressView().tint(.white)
+                } else {
+                    HStack(spacing: 4) {
+                        Text("💝").font(.system(size: 18))
+                        Text(title).font(.system(size: 16, weight: .black, design: .rounded))
+                    }
+                    Text(tr("מַתָּנָה · פִּתְחוּ!")).font(.system(size: 11, weight: .heavy, design: .rounded)).opacity(0.95)
+                }
+            }
+            .foregroundStyle(.white)
+            .lineLimit(1).minimumScaleFactor(0.7)
+            .frame(maxWidth: .infinity, minHeight: isShort ? 52 : 58)
+            .background(LinearGradient(colors: [Color(hex: "FF5FA8"), Color(hex: "FFA53A")], startPoint: .top, endPoint: .bottom),
+                        in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.55), lineWidth: 1.2))
+            .shadow(color: Color(hex: "FF5FA8").opacity(0.55), radius: 8)
+        }
+        .buttonStyle(.juicy)
+        .disabled(isOpening)
+        .frame(width: 112)   // fixed, like the code key — the minutes take the rest
+        .accessibilityLabel(giftButtonTitle)
+    }
+
+    /// 🎮 The play minutes — the middle key, widest. Tappable only when they open.
+    @ViewBuilder
+    private var minutesKey: some View {
+        let have = progress.redeemableMinutesNow, from = progress.minimumUnlockMinutes
+        if let occ = quiet.current {
+            // 🏫🌙 the minutes wait until the quiet hours end
+            keyBox {
+                VStack(spacing: 3) {
+                    Text(occ.kind == .school ? tr("🏫 זְמַן בֵּית סֵפֶר") : tr("🌙 שְׁעַת שֵׁינָה"))
+                        .font(.system(size: 15, weight: .black, design: .rounded))
+                    Text(tr("הַדַּקּוֹת מְחַכּוֹת עַד \(QuietHoursManager.clock(occ.end))"))
+                        .font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.secondary)
+                }
+            }
+            .frame(minWidth: 150)
+            .accessibilityLabel(quiet.blockedMessage() ?? "")
+        } else if progress.canRedeemNow {
+            Button {
+                requestUnlock { redeemMinutes() }
+            } label: {
+                keyBox {
+                    VStack(spacing: 3) {
+                        if isOpening {
+                            ProgressView().tint(.white)
+                        } else {
+                            HStack(spacing: 5) {
+                                Image(systemName: "gamecontroller.fill").font(.system(size: 15, weight: .bold)).foregroundStyle(Color(hex: "8CFFC4"))
+                                Text(tr("\(Self.timeLabel(progress.redeemableSecondsNow)) דַּקּ׳ לְשַׂחֵק"))
+                                    .font(.system(size: 16, weight: .black, design: .rounded))
+                            }
+                            Text(tr("לְחִיצָה לִפְתִּיחָה ▶")).font(.system(size: 11, weight: .heavy, design: .rounded))
+                                .foregroundStyle(Color(hex: "8CFFC4"))
+                        }
+                    }
+                }
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color(hex: "8CFFC4"), lineWidth: 1.5))
+            }
+            .buttonStyle(.juicy)
+            .disabled(isOpening)
+            .frame(minWidth: 150)
+        } else if progress.dailyScreenTimeMaxedOut {
+            keyBox {
+                VStack(spacing: 3) {
+                    Text(tr("🌙 \(progress.pendingMinutes) שְׁמוּרוֹת לְמָחָר")).font(.system(size: 15, weight: .black, design: .rounded))
+                    Text(Gendered.g(tr("שִׂחַקְתָּ \(progress.minutesPlayedToday) מִתּוֹךְ \(progress.dailyCap.max) הַיּוֹם"),
+                                    tr("שִׂחַקְתְּ \(progress.minutesPlayedToday) מִתּוֹךְ \(progress.dailyCap.max) הַיּוֹם")))
+                        .font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.secondary)
+                }
+            }
+            .frame(minWidth: 150)
+        } else {
+            keyBox {
+                VStack(spacing: 4) {
+                    HStack(spacing: 5) {
+                        Image(systemName: "gamecontroller.fill").font(.system(size: 15, weight: .bold)).foregroundStyle(Color(hex: "8CFFC4"))
+                        Text(tr("\(have) דַּקּ׳ לְשַׂחֵק")).font(.system(size: 16, weight: .black, design: .rounded))
+                    }
+                    GeometryReader { g in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(.white.opacity(0.2))
+                            Capsule().fill(Color(hex: "8CFFC4"))
+                                .frame(width: g.size.width * min(1, CGFloat(have) / CGFloat(max(from, 1))))
+                        }
+                    }
+                    .frame(height: 5)
+                    .environment(\.layoutDirection, .leftToRight)
+                    .padding(.horizontal, 14)
+                    Text(have > 0 ? tr("עוֹד \(max(0, from - have)) וּפוֹתְחִים") : tr("עוֹנִים וּמַרְוִיחִים 🎮"))
+                        .font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.secondary)
+                }
+            }
+            .frame(minWidth: 150)
+        }
+    }
+
+    /// 🔒 The child's own code for their minutes.
+    private func codeKey(_ p: Profile) -> some View {
+        Button {
+            Haptic.light()
+            playPINSheet = p.hasPlayPIN ? .manage : .setNew
+        } label: {
+            keyBox {
+                VStack(spacing: 3) {
+                    Image(systemName: p.hasPlayPIN ? "lock.fill" : "lock.open.fill").font(.system(size: 18, weight: .bold))
+                    Text(tr("קוֹד סוֹדִי")).font(.system(size: 11, weight: .heavy, design: .rounded))
+                }
+                .foregroundStyle(.white.opacity(0.92))
+            }
+        }
+        .buttonStyle(.plain)
+        .frame(width: 92)   // a small key — the minutes are the wide one
+        .accessibilityLabel(p.hasPlayPIN ? tr("הַדַּקּוֹת שֶׁלִּי מוּגָנוֹת בְּקוֹד") : tr("קוֹד סוֹדִי לַדַּקּוֹת שֶׁלִּי"))
     }
 
     /// A pill-styled hint shown in the bottom CTA spot when there's no openable

@@ -3655,6 +3655,50 @@
         }
       }
     },
+    "%@ דַּקּ׳" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ د"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ min"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ мин"
+          }
+        }
+      }
+    },
+    "%@ דַּקּ׳ לְשַׂחֵק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ د للعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ min to play"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ мин игры"
+          }
+        }
+      }
+    },
     "%@ דקות" : {
       "localizations" : {
         "ar" : {
@@ -7236,6 +7280,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Подарочные минуты: %lld"
+          }
+        }
+      }
+    },
+    "%lld דַּקּ׳ לְשַׂחֵק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld د للعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min to play"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld мин игры"
           }
         }
       }
@@ -35611,6 +35677,28 @@
         }
       }
     },
+    "הַדַּקּוֹת מְחַכּוֹת עַד %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدقائق تنتظر حتى %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your minutes wait until %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Минуты ждут до %@"
+          }
+        }
+      }
+    },
     "הַדַּקּוֹת שֶׁלִּי מוּגָנוֹת בְּקוֹד" : {
       "localizations" : {
         "ar" : {
@@ -51962,6 +52050,28 @@
         }
       }
     },
+    "זיהוי הפנים ביציאה ממצב ילד פותח ישר את מסך ההורה, בלי לבקש שוב" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التحقق بالوجه عند الخروج من وضع الطفل يفتح شاشة الوالدين مباشرة، دون طلبه مرة أخرى"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Face ID that ends kid mode opens the parent screen straight away, without asking again"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID при выходе из детского режима сразу открывает экран родителя — без повторного запроса"
+          }
+        }
+      }
+    },
     "זכייה בגלגל המזל" : {
       "localizations" : {
         "ar" : {
@@ -60704,6 +60814,28 @@
         }
       }
     },
+    "יציאה ממצב ילד בזיהוי אחד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخروج من وضع الطفل بتحقق واحد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leave kid mode with one Face ID"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выход из детского режима с одной проверкой"
+          }
+        }
+      }
+    },
     "יציאה ממצב ילד ושחרור נעילת המכשיר" : {
       "localizations" : {
         "ar" : {
@@ -68715,6 +68847,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удалить друга?"
+          }
+        }
+      }
+    },
+    "לְחִיצָה לִפְתִּיחָה ▶" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اضغطوا للفتح ▶"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to open ▶"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажми, чтобы открыть ▶"
           }
         }
       }
@@ -78535,6 +78689,28 @@
     },
     "מַתָּנָה" : {
 
+    },
+    "מַתָּנָה · פִּתְחוּ!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هدية · افتحوها!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gift · open it!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подарок · открой!"
+          }
+        }
+      }
     },
     "מַתָּנָה לְחָבֵר" : {
       "localizations" : {
@@ -92195,6 +92371,28 @@
         }
       }
     },
+    "עוֹד %lld וּפוֹתְחִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld أخرى ونفتح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld more to open"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё %lld — и открываем"
+          }
+        }
+      }
+    },
     "עוֹד %lld יוֹם · חִדּוּשׁ" : {
       "localizations" : {
         "ar" : {
@@ -93856,6 +94054,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "עוֹנִים וּמַרְוִיחִים 🎮" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أجيبوا واربحوا 🎮"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Answer and earn 🎮"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отвечай и зарабатывай 🎮"
           }
         }
       }
@@ -102176,6 +102396,28 @@
         }
       }
     },
+    "קוֹד סוֹדִי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رمز سري"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secret code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Секретный код"
+          }
+        }
+      }
+    },
     "קוֹד סוֹדִי לַדַּקּוֹת שֶׁלִּי" : {
       "localizations" : {
         "ar" : {
@@ -103165,6 +103407,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Бой с боссом засчитывается"
+          }
+        }
+      }
+    },
+    "קריאת מיקום אחת לא מדויקת בתוך בניין כבר לא מאפסת את השעה שבה הילד הגיע למקום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قراءة موقع واحدة غير دقيقة داخل مبنى لم تعد تعيد ضبط وقت وصول الطفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One inaccurate location reading inside a building no longer resets the time the child arrived"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Одно неточное определение места в здании больше не сбрасывает время, когда ребёнок пришёл"
           }
         }
       }
@@ -107319,6 +107583,28 @@
         }
       }
     },
+    "שִׂחַקְתְּ %lld מִתּוֹךְ %lld הַיּוֹם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لعبتِ %lld من %lld اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Played %lld of %lld today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сыграно %lld из %lld сегодня"
+          }
+        }
+      }
+    },
     "שִׂחַקְתְּ אֶת 30 הַשְּׁאֵלוֹת הַחִנָּם. הֵירָשְׁמוּ כְּדֵי לְהַמְשִׁיךְ לְשַׂחֵק לְלֹא הַגְבָּלָה — וְלִשְׁמוֹר אֶת הַהִתְקַדְּמוּת." : {
       "localizations" : {
         "ar" : {
@@ -107403,6 +107689,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ты играл"
+          }
+        }
+      }
+    },
+    "שִׂחַקְתָּ %lld מִתּוֹךְ %lld הַיּוֹם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لعبتَ %lld من %lld اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Played %lld of %lld today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сыграно %lld из %lld сегодня"
           }
         }
       }
@@ -113460,6 +113768,28 @@
         }
       }
     },
+    "״מאז״ מדויק יותר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«منذ» أدق"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A more accurate “since”"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Более точное «с»"
+          }
+        }
+      }
+    },
     "—" : {
 
     },
@@ -116170,6 +116500,28 @@
         }
       }
     },
+    "🌙 %lld שְׁמוּרוֹת לְמָחָר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 %lld محفوظة للغد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 %lld saved for tomorrow"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 %lld на завтра"
+          }
+        }
+      }
+    },
     "🌙 עַכְשָׁיו שְׁעַת שֵׁינָה — הַדַּקּוֹת שֶׁלְּךָ מְחַכּוֹת לְךָ בְּ-%@" : {
       "localizations" : {
         "ar" : {
@@ -116210,6 +116562,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🌙 Сейчас время спать — твои минуты ждут тебя в %@"
+          }
+        }
+      }
+    },
+    "🌙 שְׁעַת שֵׁינָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 وقت النوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 Bedtime"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 Время сна"
           }
         }
       }
@@ -117948,6 +118322,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🏫 Школа"
+          }
+        }
+      }
+    },
+    "🏫 זְמַן בֵּית סֵפֶר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 وقت المدرسة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 School time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 Время школы"
           }
         }
       }
@@ -121221,6 +121617,50 @@
         }
       }
     },
+    "🔥 הִשְׁלַמְתְּ אֶת הָאֶתְגָּר הַיּוֹמִי! +%lld 💎" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔥 أكملتِ التحدي اليومي! +%lld 💎"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔥 You finished the daily challenge! +%lld 💎"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔥 Ты выполнила ежедневное задание! +%lld 💎"
+          }
+        }
+      }
+    },
+    "🔥 הִשְׁלַמְתָּ אֶת הָאֶתְגָּר הַיּוֹמִי! +%lld 💎" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔥 أكملتَ التحدي اليومي! +%lld 💎"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔥 You finished the daily challenge! +%lld 💎"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔥 Ты выполнил ежедневное задание! +%lld 💎"
+          }
+        }
+      }
+    },
     "🔥 קוֹמְבּוֹ ×%lld" : {
       "localizations" : {
         "ar" : {
@@ -122023,6 +122463,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🧹 Убрать комнату"
+          }
+        }
+      }
+    },
+    "🧹 מְטָלוֹת הַיּוֹם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧹 مهام اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧹 Chores today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧹 Дела сегодня"
           }
         }
       }
