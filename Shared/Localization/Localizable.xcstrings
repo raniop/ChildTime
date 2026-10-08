@@ -178,6 +178,28 @@
         }
       }
     },
+    " · %lld דקות ש%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " · %lld دقيقة %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " · %lld minutes %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " · %lld мин. %@"
+          }
+        }
+      }
+    },
     " · %lld טְעֻיּוֹת" : {
       "localizations" : {
         "ar" : {
@@ -253,6 +275,230 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : " · %lld טְעֻיּוֹת"
+                }
+              }
+            }
+          }
+        },
+        "ru" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld ошибки"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld ошибок"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld ошибка"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld ошибки"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    " · %lld טעויות" : {
+      "localizations" : {
+        "ar" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld أخطاء"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld خطأً"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld خطأ"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld خطأ"
+                }
+              },
+              "two" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld خطآن"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld خطأ"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld mistake"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld mistakes"
+                }
+              }
+            }
+          }
+        },
+        "he" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · טעות אחת"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld טעויות"
+                }
+              }
+            }
+          }
+        },
+        "ru" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld ошибки"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld ошибок"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld ошибка"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld ошибки"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    " · %lld טעיות" : {
+      "localizations" : {
+        "ar" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld أخطاء"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld خطأً"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld خطأ"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld خطأ"
+                }
+              },
+              "two" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld خطآن"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld خطأ"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld mistake"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld mistakes"
+                }
+              }
+            }
+          }
+        },
+        "he" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · טעות אחת"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : " · %lld טעויות"
                 }
               }
             }
@@ -1028,6 +1274,94 @@
         }
       }
     },
+    " באייפד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " على الآيباد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " on iPad"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " на iPad"
+          }
+        }
+      }
+    },
+    " באייפון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " على الآيفون"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " on iPhone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " на iPhone"
+          }
+        }
+      }
+    },
+    " באיפד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " على الآيباد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " on iPad"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " на iPad"
+          }
+        }
+      }
+    },
+    " באיפון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " على الآيفون"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " on iPhone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " на iPhone"
+          }
+        }
+      }
+    },
     " גַּם %@ בִּפְנִים." : {
       "localizations" : {
         "ar" : {
@@ -1095,6 +1429,50 @@
       }
     },
     " הַפַּעַר נִפְתָּח בְּעִקָּר בְּ%@." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " الفجوة تظهر أساسًا في %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " The gap is mostly in %@."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " Разрыв в основном в %@."
+          }
+        }
+      }
+    },
+    " הפער נפתח בעיקר ב%@." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " الفجوة تظهر أساسًا في %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " The gap is mostly in %@."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " Разрыв в основном в %@."
+          }
+        }
+      }
+    },
+    " הפער נפתח בעקר ב%@." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1987,6 +2365,62 @@
         }
       }
     },
+    "%@ %@ ב%@ ב-%lld נקודות לעומת התקופה הקודמת." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@ في %@ بمقدار %lld نقاط مقارنةً بالفترة السابقة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@ in %@ by %lld points compared to the previous period."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ в %3$@ на %#@count@ по сравнению с предыдущим периодом."
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 4,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "few" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg пункта"
+                    }
+                  },
+                  "many" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg пунктов"
+                    }
+                  },
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg пункт"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg пункта"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%@ %@ ב%@ — אתגרו %@ בשאלה קשה יותר ותראו את הביטחון." : {
       "localizations" : {
         "ar" : {
@@ -2031,6 +2465,62 @@
         }
       }
     },
+    "%@ %@ ב-%lld ימים %@, %lld שאלות בסך הכול ב-%@ הצלחה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@ في %lld أيام %@، %lld سؤالًا في المجموع بنسبة نجاح %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%4$@, %1$@ %2$@ on %3$lld days — %5$lld questions in total, %6$@ correct."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ в течение %#@count@ %4$@ — всего %5$lld вопр., %6$@ правильных."
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 3,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "few" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg дней"
+                    }
+                  },
+                  "many" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg дней"
+                    }
+                  },
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg дня"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg дня"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%@ %@ ב-%lld מתוך 7 הימים האחרונים — עקביות יפה!" : {
       "localizations" : {
         "ar" : {
@@ -2049,6 +2539,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ %@ в %lld из последних 7 дней — отличная регулярность!"
+          }
+        }
+      }
+    },
+    "%@ %@ ב-%lld%%" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@ بنسبة %lld%%"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@ by %lld%%"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@ на %lld%%"
           }
         }
       }
@@ -2596,7 +3108,51 @@
         }
       }
     },
+    "%@ %@ על %@ ב-%@ לעומת %@ ב%@ — הפער הגדול ביותר בין הנושאים %@.%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@ في %@ بنسبة %@ مقابل %@ في %@ — أكبر فجوة بين المواضيع %@.%@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ %4$@ correctly in %3$@ vs. %5$@ in %6$@ — the biggest gap between %7$@ topics.%8$@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ %4$@ в %3$@ против %5$@ в %6$@ — самый большой разрыв между %7$@ темами.%8$@"
+          }
+        }
+      }
+    },
     "%@ %@ שֶׁל %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@ %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %3$@'s %2$@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@ — %@"
+          }
+        }
+      }
+    },
+    "%@ %@ של %@" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2816,7 +3372,141 @@
         }
       }
     },
+    "%@ · %lld טעויות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %lld خطأ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %lld mistakes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "few" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg ошибки"
+                    }
+                  },
+                  "many" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg ошибок"
+                    }
+                  },
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg ошибка"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg ошибки"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%@ · %lld טעיות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %lld خطأ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %lld mistakes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "few" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg ошибки"
+                    }
+                  },
+                  "many" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg ошибок"
+                    }
+                  },
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg ошибка"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg ошибки"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%@ · %lld שְׁאֵלוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %lld سؤال"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %lld questions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %lld вопр."
+          }
+        }
+      }
+    },
+    "%@ · %lld שאלות" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -3301,6 +3991,28 @@
         }
       }
     },
+    "%@ ב%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ في %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ in %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ в %@"
+          }
+        }
+      }
+    },
     "%@ בְּ%@" : {
       "localizations" : {
         "ar" : {
@@ -3633,6 +4345,28 @@
         }
       }
     },
+    "%@ גם בלי פרס" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ حتى بدون مكافأة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keeps %@ without a reward"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ и без награды"
+          }
+        }
+      }
+    },
     "%@ דַּקּוֹת" : {
       "localizations" : {
         "ar" : {
@@ -3854,6 +4588,28 @@
         }
       }
     },
+    "%@ הופכת לחוזקה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ تتحوّل إلى نقطة قوة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is becoming a strength"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ становится сильной стороной"
+          }
+        }
+      }
+    },
     "%@ היום" : {
       "localizations" : {
         "ar" : {
@@ -3872,6 +4628,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ сегодня"
+          }
+        }
+      }
+    },
+    "%@ הצלחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ نجاح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ correct"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ успеха"
           }
         }
       }
@@ -4927,7 +5705,51 @@
         }
       }
     },
+    "%@ מה היה קשה השבוע — לרוב זו שאלה אחת שפותחת הכול." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ما الذي كان صعبًا هذا الأسبوع — غالبًا يكون سؤالًا واحدًا يفتح كل شيء."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ what was hard this week — often it's one question that unlocks everything."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ что было трудным на этой неделе — чаще всего это один вопрос, который открывает всё."
+          }
+        }
+      }
+    },
     "%@ מוּל %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ مقابل %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ vs. %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ против %@"
+          }
+        }
+      }
+    },
+    "%@ מול %@" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -5321,6 +6143,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ ещё не выбрала код"
+          }
+        }
+      }
+    },
+    "%@ עכשיו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ сейчас"
           }
         }
       }
@@ -7478,13 +8322,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "דַּקָּה אַחַת בְּיוֹם"
+                  "value" : "דקה אחת ביום"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld דַּקּוֹת בְּיוֹם"
+                  "value" : "%lld דקות ביום"
                 }
               }
             }
@@ -8919,13 +9763,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "יֶלֶד אֶחָד"
+                  "value" : "ילד אחד"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld יְלָדִים"
+                  "value" : "%lld ילדים"
                 }
               }
             }
@@ -8956,6 +9800,230 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld ребёнка"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld ימים אחרונים" : {
+      "localizations" : {
+        "ar" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "آخر %lld أيام"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "آخر %lld يومًا"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "آخر %lld يوم"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "آخر %lld يوم"
+                }
+              },
+              "two" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "آخر %lld يومين"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "آخر %lld يوم"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Last %lld day"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Last %lld days"
+                }
+              }
+            }
+          }
+        },
+        "he" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "היום האחרון"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ימים אחרונים"
+                }
+              }
+            }
+          }
+        },
+        "ru" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Последние %lld дня"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Последние %lld дней"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Последний %lld день"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Последние %lld дня"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld ימים של למידה" : {
+      "localizations" : {
+        "ar" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld أيام من التعلّم"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld يومًا من التعلّم"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld يوم من التعلّم"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld يوم من التعلّم"
+                }
+              },
+              "two" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld يومان من التعلّم"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld يوم من التعلّم"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld day of learning"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld days of learning"
+                }
+              }
+            }
+          }
+        },
+        "he" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "יום אחד של למידה"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ימים של למידה"
+                }
+              }
+            }
+          }
+        },
+        "ru" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld дня обучения"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld дней обучения"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld день обучения"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld дня обучения"
                 }
               }
             }
@@ -10078,6 +11146,47 @@
         }
       }
     },
+    "%lld נכונות" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld صحيحة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld correct"
+          }
+        },
+        "he" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "נכונה אחת"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld נכונות"
+                }
+              }
+            }
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld верно"
+          }
+        }
+      }
+    },
     "%lld עולמות · %lld שאלות · %lld%% הצלחה — אפשר להשאיר הכל פתוח" : {
       "localizations" : {
         "ar" : {
@@ -11063,6 +12172,28 @@
         }
       }
     },
+    "%lld שאלות %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld سؤال %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld questions %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld вопр. %@"
+          }
+        }
+      }
+    },
     "%lld שינויים" : {
       "localizations" : {
         "ar" : {
@@ -11493,6 +12624,28 @@
         }
       }
     },
+    "%lld%% מהתשובות של %@ ניתנו אחרי שהדקות של היום כבר נגמרו — כלומר סתם כי %@." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%% من إجابات %@ جاءت بعد أن انتهت دقائق اليوم — أي لمجرد أن %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%% of %@'s answers came after today's minutes had already run out — simply because %@."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%2$@: %1$lld%% ответов даны уже после того, как минуты на сегодня закончились — просто потому, что %3$@."
+          }
+        }
+      }
+    },
     "%lld/%lld" : {
       "localizations" : {
         "he" : {
@@ -11889,6 +13042,28 @@
         }
       }
     },
+    "+ חבור מכשיר נוסף" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ ربط جهاز آخر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ Connect another device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ Подключить ещё устройство"
+          }
+        }
+      }
+    },
     "+ חברו מכשיר" : {
       "localizations" : {
         "ar" : {
@@ -11929,6 +13104,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "+ Подключить устройство для %@"
+          }
+        }
+      }
+    },
+    "+ חיבור מכשיר נוסף" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ ربط جهاز آخر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ Connect another device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ Подключить ещё устройство"
           }
         }
       }
@@ -12113,13 +13310,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "+ עוֹד עוֹלָם אֶחָד ▾"
+                  "value" : "+ עוד עולם אחד ▾"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "+ עוֹד %lld עוֹלָמוֹת ▾"
+                  "value" : "+ עוד %lld עולמות ▾"
                 }
               }
             }
@@ -13332,6 +14529,50 @@
 
     },
     "10 דַּקּוֹת שֶׁל %@ בְּיַחַד, פַּעַם־פַּעֲמַיִם בַּשָּׁבוּעַ. %@ כְּבָר %@ בְּ%@ — יֵשׁ עַל מָה לִבְנוֹת." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 دقائق من %@ معًا، مرة أو مرتين في الأسبوع. %@ بالفعل %@ في %@ — هناك ما يمكن البناء عليه."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 minutes of %@ together, once or twice a week. %@ is already %@ in %@ — there's something to build on."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 минут %@ вместе, раз-два в неделю. %@ уже %@ в %@ — есть на чём строить."
+          }
+        }
+      }
+    },
+    "10 דקות של %@ ביחד, פעם־פעמיים בשבוע. %@ כבר %@ ב%@ — יש על מה לבנות." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 دقائق من %@ معًا، مرة أو مرتين في الأسبوع. %@ بالفعل %@ في %@ — هناك ما يمكن البناء عليه."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 minutes of %@ together, once or twice a week. %@ is already %@ in %@ — there's something to build on."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 минут %@ вместе, раз-два в неделю. %@ уже %@ в %@ — есть на чём строить."
+          }
+        }
+      }
+    },
+    "10 דקות של %@ ביחד, פעם־פעמים בשבוע. %@ כבר %@ ב%@ — יש על מה לבנות." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -20016,6 +21257,28 @@
         }
       }
     },
+    "אחוז הצלחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نسبة النجاح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Success rate"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Процент успеха"
+          }
+        }
+      }
+    },
     "אחוז התשובות הנכונות מתוך כל השאלות של היום. \"—\" = עוד לא ענה/תה היום. מתחת ל-50% לאורך זמן? כדאי להוריד רמת קושי מהתפריט ⋯." : {
       "localizations" : {
         "ar" : {
@@ -20034,6 +21297,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Доля правильных ответов из всех сегодняшних вопросов. «—» = сегодня ещё не отвечал(а). Ниже 50% долгое время? Стоит снизить уровень сложности в меню ⋯."
+          }
+        }
+      }
+    },
+    "אחוזים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النسب المئوية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Percents"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проценты"
           }
         }
       }
@@ -20589,6 +21874,29 @@
         }
       }
     },
+    "אין הרשאת ״זמן מסך״ במכשיר הזה — נעילת אפליקציות לא תעבוד בו. פתחו בו את טופי ← ⚙️ ← בקש הרשאה." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد إذن «وقت الشاشة» على هذا الجهاز — لن يعمل قفل التطبيقات فيه. افتحوا توفي عليه ← ⚙️ ← اطلبوا الإذن."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Screen Time permission on this device — app locking will not work there. Open Tofy on it → ⚙️ → Request permission."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На этом устройстве нет разрешения «Экранное время» — блокировка приложений там не работает. Откройте на нём Tofy → ⚙️ → Запросить разрешение."
+          }
+        }
+      }
+    },
     "אין חבור לאינטרנט. בדקו את החבור ונסו שוב." : {
       "localizations" : {
         "ar" : {
@@ -20897,6 +22205,50 @@
         }
       }
     },
+    "אין עדיין פירוט לפי מיומנות בנושא זה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا تفصيل حسب المهارة في هذا الموضوع بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No skill breakdown for this topic yet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока нет разбивки по навыкам в этой теме."
+          }
+        }
+      }
+    },
+    "אין עדיין פעילות בתקופה הזו." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا نشاط في هذه الفترة بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No activity in this period yet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока нет активности за этот период."
+          }
+        }
+      }
+    },
     "אין עדיין שיחות" : {
       "localizations" : {
         "ar" : {
@@ -20915,6 +22267,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Пока нет чатов"
+          }
+        }
+      }
+    },
+    "אין עדין פעילות בתקופה הזו." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا نشاط في هذه الفترة بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No activity in this period yet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока нет активности за этот период."
+          }
+        }
+      }
+    },
+    "אין עדין פרוט לפי מימנות בנושא זה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا تفصيل حسب المهارة في هذا الموضوع بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No skill breakdown for this topic yet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока нет разбивки по навыкам в этой теме."
           }
         }
       }
@@ -21030,6 +22426,28 @@
         }
       }
     },
+    "איפד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPad"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPad"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPad"
+          }
+        }
+      }
+    },
     "איפה %@" : {
       "localizations" : {
         "ar" : {
@@ -21114,6 +22532,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Где дети — с первого взгляда"
+          }
+        }
+      }
+    },
+    "איפון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone"
           }
         }
       }
@@ -27840,6 +29280,28 @@
         }
       }
     },
+    "בטויים אלגבריים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التعابير الجبرية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algebraic expressions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Алгебраические выражения"
+          }
+        }
+      }
+    },
     "בטול" : {
       "localizations" : {
         "ar" : {
@@ -28194,6 +29656,28 @@
         }
       }
     },
+    "ביצועים לימודיים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأداء التعليمي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Learning performance"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Учебные результаты"
+          }
+        }
+      }
+    },
     "ביקשתם %lld — זה המקסימום שנשאר להיום, עד חצות." : {
       "localizations" : {
         "ar" : {
@@ -28388,13 +29872,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "בַּכִּיס עַכְשָׁיו: 💝 דַּקָּה אַחַת"
+                  "value" : "בכיס עכשיו: 💝 דקה אחת"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "בַּכִּיס עַכְשָׁיו: 💝 %lld דַּקּוֹת"
+                  "value" : "בכיס עכשיו: 💝 %lld דקות"
                 }
               }
             }
@@ -29072,6 +30556,28 @@
         }
       }
     },
+    "בסדר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حسنًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хорошо"
+          }
+        }
+      }
+    },
     "בסוף כל סיבוב רואים כוכבים, יהלומים וכמה זמן מסך הרווחתם — וגם סיבוב פחות מוצלח נגמר בפרס" : {
       "localizations" : {
         "ar" : {
@@ -29112,6 +30618,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "В родном языке уровень заметно растёт с возрастом. В английском — втором языке — он остаётся посильным"
+          }
+        }
+      }
+    },
+    "בעיות מלוליות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مسائل كلامية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Word problems"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Текстовые задачи"
           }
         }
       }
@@ -32282,6 +33810,50 @@
         }
       }
     },
+    "דורש חזוק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يحتاج إلى تقوية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needs practice"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нужно потренировать"
+          }
+        }
+      }
+    },
+    "דורש חיזוק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يحتاج إلى تقوية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needs practice"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нужно потренировать"
+          }
+        }
+      }
+    },
     "דיוק" : {
       "localizations" : {
         "ar" : {
@@ -32646,6 +34218,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Минуты, которые вы подарили и которые ещё не открыты, — хранятся полностью отдельно от минут, заработанных ребёнком, и одинаковы на каждом устройстве. Ребёнок открывает их когда хочет, и пока подарок открыт — обратный отсчёт показывается здесь (а не в 🎮). За один раз можно дать столько, сколько осталось до полуночи; неиспользованное остаётся на завтра."
+          }
+        }
+      }
+    },
+    "דקות שהורווחו ודקות שנוצלו לכל יום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدقائق المكتسبة والدقائق المستخدَمة في كلّ يوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minutes earned and minutes used per day"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заработанные и использованные минуты по дням"
+          }
+        }
+      }
+    },
+    "דקות שהורוחו ודקות שנצלו לכל יום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدقائق المكتسبة والدقائق المستخدَمة في كلّ يوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minutes earned and minutes used per day"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заработанные и использованные минуты по дням"
           }
         }
       }
@@ -42244,6 +43860,28 @@
         }
       }
     },
+    "האם %@ %@?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هل %@ %@؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Is %@ %@?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@?"
+          }
+        }
+      }
+    },
     "הבא" : {
       "localizations" : {
         "ar" : {
@@ -42684,6 +44322,118 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Недельный отчёт готов"
+          }
+        }
+      }
+    },
+    "הדיוק של %@ ב%@ ירד ב-%lld נקדות לעמת התקופה הקודמת. לפעמים זה פשוט חמר חדש שנכנס." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انخفضت دقّة %@ في %@ بمقدار %lld نقاط مقارنةً بالفترة السابقة. أحيانًا يكون السبب ببساطة مادة جديدة بدأت للتوّ."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s accuracy in %@ dropped by %lld points compared to the previous period. Sometimes it's just new material coming in."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Точность %1$@ по теме %2$@ упала на %#@count@ по сравнению с прошлым периодом. Иногда это просто новый материал."
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 3,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "few" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg пункта"
+                    }
+                  },
+                  "many" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg пунктов"
+                    }
+                  },
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg пункт"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg пункта"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "הדיוק של %@ ב%@ ירד ב-%lld נקודות לעומת התקופה הקודמת. לפעמים זה פשוט חומר חדש שנכנס." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انخفضت دقّة %@ في %@ بمقدار %lld نقاط مقارنةً بالفترة السابقة. أحيانًا يكون السبب ببساطة مادة جديدة بدأت للتوّ."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s accuracy in %@ dropped by %lld points compared to the previous period. Sometimes it's just new material coming in."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Точность %1$@ по теме %2$@ упала на %#@count@ по сравнению с прошлым периодом. Иногда это просто новый материал."
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 3,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "few" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg пункта"
+                    }
+                  },
+                  "many" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg пунктов"
+                    }
+                  },
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg пункт"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg пункта"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -43648,6 +45398,28 @@
         }
       }
     },
+    "הוא" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هو"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "He"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Он"
+          }
+        }
+      }
+    },
     "הוא הרוויח" : {
       "localizations" : {
         "ar" : {
@@ -44079,6 +45851,28 @@
         }
       }
     },
+    "הושלמה לעשר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإكمال إلى عشرة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Making ten"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дополнение до десяти"
+          }
+        }
+      }
+    },
     "הזזת השעון במכשיר לא מוסיפה דקות, לא פותחת מחדש פרסים יומיים ולא משאירה אפליקציות פתוחות" : {
       "localizations" : {
         "ar" : {
@@ -44274,6 +46068,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вас пригласили присоединиться как родителя — вы увидите детей, их прогресс и управление, точно как родитель, который вас пригласил."
+          }
+        }
+      }
+    },
+    "החדש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا الشهر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This month"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этот месяц"
           }
         }
       }
@@ -44627,6 +46443,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ваш телефон"
+          }
+        }
+      }
+    },
+    "היא" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "She"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Она"
           }
         }
       }
@@ -46265,6 +48103,28 @@
         }
       }
     },
+    "המכשירים של %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أجهزة %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s devices"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Устройства %@"
+          }
+        }
+      }
+    },
     "המלצות להורה" : {
       "localizations" : {
         "ar" : {
@@ -46531,13 +48391,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "הַמִּשְׁפָּחָה עָנְתָה עַל שְׁאֵלָה אַחַת הַיּוֹם 👏"
+                  "value" : "המשפחה ענתה על שאלה אחת היום 👏"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "הַמִּשְׁפָּחָה עָנְתָה עַל %lld שְׁאֵלוֹת הַיּוֹם 👏"
+                  "value" : "המשפחה ענתה על %lld שאלות היום 👏"
                 }
               }
             }
@@ -46842,13 +48702,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "הַמַּתָּנָה מִסְתַּיֶּמֶת מָחָר"
+                  "value" : "המתנה מסתימת מחר"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "הַמַּתָּנָה מִסְתַּיֶּמֶת בְּעוֹד %lld יָמִים"
+                  "value" : "המתנה מסתימת בעוד %lld ימים"
                 }
               }
             }
@@ -47042,13 +48902,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "הַמַּתָּנָה מִסְתַּיֶּמֶת מָחָר"
+                  "value" : "המתנה מסתימת מחר"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "הַמַּתָּנָה מִסְתַּיֶּמֶת בְּעוֹד %lld יָמִים"
+                  "value" : "המתנה מסתימת בעוד %lld ימים"
                 }
               }
             }
@@ -47750,6 +49610,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удалить фото"
+          }
+        }
+      }
+    },
+    "הסתברות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الاحتمالات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Probability"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вероятность"
           }
         }
       }
@@ -48682,6 +50564,28 @@
         }
       }
     },
+    "הקף ושטח" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المحيط والمساحة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perimeter and area"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Периметр и площадь"
+          }
+        }
+      }
+    },
     "הרוויח" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -48712,6 +50616,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "كسبت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "earned"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "заработала"
+          }
+        }
+      }
+    },
+    "הרויח" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ربح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "earned"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "заработал"
+          }
+        }
+      }
+    },
+    "הרויחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ربحت"
           }
         },
         "en" : {
@@ -48791,6 +50739,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Покупка делается на устройстве ребёнка, с родительским кодом"
+          }
+        }
+      }
+    },
+    "הרציפות שוה יותר מהכמות — גם 10 דקות ביום שומרות עליה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الاستمرارية أهم من الكمية — حتى 10 دقائق في اليوم تحافظ عليها."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consistency matters more than volume — even 10 minutes a day keeps it going."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Регулярность важнее количества — даже 10 минут в день её сохраняют."
           }
         }
       }
@@ -48994,6 +50964,72 @@
         }
       }
     },
+    "השואת מספרים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مقارنة الأعداد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparing numbers"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сравнение чисел"
+          }
+        }
+      }
+    },
+    "השיפור הגדול" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أكبر تحسّن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biggest improvement"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Самый большой прогресс"
+          }
+        }
+      }
+    },
+    "השלמה לעשר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإكمال إلى عشرة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Making ten"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дополнение до десяти"
+          }
+        }
+      }
+    },
     "השם יופיע במסך הבית ובעדכונים" : {
       "localizations" : {
         "ar" : {
@@ -49056,6 +51092,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Язык меняет и вопросы, а не только тексты. Если поменять его на самом устройстве ребёнка, действует последний выбор."
+          }
+        }
+      }
+    },
+    "השפור הגדול" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أكبر تحسّن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biggest improvement"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Самый большой прогресс"
           }
         }
       }
@@ -52006,6 +54064,28 @@
         }
       }
     },
+    "זוגי ואיזוגי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "زوجي وفردي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Even and odd"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чётные и нечётные"
+          }
+        }
+      }
+    },
     "זוהר" : {
       "localizations" : {
         "ar" : {
@@ -52046,6 +54126,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "сияет"
+          }
+        }
+      }
+    },
+    "זויות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "زوايا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Angles"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Углы"
           }
         }
       }
@@ -55163,6 +57265,28 @@
         }
       }
     },
+    "חבור וחסור" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الجمع والطرح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Addition and subtraction"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сложение и вычитание"
+          }
+        }
+      }
+    },
     "חברו את המכשיר של %@" : {
       "localizations" : {
         "ar" : {
@@ -55871,6 +57995,28 @@
         }
       }
     },
+    "חזק מאוד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قويّ جدًّا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Very strong"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Очень сильный"
+          }
+        }
+      }
+    },
     "חזקה" : {
       "localizations" : {
         "ar" : {
@@ -55916,6 +58062,28 @@
         }
       }
     },
+    "חזקות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأُسُس"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exponents"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Степени"
+          }
+        }
+      }
+    },
     "חזר לבחירה" : {
       "localizations" : {
         "ar" : {
@@ -55956,6 +58124,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Назад"
+          }
+        }
+      }
+    },
+    "חיבור וחסור" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الجمع والطرح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Addition and subtraction"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сложение и вычитание"
           }
         }
       }
@@ -56066,6 +58256,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Одно окно игры — сразу на всех устройствах"
+          }
+        }
+      }
+    },
+    "חלוק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قسمة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Division"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Деление"
+          }
+        }
+      }
+    },
+    "חלוק עם שארית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "القسمة مع باقٍ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Division with remainders"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Деление с остатком"
           }
         }
       }
@@ -60196,6 +62430,29 @@
         }
       }
     },
+    "יום רצף" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يوم متتالٍ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "day streak"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "день подряд"
+          }
+        }
+      }
+    },
     "יופיע חלון של אפל" : {
       "localizations" : {
         "ar" : {
@@ -60324,6 +62581,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Слишком много попыток — подождите минуту и попробуйте снова"
+          }
+        }
+      }
+    },
+    "יחס ופרופורציה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النسبة والتناسب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ratios and proportions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отношения и пропорции"
           }
         }
       }
@@ -60726,6 +63005,28 @@
         }
       }
     },
+    "ימי רצף" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أيّام متتالية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "day streak"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "дней подряд"
+          }
+        }
+      }
+    },
     "ימים" : {
       "localizations" : {
         "ar" : {
@@ -60898,6 +63199,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Новый ребёнок · последний шаг"
+          }
+        }
+      }
+    },
+    "ירד קצת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انخفض قليلًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dipped"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "немного снизился"
+          }
+        }
+      }
+    },
+    "ירידה קלה ב%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تراجع طفيف في %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slight dip in %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Небольшой спад в %@"
           }
         }
       }
@@ -68008,6 +70353,28 @@
         }
       }
     },
+    "כפל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الضرب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Multiplication"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Умножение"
+          }
+        }
+      }
+    },
     "כפתור 'עשיתי!' בצבע של הילד/ה, כתר וברכת 'אלוף/אלופה', וקטגוריה נפרדת של 'בוצעו היום'. הפרס תמיד דקות משחק" : {
       "localizations" : {
         "ar" : {
@@ -68418,13 +70785,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "לְיֶלֶד אֶחָד · פַּעַם אַחַת"
+                  "value" : "לילד אחד · פעם אחת"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "לְ־%lld יְלָדִים · פַּעַם אַחַת"
+                  "value" : "ל־%lld ילדים · פעם אחת"
                 }
               }
             }
@@ -73906,6 +76273,28 @@
         }
       }
     },
+    "לפי נושא, %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بحسب الموضوع، %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By topic, %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "По теме, %@"
+          }
+        }
+      }
+    },
     "לפנות את הצלחת מהשולחן" : {
       "localizations" : {
         "ar" : {
@@ -73946,6 +76335,118 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld мин назад"
+          }
+        }
+      }
+    },
+    "לפני %lld ימים" : {
+      "localizations" : {
+        "ar" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "قبل %lld أيام"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "قبل %lld يومًا"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "قبل %lld يوم"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "قبل %lld يوم"
+                }
+              },
+              "two" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "قبل %lld يومين"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "قبل %lld أيام"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld day ago"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld days ago"
+                }
+              }
+            }
+          }
+        },
+        "he" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "אתמול"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "לפני %lld ימים"
+                }
+              }
+            }
+          }
+        },
+        "ru" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld дня назад"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld дней назад"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld день назад"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld дня назад"
+                }
+              }
+            }
           }
         }
       }
@@ -80133,6 +82634,28 @@
         }
       }
     },
+    "מגמת למידה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اتجاه التعلّم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Learning trend"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Динамика учёбы"
+          }
+        }
+      }
+    },
     "מדברים אל הילדה בלשון נקבה" : {
       "localizations" : {
         "ar" : {
@@ -81013,6 +83536,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Рекомендуем, если ребёнок играет на этом iPad"
+          }
+        }
+      }
+    },
+    "מומלץ: %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "موصى به: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recommended: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Рекомендуется: %@"
           }
         }
       }
@@ -82474,6 +85019,50 @@
         }
       }
     },
+    "ממלץ: %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "موصى به: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recommended: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Рекомендуется: %@"
+          }
+        }
+      }
+    },
+    "ממצע" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المتوسّطات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Averages"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Средние значения"
+          }
+        }
+      }
+    },
     "ממשיך" : {
       "localizations" : {
         "ar" : {
@@ -82849,6 +85438,28 @@
         }
       }
     },
+    "מספרים מכונים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأعداد السالبة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Negative numbers"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отрицательные числа"
+          }
+        }
+      }
+    },
     "מספרים משמאל לימין" : {
       "localizations" : {
         "ar" : {
@@ -82867,6 +85478,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Числа слева направо"
+          }
+        }
+      }
+    },
+    "מספרים עשרוניים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأعداد العشرية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Decimals"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Десятичные дроби"
           }
         }
       }
@@ -82911,6 +85544,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Передаём устройство…"
+          }
+        }
+      }
+    },
+    "מעגל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دوائر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Circles"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Круги"
           }
         }
       }
@@ -83559,6 +86214,28 @@
         }
       }
     },
+    "משואות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "معادلات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Equations"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Уравнения"
+          }
+        }
+      }
+    },
     "משחק" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -83843,6 +86520,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Семья Голан"
+          }
+        }
+      }
+    },
+    "משפט פיתגורס" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نظرية فيثاغورس"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Pythagorean theorem"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Теорема Пифагора"
+          }
+        }
+      }
+    },
+    "משתפר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يتحسّن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "improving"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "улучшается"
+          }
+        }
+      }
+    },
+    "משתפרת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تتحسّن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "improving"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "улучшается"
           }
         }
       }
@@ -87066,6 +89809,50 @@
         }
       }
     },
+    "ניצל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استخدمَ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Использовал"
+          }
+        }
+      }
+    },
+    "ניצלה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استخدمَت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Использовала"
+          }
+        }
+      }
+    },
     "ניקוי השם" : {
       "localizations" : {
         "ar" : {
@@ -87676,6 +90463,28 @@
         }
       }
     },
+    "נפח" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مستوى الصوت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volume"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Громкость"
+          }
+        }
+      }
+    },
     "נפתח הדף של טופי בהגדרות — חזרו צעד אחד אחורה ובחרו \"זמן מסך\"." : {
       "localizations" : {
         "ar" : {
@@ -87809,6 +90618,50 @@
         }
       }
     },
+    "נצל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استخدمَ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Использовал"
+          }
+        }
+      }
+    },
+    "נצלה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استخدمَت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Использовала"
+          }
+        }
+      }
+    },
     "נקבע זמן מסך יומי" : {
       "localizations" : {
         "ar" : {
@@ -87917,6 +90770,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Очистить список"
+          }
+        }
+      }
+    },
+    "נראה %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شوهد %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seen %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Был в сети %@"
           }
         }
       }
@@ -88077,13 +90952,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "נִשְׁאֲרָה בְּעֵרֶךְ דַּקָּה"
+                  "value" : "נשארה בערך דקה"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "נִשְׁאֲרוּ כְּ-%lld דַּקּוֹת"
+                  "value" : "נשארו כ-%lld דקות"
                 }
               }
             }
@@ -94663,6 +97538,94 @@
         }
       }
     },
+    "עוד לא ביקר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يزره بعد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not visited yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё не был"
+          }
+        }
+      }
+    },
+    "עוד לא ביקרה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم تزره بعد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not visited yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё не была"
+          }
+        }
+      }
+    },
+    "עוד לא בקר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يزره بعد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not visited yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё не был"
+          }
+        }
+      }
+    },
+    "עוד לא בקרה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم تزره بعد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not visited yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё не была"
+          }
+        }
+      }
+    },
     "עוד לא הושלמה" : {
       "localizations" : {
         "ar" : {
@@ -94681,6 +97644,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ещё не выполнено"
+          }
+        }
+      }
+    },
+    "עוד לא חבר מכשיר." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يُوصَل جهاز بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No device connected yet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Устройство ещё не подключено."
           }
         }
       }
@@ -94707,6 +97692,28 @@
         }
       }
     },
+    "עוד לא חובר מכשיר." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يُوصَل جهاز بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No device connected yet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Устройство ещё не подключено."
+          }
+        }
+      }
+    },
     "עוד לא חובר — לחצו לחיבור" : {
       "localizations" : {
         "ar" : {
@@ -94725,6 +97732,182 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ещё не подключено — нажмите, чтобы подключить"
+          }
+        }
+      }
+    },
+    "עוד לא נענו שאלות %@." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم تُجَب أي أسئلة %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No questions answered %@."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё не отвечали на вопросы %@."
+          }
+        }
+      }
+    },
+    "עוד לא נפתח זמן מסך בתקופה הזו." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يُفتح وقت شاشة في هذه الفترة بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No screen time unlocked in this period yet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В этот период экранное время ещё не открывали."
+          }
+        }
+      }
+    },
+    "עוד לא שחק באף עולם." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يلعب في أي عالم بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hasn't played any world yet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё не играл ни в одном мире."
+          }
+        }
+      }
+    },
+    "עוד לא שחקה באף עולם." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم تلعب في أي عالم بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hasn't played any world yet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё не играла ни в одном мире."
+          }
+        }
+      }
+    },
+    "עוד לא שיחק באף עולם." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يلعب في أي عالم بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hasn't played any world yet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё не играл ни в одном мире."
+          }
+        }
+      }
+    },
+    "עוד לא שיחקה באף עולם." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم تلعب في أي عالم بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hasn't played any world yet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё не играла ни в одном мире."
+          }
+        }
+      }
+    },
+    "עוד לא — בקרוב 😊" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ليس بعد — قريبًا 😊"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not yet — soon 😊"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока нет — скоро 😊"
+          }
+        }
+      }
+    },
+    "עוד מעט" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بقي القليل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not enough yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё чуть-чуть"
           }
         }
       }
@@ -95057,6 +98240,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Активные миры"
+          }
+        }
+      }
+    },
+    "עונה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يجيب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "answers"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "отвечает"
           }
         }
       }
@@ -98151,6 +101356,28 @@
         }
       }
     },
+    "פונקציה קוית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدالة الخطية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Linear functions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Линейная функция"
+          }
+        }
+      }
+    },
     "פועלות" : {
       "localizations" : {
         "ar" : {
@@ -98437,6 +101664,28 @@
         }
       }
     },
+    "פעולות משלבות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "العمليات المركّبة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Order of operations"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порядок действий"
+          }
+        }
+      }
+    },
     "פעולות פשוטות יותר, וזמן מסך מדויק" : {
       "localizations" : {
         "ar" : {
@@ -98525,6 +101774,28 @@
         }
       }
     },
+    "פעלות משלבות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "العمليات المركّبة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Order of operations"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порядок действий"
+          }
+        }
+      }
+    },
     "פעם" : {
       "localizations" : {
         "ar" : {
@@ -98609,6 +101880,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Два раза в день"
+          }
+        }
+      }
+    },
+    "פער גדול בין נושאים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فجوة كبيرة بين المواضيع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Big gap between topics"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Большой разрыв между темами"
           }
         }
       }
@@ -105430,13 +108723,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "רִכְשׁוּ וְשִׁלְחוּ לְיֶלֶד אֶחָד"
+                  "value" : "רכשו ושלחו לילד אחד"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "רִכְשׁוּ וְשִׁלְחוּ לְ־%lld יְלָדִים"
+                  "value" : "רכשו ושלחו ל־%lld ילדים"
                 }
               }
             }
@@ -105823,6 +109116,28 @@
         }
       }
     },
+    "רצה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أراد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "he wanted to"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "хотел"
+          }
+        }
+      }
+    },
     "רצף %lld ימים" : {
       "localizations" : {
         "ar" : {
@@ -105968,6 +109283,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Серия из %lld верных ответов"
+          }
+        }
+      }
+    },
+    "רצתה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أرادت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "she wanted to"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "хотела"
           }
         }
       }
@@ -109518,6 +112855,50 @@
         }
       }
     },
+    "שאלו אותה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اسألوها"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask her"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спросите её"
+          }
+        }
+      }
+    },
+    "שאלו אותו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اسألوه"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask him"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спросите его"
+          }
+        }
+      }
+    },
     "שאלו את %@ מה %@ היום ב%@ — סקרנות מחזקת זיכרון." : {
       "localizations" : {
         "ar" : {
@@ -109732,6 +113113,28 @@
         }
       }
     },
+    "שאלות ואחוז הצלחה לכל יום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأسئلة ونسبة النجاح لكلّ يوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questions and success rate per day"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вопросы и процент успеха по дням"
+          }
+        }
+      }
+    },
     "שאלות מותאמות לכיתה" : {
       "localizations" : {
         "ar" : {
@@ -109821,6 +113224,28 @@
         }
       }
     },
+    "שברים פשוטים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كسور بسيطة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fractions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Простые дроби"
+          }
+        }
+      }
+    },
     "שגיאה: %@" : {
       "localizations" : {
         "ar" : {
@@ -109865,6 +113290,28 @@
         }
       }
     },
+    "שוה לצין את זה בקול — ילדים ממשיכים להשתפר במה שמשבחים אותם עליו." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يستحقّ أن تقولوا ذلك بصوت عالٍ — الأطفال يواصلون التحسّن في ما يُمدحون عليه."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Worth saying out loud — kids keep improving at what they're praised for."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Об этом стоит сказать вслух — дети продолжают расти в том, за что их хвалят."
+          }
+        }
+      }
+    },
     "שולח מתנה…" : {
       "localizations" : {
         "ar" : {
@@ -109905,6 +113352,94 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отправляем…"
+          }
+        }
+      }
+    },
+    "שולט" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "متمكّن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proficient"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Освоил"
+          }
+        }
+      }
+    },
+    "שולטת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "متمكّنة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastered"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "освоила"
+          }
+        }
+      }
+    },
+    "שום דבר בולט 👏" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا شيء لافت 👏"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing stands out 👏"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ничего не выделяется 👏"
+          }
+        }
+      }
+    },
+    "שורשים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الجذور التربيعية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Square roots"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Квадратные корни"
           }
         }
       }
@@ -114362,13 +117897,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "⏳ שְׁנִיָּה אַחַת מַעֲנֶה"
+                  "value" : "⏳ שניה אחת מענה"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "⏳ %lld שְׁנִיּוֹת מַעֲנֶה"
+                  "value" : "⏳ %lld שניות מענה"
                 }
               }
             }
@@ -114497,7 +118032,73 @@
         }
       }
     },
+    "● %@ עכשיו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "● %@ الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "● %@ now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "● %@ сейчас"
+          }
+        }
+      }
+    },
     "● מְחֻבָּר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "● متّصل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "● Connected"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "● Подключено"
+          }
+        }
+      }
+    },
+    "● מחבר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "● متّصل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "● Connected"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "● Подключено"
+          }
+        }
+      }
+    },
+    "● מחובר" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -115042,6 +118643,28 @@
       }
     },
     "✅ כְּבָר %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ %@ بالفعل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ Already %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ Уже %@"
+          }
+        }
+      }
+    },
+    "✅ כבר %@" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -118175,6 +121798,28 @@
         }
       }
     },
+    "🎯 כדאי לתרגל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎯 يستحق التمرين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎯 Worth practicing"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎯 Стоит потренировать"
+          }
+        }
+      }
+    },
     "🎲 בְּשַׂקִּית %@ וְ־%@. שׁוֹלְפִים כַּדּוּר אֶחָד בְּלִי לְהִסְתַּכֵּל. מָה הַסִּכּוּי שֶׁהוּא אָדֹם?" : {
       "localizations" : {
         "ar" : {
@@ -118226,6 +121871,28 @@
       }
     },
     "🏆 הָעוֹלָמוֹת שֶׁל %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏆 عوالم %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏆 %@'s worlds"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏆 Миры: %@"
+          }
+        }
+      }
+    },
+    "🏆 העולמות של %@" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -118729,6 +122396,50 @@
       }
     },
     "👑 דַּרְגּוֹת שֶׁהֻשְׁלְמוּ: %lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👑 المستويات المكتملة: %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👑 Levels completed: %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👑 Пройдено уровней: %lld"
+          }
+        }
+      }
+    },
+    "👑 דרגות שהושלמו: %lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👑 المستويات المكتملة: %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👑 Levels completed: %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👑 Пройдено уровней: %lld"
+          }
+        }
+      }
+    },
+    "👑 דרגות שהשלמו: %lld" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -119596,6 +123307,94 @@
       }
     },
     "💡 תּוֹבְנַת הַשָּׁבוּעַ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 خلاصة الأسبوع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 This week's insight"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 Вывод за неделю"
+          }
+        }
+      }
+    },
+    "💡 תובנת החדש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 خلاصة الشهر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 This month's insight"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 Вывод за месяц"
+          }
+        }
+      }
+    },
+    "💡 תובנת החודש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 خلاصة الشهر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 This month's insight"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 Вывод за месяц"
+          }
+        }
+      }
+    },
+    "💡 תובנת היום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 خلاصة اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 Today's insight"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💡 Вывод за сегодня"
+          }
+        }
+      }
+    },
+    "💡 תובנת השבוע" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -121528,13 +125327,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "🔥 יוֹם אֶחָד בְּרֶצֶף"
+                  "value" : "🔥 יום אחד ברצף"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "🔥 %lld יְמֵי רֶצֶף"
+                  "value" : "🔥 %lld ימי רצף"
                 }
               }
             }

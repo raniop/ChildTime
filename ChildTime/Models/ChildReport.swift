@@ -6,33 +6,33 @@ import Foundation
 enum SkillCatalog {
     /// Computed so the names follow the app language (a stored static would freeze the first one).
     static var names: [String: String] { [
-        "addSub":       tr("חִבּוּר וְחִסּוּר"),
-        "completeTen":  tr("הַשְׁלָמָה לְעֶשֶׂר"),
-        "compare":      tr("הַשְׁוָאַת מִסְפָּרִים"),
-        "evenOdd":      tr("זוּגִי וְאִי־זוּגִי"),
-        "mul":          tr("כֶּפֶל"),
-        "div":          tr("חִלּוּק"),
-        "mixedOps":     tr("פְּעֻלּוֹת מְשֻׁלָּבוֹת"),
-        "wordProblem":  tr("בְּעָיוֹת מִלּוּלִיּוֹת"),
-        "fractions":    tr("שְׁבָרִים פְּשׁוּטִים"),
-        "divRemainder": tr("חִלּוּק עִם שְׁאֵרִית"),
-        "geometry":     tr("הֶקֵּף וְשֶׁטַח"),
-        "decimals":     tr("מִסְפָּרִים עֶשְׂרוֹנִיִּים"),
-        "average":      tr("מְמֻצָּע"),
-        "percent":      tr("אֲחוּזִים"),
+        "addSub":       tr("חיבור וחסור"),
+        "completeTen":  tr("הושלמה לעשר"),
+        "compare":      tr("השואת מספרים"),
+        "evenOdd":      tr("זוגי ואיזוגי"),
+        "mul":          tr("כפל"),
+        "div":          tr("חלוק"),
+        "mixedOps":     tr("פעולות משלבות"),
+        "wordProblem":  tr("בעיות מלוליות"),
+        "fractions":    tr("שברים פשוטים"),
+        "divRemainder": tr("חלוק עם שארית"),
+        "geometry":     tr("הקף ושטח"),
+        "decimals":     tr("מספרים עשרוניים"),
+        "average":      tr("ממצע"),
+        "percent":      tr("אחוזים"),
         // ז׳–ח׳
-        "negatives":      tr("מִסְפָּרִים מְכֻוָּנִים"),
-        "expressions":    tr("בִּטּוּיִים אַלְגֶּבְּרִיִּים"),
-        "equations":      tr("מִשְׁוָאוֹת"),
-        "powers":         tr("חֶזְקוֹת"),
-        "roots":          tr("שׁוֹרָשִׁים"),
-        "angles":         tr("זָוִיּוֹת"),
-        "proportion":     tr("יַחַס וּפְרוֹפּוֹרְצְיָה"),
-        "pythagoras":     tr("מִשְׁפַּט פִּיתָגוֹרַס"),
-        "linearFunction": tr("פוּנְקְצִיָּה קַוִּית"),
-        "volume":         tr("נֶפַח"),
-        "probability":    tr("הִסְתַּבְּרוּת"),
-        "circle":         tr("מַעְגָּל"),
+        "negatives":      tr("מספרים מכונים"),
+        "expressions":    tr("בטויים אלגבריים"),
+        "equations":      tr("משואות"),
+        "powers":         tr("חזקות"),
+        "roots":          tr("שורשים"),
+        "angles":         tr("זויות"),
+        "proportion":     tr("יחס ופרופורציה"),
+        "pythagoras":     tr("משפט פיתגורס"),
+        "linearFunction": tr("פונקציה קוית"),
+        "volume":         tr("נפח"),
+        "probability":    tr("הסתברות"),
+        "circle":         tr("מעגל"),
     ] }
     static func name(_ key: String) -> String { names[key] ?? key }
 }
@@ -42,7 +42,7 @@ enum ReportPeriod: String, CaseIterable, Identifiable {
     case today, week, month
     var id: String { rawValue }
     var title: String {
-        switch self { case .today: return tr("הַיּוֹם"); case .week: return tr("הַשָּׁבוּעַ"); case .month: return tr("הַחֹדֶשׁ") }
+        switch self { case .today: return tr("היום"); case .week: return tr("השבוע"); case .month: return tr("החודש") }
     }
     /// Calendar days covered (today inclusive).
     var days: Int { switch self { case .today: return 1; case .week: return 7; case .month: return 30 } }
@@ -200,11 +200,11 @@ extension InsightsEngine {
             // multiplication, struggling with fractions" is exactly the picture
             // a parent needs, and folding it into "math 45%" would hide it.
             for s in skills where s.answered >= 5 && s.accuracy >= 0.85 {
-                out.append((s.name, pct(s.accuracy), s.accuracy))
+                out.append((Question.stripNiqqud(s.name), pct(s.accuracy), s.accuracy))
             }
             // The topic as a whole only when there is nothing finer to say.
             if skills.isEmpty, t.accuracy >= 0.85 {
-                out.append((t.topic.displayName, tr("\(pct(t.accuracy)) · \(t.answered) שְׁאֵלוֹת"), t.accuracy))
+                out.append((t.topic.parentName, tr("\(pct(t.accuracy)) · \(t.answered) שאלות"), t.accuracy))
             }
         }
         return out.sorted { $0.2 > $1.2 }.prefix(4).map { ($0.0, $0.1) }
@@ -217,10 +217,10 @@ extension InsightsEngine {
         for t in topicReports(period) where t.answered >= 6 {
             let skills = skillReports(t.topic, period)
             for s in skills.prefix(3) where s.answered >= 4 && s.accuracy < 0.7 {
-                out.append((s.name, tr("\(pct(s.accuracy)) בְּ\(t.topic.displayName)"), s.accuracy))
+                out.append((Question.stripNiqqud(s.name), tr("\(pct(s.accuracy)) ב\(t.topic.parentName)"), s.accuracy))
             }
             if skills.isEmpty, t.accuracy < 0.7 {
-                out.append((t.topic.displayName, tr("\(pct(t.accuracy)) · \(t.wrong) טְעֻיּוֹת"), t.accuracy))
+                out.append((t.topic.parentName, tr("\(pct(t.accuracy)) · \(t.wrong) טעויות"), t.accuracy))
             }
         }
         return out.sorted { $0.2 < $1.2 }.prefix(4).map { ($0.0, $0.1) }
@@ -280,44 +280,44 @@ extension InsightsEngine {
         if let best = topics.first, let worst = topics.last, best.topic != worst.topic,
            best.accuracy - worst.accuracy >= 0.30, worst.accuracy < 0.6 {
             let weakSkill = skillReports(worst.topic, period).first
-            let focus = weakSkill.map { tr(" הַפַּעַר נִפְתָּח בְּעִקָּר בְּ\($0.name).") } ?? ""
+            let focus = weakSkill.map { tr(" הפער נפתח בעיקר ב\($0.name).") } ?? ""
             return DailyInsight(
                 emoji: "💡",
-                title: tr("פַּעַר גָּדוֹל בֵּין נוֹשְׂאִים"),
-                body: tr("\(name) \(g(tr("עוֹנֶה"), tr("עוֹנָה"))) עַל \(worst.topic.displayName) בְּ-\(pct(worst.accuracy)) לְעֻמַּת \(pct(best.accuracy)) בְּ\(best.topic.displayName) — הַפַּעַר הַגָּדוֹל בְּיוֹתֵר בֵּין הַנּוֹשְׂאִים \(g(tr("שֶׁלּוֹ"), tr("שֶׁלָּהּ"))).\(focus)"),
-                recommendation: tr("10 דַּקּוֹת שֶׁל \(weakSkill?.name ?? worst.topic.displayName) בְּיַחַד, פַּעַם־פַּעֲמַיִם בַּשָּׁבוּעַ. \(g(tr("הוּא"), tr("הִיא"))) כְּבָר \(g(tr("חָזָק"), tr("חֲזָקָה"))) בְּ\(best.topic.displayName) — יֵשׁ עַל מָה לִבְנוֹת."))
+                title: tr("פער גדול בין נושאים"),
+                body: tr("\(name) \(g(tr("עונה"), tr("עונה"))) על \(worst.topic.parentName) ב-\(pct(worst.accuracy)) לעומת \(pct(best.accuracy)) ב\(best.topic.parentName) — הפער הגדול ביותר בין הנושאים \(g(tr("שלו"), tr("שלה"))).\(focus)"),
+                recommendation: tr("10 דקות של \(weakSkill.map { Question.stripNiqqud($0.name) } ?? worst.topic.parentName) ביחד, פעם־פעמיים בשבוע. \(g(tr("הוא"), tr("היא"))) כבר \(g(tr("חזק"), tr("חזקה"))) ב\(best.topic.parentName) — יש על מה לבנות."))
         }
         // 2. A subject that jumped.
         if let up = deltas.first, up.deltaPoints >= 10 {
             return DailyInsight(
                 emoji: "🌟",
-                title: tr("\(up.topic.displayName) הוֹפֶכֶת לְחוֹזְקָה"),
-                body: tr("\(name) \(g(tr("הִשְׁתַּפֵּר"), tr("הִשְׁתַּפְּרָה"))) בְּ\(up.topic.displayName) בְּ-\(Int(up.deltaPoints.rounded())) נְקֻדּוֹת לְעֻמַּת הַתְּקוּפָה הַקּוֹדֶמֶת."),
-                recommendation: tr("שָׁוֶה לְצַיֵּן אֶת זֶה בְּקוֹל — יְלָדִים מַמְשִׁיכִים לְהִשְׁתַּפֵּר בְּמַה שֶׁמְּשַׁבְּחִים אוֹתָם עָלָיו."))
+                title: tr("\(up.topic.parentName) הופכת לחוזקה"),
+                body: tr("\(name) \(g(tr("השתפר"), tr("השתפרה"))) ב\(up.topic.parentName) ב-\(Int(up.deltaPoints.rounded())) נקודות לעומת התקופה הקודמת."),
+                recommendation: tr("שוה לצין את זה בקול — ילדים ממשיכים להשתפר במה שמשבחים אותם עליו."))
         }
         // 3. A subject that slipped.
         if let down = deltas.last, down.deltaPoints <= -8 {
             return DailyInsight(
                 emoji: "🔎",
-                title: tr("יְרִידָה קַלָּה בְּ\(down.topic.displayName)"),
-                body: tr("הַדִּיּוּק שֶׁל \(name) בְּ\(down.topic.displayName) יָרַד בְּ-\(Int(abs(down.deltaPoints).rounded())) נְקֻדּוֹת לְעֻמַּת הַתְּקוּפָה הַקּוֹדֶמֶת. לִפְעָמִים זֶה פָּשׁוּט חֹמֶר חָדָשׁ שֶׁנִּכְנַס."),
-                recommendation: tr("\(g(tr("שַׁאֲלוּ אוֹתוֹ"), tr("שַׁאֲלוּ אוֹתָהּ"))) מָה הָיָה קָשֶׁה הַשָּׁבוּעַ — לָרוֹב זוֹ שְׁאֵלָה אַחַת שֶׁפּוֹתַחַת הַכֹּל."))
+                title: tr("ירידה קלה ב\(down.topic.parentName)"),
+                body: tr("הדיוק של \(name) ב\(down.topic.parentName) ירד ב-\(Int(abs(down.deltaPoints).rounded())) נקודות לעומת התקופה הקודמת. לפעמים זה פשוט חומר חדש שנכנס."),
+                recommendation: tr("\(g(tr("שאלו אותו"), tr("שאלו אותה"))) מה היה קשה השבוע — לרוב זו שאלה אחת שפותחת הכול."))
         }
         // 4. A real streak.
         let s = summary(period)
         if s.activeDays >= 5 && period != .today {
             return DailyInsight(
                 emoji: "🔥",
-                title: tr("\(s.activeDays) יָמִים שֶׁל לְמִידָה"),
-                body: tr("\(name) \(g(tr("לָמַד"), tr("לָמְדָה"))) בְּ-\(s.activeDays) יָמִים \(period == .week ? tr("הַשָּׁבוּעַ") : tr("הַחֹדֶשׁ")), \(s.questions) שְׁאֵלוֹת בְּסַךְ הַכֹּל בְּ-\(pct(s.accuracy)) הַצְלָחָה."),
-                recommendation: tr("הָרְצִיפוּת שָׁוָה יוֹתֵר מֵהַכַּמּוּת — גַּם 10 דַּקּוֹת בְּיוֹם שׁוֹמְרוֹת עָלֶיהָ."))
+                title: tr("\(s.activeDays) ימים של למידה"),
+                body: tr("\(name) \(g(tr("למד"), tr("למדה"))) ב-\(s.activeDays) ימים \(period == .week ? tr("השבוע") : tr("החודש")), \(s.questions) שאלות בסך הכול ב-\(pct(s.accuracy)) הצלחה."),
+                recommendation: tr("הרציפות שוה יותר מהכמות — גם 10 דקות ביום שומרות עליה."))
         }
         // 5. Learning for its own sake.
         if s.voluntaryLearningRate >= 0.3, s.questions >= 20 {
             return DailyInsight(
                 emoji: "💛",
-                title: tr("\(g(tr("לוֹמֵד"), tr("לוֹמֶדֶת"))) גַּם בְּלִי פְּרָס"),
-                body: tr("\(Int((s.voluntaryLearningRate * 100).rounded()))% מֵהַתְּשׁוּבוֹת שֶׁל \(name) נִתְּנוּ אַחֲרֵי שֶׁהַדַּקּוֹת שֶׁל הַיּוֹם כְּבָר נִגְמְרוּ — כְּלוֹמַר סְתָם כִּי \(g(tr("רָצָה"), tr("רָצְתָה")))."),
+                title: tr("\(g(tr("לומד"), tr("לומדת"))) גם בלי פרס"),
+                body: tr("\(Int((s.voluntaryLearningRate * 100).rounded()))% מהתשובות של \(name) ניתנו אחרי שהדקות של היום כבר נגמרו — כלומר סתם כי \(g(tr("רצה"), tr("רצתה")))."),
                 recommendation: nil)
         }
         // 6. Plain summary when there is data but no story yet.
@@ -325,8 +325,8 @@ extension InsightsEngine {
         let mins = (period == .today ? minutesToday : nil) ?? s.minutesEarned
         return DailyInsight(
             emoji: "📚",
-            title: tr("\(s.questions) שְׁאֵלוֹת \(period.title.lowercased())"),
-            body: tr("\(pct(s.accuracy)) הַצְלָחָה") + (mins > 0 ? tr(" · \(mins) דַּקּוֹת שֶׁ\(g(tr("הִרְוִיחַ"), tr("הִרְוִיחָה")))") : ""),
+            title: tr("\(s.questions) שאלות \(period.title.lowercased())"),
+            body: tr("\(pct(s.accuracy)) הצלחה") + (mins > 0 ? tr(" · \(mins) דקות ש\(g(tr("הרוויח"), tr("הרוויחה")))") : ""),
             recommendation: nil)
     }
 

@@ -227,7 +227,7 @@ struct ChildInsightsView: View {
                                 .foregroundStyle(confidenceColor(row.score))
                             ProgressView(value: Double(row.score), total: 100)
                                 .tint(confidenceColor(row.score))
-                            Text("\(row.topic.emoji) \(row.topic.displayName)")
+                            Text("\(row.topic.emoji) \(row.topic.parentName)")
                                 .font(.system(size: 14, weight: .semibold, design: .rounded))
                                 .frame(width: 110, alignment: .trailing)
                         }
@@ -262,7 +262,7 @@ struct ChildInsightsView: View {
                 Text(empty).font(.caption).foregroundStyle(.secondary)
             } else {
                 ForEach(topics.prefix(3), id: \.self) { t in
-                    Text("\(t.emoji) \(t.displayName)")
+                    Text("\(t.emoji) \(t.parentName)")
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                         .padding(.horizontal, 8).padding(.vertical, 3)
                         .background(Capsule().fill(tint.opacity(0.18)))

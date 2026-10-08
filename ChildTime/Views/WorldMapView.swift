@@ -124,7 +124,7 @@ struct WorldMapView: View {
     }
 
     private var worldGridColumns: [GridItem] {
-        let count = isCompact ? 2 : 3
+        let count = isCompact || useSidebar ? 2 : 3
         return Array(
             repeating: GridItem(.flexible(), spacing: AppSpacing.md),
             count: count
@@ -400,8 +400,11 @@ struct WorldMapView: View {
             GlassBackdrop()
             SparkleField(count: 14, size: 11)
 
+            HStack(spacing: 0) {
+            if useSidebar { kidSidebar }
             ScrollView {
                 VStack(spacing: 0) {
+                  if !useSidebar {
                     // The approved header (Rani, 2026-09-07): the gold "טופי" wordmark
                     // with the lion on the right and the round buttons on the left,
                     // ABOVE the glass pane — then the pane, then the worlds.
@@ -416,6 +419,7 @@ struct WorldMapView: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.horizontal, homeHPad)
                         .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("home")).maxY } action: { headerBottom = $0 }
+                  }
                     // (The limited-time event banner is now a transient TOAST —
                     // see eventToastOverlay — instead of a permanent row here
                     // that ate a full line of the map all day.)
@@ -571,14 +575,16 @@ struct WorldMapView: View {
                     // (Rani, on-device). The companion floats and never needs
                     // scroll room of its own.
                     // The toolbar is one bar now, so the room is what it measures.
-                    .padding(.bottom, bottomPanelHeight > 0
-                             ? bottomPanelHeight + 8
-                             : (isCompact ? 220 : 190))
+                    .padding(.bottom, useSidebar ? AppSpacing.lg
+                             : (bottomPanelHeight > 0 ? bottomPanelHeight + 8 : (isCompact ? 220 : 190)))
                 }
+            }
             }
 
             // Bottom CTAs floating panel — over a soft scrim, so the tiles
             // scrolling underneath fade out instead of showing through the glass.
+            // (With the sidebar the toolbar lives in it, not over the worlds.)
+            if !useSidebar {
             VStack {
                 Spacer()
                 bottomCTAs
@@ -597,6 +603,7 @@ struct WorldMapView: View {
                             .ignoresSafeArea(edges: [.bottom, .horizontal])
                     )
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { bottomPanelHeight = $0 }
+            }
             }
 
 
@@ -1147,6 +1154,31 @@ struct WorldMapView: View {
         .eraseToAnyView()
     }
 
+    // MARK: - 📐 Sidebar (wide and short: the open Duo, an iPad on its side)
+
+    /// On a wide, short screen the phone layout stacked a header over the worlds
+    /// and a toolbar under them, and the worlds got squeezed in between (Rani:
+    /// "עמוס מדי וקשה לעיין"). Here everything about the CHILD sits in a fixed
+    /// column on the side — the way Apple's iPad apps keep a sidebar — and the
+    /// worlds get the whole height of the rest.
+    private var useSidebar: Bool { display.isWideShort }
+
+    private var kidSidebar: some View {
+        VStack(spacing: 14) {
+            brandRow
+            topBar
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("home")).maxY } action: { headerBottom = $0 }
+            if kidMode.active { kidExitBar }
+            Spacer(minLength: 8)
+            bottomCTAs
+                .coachMark("k.minutes")
+        }
+        .padding(.horizontal, AppSpacing.md)
+        .padding(.vertical, AppSpacing.sm)
+        .frame(width: 400)
+        .clearOfBar()
+    }
+
     // MARK: - Top bar
 
     private var topBar: some View {
@@ -1157,17 +1189,8 @@ struct WorldMapView: View {
         // twin insets (daily challenge · chores). Forced LTR so the avatar sits
         // on the left and the buttons on the right, matching the mockup.
         _ = btnSize
-        // 📐 Wide and short (the open Duo, an iPad on its side): ONE row — who,
-        // the wallet, and today — so the worlds get the height (Rani: open, it
-        // was "עמוס מדי וקשה לעיין").
-        let oneRow = display.isWideShort
         return VStack(spacing: 12) {
-            if oneRow {
-                HStack(alignment: .center, spacing: 14) {
-                    identityBlock(avatar: avatarSize)
-                    walletStats.coachMark("k.wallet")
-                    statsPanel.frame(maxWidth: 460)
-                }
+            if false {
             } else {
                 HStack(alignment: .center, spacing: 10) {
                     identityBlock(avatar: avatarSize)
