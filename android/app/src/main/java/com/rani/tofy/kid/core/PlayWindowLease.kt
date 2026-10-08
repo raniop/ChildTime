@@ -113,6 +113,8 @@ data class ClaimedWallet(
     val pendingMinutes: Int,
     val parentGiftMinutes: Int,
     val minutesUnlockedToday: Int,
+    /** Minutes handed back to today's allowance — climbs, merged with max. */
+    val returnedTodayMinutes: Int = 0,
     val secondsCarry: Int,
     val carryIsGift: Boolean = false,
     val revision: Int,
@@ -255,7 +257,7 @@ class PlayWindowLeaseManager(
 
     private fun walletOf(s: ProgressSnapshot, baseSeq: Int, delta: Int, gift: Boolean) = ClaimedWallet(
         pendingMinutes = s.pendingMinutes, parentGiftMinutes = s.parentGiftMinutes ?: 0,
-        minutesUnlockedToday = s.minutesUnlockedToday, secondsCarry = s.secondsCarry ?: 0,
+        minutesUnlockedToday = s.minutesUnlockedToday, returnedTodayMinutes = s.returnedTodayMinutes, secondsCarry = s.secondsCarry ?: 0,
         carryIsGift = s.carryIsGift ?: false, revision = s.revision, basedOnEditSeq = baseSeq,
         deltaSeconds = delta, deltaIsGift = gift,
     )
@@ -295,7 +297,9 @@ class PlayWindowLeaseManager(
                     if (owed > 0) when (held.kind) {
                         PlayWindowLease.Kind.EARNED -> {
                             cloud.earnedSecondsIn = (cloud.earnedSecondsIn ?: 0) + owed
-                            cloud.minutesUnlockedToday = maxOf(0, cloud.minutesUnlockedToday - owed / 60)
+                            // RAISE "returned" — a lowered "opened" is erased by the next
+                            // max-merge (Ben David, 2026-10-08: refunded 59 of 60, parent saw 60/60).
+                            cloud.returnedTodayMinutes += owed / 60
                         }
                         PlayWindowLease.Kind.GIFT -> cloud.giftSecondsIn = (cloud.giftSecondsIn ?: 0) + owed
                         PlayWindowLease.Kind.GRANT -> Unit
@@ -380,7 +384,7 @@ class PlayWindowLeaseManager(
                 if (refund > 0) when (held.kind) {
                     PlayWindowLease.Kind.EARNED -> {
                         cloud.earnedSecondsIn = (cloud.earnedSecondsIn ?: 0) + refund
-                        cloud.minutesUnlockedToday = maxOf(0, cloud.minutesUnlockedToday - refund / 60)
+                        cloud.returnedTodayMinutes += refund / 60   // raise "returned", never lower "opened"
                     }
                     PlayWindowLease.Kind.GIFT -> cloud.giftSecondsIn = (cloud.giftSecondsIn ?: 0) + refund
                     PlayWindowLease.Kind.GRANT -> Unit

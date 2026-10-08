@@ -1219,7 +1219,10 @@ class ProgressEngine(
     fun creditRefundLocally(seconds: Int, manual: Boolean) = op {
         clearInFlightRefund()
         if (seconds <= 0) return@op
-        if (manual) creditGiftRaw(seconds) else creditEarnedRaw(seconds)
+        if (manual) creditGiftRaw(seconds) else {
+            creditEarnedRaw(seconds)
+            s.returnedTodayMinutes += seconds / 60   // unplayed → back into today's allowance
+        }
     }
 
     /** Mirror of creditRefundLocally for a spend the cloud already made. */
@@ -1254,6 +1257,7 @@ class ProgressEngine(
             else if (w.deltaSeconds < 0) { if (w.deltaIsGift) debitGiftRaw(-w.deltaSeconds) else debitEarnedRaw(-w.deltaSeconds) }
         }
         s.minutesUnlockedToday = maxOf(s.minutesUnlockedToday, w.minutesUnlockedToday)
+        s.returnedTodayMinutes = maxOf(s.returnedTodayMinutes, w.returnedTodayMinutes)
         adoptRevision(w.revision)
     }
 

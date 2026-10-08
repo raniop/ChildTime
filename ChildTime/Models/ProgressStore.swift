@@ -2026,6 +2026,12 @@ final class ProgressStore: ObservableObject {
             else { debitEarned(seconds: -w.deltaSeconds) }
         }
         minutesUnlockedToday = max(minutesUnlockedToday, w.minutesUnlockedToday)
+        returnedTodayMinutes = max(returnedTodayMinutes, w.returnedTodayMinutes)
+        // A refund of an earned window: those minutes were never played, so the
+        // parent's "used today" must not count them either.
+        if w.deltaSeconds >= 60, !w.deltaIsGift {
+            LearningHistoryStore.shared.recordMinutesReturned(w.deltaSeconds / 60)
+        }
         adoptRevision(w.revision)
     }
 
@@ -2355,7 +2361,13 @@ final class ProgressStore: ObservableObject {
     func creditRefundLocally(seconds: Int, manual: Bool) {
         clearInFlightRefund()   // this IS the credit now — don't show it twice
         guard seconds > 0 else { return }
-        if manual { creditGift(seconds: seconds) } else { creditEarned(seconds: seconds) }
+        if manual { creditGift(seconds: seconds) } else {
+            creditEarned(seconds: seconds)
+            // Same as the cloud release: unplayed minutes go back into today's
+            // allowance and out of the parent's "used today".
+            returnedTodayMinutes += seconds / 60
+            LearningHistoryStore.shared.recordMinutesReturned(seconds / 60)
+        }
     }
 
     private func creditRefundLocally_unused(seconds: Int, manual: Bool) {
@@ -2497,6 +2509,7 @@ final class ProgressStore: ObservableObject {
             // These minutes were returned unused — they don't count against today's
             // unlocked allowance, so the kid can re-open them later today.
             returnedTodayMinutes += remainingMinutes
+            LearningHistoryStore.shared.recordMinutesReturned(remainingMinutes)
         }
         unlockEndsAt = nil
         PlayTimeLiveActivity.end()

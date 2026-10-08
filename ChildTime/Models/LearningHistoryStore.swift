@@ -110,6 +110,14 @@ final class LearningHistoryStore: ObservableObject {
         mutateToday { $0.minutesUsed += minutes }
     }
 
+    /// Minutes of an opened window handed back unplayed — the parent's report
+    /// counts what was PLAYED, not what was opened (Ben David: opened 60, closed
+    /// after 5 seconds, the report said 60 minutes used).
+    func recordMinutesReturned(_ minutes: Int) {
+        guard minutes > 0 else { return }
+        mutateToday { $0.minutesUsed = max(0, $0.minutesUsed - minutes) }
+    }
+
     // MARK: - Reads (for the dashboard / engines)
 
     /// History for the bound child if it matches; otherwise loads from disk.

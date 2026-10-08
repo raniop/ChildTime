@@ -126,6 +126,8 @@ struct ClaimedWallet: Equatable {
     let pendingMinutes: Int
     let parentGiftMinutes: Int
     let minutesUnlockedToday: Int
+    /// Minutes handed back to today's allowance — climbs, merged with max.
+    var returnedTodayMinutes: Int = 0
     /// Sub-minute remainder left after the transaction spent/refunded (0…59).
     let secondsCarry: Int
     /// Which pocket that remainder belongs to.
@@ -390,7 +392,11 @@ final class PlayWindowLeaseManager: ObservableObject {
                         switch held.kind {
                         case .earned:
                             cloud.earnedSecondsIn = (cloud.earnedSecondsIn ?? 0) + owed
-                            cloud.minutesUnlockedToday = max(0, cloud.minutesUnlockedToday - owed / 60)
+                            // Back into today's allowance by RAISING "returned" — the
+                            // opened total merges with max and a lowered value was
+                            // erased by the next sync (Ben David, 2026-10-08: 59 of
+                            // 60 minutes refunded, the parent still saw 60/60).
+                            cloud.returnedTodayMinutes += owed / 60
                         case .gift:
                             cloud.giftSecondsIn = (cloud.giftSecondsIn ?? 0) + owed
                         case .grant: break
@@ -443,7 +449,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                 ], forDocument: wRef)
                 return ["ok": true, "leaseID": candidate, "seconds": grant,
                         "wPending": merged.pendingMinutes, "wGiftPocket": merged.parentGiftMinutes ?? 0,
-                        "wToday": merged.minutesUnlockedToday, "wCarry": merged.secondsCarry ?? 0, "wCarryGift": merged.carryIsGift ?? false,
+                        "wToday": merged.minutesUnlockedToday, "wReturned": merged.returnedTodayMinutes, "wCarry": merged.secondsCarry ?? 0, "wCarryGift": merged.carryIsGift ?? false,
                         "wRev": merged.revision, "wBase": baseSeq,
                         "wDelta": (policy == .adoptLocal || kind == .grant) ? 0 : -grant,
                         "wGift": kind == .gift]
@@ -461,6 +467,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                     wallet = ClaimedWallet(pendingMinutes: r["wPending"] as? Int ?? 0,
                                            parentGiftMinutes: r["wGiftPocket"] as? Int ?? 0,
                                            minutesUnlockedToday: r["wToday"] as? Int ?? 0,
+                                           returnedTodayMinutes: r["wReturned"] as? Int ?? 0,
                                            secondsCarry: r["wCarry"] as? Int ?? 0,
                                            carryIsGift: r["wCarryGift"] as? Bool ?? false,
                                            revision: rev,
@@ -522,7 +529,8 @@ final class PlayWindowLeaseManager: ObservableObject {
                     switch held.kind {
                     case .earned:
                         cloud.earnedSecondsIn = (cloud.earnedSecondsIn ?? 0) + refund
-                        cloud.minutesUnlockedToday = max(0, cloud.minutesUnlockedToday - refund / 60)
+                        // RAISE "returned", never lower "opened" — see the settle above.
+                        cloud.returnedTodayMinutes += refund / 60
                     case .gift:
                         cloud.giftSecondsIn = (cloud.giftSecondsIn ?? 0) + refund
                     case .grant: break
@@ -548,7 +556,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                     "refundedSeconds": refund,
                 ], forDocument: wRef, merge: true)
                 return ["wPending": cloud.pendingMinutes, "wGiftPocket": cloud.parentGiftMinutes ?? 0,
-                        "wToday": cloud.minutesUnlockedToday, "wCarry": cloud.secondsCarry ?? 0, "wCarryGift": cloud.carryIsGift ?? false,
+                        "wToday": cloud.minutesUnlockedToday, "wReturned": cloud.returnedTodayMinutes, "wCarry": cloud.secondsCarry ?? 0, "wCarryGift": cloud.carryIsGift ?? false,
                         "wRev": cloud.revision, "wBase": baseSeq,
                         "wDelta": held.kind == .grant ? 0 : refund,
                         "wGift": held.kind == .gift]
@@ -567,6 +575,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                     let w = ClaimedWallet(pendingMinutes: r["wPending"] as? Int ?? 0,
                                           parentGiftMinutes: r["wGiftPocket"] as? Int ?? 0,
                                           minutesUnlockedToday: r["wToday"] as? Int ?? 0,
+                                          returnedTodayMinutes: r["wReturned"] as? Int ?? 0,
                                           secondsCarry: r["wCarry"] as? Int ?? 0,
                                           carryIsGift: r["wCarryGift"] as? Bool ?? false,
                                           revision: rev,
