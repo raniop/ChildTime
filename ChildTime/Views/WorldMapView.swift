@@ -1177,10 +1177,9 @@ struct WorldMapView: View {
         #endif
         // Rani (2026-10-08): opening the device must CONTINUE the closed screen —
         // the same pieces in the same order, with room for more worlds.
-        // …and keep every piece at its CLOSED size: the extra width buys more
-        // worlds (4 across, each the size of a closed-screen card) and lets the
-        // child's card become one row, instead of stretching everything.
-        return "a"
+        // Apple's guide: "On the inner display, your app should look like a
+        // natural extension of its iPad layout" — so it is the iPad's home.
+        return "c"
     }
     private var useSidebar: Bool { wideMode == "b" }
     private var thinTopRow: Bool { wideMode == "a" }
