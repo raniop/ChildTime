@@ -266,9 +266,13 @@ struct MiniGameTopBar<Trailing: View>: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            chips
+            // ✕ in the corner away from the foldable's camera — it sat hidden
+            // under "9:41" in every game (Rani's Duo review).
+            chips.awayFromBar(.leading)
             if earn != nil { MiniGameEarnBar() }
         }
+        // …and the whole row stops short of the clock, like the question runner's.
+        .clearOfBar()
         .padding(.horizontal, AppSpacing.md)
         .padding(.top, AppSpacing.sm)
     }
