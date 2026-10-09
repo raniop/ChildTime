@@ -9,7 +9,10 @@ struct WorldUnlockView: View {
     @State private var confettiTrigger = 0
     @State private var stage: Int = 0
 
-    private var isCompact: Bool { hsc == .compact }
+    @ObservedObject private var display = DisplayGeometry.shared
+
+    /// A short glass (the foldable) sizes like a phone.
+    private var isCompact: Bool { hsc == .compact || display.isShort }
     private var emojiSize: CGFloat { isCompact ? 130 : 180 }
     private var subtitleFontSize: CGFloat { isCompact ? 26 : 32 }
     private var titleFontSize: CGFloat { isCompact ? 42 : 56 }
@@ -24,7 +27,9 @@ struct WorldUnlockView: View {
 
                 ScrollView {
                     VStack(spacing: AppSpacing.xl) {
-                        Spacer(minLength: AppSpacing.lg)
+                        // (A flexible spacer here took every spare point ABOVE the
+                        // emoji — on a short glass that sank everything to the bottom.)
+                        if !display.isShort { Spacer(minLength: AppSpacing.lg) }
 
                         Text(world.emoji)
                             .font(.system(size: emojiSize))
@@ -70,6 +75,9 @@ struct WorldUnlockView: View {
 
                         Color.clear.frame(height: AppSpacing.lg)
                     }
+                    // Short glass: truly centred — the spacer above sank the world's
+                    // name and the button low, under an empty top half (Rani: "תרים
+                    // למעלה").
                     .frame(minHeight: proxy.size.height, alignment: .center)
                     .frame(maxWidth: .infinity)
                 }

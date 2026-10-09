@@ -973,6 +973,9 @@ struct SurpriseRoundIntro: View {
             .frame(maxWidth: 440)
             .glassPane(radius: 16)
             .padding(.horizontal, AppSpacing.lg)
+            // The closed foldable: centred, the card's top ran under the clock —
+            // it sits lower, below the clock's band.
+            .padding(.top, display.hasBarStrip && !display.isWideShort ? display.barStripTop - 40 : 0)
             .scaleEffect(appeared ? 1 : 0.85)
             .opacity(appeared ? 1 : 0)
 
