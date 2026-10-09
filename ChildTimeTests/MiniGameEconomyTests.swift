@@ -254,7 +254,11 @@ struct MiniGameEarnTests {
         #expect(d.minutes == 4, "10 correct answers must pay the parent's 4 minutes")
         #expect(d.seconds == 240)
         #expect(d.stars == expected.stars, "⭐ per answer must match the runner's ladder")
-        #expect(d.diamonds == expected.diamonds, "💎 per answer must match the runner's ladder")
+        // 💎 double on Fri/Sat and for the topic of the day (GameEvent) — the test
+        // failed every weekend until it allowed for that.
+        let eventMult = GameEvent.current()?.diamondMultiplier(for: .math) ?? 1
+        #expect(d.diamonds == expected.diamonds * eventMult,
+                "💎 per answer must match the runner's ladder: got \(d.diamonds), want \(expected.diamonds * eventMult)")
         #expect(d.answered == 10)
         #expect(d.correct == 10)
     }
