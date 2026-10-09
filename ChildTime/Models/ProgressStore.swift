@@ -2330,15 +2330,27 @@ final class ProgressStore: ObservableObject {
             banked = remaining / 60
             endUnlock()
             beginInFlightRefund(seconds: remaining, gift: wasManual)
+            // Captured NOW, while this store still holds `childID` — the Task
+            // below runs after the caller may have switched to another child.
+            let capture: PlayWindowLeaseManager.LocalCapture? = holdsData(for: childID)
+                ? PlayWindowLeaseManager.captureLocal() : nil
             Task {
                 let ok = await PlayWindowLeaseManager.shared.release(childID: childID,
                                                                      leaseID: leaseID,
                                                                      localRemainingSeconds: remaining,
-                                                                     asOf: cutAt)
+                                                                     asOf: cutAt,
+                                                                     captured: capture)
                 // The cloud could not take it (offline — transactions never queue).
-                // Pay locally instead, or the child just lost the leftover.
+                // Pay locally instead, or the child just lost the leftover — and
+                // pay the RIGHT child: if the store moved on, into their saved slot.
                 if !ok {
-                    await MainActor.run { self.creditRefundLocally(seconds: remaining, manual: wasManual) }
+                    await MainActor.run {
+                        if self.holdsData(for: childID) {
+                            self.creditRefundLocally(seconds: remaining, manual: wasManual)
+                        } else {
+                            ProgressVault.shared.creditRefund(seconds: remaining, gift: wasManual, to: childID)
+                        }
+                    }
                 }
             }
         } else if wasManual {

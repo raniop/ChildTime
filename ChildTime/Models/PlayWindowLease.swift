@@ -491,13 +491,24 @@ final class PlayWindowLeaseManager: ObservableObject {
     /// `asOf`: measure the leftover at that moment instead of now — a window
     /// closed by a school time / bedtime that the app only noticed later still
     /// refunds what was left when the quiet time began.
-    func release(childID: UUID, leaseID: String, localRemainingSeconds: Int, asOf: Date? = nil) async -> Bool {
+    func release(childID: UUID, leaseID: String, localRemainingSeconds: Int, asOf: Date? = nil,
+                 captured: LocalCapture? = nil) async -> Bool {
         let cid = childID.uuidString
         let wRef = windowRef(cid), sRef = stateRef(cid)
-        let localRevision = ProgressStore.shared.revision
-        // Captured BEFORE the transaction — the block may re-run.
-        let local = ProgressStore.shared.captureSnapshot()
-        let baseSeq = ProgressStore.shared.localEditSeq
+        // 🛡 WHOSE numbers are merged up. This used to capture the live store HERE
+        // — but this runs in a Task, after the caller has already switched profile
+        // (Kid Mode exit, a sibling switch), so it merged the NEXT child's stars
+        // and wallet into THIS child's cloud doc. And on a parent's phone (a lock
+        // the child's device never answered) it merged the parent's cached copy —
+        // possibly a sibling's. Now: the caller's synchronous capture, or the live
+        // store only if it provably holds this child on a device that plays as
+        // them; otherwise the cloud alone (refund still applied).
+        let mayUseLive = ProgressStore.shared.holdsData(for: childID)
+            && (ParentSettings.shared.deviceRole != .parent || KidModeManager.shared.active)
+        let capture = captured ?? (mayUseLive ? Self.captureLocal() : nil)
+        let local = capture?.snapshot
+        let localRevision = capture?.snapshot.revision ?? 0
+        let baseSeq = capture?.editSeq ?? 0
 
         return await withCheckedContinuation { (cont: CheckedContinuation<Bool, Never>) in
             db.runTransaction({ txn, _ -> Any? in
@@ -520,7 +531,7 @@ final class PlayWindowLeaseManager: ObservableObject {
                 // minutes earned mid-window, an approved chore), and adopting that
                 // result would erase it.
                 let remote = (try? txn.getDocument(sRef))?.data().flatMap(ProgressSnapshot.fromFirestore) ?? .blank
-                var cloud = ProgressSnapshot.ratchetMerged(local: local, remote: remote)
+                var cloud = local.map { ProgressSnapshot.ratchetMerged(local: $0, remote: remote) } ?? remote
                 // Seconds-exact: give back every second, whole minutes to the
                 // pocket and the remainder to the carry. Flooring here is what
                 // used to shave up to 59 seconds off every hand-off.
@@ -587,13 +598,25 @@ final class PlayWindowLeaseManager: ObservableObject {
                         // parent closing a child's window remotely runs the very
                         // same transaction — writing that child's wallet into the
                         // parent's ProgressStore would corrupt whoever is active.
-                        guard ProfileStore.shared.activeID == childID else { return }
+                        guard ProfileStore.shared.activeID == childID,
+                              ProgressStore.shared.holdsData(for: childID),
+                              capture != nil else { return }
                         ProgressStore.shared.applyClaimedWallet(w)
                     }
                 }
                 cont.resume(returning: err == nil)
             }
         }
+    }
+
+    /// The live store's state, taken synchronously by the caller BEFORE anything
+    /// can switch profile — the only snapshot `release` may merge up.
+    struct LocalCapture {
+        let snapshot: ProgressSnapshot
+        let editSeq: Int
+    }
+    static func captureLocal() -> LocalCapture {
+        LocalCapture(snapshot: ProgressStore.shared.captureSnapshot(), editSeq: ProgressStore.shared.localEditSeq)
     }
 
     /// PARENT closes the child's window from afar, with no cooperation from the

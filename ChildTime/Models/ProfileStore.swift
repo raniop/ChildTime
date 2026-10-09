@@ -125,7 +125,7 @@ final class ProfileStore: ObservableObject {
     func remove(_ profile: Profile) {
         profiles.removeAll { $0.id == profile.id }
         if activeID == profile.id {
-            activeID = fallbackActiveID()
+            activate(fallbackActiveID())
         }
         HouseholdManager.shared.deleteChild(profile.id)
     }
@@ -136,7 +136,7 @@ final class ProfileStore: ObservableObject {
     func removeLocalOnly(_ id: UUID) {
         guard profiles.contains(where: { $0.id == id }) else { return }
         profiles.removeAll { $0.id == id }
-        if activeID == id { activeID = fallbackActiveID() }
+        if activeID == id { activate(fallbackActiveID()) }
     }
 
     /// Replacement identity after the active profile disappears. A PARENT device
@@ -180,6 +180,18 @@ final class ProfileStore: ObservableObject {
             // the sibling's stars" incident, 36502FEA).
             ProgressVault.shared.switchTo(profileID: id)
             activeID = id
+        }
+    }
+
+    /// 🛡 Every switch of WHO is active goes through the vault — save the
+    /// outgoing child, load the incoming one, bind. A bare `activeID = x` left
+    /// the previous child's numbers live in the store under the new name, and
+    /// the next autosave/sync wrote them there (a sibling's stars and wallet).
+    private func activate(_ id: UUID?) {
+        if let id, let p = profiles.first(where: { $0.id == id }) {
+            setActive(p)
+        } else {
+            activeID = nil
         }
     }
 
@@ -252,7 +264,7 @@ final class ProfileStore: ObservableObject {
             // dashboard). On a CHILD device the identity is the joinedChildID
             // binding — "first in the list" once bound Yoav's iPad to a sibling.
             if activeID == nil, ParentSettings.shared.deviceRole != .child {
-                activeID = profiles.first?.id
+                activate(profiles.first?.id)
             }
         }
         for winner in localCharacterWinners {

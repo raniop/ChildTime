@@ -100,4 +100,61 @@ struct FamilyLinkTests {
         if let prev = previousActive, store.profiles.contains(where: { $0.id == prev }) { store.setActiveID(prev) }
         #expect(store.profiles.map(\.id) == before)
     }
+
+    // MARK: - Stage 1: one child's numbers never land on another
+
+    /// Removing the active child hands the store to the next one THROUGH the
+    /// vault — never a bare `activeID =` with the removed child's numbers live.
+    @Test func removingActiveChildLoadsTheNextChildsOwnNumbers() {
+        let store = ProfileStore.shared
+        let progress = ProgressStore.shared
+        let before = store.profiles.map(\.id)
+        let previousActive = store.activeID
+
+        let b = Profile(name: "בדיקה ב2", gender: .boy, age: .grade1)
+        store.add(b)                                   // B: blank slot
+        let a = Profile(name: "בדיקה א2", gender: .girl, age: .grade1)
+        store.add(a)
+        store.setActive(a)
+        progress.applyChestReward(ChestReward(stars: 70, diamonds: 15, minutes: 12))
+        #expect(progress.stars >= 70)
+
+        // Put B first so the fallback picks B, then remove A.
+        store.signOutCurrentProfile()
+        store.setActive(a)
+        store.removeLocalOnly(a.id)
+        if let now = store.activeID {
+            #expect(progress.holdsData(for: now))      // store and active id agree
+            let slot = ProgressVault.shared.snapshot(for: now)
+            #expect(progress.stars == slot.stars)      // the newcomer's OWN numbers
+            #expect(progress.pendingMinutes == slot.pendingMinutes)
+            if now == b.id { #expect(progress.stars == 0 && progress.pendingMinutes == 0) }
+        }
+
+        store.removeLocalOnly(b.id)
+        if let prev = previousActive, store.profiles.contains(where: { $0.id == prev }) { store.setActiveID(prev) }
+        #expect(store.profiles.map(\.id) == before)
+    }
+
+    /// An offline refund for a child who is no longer live goes into THEIR saved
+    /// slot — never into the live store of whoever replaced them.
+    @Test func offlineRefundForAnotherChildCreditsTheirSlot() {
+        let vault = ProgressVault.shared
+        let progress = ProgressStore.shared
+        let other = UUID()
+        vault.write(.blank, for: other)
+        let liveEarned = progress.earnedSecondsIn
+        let liveGift = progress.giftSecondsIn
+
+        vault.creditRefund(seconds: 300, gift: false, to: other)
+        vault.creditRefund(seconds: 120, gift: true, to: other)
+
+        let slot = vault.snapshot(for: other)
+        #expect(slot.earnedSecondsIn == 300)
+        #expect(slot.giftSecondsIn == 120)
+        #expect(slot.returnedTodayMinutes == 5)
+        #expect(progress.earnedSecondsIn == liveEarned)   // live store untouched
+        #expect(progress.giftSecondsIn == liveGift)
+        vault.purgeCache(for: other)
+    }
 }

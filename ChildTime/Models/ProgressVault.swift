@@ -142,6 +142,7 @@ final class ProgressVault {
         // The outgoing child was saved above; start the incoming one from her own.
         if !ProgressStore.shared.holdsData(for: profileID) {
             ProgressStore.shared.resetWallets()
+            ProgressStore.shared.clearInFlightRefund()   // the outgoing child's pending refund isn't theirs
         }
         ProgressStore.shared.apply(incoming)
         // 3. Bind — the store now holds THIS child's data, and says so. Every
@@ -161,6 +162,24 @@ final class ProgressVault {
         QuestionMemory.shared.reloadForActiveProfile()
         LearningHistoryStore.shared.bind(to: profileID)
         observeAndAutoSave()
+    }
+
+    /// An offline refund for a child who is no longer the live one: credit their
+    /// SAVED slot (raise "in", like the cloud release does), never the live store.
+    func creditRefund(seconds: Int, gift: Bool, to profileID: UUID) {
+        guard seconds > 0, profileID != boundProfileID else { return }
+        var s = snapshot(for: profileID)
+        if gift {
+            s.giftSecondsIn = (s.giftSecondsIn ?? 0) + seconds
+        } else {
+            s.earnedSecondsIn = (s.earnedSecondsIn ?? 0) + seconds
+            s.returnedTodayMinutes += seconds / 60
+        }
+        s.syncWalletMirrors()
+        s.revision += 1
+        s.lastModifiedAt = .now
+        s.deviceID = ProgressSnapshot.thisDeviceID
+        write(s, for: profileID)
     }
 
     /// Reset a specific profile's progress to a blank slate. If it's the

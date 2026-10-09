@@ -586,65 +586,58 @@ final class RemoteSyncManager: ObservableObject {
         #endif
     }
 
-    /// CHILD device: a parent asked to reset THIS child. Consume the command
-    /// exactly once (read + clear in a transaction), then wipe the live store
-    /// and push the blank state up.
+    /// The device that plays as this child (or, for a child with no device, the
+    /// parent's phone) consumes a parent's reset — in ONE transaction: read the
+    /// command, write the blank state at a higher revision AND reset epoch, clear
+    /// the command. All or nothing, so a dropped connection can no longer leave
+    /// the command consumed with the wipe never written (the reset then lost for
+    /// good). Only after the cloud committed is anything wiped here — and only
+    /// THIS child: the live store if it holds them, else their saved slot. The
+    /// revision/epoch come from the cloud and this child's own copy, never from
+    /// whichever child happens to be live (that once stamped a sibling).
     private func applyPendingReset(childID: UUID) {
         #if canImport(FirebaseFirestore)
-        let ref = db.collection("children").document(childID.uuidString)
+        let childRef = db.collection("children").document(childID.uuidString)
+        let stateRef = childRef.collection("state").document("current")
+        let store = ProgressStore.shared
+        let holds = store.holdsData(for: childID)
+        let mine = holds ? store.captureSnapshot() : ProgressVault.shared.snapshot(for: childID)
         db.runTransaction({ txn, _ -> Any? in
-            let doc = try? txn.getDocument(ref)
-            let requested = doc?.data()?["resetRequestedAt"] != nil
-            if requested { txn.updateData(["resetRequestedAt": FieldValue.delete()], forDocument: ref) }
-            return requested
-        }) { [weak self] result, _ in
-            guard (result as? Bool) == true else { return }
-            Task { @MainActor in
-                guard let self else { return }
-                TofyLink("applyPendingReset: parent reset for \(childID.uuidString.prefix(8)) → wiping local + cloud")
-                let wasOpen = ProgressStore.shared.isUnlocked
-                ProgressVault.shared.resetProfile(childID)
-                if wasOpen {   // resetAll ended the window — bring the shield back
-                    ShieldManager.shared.cancelScheduledReshield()
-                    ShieldManager.shared.relockBaseline()
-                }
-                // AUTHORITATIVE cloud wipe: a plain (non-ratchet) set from the child.
-                // pushNow() would ratchet-merge and resurrect stars/xp from the cloud.
-                self.writeBlankCloudState(childID: childID)
-            }
-        }
-        #endif
-    }
-
-    /// CHILD device: overwrite this child's cloud state with a blank snapshot at a
-    /// revision above both cloud and local (so it wins, and our echo is skipped),
-    /// then adopt that revision locally.
-    private func writeBlankCloudState(childID: UUID) {
-        #if canImport(FirebaseFirestore)
-        let ref = db.collection("children").document(childID.uuidString)
-            .collection("state").document("current")
-        let localRev = ProgressStore.shared.revision
-        db.runTransaction({ txn, _ -> Any? in
-            let cloudSnap = (try? txn.getDocument(ref))?.data().flatMap({ Self.decode($0) })
-            let cloudRev = cloudSnap?.revision ?? 0
-            let cloudEpoch = cloudSnap?.resetEpoch ?? 0
+            let cmd = (try? txn.getDocument(childRef))?.data()
+            guard cmd?["resetRequestedAt"] != nil else { return nil }   // already consumed
+            let cloudSnap = (try? txn.getDocument(stateRef))?.data().flatMap({ Self.decode($0) })
             var blank = ProgressSnapshot.blank
-            blank.revision = max(cloudRev, localRev) + 1
-            // 🧹 higher epoch = authoritative wipe that survives the ratchet on
-            // EVERY device, incl. a second device that never saw the command.
-            blank.resetEpoch = max(cloudEpoch, ProgressStore.shared.resetEpoch) + 1
+            blank.revision = max(cloudSnap?.revision ?? 0, mine.revision) + 1
+            // 🧹 higher epoch = an authoritative wipe that survives the ratchet on
+            // EVERY device, incl. one that never saw the command.
+            blank.resetEpoch = max(cloudSnap?.resetEpoch ?? 0, mine.resetEpoch) + 1
             blank.lastModifiedAt = Date()
             blank.deviceID = ProgressSnapshot.thisDeviceID
-            if let data = Self.encode(blank) { txn.setData(data, forDocument: ref) }   // NOT merge
+            if let data = Self.encode(blank) { txn.setData(data, forDocument: stateRef) }   // NOT merge
+            txn.updateData(["resetRequestedAt": FieldValue.delete()], forDocument: childRef)
             return ["rev": blank.revision, "epoch": blank.resetEpoch]
         }) { result, err in
-            if let err { TofyLink("writeBlankCloudState FAILED: \(err.localizedDescription)"); return }
-            if let r = result as? [String: Int], let rev = r["rev"], let epoch = r["epoch"] {
-                Task { @MainActor in
+            if let err { TofyLink("applyPendingReset FAILED (command kept, will retry): \(err.localizedDescription)"); return }
+            guard let r = result as? [String: Int], let rev = r["rev"], let epoch = r["epoch"] else { return }
+            Task { @MainActor in
+                TofyLink("applyPendingReset: \(childID.uuidString.prefix(8)) wiped at rev \(rev) epoch \(epoch)")
+                if ProgressStore.shared.holdsData(for: childID) {
+                    let wasOpen = ProgressStore.shared.isUnlocked
+                    ProgressVault.shared.resetProfile(childID)
                     ProgressStore.shared.adoptRevision(rev)
-                    // Adopt the epoch too — else this device is left behind the
-                    // cloud it wrote and its post-reset progress never syncs.
                     ProgressStore.shared.adoptResetEpoch(epoch)
+                    ProgressVault.shared.write(ProgressStore.shared.captureSnapshot(), for: childID)
+                    if wasOpen {   // resetAll ended the window — bring the shield back
+                        ShieldManager.shared.cancelScheduledReshield()
+                        ShieldManager.shared.relockBaseline()
+                    }
+                } else {
+                    var blank = ProgressSnapshot.blank
+                    blank.revision = rev
+                    blank.resetEpoch = epoch
+                    blank.lastModifiedAt = .now
+                    blank.deviceID = ProgressSnapshot.thisDeviceID
+                    ProgressVault.shared.write(blank, for: childID)
                 }
             }
         }
@@ -1112,6 +1105,17 @@ final class RemoteSyncManager: ObservableObject {
         // Don't re-apply our OWN echo to the live in-memory store (it would fight
         // local play). Display caching above already happened.
         if snap.deviceID == ProgressSnapshot.thisDeviceID { return }
+        // 🛡 The live store must really hold THIS child before anything of theirs
+        // is merged into it — `activeID` can run ahead of the vault switch (a
+        // re-sign-in, a roster change), and merging then puts this child's stars
+        // and wallet into whoever the store is bound to, whose autosave writes
+        // them under the wrong id. Their vault copy is kept up to date instead;
+        // the store catches up on the switch.
+        guard ProgressStore.shared.holdsData(for: profileID) else {
+            let vaultCopy = ProgressVault.shared.snapshot(for: profileID)
+            ProgressVault.shared.write(ProgressSnapshot.ratchetMerged(local: vaultCopy, remote: snap), for: profileID)
+            return
+        }
         // Merge instead of clobber: a plain revision race would discard the
         // losing device's earnings wholesale (the symptom: one device showing
         // 129⭐, the other 75⭐). `mergeRemote` ratchets accumulators up over
