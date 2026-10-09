@@ -55,7 +55,7 @@ struct ParentGateView<Content: View>: View {
     /// zero and could not get out. Short screens get smaller keys, and a wide
     /// short one puts the header beside the keypad instead of above it.
     @ObservedObject private var display = DisplayGeometry.shared
-    private var keySize: CGFloat { display.isShort ? 56 : 76 }
+    private var keySize: CGFloat { display.isWideShort ? 64 : (display.isShort ? 56 : 76) }
     private var keyGap: CGFloat { display.isShort ? 10 : 18 }
     @Environment(\.dismiss) private var dismiss
     @State private var confirmDeviceReset = false
@@ -330,19 +330,15 @@ struct ParentGateView<Content: View>: View {
         }
     }
 
-    /// Above each other on a tall screen; side by side when the screen is wide
-    /// and short, where stacking does not fit.
+    /// Above each other, always — on the open foldable too, centred on the
+    /// glass (Rani rejected the side-by-side split on the kid's code screen:
+    /// the keypad sat off by the clock; the parent's code matches it).
     @ViewBuilder private var gateHeaderAndKeypad: some View {
         if display.isWideShort {
-            HStack(alignment: .center, spacing: 28) {
-                gateHeader
-                    .frame(maxWidth: .infinity)
-                keypad
-            }
-            .padding(.top, 4)
-            .environment(\.layoutDirection, .leftToRight)
-            // Open, the keypad's top row reached under the clock.
-            .clearOfBar()
+            Spacer(minLength: 0)
+            gateHeader
+            Color.clear.frame(height: 16)
+            keypad
         } else {
             gateHeader
                 .padding(.top, display.isShort ? 8 : 28)

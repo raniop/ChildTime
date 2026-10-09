@@ -86,19 +86,6 @@ struct AgeGateYearView: View {
             GlassBackdrop()
             SparkleField(count: 10, size: 11)
             VStack(spacing: AppSpacing.md) {
-                HStack {
-                    Spacer()
-                    Button(action: onCancel) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundStyle(.white.opacity(0.8))
-                            .frame(width: 40, height: 40)
-                            .background(Circle().fill(.white.opacity(0.16)))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(tr("סגירה"))
-                }
-                .awayFromBar(.trailing)
                 CharacterView(character: Character3DCatalog.find("lion"))
                     .frame(width: 104, height: 104)
                 Text(tr("שְׁאֵלָה קְטַנָּה לִפְנֵי שֶׁמַּתְחִילִים"))
@@ -142,7 +129,11 @@ struct AgeGateYearView: View {
             .frame(maxWidth: 440)
             .padding(.horizontal, AppSpacing.lg)
             .padding(.vertical, AppSpacing.md)
+            .padding(.top, 40)
         }
+        // ✕ in the screen's own corner (away from the foldable's camera), not
+        // the corner of the centred column.
+        .overlay(alignment: .top) { AgeGateCloseRow(action: onCancel) }
     }
 }
 
@@ -157,19 +148,6 @@ struct AgeGateMinorView: View {
             GlassBackdrop()
             SparkleField(count: 12, size: 11)
             VStack(spacing: AppSpacing.md) {
-                HStack {
-                    Spacer()
-                    Button(action: onClose) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundStyle(.white.opacity(0.8))
-                            .frame(width: 40, height: 40)
-                            .background(Circle().fill(.white.opacity(0.16)))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(tr("סגירה"))
-                }
-                .awayFromBar(.trailing)
                 CharacterView(character: Character3DCatalog.find("fox"))
                     .frame(width: 130, height: 130)
                 Text(tr("נִרְאֶה שֶׁזֶּה הַמַּכְשִׁיר שֶׁל הַיֶּלֶד 😊"))
@@ -205,6 +183,32 @@ struct AgeGateMinorView: View {
             .frame(maxWidth: 440)
             .padding(.horizontal, AppSpacing.lg)
             .padding(.vertical, AppSpacing.md)
+            .padding(.top, 40)
         }
+        // ✕ in the screen's own corner (away from the foldable's camera), not
+        // the corner of the centred column.
+        .overlay(alignment: .top) { AgeGateCloseRow(action: onClose) }
+    }
+}
+
+/// The ✕ row of the age screens: the screen's corner away from the camera.
+private struct AgeGateCloseRow: View {
+    let action: () -> Void
+    var body: some View {
+        HStack {
+            Spacer()
+            Button(action: action) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.8))
+                    .frame(width: 40, height: 40)
+                    .background(Circle().fill(.white.opacity(0.16)))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(tr("סגירה"))
+        }
+        .awayFromBar(.trailing)
+        .padding(.horizontal, AppSpacing.lg)
+        .padding(.top, AppSpacing.sm)
     }
 }
