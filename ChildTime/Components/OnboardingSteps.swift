@@ -233,6 +233,10 @@ struct OnboardingFooter: View {
                            startPoint: .top, endPoint: .bottom)
                 .padding(.horizontal, -40)
                 .ignoresSafeArea(edges: .bottom)
+                // Not on the open foldable: the form fits there, nothing scrolls
+                // under the button, and the floor was only a dark box (Rani: "הרקע
+                // הכחול כהה נראה מוזר").
+                .opacity(DisplayGeometry.shared.isWideShort ? 0 : 1)
         )
     }
 }

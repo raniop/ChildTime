@@ -261,7 +261,10 @@ struct ProfileEditorView: View {
                         .padding(.vertical, AppSpacing.sm)
                         .glassPane(radius: 16, shadow: false)
                 }
-                .clearOfBar(active: foldTopRow)   // beside the clock: narrower
+                // Beside the clock (closed) it stops short of it; open, the form is
+                // centred far from the clock and the field keeps the full row, its
+                // right edge on the buttons' (Rani: "תיישר את השם לימין").
+                .clearOfBar(active: foldTopRow && !DisplayGeometry.shared.isWideShort)
 
                 HStack(spacing: AppSpacing.md) {
                     ForEach(ChildGender.allCases) { g in genderOption(g) }
