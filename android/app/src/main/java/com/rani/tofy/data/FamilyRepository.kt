@@ -94,6 +94,7 @@ object FamilyRepository {
             delay(wait)
             if (listeningHid != hid) return@launch
             reassertMembership(hid)
+            if (listeningHid != hid) return@launch          // signed out / switched meanwhile
             regs.forEach { it.remove() }; regs.clear()
             childRegs.values.flatten().forEach { it.remove() }; childRegs.clear()
             listen(hid)
@@ -117,8 +118,9 @@ object FamilyRepository {
         val hid = listeningHid ?: return
         listenerFailures = 0
         relistenJob?.cancel()
-        scope.launch {
+        relistenJob = scope.launch {
             reassertMembership(hid)
+            if (listeningHid != hid) return@launch          // signed out / switched meanwhile
             regs.forEach { it.remove() }; regs.clear()
             childRegs.values.flatten().forEach { it.remove() }; childRegs.clear()
             listen(hid)
@@ -154,7 +156,6 @@ object FamilyRepository {
 
     private fun listen(hid: String) {
         listeningHid = hid
-        failing.clear()
         // INCLUDE metadata changes: a server CONFIRMING the cached doc (no data
         // change) is otherwise silent, so `householdFromServer` never turned true
         // and the PIN gate waited forever on "מתחברים".
@@ -208,6 +209,8 @@ object FamilyRepository {
     /** Re-add our uid to parentUIDs — the rules let anyone add ONLY themselves. */
     suspend fun reassertMembership(forHousehold: String? = null) {
         val u = uid ?: return; val hid = forHousehold ?: householdID ?: return
-        runCatching { db.collection("households").document(hid).update("parentUIDs", FieldValue.arrayUnion(u)).await() }
+        try { db.collection("households").document(hid).update("parentUIDs", FieldValue.arrayUnion(u)).await() }
+        catch (e: kotlinx.coroutines.CancellationException) { throw e }   // signed out meanwhile — stop here
+        catch (_: Exception) {}
     }
 }

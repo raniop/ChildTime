@@ -51,8 +51,11 @@ object AccountRepository {
     /** Try again now — the connecting screen's button, and app resume. */
     fun retryNow() {
         if (_boot.value !is Bootstrap.Failed) return
+        _boot.value = Bootstrap.Loading   // at once — a second tap/onResume now finds "Loading" and stops
         retryJob?.cancel()
-        scope.launch { bootstrap() }
+        // Tracked, and only one at a time: a double tap / rotation used to start
+        // two bootstraps, and both attached the family's listeners.
+        retryJob = scope.launch { bootstrap() }
     }
 
     suspend fun bootstrap() {

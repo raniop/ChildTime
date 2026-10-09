@@ -52,7 +52,7 @@ fun FamilyChoiceScreen(onJoin: () -> Unit) {
                     runCatching {
                         AccountRepository.createOwnHousehold(name)
                         AccountRepository.recordConsent()
-                    }.onFailure { error = it.localizedMessage; busy = false }
+                    }.onFailure { error = tr("אין כרגע חיבור, אז לא הצלחנו ליצור את המשפחה. בדקו את האינטרנט ונסו שוב."); busy = false }
                 }
             }
             P(tr("הוזמנתם על ידי הורה אחר? הצטרפו למשפחה"), 15f, Modifier.clickable(onClick = onJoin), color = Ink.primary, weight = FontWeight.Bold, align = TextAlign.Center)
@@ -102,7 +102,17 @@ fun JoinFamilyScreen(onBack: () -> Unit) {
             error?.let { P(it, 13f, color = Ink.weak, align = TextAlign.Center) }
             GoldButton(tr("הצטרפו"), enabled = code.length == 6, busy = busy) {
                 busy = true; error = null
-                scope.launch { AccountRepository.redeemInvite(code).onFailure { busy = false; error = tr("קוד לא תקין") } }
+                scope.launch {
+                    AccountRepository.redeemInvite(code).onFailure {
+                        busy = false
+                        // A bad/expired code vs. a join that worked but whose family
+                        // couldn't load (offline) — the second isn't "קוד לא תקין".
+                        error = when (it.message) {
+                            "code", "expired" -> tr("קוד לא תקין")
+                            else -> tr("אין כרגע חיבור. בדקו את האינטרנט ונסו שוב — אותו קוד יעבוד.")
+                        }
+                    }
+                }
             }
             TextButton(onBack) { Text(tr("ביטול"), fontFamily = Rounded, color = Ink.secondary) }
         }
@@ -114,6 +124,7 @@ fun JoinFamilyScreen(onBack: () -> Unit) {
 fun EmailInviteScreen(invite: com.rani.tofy.data.Bootstrap.EmailInvite) {
     val scope = rememberCoroutineScope()
     var busy by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
     GlassBackdrop {
         Column(
             Modifier.contentColumn().fillMaxSize().systemBarsPadding().padding(24.dp),
@@ -125,8 +136,10 @@ fun EmailInviteScreen(invite: com.rani.tofy.data.Bootstrap.EmailInvite) {
             P(tr("הוזמנתם להצטרף כהורה — תראו את הילדים, ההתקדמות והשליטה, בדיוק כמו ההורה שהזמין אתכם."), 15f, align = TextAlign.Center)
             GoldButton(tr("הצטרפו למשפחה"), busy = busy) {
                 busy = true
-                scope.launch { runCatching { AccountRepository.acceptEmailInvite(invite.householdID) }.onFailure { busy = false } }
+                failed = false
+                scope.launch { runCatching { AccountRepository.acceptEmailInvite(invite.householdID) }.onFailure { busy = false; failed = true } }
             }
+            if (failed) P(tr("אין כרגע חיבור. בדקו את האינטרנט ונסו שוב."), 13f, color = Ink.weak, align = TextAlign.Center)
             TextButton({ AccountRepository.declineEmailInvite() }) { Text(tr("לא המשפחה שלי — התחילו מהתחלה"), fontFamily = Rounded, color = Ink.secondary) }
         }
     }
