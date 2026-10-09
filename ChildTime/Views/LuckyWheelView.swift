@@ -33,7 +33,9 @@ struct LuckyWheelView: View {
             // button fit on a short screen too (the closed Duo cut the card off).
             let wheelSize = min(isCompact ? 380 : 480,
                                 proxy.size.height * (landscape ? 0.80 : (winner == nil ? 0.56 : 0.40)),
-                                proxy.size.width * (landscape ? 0.46 : 0.98))
+                                // Inside the side padding — 98% of the full width ran past
+                                // it and pushed the wheel off-centre on a phone (Rani).
+                                (proxy.size.width - 2 * AppSpacing.md) * (landscape ? 0.46 : 0.96))
             ZStack {
                 GlassBackdrop()
                 SparkleField(count: 14, size: 11)
@@ -52,22 +54,25 @@ struct LuckyWheelView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     ScrollView {
+                        // The title on top, the wheel in the middle of the screen and
+                        // "skip" at the bottom (Rani).
                         VStack(spacing: AppSpacing.lg) {
                             header
+                            Spacer(minLength: 0)
                             wheelStack(size: wheelSize)
                                 .padding(.vertical, AppSpacing.md)
                             if let prize = winner {
                                 winnerCard(prize)
                                     .transition(.scale.combined(with: .opacity))
                             }
-                            primaryButton
-                            if winner == nil { skipButton }
+                            Spacer(minLength: 0)
+                            if winner != nil { primaryButton } else { skipButton }
                         }
                         .padding(.horizontal, AppSpacing.md)
                         .padding(.top, AppSpacing.sm)
                         .padding(.bottom, AppSpacing.xl)
                         .frame(maxWidth: 720)
-                        .frame(maxWidth: .infinity, alignment: .top)
+                        .frame(maxWidth: .infinity, minHeight: proxy.size.height, alignment: .top)
                     }
                     .scrollIndicators(.hidden)
                 }
@@ -114,8 +119,12 @@ struct LuckyWheelView: View {
                 .font(.system(size: isCompact ? 30 : 40, weight: .black, design: .rounded))
                 .foregroundStyle(GlassInk.primary)
                 .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
-            Text(winner == nil ? Gendered.g(tr("הַקֵּשׁ עַל הַגַּלְגַּל כְּדֵי לְסוֹבֵב ✨"), tr("הַקִּישִׁי עַל הַגַּלְגַּל כְּדֵי לְסוֹבֵב ✨")) : tr("אֵיזֶה כֵּיף! 🎉"))
-                .font(.system(size: 13.5, weight: .semibold, design: .rounded))
+            // No "spin" button any more — the child turns the wheel by hand, either
+            // way (Rani). The line says so.
+            Text(winner == nil ? Gendered.g(tr("סוֹבֵב אֶת הַגַּלְגַּל עִם הָאֶצְבַּע — לְאֵיזֶה צַד שֶׁתִּרְצֶה ✨"),
+                                            tr("סוֹבְבִי אֶת הַגַּלְגַּל עִם הָאֶצְבַּע — לְאֵיזֶה צַד שֶׁתִּרְצִי ✨"))
+                               : tr("אֵיזֶה כֵּיף! 🎉"))
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
         }
         .multilineTextAlignment(.center)
@@ -131,8 +140,7 @@ struct LuckyWheelView: View {
                 winnerCard(prize)
                     .transition(.scale.combined(with: .opacity))
             }
-            primaryButton
-            if winner == nil { skipButton }
+            if winner != nil { primaryButton } else { skipButton }
         }
     }
 

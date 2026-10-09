@@ -1557,9 +1557,12 @@ struct WorldMapView: View {
                 CharacterView(character: profiles.active?.character
                               ?? Character3DCatalog.find(Character3DCatalog.defaultID),
                               portrait: true)
+                    // A little inside the ring and NOT clipped to it — the circle cut
+                    // the koala's wide ears off (Rani). An ear may now just touch the
+                    // ring instead.
+                    .padding(avatar * 0.08)
                     .frame(width: avatar, height: avatar)
                     .background(Circle().fill(Color.white.opacity(0.22)))
-                    .clipShape(Circle())
                     .overlay(Circle().stroke(ring, lineWidth: tier == 0 ? 1 : 2.5))
                     .shadow(color: tier == 0 ? .clear : ring.opacity(0.7), radius: tier == 0 ? 0 : 6)
             }
@@ -2196,6 +2199,7 @@ struct WorldMapView: View {
         content()
             .foregroundStyle(.white)
             .lineLimit(1).minimumScaleFactor(0.7)
+            .padding(.horizontal, 6)
             .frame(maxWidth: .infinity, minHeight: isShort ? 52 : 58)
             .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.25), lineWidth: 1))
@@ -2214,7 +2218,7 @@ struct WorldMapView: View {
                 } else {
                     HStack(spacing: 4) {
                         Text("💝").font(.system(size: 18))
-                        Text(title).font(.system(size: 16, weight: .black, design: .rounded))
+                        Text(title).font(.system(size: 16, weight: .black, design: .rounded)).lineLimit(1).minimumScaleFactor(0.5)
                     }
                     Text(tr("מַתָּנָה · פִּתְחוּ!")).font(.system(size: 11, weight: .heavy, design: .rounded)).opacity(0.95)
                 }
@@ -2249,7 +2253,7 @@ struct WorldMapView: View {
             }
             .frame(minWidth: isCompact || display.hasBarStrip ? 0 : 150)
             .accessibilityLabel(quiet.blockedMessage() ?? "")
-        } else if progress.canRedeemNow {
+        } else if progress.canRedeemNow || demoPlaySeconds != nil {
             Button {
                 requestUnlock { redeemMinutes() }
             } label: {
@@ -2260,8 +2264,12 @@ struct WorldMapView: View {
                         } else {
                             HStack(spacing: 5) {
                                 Image(systemName: "gamecontroller.fill").font(.system(size: 15, weight: .bold)).foregroundStyle(Color(hex: "8CFFC4"))
-                                Text(tr("\(Self.timeLabel(progress.redeemableSecondsNow)) דַּקּ׳ לְשַׂחֵק"))
+                                // Exact minutes AND seconds (Rani) — "74:49 דק׳ לשחק" was cut
+                                // to "…לש"; it shrinks to fit whole instead.
+                                Text(tr("\(Self.timeLabel(demoPlaySeconds ?? progress.redeemableSecondsNow)) דַּקּ׳ לְשַׂחֵק"))
                                     .font(.system(size: 16, weight: .black, design: .rounded))
+                                    .lineLimit(1).minimumScaleFactor(0.5)
+                                    .layoutPriority(1)
                             }
                             Text(tr("לְחִיצָה לִפְתִּיחָה ▶")).font(.system(size: 11, weight: .heavy, design: .rounded))
                                 .foregroundStyle(Color(hex: "8CFFC4"))
@@ -2323,7 +2331,7 @@ struct WorldMapView: View {
             }
         }
         .buttonStyle(.plain)
-        .frame(width: 92)   // a small key — the minutes are the wide one
+        .frame(width: 84)   // a small key — the minutes are the wide one
         .accessibilityLabel(p.hasPlayPIN ? tr("הַדַּקּוֹת שֶׁלִּי מוּגָנוֹת בְּקוֹד") : tr("קוֹד סוֹדִי לַדַּקּוֹת שֶׁלִּי"))
     }
 
@@ -2888,8 +2896,14 @@ struct WorldMapView: View {
     /// kind of small lie about their time that costs trust.
     /// The gift pocket as the button sees it. DEMO_GIFT_MINUTES (screenshots
     /// only — the cloud snapshot would wipe a locally seeded pocket) overrides.
+    /// DEMO_PLAY_SECONDS (screenshots only): the open "דק׳ לשחק" key with that balance.
+    private var demoPlaySeconds: Int? {
+        ProcessInfo.processInfo.environment["DEMO_PLAY_SECONDS"].flatMap(Int.init)
+    }
+
     private var giftOpenableSeconds: Int {
         if let m = ProcessInfo.processInfo.environment["DEMO_GIFT_MINUTES"].flatMap(Int.init) { return m * 60 }
+        if let sec = ProcessInfo.processInfo.environment["DEMO_GIFT_SECONDS"].flatMap(Int.init) { return sec }
         return progress.openableSeconds(gift: true)
     }
 

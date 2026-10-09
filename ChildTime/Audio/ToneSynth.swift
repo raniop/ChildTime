@@ -8,38 +8,112 @@ import AVFoundation
 /// Each melody is a short sequence of sine notes with a small attack/release
 /// envelope so they don't click. We pre-render every melody at init time and
 /// schedule the buffer on demand for instant, low-latency playback.
+/// Every AVAudioEngine call, on one serial queue OFF the main thread.
+///
+/// Build 214 stopped the engine a few seconds after the last sound (Dan's iPad
+/// hissed while it ran). But `engine.start()` takes a real moment on a phone, and
+/// it ran on the main thread — at the exact instant a child tapped an answer
+/// after thinking for more than three seconds, and on balloon pops: the whole
+/// screen froze for it (Rani, build 215: "הכל מאוד מאוד תקוע"). Now the start
+/// happens here, the UI never waits for it, and the engine idles out only after
+/// half a minute of silence — not between answers.
+final class ToneEngine: @unchecked Sendable {
+    let format: AVAudioFormat
+    private let engine = AVAudioEngine()
+    private let player = AVAudioPlayerNode()
+    private let musicPlayer = AVAudioPlayerNode()
+    private let q = DispatchQueue(label: "com.rani.tofy.tone-engine", qos: .userInteractive)
+    // Touched only on `q`.
+    private var running = false
+    private var musicOn = false
+    private var idleStop: DispatchWorkItem?
+    static let idleSeconds: Double = 30
+
+    init(format: AVAudioFormat) {
+        self.format = format
+        engine.attach(player)
+        engine.connect(player, to: engine.mainMixerNode, format: format)
+        engine.attach(musicPlayer)
+        engine.connect(musicPlayer, to: engine.mainMixerNode, format: format)
+        // The system can stop the engine under us (a route change, a call,
+        // another app taking the audio). Start fresh on the next sound instead
+        // of scheduling onto a dead engine.
+        NotificationCenter.default.addObserver(forName: .AVAudioEngineConfigurationChange, object: engine, queue: nil) { [weak self] _ in
+            self?.q.async { self?.running = false }
+        }
+    }
+
+    func play(_ buffer: AVAudioPCMBuffer) {
+        q.async { [self] in
+            ensureRunning()
+            guard running else { return }
+            player.scheduleBuffer(buffer, at: nil, options: .interrupts, completionHandler: nil)
+            scheduleIdleStop(after: Self.idleSeconds)
+        }
+    }
+
+    func playMusic(_ buffer: AVAudioPCMBuffer) {
+        q.async { [self] in
+            ensureRunning()
+            guard running else { return }
+            musicOn = true
+            musicPlayer.scheduleBuffer(buffer, at: nil, options: [], completionHandler: { [weak self] in
+                self?.q.async { self?.musicOn = false; self?.scheduleIdleStop(after: Self.idleSeconds) }
+            })
+            musicPlayer.play()
+        }
+    }
+
+    func stopMusic() {
+        q.async { [self] in
+            musicOn = false
+            musicPlayer.stop()
+            scheduleIdleStop(after: 1)
+        }
+    }
+
+    private func ensureRunning() {
+        idleStop?.cancel(); idleStop = nil
+        guard !running || !engine.isRunning else { return }
+        do {
+            try engine.start()
+            player.play()
+            running = true
+        } catch {
+            // Silent fallback — the sound is skipped if the engine fails.
+            running = false
+        }
+    }
+
+    /// Shut the engine down once nothing has played for a while.
+    private func scheduleIdleStop(after seconds: Double) {
+        idleStop?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            guard let self, !self.musicOn else { return }
+            self.player.stop()
+            self.engine.stop()
+            self.running = false
+        }
+        idleStop = work
+        q.asyncAfter(deadline: .now() + seconds, execute: work)
+    }
+}
+
 @MainActor
 final class ToneSynth {
     static let shared = ToneSynth()
 
-    private let engine = AVAudioEngine()
-    private let player = AVAudioPlayerNode()
-    private let musicPlayer = AVAudioPlayerNode()
     private let format = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 1)!
+    private lazy var tone = ToneEngine(format: format)
 
     private var buffers: [AppSound: AVAudioPCMBuffer] = [:]
     private var musicBuffer: AVAudioPCMBuffer?
     /// If a real music track is bundled (background_music.mp3/.m4a/.caf/.wav),
     /// we play THAT instead of the procedural loop. Drop a file in to upgrade.
     private var musicFilePlayer: AVAudioPlayer?
-    private var didStart = false
     private var musicOn = false
-    /// Stops the engine once nothing has played for a few seconds — a running
-    /// AVAudioEngine kept the output open the whole session, which on Dan's
-    /// iPad was an audible hiss that only stopped when Tofy was closed (Rani).
-    private var idleStop: DispatchWorkItem?
 
     private init() {
-        // The system can stop the engine under us (a route change, a call,
-        // another app taking the audio). Start fresh on the next sound instead
-        // of scheduling onto a dead engine.
-        NotificationCenter.default.addObserver(forName: .AVAudioEngineConfigurationChange, object: engine, queue: .main) { _ in
-            Task { @MainActor in ToneSynth.shared.didStart = false }
-        }
-        engine.attach(player)
-        engine.connect(player, to: engine.mainMixerNode, format: format)
-        engine.attach(musicPlayer)
-        engine.connect(musicPlayer, to: engine.mainMixerNode, format: format)
         preloadAll()
         musicFilePlayer = Self.loadBundledMusic()
         if musicFilePlayer == nil { musicBuffer = renderMusicLoop() }
@@ -58,38 +132,10 @@ final class ToneSynth {
         return p
     }
 
-    /// Lazy-start the engine on first play (avoids audio session conflicts at launch).
-    private func ensureRunning() {
-        idleStop?.cancel(); idleStop = nil
-        guard !didStart || !engine.isRunning else { return }
-        do {
-            try engine.start()
-            player.play()
-            didStart = true
-        } catch {
-            // Silent fallback — we'll just no-op the playback if the engine fails.
-            didStart = false
-        }
-    }
-
-    /// Shut the engine down a few seconds after the last sound.
-    private func scheduleIdleStop(after seconds: Double) {
-        idleStop?.cancel()
-        let work = DispatchWorkItem { [weak self] in
-            guard let self, !self.musicOn else { return }
-            self.player.stop()
-            self.engine.stop()
-            self.didStart = false
-        }
-        idleStop = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + seconds, execute: work)
-    }
-
+    /// Never blocks: the engine (re)starts on its own queue (see ToneEngine).
     func play(_ sound: AppSound) {
-        ensureRunning()
-        guard didStart, engine.isRunning, let buf = buffers[sound] else { return }
-        player.scheduleBuffer(buf, at: nil, options: .interrupts, completionHandler: nil)
-        scheduleIdleStop(after: Double(buf.frameLength) / format.sampleRate + 3)
+        guard let buf = buffers[sound] else { return }
+        tone.play(buf)
     }
 
     // MARK: - Intro music
@@ -103,26 +149,21 @@ final class ToneSynth {
     func startMusic() {
         guard !musicPlayedOnce, ParentSettings.shared.soundsEnabled else { return }
         musicPlayedOnce = true
+        musicOn = true
         if let fp = musicFilePlayer {
             fp.numberOfLoops = 0
             fp.currentTime = 0
             fp.play()
-            musicOn = true
             return
         }
-        ensureRunning()
-        guard didStart, engine.isRunning, let buf = musicBuffer else { return }
-        musicOn = true
-        musicPlayer.scheduleBuffer(buf, at: nil, options: [], completionHandler: { [weak self] in
-            DispatchQueue.main.async { self?.musicOn = false; self?.scheduleIdleStop(after: 2) }
-        })  // once
-        musicPlayer.play()
+        guard let buf = musicBuffer else { return }
+        tone.playMusic(buf)
     }
 
     func stopMusic() {
         guard musicOn else { return }
         musicOn = false
-        if let fp = musicFilePlayer { fp.stop() } else { musicPlayer.stop(); scheduleIdleStop(after: 1) }
+        if let fp = musicFilePlayer { fp.stop() } else { tone.stopMusic() }
     }
 
     /// If the parent turns sounds off mid-intro, silence it. Never restarts.

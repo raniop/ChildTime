@@ -112,7 +112,9 @@ struct WorldGameChooserView: View {
                 }
             }
         }
-        .fullScreenCover(item: $launch) { pick in
+        // ✕ in a game (or the questions) goes all the way back to the child's
+        // home, not to this chooser (Rani, 2026-10-09).
+        .fullScreenCover(item: $launch, onDismiss: { if !inertPreview { dismiss() } }) { pick in
             Group {
                 switch pick {
                 case .questions:

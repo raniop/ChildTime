@@ -233,12 +233,17 @@ struct BalloonPopView: View {
                 .contentTransition(.numericText())
 
             GeometryReader { geo in
-                ZStack {
-                    ForEach(balloons) { b in
-                        balloonView(b, in: geo.size)
+                // Positions follow the display's own frames. They used to follow
+                // the 0.1s game ticker — the balloons rose in ten jumps a second
+                // and looked laggy (Rani). The ticker still runs the game.
+                TimelineView(.animation(paused: phase != .playing)) { timeline in
+                    ZStack {
+                        ForEach(balloons) { b in
+                            balloonView(b, in: geo.size, at: max(timeline.date, now))
+                        }
                     }
+                    .frame(width: geo.size.width, height: geo.size.height)
                 }
-                .frame(width: geo.size.width, height: geo.size.height)
             }
             .clipped()
         }
@@ -268,7 +273,7 @@ struct BalloonPopView: View {
     }
 
     @ViewBuilder
-    private func balloonView(_ b: Balloon, in field: CGSize) -> some View {
+    private func balloonView(_ b: Balloon, in field: CGSize, at now: Date) -> some View {
         let size = balloonSize
         let age = now.timeIntervalSince(b.spawnedAt)
         let progress = age / b.duration

@@ -93428,6 +93428,28 @@
         }
       }
     },
+    "סוֹבְבִי אֶת הַגַּלְגַּל עִם הָאֶצְבַּע — לְאֵיזֶה צַד שֶׁתִּרְצִי ✨" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أديري العجلة بإصبعك — في أي اتجاه تريدين ✨"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spin the wheel with your finger — whichever way you like ✨"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Крути колесо пальцем — в любую сторону ✨"
+          }
+        }
+      }
+    },
     "סוֹבְבִי!" : {
       "localizations" : {
         "ar" : {
@@ -93446,6 +93468,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Крути!"
+          }
+        }
+      }
+    },
+    "סוֹבֵב אֶת הַגַּלְגַּל עִם הָאֶצְבַּע — לְאֵיזֶה צַד שֶׁתִּרְצֶה ✨" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أدِر العجلة بإصبعك — في أي اتجاه تريد ✨"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spin the wheel with your finger — whichever way you like ✨"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Крути колесо пальцем — в любую сторону ✨"
           }
         }
       }
