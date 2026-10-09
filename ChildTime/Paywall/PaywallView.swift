@@ -157,6 +157,9 @@ struct PaywallView: View {
                     if let pitch { freeForeverLine(pitch) }
                     footerLinks
                 }
+                // This column sits under the floating ✕ (the corner away from the
+                // clock) — it starts below it instead of under it.
+                .padding(.top, 44)
                 .frame(maxWidth: .infinity)
             }
             .padding(.horizontal, AppSpacing.lg)
