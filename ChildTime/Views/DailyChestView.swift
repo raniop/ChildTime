@@ -151,26 +151,15 @@ struct DailyChestView: View {
                 }
             }
 
-            // Companion — the child's OWN chosen character, greeting from a
-            // bubble stacked right above it so its tail points down at the avatar.
-            VStack {
-                Spacer()
-                HStack {
-                    VStack(spacing: -4) {
-                        if let bubble = companion.bubbleText {
-                            BubbleSpeech(text: bubble)
-                                .transition(.scale.combined(with: .opacity))
-                        }
-                        CharacterView(character: childCharacter, animated: true)
-                            .id(childCharacter.id)
-                            .frame(width: companionSize, height: companionSize * 1.3)
-                    }
-                    .padding(.leading, AppSpacing.lg)
-                    Spacer()
-                }
-            }
-            .padding(.bottom, AppSpacing.lg)
-            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: companion.bubbleText)
+            // Companion — the child's own character, the same floating buddy as
+            // on the home: it wanders, can be dragged, and its words ride on it
+            // (Rani: parked over the "5 דקות" row with no way to move it).
+            FloatingCompanion(controller: companion,
+                              profile: ProfileStore.shared.active,
+                              size: companionSize,
+                              topInset: 140,
+                              bottomInset: 40,
+                              horizontalInset: AppSpacing.lg)
 
             // Tap ANYWHERE to charge open while glowing — not only on the chest.
             if stage == .glowing {

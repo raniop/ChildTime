@@ -1892,7 +1892,11 @@ final class ProgressStore: ObservableObject {
         // From the COUNTERS, not `pendingMinutes`: this value both labels the button
         // and decides the debit, so it must come from the one ledger that is the
         // truth. The mirror is for display on older builds and the parent's tiles.
-        let wallet = earnedSecondsAvailable / 60
+        // + a refund still on its way back from the cloud: right after "סיימתי
+        // לשחק" the key read "0 דק'" for a few seconds until it landed (Rani).
+        // The gift key already counted it; now both do. (The lease claim that
+        // opens the window is checked on the server, so nothing is overspent.)
+        let wallet = openableSeconds(gift: false) / 60
         let cap = dailyCap
         guard cap.enabled else { return wallet }
         let roomToday = max(0, cap.max - minutesUnlockedTodayResolved)

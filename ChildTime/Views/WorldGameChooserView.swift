@@ -38,6 +38,10 @@ struct WorldGameChooserView: View {
 
     @State private var games: [MiniGameKind] = []
     @State private var launch: Launch?
+    /// Set the moment a game or the questions open. The chooser never shows
+    /// again after that: closing the game goes straight home (Rani — it used to
+    /// flash this screen on the way out).
+    @State private var leftForPlay = false
     @State private var lastPick: String?
     @State private var appeared = false
     /// 💎 paid for the first visit to this world (shown once, then gone).
@@ -93,6 +97,7 @@ struct WorldGameChooserView: View {
                 .padding(.bottom, AppSpacing.xl)
                 .frame(maxWidth: .infinity)
             }
+            .opacity(leftForPlay && !inertPreview ? 0 : 1)
         }
         .onAppear {
             games = WorldGameFit.games(for: world, grade: profiles.active?.effectiveGrade ?? 1)
@@ -114,7 +119,11 @@ struct WorldGameChooserView: View {
         }
         // ✕ in a game (or the questions) goes all the way back to the child's
         // home, not to this chooser (Rani, 2026-10-09).
-        .fullScreenCover(item: $launch, onDismiss: { if !inertPreview { dismiss() } }) { pick in
+        .fullScreenCover(item: $launch, onDismiss: {
+            guard !inertPreview else { return }
+            var quiet = Transaction(); quiet.disablesAnimations = true
+            withTransaction(quiet) { dismiss() }
+        }) { pick in
             Group {
                 switch pick {
                 case .questions:
@@ -389,6 +398,7 @@ struct WorldGameChooserView: View {
         UserDefaults.standard.set(choice.id, forKey: lastKey)
         AppAnalytics.log("world_chooser_pick", ["world": world.id, "pick": choice.id, "surprise": viaSurprise ? "1" : "0"])
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            leftForPlay = true
             launch = choice
             lastPick = choice.id
         }

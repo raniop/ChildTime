@@ -79,7 +79,7 @@ struct FloatingCompanion: View {
                             Color.clear.preference(key: BubbleSizeKey.self, value: g.size)
                         })
                         .onPreferenceChange(BubbleSizeKey.self) { bubbleSize = $0 }
-                        .offset(x: (clampedX - anchor.x) * (layoutDirection == .rightToLeft ? -1 : 1),
+                        .offset(x: clampedX - anchor.x,
                                 y: -size * 0.9)
                         .transition(.asymmetric(insertion: .scale.combined(with: .opacity), removal: .identity))
                         .allowsHitTesting(false)

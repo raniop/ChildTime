@@ -2773,9 +2773,14 @@ struct WorldMapView: View {
         }
     }
 
+    /// Greeted already in this run of the app — the home is rebuilt every time a
+    /// play window ends, and "חזרת! X ימים ברצף" popped after every game (Rani).
+    private static var greetedThisLaunch = false
+
     private func greetIfNeeded() {
         // No speech bubble on screenshot runs — it landed on the store images.
-        guard !AppInfo.isDemoRun else { return }
+        guard !AppInfo.isDemoRun, !Self.greetedThisLaunch else { return }
+        Self.greetedThisLaunch = true
         if progress.dayStreak == 0 {
             companion.cheer(tr("הֵיי! יַאלְלָה לְהַרְפַּתְקָה 🌟"))
         } else if progress.dayStreak == 1 {

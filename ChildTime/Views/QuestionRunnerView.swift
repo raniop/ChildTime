@@ -239,10 +239,17 @@ struct QuestionRunnerView: View {
                     // with no protection at all: on Yoav's iPad the passage pushed the
                     // whole tool row under the bottom of the glass and "רמז" was cut
                     // in half at the edge. A screen that fits is unaffected either way.
-                    ViewThatFits(in: .vertical) {
+                    // ViewThatFits lays the whole column out TWICE on every question
+                    // (both candidates are measured) — only where it can overflow: a
+                    // reading passage, or a short screen. Measured ~15ms a question.
+                    if q.passage != nil || display.isShort {
+                        ViewThatFits(in: .vertical) {
+                            questionColumn(q)
+                            ScrollView { questionColumn(q) }
+                                .scrollIndicators(.hidden)
+                        }
+                    } else {
                         questionColumn(q)
-                        ScrollView { questionColumn(q) }
-                            .scrollIndicators(.hidden)
                     }
                 } else {
                     Spacer()
@@ -1333,7 +1340,7 @@ struct QuestionRunnerView: View {
         HitchMonitor.shared.start()
         if ProcessInfo.processInfo.environment["DEMO_WAND"] != nil {   // two misses + the buddy talking
             consecutiveWrong = 2
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { companion.cheer(tr("אַלּוּפָה!")) }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { companion.cheer(ProcessInfo.processInfo.environment["DEMO_BUBBLE"] ?? tr("אַלּוּפָה!")) }
         }
         if ProcessInfo.processInfo.environment["DEMO_AUTOTAP"] != nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { pickOption(q.correctIndex, q: q) }
