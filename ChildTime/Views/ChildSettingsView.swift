@@ -108,6 +108,14 @@ struct ChildSettingsView: View {
             }
         }
         .railDismiss(tr("סיום"), systemImage: "checkmark") { dismiss() }
+        // 🔌 An edit refused while the family isn't loaded — outside the
+        // NavigationStack, so it shows from every pushed page.
+        .alert(tr("מתחברים למשפחה…"), isPresented: $household.connectionNotice) {
+            Button(tr("נסו שוב")) { household.retryFamilyLoadIfNeeded() }
+            Button(tr("הבנתי"), role: .cancel) {}
+        } message: {
+            Text(tr("הטלפון עדיין לא מחובר למשפחה, אז אי אפשר לעשות את זה כרגע. בדקו שיש אינטרנט — אנחנו מנסים להתחבר שוב לבד."))
+        }
         .environment(\.layoutDirection, .app)
     }
 
@@ -205,7 +213,7 @@ struct ChildSettingsView: View {
                       fresh.onlyRegularQuestions != on else { return }
                 Haptic.light()
                 fresh.onlyRegularQuestions = on
-                profiles.update(fresh)
+                profiles.parentEdit(fresh)
             })) {
             HStack(spacing: 12) {
                 Text("📝").font(.system(size: 20)).frame(width: 28)
@@ -326,7 +334,9 @@ struct ChildSettingsView: View {
         .alert(tr("לאפס את ההתקדמות של \(p.name)?"), isPresented: $confirmReset) {
                 Button(tr("אפס דקות + ניקוד"), role: .destructive) {
                     onResetProgress(p)
-                    moreNote = tr("ההתקדמות של \(p.name) אופסה.")
+                    // "Sent", not "done": for a child with a device, that device
+                    // performs the wipe (a refusal shows on the dashboard).
+                    moreNote = tr("בקשת האיפוס של \(p.name) נשלחה. ההתקדמות תתאפס בכל המכשירים.")
                 }
                 Button(tr("בטל"), role: .cancel) {}
             } message: {
@@ -337,7 +347,7 @@ struct ChildSettingsView: View {
                     var updated = p
                     // "" (not nil) — deliberate-clear sentinel; survives sync merges.
                     updated.playPIN = ""
-                    profiles.update(updated)
+                    profiles.parentEdit(updated)
                 }
                 Button(tr("בטל"), role: .cancel) {}
             } message: {
@@ -463,7 +473,7 @@ struct ChildSettingsView: View {
         content
             .sheet(item: $editing) { p in
                 ProfileEditorView(mode: .edit(p)) { updated in
-                    profiles.update(updated)
+                    profiles.parentEdit(updated)
                 } onDelete: { removed in
                     editing = nil
                     onDelete(removed)

@@ -151,6 +151,17 @@ final class ProfileStore: ObservableObject {
         ParentSettings.shared.deviceRole == .child ? nil : profiles.first?.id
     }
 
+    /// 🔌 A PARENT's edit of a child's settings (cap, quiet hours, difficulty,
+    /// worlds, language…). While the family isn't loaded the edit would stay on
+    /// this phone only — the child never got it and the next sync put the old
+    /// value back. Refuse it instead and say why. Returns false when refused.
+    @discardableResult
+    func parentEdit(_ profile: Profile) -> Bool {
+        if HouseholdManager.shared.refuseIfDisconnected() { return false }
+        update(profile)
+        return true
+    }
+
     func update(_ profile: Profile) {
         if let idx = profiles.firstIndex(where: { $0.id == profile.id }) {
             profiles[idx] = profile

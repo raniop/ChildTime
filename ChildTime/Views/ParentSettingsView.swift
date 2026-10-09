@@ -32,6 +32,8 @@ struct ParentSettingsView: View {
     @State private var showRolePickerConfirm = false
     @State private var showSignOutConfirm = false
     @State private var deleting = false
+    /// "מחק הכול" couldn't reach the cloud — nothing was deleted.
+    @State private var deleteFailed = false
     @State private var testPushMessage: String?
     @State private var removalNote: String?
     @State private var requestingShield = false
@@ -40,6 +42,11 @@ struct ParentSettingsView: View {
         settingsStack
             // 🔌 A family write refused while disconnected (the family name) —
             // the dashboard's alert sits UNDER this sheet and never showed.
+            .alert(tr("לא נמחק"), isPresented: $deleteFailed) {
+                Button(tr("הבנתי"), role: .cancel) {}
+            } message: {
+                Text(tr("אין כרגע חיבור, אז לא מחקנו כלום — לא בענן ולא בחשבון. נסו שוב כשיש אינטרנט."))
+            }
             .alert(tr("מתחברים למשפחה…"), isPresented: $household.connectionNotice) {
                 Button(tr("נסו שוב")) { household.retryFamilyLoadIfNeeded() }
                 Button(tr("הבנתי"), role: .cancel) {}
@@ -874,7 +881,19 @@ struct ParentSettingsView: View {
         // Order matters: wipe the cloud data first (Firestore rules need a valid
         // auth session), THEN delete the auth account itself (App Store 5.1.1(v)),
         // then clear local state and sign out.
-        await HouseholdManager.shared.deleteAllData()
+        // Nothing else happens unless the family's data really left the cloud.
+        // An account with no family at all (never created one) still deletes
+        // its account (App Store 5.1.1(v)); only a family that EXISTS but can't
+        // be removed right now blocks it.
+        let h = HouseholdManager.shared
+        let noFamilyAtAll = h.household == nil && !h.familyNotLoaded && !h.familyLinkBroken
+        var cloudCleared = noFamilyAtAll
+        if !cloudCleared { cloudCleared = await h.deleteAllData() }
+        guard cloudCleared else {
+            deleting = false
+            deleteFailed = true
+            return
+        }
         await auth.deleteAccount()
         DataExporter.wipeLocalData()
         ProgressStore.shared.resetAll()
@@ -988,11 +1007,21 @@ struct ChangePINView: View {
                     .glassRows()
                 }
                 Section {
-                    Button(tr("שמור")) { save() }
-                        .disabled(newPIN.count != 4 || confirmPIN.count != 4)
+                    // Saving goes to the family first — show it, and don't let a
+                    // second tap or a swipe-down leave the parent unsure.
+                    Button {
+                        save()
+                    } label: {
+                        HStack(spacing: 8) {
+                            if saving { ProgressView() }
+                            Text(saving ? tr("שומרים…") : tr("שמור"))
+                        }
+                    }
+                    .disabled(saving || newPIN.count != 4 || confirmPIN.count != 4)
                 }
                 .glassRows()
             }
+            .interactiveDismissDisabled(saving)
             .readableColumn()
             .glassForm()
             .navigationTitle(tr("שינוי קוד הורה"))

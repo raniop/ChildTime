@@ -1369,13 +1369,9 @@ struct ParentDashboardView: View {
                 return
             }
             let cid = child.id.uuidString
-            qrCode = await withTaskGroup(of: String?.self) { group in
-                group.addTask { await HouseholdManager.shared.makeChildJoinCode(for: cid) }
-                group.addTask { try? await Task.sleep(nanoseconds: 12_000_000_000); return nil }
-                let first = await group.next() ?? nil
-                group.cancelAll()
-                return first
-            }
+            // A real race: a task group waits for ALL its children, and an offline
+            // Firestore write never finishes — so the 12s "timeout" never fired.
+            qrCode = await firstOrNil(within: 12) { await HouseholdManager.shared.makeChildJoinCode(for: cid) }
             if qrCode == nil { qrFailed = true }
             if let code = qrCode {
                 HouseholdManager.shared.watchInviteRedemption(payload: code)
@@ -2963,4 +2959,34 @@ struct OnboardingFinish: Identifiable {
     let id = UUID()
     let child: Profile
     let playsHere: Bool
+}
+
+
+/// The work's result, or nil after `seconds` — WITHOUT waiting for the work to
+/// finish (an offline Firestore write never does). The work keeps running and
+/// its late result is simply dropped.
+func firstOrNil<T: Sendable>(within seconds: Double, _ work: @escaping @Sendable () async -> T?) async -> T? {
+    await withCheckedContinuation { (cont: CheckedContinuation<T?, Never>) in
+        let latch = OneShot()
+        Task {
+            let v = await work()
+            if latch.fire() { cont.resume(returning: v) }
+        }
+        Task {
+            try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+            if latch.fire() { cont.resume(returning: nil) }
+        }
+    }
+}
+
+/// Fires exactly once, from any thread.
+final class OneShot: @unchecked Sendable {
+    private let lock = NSLock()
+    private var fired = false
+    func fire() -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        if fired { return false }
+        fired = true
+        return true
+    }
 }

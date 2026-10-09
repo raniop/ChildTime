@@ -164,7 +164,7 @@ struct QuietHoursEditorView: View {
         if fresh.quietHours == nil, q.isEmpty, !offToday, !paused { return }
         guard q != fresh.quietHours else { return }
         fresh.quietHours = q
-        profiles.update(fresh)
+        profiles.parentEdit(fresh)
     }
 }
 

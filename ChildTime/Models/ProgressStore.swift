@@ -1975,6 +1975,7 @@ final class ProgressStore: ObservableObject {
     }
 
     func clearInFlightRefund() { inFlightRefundSeconds = 0 }
+    func clearSecondsCarry() { pendingSecondsCarry = 0; carryIsGift = false }
 
     /// WHICH CHILD the live data in this store belongs to.
     ///
@@ -2681,6 +2682,15 @@ final class ProgressStore: ObservableObject {
         }
         totalCorrect        = s.totalCorrect
         totalAnswered       = s.totalAnswered
+        // 🧹 A snapshot from a NEWER reset epoch is an authoritative wipe: its
+        // wallet replaces ours instead of being max-merged with it (the max kept
+        // the pre-reset minutes on a device that received someone else's reset).
+        if s.resetEpoch > resetEpoch {
+            resetWallets()
+            clearInFlightRefund()
+            pendingSecondsCarry = 0
+            carryIsGift = false
+        }
         earnedSecondsIn  = max(earnedSecondsIn,  s.earnedSecondsIn  ?? 0)
         earnedSecondsOut = max(earnedSecondsOut, s.earnedSecondsOut ?? 0)
         giftSecondsIn    = max(giftSecondsIn,    s.giftSecondsIn    ?? 0)
@@ -2852,6 +2862,15 @@ final class ProgressStore: ObservableObject {
     func resetAll() {
         let nextRevision = revision + 1
         apply(.blank)                  // zeroes the data (and adopts blank's rev 0)
+        // 💰 …except the wallets: `apply` merges their counters with `max`, so a
+        // blank left every minute and the whole gift pocket in place — "איפוס
+        // didn't do anything" again, and the next upload put them back in the
+        // cloud. A reset is total: the counters and the carry go to zero too.
+        resetWallets()
+        clearInFlightRefund()
+        pendingSecondsCarry = 0
+        carryIsGift = false
+        recomputeWallets()
         revision = nextRevision        // …but bump so the wipe outranks cloud state
         lastModifiedAt = .now
         // Device-local pockets aren't in the snapshot — wipe them too (a reset is

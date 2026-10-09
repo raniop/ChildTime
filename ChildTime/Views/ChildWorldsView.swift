@@ -90,18 +90,18 @@ struct ChildWorldsView: View {
                 if let pack = world.topic.pack {
                     // A pack: the parent's per-child switch (the family keeps the pack).
                     if on { p.disabledPacks.remove(pack.id) } else { p.disabledPacks.insert(pack.id) }
-                    profiles.update(p); Haptic.light(); return
+                    profiles.parentEdit(p); Haptic.light(); return
                 }
                 if on {
                     p.enabledTopics.insert(world.topic)
-                    profiles.update(p)
+                    profiles.parentEdit(p)
                     Haptic.light()
                 } else {
                     // Never let the parent close the last world — the toggle just
                     // springs back (the getter still reports it on).
                     guard p.enabledTopics.count > 1 else { Haptic.soft(); return }
                     p.enabledTopics.remove(world.topic)
-                    profiles.update(p)
+                    profiles.parentEdit(p)
                     Haptic.light()
                 }
             }

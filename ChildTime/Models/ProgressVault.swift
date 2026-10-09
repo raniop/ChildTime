@@ -143,6 +143,7 @@ final class ProgressVault {
         if !ProgressStore.shared.holdsData(for: profileID) {
             ProgressStore.shared.resetWallets()
             ProgressStore.shared.clearInFlightRefund()   // the outgoing child's pending refund isn't theirs
+            ProgressStore.shared.clearSecondsCarry()     // …nor their sub-minute leftover
         }
         ProgressStore.shared.apply(incoming)
         // 3. Bind — the store now holds THIS child's data, and says so. Every

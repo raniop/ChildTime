@@ -84,7 +84,7 @@ struct ChildLanguageView: View {
         guard var p = profile, p.language != lang.rawValue else { return }
         p.language = lang.rawValue
         p.languageUpdatedAt = .now          // the stamp the merge compares
-        profiles.update(p)
+        profiles.parentEdit(p)
         Haptic.light()
     }
 }

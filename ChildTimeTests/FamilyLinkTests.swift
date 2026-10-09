@@ -191,4 +191,35 @@ struct FamilyLinkTests {
         #expect(progress.giftSecondsIn == liveGift)
         vault.purgeCache(for: other)
     }
+
+    // MARK: - Round 2: a reset really zeroes the wallet
+
+    @Test func resetZeroesMinutesAndGiftPocket() {
+        let progress = ProgressStore.shared
+        progress.applyChestReward(ChestReward(stars: 10, diamonds: 2, minutes: 25))
+        progress.addParentGiftMinutes(30)
+        #expect(progress.pendingMinutes > 0)
+        #expect(progress.parentGiftMinutes > 0)
+
+        progress.resetAll()
+
+        #expect(progress.pendingMinutes == 0)
+        #expect(progress.parentGiftMinutes == 0)
+        #expect(progress.earnedSecondsIn == 0 && progress.giftSecondsIn == 0)
+        #expect(progress.captureSnapshot().pendingMinutes == 0)   // and so does what gets uploaded
+    }
+
+    /// A snapshot from a NEWER reset epoch (someone else's reset) replaces the
+    /// wallet instead of being max-merged with the old one.
+    @Test func newerResetEpochReplacesTheWallet() {
+        let progress = ProgressStore.shared
+        progress.applyChestReward(ChestReward(stars: 5, diamonds: 1, minutes: 18))
+        #expect(progress.pendingMinutes >= 18)
+        var wiped = ProgressSnapshot.blank
+        wiped.resetEpoch = progress.resetEpoch + 1
+        wiped.revision = progress.revision + 1
+        progress.apply(wiped)
+        #expect(progress.pendingMinutes == 0)
+        #expect(progress.earnedSecondsIn == 0)
+    }
 }

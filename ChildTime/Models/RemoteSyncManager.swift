@@ -482,7 +482,10 @@ final class RemoteSyncManager: ObservableObject {
             // "לחצתי איפוס וזה לא עשה כלום"). This phone is her play device:
             // consume it here. Never when she has a device: that device holds
             // the live numbers and must be the one to wipe them.
-            if (HouseholdManager.shared.devicesByChild[childID.uuidString] ?? []).isEmpty {
+            // Only when the device list is KNOWN (server-confirmed) and empty —
+            // an unloaded list would take the wipe away from a real device.
+            if HouseholdManager.shared.childDevicesLoaded,
+               (HouseholdManager.shared.devicesByChild[childID.uuidString] ?? []).isEmpty {
                 self.applyPendingReset(childID: childID)
             }
         }
@@ -568,11 +571,14 @@ final class RemoteSyncManager: ObservableObject {
             let doc = try? txn.getDocument(ref)
             let stateDoc = try? txn.getDocument(stateRef)
             guard let stamp = doc?.data()?["revokeGiftAt"] as? Double else { return nil }
+            // A failed state READ is not "nothing to erase" — don't consume and
+            // confirm "✅ נמחקו" with the gift still in the cloud.
+            guard let stateDoc else { return nil }
             // 🧹 Erase the gift pocket IN THE CLOUD, in this same transaction. It
             // used to be a local debit + a max-merging push, so any gift seconds
             // this device didn't know about (consumed on the child's other device)
             // survived — the parent saw "✅ נמחקו" and the gift was still there.
-            if let stateDoc, stateDoc.exists,
+            if stateDoc.exists,
                var cloud = stateDoc.data().flatMap(ProgressSnapshot.fromFirestore),
                (cloud.giftSecondsIn ?? 0) > (cloud.giftSecondsOut ?? 0) {
                 cloud.giftSecondsOut = cloud.giftSecondsIn
@@ -597,14 +603,15 @@ final class RemoteSyncManager: ObservableObject {
             guard result is Double else { return }
             Task { @MainActor in
                 TofyLink("applyPendingGiftRevoke: parent revoked gift for \(childID.uuidString.prefix(8))")
-                guard ProgressStore.shared.holdsData(for: childID) else { return }
-                let closed = ProgressStore.shared.revokeAllParentTime()
-                if closed {
-                    ShieldManager.shared.cancelScheduledReshield()
-                    ShieldManager.shared.relockBaseline()
+                if ProgressStore.shared.holdsData(for: childID) {
+                    let closed = ProgressStore.shared.revokeAllParentTime()
+                    if closed {
+                        ShieldManager.shared.cancelScheduledReshield()
+                        ShieldManager.shared.relockBaseline()
+                    }
+                    Haptic.warning()
+                    self?.pushNow()
                 }
-                Haptic.warning()
-                self?.pushNow()
                 // Order: revoke first, THEN any gift given after it.
                 self?.applyPendingGift(childID: childID)
             }

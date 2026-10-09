@@ -22491,6 +22491,28 @@
         }
       }
     },
+    "אין כרגע חיבור, אז לא מחקנו כלום — לא בענן ולא בחשבון. נסו שוב כשיש אינטרנט." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد اتصال حاليًا، لذا لم يُحذف شيء — لا في السحابة ولا الحساب. حاولوا مرة أخرى عند توفر الإنترنت."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There's no connection right now, so nothing was deleted — not in the cloud and not the account. Try again when you're online."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас нет подключения, поэтому ничего не удалено — ни в облаке, ни аккаунт. Попробуйте снова, когда будет интернет."
+          }
+        }
+      }
+    },
     "אין כרגע מכשיר מחבר ל%@ — החלון יפתח ברגע שהמכשיר יתחבר." : {
       "localizations" : {
         "ar" : {
@@ -31411,6 +31433,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Запросы на одобрение"
+          }
+        }
+      }
+    },
+    "בקשת האיפוס של %@ נשלחה. ההתקדמות תתאפס בכל המכשירים." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أُرسل طلب إعادة تعيين %@. سيُعاد تعيين التقدّم على كل الأجهزة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The reset for %@ was sent. Progress will reset on every device."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сброс для %@ отправлен. Прогресс обнулится на всех устройствах."
           }
         }
       }
@@ -53403,6 +53447,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выйти"
+          }
+        }
+      }
+    },
+    "התנתקות והתחברות מחדש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تسجيل الخروج والدخول مجددًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign out and sign in again"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выйти и войти снова"
           }
         }
       }
@@ -75997,6 +76063,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сейчас нельзя создать код"
+          }
+        }
+      }
+    },
+    "לא נמחק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يُحذف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not deleted"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалено"
           }
         }
       }
@@ -116608,6 +116696,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ничего не выделяется 👏"
+          }
+        }
+      }
+    },
+    "שומרים…" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جارٍ الحفظ…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохраняем…"
           }
         }
       }

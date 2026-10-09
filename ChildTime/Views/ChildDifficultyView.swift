@@ -98,7 +98,7 @@ struct ChildDifficultyView: View {
             set: { newValue in
                 guard var p = profile else { return }
                 p.difficultyByTopic[topic.rawValue] = newValue.rawValue
-                profiles.update(p)
+                profiles.parentEdit(p)
                 Haptic.light()
             }
         )
@@ -109,7 +109,7 @@ struct ChildDifficultyView: View {
         for topic in Topic.allCases {
             p.difficultyByTopic[topic.rawValue] = d.rawValue
         }
-        profiles.update(p)
+        profiles.parentEdit(p)
         Haptic.success()
     }
 }

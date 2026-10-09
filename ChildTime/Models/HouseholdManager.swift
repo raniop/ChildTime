@@ -50,6 +50,9 @@ final class HouseholdManager: ObservableObject {
     /// Devices connected per child (childID string → devices), so the parent can
     /// see which/how many devices each child plays on.
     @Published private(set) var devicesByChild: [String: [ChildDevice]] = [:]
+    /// The device list has come from the SERVER at least once — before that an
+    /// empty list means "not known yet", not "this child has no device".
+    @Published private(set) var childDevicesLoaded = false
     /// The PARENT phones in this household — who they are and when each was last
     /// seen. Without this there is no way to tell a parent's device from a child's.
     @Published private(set) var parentDevices: [ChildDevice] = []
@@ -189,7 +192,10 @@ final class HouseholdManager: ObservableObject {
     /// One bootstrap at a time; results of a bootstrap from before the latest
     /// start()/stop() are thrown away (a sign-out mid-flight must not re-attach
     /// the previous account's family).
-    private var bootstrapInFlight = false
+    /// How many bootstraps are running right now (a counter, not a flag: the
+    /// 15s timeout used to clear a shared flag under a load still in flight).
+    private var bootstrapsRunning = 0
+    private var bootstrapInFlight: Bool { bootstrapsRunning > 0 }
     private var bootstrapGeneration = 0
     private struct FamilyLoadTimeout: LocalizedError {
         var errorDescription: String? { "family load timed out (offline?)" }
@@ -349,10 +355,12 @@ final class HouseholdManager: ObservableObject {
         // 15s with nothing, call it what it is: a failed load.
         Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: 15_000_000_000)
+            // Only a signed-in PARENT waits for a family; a child device or a guest
+            // finished with "no family" on purpose.
             guard let self, self.bootstrapGeneration == gen, self.uid == uid,
+                  self.isRealParentSession,
                   self.household == nil, !self.needsFamilyChoice, self.pendingEmailInvite == nil,
                   self.cloudLinkProblem == nil else { return }
-            self.bootstrapInFlight = false
             self.bootstrapFailed(FamilyLoadTimeout(), uid: uid, email: email, displayName: displayName)
         }
         Task { await bootstrap(uid: uid, email: email, displayName: displayName) }
@@ -369,6 +377,7 @@ final class HouseholdManager: ObservableObject {
         tombstoneListener?.remove(); tombstoneListener = nil
         #endif
         devicesByChild = [:]
+        childDevicesLoaded = false
         bootstrapRetry?.cancel(); bootstrapRetry = nil
         bootstrapAttempts = 0
         bootstrapGeneration &+= 1          // any bootstrap still in flight is now stale
@@ -390,9 +399,13 @@ final class HouseholdManager: ObservableObject {
 
     #if canImport(FirebaseFirestore)
     private func bootstrap(uid: String, email: String?, displayName: String?) async {
-        guard !bootstrapInFlight else { return }
-        bootstrapInFlight = true
-        defer { bootstrapInFlight = false }
+        // No single-flight guard: a second start() (an anonymous session upgraded
+        // to Apple/Google a second later) must get its OWN bootstrap — the old
+        // guard returned at once and the old one then dropped itself as stale,
+        // leaving nobody loading. Stale results are dropped by generation, and a
+        // family already loaded isn't loaded twice (finishBootstrap below).
+        bootstrapsRunning += 1
+        defer { bootstrapsRunning -= 1 }
         let gen = bootstrapGeneration
         /// A sign-out / another sign-in happened while we were waiting.
         func stale() -> Bool { gen != bootstrapGeneration || self.uid != uid }
@@ -410,6 +423,10 @@ final class HouseholdManager: ObservableObject {
             #endif
             let found = try await ensureHousehold(uid: uid, canCreate: false)
             guard !stale() else { TofyLink("bootstrap: result dropped — signed out meanwhile"); return }
+            if let hh = found, self.household?.id == hh.id {
+                bootstrapSucceeded(uid: uid)    // a parallel load already finished it
+                return
+            }
             if let hh = found {
                 TofyLink("bootstrap: household \(hh.id.prefix(8)) loaded — pin=\(hh.parentPinHash != nil) kids=\(hh.childIDs.count)")
                 bootstrapSucceeded(uid: uid)
@@ -632,14 +649,16 @@ final class HouseholdManager: ObservableObject {
             // the load is retried instead of believed.
             docs = try await query.getDocuments(source: .server).documents
         }
-        // Several families (one created by accident, the partner's joined later):
-        // never "whichever came first" — prefer the one the parent doc names
-        // last, then one that has children.
+        // Several families (one created by accident, the partner's joined
+        // earlier): never "whichever came first". The one WITH children wins —
+        // an accidental family is the empty one, and it is also the one listed
+        // LAST on the parent doc (arrayUnion appends), so order comes second.
         let named = parentAccount?.householdIDs ?? []
         let ranked = docs.sorted { a, b in
+            let ca = (a.data()["childIDs"] as? [Any])?.count ?? 0, cb = (b.data()["childIDs"] as? [Any])?.count ?? 0
+            if (ca > 0) != (cb > 0) { return ca > 0 }
             let ra = named.lastIndex(of: a.documentID) ?? -1, rb = named.lastIndex(of: b.documentID) ?? -1
             if ra != rb { return ra > rb }
-            let ca = (a.data()["childIDs"] as? [Any])?.count ?? 0, cb = (b.data()["childIDs"] as? [Any])?.count ?? 0
             return ca > cb
         }
         if docs.count > 1 {
@@ -882,6 +901,7 @@ final class HouseholdManager: ObservableObject {
                 }
                 guard let snap else { return }
                 self.childDevicesHealAttempted = false   // healthy again
+                if !snap.metadata.isFromCache { self.childDevicesLoaded = true }
                 let devices = snap.documents.compactMap {
                     Self.decode(ChildDevice.self, $0.data())
                 }.filter { $0.removed != true }   // hide removed devices from the parent
@@ -2307,9 +2327,17 @@ final class HouseholdManager: ObservableObject {
 
     /// Cascade-deletes every child this parent's household owns, the household
     /// itself, and the parent record. Local state is cleared by the caller.
-    func deleteAllData() async {
+    /// Returns false when the family's data could NOT be removed — then the
+    /// caller must NOT delete the account (that left the children's data, incl.
+    /// their names on the public friends board, in the cloud with no owner).
+    @discardableResult
+    func deleteAllData() async -> Bool {
         #if canImport(FirebaseFirestore)
-        guard let uid, let hh = household else { return }
+        guard let uid, let hh = household else { return false }
+        // Reach the server first — offline, deletes queue forever and the
+        // account would be deleted with the family still up there.
+        do { _ = try await db.collection("households").document(hh.id).getDocument(source: .server) }
+        catch { TofyLink("deleteAllData: server unreachable — refusing"); return false }
         do {
             for childID in hh.childIDs {
                 try? await db.collection("children").document(childID)
@@ -2319,8 +2347,9 @@ final class HouseholdManager: ObservableObject {
                 // linger after a full account deletion, GDPR + Kids Category).
                 // BEFORE the parent doc: the card's delete rule gates on the
                 // child's householdID, so the `children/{id}` doc must still exist.
-                try? await db.collection("friendCards").document(childID).delete()
-                try? await db.collection("children").document(childID).delete()
+                // These two MUST succeed (names): a failure stops everything.
+                try await db.collection("friendCards").document(childID).delete()
+                try await db.collection("children").document(childID).delete()
                 // This child's device rows (device names + FCM tokens).
                 let devs = try? await db.collection("childDevices")
                     .whereField("childID", isEqualTo: childID).getDocuments()
@@ -2329,9 +2358,15 @@ final class HouseholdManager: ObservableObject {
             // Family chores + earnings ledger.
             try? await deleteSubcollection("households/\(hh.id)/chores")
             try? await deleteSubcollection("households/\(hh.id)/choreStats")
-            try? await db.collection("households").document(hh.id).delete()
+            try await db.collection("households").document(hh.id).delete()
             try? await parentRef(uid).delete()
+            return true
+        } catch {
+            TofyLink("deleteAllData FAILED: \(error.localizedDescription)")
+            return false
         }
+        #else
+        return false
         #endif
     }
 

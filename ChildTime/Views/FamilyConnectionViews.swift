@@ -10,6 +10,9 @@ import SwiftUI
 struct FamilyConnectingView: View {
     @ObservedObject private var household = HouseholdManager.shared
     @State private var slow = false
+    /// After a minute, a way out — a load that fails for good (not the network)
+    /// must not trap the parent on this screen with only "נסו שוב".
+    @State private var stuck = false
 
     var body: some View {
         ZStack {
@@ -41,6 +44,19 @@ struct FamilyConnectingView: View {
                     .buttonStyle(.juicy)
                     .padding(.top, AppSpacing.sm)
                 }
+                if stuck {
+                    Button {
+                        Haptic.light()
+                        AuthManager.shared.signOut()   // the family stays in the cloud; sign in again
+                    } label: {
+                        Text(tr("התנתקות והתחברות מחדש"))
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.85))
+                            .underline()
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 4)
+                }
                 Spacer()
             }
             .padding(.horizontal, AppSpacing.xl)
@@ -48,6 +64,8 @@ struct FamilyConnectingView: View {
         .task {
             try? await Task.sleep(nanoseconds: 10_000_000_000)
             slow = true
+            try? await Task.sleep(nanoseconds: 50_000_000_000)
+            stuck = true
         }
     }
 }

@@ -161,7 +161,7 @@ struct ChildScreenTimeView: View {
         }
         guard p.dailyCapMinutes != value else { return }
         p.dailyCapMinutes = value
-        profiles.update(p)
+        profiles.parentEdit(p)
         Haptic.light()
     }
 }

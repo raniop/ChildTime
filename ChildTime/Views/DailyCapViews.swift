@@ -393,7 +393,7 @@ struct DailyCapSetupCard: View {
             guard var fresh = profiles.profiles.first(where: { $0.id == p.id }),
                   fresh.dailyCapMinutes != v else { continue }
             fresh.dailyCapMinutes = v
-            profiles.update(fresh)   // → HouseholdManager.upsertChild → the child's device
+            profiles.parentEdit(fresh)   // → HouseholdManager.upsertChild → the child's device
         }
         Haptic.success()
         withAnimation(.easeInOut(duration: 0.25)) { settings.dailyCapCardDone = true }
