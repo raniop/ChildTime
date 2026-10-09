@@ -78,11 +78,21 @@ struct WelcomeIntroView: View {
             }
         }
         .sheet(isPresented: $showLanguages) {
-            NavigationStack { LanguagePickerView() }
-                .presentationDetents([.medium, .large])
+            // In the app's direction and on the dark glass — a sheet inherits
+            // neither, and the list came up left-to-right under a black title.
+            // A short glass gets the whole height: half of it cut the last language.
+            LanguagePickerView(ownHeader: true)
+                .environment(\.layoutDirection, .app)
+                .environment(\.colorScheme, .dark)
+                .presentationDetents(DisplayGeometry.shared.isShort ? [.large] : [.medium, .large])
         }
         .opacity(appeared ? 1 : 0)
-        .onAppear { withAnimation(.easeOut(duration: 0.45)) { appeared = true } }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.45)) { appeared = true }
+            #if DEBUG
+            if ProcessInfo.processInfo.environment["DEMO_LANGSHEET"] == "1" { showLanguages = true }   // DEMO_SCREEN=welcome DEMO_LANGSHEET=1
+            #endif
+        }
     }
 
     // MARK: - Hero

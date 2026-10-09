@@ -10,10 +10,24 @@ import WidgetKit
 struct LanguagePickerView: View {
     @ObservedObject private var language = LanguageStore.shared
     @Environment(\.dismiss) private var dismiss
+    /// As a sheet of its own (the welcome screen): the title is drawn here,
+    /// centred on the glass — the navigation bar's sat off to the side of the
+    /// foldable's clock (Rani: "הכותרת תמרכז").
+    var ownHeader = false
 
     var body: some View {
         ScrollView {
             VStack(spacing: 10) {
+                if ownHeader {
+                    Text(tr("שָׁפָה · Language"))
+                        .font(.system(size: 20, weight: .heavy, design: .rounded))
+                        .foregroundStyle(GlassInk.primary)
+                        .frame(maxWidth: .infinity)
+                        .clearOfBarBothSides()
+                        // Fills the band beside the clock, so the list starts below it.
+                        .fillsTopBand(above: AppSpacing.lg)
+                        .padding(.bottom, 6)
+                }
                 ForEach(language.available) { lang in
                     row(lang)
                 }
@@ -28,7 +42,7 @@ struct LanguagePickerView: View {
         }
         .background(GlassBackdrop())
         .environment(\.colorScheme, .dark)
-        .navigationTitle(tr("שָׁפָה · Language"))
+        .navigationTitle(ownHeader ? "" : tr("שָׁפָה · Language"))
         .navigationBarTitleDisplayMode(.inline)
     }
 
