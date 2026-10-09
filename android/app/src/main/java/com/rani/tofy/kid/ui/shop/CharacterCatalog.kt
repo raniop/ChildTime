@@ -69,6 +69,9 @@ object CharacterCatalog {
         "ibex" to 1550, "pig" to 1600, "pig_b" to 1700, "koala" to 1800, "koala_b" to 1850, "koala_c" to 1950,
         "otter" to 2000, "fox_b" to 2100, "crocodile_b" to 2250, "mouse" to 1500, "chinchilla" to 1650,
         "koala_d" to 1900, "koala_e" to 2300,
+        // 🎒 school series
+        "bunny_b" to 1900, "chick" to 1900, "lamb" to 1950, "kitten" to 2000, "puppy" to 2050, "penguin_b" to 2100, "fox_c" to 2100,
+        "hedgehog_d" to 2150, "panda_c" to 2200, "otter_b" to 2200, "frog" to 2250, "fawn" to 2300, "raccoon" to 2350, "polarbear" to 2400,
         // 🔵 Rare (2401–5200)
         "tiger" to 2900, "zebra" to 3200, "zebra_b" to 3450, "crocodile" to 3750, "elephant" to 4200,
         "elephant_b" to 4500, "elephant_c" to 4800, "hedgehog_c" to 2650, "lemur" to 3100, "camel" to 3600,
@@ -114,6 +117,14 @@ object CharacterCatalog {
         "redpanda" -> tr("פַּנְדָּה אֲדוּמָּה")
         "unicorn" -> tr("חַד-קֶרֶן")
         "owl" -> tr("יַנְשׁוּף")
+        "chick" -> tr("אֶפְרוֹחַ")
+        "lamb" -> tr("טָלֶה")
+        "kitten" -> tr("חֲתַלְתּוּל")
+        "puppy" -> tr("כְּלַבְלָב")
+        "frog" -> tr("צְפַרְדֵּעַ")
+        "fawn" -> tr("עֹפֶר")
+        "raccoon" -> tr("רָקוּן")
+        "polarbear" -> tr("דּוֹב קֻטְבִּי")
         else -> tr("שׁוּעָל")
     }
 

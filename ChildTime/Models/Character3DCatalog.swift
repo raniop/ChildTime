@@ -114,6 +114,21 @@ enum Character3DCatalog {
         Character3D(id: "chinchilla",  name: tr("צִ'ינְצִ'ילָה"), priceStars: 1650, imageAsset: "chinchilla"),
         Character3D(id: "koala_d",     name: tr("קוֹאָלָה"),   priceStars: 1900, imageAsset: "koala_d"),
         Character3D(id: "koala_e",     name: tr("קוֹאָלָה"),   priceStars: 2300, imageAsset: "koala_e"),
+        // 🎒 The school series — beanie, sweater, satchel (Rani, 2026-10-09).
+        Character3D(id: "bunny_b",     name: tr("אַרְנָב"), priceStars: 1900, imageAsset: "bunny_b"),
+        Character3D(id: "chick",       name: tr("אֶפְרוֹחַ"), priceStars: 1900, imageAsset: "chick"),
+        Character3D(id: "lamb",        name: tr("טָלֶה"), priceStars: 1950, imageAsset: "lamb"),
+        Character3D(id: "kitten",      name: tr("חֲתַלְתּוּל"), priceStars: 2000, imageAsset: "kitten"),
+        Character3D(id: "puppy",       name: tr("כְּלַבְלָב"), priceStars: 2050, imageAsset: "puppy"),
+        Character3D(id: "penguin_b",   name: tr("פִּינְגְּוִין"), priceStars: 2100, imageAsset: "penguin_b"),
+        Character3D(id: "fox_c",       name: tr("שׁוּעָל"), priceStars: 2100, imageAsset: "fox_c"),
+        Character3D(id: "hedgehog_d",  name: tr("קִיפּוֹד"), priceStars: 2150, imageAsset: "hedgehog_d"),
+        Character3D(id: "panda_c",     name: tr("פַּנְדָּה"), priceStars: 2200, imageAsset: "panda_c"),
+        Character3D(id: "otter_b",     name: tr("לוּטְרָה"), priceStars: 2200, imageAsset: "otter_b"),
+        Character3D(id: "frog",        name: tr("צְפַרְדֵּעַ"), priceStars: 2250, imageAsset: "frog"),
+        Character3D(id: "fawn",        name: tr("עֹפֶר"), priceStars: 2300, imageAsset: "fawn"),
+        Character3D(id: "raccoon",     name: tr("רָקוּן"), priceStars: 2350, imageAsset: "raccoon"),
+        Character3D(id: "polarbear",   name: tr("דּוֹב קֻטְבִּי"), priceStars: 2400, imageAsset: "polarbear"),
 
         // 🔵 Rare (2401–5200) — hint-level help.
         Character3D(id: "tiger",       name: tr("נָמֵר"),      priceStars: 2900, imageAsset: "tiger"),

@@ -17990,6 +17990,28 @@
         }
       }
     },
+    "אֶפְרוֹחַ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كتكوت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chick"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цыплёнок"
+          }
+        }
+      }
+    },
     "אֶפְשָׁר לְדַלֵּג וּלְחַבֵּר אֶת הַמַּכְשִׁיר אַחַר כָּךְ — מֵהַמָּסָךְ הָרָאשִׁי." : {
       "localizations" : {
         "ar" : {
@@ -33849,6 +33871,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Медведь"
+          }
+        }
+      }
+    },
+    "דּוֹב קֻטְבִּי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دب قطبي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Polar bear"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Белый медведь"
           }
         }
       }
@@ -55718,6 +55762,28 @@
         }
       }
     },
+    "חֲתַלְתּוּל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هريرة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kitten"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Котёнок"
+          }
+        }
+      }
+    },
     "חֲתוּלִים" : {
       "localizations" : {
         "ar" : {
@@ -59416,6 +59482,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Та-дам!"
+          }
+        }
+      }
+    },
+    "טָלֶה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خروف صغير"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lamb"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ягнёнок"
           }
         }
       }
@@ -64369,6 +64457,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Машины и транспорт"
+          }
+        }
+      }
+    },
+    "כְּלַבְלָב" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جرو"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puppy"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Щенок"
           }
         }
       }
@@ -95638,6 +95748,28 @@
         }
       }
     },
+    "עֹפֶר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أيل صغير"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fawn"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оленёнок"
+          }
+        }
+      }
+    },
     "עֻדְכַּן %@" : {
       "localizations" : {
         "ar" : {
@@ -103805,6 +103937,28 @@
         }
       }
     },
+    "צְפַרְדֵּעַ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ضفدع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frog"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лягушка"
+          }
+        }
+      }
+    },
     "צְרִיכִים" : {
       "localizations" : {
         "ar" : {
@@ -109132,6 +109286,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "хотел"
+          }
+        }
+      }
+    },
+    "רָקוּן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "راكون"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raccoon"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Енот"
           }
         }
       }

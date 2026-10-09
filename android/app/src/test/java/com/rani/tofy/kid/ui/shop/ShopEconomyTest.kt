@@ -171,7 +171,7 @@ class ShopEconomyTest {
         assertEquals(CharacterTier.Help.EXPLAIN, CharacterCatalog.help("owl"))
         assertEquals(CharacterTier.Help.HINT, CharacterCatalog.help("tiger"))
         assertEquals(CharacterTier.Help.ENCOURAGE, CharacterCatalog.help("fox"))
-        assertEquals(48, CharacterCatalog.prices.size)   // = the 48 char_*.png
+        assertEquals(62, CharacterCatalog.prices.size)   // = the 62 char_*.png
         assertEquals("fox", CharacterCatalog.find("nope").id)
     }
 
