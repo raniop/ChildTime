@@ -50,6 +50,8 @@ struct QuestionRunnerView: View {
     /// Held, not observed: every cheer and bubble republished the WHOLE question
     /// screen (~45ms a time on the simulator, more on a phone) — the stutter after
     /// an answer (Rani). Only the buddy views that show it observe it.
+    /// Global frame of 🚩 🔊 🙋 — the buddy is pinned under it.
+    @State private var toolsFrame: CGRect = .zero
     @State private var companion = CompanionController()
     @State private var current: Question?
     @State private var questionIndex: Int = 0
@@ -269,8 +271,9 @@ struct QuestionRunnerView: View {
             // parks on a choice or on the 🔊 button. `topInset` is now where the
             // answers REALLY end rather than a fixed 150pt from the bottom, which
             // was only ever right on the screens it was guessed on.
-            if buddyHasFreeStrip {
+            if buddyHasFreeStrip, toolsFrame != .zero {
                 GeometryReader { geo in
+                    let field = geo.frame(in: .global)
                     FloatingCompanion(
                         controller: companion,
                         profile: profiles.active,
@@ -280,7 +283,11 @@ struct QuestionRunnerView: View {
                         // appearing), and the buddy jumped each time.
                         topInset: max(120, geo.size.height - companionSize * 1.3 - 60),
                         bottomInset: 28,
-                        horizontalInset: AppSpacing.md
+                        horizontalInset: AppSpacing.md,
+                        // 📌 Parked under 🚩 🔊 🙋, not wandering (Rani, 2026-10-09);
+                        // a drag still moves it.
+                        pinnedAt: CGPoint(x: toolsFrame.midX - field.minX,
+                                          y: toolsFrame.maxY - field.minY + 8 + companionSize * 0.65)
                     )
                 }
                 .allowsHitTesting(true)
@@ -811,19 +818,23 @@ struct QuestionRunnerView: View {
                     .transition(.opacity)
                 }
                 HStack(spacing: AppSpacing.sm) {
-                    cardIconButton(system: "flag", fg: .white.opacity(0.7), bg: .white.opacity(0.14)) {
-                        showReportConfirm = true
+                    HStack(spacing: AppSpacing.sm) {
+                        cardIconButton(system: "flag", fg: .white.opacity(0.7), bg: .white.opacity(0.14)) {
+                            showReportConfirm = true
+                        }
+                        cardIconButton(system: "speaker.wave.2.fill", fg: .white, bg: .white.opacity(0.22)) {
+                            Haptic.light()
+                            // For a passage question, read the passage first — one
+                            // utterance, so the two don't cut each other off.
+                            let spokenPrompt = (q.passage.map { $0 + ". " } ?? "") + q.readAloudText
+                            SpeechReader.shared.readQuestion(prompt: spokenPrompt, options: q.options)
+                        }
+                        if !isPreReader {
+                            askParentButton(for: q)
+                        }
                     }
-                    cardIconButton(system: "speaker.wave.2.fill", fg: .white, bg: .white.opacity(0.22)) {
-                        Haptic.light()
-                        // For a passage question, read the passage first — one
-                        // utterance, so the two don't cut each other off.
-                        let spokenPrompt = (q.passage.map { $0 + ". " } ?? "") + q.readAloudText
-                        SpeechReader.shared.readQuestion(prompt: spokenPrompt, options: q.options)
-                    }
-                    if !isPreReader {
-                        askParentButton(for: q)
-                    }
+                    // 📌 Where the buddy stands: right under these three.
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { toolsFrame = $0 }
                     Spacer(minLength: 0)
                     if !showFeedback, !wandShowing {
                         hintButton(for: q)
@@ -1494,7 +1505,9 @@ struct QuestionRunnerView: View {
             if hadMistakeThisQuestion, !reAskQueue.contains(where: { $0.question.prompt == q.prompt }) {
                 reAskQueue.append((q, questionIndex + reAskSpacing))
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            // 1.0s (was 1.5 since May): enough to see the ✓ and hear it — the
+            // half second more read as "a crazy delay" (Rani, 2026-10-09).
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 questionIndex += 1
                 PerfMark.run("nextQuestion") { nextQuestion() }
             }

@@ -19,6 +19,10 @@ struct FloatingCompanion: View {
     var topInset: CGFloat = 80
     var bottomInset: CGFloat = 220
     var horizontalInset: CGFloat = 20
+    /// 📌 A fixed spot (in this view's coordinates) instead of wandering: the
+    /// quiz parks the buddy under 🚩 🔊 🙋 (Rani, 2026-10-09). The child can
+    /// still drag it; once they do, it stays where they left it.
+    var pinnedAt: CGPoint? = nil
 
     @Environment(\.layoutDirection) private var layoutDirection
 
@@ -27,6 +31,15 @@ struct FloatingCompanion: View {
     @State private var hasAppeared: Bool = false
     @State private var wanderTask: Task<Void, Never>? = nil
     @State private var bubbleSize: CGSize = .zero
+    /// The child moved a pinned buddy — stop following the pin.
+    @State private var movedByChild = false
+
+    /// `pinnedAt` is measured from the LEFT edge (global frames); `.position`
+    /// here runs from the leading edge, so a right-to-left screen mirrors it —
+    /// unmirrored, the buddy stood under nothing on the far side.
+    private func pinPoint(_ pin: CGPoint, in size: CGSize) -> CGPoint {
+        return clamp(CGPoint(x: layoutDirection == .rightToLeft ? size.width - pin.x : pin.x, y: pin.y), in: size)
+    }
     @ObservedObject private var cosmeticStore = CosmeticStore.shared
 
     var body: some View {
@@ -82,8 +95,9 @@ struct FloatingCompanion: View {
                         // The bubble's BOTTOM sits just above the head (the
                         // avatar is size×1.3 tall, centred). Placed by its centre,
                         // a two-line bubble grew down onto the hat (Rani).
-                        .offset(x: clampedX - anchor.x,
-                                y: bubbleSize.height > 0 ? -(size * 0.65 + bubbleSize.height / 2 + 2) : -size * 0.9)
+                        .offset(x: pinnedAt != nil ? besideX(anchor: anchor, width: geo.size.width) : clampedX - anchor.x,
+                                y: pinnedAt != nil ? -size * 0.25
+                                   : (bubbleSize.height > 0 ? -(size * 0.65 + bubbleSize.height / 2 + 8) : -size * 0.9))
                         .transition(.asymmetric(insertion: .scale.combined(with: .opacity), removal: .identity))
                         .allowsHitTesting(false)
                 }
@@ -117,7 +131,7 @@ struct FloatingCompanion: View {
                             onTap?()
                         } else {
                             Haptic.soft()
-                            scheduleWander(in: geo.size)
+                            if pinnedAt == nil { scheduleWander(in: geo.size) } else { movedByChild = true }
                         }
                         isDragging = false
                     }
@@ -125,8 +139,12 @@ struct FloatingCompanion: View {
             .onAppear {
                 if !hasAppeared {
                     hasAppeared = true
-                    position = defaultPosition(in: geo.size)
-                    scheduleWander(in: geo.size)
+                    if let pin = pinnedAt {
+                        position = pinPoint(pin, in: geo.size)
+                    } else {
+                        position = defaultPosition(in: geo.size)
+                        scheduleWander(in: geo.size)
+                    }
                 }
             }
             .onDisappear { cancelWandering() }
@@ -135,11 +153,18 @@ struct FloatingCompanion: View {
             // from the unmeasured band (topInset 120), so the buddy walked onto the
             // answers and stayed there — nothing moved it back once the real band
             // arrived. When the band moves, a buddy now outside it walks back in.
+            // 📌 Follow the pin when the layout moves it (a taller question) —
+            // without a walk — until the child picks the buddy up.
+            .onChangeCompat(of: pinnedAt) { _, pin in
+                guard let pin, !movedByChild, !isDragging else { return }
+                var t = Transaction(); t.disablesAnimations = true
+                withTransaction(t) { position = pinPoint(pin, in: geo.size) }
+            }
             .onChangeCompat(of: topInset) { old, newTop in
                 // Only a real change of band — the question screen re-measured on
                 // every answer (the 🔥 streak line), and each re-measure sent the
                 // buddy on a new walk: it "danced" with the confetti (Rani).
-                guard abs(newTop - old) > 40 else { return }
+                guard pinnedAt == nil, abs(newTop - old) > 40 else { return }
                 guard !isDragging, position != .zero, position.y - size * 0.65 < newTop else { return }
                 position = randomTarget(in: geo.size)
             }
@@ -158,6 +183,17 @@ struct FloatingCompanion: View {
             .animation(.spring(response: 0.5, dampingFraction: 0.7), value: controller.bubbleText)
             .animation(.spring(response: 0.5, dampingFraction: 0.7), value: showGift)
         }
+    }
+
+    /// 📌 A parked buddy stands right under 🚩 🔊 🙋 — a bubble over its head
+    /// would cover them, so it speaks to the SIDE with more room.
+    private func besideX(anchor: CGPoint, width: CGFloat) -> CGFloat {
+        let half = bubbleSize.width / 2
+        let gap = size * 0.5 + 6
+        let toLow = anchor.x > width / 2          // more room toward x = 0
+        var center = toLow ? anchor.x - gap - half : anchor.x + gap + half
+        center = min(max(10 + half, center), width - 10 - half)   // stay on screen
+        return center - anchor.x
     }
 
     // MARK: - Wandering

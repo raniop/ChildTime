@@ -50,6 +50,8 @@ final class HitchMonitor: NSObject {
         watch("Auth", AuthManager.shared.objectWillChange)
         watch("Location", LocationSharing.shared.objectWillChange)
         watch("JoinCoord", JoinCoordinator.shared.objectWillChange)
+        // Any UserDefaults write — @AppStorage views redraw on these.
+        watch("Defaults", NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification))
     }
 
     @objc private func tick(_ l: CADisplayLink) {

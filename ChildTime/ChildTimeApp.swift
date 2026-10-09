@@ -467,6 +467,10 @@ struct ChildTimeApp: App {
         case "surpriseround":                               // DEMO_SCREEN=surpriseround [DEMO_WORLD=soccer] [DEMO_GAME=balloon] — ⚡ the interstitial → the game
             MiniGameDemoHost(screen: name)
         case "wheel":    LuckyWheelView(onClose: {})
+        #if DEBUG
+        case "quizdesign":                                  // DEMO_SCREEN=quizdesign DEMO_DESIGN=1…4 — page redesign mockups
+            QuizDesignMockup(variant: Int(ProcessInfo.processInfo.environment["DEMO_DESIGN"] ?? "") ?? 1)
+        #endif
         case "memory":   MemoryMatchView(onClose: {})   // DEMO_SCREEN=memory [DEMO_PREREADER=1 → pictures only]
         // 🎁 "אֵיזֶה נִצָּחוֹן!" — the chest after a session (test profile only).
         case "reward":
@@ -663,6 +667,15 @@ struct ChildTimeApp: App {
         case "kidhome":                                     // DEMO_SCREEN=kidhome — the child's home
             WorldMapView()   // (+ DEMO_GIFT_MINUTES=30 to show the 💝 button)
                 .onAppear {
+                    // 📏 DEMO_DEFAULTS_PING=standard|group: write an UNRELATED key every 2s —
+                    // does the home redraw for it? ([Body] Home in the log)
+                    if let which = ProcessInfo.processInfo.environment["DEMO_DEFAULTS_PING"] {
+                        let store = which == "group" ? AppGroup.defaults : UserDefaults.standard
+                        Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
+                            NSLog("[Mark] ping write (%@)", which)
+                            store.set(Date().timeIntervalSince1970, forKey: "demo.ping")
+                        }
+                    }
                     // A previous DEMO_SCREEN=unlocked run leaves a fake open window
                     // behind; the home must start closed.
                     if ProgressStore.shared.isUnlocked { ProgressStore.shared.endUnlock() }

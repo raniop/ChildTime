@@ -2,7 +2,7 @@ import SwiftUI
 import Combine
 
 struct WorldMapView: View {
-    @AppStorage(ChildLockSetup.pendingKey) private var lockSetupPending = false
+    @QuietAppStorage(ChildLockSetup.pendingKey) private var lockSetupPending = false
     /// NOT observed directly. Every answer changes ⭐ 💎 and the wallet, and the
     /// whole home — hidden under the question screen — re-built and re-laid-out
     /// on each correct answer: the stutter Rani felt only on RIGHT answers

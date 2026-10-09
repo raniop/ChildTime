@@ -15,12 +15,12 @@ struct ContentView: View {
     @StateObject private var kidMode = KidModeManager.shared
     @StateObject private var joinCoord = JoinCoordinator.shared
     @StateObject private var liveGame = LiveGameManager.shared
-    @AppStorage(ChildLockSetup.pendingKey) private var lockSetupPending = false
+    @QuietAppStorage(ChildLockSetup.pendingKey) private var lockSetupPending = false
     @ObservedObject private var location = LocationSharing.shared
     /// 📍 The child's explanation shows at most once per launch and 3 times in
     /// all — iOS asks for "always" only once, so a kid who declined is not nagged.
     @State private var locationPromptShown = false
-    @AppStorage("location.promptCount") private var locationPromptCount = 0
+    @QuietAppStorage("location.promptCount") private var locationPromptCount = 0
 
     /// Guests (no account) can answer this many questions before registration
     /// is required.
