@@ -143,30 +143,31 @@ struct PaywallView: View {
     /// side — who it's for and what's in it; the decision on the other — the
     /// child's own numbers, both plans, the button with its billing line.
     private var wideBody: some View {
-        ScrollView {
-            HStack(alignment: .top, spacing: AppSpacing.xl) {
-                VStack(spacing: AppSpacing.sm) {
-                    hero
-                    benefitsCard
-                }
-                .frame(maxWidth: .infinity)
+        GeometryReader { geo in
+            ScrollView {
+                // The lion and "טופי+" head the page across both halves; under
+                // them, what's included beside the decision — both starting on
+                // one line, the whole block centred on the glass (Rani).
                 VStack(spacing: AppSpacing.md) {
-                    if let pitch { personalCard(pitch) }
-                    planPicker
-                    primaryCTA
-                    if let pitch { freeForeverLine(pitch) }
-                    footerLinks
+                    hero
+                    HStack(alignment: .top, spacing: AppSpacing.xl) {
+                        benefitsCard
+                            .frame(maxWidth: .infinity)
+                        VStack(spacing: AppSpacing.md) {
+                            if let pitch { personalCard(pitch) }
+                            planPicker
+                            primaryCTA
+                            if let pitch { freeForeverLine(pitch) }
+                            footerLinks
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
                 }
-                // This column sits under the floating ✕ (the corner away from the
-                // clock) — it starts below it instead of under it.
-                .padding(.top, 44)
-                .frame(maxWidth: .infinity)
+                .padding(.horizontal, AppSpacing.lg)
+                .padding(.vertical, AppSpacing.md)
+                .frame(maxWidth: 900)
+                .frame(maxWidth: .infinity, minHeight: geo.size.height)
             }
-            .padding(.horizontal, AppSpacing.lg)
-            .padding(.top, AppSpacing.sm)
-            .padding(.bottom, AppSpacing.md)
-            .frame(maxWidth: 900)
-            .frame(maxWidth: .infinity)
         }
     }
 
