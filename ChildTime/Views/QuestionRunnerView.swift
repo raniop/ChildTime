@@ -267,8 +267,10 @@ struct QuestionRunnerView: View {
                         controller: companion,
                         profile: profiles.active,
                         size: companionSize,
-                        topInset: min(max(120, answersBottom + 8),
-                                      max(120, geo.size.height - companionSize - 28)),
+                        // A fixed band at the bottom of the screen. Following where
+                        // the answers end moved it on every answer (the streak line
+                        // appearing), and the buddy jumped each time.
+                        topInset: max(120, geo.size.height - companionSize * 1.3 - 60),
                         bottomInset: 28,
                         horizontalInset: AppSpacing.md
                     )
@@ -787,6 +789,19 @@ struct QuestionRunnerView: View {
                 // (e.g. the hint hides the moment the answer is locked in).
                 // RTL row: hint in the middle, 🚩 🔊 🙋 together on the right; the
                 // left end stays empty for the buddy.
+                // 🪄 After two misses the wand joins the hint — the two pills get a
+                // row of their own, at full size. Squeezed in beside 🚩 🔊 🙋 they
+                // shrank to "רמ…" and "הח…" (Rani).
+                let wandShowing = consecutiveWrong >= 2 && !showFeedback
+                if wandShowing {
+                    HStack(spacing: AppSpacing.sm) {
+                        hintButton(for: q)
+                        magicWandButton
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, AppSpacing.md)
+                    .transition(.opacity)
+                }
                 HStack(spacing: AppSpacing.sm) {
                     cardIconButton(system: "flag", fg: .white.opacity(0.7), bg: .white.opacity(0.14)) {
                         showReportConfirm = true
@@ -802,19 +817,14 @@ struct QuestionRunnerView: View {
                         askParentButton(for: q)
                     }
                     Spacer(minLength: 0)
-                    if !showFeedback {
+                    if !showFeedback, !wandShowing {
                         hintButton(for: q)
-                    }
-                    if consecutiveWrong >= 2 && !showFeedback {
-                        magicWandButton
                     }
                     Spacer(minLength: 0)
                     if !buddyHasFreeStrip {
                         // 📐 Nowhere under the answers to stand: the buddy lives IN
                         // this slot instead. A short screen was never the only case.
                         InlineBuddy(controller: companion, profile: profiles.active, width: 44)
-                    } else {
-                        Color.clear.frame(width: companionSize * 0.7, height: 1)   // room for the buddy
                     }
                 }
                 .padding(.horizontal, AppSpacing.md)
@@ -1321,6 +1331,10 @@ struct QuestionRunnerView: View {
         #if DEBUG
         // 📏 DEMO_AUTOTAP: answer each question correctly after 2.5s, to time the tap path.
         HitchMonitor.shared.start()
+        if ProcessInfo.processInfo.environment["DEMO_WAND"] != nil {   // two misses + the buddy talking
+            consecutiveWrong = 2
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { companion.cheer(tr("אַלּוּפָה!")) }
+        }
         if ProcessInfo.processInfo.environment["DEMO_AUTOTAP"] != nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { pickOption(q.correctIndex, q: q) }
         }

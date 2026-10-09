@@ -59,6 +59,32 @@ struct FloatingCompanion: View {
                 .scaleEffect(isDragging ? 1.12 : 1.0)
                 .animation(.spring(response: 0.3, dampingFraction: 0.55), value: isDragging)
             }
+            // 💬 The bubble rides ON the avatar — one view, one walk. As a separate
+            // layer it was placed at the walk's END while the buddy was still on
+            // its way, so an empty bubble ran ahead and the buddy caught up into
+            // the words (Rani, 2026-10-09).
+            .overlay(alignment: .center) {
+                if let bubble = controller.bubbleText {
+                    let margin: CGFloat = 10
+                    let half = bubbleSize.width / 2
+                    let clampedX = bubbleSize.width > 0
+                        ? min(max(margin + half, anchor.x), geo.size.width - margin - half)
+                        : anchor.x
+                    BubbleSpeech(text: bubble, showTail: false)
+                        .fixedSize()
+                        // A new line REPLACES the old one (two lines cross-faded on
+                        // top of each other, 2026-10-02).
+                        .id(bubble)
+                        .background(GeometryReader { g in
+                            Color.clear.preference(key: BubbleSizeKey.self, value: g.size)
+                        })
+                        .onPreferenceChange(BubbleSizeKey.self) { bubbleSize = $0 }
+                        .offset(x: (clampedX - anchor.x) * (layoutDirection == .rightToLeft ? -1 : 1),
+                                y: -size * 0.9)
+                        .transition(.asymmetric(insertion: .scale.combined(with: .opacity), removal: .identity))
+                        .allowsHitTesting(false)
+                }
+            }
             .position(anchor)
             .animation(isDragging ? nil : .easeInOut(duration: 4), value: position)
             .gesture(
@@ -106,7 +132,11 @@ struct FloatingCompanion: View {
             // from the unmeasured band (topInset 120), so the buddy walked onto the
             // answers and stayed there — nothing moved it back once the real band
             // arrived. When the band moves, a buddy now outside it walks back in.
-            .onChangeCompat(of: topInset) { _, newTop in
+            .onChangeCompat(of: topInset) { old, newTop in
+                // Only a real change of band — the question screen re-measured on
+                // every answer (the 🔥 streak line), and each re-measure sent the
+                // buddy on a new walk: it "danced" with the confetti (Rani).
+                guard abs(newTop - old) > 40 else { return }
                 guard !isDragging, position != .zero, position.y - size * 0.65 < newTop else { return }
                 position = randomTarget(in: geo.size)
             }
@@ -121,32 +151,6 @@ struct FloatingCompanion: View {
                     .transition(.scale.combined(with: .opacity))
             }
 
-            // Layer 3 (front): the speech bubble — ALWAYS on top so the child can
-            // read it, floating just above the avatar's head and kept fully ON
-            // SCREEN (clamped horizontally). No tail: the buddy wanders, so a tail
-            // can't reliably point at it — a clean bubble right above reads best.
-            if let bubble = controller.bubbleText {
-                let margin: CGFloat = 10
-                let half = bubbleSize.width / 2
-                let clampedX = bubbleSize.width > 0
-                    ? min(max(margin + half, anchor.x), geo.size.width - margin - half)
-                    : anchor.x
-                BubbleSpeech(text: bubble, showTail: false)
-                    .fixedSize()
-                    // A new line REPLACES the old one. Without its own identity the
-                    // text change rode the 4-second walk animation below, so two
-                    // lines cross-faded on top of each other and neither could be
-                    // read (seen after a wrong answer, 2026-10-02).
-                    .id(bubble)
-                    .background(GeometryReader { g in
-                        Color.clear.preference(key: BubbleSizeKey.self, value: g.size)
-                    })
-                    .onPreferenceChange(BubbleSizeKey.self) { bubbleSize = $0 }
-                    .position(x: clampedX, y: anchor.y - size * 0.9)
-                    .animation(isDragging ? nil : .easeInOut(duration: 4), value: position)
-                    .transition(.asymmetric(insertion: .scale.combined(with: .opacity), removal: .identity))
-                    .allowsHitTesting(false)
-            }
             }
             .animation(.spring(response: 0.5, dampingFraction: 0.7), value: controller.bubbleText)
             .animation(.spring(response: 0.5, dampingFraction: 0.7), value: showGift)
@@ -164,7 +168,9 @@ struct FloatingCompanion: View {
                 try? await Task.sleep(nanoseconds: UInt64(wait * 1_000_000_000))
                 if Task.isCancelled { break }
                 await MainActor.run {
-                    guard !isDragging else { return }
+                    // Stand still while talking — walking off mid-sentence made the
+                    // words hard to read.
+                    guard !isDragging, controller.bubbleText == nil else { return }
                     let target = randomTarget(in: size)
                     position = target
                 }

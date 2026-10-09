@@ -28,6 +28,8 @@ struct LevelUpView: View {
 
                 ScrollView {
                     VStack(spacing: display.isShort ? AppSpacing.md : AppSpacing.xl) {
+                        // The lion and the words in the MIDDLE of the screen, the
+                        // button at the bottom (Rani) — two equal spacers around them.
                         Spacer(minLength: AppSpacing.lg)
 
                         CompanionView(controller: companion, size: companionSize)
@@ -65,6 +67,8 @@ struct LevelUpView: View {
                             }
                             .padding(.horizontal, AppSpacing.lg)
                         }
+
+                        Spacer(minLength: AppSpacing.lg)
 
                         Button { Haptic.light(); onContinue() } label: {
                             Text(Gendered.g(tr("הַמְשֵׁךְ"), tr("הַמְשִׁיכִי")))

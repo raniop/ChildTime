@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 import PhotosUI
+import PencilKit
 
 #if canImport(FirebaseFirestore)
 import FirebaseFirestore
@@ -219,10 +220,13 @@ struct SupportChatView: View {
         // 📷 Picked → a full screen to look at it, add a caption and send — the
         // WhatsApp / Telegram way (Rani: the thumbnail by the field wasn't clear).
         .fullScreenCover(isPresented: Binding(get: { attachment != nil }, set: { if !$0 { attachment = nil; pickedPhoto = nil } })) {
-            if let attachment, let ui = UIImage(data: attachment) {
+            if let picked = attachment, let ui = UIImage(data: picked) {
                 SupportImageComposer(image: ui, caption: $draft, sending: sending,
                                      onCancel: { self.attachment = nil; pickedPhoto = nil },
-                                     onSend: { send() })
+                                     onSend: { edited in
+                                         if let edited { attachment = edited }
+                                         send()
+                                     })
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -664,73 +668,249 @@ struct SupportImageViewer: View {
     }
 }
 
-/// 📷 The picked screenshot, big, with a caption field and a send button.
+/// 📷 The picked screenshot, big, with a caption field and a send button — and
+/// ✂️ crop and ✏️ draw, so a parent can circle what they mean (Rani).
 struct SupportImageComposer: View {
     let image: UIImage
     @Binding var caption: String
     let sending: Bool
     let onCancel: () -> Void
-    let onSend: () -> Void
+    /// The edited picture (JPEG, ready to send) — nil when nothing was changed.
+    let onSend: (Data?) -> Void
+
+    enum Mode { case view, draw, crop }
+    @State private var current: UIImage?
+    @State private var edited = false
+    @State private var mode: Mode = .view
+    @State private var drawing = PKDrawing()
+    /// The crop box, as fractions of the picture (0…1).
+    @State private var crop = CGRect(x: 0, y: 0, width: 1, height: 1)
+    @State private var shown: CGRect = .zero
     @FocusState private var focused: Bool
+
+    private var img: UIImage { current ?? image }
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
             VStack(spacing: 0) {
-                HStack {
-                    Button(action: onCancel) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(.white)
-                            .frame(width: 40, height: 40)
-                            .background(Circle().fill(.white.opacity(0.18)))
-                    }
-                    .accessibilityLabel(tr("ביטול"))
-                    Spacer()
+                topRow
+                GeometryReader { geo in
+                    editor(in: geo.size)
                 }
-                .padding(.horizontal, AppSpacing.md)
-                .padding(.top, AppSpacing.sm)
-
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .padding(AppSpacing.lg)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .contentShape(Rectangle())
-                    .onTapGesture { focused = false }
-
-                HStack(alignment: .bottom, spacing: 10) {
-                    TextField(tr("הוסיפו הערה…"), text: $caption, axis: .vertical)
-                        .lineLimit(1...4)
-                        .focused($focused)
-                        .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundStyle(.white)
-                        .tint(.white)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 11)
-                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
-                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.25), lineWidth: 1))
-                    Button(action: onSend) {
-                        Group {
-                            if sending { ProgressView().tint(Color(hex: "3A2600")) }
-                            else {
-                                Image(systemName: "arrow.up")
-                                    .font(.system(size: 18, weight: .heavy))
-                                    .foregroundStyle(Color(hex: "3A2600"))
-                            }
-                        }
-                        .frame(width: 48, height: 48)
-                        .background(AppGradient.gold, in: Circle())
-                    }
-                    .buttonStyle(.juicy)
-                    .disabled(sending)
-                    .accessibilityLabel(tr("שלח"))
-                }
-                .padding(.horizontal, AppSpacing.md)
-                .padding(.bottom, AppSpacing.sm)
+                bottomRow
             }
         }
         .environment(\.layoutDirection, .app)
+    }
+
+    private func editor(in size: CGSize) -> some View {
+        let r = Self.fit(img.size, in: CGRect(origin: .zero, size: size).insetBy(dx: 16, dy: 16))
+        return ZStack(alignment: .topLeading) {
+            Image(uiImage: img)
+                .resizable()
+                .frame(width: r.width, height: r.height)
+                .offset(x: r.minX, y: r.minY)
+            MarkupCanvas(drawing: $drawing, active: mode == .draw)
+                .frame(width: r.width, height: r.height)
+                .offset(x: r.minX, y: r.minY)
+            if mode == .crop { cropOverlay(in: r) }
+        }
+        .frame(width: size.width, height: size.height, alignment: .topLeading)
+        .contentShape(Rectangle())
+        .onTapGesture { if mode == .view { focused = false } }
+        .onAppear { shown = r }
+        .onChangeCompat(of: r) { _, nr in shown = nr }
+    }
+
+    // MARK: rows
+
+    private var topRow: some View {
+        HStack(spacing: 10) {
+            circleButton("xmark", label: tr("ביטול"), action: onCancel)
+            Spacer()
+            switch mode {
+            case .view:
+                circleButton("crop", label: tr("חיתוך")) { crop = CGRect(x: 0, y: 0, width: 1, height: 1); mode = .crop }
+                circleButton("pencil.tip", label: tr("ציור")) { focused = false; mode = .draw }
+            case .draw:
+                circleButton("arrow.uturn.backward", label: tr("ביטול הקו האחרון")) {
+                    if !drawing.strokes.isEmpty { drawing.strokes.removeLast() }
+                }
+                doneButton { mode = .view }
+            case .crop:
+                doneButton { applyCrop(); mode = .view }
+            }
+        }
+        .padding(.horizontal, AppSpacing.md)
+        .padding(.top, AppSpacing.sm)
+    }
+
+    private var bottomRow: some View {
+        HStack(alignment: .bottom, spacing: 10) {
+            TextField(tr("הוסיפו הערה…"), text: $caption, axis: .vertical)
+                .lineLimit(1...4)
+                .focused($focused)
+                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .foregroundStyle(.white)
+                .tint(.white)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 11)
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.25), lineWidth: 1))
+            Button {
+                if mode == .crop { applyCrop() }
+                mode = .view
+                onSend(finalJPEG())
+            } label: {
+                Group {
+                    if sending { ProgressView().tint(Color(hex: "3A2600")) }
+                    else {
+                        Image(systemName: "arrow.up")
+                            .font(.system(size: 18, weight: .heavy))
+                            .foregroundStyle(Color(hex: "3A2600"))
+                    }
+                }
+                .frame(width: 48, height: 48)
+                .background(AppGradient.gold, in: Circle())
+            }
+            .buttonStyle(.juicy)
+            .disabled(sending)
+            .accessibilityLabel(tr("שלח"))
+        }
+        .padding(.horizontal, AppSpacing.md)
+        .padding(.bottom, AppSpacing.sm)
+        .opacity(mode == .view ? 1 : 0.35)
+        .allowsHitTesting(mode == .view)
+    }
+
+    private func circleButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 40, height: 40)
+                .background(Circle().fill(.white.opacity(0.18)))
+        }
+        .accessibilityLabel(label)
+    }
+
+    private func doneButton(_ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(tr("סיום"))
+                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(Color(hex: "3A2600"))
+                .padding(.horizontal, 16).frame(height: 40)
+                .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        }
+    }
+
+    // MARK: crop
+
+    private func cropOverlay(in r: CGRect) -> some View {
+        let box = CGRect(x: r.minX + crop.minX * r.width, y: r.minY + crop.minY * r.height,
+                         width: crop.width * r.width, height: crop.height * r.height)
+        return ZStack(alignment: .topLeading) {
+            // Dim everything outside the box.
+            Path { p in p.addRect(r); p.addRect(box) }
+                .fill(Color.black.opacity(0.55), style: FillStyle(eoFill: true))
+            Rectangle().strokeBorder(.white, lineWidth: 2)
+                .frame(width: box.width, height: box.height)
+                .offset(x: box.minX, y: box.minY)
+            ForEach(0..<4, id: \.self) { corner in
+                handle(corner, box: box, in: r)
+            }
+        }
+        .environment(\.layoutDirection, .leftToRight)
+    }
+
+    private func handle(_ corner: Int, box: CGRect, in r: CGRect) -> some View {
+        let left = corner % 2 == 0, top = corner < 2
+        return Circle().fill(.white)
+                    .frame(width: 26, height: 26)
+                    .shadow(radius: 3)
+                    .position(x: left ? box.minX : box.maxX, y: top ? box.minY : box.maxY)
+                    .gesture(DragGesture().onChanged { v in
+                        let fx = min(max(0, (v.location.x - r.minX) / r.width), 1)
+                        let fy = min(max(0, (v.location.y - r.minY) / r.height), 1)
+                        var c = crop
+                        let minSide: CGFloat = 0.12
+                        if left { let maxX = c.maxX; c.origin.x = min(fx, maxX - minSide); c.size.width = maxX - c.origin.x }
+                        else { c.size.width = max(minSide, fx - c.minX) }
+                        if top { let maxY = c.maxY; c.origin.y = min(fy, maxY - minSide); c.size.height = maxY - c.origin.y }
+                        else { c.size.height = max(minSide, fy - c.minY) }
+                        crop = c
+                    })
+    }
+
+    /// Bakes the drawing in, then cuts the picture to the box.
+    private func applyCrop() {
+        guard crop != CGRect(x: 0, y: 0, width: 1, height: 1) else { return }
+        let base = flattened()
+        let px = CGRect(x: crop.minX * base.size.width, y: crop.minY * base.size.height,
+                        width: crop.width * base.size.width, height: crop.height * base.size.height).integral
+        let format = UIGraphicsImageRendererFormat.default(); format.scale = 1
+        current = UIGraphicsImageRenderer(size: px.size, format: format).image { _ in
+            base.draw(at: CGPoint(x: -px.minX, y: -px.minY))
+        }
+        drawing = PKDrawing()
+        crop = CGRect(x: 0, y: 0, width: 1, height: 1)
+        edited = true
+    }
+
+    /// The picture with the drawing painted on it, at the picture's own pixels.
+    private func flattened() -> UIImage {
+        guard !drawing.strokes.isEmpty, shown.width > 0 else { return img }
+        let format = UIGraphicsImageRendererFormat.default(); format.scale = 1
+        let size = CGSize(width: img.size.width * img.scale, height: img.size.height * img.scale)
+        let ink = drawing.image(from: CGRect(origin: .zero, size: shown.size), scale: size.width / shown.width)
+        return UIGraphicsImageRenderer(size: size, format: format).image { _ in
+            img.draw(in: CGRect(origin: .zero, size: size))
+            ink.draw(in: CGRect(origin: .zero, size: size))
+        }
+    }
+
+    private func finalJPEG() -> Data? {
+        guard edited || !drawing.strokes.isEmpty else { return nil }
+        return flattened().jpegData(compressionQuality: 0.9).flatMap(SupportImage.prepare)
+    }
+
+    static func fit(_ size: CGSize, in box: CGRect) -> CGRect {
+        guard size.width > 0, size.height > 0 else { return box }
+        let s = min(box.width / size.width, box.height / size.height)
+        let w = size.width * s, h = size.height * s
+        return CGRect(x: box.midX - w / 2, y: box.midY - h / 2, width: w, height: h)
+    }
+}
+
+/// ✏️ PencilKit over the picture: a red marker, finger drawing.
+struct MarkupCanvas: UIViewRepresentable {
+    @Binding var drawing: PKDrawing
+    var active: Bool
+
+    func makeUIView(context: Context) -> PKCanvasView {
+        let v = PKCanvasView()
+        v.backgroundColor = .clear
+        v.isOpaque = false
+        v.drawingPolicy = .anyInput
+        v.tool = PKInkingTool(.marker, color: UIColor(red: 1, green: 0.18, blue: 0.33, alpha: 1), width: 10)
+        v.delegate = context.coordinator
+        v.isScrollEnabled = false
+        return v
+    }
+
+    func updateUIView(_ v: PKCanvasView, context: Context) {
+        if v.drawing != drawing { v.drawing = drawing }
+        v.isUserInteractionEnabled = active
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    final class Coordinator: NSObject, PKCanvasViewDelegate {
+        var parent: MarkupCanvas
+        init(_ p: MarkupCanvas) { parent = p }
+        func canvasViewDrawingDidChange(_ v: PKCanvasView) {
+            if parent.drawing != v.drawing { parent.drawing = v.drawing }
+        }
     }
 }
