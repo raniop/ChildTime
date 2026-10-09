@@ -45939,6 +45939,28 @@
         }
       }
     },
+    "הוסיפו הערה…" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أضيفوا تعليقًا…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a caption…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавьте подпись…"
+          }
+        }
+      }
+    },
     "הוסיפו מטלה" : {
       "localizations" : {
         "ar" : {

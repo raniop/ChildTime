@@ -216,6 +216,15 @@ struct SupportChatView: View {
         .fullScreenCover(isPresented: Binding(get: { viewingImage != nil }, set: { if !$0 { viewingImage = nil } })) {
             if let viewingImage { SupportImageViewer(image: viewingImage) { self.viewingImage = nil } }
         }
+        // 📷 Picked → a full screen to look at it, add a caption and send — the
+        // WhatsApp / Telegram way (Rani: the thumbnail by the field wasn't clear).
+        .fullScreenCover(isPresented: Binding(get: { attachment != nil }, set: { if !$0 { attachment = nil; pickedPhoto = nil } })) {
+            if let attachment, let ui = UIImage(data: attachment) {
+                SupportImageComposer(image: ui, caption: $draft, sending: sending,
+                                     onCancel: { self.attachment = nil; pickedPhoto = nil },
+                                     onSend: { send() })
+            }
+        }
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
@@ -245,6 +254,7 @@ struct SupportChatView: View {
                                                  at: Date().addingTimeInterval(-300)), at: thread.count)
                     thread[thread.count - 1].imageBase64 = jpg.base64EncodedString()
                     model.seedPreview(thread)
+                    if ProcessInfo.processInfo.environment["DEMO_COMPOSER"] != nil { attachment = jpg }
                     return
                 }
                 #endif
@@ -433,29 +443,6 @@ struct SupportChatView: View {
                 Text(tr("התמונה גדולה מדי — נסו צילום מסך אחר"))
                     .font(.system(size: 12.5, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.warn)
-            }
-            if let attachment, let ui = UIImage(data: attachment) {
-                HStack {
-                    ZStack(alignment: .topTrailing) {
-                        Image(uiImage: ui)
-                            .resizable().scaledToFill()
-                            .frame(width: 64, height: 64)
-                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        Button {
-                            self.attachment = nil; pickedPhoto = nil
-                        } label: {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 10, weight: .heavy))
-                                .foregroundStyle(.white)
-                                .frame(width: 22, height: 22)
-                                .background(Circle().fill(.black.opacity(0.6)))
-                        }
-                        .buttonStyle(.plain)
-                        .offset(x: 6, y: -6)
-                        .accessibilityLabel(tr("הסרת התמונה"))
-                    }
-                    Spacer()
-                }
             }
             HStack(alignment: .bottom, spacing: 10) {
                 // 📷 A screenshot from the photos — "שלחו לנו צילום מסך" had no way
@@ -674,5 +661,76 @@ struct SupportImageViewer: View {
             .padding()
             .accessibilityLabel(tr("סגירה"))
         }
+    }
+}
+
+/// 📷 The picked screenshot, big, with a caption field and a send button.
+struct SupportImageComposer: View {
+    let image: UIImage
+    @Binding var caption: String
+    let sending: Bool
+    let onCancel: () -> Void
+    let onSend: () -> Void
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            VStack(spacing: 0) {
+                HStack {
+                    Button(action: onCancel) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(.white)
+                            .frame(width: 40, height: 40)
+                            .background(Circle().fill(.white.opacity(0.18)))
+                    }
+                    .accessibilityLabel(tr("ביטול"))
+                    Spacer()
+                }
+                .padding(.horizontal, AppSpacing.md)
+                .padding(.top, AppSpacing.sm)
+
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .padding(AppSpacing.lg)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .contentShape(Rectangle())
+                    .onTapGesture { focused = false }
+
+                HStack(alignment: .bottom, spacing: 10) {
+                    TextField(tr("הוסיפו הערה…"), text: $caption, axis: .vertical)
+                        .lineLimit(1...4)
+                        .focused($focused)
+                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                        .foregroundStyle(.white)
+                        .tint(.white)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 11)
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.25), lineWidth: 1))
+                    Button(action: onSend) {
+                        Group {
+                            if sending { ProgressView().tint(Color(hex: "3A2600")) }
+                            else {
+                                Image(systemName: "arrow.up")
+                                    .font(.system(size: 18, weight: .heavy))
+                                    .foregroundStyle(Color(hex: "3A2600"))
+                            }
+                        }
+                        .frame(width: 48, height: 48)
+                        .background(AppGradient.gold, in: Circle())
+                    }
+                    .buttonStyle(.juicy)
+                    .disabled(sending)
+                    .accessibilityLabel(tr("שלח"))
+                }
+                .padding(.horizontal, AppSpacing.md)
+                .padding(.bottom, AppSpacing.sm)
+            }
+        }
+        .environment(\.layoutDirection, .app)
     }
 }
