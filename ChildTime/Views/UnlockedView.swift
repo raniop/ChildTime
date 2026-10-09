@@ -253,10 +253,12 @@ struct UnlockedView: View {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             Task { @MainActor in
                 secondsRemaining = progress.unlockSecondsRemaining
-                // Only a window that is still open can run out. "סיימתי לשחק"
-                // closes it first, and this timer — left running — then saw zero
-                // and sent a SECOND "finished" push (Rani's lock screen).
-                if secondsRemaining <= 0, progress.isUnlocked {
+                // Only a window that EXISTS can run out. Two false "finished"
+                // pushes came from here (Rani's lock screen): while the window was
+                // still being opened (no end time yet → 0 left) the timer re-locked
+                // and reported "סיים" right beside "פתח"; and after "סיימתי לשחק"
+                // closed it, the timer saw zero and reported a second "סיים".
+                if secondsRemaining <= 0, progress.unlockEndsAt != nil, !preparing {
                     // Time's up — re-apply the shield in-app (the extension would normally do this,
                     // but this covers the case where the kid is still inside ChildTime).
                     ShieldManager.shared.cancelScheduledReshield()
