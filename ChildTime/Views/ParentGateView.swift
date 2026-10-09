@@ -62,6 +62,9 @@ struct ParentGateView<Content: View>: View {
     @State private var loadingTimedOut = false
     @State private var loadingToken = UUID()
     @Environment(\.scenePhase) private var scenePhase
+    /// Set on a real trip to the background — NOT on `.inactive`, which the
+    /// Face ID sheet itself causes (re-prompting on that would loop a cancel).
+    @State private var cameBackFromBackground = false
     @State private var entered: String = ""
     @State private var shake: Bool = false
     @State private var authorized: Bool = false
@@ -120,6 +123,16 @@ struct ParentGateView<Content: View>: View {
             // already reset on background; we must also drop the local `authorized`
             // flag, which otherwise keeps the content showing.) The parent's own
             // device keeps its session so the parent isn't re-prompted constantly.
+            // 🔐 Back from another app with the keypad still up: ask Face ID
+            // again. It only ran in onAppear, and a gate already on screen
+            // doesn't appear again (Rani: "לא מקפיץ אוטומטית את הזיהוי פנים").
+            if phase == .background { cameBackFromBackground = true }
+            if phase == .active, cameBackFromBackground {
+                cameBackFromBackground = false
+                let gateShowing = !(authorized || (respectSession && settings.sessionUnlocked))
+                    && !householdStillLoading && !(isSetupMode && !allowSetup)
+                if gateShowing, canUseFaceID { Task { await tryBiometric() } }
+            }
             if phase == .background, settings.deviceRole == .child {
                 authorized = false
                 // …and forget the code that opened it. The keypad kept those four
