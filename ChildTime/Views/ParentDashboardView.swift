@@ -416,12 +416,7 @@ struct ParentDashboardView: View {
         dashboardStackBody
             // 🔌 A blocked action (new child, family name, chat) while the family
             // isn't loaded — the honest answer instead of a dead tap.
-            .alert(tr("מתחברים למשפחה…"), isPresented: $household.connectionNotice) {
-                Button(tr("נסו שוב")) { household.retryFamilyLoadIfNeeded() }
-                Button(tr("הבנתי"), role: .cancel) {}
-            } message: {
-                Text(tr("הטלפון עדיין לא מחובר למשפחה, אז אי אפשר לעשות את זה כרגע. בדקו שיש אינטרנט — אנחנו מנסים להתחבר שוב לבד."))
-            }
+            .familyConnectionAlert()
     }
 
     private var dashboardStackBody: some View {
@@ -778,19 +773,21 @@ struct ParentDashboardView: View {
             .sheet(item: $actionsChild) { p in actionsSheet(p) }
             .sheet(item: $editChild) { p in
                 ProfileEditorView(mode: .edit(p)) { updated in
-                    profiles.update(updated)
+                    profiles.parentEdit(updated)
                 } onDelete: { removed in
                     editChild = nil
                     profiles.remove(removed)
                 }
                 .environmentObject(profiles)
                 .environment(\.layoutDirection, .app)
+                .familyConnectionAlert()
             }
             .sheet(item: $screenTimeChild) { p in
                 ChildScreenTimeView(profileID: p.id)
                     .environmentObject(profiles)
                     .environmentObject(settings)
                     .environment(\.layoutDirection, .app)
+                    .familyConnectionAlert()
             }
             .sheet(item: $homeSettingsChild) { p in
                 ChildSettingsView(profileID: p.id,

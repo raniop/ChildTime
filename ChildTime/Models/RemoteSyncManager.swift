@@ -482,10 +482,9 @@ final class RemoteSyncManager: ObservableObject {
             // "לחצתי איפוס וזה לא עשה כלום"). This phone is her play device:
             // consume it here. Never when she has a device: that device holds
             // the live numbers and must be the one to wipe them.
-            // Only when the device list is KNOWN (server-confirmed) and empty —
-            // an unloaded list would take the wipe away from a real device.
-            if HouseholdManager.shared.childDevicesLoaded,
-               (HouseholdManager.shared.devicesByChild[childID.uuidString] ?? []).isEmpty {
+            // Only when the SERVER says she has no device — an unknown answer
+            // (offline) would take the wipe away from a real device.
+            if await HouseholdManager.shared.childHasOwnDevice(childID) == false {
                 self.applyPendingReset(childID: childID)
             }
         }

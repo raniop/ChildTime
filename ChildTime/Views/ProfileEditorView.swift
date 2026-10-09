@@ -781,6 +781,9 @@ struct ProfileEditorView: View {
             // This family has met the question — the home's one-time card is moot.
             ParentSettings.shared.dailyCapCardDone = true
         }
+        // 🔌 Editing an existing child while the family isn't loaded: stay on
+        // the editor (the sheet's alert explains) — closing it lost the edit.
+        if case .edit = mode, HouseholdManager.shared.refuseIfDisconnected() { return }
         Haptic.success()
         SoundPlayer.shared.play(.companionCheer)
         onSave(p)

@@ -923,6 +923,29 @@ final class HouseholdManager: ObservableObject {
             }
     }
 
+    /// Does this child have a play device of their own? Asked of the SERVER at
+    /// the moment it matters — the listener's `childDevicesLoaded` can stay false
+    /// for a whole session (a warm cache that the server merely confirms raises
+    /// no new snapshot), and then a Kid-Mode-only child's reset never ran.
+    /// nil = couldn't ask (offline) → the caller must not guess.
+    func childHasOwnDevice(_ childID: UUID) async -> Bool? {
+        #if canImport(FirebaseFirestore)
+        guard let hid = household?.id else { return nil }
+        guard let snap = try? await db.collection("childDevices")
+            .whereField("householdID", isEqualTo: hid)
+            .getDocuments(source: .server) else { return nil }
+        let id = childID.uuidString
+        return snap.documents.contains { doc in
+            let d = doc.data()
+            return (d["childID"] as? String) == id
+                && (d["role"] as? String) != "parent"
+                && (d["removed"] as? Bool) != true
+        }
+        #else
+        return nil
+        #endif
+    }
+
     /// Register THIS device as a PARENT device of the household.
     ///
     /// Rani: "מכשיר הורה חייב להירשם ישירות שיוצרים משפחה". It lives in the same
@@ -2332,33 +2355,67 @@ final class HouseholdManager: ObservableObject {
     /// their names on the public friends board, in the cloud with no owner).
     @discardableResult
     func deleteAllData() async -> Bool {
+        // A connection that drops MID-delete used to leave the spinner hanging
+        // forever (a required delete waits for the server). Two minutes, then an
+        // honest "לא נמחק" — the steps below are safe to run again.
+        await firstOrNil(within: 120) { await self.deleteAllDataSteps() } ?? false
+    }
+
+    private func deleteAllDataSteps() async -> Bool {
         #if canImport(FirebaseFirestore)
         guard let uid, let hh = household else { return false }
+        let hhRef = db.collection("households").document(hh.id)
         // Reach the server first — offline, deletes queue forever and the
-        // account would be deleted with the family still up there.
-        do { _ = try await db.collection("households").document(hh.id).getDocument(source: .server) }
+        // account would be deleted with the family still up there. Its FRESH
+        // childIDs, not the cached ones: a child removed meanwhile is gone.
+        let probe: DocumentSnapshot
+        do { probe = try await hhRef.getDocument(source: .server) }
         catch { TofyLink("deleteAllData: server unreachable — refusing"); return false }
+        let childIDs = (probe.data()?["childIDs"] as? [String]) ?? (probe.exists ? [] : hh.childIDs)
         do {
-            for childID in hh.childIDs {
-                try? await db.collection("children").document(childID)
-                    .collection("state").document("current").delete()
+            for childID in childIDs {
+                let childRef = db.collection("children").document(childID)
+                // Safe to run again after a half-finished attempt: a child whose
+                // doc is already gone (or belongs to another family) is SKIPPED —
+                // its delete rule reads the doc, so deleting a missing one is
+                // "permission denied" and used to block the account for good.
+                // (Reading such a doc is denied too — the read rule needs
+                // resource.data — so "denied" here means gone / not ours. Any
+                // other error, e.g. offline, stops everything as before.)
+                var child: DocumentSnapshot?
+                do { child = try await childRef.getDocument(source: .server) }
+                catch let e as NSError where e.domain == FirestoreErrorDomain && e.code == FirestoreErrorCode.permissionDenied.rawValue {
+                    child = nil
+                }
+                guard let child, child.exists, (child.data()?["householdID"] as? String) == hh.id else {
+                    if probe.exists { _ = try? await hhRef.updateData(["childIDs": FieldValue.arrayRemove([childID])]) }
+                    continue
+                }
+                try? await childRef.collection("state").document("current").delete()
                 try? await deleteSubcollection("children/\(childID)/dailyStats")
                 // Public leaderboard card (a CHILD's name lives here — must not
                 // linger after a full account deletion, GDPR + Kids Category).
-                // BEFORE the parent doc: the card's delete rule gates on the
+                // BEFORE the child doc: the card's delete rule gates on the
                 // child's householdID, so the `children/{id}` doc must still exist.
                 // These two MUST succeed (names): a failure stops everything.
-                try await db.collection("friendCards").document(childID).delete()
-                try await db.collection("children").document(childID).delete()
+                let card = db.collection("friendCards").document(childID)
+                if (try? await card.getDocument(source: .server))?.exists != false {
+                    try await card.delete()
+                }
                 // This child's device rows (device names + FCM tokens).
+                // (The household filter lets the rules prove the query is ours —
+                // a childID-only query was denied, so the rows were never deleted.)
                 let devs = try? await db.collection("childDevices")
+                    .whereField("householdID", isEqualTo: hh.id)
                     .whereField("childID", isEqualTo: childID).getDocuments()
                 for d in devs?.documents ?? [] { try? await d.reference.delete() }
+                try await childRef.delete()
+                if probe.exists { _ = try? await hhRef.updateData(["childIDs": FieldValue.arrayRemove([childID])]) }
             }
             // Family chores + earnings ledger.
             try? await deleteSubcollection("households/\(hh.id)/chores")
             try? await deleteSubcollection("households/\(hh.id)/choreStats")
-            try await db.collection("households").document(hh.id).delete()
+            if probe.exists { try await hhRef.delete() }
             try? await parentRef(uid).delete()
             return true
         } catch {

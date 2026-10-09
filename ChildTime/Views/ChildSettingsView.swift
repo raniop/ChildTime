@@ -109,13 +109,9 @@ struct ChildSettingsView: View {
         }
         .railDismiss(tr("סיום"), systemImage: "checkmark") { dismiss() }
         // 🔌 An edit refused while the family isn't loaded — outside the
-        // NavigationStack, so it shows from every pushed page.
-        .alert(tr("מתחברים למשפחה…"), isPresented: $household.connectionNotice) {
-            Button(tr("נסו שוב")) { household.retryFamilyLoadIfNeeded() }
-            Button(tr("הבנתי"), role: .cancel) {}
-        } message: {
-            Text(tr("הטלפון עדיין לא מחובר למשפחה, אז אי אפשר לעשות את זה כרגע. בדקו שיש אינטרנט — אנחנו מנסים להתחבר שוב לבד."))
-        }
+        // NavigationStack, so it shows from every pushed page. (The editor
+        // SHEETS below carry their own: an alert can't show under a sheet.)
+        .familyConnectionAlert()
         .environment(\.layoutDirection, .app)
     }
 
@@ -480,36 +476,43 @@ struct ChildSettingsView: View {
                 }
                 .environmentObject(profiles)
                 .environment(\.layoutDirection, .app)
+                .familyConnectionAlert()
             }
             .sheet(item: $language) { p in
                 ChildLanguageView(profileID: p.id)
                     .environmentObject(profiles)
                     .environment(\.layoutDirection, .app)
+                .familyConnectionAlert()
             }
             .sheet(item: $difficulty) { p in
                 ChildDifficultyView(profileID: p.id)
                     .environmentObject(profiles)
                     .environment(\.layoutDirection, .app)
+                .familyConnectionAlert()
             }
             .sheet(item: $worlds) { p in
                 ChildWorldsView(profileID: p.id)
                     .environmentObject(profiles)
                     .environment(\.layoutDirection, .app)
+                .familyConnectionAlert()
             }
             .sheet(item: $screenTime) { p in
                 ChildScreenTimeView(profileID: p.id)
                     .environmentObject(profiles)
                     .environmentObject(settings)
                     .environment(\.layoutDirection, .app)
+                .familyConnectionAlert()
             }
             .sheet(item: $quietEdit) { q in
                 QuietHoursEditorView(profileID: profileID, kind: q.kind)
                     .environmentObject(profiles)
                     .environment(\.layoutDirection, .app)
+                .familyConnectionAlert()
             }
             .sheet(item: $friends) { p in
                 ChildFriendsView(childID: p.id.uuidString, childName: p.name)
                     .environment(\.layoutDirection, .app)
+                .familyConnectionAlert()
             }
     }
 

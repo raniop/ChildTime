@@ -47,12 +47,7 @@ struct ParentSettingsView: View {
             } message: {
                 Text(tr("אין כרגע חיבור, אז לא מחקנו כלום — לא בענן ולא בחשבון. נסו שוב כשיש אינטרנט."))
             }
-            .alert(tr("מתחברים למשפחה…"), isPresented: $household.connectionNotice) {
-                Button(tr("נסו שוב")) { household.retryFamilyLoadIfNeeded() }
-                Button(tr("הבנתי"), role: .cancel) {}
-            } message: {
-                Text(tr("הטלפון עדיין לא מחובר למשפחה, אז אי אפשר לעשות את זה כרגע. בדקו שיש אינטרנט — אנחנו מנסים להתחבר שוב לבד."))
-            }
+            .familyConnectionAlert()
     }
 
     private var settingsStack: some View {

@@ -385,6 +385,9 @@ struct DailyCapSetupCard: View {
     }
 
     private func save() {
+        // 🔌 Family not loaded: nothing is saved, so the card must NOT close as
+        // "done" (it never came back). The dashboard's alert explains.
+        if HouseholdManager.shared.refuseIfDisconnected() { return }
         for p in children {
             let v = value(for: p)
             // The parent confirmed this number — store it on the child even if
@@ -393,7 +396,8 @@ struct DailyCapSetupCard: View {
             guard var fresh = profiles.profiles.first(where: { $0.id == p.id }),
                   fresh.dailyCapMinutes != v else { continue }
             fresh.dailyCapMinutes = v
-            profiles.parentEdit(fresh)   // → HouseholdManager.upsertChild → the child's device
+            // → HouseholdManager.upsertChild → the child's device
+            guard profiles.parentEdit(fresh) else { return }
         }
         Haptic.success()
         withAnimation(.easeInOut(duration: 0.25)) { settings.dailyCapCardDone = true }

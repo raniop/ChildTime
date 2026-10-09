@@ -106,3 +106,25 @@ struct FamilyLinkBanner: View {
         }
     }
 }
+
+/// "מתחברים למשפחה…" — the answer to an edit refused while the family isn't
+/// loaded. Attached to EVERY place such an edit can come from, sheets
+/// included: an alert can't present from under a sheet, so one on the
+/// settings page left a sheet's refused toggle springing back in silence.
+struct FamilyConnectionAlert: ViewModifier {
+    @ObservedObject private var household = HouseholdManager.shared
+
+    func body(content: Content) -> some View {
+        content
+            .alert(tr("מתחברים למשפחה…"), isPresented: $household.connectionNotice) {
+                Button(tr("נסו שוב")) { household.retryFamilyLoadIfNeeded() }
+                Button(tr("הבנתי"), role: .cancel) {}
+            } message: {
+                Text(tr("הטלפון עדיין לא מחובר למשפחה, אז אי אפשר לעשות את זה כרגע. בדקו שיש אינטרנט — אנחנו מנסים להתחבר שוב לבד."))
+            }
+    }
+}
+
+extension View {
+    func familyConnectionAlert() -> some View { modifier(FamilyConnectionAlert()) }
+}
