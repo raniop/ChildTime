@@ -14859,6 +14859,28 @@
         }
       }
     },
+    "14 דמויות חדשות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "14 شخصية جديدة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "14 new characters"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "14 новых персонажей"
+          }
+        }
+      }
+    },
     "15 כּוֹכָבִים" : {
       "localizations" : {
         "ar" : {
@@ -23945,6 +23967,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Это можно посмотреть снова в любой момент: Настройки → Что нового"
+          }
+        }
+      }
+    },
+    "אפשר לשלוח לנו צילום מסך, לחתוך אותו ולסמן עליו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمكنك إرسال لقطة شاشة إلينا وقصّها والتأشير عليها"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send us a screenshot, crop it and mark on it"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Можно отправить нам скриншот, обрезать его и отметить на нём"
           }
         }
       }
@@ -55758,6 +55802,28 @@
         }
       }
     },
+    "זיהוי פנים כשחוזרים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID عند العودة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID when you come back"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID при возвращении"
+          }
+        }
+      }
+    },
     "זכייה בגלגל המזל" : {
       "localizations" : {
         "ar" : {
@@ -60316,6 +60382,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Полчаса, час, два часа, без ограничения — или любое число минут, которое вы введёте"
+          }
+        }
+      }
+    },
+    "חשבון בתמונות עם חיבור וחיסור, אותיות ואות ראשונה, ולכל עולם תמונות משלו — הכול מוקרא בקול" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حساب بالصور مع الجمع والطرح، والحروف والحرف الأول، ولكل عالم صوره الخاصة — وكل شيء يُقرأ بصوت عالٍ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Picture math with adding and subtracting, letters and first letters, and every world with its own pictures — all read aloud"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Счёт в картинках со сложением и вычитанием, буквы и первая буква, и в каждом мире свои картинки — всё озвучено"
           }
         }
       }
@@ -72311,6 +72399,28 @@
         }
       }
     },
+    "כשחוזרים לאפליקציה ומסך קוד ההורה פתוח, זיהוי הפנים עולה לבד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عند العودة إلى التطبيق وشاشة رمز الوالد مفتوحة، يظهر Face ID تلقائيًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When you return to the app with the parent code screen open, Face ID comes up by itself"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если вернуться в приложение, когда открыт экран кода родителя, Face ID появится сам"
+          }
+        }
+      }
+    },
     "כשיוצאת גרסה חדשה של טופי, מופיעה הודעה קצרה עם מה שחדש וכפתור שמוביל ישר לעדכון" : {
       "localizations" : {
         "ar" : {
@@ -77345,6 +77455,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Для 1 ребёнка · один раз"
+          }
+        }
+      }
+    },
+    "לילדי גן — זוגות של תמונות זהות, בלי מילים באנגלית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لأطفال الروضة — أزواج من الصور المتطابقة، بدون كلمات إنجليزية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For kindergarten — pairs of identical pictures, no English words"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для детсадовцев — пары одинаковых картинок, без английских слов"
+          }
+        }
+      }
+    },
+    "לילדי הגן: כל עולם שונה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لأطفال الروضة: كل عالم مختلف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For kindergarten: every world is different"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для детсадовцев: каждый мир — свой"
           }
         }
       }
@@ -88261,6 +88415,28 @@
         }
       }
     },
+    "משחק זיכרון בתמונות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لعبة ذاكرة بالصور"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A picture memory game"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Игра на память с картинками"
+          }
+        }
+      }
+    },
     "משחק עכשיו" : {
       "localizations" : {
         "ar" : {
@@ -94842,6 +95018,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "На иврите и арабском ряды чисел и код сейфа теперь читаются справа налево, а Tofy Time всегда первое среди миров"
+          }
+        }
+      }
+    },
+    "סדרת בית הספר בחנות: אפרוח, טלה, חתלתול, כלבלב, צפרדע, עופר, רקון, דוב קוטבי ועוד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سلسلة المدرسة في المتجر: كتكوت، خروف صغير، هريرة، جرو، ضفدع، أيل صغير، راكون، دب قطبي والمزيد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The school series in the shop: chick, lamb, kitten, puppy, frog, fawn, raccoon, polar bear and more"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Школьная серия в магазине: цыплёнок, ягнёнок, котёнок, щенок, лягушка, оленёнок, енот, белый медведь и другие"
           }
         }
       }
@@ -106299,6 +106497,28 @@
         }
       }
     },
+    "צילום מסך בצ'אט התמיכה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لقطات شاشة في دردشة الدعم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screenshots in support chat"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скриншоты в чате поддержки"
+          }
+        }
+      }
+    },
     "צירוף צילום מסך" : {
       "localizations" : {
         "ar" : {
@@ -115583,6 +115803,28 @@
         }
       }
     },
+    "שאלון חלק ומהיר יותר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختبار أسلس وأسرع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A smoother, faster quiz"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Более плавный и быстрый тест"
+          }
+        }
+      }
+    },
     "שאלונים חדשים לילדים — עולם הכדורגל ראשון" : {
       "localizations" : {
         "ar" : {
@@ -119790,6 +120032,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Правильный ответ в игре"
+          }
+        }
+      }
+    },
+    "תשובה נכונה מגיבה מיד, בלי תקיעות, והשאלה הבאה מגיעה מהר יותר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإجابة الصحيحة تستجيب فورًا دون توقف، والسؤال التالي يصل أسرع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A right answer responds instantly, with no stutter, and the next question comes sooner"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Правильный ответ реагирует сразу, без задержек, а следующий вопрос приходит быстрее"
           }
         }
       }

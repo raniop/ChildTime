@@ -10,6 +10,7 @@ struct QuizDesignMockup: View {
 
     var body: some View {
         switch variant {
+        case 5...: QuizDesignMockup2(variant: variant)
         case 2:  CardStackDesign()
         case 3:  RingsDesign()
         case 4:  ChatDesign()

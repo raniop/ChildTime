@@ -50,8 +50,8 @@ struct QuestionRunnerView: View {
     /// Held, not observed: every cheer and bubble republished the WHOLE question
     /// screen (~45ms a time on the simulator, more on a phone) — the stutter after
     /// an answer (Rani). Only the buddy views that show it observe it.
-    /// Global frame of 🚩 🔊 🙋 — the buddy is pinned under it.
-    @State private var toolsFrame: CGRect = .zero
+    /// Global frame of the glass shelf — the buddy stands on its top edge.
+    @State private var shelfFrame: CGRect = .zero
     @State private var companion = CompanionController()
     @State private var current: Question?
     @State private var questionIndex: Int = 0
@@ -271,13 +271,15 @@ struct QuestionRunnerView: View {
             // parks on a choice or on the 🔊 button. `topInset` is now where the
             // answers REALLY end rather than a fixed 150pt from the bottom, which
             // was only ever right on the screens it was guessed on.
-            if buddyHasFreeStrip, toolsFrame != .zero {
+            if buddyHasFreeStrip, shelfFrame != .zero {
                 GeometryReader { geo in
-                    let field = geo.frame(in: .global)
+                    // Both frames in the runner's own space — global frames drifted
+                    // ~15pt from what was drawn and the buddy sank into the shelf.
+                    let field = geo.frame(in: .named(Self.runnerSpace))
                     FloatingCompanion(
                         controller: companion,
                         profile: profiles.active,
-                        size: companionSize,
+                        size: shelfBuddySize,
                         // A fixed band at the bottom of the screen. Following where
                         // the answers end moved it on every answer (the streak line
                         // appearing), and the buddy jumped each time.
@@ -286,8 +288,8 @@ struct QuestionRunnerView: View {
                         horizontalInset: AppSpacing.md,
                         // 📌 Parked under 🚩 🔊 🙋, not wandering (Rani, 2026-10-09);
                         // a drag still moves it.
-                        pinnedAt: CGPoint(x: toolsFrame.midX - field.minX,
-                                          y: toolsFrame.maxY - field.minY + 8 + companionSize * 0.65)
+                        pinnedAt: CGPoint(x: shelfFrame.minX + AppSpacing.md + shelfBuddySize * 0.55 - field.minX,
+                                          y: shelfFrame.minY - field.minY - shelfBuddySize * 0.65 + 2)
                     )
                 }
                 .allowsHitTesting(true)
@@ -749,6 +751,26 @@ struct QuestionRunnerView: View {
 
     /// A consistent round icon button for the question's control row (read-aloud,
     /// report) — both the same size so the row reads tidy.
+    /// The buddy standing on the shelf — a little smaller than the old roaming
+    /// one, so the room above the shelf doesn't push the question off the top.
+    private var shelfBuddySize: CGFloat { isCompact ? 64 : 80 }
+
+    /// How full the shelf's flame bar is: the streak toward ten in a row.
+    private var streakFill: CGFloat { CGFloat(min(progress.currentStreak, 10)) / 10 }
+
+    /// 🚩 🔊 on the shelf — 16pt squares, like every frame in the app.
+    private func shelfIcon(_ system: String, fg: Color = .white, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: system)
+                .font(.system(size: 17, weight: .bold))
+                .foregroundStyle(fg)
+                .frame(width: 46, height: 46)
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.28), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+    }
+
     private func cardIconButton(system: String, fg: Color, bg: Color,
                                 glow: Color = .clear,
                                 action: @escaping () -> Void) -> some View {
@@ -756,9 +778,10 @@ struct QuestionRunnerView: View {
             Image(systemName: system)
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(fg)
-                .frame(width: 36, height: 36)
-                .background(bg, in: Circle())
-                .overlay(Circle().stroke(.white.opacity(0.35), lineWidth: 1))
+                .font(.system(size: 17, weight: .bold))
+                .frame(width: 46, height: 46)
+                .background(bg, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.28), lineWidth: 1))
                 .glow(glow, radius: 5)
         }
         .buttonStyle(.plain)
@@ -774,8 +797,9 @@ struct QuestionRunnerView: View {
                 optionsGrid(for: q)
             }
 
+            // 🧊 Everywhere but the foldable's rail these two live on the shelf.
             // Mockup `.streak`: "🔥 3 ברצף · עוד 2 ובונוס!" in gold under the answers.
-            if progress.currentStreak >= 2 {
+            if display.hasRail, progress.currentStreak >= 2 {
                 Text(tr("🔥 \(progress.currentStreak) בְּרֶצֶף") + "!")
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(AppColor.starGold)
@@ -784,7 +808,7 @@ struct QuestionRunnerView: View {
             // Mockup `.hint`: what a right answer is worth, as a glass line.
             // Not on a short screen: the timer bar at the top already shows the
             // seconds, and this line pushed a three-line question off the screen.
-            if earnsTime && !display.isShort {
+            if display.hasRail, earnsTime && !display.isShort {
                 Text(tr("💡 כָּל תְּשׁוּבָה נְכוֹנָה = \(progress.secondsPerCorrect) שְׁנִיּוֹת שֶׁל מִשְׂחָק"))
                     .font(.system(size: 12.5, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
@@ -817,12 +841,41 @@ struct QuestionRunnerView: View {
                     .padding(.horizontal, AppSpacing.md)
                     .transition(.opacity)
                 }
-                HStack(spacing: AppSpacing.sm) {
-                    HStack(spacing: AppSpacing.sm) {
-                        cardIconButton(system: "flag", fg: .white.opacity(0.7), bg: .white.opacity(0.14)) {
-                            showReportConfirm = true
+                // Room for the buddy standing on the shelf, and the shelf sinks to
+                // the bottom of the screen like in the mockup.
+                if buddyHasFreeStrip { Spacer(minLength: shelfBuddySize * 1.3 - 14) }
+                // 🧊 The glass shelf (Rani picked it, 2026-10-09): the streak meter
+                // and what a right answer pays on top, 🚩 🔊 🙋 and the hint below,
+                // and the buddy standing on its edge.
+                VStack(spacing: 10) {
+                    HStack(spacing: 8) {
+                        Text(tr("🔥 \(progress.currentStreak) בָּרֶצֶף"))
+                            .font(.system(size: 15, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .lineLimit(1).fixedSize()
+                            .contentTransition(.numericText())
+                        GeometryReader { g in
+                            ZStack(alignment: .leading) {
+                                RoundedRectangle(cornerRadius: 6, style: .continuous).fill(.white.opacity(0.18))
+                                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                    .fill(LinearGradient(colors: [Color(hex: "FFB347"), Color(hex: "FF5E62")], startPoint: .leading, endPoint: .trailing))
+                                    .frame(width: g.size.width * streakFill)
+                            }
+                            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: streakFill)
                         }
-                        cardIconButton(system: "speaker.wave.2.fill", fg: .white, bg: .white.opacity(0.22)) {
+                        .frame(height: 12)
+                        if earnsTime {
+                            Text(tr("+\(progress.secondsPerCorrect) שְׁנִיּוֹת"))
+                                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                                .foregroundStyle(Color(hex: "053D2E"))
+                                .lineLimit(1).fixedSize()
+                                .padding(.horizontal, 10).frame(height: 30)
+                                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppColor.successMint))
+                        }
+                    }
+                    HStack(spacing: AppSpacing.sm) {
+                        shelfIcon("flag", fg: .white.opacity(0.75)) { showReportConfirm = true }
+                        shelfIcon("speaker.wave.2.fill") {
                             Haptic.light()
                             // For a passage question, read the passage first — one
                             // utterance, so the two don't cut each other off.
@@ -832,23 +885,20 @@ struct QuestionRunnerView: View {
                         if !isPreReader {
                             askParentButton(for: q)
                         }
+                        Spacer(minLength: 0)
+                        if !buddyHasFreeStrip {
+                            InlineBuddy(controller: companion, profile: profiles.active, width: 44)
+                        }
+                        if !showFeedback, !wandShowing {
+                            hintButton(for: q)
+                        }
                     }
-                    // 📌 Where the buddy stands: right under these three.
-                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { toolsFrame = $0 }
-                    Spacer(minLength: 0)
-                    if !showFeedback, !wandShowing {
-                        hintButton(for: q)
-                    }
-                    Spacer(minLength: 0)
-                    if !buddyHasFreeStrip {
-                        // 📐 Nowhere under the answers to stand: the buddy lives IN
-                        // this slot instead. A short screen was never the only case.
-                        InlineBuddy(controller: companion, profile: profiles.active, width: 44)
-                    }
+                    .frame(height: 46)
                 }
+                .padding(12)
+                .glassPane(radius: 16)
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Self.runnerSpace)) } action: { shelfFrame = $0 }
                 .padding(.horizontal, AppSpacing.md)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
                 .overlay(alignment: .trailing) {
                     if !buddyHasFreeStrip {
                         InlineBuddyBubble(controller: companion, clearance: AppSpacing.md + 44 + 6)
@@ -931,16 +981,16 @@ struct QuestionRunnerView: View {
             (Text("💡 ")
              + Text(tr("רֶמֶז"))
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(Color(hex: "3A2A00"))
              + Text("  " + (hintCost == 0 ? tr("(חִנָּם)") : tr("(\(hintCost) שְׁנִיּוֹת)")))
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .foregroundColor(.white.opacity(0.75)))
+                .foregroundColor(Color(hex: "3A2A00").opacity(0.7)))
             .lineLimit(1)
             .minimumScaleFactor(0.6)
             .padding(.horizontal, AppSpacing.md)
-            .padding(.vertical, AppSpacing.sm)
-            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(AppColor.starGold.opacity(enabled ? 0.7 : 0.3), lineWidth: 1))
+            .frame(height: 46)
+            // 🧊 Gold on the shelf, as in the mockup Rani picked.
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
             .opacity(enabled ? 1.0 : 0.45)
         }
         .buttonStyle(.juicy)
