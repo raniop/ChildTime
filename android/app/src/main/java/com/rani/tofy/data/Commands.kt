@@ -150,10 +150,19 @@ object Commands {
             db.collection("childDevices").whereEqualTo("householdID", hid)
                 .get(com.google.firebase.firestore.Source.SERVER).await().documents
         }.getOrNull() ?: return null
-        val parentPhones = docs.filter { it.getString("role") == "parent" }.mapNotNull { it.getString("deviceID") }.toSet()
+        // A parent row hides a child row only if it was still alive when the
+        // child row appeared (a phone that became the child's own keeps a dead one).
+        fun secs(v: Any?) = (v as? Number)?.toDouble() ?: 0.0
+        val parentLastSeen = HashMap<String, Double>()
+        for (d in docs) {
+            val dev = d.get("deviceID") as? String ?: continue
+            if (d.get("role") as? String == "parent") parentLastSeen[dev] = maxOf(parentLastSeen[dev] ?: 0.0, secs(d.get("lastSeenAt")))
+        }
         return docs.any {
-            it.getString("childID") == childID && it.getString("role") != "parent" &&
-                it.getBoolean("removed") != true && it.getString("deviceID") !in parentPhones
+            val dev = it.get("deviceID") as? String ?: ""
+            val kidMode = parentLastSeen[dev]?.let { seen -> seen >= secs(it.get("joinedAt")) } ?: false
+            it.get("childID") as? String == childID && it.get("role") as? String != "parent" &&
+                it.get("removed") as? Boolean != true && !kidMode
         }
     }
 

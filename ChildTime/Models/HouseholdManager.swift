@@ -938,17 +938,23 @@ final class HouseholdManager: ObservableObject {
         // Kid Mode rows are a PARENT's phone playing as the child — not her own
         // device. Every parent phone also has its `parent_<install>` row with the
         // same deviceID, which is how they're told apart (this phone's, a
-        // co-parent's, or one left behind by an older build).
-        let parentPhones = Set(snap.documents.compactMap { doc -> String? in
+        // co-parent's, or one left behind by an older build) — as long as that
+        // parent row was still alive when the child row appeared: a phone that
+        // was a parent's and is now the child's own keeps a dead parent row.
+        func secs(_ v: Any?) -> Double { (v as? NSNumber)?.doubleValue ?? 0 }
+        var parentLastSeen: [String: Double] = [:]
+        for doc in snap.documents {
             let d = doc.data()
-            return (d["role"] as? String) == "parent" ? d["deviceID"] as? String : nil
-        })
+            guard (d["role"] as? String) == "parent", let dev = d["deviceID"] as? String else { continue }
+            parentLastSeen[dev] = max(parentLastSeen[dev] ?? 0, secs(d["lastSeenAt"]))
+        }
         return snap.documents.contains { doc in
             let d = doc.data()
             let device = d["deviceID"] as? String ?? ""
+            let isKidMode = parentLastSeen[device].map { $0 >= secs(d["joinedAt"]) } ?? false
             return (d["childID"] as? String) == id
                 && device != DeviceIdentity.installID
-                && !parentPhones.contains(device)
+                && !isKidMode
                 && (d["role"] as? String) != "parent"
                 && (d["removed"] as? Bool) != true
         }
@@ -1981,6 +1987,12 @@ final class HouseholdManager: ObservableObject {
         #if canImport(FirebaseFirestore)
         if let cid = s.joinedChildID {           // remove our own child-device row
             db.collection("childDevices").document("\(cid)_\(DeviceIdentity.installID)").delete()
+        }
+        // …and our parent row: the install id survives this reset, so if the
+        // device becomes a CHILD's next, a leftover parent row with the same id
+        // would make it look like a parent's phone in Kid Mode.
+        if s.deviceRole != .child {
+            db.collection("childDevices").document("parent_\(DeviceIdentity.installID)").delete()
         }
         #endif
         ownDeviceListener?.remove(); ownDeviceListener = nil
