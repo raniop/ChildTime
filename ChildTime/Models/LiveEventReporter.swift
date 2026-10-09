@@ -35,6 +35,9 @@ enum LiveEventReporter {
         case personalBest       // beat their own best streak
     }
 
+    /// When each (child, kind) was last reported — see the de-duplication in `report`.
+    private static var lastSent: [String: Date] = [:]
+
     static func report(_ type: EventType, value: String? = nil, topic: Topic? = nil,
                        extra: [String: Any] = [:]) {
         // Demo / screenshot / automated-test runs must never write live events
@@ -63,6 +66,16 @@ enum LiveEventReporter {
         #if canImport(FirebaseFirestore)
         guard AuthManager.shared.isSignedIn,
               let childID = ProfileStore.shared.activeID else { return }
+        // 🔁 One open / one close per moment: two code paths reporting the same
+        // window (the end button AND the countdown hitting zero, a double tap)
+        // sent the parent the same push twice (Rani). Same child, same kind,
+        // within 20 seconds → once.
+        if [.screenTimeStart, .screenTimeEnd].contains(type) {
+            let key = "\(childID.uuidString)|\(type.rawValue)"
+            let now = Date()
+            if let last = lastSent[key], now.timeIntervalSince(last) < 20 { return }
+            lastSent[key] = now
+        }
         let childName = ProfileStore.shared.active?.name ?? ""
         var payload: [String: Any] = [
             "type": type.rawValue,

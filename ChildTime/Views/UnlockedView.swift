@@ -253,7 +253,10 @@ struct UnlockedView: View {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             Task { @MainActor in
                 secondsRemaining = progress.unlockSecondsRemaining
-                if secondsRemaining <= 0 {
+                // Only a window that is still open can run out. "סיימתי לשחק"
+                // closes it first, and this timer — left running — then saw zero
+                // and sent a SECOND "finished" push (Rani's lock screen).
+                if secondsRemaining <= 0, progress.isUnlocked {
                     // Time's up — re-apply the shield in-app (the extension would normally do this,
                     // but this covers the case where the kid is still inside ChildTime).
                     ShieldManager.shared.cancelScheduledReshield()
@@ -269,6 +272,7 @@ struct UnlockedView: View {
     }
 
     private func endEarly() {
+        timer?.invalidate()
         ShieldManager.shared.cancelScheduledReshield()
         // Baseline re-lock (Kid-Mode-aware; block-all vs block-list).
         ShieldManager.shared.relockBaseline()
