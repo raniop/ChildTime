@@ -55,11 +55,22 @@ class SelectionTest {
 
     @Test fun preReaderGetsPictureQuestions() {
         val s = QuestionSource.session(child(0), ContentMode.World(Topic.MATH))
-        repeat(20) {
+        // Count, add, take away, compare, find the digit — always read aloud,
+        // and a plain row of pictures is answered by counting it.
+        repeat(60) {
             val q = s.next().question
             assertTrue(q.spoken != null)
-            assertTrue(q.correctAnswer.toInt() in 1..5)
-            assertEquals(q.correctAnswer.toInt(), q.prompt.split(" ").size)
+            assertTrue(q.correctIndex in q.options.indices)
+            val marked = listOf("➕", "➖", "⚖️", "👂").any { it in q.prompt }
+            if (!marked) assertEquals(q.correctAnswer.toInt(), q.prompt.split(" ").size)
+            if ("➕" in q.prompt) {
+                val (a, b) = q.prompt.split("➕").map { side -> side.trim().split(" ").size }
+                assertEquals(a + b, q.correctAnswer.toInt())
+            }
+            if ("➖" in q.prompt) {
+                val (a, b) = q.prompt.split("➖").map { side -> side.trim().split(" ").size }
+                assertEquals(a - b, q.correctAnswer.toInt())
+            }
         }
     }
 

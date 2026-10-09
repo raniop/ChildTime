@@ -1366,8 +1366,8 @@ struct QuestionRunnerView: View {
     /// effective grade (auto-advancing), so a גן חובה kid graduates to real
     /// questions the September they start כיתה א׳.
     private var isPreReader: Bool {
-        guard let p = profiles.active else { return false }
-        return p.effectiveGrade < 1
+        guard profiles.active != nil else { return false }
+        return PreReaderGames.activeChildIsPreReader   // effectiveGrade < 1 (+ DEMO_PREREADER)
     }
 
     /// 💫 This session is the bonus arena: every question comes from the

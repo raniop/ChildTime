@@ -442,8 +442,9 @@ struct ChildTimeApp: App {
         case "mathgrade":                                   // DEMO_SCREEN=mathgrade DEMO_GRADE=8 [DEMO_WORLD=reading] — a world at a grade
             QuestionRunnerView(mode: .world(Worlds.all.first { $0.topic.rawValue == (ProcessInfo.processInfo.environment["DEMO_WORLD"] ?? "math") } ?? Worlds.all[0]), purpose: .earnTime)
                 .onAppear {
-                    if var p = ProfileStore.shared.active {
-                        p.grade = Int(ProcessInfo.processInfo.environment["DEMO_GRADE"] ?? "") ?? 8
+                    // No DEMO_GRADE → the profile is left alone (DEMO_PREREADER=1 shows גן without writing a grade).
+                    if var p = ProfileStore.shared.active, let g = Int(ProcessInfo.processInfo.environment["DEMO_GRADE"] ?? "") {
+                        p.grade = g
                         p.gradeSchoolYear = Profile.schoolYear()
                         ProfileStore.shared.update(p)
                     }

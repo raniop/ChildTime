@@ -21,6 +21,7 @@ private val skillKeys = mapOf(
     "powers" to "חֶזְקוֹת", "roots" to "שׁוֹרָשִׁים", "angles" to "זָוִיּוֹת", "proportion" to "יַחַס וּפְרוֹפּוֹרְצְיָה",
     "pythagoras" to "מִשְׁפַּט פִּיתָגוֹרַס", "linearFunction" to "פוּנְקְצִיָּה קַוִּית", "volume" to "נֶפַח",
     "probability" to "הִסְתַּבְּרוּת", "circle" to "מַעְגָּל",
+    "letters" to "אוֹתִיּוֹת",
 )
 
 fun skillName(key: String): String = skillKeys[key]?.let { tr(it) } ?: key
