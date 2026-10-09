@@ -76,6 +76,9 @@ private enum Economy {
             ProfileStore.shared.update(profile)
         }
         ProgressStore.shared.resetAll()
+        // The store saves on a background queue: land its writes before this
+        // harness edits the same keys underneath it.
+        ProgressStore.shared.flushPendingWrites()
         for g in specs { UserDefaults.standard.removeObject(forKey: dayKey(g.key)) }
         // 🌈 The topic-balance day counters live outside the snapshot, so
         // `resetAll` leaves them — and 30 answers in one topic put every later
@@ -508,6 +511,7 @@ struct MiniGameEconomyPersistenceTests {
 
         // The relaunch: a fresh store reads the same numbers back from disk.
         let stars = p.stars, diamonds = p.diamonds, minutes = p.pendingMinutes
+        p.flushPendingWrites()
         #expect(AppGroup.defaults.integer(forKey: "stars") == stars)
         #expect(AppGroup.defaults.integer(forKey: "diamonds") == diamonds)
         #expect(AppGroup.defaults.integer(forKey: "pendingMinutes") == minutes)

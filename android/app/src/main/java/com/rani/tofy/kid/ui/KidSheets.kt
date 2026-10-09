@@ -438,7 +438,7 @@ internal fun StatInfoSheet(kind: StatInfoKind, engine: ProgressEngine, onClose: 
             if (cap.enabled && !engine.dailyScreenTimeMaxedOut)
                 lines += SocialMe.g(tr("הַיּוֹם הִרְוַחְתָּ %lld מִתּוֹךְ %lld דַּקּוֹת.", engine.snapshot.minutesEarnedToday, cap.max), tr("הַיּוֹם הִרְוַחַתְּ %lld מִתּוֹךְ %lld דַּקּוֹת.", engine.snapshot.minutesEarnedToday, cap.max))
             val carry = engine.snapshot.carryOverMinutes ?: 0
-            if (carry > 0) lines += tr("🎁 %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר.", carry)
+            if (carry > 0) lines += BankedNote.savedForTomorrow(carry)
             emoji = "🎮"; title = tr("דַּקּוֹת מִשְׂחָק"); subtitle = SocialMe.g(tr("זְמַן הַמִּשְׂחָק שֶׁלְּךָ"), tr("זְמַן הַמִּשְׂחָק שֶׁלָּךְ"))
             body = lines.joinToString("\n"); tip = tr("עוֹנִים נָכוֹן — מַרְוִיחִים עוֹד דַּקּוֹת!")
         }

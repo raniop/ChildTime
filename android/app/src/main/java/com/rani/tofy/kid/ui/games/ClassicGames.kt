@@ -457,12 +457,15 @@ fun MatchPairs(onClose: () -> Unit) {
 
 // MARK: - 🧠 MemoryMatchView
 
-/** "מִשְׂחַק הַזִּכָּרוֹן" — flip two cards: an emoji and its English word. Clear the board → ⭐ 💎 🎮. */
+/** "מִשְׂחַק הַזִּכָּרוֹן" — flip two cards: an emoji and its English word. Clear the board → ⭐ 💎 🎮.
+ *  👶 גן: two identical pictures, six pairs, the instruction read aloud (MemoryMatchView.swift). */
 @Composable
 fun MemoryMatch(onClose: () -> Unit) {
     val h = rememberHaptics()
     val scope = rememberCoroutineScope()
-    val pairCount = 8
+    val preReader = PreReaderGames.isPreReader(GameEnv.grade(1))
+    val pairCount = if (preReader) 6 else 8
+    val instruction = if (preReader) tr("מִצְאוּ שְׁתֵּי תְּמוּנוֹת זֵהוֹת") else tr("מָצְאוּ אֶת הָאֶמוֹגִ'י וְהַמִּלָּה הַתּוֹאֶמֶת בְּאַנְגְּלִית")
     val vocab = remember {
         listOf("🐶" to "dog", "🐱" to "cat", "☀️" to "sun", "🍎" to "apple", "🚗" to "car", "🌳" to "tree", "🏠" to "house", "⭐" to "star",
             "🐟" to "fish", "🌙" to "moon", "🌸" to "flower", "🎈" to "balloon", "🦋" to "butterfly", "🐢" to "turtle", "🍌" to "banana", "🌈" to "rainbow")
@@ -480,7 +483,7 @@ fun MemoryMatch(onClose: () -> Unit) {
 
     fun deal() {
         matched.clear(); flipped.clear(); busy = false; mistakes = 0
-        cards = vocab.shuffled().take(pairCount).flatMap { (e, w) -> listOf(MemCard(nextId(), w, e), MemCard(nextId(), w, w)) }.shuffled()
+        cards = vocab.shuffled().take(pairCount).flatMap { (e, w) -> listOf(MemCard(nextId(), w, e), MemCard(nextId(), w, if (preReader) e else w)) }.shuffled()
     }
     fun win() {
         won = true
@@ -503,7 +506,10 @@ fun MemoryMatch(onClose: () -> Unit) {
             scope.launch { delay(800); flipped.clear(); busy = false }
         }
     }
-    LaunchedEffect(Unit) { if (cards.isEmpty()) deal() }
+    LaunchedEffect(Unit) {
+        if (cards.isEmpty()) deal()
+        if (preReader) GameEnv.speak(instruction)
+    }
 
     ClassicBackdrop(listOf("9B5DE5", "5B6CFF", "06D6A0"), burst, confetti, onClose) {
         if (won) ClassicSummary(if (mistakes <= 2) tr("זִכָּרוֹן מְצֻיָּן! 🌟") else tr("כָּל הַכָּבוֹד! 🎉"), (if (GameEnv.source.isGirl) tr("מָצָאת אֶת כָּל הַזּוּגוֹת!") else tr("מָצָאתָ אֶת כָּל הַזּוּגוֹת!")),
@@ -511,8 +517,11 @@ fun MemoryMatch(onClose: () -> Unit) {
         else Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Column(Modifier.padding(top = 60.dp).padding(horizontal = 20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(tr("מִשְׂחַק הַזִּכָּרוֹן 🧠"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
-                Text(tr("מָצְאוּ אֶת הָאֶמוֹגִ'י וְהַמִּלָּה הַתּוֹאֶמֶת בְּאַנְגְּלִית"), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded,
-                    fontWeight = FontWeight.SemiBold, fontSize = 13.sp, textAlign = TextAlign.Center)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(instruction, color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded,
+                        fontWeight = FontWeight.SemiBold, fontSize = (if (preReader) 17 else 13).sp, textAlign = TextAlign.Center)
+                    if (preReader) PreReaderSpeakButton(instruction, 44.dp)
+                }
             }
             Spacer(Modifier.weight(1f))
             Column(Modifier.padding(horizontal = 14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {

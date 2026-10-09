@@ -411,6 +411,7 @@ struct WorldMapView: View {
 
     var body: some View {
         let _ = progressTick   // re-render when the store changes (see `progress`)
+        let _ = BodyLog.hit("Home")
         ZStack {
             // Layered background
             GlassBackdrop()
@@ -1937,7 +1938,7 @@ struct WorldMapView: View {
                 lines.append(Gendered.g(tr("הַיּוֹם הִרְוַחְתָּ \(progress.minutesEarnedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת."), tr("הַיּוֹם הִרְוַחַתְּ \(progress.minutesEarnedToday) מִתּוֹךְ \(cap.max) דַּקּוֹת.")))
             }
             if progress.carryOverMinutes > 0 {
-                lines.append(tr("🎁 \(progress.carryOverMinutes) דַּקּוֹת נִשְׁמְרוּ לְמָחָר."))
+                lines.append(BankedNote.savedForTomorrow(progress.carryOverMinutes))
             }
             return InfoContent(
                 emoji: "🎮",

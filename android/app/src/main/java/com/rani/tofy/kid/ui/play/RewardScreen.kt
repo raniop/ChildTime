@@ -122,9 +122,7 @@ fun RewardScreen(
         timeSeconds = roundSeconds + ((grant?.addedToday ?: 0) + (grant?.bankedForTomorrow ?: 0)) * 60
         if (grant != null && grant.bankedForTomorrow > 0) {
             val carry = KidSession.engine()?.snapshot?.carryOverMinutes ?: 0
-            bankedNote = (if (isGirl) tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (%lld/%lld)",
-                grant.bankedForTomorrow, carry, ProgressEngine.MAX_CARRY_OVER) else tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (%lld/%lld)",
-                grant.bankedForTomorrow, carry, ProgressEngine.MAX_CARRY_OVER))
+            bankedNote = com.rani.tofy.kid.ui.BankedNote.capReached(grant.bankedForTomorrow, carry, ProgressEngine.MAX_CARRY_OVER, isGirl)
         }
         KidSession.edit { it.advanceRoom(world.id) }
     }

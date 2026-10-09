@@ -60,7 +60,11 @@ enum PreReaderGames {
     /// `MiniGameLevel.grade(for:)`, which floors at 1 and would answer "א׳"
     /// for a child who cannot read a word.
     static var activeChildIsPreReader: Bool {
-        isPreReader(ProfileStore.shared.active?.effectiveGrade ?? 1)
+        #if DEBUG
+        // DEMO_PREREADER=1: look at a גן screen without changing a real child's grade.
+        if ProcessInfo.processInfo.environment["DEMO_PREREADER"] != nil { return true }
+        #endif
+        return isPreReader(ProfileStore.shared.active?.effectiveGrade ?? 1)
     }
 
     /// Items a round holds — six, not ten, and the balloon round stops at six

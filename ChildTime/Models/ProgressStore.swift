@@ -4,7 +4,15 @@ import Combine
 final class ProgressStore: ObservableObject {
     static let shared = ProgressStore()
 
-    private let defaults = AppGroup.defaults
+    /// Writes land on a background queue (see `WriteBehindDefaults`): a right
+    /// answer changes ~30 fields and each one used to save itself to the App
+    /// Group plist right there on the main thread — 75% of `recordCorrect`,
+    /// the stutter after every correct answer (measured on Rani's phone).
+    private let defaults = WriteBehindDefaults(AppGroup.defaults)
+
+    /// Waits until every queued save is on disk — for code (and tests) that read
+    /// the App Group store directly instead of through this object.
+    func flushPendingWrites() { defaults.flush() }
 
     private enum Key {
         static let pendingMinutes = "pendingMinutes"
@@ -2844,4 +2852,98 @@ final class ProgressStore: ObservableObject {
         lastPenaltyMinutes = 0
         lastRecoveredMinutes = 0
     }
+}
+
+
+/// UserDefaults with the writes moved off the main thread.
+///
+/// `set`/`removeObject` return at once; a serial queue applies them to the
+/// real store in order. Until a write lands, a read of that key answers from
+/// the queued value — so code that reads straight after it writes (the topic
+/// counters, the earn ledger) never sees an older value. Only ProgressStore
+/// reads these keys; values the extensions need (the lease) are still written
+/// directly.
+final class WriteBehindDefaults: @unchecked Sendable {
+    private enum Pending { case value(Any), removed }
+
+    private let base: UserDefaults
+    private let queue = DispatchQueue(label: "tofy.progress.defaults", qos: .userInitiated)
+    private let lock = NSLock()
+    private var pending: [String: (Pending, UInt64)] = [:]
+    private var counter: UInt64 = 0
+
+    init(_ base: UserDefaults) {
+        self.base = base
+        // Going to the background: land everything before iOS may suspend us.
+        NotificationCenter.default.addObserver(forName: Notification.Name("UIApplicationDidEnterBackgroundNotification"),
+                                               object: nil, queue: nil) { [weak self] _ in self?.flush() }
+    }
+
+    func set(_ value: Any?, forKey key: String) {
+        guard let value else { removeObject(forKey: key); return }
+        enqueue(key, .value(value))
+    }
+
+    func removeObject(forKey key: String) { enqueue(key, .removed) }
+
+    private func enqueue(_ key: String, _ change: Pending) {
+        lock.lock()
+        counter &+= 1
+        let ticket = counter
+        pending[key] = (change, ticket)
+        lock.unlock()
+        queue.async { [self] in
+            switch change {
+            case .value(let v): base.set(v, forKey: key)
+            case .removed:      base.removeObject(forKey: key)
+            }
+            lock.lock()
+            if pending[key]?.1 == ticket { pending[key] = nil }   // a newer write keeps its entry
+            lock.unlock()
+        }
+    }
+
+    /// Blocks until every queued write is in the store.
+    func flush() { queue.sync {} }
+
+    func object(forKey key: String) -> Any? {
+        lock.lock()
+        let p = pending[key]?.0
+        lock.unlock()
+        switch p {
+        case .value(let v): return v
+        case .removed:      return nil
+        case nil:           return base.object(forKey: key)
+        }
+    }
+
+    // The same conversions UserDefaults applies to what it stores.
+    func integer(forKey key: String) -> Int {
+        let o = object(forKey: key)
+        if let n = o as? NSNumber { return n.intValue }
+        if let s = o as? String { return Int(s) ?? Int(Double(s) ?? 0) }
+        return 0
+    }
+    func double(forKey key: String) -> Double {
+        let o = object(forKey: key)
+        if let n = o as? NSNumber { return n.doubleValue }
+        if let s = o as? String { return Double(s) ?? 0 }
+        return 0
+    }
+    func bool(forKey key: String) -> Bool {
+        let o = object(forKey: key)
+        if let n = o as? NSNumber { return n.boolValue }
+        if let s = o as? String { return ["yes", "true", "1"].contains(s.lowercased()) }
+        return false
+    }
+    func string(forKey key: String) -> String? {
+        let o = object(forKey: key)
+        if let s = o as? String { return s }
+        if let n = o as? NSNumber { return n.stringValue }
+        return nil
+    }
+    func data(forKey key: String) -> Data? { object(forKey: key) as? Data }
+    func array(forKey key: String) -> [Any]? { object(forKey: key) as? [Any] }
+    func stringArray(forKey key: String) -> [String]? { object(forKey: key) as? [String] }
+    func dictionary(forKey key: String) -> [String: Any]? { object(forKey: key) as? [String: Any] }
 }

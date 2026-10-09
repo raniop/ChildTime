@@ -127,7 +127,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 struct ChildTimeApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var settings: ParentSettings
-    @StateObject private var progress: ProgressStore
+    /// Held, NOT observed: the scene only hands it down. As a @StateObject every
+    /// progress change (~30 per right answer) re-ran the whole App body.
+    private let progress: ProgressStore
     @StateObject private var shields: ShieldManager
     @StateObject private var auth: AuthManager
     @StateObject private var subs: SubscriptionManager
@@ -155,7 +157,7 @@ struct ChildTimeApp: App {
         #endif
 
         _settings = StateObject(wrappedValue: ParentSettings.shared)
-        _progress = StateObject(wrappedValue: ProgressStore.shared)
+        progress = ProgressStore.shared
         _shields = StateObject(wrappedValue: ShieldManager.shared)
         _auth = StateObject(wrappedValue: AuthManager.shared)
         _subs = StateObject(wrappedValue: SubscriptionManager.shared)
@@ -253,6 +255,7 @@ struct ChildTimeApp: App {
     @ObservedObject private var updateConfig = AppUpdateConfig.shared
 
     var body: some Scene {
+        let _ = BodyLog.hit("App")
         WindowGroup {
             ZStack {
                 // A base layer in the brand gradient (matching the launch
@@ -463,6 +466,7 @@ struct ChildTimeApp: App {
         case "surpriseround":                               // DEMO_SCREEN=surpriseround [DEMO_WORLD=soccer] [DEMO_GAME=balloon] — ⚡ the interstitial → the game
             MiniGameDemoHost(screen: name)
         case "wheel":    LuckyWheelView(onClose: {})
+        case "memory":   MemoryMatchView(onClose: {})   // DEMO_SCREEN=memory [DEMO_PREREADER=1 → pictures only]
         // 🎁 "אֵיזֶה נִצָּחוֹן!" — the chest after a session (test profile only).
         case "reward":
             RewardScreenView(kind: .gold, correctInSession: 10, world: Worlds.all[0],

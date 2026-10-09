@@ -221,6 +221,7 @@ struct QuestionRunnerView: View {
     }
 
     var body: some View {
+        let _ = BodyLog.hit("Runner")
         ZStack {
             background
 
@@ -1592,7 +1593,7 @@ struct QuestionRunnerView: View {
         // Whole minutes this answer moved the wallet across (for the parent's
         // reports); the seconds themselves land with every right answer.
         let minutesBefore = progress.pendingMinutes
-        let earned = progress.recordCorrect(
+        let earned = PerfMark.run("hc.recordCorrect") { progress.recordCorrect(
             ctx,
             minutesPerCorrect: settings.minutesPerCorrectAnswer,
             responseMs: responseMs,
@@ -1601,7 +1602,7 @@ struct QuestionRunnerView: View {
             grantsScreenTime: earnsTime,
             cycleMultiplier: isBonusArena ? 2 : 1,   // 💫 arena: double minutes
             affectsAdaptive: !isBonusArena && !isBonusQuestion
-        )
+        ) }
         earnedThisSession += earned
         // 🌈 Topic balance — celebrate the variety bonus, or nudge (positively)
         // toward other worlds when one topic hit its daily soft cap. One-shot
@@ -1628,14 +1629,14 @@ struct QuestionRunnerView: View {
         }
         let minutesGranted = max(0, progress.pendingMinutes - minutesBefore)
 
-        LearningHistoryStore.shared.recordAnswer(
+        PerfMark.run("hc.history") { LearningHistoryStore.shared.recordAnswer(
             topic: q.topic, correct: true, responseMs: responseMs,
             earnedMinutes: minutesGranted,
             streak: progress.currentStreak,
             voluntary: cappedBefore,   // learning past the max = voluntary
             skill: q.skill
-        )
-        reportLiveEvents(for: q)
+        ) }
+        PerfMark.run("hc.liveEvents") { reportLiveEvents(for: q) }
 
         // Immediate per-question reward: "+24 שניות" rising into the timer
         // (doubled in the bonus arena).

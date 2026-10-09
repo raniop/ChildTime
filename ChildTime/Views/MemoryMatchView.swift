@@ -3,12 +3,19 @@ import SwiftUI
 /// "מִשְׂחַק הַזִּכָּרוֹן" — a flip-card memory game that's also English practice:
 /// each pair is an emoji and its English word (🐶 ↔ dog). Flip two cards; an
 /// emoji + its matching word lock in. Clear the board → confetti + reward.
+/// 👶 גן: two identical pictures (🐶 ↔ 🐶), six pairs, the instruction read
+/// aloud — "apple" on a card is a wall for a child who can't read (Ben David).
 struct MemoryMatchView: View {
     var onClose: () -> Void
 
     @ObservedObject private var progress = ProgressStore.shared
 
-    private let pairCount = 8
+    /// Set when the board is dealt: 6 picture pairs for a pre-reader, else 8.
+    @State private var pairCount = 8
+    private var preReader: Bool { PreReaderGames.activeChildIsPreReader }
+    private var instruction: String {
+        preReader ? tr("מִצְאוּ שְׁתֵּי תְּמוּנוֹת זֵהוֹת") : tr("מָצְאוּ אֶת הָאֶמוֹגִ'י וְהַמִּלָּה הַתּוֹאֶמֶת בְּאַנְגְּלִית")
+    }
 
     /// Kid-friendly emoji → English word vocabulary.
     private static let vocab: [(emoji: String, word: String)] = [
@@ -59,7 +66,10 @@ struct MemoryMatchView: View {
             .padding(20)
         }
         .environment(\.layoutDirection, .app)
-        .onAppear { if cards.isEmpty { deal() } }
+        .onAppear {
+            if cards.isEmpty { deal() }
+            if preReader { SpeechReader.shared.speak(instruction) }
+        }
     }
 
     private var board: some View {
@@ -68,9 +78,12 @@ struct MemoryMatchView: View {
                 Text(tr("מִשְׂחַק הַזִּכָּרוֹן 🧠"))
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white).shadow(color: .black.opacity(0.2), radius: 4, y: 2)
-                Text(tr("מָצְאוּ אֶת הָאֶמוֹגִ'י וְהַמִּלָּה הַתּוֹאֶמֶת בְּאַנְגְּלִית"))
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85)).multilineTextAlignment(.center)
+                HStack(spacing: 10) {
+                    Text(instruction)
+                        .font(.system(size: preReader ? 17 : 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85)).multilineTextAlignment(.center)
+                    if preReader { PreReaderSpeakButton(spoken: instruction, side: 44) }
+                }
             }
             .padding(.top, 60)
 
@@ -164,11 +177,13 @@ struct MemoryMatchView: View {
 
     private func deal() {
         matched = []; flipped = []; busy = false; mistakes = 0; revealStep = 0
+        let pictures = preReader
+        pairCount = pictures ? 6 : 8
         let chosen = Self.vocab.shuffled().prefix(pairCount)
         var deck: [MemCard] = []
         for v in chosen {
             deck.append(MemCard(key: v.word, face: v.emoji))
-            deck.append(MemCard(key: v.word, face: v.word))
+            deck.append(MemCard(key: v.word, face: pictures ? v.emoji : v.word))
         }
         cards = deck.shuffled()
     }

@@ -94,7 +94,7 @@ extension WheelPrize {
             if g.addedToday > 0 && g.bankedForTomorrow > 0 {
                 return tr("+\(g.addedToday) דַּקּוֹת עַכְשָׁיו · עוֹד \(g.bankedForTomorrow) נִשְׁמְרוּ לְמָחָר 🎁")
             } else if g.bankedForTomorrow > 0 {
-                return Gendered.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! \(g.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))"), tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! \(g.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))"))
+                return BankedNote.capReached(banked: g.bankedForTomorrow, carry: progress.carryOverMinutes, max: ProgressStore.maxCarryOverMinutes)
             } else {
                 return tr("+\(g.addedToday) דַּקּוֹת נוֹסְפוּ לִזְמַן הַמִּשְׂחָק")
             }

@@ -3,7 +3,12 @@ import Combine
 
 struct ContentView: View {
     @EnvironmentObject var settings: ParentSettings
-    @EnvironmentObject var progress: ProgressStore
+    /// Read, not observed: the root only needs "is a play window open", and
+    /// observing the whole store re-ran it on every star of every answer.
+    private var progress: ProgressStore { ProgressStore.shared }
+    /// Flips when the window opens/closes — the only progress change that
+    /// should redraw the root (the body still reads the live value).
+    @State private var windowShowing = ProgressStore.shared.isUnlocked || ProgressStore.shared.isOpeningWindow
     @EnvironmentObject var profiles: ProfileStore
     @EnvironmentObject var auth: AuthManager
     @StateObject private var household = HouseholdManager.shared
@@ -21,6 +26,7 @@ struct ContentView: View {
     /// is required.
 
     var body: some View {
+        let _ = BodyLog.hit("ContentView")
         Group {
             if kidMode.active {
                 // Parent's phone temporarily acting as the kid's device.
@@ -48,6 +54,12 @@ struct ContentView: View {
             } else {
                 parentFlow
             }
+        }
+        // Redraw the root only when the play window opens or closes. The store
+        // publishes BEFORE it changes, so read the value a beat later.
+        .onReceive(ProgressStore.shared.objectWillChange.receive(on: DispatchQueue.main)) { _ in
+            let open = progress.isUnlocked || progress.isOpeningWindow
+            if open != windowShowing { windowShowing = open }
         }
         // Global presence heartbeat: while a CHILD device is open (any screen),
         // refresh "last seen" every 15s so the parent sees "משחק עכשיו" live —
@@ -217,6 +229,7 @@ struct ContentView: View {
             // always show WorldMap, which hosts the live-game cover. Otherwise an
             // active screen-time window would land on UnlockedView and the tap
             // would never open the game.
+            let _ = windowShowing
             if (progress.isUnlocked || progress.isOpeningWindow) && liveGame.pendingGameID == nil && liveGame.game == nil && !liveGame.isSettingUp {
                 UnlockedView()
             } else {

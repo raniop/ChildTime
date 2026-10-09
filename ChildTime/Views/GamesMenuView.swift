@@ -55,7 +55,7 @@ struct GamesMenuView: View {
                         gameCard(
                             emoji: "🧠",
                             title: tr("מִשְׂחַק הַזִּכָּרוֹן"),
-                            subtitle: tr("מָצְאוּ אֶת הָאֶמוֹגִ'י וְהַמִּלָּה בְּאַנְגְּלִית"),
+                            subtitle: isPreReader ? tr("מִצְאוּ שְׁתֵּי תְּמוּנוֹת זֵהוֹת") : tr("מָצְאוּ אֶת הָאֶמוֹגִ'י וְהַמִּלָּה בְּאַנְגְּלִית"),
                             colors: [Color(hex: "9B5DE5"), Color(hex: "EF476F")]
                         ) { showingMemory = true }
                     }

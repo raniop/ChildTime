@@ -73,6 +73,7 @@ struct WorldGameChooserView: View {
     }
 
     var body: some View {
+        let _ = BodyLog.hit("Chooser")
         ZStack {
             GlassBackdrop()
             SparkleField(count: 14, size: 12)

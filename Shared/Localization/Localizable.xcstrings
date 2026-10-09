@@ -35343,6 +35343,28 @@
         }
       }
     },
+    "הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! דַּקָּה אַחַת נִשְׁמְרָה לְמָחָר 🎁 (%lld/%lld)" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وصلتَ إلى الحدّ الأقصى اليومي! حُفظت دقيقة واحدة للغد 🎁 (%lld/%lld)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You hit today's max! 1 minute saved for tomorrow 🎁 (%lld/%lld)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ты достиг дневного максимума! 1 минута сохранена на завтра 🎁 (%lld/%lld)"
+          }
+        }
+      }
+    },
     "הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת" : {
       "localizations" : {
         "ar" : {
@@ -35483,6 +35505,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! דַּקָּה אַחַת נִשְׁמְרָה לְמָחָר 🎁 (%lld/%lld)" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وصلتِ إلى الحدّ الأقصى اليومي! حُفظت دقيقة واحدة للغد 🎁 (%lld/%lld)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You hit today's max! 1 minute saved for tomorrow 🎁 (%lld/%lld)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ты достигла дневного максимума! 1 минута сохранена на завтра 🎁 (%lld/%lld)"
           }
         }
       }
@@ -79401,6 +79445,28 @@
         }
       }
     },
+    "מִצְאוּ שְׁתֵּי תְּמוּנוֹת זֵהוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اعثروا على صورتين متطابقتين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find two matching pictures"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Найдите две одинаковые картинки"
+          }
+        }
+      }
+    },
     "מִצְנָח" : {
       "localizations" : {
         "ar" : {
@@ -121792,6 +121858,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "🎁 דַּקָּה אַחַת נִשְׁמְרָה לְמָחָר." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎁 حُفظت دقيقة واحدة للغد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎁 1 minute saved for tomorrow."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎁 1 минута сохранена на завтра."
           }
         }
       }

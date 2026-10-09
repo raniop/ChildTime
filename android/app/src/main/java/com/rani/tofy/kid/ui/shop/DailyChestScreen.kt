@@ -119,9 +119,7 @@ fun DailyChestScreenImpl(onExit: () -> Unit) {
                 granted = reward
                 if (grant.bankedForTomorrow > 0) {
                     val carry = KidSession.engine()?.snapshot?.carryOverMinutes ?: 0
-                    bankedNote = SocialMe.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (%lld/%lld)",
-                        grant.bankedForTomorrow, carry, ProgressEngine.MAX_CARRY_OVER), tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (%lld/%lld)",
-                        grant.bankedForTomorrow, carry, ProgressEngine.MAX_CARRY_OVER))
+                    bankedNote = com.rani.tofy.kid.ui.BankedNote.capReached(grant.bankedForTomorrow, carry, ProgressEngine.MAX_CARRY_OVER, SocialMe.isGirl)
                 }
                 KidSession.pushNow()
             }

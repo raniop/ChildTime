@@ -382,7 +382,7 @@ internal fun GamesMenu(onClose: () -> Unit) {
                     MenuCard("🎯", tr("חִידוֹן בָּזָק"), com.rani.tofy.kid.ui.social.SocialMe.g(tr("אַרְבַּע תְּשׁוּבוֹת — בְּחַר אֶת הַנְּכוֹנָה מַהֵר!"), tr("אַרְבַּע תְּשׁוּבוֹת — בַּחֲרִי אֶת הַנְּכוֹנָה מַהֵר!")), listOf("118AB2", "5B6CFF"), appeared) { open = "quiz" }
                     MenuCard("🧩", tr("הַתְאָמַת זוּגוֹת"), tr("הַתְאִימוּ שְׁאֵלָה לַתְּשׁוּבָה וּזְכוּ בִּפְרָסִים"), listOf("06D6A0", "118AB2"), appeared) { open = "match" }
                 }
-                MenuCard("🧠", tr("מִשְׂחַק הַזִּכָּרוֹן"), tr("מָצְאוּ אֶת הָאֶמוֹגִ'י וְהַמִּלָּה בְּאַנְגְּלִית"), listOf("9B5DE5", "EF476F"), appeared) { open = "memory" }
+                MenuCard("🧠", tr("מִשְׂחַק הַזִּכָּרוֹן"), if (preReader) tr("מִצְאוּ שְׁתֵּי תְּמוּנוֹת זֵהוֹת") else tr("מָצְאוּ אֶת הָאֶמוֹגִ'י וְהַמִּלָּה בְּאַנְגְּלִית"), listOf("9B5DE5", "EF476F"), appeared) { open = "memory" }
             }
         }
     }

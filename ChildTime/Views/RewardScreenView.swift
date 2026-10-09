@@ -358,7 +358,7 @@ struct RewardScreenView: View {
         // the won minutes weren't lost.
         let grant = progress.applyChestReward(reward)
         if grant.bankedForTomorrow > 0 {
-            bankedNote = Gendered.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! \(grant.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))"), tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! \(grant.bankedForTomorrow) דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (\(progress.carryOverMinutes)/\(ProgressStore.maxCarryOverMinutes))"))
+            bankedNote = BankedNote.capReached(banked: grant.bankedForTomorrow, carry: progress.carryOverMinutes, max: ProgressStore.maxCarryOverMinutes)
         }
         progress.advanceRoom(in: world.id)
     }

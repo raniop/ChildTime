@@ -34,6 +34,22 @@ final class HitchMonitor: NSObject {
         watch("ProfileStore", ProfileStore.shared.objectWillChange)
         watch("CosmeticStore", CosmeticStore.shared.objectWillChange)
         watch("ParentSettings", ParentSettings.shared.objectWillChange)
+        watch("Household", HouseholdManager.shared.objectWillChange)
+        watch("Lease", PlayWindowLeaseManager.shared.objectWillChange)
+        watch("Friends", FriendsManager.shared.objectWillChange)
+        watch("LiveGame", LiveGameManager.shared.objectWillChange)
+        watch("KidMode", KidModeManager.shared.objectWillChange)
+        watch("Quiet", QuietHoursManager.shared.objectWillChange)
+        watch("PackStore", PackStore.shared.objectWillChange)
+        watch("Conversion", ConversionConfig.shared.objectWillChange)
+        watch("Campaign", CampaignTracker.shared.objectWillChange)
+        watch("Chores", ChoreStore.shared.objectWillChange)
+        watch("Display", DisplayGeometry.shared.objectWillChange)
+        watch("Shields", ShieldManager.shared.objectWillChange)
+        watch("Subs", SubscriptionManager.shared.objectWillChange)
+        watch("Auth", AuthManager.shared.objectWillChange)
+        watch("Location", LocationSharing.shared.objectWillChange)
+        watch("JoinCoord", JoinCoordinator.shared.objectWillChange)
     }
 
     @objc private func tick(_ l: CADisplayLink) {
@@ -65,5 +81,20 @@ enum PerfMark {
         #else
         return try body()
         #endif
+    }
+}
+
+/// 📏 `let _ = BodyLog.hit("X")` inside a body: logs each re-evaluation
+/// against the last answer tap when DEMO_HITCHES is on. Free in Release.
+enum BodyLog {
+    @inline(__always) @discardableResult
+    static func hit(_ name: StaticString) -> Int {
+        #if DEBUG
+        if HitchMonitor.enabled {
+            let tap = HitchMonitor.shared.lastTap
+            NSLog("[Body] %@ at %.0fms after tap", "\(name)", tap > 0 ? (CACurrentMediaTime() - tap) * 1000 : -1)
+        }
+        #endif
+        return 0
     }
 }

@@ -100,9 +100,7 @@ object LuckyWheel {
                 g.addedToday > 0 && g.bankedForTomorrow > 0 ->
                     tr("+%lld דַּקּוֹת עַכְשָׁיו · עוֹד %lld נִשְׁמְרוּ לְמָחָר 🎁", g.addedToday, g.bankedForTomorrow)
                 g.bankedForTomorrow > 0 ->
-                    SocialMe.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (%lld/%lld)",
-                        g.bankedForTomorrow, e.snapshot.carryOverMinutes ?: 0, ProgressEngine.MAX_CARRY_OVER), tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! %lld דַּקּוֹת נִשְׁמְרוּ לְמָחָר 🎁 (%lld/%lld)",
-                        g.bankedForTomorrow, e.snapshot.carryOverMinutes ?: 0, ProgressEngine.MAX_CARRY_OVER))
+                    com.rani.tofy.kid.ui.BankedNote.capReached(g.bankedForTomorrow, e.snapshot.carryOverMinutes ?: 0, ProgressEngine.MAX_CARRY_OVER, SocialMe.isGirl)
                 else -> tr("+%lld דַּקּוֹת נוֹסְפוּ לִזְמַן הַמִּשְׂחָק", g.addedToday)
             }
         }

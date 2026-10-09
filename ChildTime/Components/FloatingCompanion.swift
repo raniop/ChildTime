@@ -79,8 +79,11 @@ struct FloatingCompanion: View {
                             Color.clear.preference(key: BubbleSizeKey.self, value: g.size)
                         })
                         .onPreferenceChange(BubbleSizeKey.self) { bubbleSize = $0 }
+                        // The bubble's BOTTOM sits just above the head (the
+                        // avatar is size×1.3 tall, centred). Placed by its centre,
+                        // a two-line bubble grew down onto the hat (Rani).
                         .offset(x: clampedX - anchor.x,
-                                y: -size * 0.9)
+                                y: bubbleSize.height > 0 ? -(size * 0.65 + bubbleSize.height / 2 + 2) : -size * 0.9)
                         .transition(.asymmetric(insertion: .scale.combined(with: .opacity), removal: .identity))
                         .allowsHitTesting(false)
                 }
