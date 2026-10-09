@@ -135,6 +135,9 @@ struct LeaderboardView: View {
                 .font(.system(size: 26, weight: .black, design: .rounded))
                 .foregroundStyle(GlassInk.primary)
                 .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
+                // The closed foldable: the clock's band ends below the title — the
+                // tournament rows start under it, not beside the Wi-Fi.
+                .fillsTopBand(above: DisplayProbeView.minimumTopMargin + 50, alignment: .top)
             tournamentBlock
         }
         .padding(.horizontal, AppSpacing.lg).padding(.vertical, AppSpacing.sm)

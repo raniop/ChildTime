@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct UnlockedView: View {
+    @ObservedObject private var display = DisplayGeometry.shared
     /// One width for every frame on the screen — the countdown, the hint and the button.
     static let paneWidth: CGFloat = 480
     @EnvironmentObject var progress: ProgressStore
@@ -122,7 +123,9 @@ struct UnlockedView: View {
             // Side margins like the home cards — the panes never touch the edges.
             .padding(.horizontal, 28)
 
-            // Sleepy companion
+            // Sleepy companion — not on the closed foldable, where the glass is too
+            // short for it to sleep anywhere but on the "now switch apps" line.
+            if !(display.isShort && !display.isWideShort) {
             VStack {
                 Spacer()
                 HStack {
@@ -133,6 +136,7 @@ struct UnlockedView: View {
                 }
             }
             .padding(.bottom, 100)
+            }
         }
         .onAppear {
             // A play session means the device is now the kid's — re-lock the parent
