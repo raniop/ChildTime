@@ -319,6 +319,9 @@ struct SupportChatView: View {
             }
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { viewportHeight = $0 }
             .scrollDismissesKeyboard(.interactively)
+            // A tap anywhere on the conversation closes the keyboard (Rani). A
+            // simultaneous gesture, so taps on a screenshot still open it.
+            .simultaneousGesture(TapGesture().onEnded { focused = false })
             .onAppear { scrollToBottom(proxy, animated: false) }
             .onChangeCompat(of: model.messages.count) { _, _ in scrollToBottom(proxy, animated: true) }
             .onChangeCompat(of: focused) { _, isOn in
