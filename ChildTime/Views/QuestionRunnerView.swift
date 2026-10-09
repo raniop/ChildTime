@@ -112,11 +112,11 @@ struct QuestionRunnerView: View {
     ///
     /// On the foldable it never floats at all: the rail holds טופי already, and
     /// two of him on one screen is worse than either place.
-    private var buddyHasFreeStrip: Bool {
-        guard !display.hasRail else { return false }
-        guard runnerHeight > 0, answersBottom > 0 else { return !display.isShort }
-        return runnerHeight - answersBottom >= companionSize + 24
-    }
+    ///
+    /// Back to floating everywhere (Rani, 2026-10-09): squeezed into the tool row
+    /// the buddy shrank and its words landed on the hint button. Over a card is
+    /// fine — it keeps moving, and the child can drag it away.
+    private var buddyHasFreeStrip: Bool { !display.hasRail }
 
     // Smart Feed / learning state
     @State private var currentTopic: Topic = .math
@@ -1411,8 +1411,14 @@ struct QuestionRunnerView: View {
     /// A timer, not `main.async`: the frame is committed only when the run
     /// loop is about to sleep, and queued main-queue work keeps it awake — a
     /// timer guarantees it sleeps (and draws) first. 30ms is two frames.
-    private func afterThisFrame(_ work: @escaping () -> Void) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.03, execute: work)
+    /// Recording an answer (progress, learning history, the parent's feed, the
+    /// wallet) holds the main thread ~60ms in the simulator and several times
+    /// that on a real phone. Run 30ms after the tap, it landed in the MIDDLE of
+    /// the card's 0.3s colour change and froze it there — the "delay" Rani still
+    /// felt on his iPhone after the first fix. It now waits for the change to
+    /// finish; the next question comes at 1–1.5s regardless.
+    private func afterFeedbackSettles(_ work: @escaping () -> Void) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35, execute: work)
     }
 
     private func pickOption(_ idx: Int, q: Question) {
@@ -1446,7 +1452,13 @@ struct QuestionRunnerView: View {
             }
             feedbackForIndex = map
             showFeedback = true
-            afterThisFrame { handleCorrect(q: q) }
+            // The feel of the answer — sound, buzz, sparkle — right now; the
+            // bookkeeping only once the card has finished turning green.
+            SoundPlayer.shared.play(isSuperQuestion ? .correctBig : .correctSmall)
+            Haptic.success()
+            burstTrigger += 1
+            let answeredAt = Date()
+            afterFeedbackSettles { handleCorrect(q: q, answeredAt: answeredAt) }
             // If the child stumbled on this one, queue it to re-ask later — the
             // only question that's allowed to repeat in a session.
             if hadMistakeThisQuestion, !reAskQueue.contains(where: { $0.question.prompt == q.prompt }) {
@@ -1460,7 +1472,9 @@ struct QuestionRunnerView: View {
             // 💫 Bonus: the rare event is its own challenge — flash the pick red,
             // dim it, and let the kid keep trying on THIS question (old behavior).
             feedbackForIndex[idx] = .wrong
-            afterThisFrame { handleWrong(q: q) }
+            SoundPlayer.shared.play(.wrongSoft)
+            Haptic.warning()
+            afterFeedbackSettles { handleWrong(q: q) }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
                     feedbackForIndex[idx] = .dimmed
@@ -1473,7 +1487,9 @@ struct QuestionRunnerView: View {
             // coming back to it after a breather teaches better (Rani).
             // Do NOT reveal the correct answer.
             feedbackForIndex[idx] = .wrong
-            afterThisFrame { handleWrong(q: q) }
+            SoundPlayer.shared.play(.wrongSoft)
+            Haptic.warning()
+            afterFeedbackSettles { handleWrong(q: q) }
             if !reAskQueue.contains(where: { $0.question.prompt == q.prompt }) {
                 reAskQueue.append((q, questionIndex + reAskSpacing))
             }
@@ -1525,14 +1541,13 @@ struct QuestionRunnerView: View {
         }
     }
 
-    private func handleCorrect(q: Question) {
-        SoundPlayer.shared.play(isSuperQuestion ? .correctBig : .correctSmall)
-        Haptic.success()
-        burstTrigger += 1
+    /// (The sound, haptic and sparkle already played in `pickOption`.)
+    private func handleCorrect(q: Question, answeredAt: Date = Date()) {
         correctInSession += 1
         consecutiveWrong = 0
 
-        let responseMs = questionShownAt.map { Date().timeIntervalSince($0) * 1000 } ?? 0
+        // Timed at the tap, not here — this runs a beat later (see afterFeedbackSettles).
+        let responseMs = questionShownAt.map { answeredAt.timeIntervalSince($0) * 1000 } ?? 0
         let ctx = ProgressStore.AnswerContext(
             topic: q.topic,
             combo: progress.currentStreak,
@@ -1697,9 +1712,8 @@ struct QuestionRunnerView: View {
         }
     }
 
+    /// (The sound and haptic already played in `pickOption`.)
     private func handleWrong(q: Question) {
-        SoundPlayer.shared.play(.wrongSoft)
-        Haptic.warning()
         consecutiveWrong += 1
         hadMistakeThisQuestion = true
         // No automatic help sheet any more: a wrong answer moves on after a
