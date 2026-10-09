@@ -135,6 +135,14 @@ final class ProgressVault {
         }
         // 2. Apply incoming snapshot
         let incoming = snapshot(for: profileID)
+        // 💰 `apply` merges the wallet counters with `max` — right for the SAME
+        // child (a cloud echo must never lower them), wrong for a DIFFERENT one:
+        // the previous child's minutes and gift pocket stayed live and became the
+        // new child's (Eli, 9.10: a brand-new אורית with 18 min + a 60-min gift).
+        // The outgoing child was saved above; start the incoming one from her own.
+        if !ProgressStore.shared.holdsData(for: profileID) {
+            ProgressStore.shared.resetWallets()
+        }
         ProgressStore.shared.apply(incoming)
         // 3. Bind — the store now holds THIS child's data, and says so. Every
         //    path that writes it out (vault save, cloud upload) checks this.

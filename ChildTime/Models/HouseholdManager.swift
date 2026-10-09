@@ -190,7 +190,7 @@ final class HouseholdManager: ObservableObject {
                                        "build": AppInfo.build], forKey: Self.failureKey)
         }
         bootstrapAttempts += 1
-        let delay = min(60.0, 3.0 * pow(2.0, Double(min(bootstrapAttempts - 1, 5))))
+        let delay = Self.retryDelay(attempt: bootstrapAttempts)
         bootstrapRetry?.cancel()
         bootstrapRetry = Task { [weak self] in
             try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
@@ -213,6 +213,16 @@ final class HouseholdManager: ObservableObject {
         TofyLink("bootstrap recovered after a failure: \(failure["error"] ?? "")")
         Task { try? await parentRef(uid).setData(["lastSyncRecovery": note], merge: true) }
     }
+
+    /// 3s, 6s, 12s, 24s, 48s, then every minute — never gives up.
+    static func retryDelay(attempt: Int) -> Double {
+        min(60.0, 3.0 * pow(2.0, Double(min(max(attempt, 1) - 1, 5))))
+    }
+
+    #if DEBUG
+    /// Tests: put the manager in / out of the "family load failed" state.
+    func setLinkProblemForTesting(_ message: String?) { cloudLinkProblem = message; connectionNotice = false }
+    #endif
 
     /// Back in the app, or the network returned: a parent still without the
     /// family tries again NOW instead of waiting for the next back-off step.

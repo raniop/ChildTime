@@ -154,15 +154,7 @@ struct ParentDashboardView: View {
             // device rolls them over only when it next plays — so a child who
             // didn't play today shows zeros here. Display only; the stored
             // snapshot is untouched.
-            if !DayGate.usedToday(snap.dailyEarnedDate) {
-                snap.answeredToday = 0
-                snap.correctToday = 0
-                snap.minutesEarnedToday = 0
-                snap.minutesUnlockedToday = 0
-                snap.returnedTodayMinutes = 0
-                snap.hourlyAnswered = nil
-                snap.hourlyCorrect = nil
-            }
+            snap = snap.todayCountersForDisplay()
             // Fold in any parent minute grant still in flight to the child's device,
             // so a +10/−5 shows immediately and doesn't appear to "revert".
             let adj = remote.pendingAdjustments[row.profile.id, default: 0]

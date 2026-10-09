@@ -520,3 +520,24 @@ extension ProgressSnapshot {
         return snap
     }
 }
+
+
+extension ProgressSnapshot {
+    /// 📅 The same snapshot with its "today" counters zeroed when they belong to
+    /// another day. The child's device rolls them over only when it next plays,
+    /// so a child who hasn't played today still carries yesterday's numbers —
+    /// and the parent read them as today's (Eli, 9.10). Display only.
+    func todayCountersForDisplay(now: Date = Date()) -> ProgressSnapshot {
+        let cal = Calendar.current
+        if let d = dailyEarnedDate, cal.startOfDay(for: d) >= cal.startOfDay(for: now) { return self }
+        var s = self
+        s.answeredToday = 0
+        s.correctToday = 0
+        s.minutesEarnedToday = 0
+        s.minutesUnlockedToday = 0
+        s.returnedTodayMinutes = 0
+        s.hourlyAnswered = nil
+        s.hourlyCorrect = nil
+        return s
+    }
+}
