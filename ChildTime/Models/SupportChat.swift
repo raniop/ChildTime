@@ -17,7 +17,9 @@ import FirebaseCore
 ///
 ///   supportChats/{householdID}               summary — written ONLY by the
 ///                                            `onSupportMessage` Cloud Function
-///   supportChats/{householdID}/messages/{id} { text, from, senderUID, senderName, at }
+///   supportChats/{householdID}/messages/{id} { text, from, senderUID, senderName, at, image? }
+///   `image` — a screenshot, JPEG as base64 right in the message (≤ ~600KB, so
+///   it fits a Firestore document; no separate file storage to set up).
 ///
 /// Parents never see who on the team answered: every team bubble on the parent
 /// side, and every parent push, says only "צוות טופי". The team's own inbox
@@ -45,16 +47,21 @@ struct SupportMessage: Identifiable, Equatable {
     /// nil only for a moment: our own write before the server stamps it.
     var at: Date?
     var pending: Bool = false
+    /// 📷 A screenshot the parent (or the team) attached — base64 JPEG.
+    var imageBase64: String? = nil
 
     #if canImport(FirebaseFirestore)
     init?(_ doc: DocumentSnapshot) {
         // `.estimate` so our own just-sent message has a time (and a place in
         // the order) before the server's timestamp comes back.
         guard let d = doc.data(with: .estimate),
-              let text = d["text"] as? String,
               let from = Sender(rawValue: d["from"] as? String ?? "") else { return nil }
+        let text = d["text"] as? String ?? ""
+        let image = d["image"] as? String
+        guard !text.isEmpty || image != nil else { return nil }
         id = doc.documentID
         self.text = text
+        imageBase64 = image
         self.from = from
         senderUID = d["senderUID"] as? String ?? ""
         senderName = d["senderName"] as? String ?? ""
@@ -214,9 +221,9 @@ final class SupportChatStore: ObservableObject {
     /// delivers later; the bubble shows at once (pending) either way.
     /// Returns false only when the server REJECTED it.
     @discardableResult
-    func send(_ raw: String, householdID: String, asTeam: Bool) async -> Bool {
+    func send(_ raw: String, householdID: String, asTeam: Bool, image: Data? = nil) async -> Bool {
         let text = String(raw.trimmingCharacters(in: .whitespacesAndNewlines).prefix(Self.textLimit))
-        guard !text.isEmpty, let uid = AuthManager.shared.userID else { return false }
+        guard !text.isEmpty || image != nil, let uid = AuthManager.shared.userID else { return false }
         var data: [String: Any] = [
             "text": text,
             "from": asTeam ? "team" : "parent",
@@ -224,6 +231,7 @@ final class SupportChatStore: ObservableObject {
             "at": FieldValue.serverTimestamp(),
         ]
         data["senderName"] = asTeam ? Self.teamSenderName : String((AuthManager.shared.displayName ?? "").prefix(80))
+        if let image { data["image"] = image.base64EncodedString() }
         let ref = messagesQuery(householdID: householdID).document()
         let outcome = await confirmedSet(ref, data)
         if outcome == .denied, !asTeam {
@@ -262,7 +270,7 @@ final class SupportChatStore: ObservableObject {
     func stop() {}
     func markParentRead(householdID: String) {}
     @discardableResult
-    func send(_ raw: String, householdID: String, asTeam: Bool) async -> Bool { false }
+    func send(_ raw: String, householdID: String, asTeam: Bool, image: Data? = nil) async -> Bool { false }
     #endif
 
     // MARK: - Reply straight from the notification (team)
@@ -341,5 +349,26 @@ final class SupportChatStore: ObservableObject {
                 wantsParentChat = true
             }
         }
+    }
+}
+
+/// 📷 A picked screenshot, made small enough to travel inside one message:
+/// the long side at most 1400pt, JPEG, stepping the quality down until it is
+/// under ~600KB (a Firestore document holds 1MB, base64 adds a third).
+enum SupportImage {
+    static let maxBytes = 450_000
+
+    static func prepare(_ data: Data) -> Data? {
+        guard let src = UIImage(data: data) else { return nil }
+        let longSide = max(src.size.width, src.size.height)
+        let scale = min(1, 1400 / max(1, longSide))
+        let size = CGSize(width: (src.size.width * scale).rounded(), height: (src.size.height * scale).rounded())
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1
+        let img = UIGraphicsImageRenderer(size: size, format: format).image { _ in src.draw(in: CGRect(origin: .zero, size: size)) }
+        for q in stride(from: 0.7, through: 0.25, by: -0.15) {
+            if let jpg = img.jpegData(compressionQuality: q), jpg.count <= maxBytes { return jpg }
+        }
+        return nil
     }
 }

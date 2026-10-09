@@ -360,11 +360,18 @@ service cloud.firestore {
         && (request.auth.token.email_verified == true
             || request.auth.token.firebase.sign_in_provider in ['google.com', 'apple.com']);
     }
+    // 📷 `image`: an optional screenshot, base64 JPEG inside the message
+    // (≤ 620,000 chars ≈ 450KB). A message is text, an image, or both.
     function supportMessageOK(from) {
-      return request.resource.data.keys().hasOnly(['text', 'from', 'senderUID', 'senderName', 'at'])
+      return request.resource.data.keys().hasOnly(['text', 'from', 'senderUID', 'senderName', 'at', 'image'])
         && request.resource.data.text is string
-        && request.resource.data.text.size() > 0
         && request.resource.data.text.size() <= 2000
+        && (request.resource.data.text.size() > 0
+            || ('image' in request.resource.data))
+        && (!('image' in request.resource.data)
+            || (request.resource.data.image is string
+                && request.resource.data.image.size() > 0
+                && request.resource.data.image.size() <= 620000))
         && request.resource.data.from == from
         && request.resource.data.senderUID == request.auth.uid
         && (!('senderName' in request.resource.data)

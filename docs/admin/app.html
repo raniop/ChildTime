@@ -201,7 +201,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261008104259";
+const PAGE_STAMP = "20261009122428";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -1115,7 +1115,7 @@ async function supportChat() {
 async function chatThread(hid, c) {
   let msgs = [];
   try { msgs = (await call("adminSupportThread", { householdID: hid })).messages || []; } catch (e) { $("chatThread").textContent = e.message; return; }
-  const bubble = (m) => { const team = m.from === "team"; return `<div style="display:flex;justify-content:${team ? "flex-start" : "flex-end"};margin:6px 0"><div style="max-width:80%;padding:8px 12px;border-radius:14px;white-space:pre-wrap;${team ? "background:rgba(255,255,255,.92);color:#2B2D42" : "background:linear-gradient(135deg,#FFD23F,#FFB84D);color:#3A2600"}"><div style="font-size:11px;opacity:.7">${esc(team ? (m.senderName || "צוות טופי") : (m.senderName || (c && c.parentName) || "הורה"))} · ${when(m.at)}</div>${esc(m.text)}</div></div>`; };
+  const bubble = (m) => { const team = m.from === "team"; return `<div style="display:flex;justify-content:${team ? "flex-start" : "flex-end"};margin:6px 0"><div style="max-width:80%;padding:8px 12px;border-radius:14px;white-space:pre-wrap;${team ? "background:rgba(255,255,255,.92);color:#2B2D42" : "background:linear-gradient(135deg,#FFD23F,#FFB84D);color:#3A2600"}"><div style="font-size:11px;opacity:.7">${esc(team ? (m.senderName || "צוות טופי") : (m.senderName || (c && c.parentName) || "הורה"))} · ${when(m.at)}</div>${m.image ? `<a href="data:image/jpeg;base64,${m.image}" target="_blank" rel="noopener"><img alt="צילום מסך" src="data:image/jpeg;base64,${m.image}" style="display:block;max-width:240px;max-height:360px;border-radius:12px;margin:4px 0;cursor:zoom-in"></a>` : ""}${esc(m.text)}</div></div>`; };
   $("chatThread").innerHTML = `<div class="card"><b>${esc((c && c.familyName) || "משפחה")}</b>${c && c.kidsSummary ? ` · <span class="m">${esc(c.kidsSummary)}</span>` : ""}<div id="chatMsgs" style="max-height:52vh;overflow:auto;margin-top:8px">${msgs.map(bubble).join("") || '<div class="empty">אין הודעות.</div>'}</div>
     <textarea id="chatReply" maxlength="2000" placeholder="תשובה מצוות טופי…"></textarea><div style="margin-top:6px"><button class="btn" id="chatSend">שלח</button></div></div>`;
   const box = $("chatMsgs"); box.scrollTop = box.scrollHeight;

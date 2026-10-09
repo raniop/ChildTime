@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import PhotosUI
 
 #if canImport(FirebaseFirestore)
 import FirebaseFirestore
@@ -158,6 +159,12 @@ struct SupportChatView: View {
     @State private var draft = ""
     @State private var sending = false
     @State private var failed = false
+    /// 📷 A screenshot picked for the next message (already shrunk to send).
+    @State private var pickedPhoto: PhotosPickerItem?
+    @State private var attachment: Data?
+    @State private var attachmentTooBig = false
+    /// A tapped image, shown full screen.
+    @State private var viewingImage: UIImage?
     @FocusState private var focused: Bool
 
     private var summary: SupportChatSummary? { store.teamChats.first { $0.id == householdID } }
@@ -195,7 +202,7 @@ struct SupportChatView: View {
     }
 
     private var canSend: Bool {
-        !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !sending
+        (!draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || attachment != nil) && !sending
     }
 
     var body: some View {
@@ -205,6 +212,9 @@ struct SupportChatView: View {
                 messageList
                 inputBar
             }
+        }
+        .fullScreenCover(isPresented: Binding(get: { viewingImage != nil }, set: { if !$0 { viewingImage = nil } })) {
+            if let viewingImage { SupportImageViewer(image: viewingImage) { self.viewingImage = nil } }
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
@@ -223,7 +233,23 @@ struct SupportChatView: View {
             // listener, must not mark the thread read and must not clear the
             // parent's notifications — it shows a fixed exchange and nothing
             // else happens.
-            guard !inertPreview else { model.seedPreview(Self.previewThread); return }
+            guard !inertPreview else {
+                #if DEBUG
+                // DEMO_SCREEN=supportchat — the thread with a screenshot in it.
+                if ProcessInfo.processInfo.environment["DEMO_SCREEN"] == "supportchat",
+                   let shot = ProcessInfo.processInfo.environment["DEMO_IMAGE"].flatMap(UIImage.init(contentsOfFile:))
+                        ?? Character2DImages.image("lion"),
+                   let jpg = SupportImage.prepare(shot.pngData() ?? Data()) {
+                    var thread = Self.previewThread
+                    thread.insert(SupportMessage(id: "p0", text: tr("זה מה שמופיע לי במסך"), from: .parent,
+                                                 at: Date().addingTimeInterval(-300)), at: thread.count)
+                    thread[thread.count - 1].imageBase64 = jpg.base64EncodedString()
+                    model.seedPreview(thread)
+                    return
+                }
+                #endif
+                model.seedPreview(Self.previewThread); return
+            }
             model.start(householdID: householdID)
             store.visibleHouseholdID = householdID
             if mode == .parent { store.markParentRead(householdID: householdID) }
@@ -279,7 +305,7 @@ struct SupportChatView: View {
                     ForEach(model.messages) { m in
                         let mine = (mode == .parent) == (m.from == .parent)
                         bubble(text: m.text, mine: mine, name: mine ? nil : nameLine(for: m),
-                               at: m.at, pending: m.pending)
+                               at: m.at, pending: m.pending, image: m.imageBase64)
                             .id(m.id)
                     }
                     Color.clear.frame(height: 1).id("bottom")
@@ -326,7 +352,7 @@ struct SupportChatView: View {
     }
 
     @ViewBuilder
-    private func bubble(text: String, mine: Bool, name: String?, at: Date?, pending: Bool) -> some View {
+    private func bubble(text: String, mine: Bool, name: String?, at: Date?, pending: Bool, image: String? = nil) -> some View {
         HStack(alignment: .bottom, spacing: 0) {
             if mine { Spacer(minLength: 48) }
             VStack(alignment: mine ? .trailing : .leading, spacing: 3) {
@@ -336,6 +362,24 @@ struct SupportChatView: View {
                         .foregroundStyle(GlassInk.secondary)
                         .padding(.horizontal, 6)
                 }
+                if let image, let ui = SupportImageCache.image(image) {
+                    Button { viewingImage = ui } label: {
+                        // The frame IS the picture's own shape — a fixed box left an
+                        // empty bordered band beside a tall screenshot.
+                        let aspect = ui.size.width / max(1, ui.size.height)
+                        let h = min(320, 220 / max(0.01, aspect))
+                        Image(uiImage: ui)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: h * aspect, height: h)
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.6), lineWidth: 1))
+                            .shadow(color: .black.opacity(0.14), radius: 5, y: 2)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(tr("צילום מסך"))
+                }
+                if !text.isEmpty {
                 Text(text)
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundStyle(mine ? Color(hex: "3A2600") : AppColor.textOnLight)
@@ -348,6 +392,7 @@ struct SupportChatView: View {
                             .fill(mine ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(Color.white.opacity(0.93)))
                     )
                     .shadow(color: .black.opacity(0.14), radius: 5, y: 2)
+                }
                 if let at {
                     HStack(spacing: 4) {
                         if pending { Image(systemName: "clock").font(.system(size: 9, weight: .bold)) }
@@ -381,7 +426,55 @@ struct SupportChatView: View {
                     .font(.system(size: 12.5, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.warn)
             }
+            if attachmentTooBig {
+                Text(tr("התמונה גדולה מדי — נסו צילום מסך אחר"))
+                    .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+                    .foregroundStyle(GlassInk.warn)
+            }
+            if let attachment, let ui = UIImage(data: attachment) {
+                HStack {
+                    ZStack(alignment: .topTrailing) {
+                        Image(uiImage: ui)
+                            .resizable().scaledToFill()
+                            .frame(width: 64, height: 64)
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        Button {
+                            self.attachment = nil; pickedPhoto = nil
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 10, weight: .heavy))
+                                .foregroundStyle(.white)
+                                .frame(width: 22, height: 22)
+                                .background(Circle().fill(.black.opacity(0.6)))
+                        }
+                        .buttonStyle(.plain)
+                        .offset(x: 6, y: -6)
+                        .accessibilityLabel(tr("הסרת התמונה"))
+                    }
+                    Spacer()
+                }
+            }
             HStack(alignment: .bottom, spacing: 10) {
+                // 📷 A screenshot from the photos — "שלחו לנו צילום מסך" had no way
+                // to be done from inside the chat (Rani).
+                PhotosPicker(selection: $pickedPhoto, matching: .images, photoLibrary: .shared()) {
+                    Image(systemName: "photo.badge.plus")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .glassPane(radius: 16, strength: 0.18, shadow: false)
+                }
+                .accessibilityLabel(tr("צירוף צילום מסך"))
+                .onChangeCompat(of: pickedPhoto) { _, item in
+                    guard let item else { return }
+                    Task {
+                        let raw = try? await item.loadTransferable(type: Data.self)
+                        let ready = raw.flatMap(SupportImage.prepare)
+                        attachment = ready
+                        attachmentTooBig = raw != nil && ready == nil
+                        if failed { failed = false }
+                    }
+                }
                 TextField(tr("כתבו הודעה…"), text: $draft, axis: .vertical)
                     .lineLimit(1...5)
                     .focused($focused)
@@ -423,18 +516,21 @@ struct SupportChatView: View {
 
     private func send() {
         let text = draft
+        let image = attachment
         guard canSend else { return }
         sending = true
         failed = false
         draft = ""
+        attachment = nil; pickedPhoto = nil
         Haptic.light()
         Task {
-            let ok = await store.send(text, householdID: householdID, asTeam: mode == .team)
+            let ok = await store.send(text, householdID: householdID, asTeam: mode == .team, image: image)
             sending = false
             if !ok {
-                // Nothing is lost: the text goes back into the field.
+                // Nothing is lost: the text and the picture go back.
                 failed = true
                 if draft.isEmpty { draft = text }
+                if attachment == nil { attachment = image }
             }
         }
     }
@@ -539,5 +635,41 @@ struct SupportInboxView: View {
         f.locale = LanguageStore.shared.current.locale
         f.unitsStyle = .short
         return f.localizedString(for: date, relativeTo: Date())
+    }
+}
+
+/// Decoded screenshots, so a chat re-render doesn't decode base64 again.
+enum SupportImageCache {
+    private static let cache = NSCache<NSString, UIImage>()
+    static func image(_ base64: String) -> UIImage? {
+        let key = String(base64.prefix(64) + base64.suffix(64) + "\(base64.count)") as NSString
+        if let hit = cache.object(forKey: key) { return hit }
+        guard let data = Data(base64Encoded: base64), let img = UIImage(data: data) else { return nil }
+        cache.setObject(img, forKey: key)
+        return img
+    }
+}
+
+/// A tapped screenshot, full screen; tap anywhere to close.
+struct SupportImageViewer: View {
+    let image: UIImage
+    let onClose: () -> Void
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            Image(uiImage: image).resizable().scaledToFit().padding()
+        }
+        .onTapGesture(perform: onClose)
+        .overlay(alignment: .topLeading) {
+            Button(action: onClose) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 40, height: 40)
+                    .background(Circle().fill(.white.opacity(0.2)))
+            }
+            .padding()
+            .accessibilityLabel(tr("סגירה"))
+        }
     }
 }

@@ -49856,6 +49856,28 @@
         }
       }
     },
+    "הסרת התמונה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إزالة الصورة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove the picture"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Убрать изображение"
+          }
+        }
+      }
+    },
     "הסתברות" : {
       "localizations" : {
         "ar" : {
@@ -51862,6 +51884,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Постоянство"
+          }
+        }
+      }
+    },
+    "התמונה גדולה מדי — נסו צילום מסך אחר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الصورة كبيرة جدًا — جرّبوا لقطة شاشة أخرى"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That picture is too large — try another screenshot"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изображение слишком большое — попробуйте другой снимок экрана"
           }
         }
       }
@@ -54148,6 +54192,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вот что iOS получила от нас прямо сейчас."
+          }
+        }
+      }
+    },
+    "זה מה שמופיע לי במסך" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا ما يظهر على شاشتي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is what I see on the screen"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вот что у меня на экране"
           }
         }
       }
@@ -104755,6 +104821,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Оценка уверенности по темам"
+          }
+        }
+      }
+    },
+    "צילום מסך" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لقطة شاشة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screenshot"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Снимок экрана"
+          }
+        }
+      }
+    },
+    "צירוף צילום מסך" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إرفاق لقطة شاشة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attach a screenshot"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прикрепить снимок экрана"
           }
         }
       }

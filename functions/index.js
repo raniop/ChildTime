@@ -5792,7 +5792,10 @@ exports.onSupportMessage = onDocumentCreated(
   async (event) => {
     const hid = event.params.hid;
     const msg = (event.data && event.data.data()) || {};
-    const text = String(msg.text || "").trim().slice(0, SUPPORT_TEXT_MAX);
+    // 📷 A screenshot with no words still notifies, as "📷 צילום מסך".
+    const hasImage = typeof msg.image === "string" && msg.image.length > 0;
+    const typed = String(msg.text || "").trim().slice(0, SUPPORT_TEXT_MAX);
+    const text = typed || (hasImage ? "📷 צילום מסך" : "");
     if (!text) return;
     const chatRef = db.collection("supportChats").doc(hid);
     const FV = admin.firestore.FieldValue;
@@ -5902,7 +5905,8 @@ exports.adminSupportThread = onCall({ timeoutSeconds: 30, memory: "256MiB" }, as
   return {
     messages: snap.docs.map((d) => {
       const m = d.data() || {};
-      return { id: d.id, text: m.text || "", from: m.from || "", senderName: m.senderName || "", at: supportTs(m.at) };
+      return { id: d.id, text: m.text || "", from: m.from || "", senderName: m.senderName || "", at: supportTs(m.at),
+               image: typeof m.image === "string" ? m.image : "" };
     }),
   };
 });
