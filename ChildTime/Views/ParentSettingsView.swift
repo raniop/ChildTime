@@ -45,7 +45,7 @@ struct ParentSettingsView: View {
             .alert(tr("לא נמחק"), isPresented: $deleteFailed) {
                 Button(tr("הבנתי"), role: .cancel) {}
             } message: {
-                Text(tr("אין כרגע חיבור, אז לא מחקנו כלום — לא בענן ולא בחשבון. נסו שוב כשיש אינטרנט."))
+                Text(tr("לא הצלחנו לסיים את המחיקה כי אין כרגע חיבור יציב. החשבון לא נמחק — נסו שוב כשיש אינטרנט."))
             }
             .familyConnectionAlert()
     }

@@ -22491,28 +22491,6 @@
         }
       }
     },
-    "אין כרגע חיבור, אז לא מחקנו כלום — לא בענן ולא בחשבון. נסו שוב כשיש אינטרנט." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لا يوجد اتصال حاليًا، لذا لم يُحذف شيء — لا في السحابة ولا الحساب. حاولوا مرة أخرى عند توفر الإنترنت."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "There's no connection right now, so nothing was deleted — not in the cloud and not the account. Try again when you're online."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сейчас нет подключения, поэтому ничего не удалено — ни в облаке, ни аккаунт. Попробуйте снова, когда будет интернет."
-          }
-        }
-      }
-    },
     "אין כרגע מכשיר מחבר ל%@ — החלון יפתח ברגע שהמכשיר יתחבר." : {
       "localizations" : {
         "ar" : {
@@ -75865,6 +75843,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сейчас не удалось создать семью. Проверьте подключение и попробуйте снова."
+          }
+        }
+      }
+    },
+    "לא הצלחנו לסיים את המחיקה כי אין כרגע חיבור יציב. החשבון לא נמחק — נסו שוב כשיש אינטרנט." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم نتمكن من إكمال الحذف لعدم وجود اتصال مستقر حاليًا. لم يُحذف الحساب — حاولوا مرة أخرى عند توفر الإنترنت."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We couldn't finish deleting because there's no stable connection right now. Your account was not deleted — try again when you're online."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось завершить удаление: сейчас нет стабильного подключения. Аккаунт не удалён — попробуйте снова, когда будет интернет."
           }
         }
       }

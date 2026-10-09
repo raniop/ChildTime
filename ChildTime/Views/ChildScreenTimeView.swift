@@ -82,7 +82,7 @@ struct ChildScreenTimeView: View {
                 // 🎚 The one way out lives in the rail on a foldable.
                 if !railHost.hasRail {
                     ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) {
-                        Button(tr("סיום")) { save(); dismiss() }
+                        Button(tr("סיום")) { if save() { dismiss() } }
                     }
                 }
                 ToolbarItemGroup(placement: .keyboard) {
@@ -94,11 +94,11 @@ struct ChildScreenTimeView: View {
         // 🎚 Outside the NavigationStack and outside the readable-width cap —
         // otherwise the rail is drawn at the edge of the 600pt column instead
         // of the edge of the glass.
-        .railDismiss(tr("סיום"), systemImage: "checkmark") { save(); dismiss() }
+        .railDismiss(tr("סיום"), systemImage: "checkmark") { if save() { dismiss() } }
         .onAppear { loadIfNeeded() }
         // Persist when the sheet closes (covers both typed and stepped values)
         // — keeps Firestore writes to one per edit session, not one per keystroke.
-        .onDisappear { save() }
+        .onDisappear { _ = save() }
         .onChangeCompat(of: limited) { _, on in if on && minutes < Self.minMinutes { minutes = 60 } }
     }
 
@@ -148,8 +148,11 @@ struct ChildScreenTimeView: View {
         }
     }
 
-    private func save() {
-        guard var p = profile else { return }
+    /// False only when the family isn't loaded and the edit was refused — "סיום"
+    /// then keeps the sheet open (its alert explains) instead of losing it.
+    @discardableResult
+    private func save() -> Bool {
+        guard var p = profile else { return true }
         let value = limited ? clamped(minutes) : 0
         // If this child was INHERITING the global cap (dailyCapMinutes == nil)
         // and the shown value still equals that inherited value, don't write —
@@ -157,11 +160,12 @@ struct ChildScreenTimeView: View {
         // per-child override and future global changes stopped affecting them.
         if p.dailyCapMinutes == nil {
             let inherited = settings.dailyCapEnabled ? settings.maxMinutesPerDay : 0
-            if value == inherited { return }
+            if value == inherited { return true }
         }
-        guard p.dailyCapMinutes != value else { return }
+        guard p.dailyCapMinutes != value else { return true }
         p.dailyCapMinutes = value
-        profiles.parentEdit(p)
+        guard profiles.parentEdit(p) else { return false }
         Haptic.light()
+        return true
     }
 }

@@ -84,15 +84,15 @@ struct QuietHoursEditorView: View {
             .toolbar {
                 if !railHost.hasRail {
                     ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) {
-                        Button(tr("סיום")) { save(); dismiss() }
+                        Button(tr("סיום")) { if save() { dismiss() } }
                     }
                 }
             }
         }
-        .railDismiss(tr("סיום"), systemImage: "checkmark") { save(); dismiss() }
+        .railDismiss(tr("סיום"), systemImage: "checkmark") { if save() { dismiss() } }
         .onAppear { load() }
         // One write per editing session, not one per wheel tick.
-        .onDisappear { save() }
+        .onDisappear { _ = save() }
     }
 
     // MARK: - Pieces
@@ -144,8 +144,11 @@ struct QuietHoursEditorView: View {
         paused = q.schoolPaused == true
     }
 
-    private func save() {
-        guard loaded, var fresh = profile else { return }
+    /// False only when the family isn't loaded and the edit was refused — "סיום"
+    /// then keeps the sheet open (its alert explains) instead of losing it.
+    @discardableResult
+    private func save() -> Bool {
+        guard loaded, var fresh = profile else { return true }
         var q = fresh.quietHours ?? QuietHours()
         var w = window
         // The child doc is MERGE-written, nested maps included: a value is cleared
@@ -161,10 +164,10 @@ struct QuietHoursEditorView: View {
             q.bedtime = w
         }
         // Never written before and still off → leave the profile untouched.
-        if fresh.quietHours == nil, q.isEmpty, !offToday, !paused { return }
-        guard q != fresh.quietHours else { return }
+        if fresh.quietHours == nil, q.isEmpty, !offToday, !paused { return true }
+        guard q != fresh.quietHours else { return true }
         fresh.quietHours = q
-        profiles.parentEdit(fresh)
+        return profiles.parentEdit(fresh)
     }
 }
 

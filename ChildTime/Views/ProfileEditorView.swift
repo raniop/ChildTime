@@ -783,7 +783,9 @@ struct ProfileEditorView: View {
         }
         // 🔌 Editing an existing child while the family isn't loaded: stay on
         // the editor (the sheet's alert explains) — closing it lost the edit.
-        if case .edit = mode, HouseholdManager.shared.refuseIfDisconnected() { return }
+        // Never in Kid Mode: that's the CHILD editing her own avatar, a local edit.
+        if case .edit = mode, !KidModeManager.shared.active,
+           HouseholdManager.shared.refuseIfDisconnected() { return }
         Haptic.success()
         SoundPlayer.shared.play(.companionCheer)
         onSave(p)

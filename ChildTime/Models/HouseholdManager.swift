@@ -937,7 +937,10 @@ final class HouseholdManager: ObservableObject {
         let id = childID.uuidString
         return snap.documents.contains { doc in
             let d = doc.data()
+            // THIS phone's own Kid Mode row is not "her own device" — this phone
+            // is the one asking, and it is exactly where she plays.
             return (d["childID"] as? String) == id
+                && (d["deviceID"] as? String) != DeviceIdentity.installID
                 && (d["role"] as? String) != "parent"
                 && (d["removed"] as? Bool) != true
         }
@@ -1058,6 +1061,10 @@ final class HouseholdManager: ObservableObject {
     }
 
     private var timeStateCancellables = Set<AnyCancellable>()
+    /// A child device, or a parent's phone while Kid Mode is on.
+    private static var reportsTimeState: Bool {
+        ParentSettings.shared.deviceRole == .child || KidModeManager.shared.active
+    }
 
     /// CHILD device: keep this device's `childDevices` doc updated with the ACTUAL
     /// play-window state (open window end / frozen minutes), so the parent dashboard
@@ -1086,7 +1093,7 @@ final class HouseholdManager: ObservableObject {
 
     private func reportTimeState(childID: UUID) {
         #if canImport(FirebaseFirestore)
-        guard let hh = household else { return }
+        guard Self.reportsTimeState, let hh = household else { return }
         let docID = "\(childID.uuidString)_\(DeviceIdentity.installID)"
         let p = ProgressStore.shared
         // Always carry childID/householdID: a merge onto a row that doesn't exist
@@ -1109,6 +1116,11 @@ final class HouseholdManager: ObservableObject {
         // meant the button never appeared and nobody knew ([[command-delivery-certainty]]).
         let ref = db.collection("childDevices").document(docID)
         Task {
+            // Leaving Kid Mode zeroes the play state, which fires this report —
+            // and the write landed AFTER exit() deleted the Kid Mode row,
+            // bringing it back for good (the parent phone then looked like the
+            // child's own device). Checked again when the write actually runs.
+            guard Self.reportsTimeState else { return }
             var outcome = await confirmedMerge(ref, data)
             if outcome == .denied {
                 await self.reassertMembership()
@@ -2368,10 +2380,17 @@ final class HouseholdManager: ObservableObject {
         // Reach the server first — offline, deletes queue forever and the
         // account would be deleted with the family still up there. Its FRESH
         // childIDs, not the cached ones: a child removed meanwhile is gone.
-        let probe: DocumentSnapshot
+        // A household ALREADY deleted by a run that was cut off is "denied", not
+        // "missing" (its read rule needs the doc) — that used to block every
+        // retry until a relaunch. Denied → it's gone: finish the rest.
+        var familyGone = false
+        var probe: DocumentSnapshot?
         do { probe = try await hhRef.getDocument(source: .server) }
-        catch { TofyLink("deleteAllData: server unreachable — refusing"); return false }
-        let childIDs = (probe.data()?["childIDs"] as? [String]) ?? (probe.exists ? [] : hh.childIDs)
+        catch let e as NSError where e.domain == FirestoreErrorDomain && e.code == FirestoreErrorCode.permissionDenied.rawValue {
+            familyGone = true
+        } catch { TofyLink("deleteAllData: server unreachable — refusing"); return false }
+        if probe?.exists == false { familyGone = true }
+        let childIDs = familyGone ? hh.childIDs : ((probe?.data()?["childIDs"] as? [String]) ?? [])
         do {
             for childID in childIDs {
                 let childRef = db.collection("children").document(childID)
@@ -2388,7 +2407,7 @@ final class HouseholdManager: ObservableObject {
                     child = nil
                 }
                 guard let child, child.exists, (child.data()?["householdID"] as? String) == hh.id else {
-                    if probe.exists { _ = try? await hhRef.updateData(["childIDs": FieldValue.arrayRemove([childID])]) }
+                    if !familyGone { _ = try? await hhRef.updateData(["childIDs": FieldValue.arrayRemove([childID])]) }
                     continue
                 }
                 try? await childRef.collection("state").document("current").delete()
@@ -2410,12 +2429,12 @@ final class HouseholdManager: ObservableObject {
                     .whereField("childID", isEqualTo: childID).getDocuments()
                 for d in devs?.documents ?? [] { try? await d.reference.delete() }
                 try await childRef.delete()
-                if probe.exists { _ = try? await hhRef.updateData(["childIDs": FieldValue.arrayRemove([childID])]) }
+                if !familyGone { _ = try? await hhRef.updateData(["childIDs": FieldValue.arrayRemove([childID])]) }
             }
             // Family chores + earnings ledger.
             try? await deleteSubcollection("households/\(hh.id)/chores")
             try? await deleteSubcollection("households/\(hh.id)/choreStats")
-            if probe.exists { try await hhRef.delete() }
+            if !familyGone { try await hhRef.delete() }
             try? await parentRef(uid).delete()
             return true
         } catch {

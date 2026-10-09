@@ -484,7 +484,8 @@ final class RemoteSyncManager: ObservableObject {
             // the live numbers and must be the one to wipe them.
             // Only when the SERVER says she has no device — an unknown answer
             // (offline) would take the wipe away from a real device.
-            if await HouseholdManager.shared.childHasOwnDevice(childID) == false {
+            if await HouseholdManager.shared.childHasOwnDevice(childID) == false,
+               self.isActive {   // not signed out while we asked
                 self.applyPendingReset(childID: childID)
             }
         }

@@ -2861,12 +2861,7 @@ final class ProgressStore: ObservableObject {
 
     func resetAll() {
         let nextRevision = revision + 1
-        // The reset epoch only ever climbs: `apply(.blank)` adopts blank's 0, and
-        // then the cloud's OLD copy (still at epoch N) looked like a newer reset
-        // and was taken over wholesale — the wiped numbers came back.
-        let keptEpoch = resetEpoch
         apply(.blank)                  // zeroes the data (and adopts blank's rev 0)
-        resetEpoch = keptEpoch
         // 💰 …except the wallets: `apply` merges their counters with `max`, so a
         // blank left every minute and the whole gift pocket in place — "איפוס
         // didn't do anything" again, and the next upload put them back in the

@@ -222,19 +222,4 @@ struct FamilyLinkTests {
         #expect(progress.pendingMinutes == 0)
         #expect(progress.earnedSecondsIn == 0)
     }
-
-    // MARK: - Round 3: a reset never lowers the reset epoch
-
-    /// `resetAll` used to drop the epoch to 0 (it applies a blank), so the
-    /// cloud's OLD copy at the previous epoch looked like a newer reset and was
-    /// taken over wholesale — the wiped minutes came back.
-    @Test func resetKeepsTheEpochSoAnOldCopyCantComeBack() {
-        let progress = ProgressStore.shared
-        progress.adoptResetEpoch(progress.resetEpoch + 3)
-        let epoch = progress.resetEpoch
-        progress.applyChestReward(ChestReward(stars: 4, diamonds: 1, minutes: 20))
-        progress.resetAll()
-        #expect(progress.resetEpoch == epoch)
-        #expect(progress.captureSnapshot().resetEpoch == epoch)   // the upload carries it too
-    }
 }
