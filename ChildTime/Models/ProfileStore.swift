@@ -110,9 +110,15 @@ final class ProfileStore: ObservableObject {
     func add(_ profile: Profile) {
         guard canAddMore else { return }
         createdHereIDs.insert(profile.id.uuidString)
+        // 🧒 A new child starts at ZERO. Eli's new אורית (9.10) arrived in the
+        // cloud at revision 760 with 18 minutes + a 60-minute gift — the phone's
+        // previous live numbers. Seed her vault slot blank first…
+        ProgressVault.shared.write(.blank, for: profile.id)
         profiles.append(profile)
-        // If this is the first profile, make it active automatically.
-        if activeID == nil { activeID = profile.id }
+        // …and when she becomes the active one, go through the vault switch
+        // (save the outgoing child, load her blank state, bind) — never a bare
+        // `activeID =` with someone else's numbers still live in the store.
+        if activeID == nil { setActive(profile) }
         HouseholdManager.shared.upsertChild(profile)
     }
 

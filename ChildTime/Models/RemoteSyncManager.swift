@@ -468,6 +468,15 @@ final class RemoteSyncManager: ObservableObject {
                     self.remoteSnapshots[childID] = prev
                 }
                 self.commandFailed.insert(childID)
+                return
+            }
+            // 👨‍👧 No device of the child's own — she plays in Kid Mode on THIS
+            // phone, so nobody else will ever consume the command (Eli, 9.10:
+            // "לחצתי איפוס וזה לא עשה כלום"). This phone is her play device:
+            // consume it here. Never when she has a device: that device holds
+            // the live numbers and must be the one to wipe them.
+            if (HouseholdManager.shared.devicesByChild[childID.uuidString] ?? []).isEmpty {
+                self.applyPendingReset(childID: childID)
             }
         }
         #endif

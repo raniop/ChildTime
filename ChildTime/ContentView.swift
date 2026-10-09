@@ -172,6 +172,12 @@ struct ContentView: View {
             // name, with the parental consent on the same screen (it used to be
             // a separate privacy screen in front of this one).
             FamilyChoiceView()
+        } else if household.household == nil, profiles.profiles.isEmpty,
+                  household.isLoading || household.familyLinkBroken {
+            // 🔌 Signed in, the family still on its way (or its load failed):
+            // nothing true to show yet. The empty dashboard here invited a
+            // "צרו ילד/ה" that duplicated the family's real child (Eli, 9.10).
+            FamilyConnectingView()
         } else if !settings.hasConsented, household.household != nil {
             // A parent who reached a family another way (co-parent join, email
             // invite) still gives the parental consent once.

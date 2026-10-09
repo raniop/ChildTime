@@ -161,7 +161,7 @@ struct ChildSettingsView: View {
             if !devices.isEmpty {
                 row("🗑️", tr("לאפשר מחיקת אפליקציות (5 דק')"), chevron: false) { allowAppRemoval(p) }
             }
-            if let onLocation {
+            if let onLocation, !devices.isEmpty {   // 📍 nothing to locate without a device
                 row("📍", tr("איפה \(p.name)"), value: tr("מפה, מקומות וצפצוף לטלפון")) { onLocation() }
             }
         } header: {
@@ -316,6 +316,32 @@ struct ChildSettingsView: View {
         }
         .readableColumn()
         .glassForm()
+        // ⚠️ The confirmations live on THIS page, beside their rows. Attached to
+        // the settings root underneath, the alert never came up from here —
+        // "איפוס" did nothing at all (Eli, 9.10).
+        .alert(tr("לאפס את ההתקדמות של \(p.name)?"), isPresented: $confirmReset) {
+                Button(tr("אפס דקות + ניקוד"), role: .destructive) { onResetProgress(p) }
+                Button(tr("בטל"), role: .cancel) {}
+            } message: {
+                Text(tr("פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן ועונש טעויות. לא יימחקו שמות, פרופילים או פריטי קוסמטיקה."))
+            }
+        .alert(tr("לאפס את קוד הגנת הזמן של \(p.name)?"), isPresented: $confirmPinReset) {
+                Button(tr("אפס קוד"), role: .destructive) {
+                    var updated = p
+                    // "" (not nil) — deliberate-clear sentinel; survives sync merges.
+                    updated.playPIN = ""
+                    profiles.update(updated)
+                }
+                Button(tr("בטל"), role: .cancel) {}
+            } message: {
+                Text(tr("הקוד שהילד הגדיר לפתיחת זמן משחק יימחק. הילד יוכל להגדיר קוד חדש מהמכשיר שלו. שימושי כשהקוד נשכח."))
+            }
+        .alert(tr("למחוק את \(p.name)?"), isPresented: $confirmDelete) {
+                Button(tr("מחיקת ילד/ה"), role: .destructive) { onDelete(p) }
+                Button(tr("בטל"), role: .cancel) {}
+            } message: {
+                Text(tr("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק."))
+            }
         .navigationTitle(tr("עוד הגדרות"))
         .navigationBarTitleDisplayMode(.inline)
         .environment(\.layoutDirection, .app)
@@ -470,29 +496,6 @@ struct ChildSettingsView: View {
 
     private func dialogs<V: View>(_ content: V, _ p: Profile) -> some View {
         content
-            .alert(tr("לאפס את ההתקדמות של \(p.name)?"), isPresented: $confirmReset) {
-                Button(tr("אפס דקות + ניקוד"), role: .destructive) { onResetProgress(p) }
-                Button(tr("בטל"), role: .cancel) {}
-            } message: {
-                Text(tr("פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן ועונש טעויות. לא יימחקו שמות, פרופילים או פריטי קוסמטיקה."))
-            }
-            .alert(tr("לאפס את קוד הגנת הזמן של \(p.name)?"), isPresented: $confirmPinReset) {
-                Button(tr("אפס קוד"), role: .destructive) {
-                    var updated = p
-                    // "" (not nil) — deliberate-clear sentinel; survives sync merges.
-                    updated.playPIN = ""
-                    profiles.update(updated)
-                }
-                Button(tr("בטל"), role: .cancel) {}
-            } message: {
-                Text(tr("הקוד שהילד הגדיר לפתיחת זמן משחק יימחק. הילד יוכל להגדיר קוד חדש מהמכשיר שלו. שימושי כשהקוד נשכח."))
-            }
-            .alert(tr("למחוק את \(p.name)?"), isPresented: $confirmDelete) {
-                Button(tr("מחיקת ילד/ה"), role: .destructive) { onDelete(p) }
-                Button(tr("בטל"), role: .cancel) {}
-            } message: {
-                Text(tr("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק."))
-            }
             .alert(tr("שליטה מרחוק"), isPresented: Binding(
                 get: { remoteNote != nil },
                 set: { if !$0 { remoteNote = nil } })) {

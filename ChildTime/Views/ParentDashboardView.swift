@@ -149,6 +149,20 @@ struct ParentDashboardView: View {
         let locals = ProgressVault.shared.allSnapshots(for: profiles.profiles)
         let mapped: [(profile: Profile, snapshot: ProgressSnapshot)] = locals.map { row in
             var snap = remote.remoteSnapshots[row.profile.id] ?? row.snapshot
+            // 📅 "Today" counters from ANOTHER day read as today's (Eli, 9.10: "5
+            // שאלות היום" from the 6th, for a child who hadn't played). The child's
+            // device rolls them over only when it next plays — so a child who
+            // didn't play today shows zeros here. Display only; the stored
+            // snapshot is untouched.
+            if !DayGate.usedToday(snap.dailyEarnedDate) {
+                snap.answeredToday = 0
+                snap.correctToday = 0
+                snap.minutesEarnedToday = 0
+                snap.minutesUnlockedToday = 0
+                snap.returnedTodayMinutes = 0
+                snap.hourlyAnswered = nil
+                snap.hourlyCorrect = nil
+            }
             // Fold in any parent minute grant still in flight to the child's device,
             // so a +10/−5 shows immediately and doesn't appear to "revert".
             let adj = remote.pendingAdjustments[row.profile.id, default: 0]
@@ -286,9 +300,11 @@ struct ParentDashboardView: View {
                 if !WhatsNewStories.parentStoryForThisVersion.isEmpty {
                     storyRing.frame(width: 46, height: 46)
                 }
-                SideRailButton(systemImage: "person.badge.plus", label: tr("＋ צרו ילד/ה")) { showingCreateChild = true }
+                SideRailButton(systemImage: "person.badge.plus", label: tr("＋ צרו ילד/ה")) { if !household.refuseIfDisconnected() { showingCreateChild = true } }
                 SideRailButton(emoji: "🧹", label: tr("🧹 מטלות")) { openChores() }
-                SideRailButton(emoji: "📍", label: tr("📍 מיקום")) { showingLocation = true }
+                if familyHasChildDevice {
+                    SideRailButton(emoji: "📍", label: tr("📍 מיקום")) { showingLocation = true }
+                }
                 if !rows.isEmpty {
                     SideRailDivider()
                     ScrollView {
@@ -401,6 +417,18 @@ struct ParentDashboardView: View {
     }
 
     private var dashboardStack: some View {
+        dashboardStackBody
+            // 🔌 A blocked action (new child, family name, chat) while the family
+            // isn't loaded — the honest answer instead of a dead tap.
+            .alert(tr("מתחברים למשפחה…"), isPresented: $household.connectionNotice) {
+                Button(tr("נסו שוב")) { household.retryFamilyLoadIfNeeded() }
+                Button(tr("הבנתי"), role: .cancel) {}
+            } message: {
+                Text(tr("הטלפון עדיין לא מחובר למשפחה, אז אי אפשר לעשות את זה כרגע. בדקו שיש אינטרנט — אנחנו מנסים להתחבר שוב לבד."))
+            }
+    }
+
+    private var dashboardStackBody: some View {
         NavigationStack(path: $navPath) {
             ZStack {
                 // A real, branded control center — vibrant, not a grey list.
@@ -1157,6 +1185,7 @@ struct ParentDashboardView: View {
     private var linkButton: some View {
         Button {
             Haptic.light()
+            guard !household.refuseIfDisconnected() else { return }
             showingCreateChild = true
         } label: {
             HStack(spacing: 10) {
@@ -1547,6 +1576,12 @@ struct ParentDashboardView: View {
     /// Right under the greeting (Rani: "תן לילד לשחק / צור ילד / מטלות — איפה?"):
     /// the three things a parent does that aren't about one child's card.
     /// A family with a child's own device, nobody sharing yet, card not closed.
+    /// Any child in the family with a device of their own — the only case
+    /// where location means anything.
+    private var familyHasChildDevice: Bool {
+        profiles.profiles.contains { childHasDevice($0) }
+    }
+
     private var showsLocationIntro: Bool {
         !locationIntroDismissed && rows.contains { childHasDevice($0.profile) }
             && !rows.contains { location.sharing[$0.profile.id.uuidString] == true }
@@ -1590,7 +1625,7 @@ struct ParentDashboardView: View {
 
     private var homeActionsRow: some View {
         HStack(spacing: 8) {
-            Button { Haptic.light(); showingCreateChild = true } label: { homeGhostLabel(tr("＋ צרו ילד/ה")).frame(maxWidth: .infinity) }
+            Button { Haptic.light(); if !household.refuseIfDisconnected() { showingCreateChild = true } } label: { homeGhostLabel(tr("＋ צרו ילד/ה")).frame(maxWidth: .infinity) }
                 .buttonStyle(.plain)
                 .coachMark("p.newChild")
             // "תנו לילד לשחק" moved into each child's ⚡ menu (Rani, 2026-09-07):
@@ -1605,9 +1640,13 @@ struct ParentDashboardView: View {
             } label: { homeGhostLabel(tr("🧹 מטלות")).frame(maxWidth: .infinity) }
                 .buttonStyle(.plain)
                 .coachMark("p.chores")
-            // 📍 Where the children are — map, places, beep.
-            Button { Haptic.light(); showingLocation = true } label: { homeGhostLabel(tr("📍 מיקום")).frame(maxWidth: .infinity) }
-                .buttonStyle(.plain)
+            // 📍 Where the children are — map, places, beep. Only once a child
+            // has a phone of their own: with none, there is nothing to locate
+            // (Rani, 9.10 — Eli's daughter plays on his phone).
+            if familyHasChildDevice {
+                Button { Haptic.light(); showingLocation = true } label: { homeGhostLabel(tr("📍 מיקום")).frame(maxWidth: .infinity) }
+                    .buttonStyle(.plain)
+            }
             // 📱 "🧒 מצב ילד" lived here until every child's card got its own
             // "תנו ל… לשחק כאן" — the same thing, already aimed at the right
             // child. Rani: "הכפתור מצב ילד למעלה אפשר להסיר, לא צריך אותו יותר".
@@ -1646,6 +1685,11 @@ struct ParentDashboardView: View {
 
     /// "שלום עמית 👋" and one true line about the family — in the page, like the mockup.
     private var homeHeader: some View {
+        // 🔌 The "not connected to the family" banner rides under the header.
+        VStack(spacing: 14) { homeHeaderRow; FamilyLinkBanner() }
+    }
+
+    private var homeHeaderRow: some View {
         HStack(alignment: .top, spacing: 12) {
             // ⚙️ on the far left (the container is LTR), a glass circle like the
             // kid's nav buttons. On the Duo it lives in the rail instead.
@@ -1685,7 +1729,7 @@ struct ParentDashboardView: View {
                 .buttonStyle(.plain)
                 .alert(tr("שם המשפחה"), isPresented: $showFamilyNameEditor) {
                     TextField(tr("משפחת גולן"), text: $familyNameDraft)
-                    Button(tr("שמרו")) { household.setFamilyName(familyNameDraft) }
+                    Button(tr("שמרו")) { if !household.refuseIfDisconnected() { household.setFamilyName(familyNameDraft) } }
                     Button(tr("לא עכשיו"), role: .cancel) {
                         UserDefaults.standard.set(true, forKey: "family.namePromptOff")
                     }
@@ -2158,7 +2202,12 @@ struct ParentDashboardView: View {
     }
 
     private func openSupportChat() {
-        guard let hid = household.household?.id else { return }
+        // 🔌 No family loaded = no thread to open. Say so instead of a dead tap.
+        guard let hid = household.household?.id else {
+            household.connectionNotice = true
+            household.retryFamilyLoadIfNeeded()
+            return
+        }
         support.route = .parent(householdID: hid)
     }
 

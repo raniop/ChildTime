@@ -349,6 +349,7 @@ struct ChildTimeApp: App {
                             progress.applyDailyRolloverIfNeeded()
                         }
                         StopAndSaveBridge.applyIfRequested()   // Live Activity "עצור ושמור" fallback
+                        HouseholdManager.shared.retryFamilyLoadIfNeeded()   // 🔌 a failed family load tries again now
                         LocationSharing.shared.appBecameActive()   // 📍 child device: a fresh fix + fences
                         ShieldManager.shared.refreshStatus()   // Screen Time approved in Settings meanwhile?
                         // 🔑 Re-mint Screen Time tokens that iOS expired while we

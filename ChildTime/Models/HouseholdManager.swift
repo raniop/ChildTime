@@ -1,4 +1,5 @@
 import Foundation
+import Network
 import Combine
 
 #if canImport(FirebaseFirestore)
@@ -136,6 +137,95 @@ final class HouseholdManager: ObservableObject {
 
     private func markLoaded() { isLoading = false }
 
+    // MARK: - 🔌 Staying connected to the family
+    //
+    // Eli, 9.10: the family load at launch failed ONCE (a moment without a
+    // network), the error went into `lastError`, and nothing ever tried again.
+    // iOS kept the app alive for three days: the dashboard drew the phone's own
+    // old copy, a green ✓ said "connected", nothing reached the cloud — and the
+    // repair (sign out + in) minted a second child. Now a failed load retries on
+    // its own, on every return to the app and when the network comes back, and
+    // the screens can tell the parent the truth.
+
+    /// Why the last family load failed, while it is still failing. nil = fine.
+    @Published private(set) var cloudLinkProblem: String? = nil
+    /// The family load FAILED and no family is here — the moment to block what
+    /// would create cloud data on a local copy only (a child, the family name).
+    /// Not merely "no household": a brand-new parent has none on purpose.
+    var familyLinkBroken: Bool { household == nil && cloudLinkProblem != nil }
+    /// "מתחברים למשפחה…" asked for by a blocked action — the dashboard shows it.
+    @Published var connectionNotice = false
+
+    /// Call before an action that writes the family: when the link is broken it
+    /// says so, tries again, and returns true (= don't proceed).
+    @discardableResult
+    func refuseIfDisconnected() -> Bool {
+        guard familyLinkBroken else { return false }
+        connectionNotice = true
+        retryFamilyLoadIfNeeded()
+        return true
+    }
+    private var bootstrapRetry: Task<Void, Never>?
+    /// The network came back → a parent still without the family retries at once.
+    private lazy var pathMonitor: NWPathMonitor = {
+        let m = NWPathMonitor()
+        m.pathUpdateHandler = { [weak self] path in
+            guard path.status == .satisfied else { return }
+            DispatchQueue.main.async { self?.retryFamilyLoadIfNeeded() }
+        }
+        m.start(queue: DispatchQueue(label: "tofy.household.path"))
+        return m
+    }()
+    private var bootstrapAttempts = 0
+    private static let failureKey = "sync.bootstrapFailure"
+
+    /// A failed load: remember why (survives relaunch, for the recovery report),
+    /// tell the screens, and try again — 3s, 6s, 12s … up to a minute.
+    private func bootstrapFailed(_ error: Error, uid: String, email: String?, displayName: String?) {
+        let message = error.localizedDescription
+        Task { @MainActor in self.lastError = message; self.cloudLinkProblem = message }
+        TofyLink("bootstrap FAILED (attempt \(bootstrapAttempts + 1)): \(message)")
+        if UserDefaults.standard.dictionary(forKey: Self.failureKey) == nil {
+            UserDefaults.standard.set(["error": message, "at": Date().timeIntervalSince1970,
+                                       "build": AppInfo.build], forKey: Self.failureKey)
+        }
+        bootstrapAttempts += 1
+        let delay = min(60.0, 3.0 * pow(2.0, Double(min(bootstrapAttempts - 1, 5))))
+        bootstrapRetry?.cancel()
+        bootstrapRetry = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            guard let self, !Task.isCancelled, self.uid == uid, self.household == nil else { return }
+            await self.bootstrap(uid: uid, email: email, displayName: displayName)
+        }
+    }
+
+    /// The family is here: clear the alarm, and if this follows a failure, leave
+    /// a short note on the parent's own doc (first-party, for the founder admin)
+    /// so a disconnection is visible to us — not only to the family.
+    private func bootstrapSucceeded(uid: String) {
+        bootstrapRetry?.cancel(); bootstrapRetry = nil
+        bootstrapAttempts = 0
+        Task { @MainActor in self.cloudLinkProblem = nil }
+        guard let failure = UserDefaults.standard.dictionary(forKey: Self.failureKey) else { return }
+        UserDefaults.standard.removeObject(forKey: Self.failureKey)
+        var note = failure
+        note["recoveredAt"] = Date().timeIntervalSince1970
+        TofyLink("bootstrap recovered after a failure: \(failure["error"] ?? "")")
+        Task { try? await parentRef(uid).setData(["lastSyncRecovery": note], merge: true) }
+    }
+
+    /// Back in the app, or the network returned: a parent still without the
+    /// family tries again NOW instead of waiting for the next back-off step.
+    func retryFamilyLoadIfNeeded() {
+        #if canImport(FirebaseFirestore)
+        guard let uid, household == nil, !Self.skipsCloudSync else { return }
+        guard bootstrapAttempts > 0 || cloudLinkProblem != nil else { return }   // only after a real failure
+        bootstrapRetry?.cancel()
+        let email = self.email, name = self.displayName
+        Task { await self.bootstrap(uid: uid, email: email, displayName: name) }
+        #endif
+    }
+
     private var uid: String?
     private var email: String?
     private var displayName: String?
@@ -180,7 +270,19 @@ final class HouseholdManager: ObservableObject {
         self.displayName = displayName
         // Demo / screenshot / test builds stay entirely local — no parent,
         // household, child, or device docs are ever written to production.
-        guard !Self.skipsCloudSync else { Task { @MainActor in self.markLoaded() }; return }
+        guard !Self.skipsCloudSync else {
+            Task { @MainActor in
+                self.markLoaded()
+                #if DEBUG
+                // DEMO_LINK_BROKEN=1: show the "not connected to the family" UI
+                // (banner, honest ✓, blocked actions) without touching the cloud.
+                if ProcessInfo.processInfo.environment["DEMO_LINK_BROKEN"] != nil {
+                    self.cloudLinkProblem = "simulated"
+                }
+                #endif
+            }
+            return
+        }
         #if canImport(FirebaseFirestore)
         // start() is invoked from the auth-state listener, which can fire while
         // SwiftUI is mid-update. Defer the @Published mutations one tick so they
@@ -194,6 +296,7 @@ final class HouseholdManager: ObservableObject {
             try? await Task.sleep(nanoseconds: 7_000_000_000)
             self.markLoaded()
         }
+        _ = pathMonitor   // start watching for the network coming back
         Task { await bootstrap(uid: uid, email: email, displayName: displayName) }
         #endif
     }
@@ -208,6 +311,9 @@ final class HouseholdManager: ObservableObject {
         tombstoneListener?.remove(); tombstoneListener = nil
         #endif
         devicesByChild = [:]
+        bootstrapRetry?.cancel(); bootstrapRetry = nil
+        bootstrapAttempts = 0
+        cloudLinkProblem = nil
         household = nil
         parentAccount = nil
         linkedParentSummaries = []
@@ -235,9 +341,12 @@ final class HouseholdManager: ObservableObject {
             #endif
             if let hh = try await ensureHousehold(uid: uid, canCreate: false) {
                 TofyLink("bootstrap: household \(hh.id.prefix(8)) loaded — pin=\(hh.parentPinHash != nil) kids=\(hh.childIDs.count)")
+                bootstrapSucceeded(uid: uid)
                 finishBootstrap(hh)
                 return
             }
+            // Reached the cloud and it answered "no family" — that IS an answer.
+            bootstrapSucceeded(uid: uid)
             guard realAccount else {
                 TofyLink("bootstrap: anonymous uid with no household — NOT creating one (joins later)")
                 markLoaded()
@@ -253,8 +362,8 @@ final class HouseholdManager: ObservableObject {
             needsFamilyChoice = true
             markLoaded()
         } catch {
-            lastError = error.localizedDescription
-            markLoaded()   // sync failed (e.g. rules not deployed) — let the UI proceed
+            bootstrapFailed(error, uid: uid, email: email, displayName: displayName)
+            markLoaded()   // the UI proceeds — and the retry keeps trying behind it
         }
     }
 

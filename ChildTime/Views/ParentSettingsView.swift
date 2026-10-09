@@ -160,9 +160,9 @@ struct ParentSettingsView: View {
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .submitLabel(.done)
-                    .onSubmit { household.setFamilyName(familyNameDraft) }
+                    .onSubmit { if !household.refuseIfDisconnected() { household.setFamilyName(familyNameDraft) } }
                 if familyNameDraft != (household.familyNameShown ?? "") {
-                    Button(tr("שמרו")) { household.setFamilyName(familyNameDraft) }
+                    Button(tr("שמרו")) { if !household.refuseIfDisconnected() { household.setFamilyName(familyNameDraft) } }
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "4B3FBF"))
                         .padding(.horizontal, 12).padding(.vertical, 6)
@@ -465,8 +465,10 @@ struct ParentSettingsView: View {
         Section(tr("סנכרון בין מכשירים")) {
             if auth.isSignedIn {
                 HStack(spacing: 12) {
-                    Image(systemName: "checkmark.icloud.fill")
-                        .foregroundStyle(.green)
+                    // 🔌 Green only when the family really is here. Eli's phone
+                    // showed this ✓ for three days with nothing reaching the cloud.
+                    Image(systemName: household.household != nil ? "checkmark.icloud.fill" : "exclamationmark.icloud.fill")
+                        .foregroundStyle(household.household != nil ? .green : .orange)
                         .font(.title3)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(auth.displayName ?? auth.email ?? tr("מחובר"))
@@ -483,6 +485,17 @@ struct ParentSettingsView: View {
                         }
                     }
                     Spacer()
+                }
+                // 🔌 Signed in but the family isn't here — say it, and offer a retry.
+                if household.household == nil {
+                    HStack(spacing: 10) {
+                        Text(tr("לא מחובר כרגע למשפחה — מנסים שוב לבד"))
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.orange)
+                        Spacer()
+                        Button(tr("נסו שוב")) { household.retryFamilyLoadIfNeeded() }
+                            .font(.caption.weight(.heavy))
+                    }
                 }
                 // Co-parents in the family (names come from the household doc, so no
                 // cross-account reads). Excludes anonymous child play-devices + self.
