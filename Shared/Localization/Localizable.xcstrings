@@ -99037,6 +99037,28 @@
         }
       }
     },
+    "עיצוב חדש למסך הבית של הילד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تصميم جديد للشاشة الرئيسية للطفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new design for the child's home screen"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новый дизайн главного экрана ребёнка"
+          }
+        }
+      }
+    },
     "עכשיו" : {
       "localizations" : {
         "ar" : {
