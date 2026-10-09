@@ -579,7 +579,8 @@ struct ParentGateView<Content: View>: View {
                     PINManager.shared.setPIN(entered)
                     settings.hasSetParentPIN = true
                     // Share it family-wide so other devices use the same code.
-                    household.setHouseholdPIN(PINManager.shared.makeBlob(entered))
+                    let blob = PINManager.shared.makeBlob(entered)
+                    Task { await household.setHouseholdPIN(blob) }
                     Haptic.success()
                     // First-time setup: immediately offer Face ID / Touch ID so the
                     // parent turns on fast unlock right here, instead of having to find
@@ -638,7 +639,7 @@ struct ParentGateView<Content: View>: View {
             // Backfill the family code if it isn't shared yet (e.g. a parent who
             // set a PIN before this feature) so other devices use the same one.
             if household.householdPIN == nil, let blob = PINManager.shared.storedBlob {
-                household.setHouseholdPIN(blob)
+                Task { await household.setHouseholdPIN(blob) }
             }
             if firstEntryHere {
                 Haptic.success()

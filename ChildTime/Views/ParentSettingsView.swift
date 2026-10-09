@@ -37,6 +37,18 @@ struct ParentSettingsView: View {
     @State private var requestingShield = false
 
     var body: some View {
+        settingsStack
+            // 🔌 A family write refused while disconnected (the family name) —
+            // the dashboard's alert sits UNDER this sheet and never showed.
+            .alert(tr("מתחברים למשפחה…"), isPresented: $household.connectionNotice) {
+                Button(tr("נסו שוב")) { household.retryFamilyLoadIfNeeded() }
+                Button(tr("הבנתי"), role: .cancel) {}
+            } message: {
+                Text(tr("הטלפון עדיין לא מחובר למשפחה, אז אי אפשר לעשות את זה כרגע. בדקו שיש אינטרנט — אנחנו מנסים להתחבר שוב לבד."))
+            }
+    }
+
+    private var settingsStack: some View {
         NavigationStack {
             // Five doors, each with a one-line summary (Rani: the old single
             // form was "a pile nobody would open"). Tofy+ lives on the home.
@@ -93,6 +105,18 @@ struct ParentSettingsView: View {
                     }
                     menuRow("ℹ️", tr("אודות ופרטיות"), tr("\(AppInfo.versionLine) · ייצוא, מחיקה"), soft: true) {
                         subScreen(tr("אודות ופרטיות")) { versionSection; privacySection }
+                            // On the PAGE, not on the Section: a sheet on a multi-row
+                            // Section is copied onto every row and they fight — "מה
+                            // חדש" flashed and never stayed up.
+                            .sheet(isPresented: $showWhatsNew) {
+                                // Every update, newest first — not just the one this build carried.
+                                WhatsNewHistoryView(onDone: { showWhatsNew = false })
+                            }
+                            .fullScreenCover(isPresented: $showWhatsNewStory) {
+                                WhatsNewStoryView(audience: .parent, items: WhatsNewStories.current(for: .parent)) {
+                                    showWhatsNewStory = false
+                                }
+                            }
                     }
                 }
                 .padding(.horizontal, AppSpacing.lg).padding(.top, AppSpacing.sm).padding(.bottom, AppSpacing.xxl)
@@ -938,16 +962,6 @@ struct ParentSettingsView: View {
             .listRowBackground(Color.clear)
         }
         .glassRows()
-        .sheet(isPresented: $showWhatsNew) {
-            // Every update, newest first — not just the one this build carried.
-            WhatsNewHistoryView(onDone: { showWhatsNew = false })
-        }
-        .fullScreenCover(isPresented: $showWhatsNewStory) {
-            WhatsNewStoryView(audience: .parent, items: WhatsNewStories.current(for: .parent)) {
-                showWhatsNewStory = false
-            }
-        }
-        .glassRows()
     }
 }
 
@@ -957,6 +971,7 @@ struct ChangePINView: View {
     @State private var newPIN: String = ""
     @State private var confirmPIN: String = ""
     @State private var error: String?
+    @State private var saving = false
 
     var body: some View {
         NavigationStack {
@@ -999,11 +1014,23 @@ struct ChangePINView: View {
             error = tr("הקודים לא תואמים")
             return
         }
-        settings.pin = newPIN          // keep legacy mirror for migration safety
-        PINManager.shared.setPIN(newPIN)
-        settings.hasSetParentPIN = true
-        HouseholdManager.shared.setHouseholdPIN(PINManager.shared.makeBlob(newPIN))  // share family-wide
-        dismiss()
+        // Family first: if the family code can't be saved, nothing changes here
+        // either — a code that exists on this phone only is refused later.
+        guard !saving else { return }
+        saving = true
+        let pin = newPIN
+        Task {
+            let ok = await HouseholdManager.shared.setHouseholdPIN(PINManager.shared.makeBlob(pin))
+            saving = false
+            guard ok else {
+                error = tr("לא הצלחנו לשמור את הקוד — אין חיבור למשפחה. הקוד הקודם עדיין בתוקף. נסו שוב בעוד רגע.")
+                return
+            }
+            settings.pin = pin              // keep legacy mirror for migration safety
+            PINManager.shared.setPIN(pin)
+            settings.hasSetParentPIN = true
+            dismiss()
+        }
     }
 }
 

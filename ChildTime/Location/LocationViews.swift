@@ -406,6 +406,8 @@ struct LocationConsentSheet: View {
     }
     @Environment(\.dismiss) private var dismiss
     @State private var saving = false
+    /// The save didn't reach the family — say so instead of a false ✅.
+    @State private var saveFailed = false
     /// After "אישור": what to do on the child's phone (Rani: the parent could
     /// not guess that the next step happens THERE).
     @State private var enabled = false
@@ -413,6 +415,15 @@ struct LocationConsentSheet: View {
     var startEnabled = false
 
     var body: some View {
+        bodyMain
+            .alert(tr("לא נשמר"), isPresented: $saveFailed) {
+                Button(tr("הבנתי"), role: .cancel) {}
+            } message: {
+                Text(tr("אין כרגע חיבור למשפחה, אז השינוי לא נשמר. בדקו את האינטרנט ונסו שוב."))
+            }
+    }
+
+    @ViewBuilder private var bodyMain: some View {
         let name = Question.stripNiqqud(profile.name)
         let girl = profile.gender == .girl
         NavigationStack {
@@ -438,8 +449,9 @@ struct LocationConsentSheet: View {
                     Button {
                         saving = true
                         Task {
-                            _ = await LocationSharing.shared.setSharing(childID: profile.id.uuidString, on: true)
+                            let ok = await LocationSharing.shared.setSharing(childID: profile.id.uuidString, on: true)
                             saving = false
+                            guard ok else { Haptic.warning(); saveFailed = true; return }
                             Haptic.success()
                             withAnimation { enabled = true }
                         }
@@ -527,10 +539,20 @@ struct PlacesListView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var editing: FamilyPlace?
     @State private var confirmStopFor: Profile?
+    @State private var saveFailed = false
 
     private var places: [FamilyPlace] { _ = household.household; return loc.familyPlaces }
 
     var body: some View {
+        bodyMain
+            .alert(tr("לא נשמר"), isPresented: $saveFailed) {
+                Button(tr("הבנתי"), role: .cancel) {}
+            } message: {
+                Text(tr("אין כרגע חיבור למשפחה, אז השינוי לא נשמר. בדקו את האינטרנט ונסו שוב."))
+            }
+    }
+
+    @ViewBuilder private var bodyMain: some View {
         NavigationStack {
             Form {
                 Section {
@@ -579,7 +601,9 @@ struct PlacesListView: View {
         .confirmationDialog(tr("לכבות את שיתוף המיקום? המיקום השמור יימחק."), isPresented: Binding(
             get: { confirmStopFor != nil }, set: { if !$0 { confirmStopFor = nil } }), titleVisibility: .visible) {
             Button(tr("כיבוי המיקום"), role: .destructive) {
-                if let p = confirmStopFor { Task { _ = await loc.setSharing(childID: p.id.uuidString, on: false) } }
+                if let p = confirmStopFor {
+                    Task { if !(await loc.setSharing(childID: p.id.uuidString, on: false)) { saveFailed = true } }
+                }
                 confirmStopFor = nil
             }
         }
@@ -604,6 +628,8 @@ struct PlaceEditorView: View {
     @State private var results: [MKMapItem] = []
     @State private var focus: CLLocationCoordinate2D?
     @State private var saving = false
+    /// The save didn't reach the family — say so instead of a false ✅.
+    @State private var saveFailed = false
 
     private static let emojis = ["🏠", "🏫", "⚽", "🎨", "🎵", "👵", "🏊", "📍"]
     private static var defaultNames: [String: String] {
@@ -612,6 +638,15 @@ struct PlaceEditorView: View {
     private var isNew: Bool { !LocationSharing.shared.familyPlaces.contains { $0.id == place.id } }
 
     var body: some View {
+        bodyMain
+            .alert(tr("לא נשמר"), isPresented: $saveFailed) {
+                Button(tr("הבנתי"), role: .cancel) {}
+            } message: {
+                Text(tr("אין כרגע חיבור למשפחה, אז השינוי לא נשמר. בדקו את האינטרנט ונסו שוב."))
+            }
+    }
+
+    @ViewBuilder private var bodyMain: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
@@ -771,8 +806,9 @@ struct PlaceEditorView: View {
             all.append(place)
         }
         Task {
-            _ = await LocationSharing.shared.savePlaces(all)
+            let ok = await LocationSharing.shared.savePlaces(all)
             saving = false
+            guard ok else { saveFailed = true; return }   // keep the editor open
             dismiss()
         }
     }

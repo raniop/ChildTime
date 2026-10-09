@@ -127,6 +127,10 @@ struct ParentDashboardView: View {
     @ObservedObject private var support = SupportChatStore.shared
     @State private var qrChild: Profile? = nil
     @State private var qrCode: String? = nil
+    /// The join code couldn't be made (no family loaded / offline) — show why and
+    /// a retry, instead of a spinner that turns forever.
+    @State private var qrFailed = false
+    @State private var qrRetryToken = 0
     /// 📱 "This iPad is the child's" — opened from the QR sheet on a parent iPad.
     @State private var convertChild: Profile? = nil
     /// After creating a child we offer to connect their device right away.
@@ -1243,6 +1247,28 @@ struct ParentDashboardView: View {
                                 .padding(.horizontal, 16).padding(.vertical, 6)
                                 .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
                                 .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                        } else if qrFailed {
+                            VStack(spacing: 12) {
+                                Text(verbatim: "📶").font(.system(size: 44))
+                                Text(tr("אין כרגע חיבור, אז אי אפשר ליצור קוד. בדקו את האינטרנט ונסו שוב."))
+                                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(GlassInk.primary)
+                                    .multilineTextAlignment(.center)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                Button {
+                                    Haptic.light()
+                                    qrFailed = false
+                                    qrRetryToken &+= 1
+                                } label: {
+                                    Text(tr("נסו שוב"))
+                                        .font(.system(size: 16, weight: .heavy, design: .rounded))
+                                        .foregroundStyle(Color(hex: "2A1E5C"))
+                                        .frame(width: 160, height: 44)
+                                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            .frame(width: 234, height: 234)
                         } else {
                             // Same footprint as the QR card, so the pane doesn't
                             // collapse into a narrow pill while the code loads.
@@ -1332,9 +1358,25 @@ struct ParentDashboardView: View {
             .environment(\.colorScheme, .dark)
             .environment(\.layoutDirection, .app)
         }
-        .task(id: child.id) {
+        .task(id: "\(child.id)-\(qrRetryToken)") {
             childDeviceLinked = false
-            qrCode = await HouseholdManager.shared.makeChildJoinCode(for: child.id.uuidString)
+            qrFailed = false
+            // No family loaded → no code can exist. Offline, creating one never
+            // returns at all — give it 12s, then say so.
+            guard household.household != nil else {
+                household.retryFamilyLoadIfNeeded()
+                qrFailed = true
+                return
+            }
+            let cid = child.id.uuidString
+            qrCode = await withTaskGroup(of: String?.self) { group in
+                group.addTask { await HouseholdManager.shared.makeChildJoinCode(for: cid) }
+                group.addTask { try? await Task.sleep(nanoseconds: 12_000_000_000); return nil }
+                let first = await group.next() ?? nil
+                group.cancelAll()
+                return first
+            }
+            if qrCode == nil { qrFailed = true }
             if let code = qrCode {
                 HouseholdManager.shared.watchInviteRedemption(payload: code)
             }

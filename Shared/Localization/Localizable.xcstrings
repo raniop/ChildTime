@@ -22447,6 +22447,50 @@
         }
       }
     },
+    "אין כרגע חיבור למשפחה, אז השינוי לא נשמר. בדקו את האינטרנט ונסו שוב." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد اتصال بالعائلة حاليًا، لذا لم يُحفظ التغيير. تحقّقوا من الإنترنت وحاولوا مرة أخرى."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There's no connection to your family right now, so the change wasn't saved. Check your internet and try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас нет связи с семьёй, поэтому изменение не сохранено. Проверьте интернет и попробуйте снова."
+          }
+        }
+      }
+    },
+    "אין כרגע חיבור, אז אי אפשר ליצור קוד. בדקו את האינטרנט ונסו שוב." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد اتصال حاليًا، لذا لا يمكن إنشاء رمز. تحقّقوا من الإنترنت وحاولوا مرة أخرى."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There's no connection right now, so a code can't be created. Check your internet and try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас нет подключения, поэтому код не создать. Проверьте интернет и попробуйте снова."
+          }
+        }
+      }
+    },
     "אין כרגע מכשיר מחבר ל%@ — החלון יפתח ברגע שהמכשיר יתחבר." : {
       "localizations" : {
         "ar" : {
@@ -46370,6 +46414,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Прогресс синхронизируется безопасно, а родительский код хранится на устройстве в зашифрованном виде."
+          }
+        }
+      }
+    },
+    "ההתקדמות של %@ אופסה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تمت إعادة تعيين تقدّم %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s progress was reset."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прогресс %@ сброшен."
           }
         }
       }
@@ -75781,6 +75847,28 @@
         }
       }
     },
+    "לא הצלחנו לשמור את הקוד — אין חיבור למשפחה. הקוד הקודם עדיין בתוקף. נסו שוב בעוד רגע." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعذّر حفظ الرمز — لا يوجد اتصال بالعائلة. الرمز السابق لا يزال ساريًا. حاولوا مرة أخرى بعد قليل."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We couldn't save the code — there's no connection to your family. The previous code still works. Try again in a moment."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось сохранить код — нет связи с семьёй. Прежний код по-прежнему действует. Попробуйте чуть позже."
+          }
+        }
+      }
+    },
     "לא הצליח — נסו מהאייפון" : {
       "localizations" : {
         "ar" : {
@@ -75931,6 +76019,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Не отправлено — можно попробовать снова"
+          }
+        }
+      }
+    },
+    "לא נשמר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يُحفظ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not saved"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не сохранено"
           }
         }
       }
@@ -93524,6 +93634,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Тестовый запрос отправлен — уведомление должно прийти через несколько секунд"
+          }
+        }
+      }
+    },
+    "נשלחה בקשת רענון לכל המכשירים של %@. זה קורה בפתיחה הבאה של טופי בכל מכשיר." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أُرسل طلب تحديث إلى كل أجهزة %@. يتم ذلك عند فتح توفي التالي على كل جهاز."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A refresh request was sent to all of %@'s devices. It happens the next time Tofy opens on each one."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запрос на обновление отправлен на все устройства %@. Он сработает при следующем открытии Тофи на каждом из них."
           }
         }
       }

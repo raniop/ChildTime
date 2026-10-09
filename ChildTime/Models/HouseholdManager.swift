@@ -1454,11 +1454,25 @@ final class HouseholdManager: ObservableObject {
     }
 
     /// Save the family parent code (hash) to the household so every device shares it.
-    func setHouseholdPIN(_ blob: String) {
+    /// The family-wide parent code. Returns false when it could NOT be saved
+    /// (no family loaded, or the cloud refused) — the caller keeps the old code
+    /// and says so. It used to skip silently: the new code lived on this phone
+    /// only, and once the family loaded the OLD one won and the new was refused.
+    @discardableResult
+    func setHouseholdPIN(_ blob: String) async -> Bool {
         #if canImport(FirebaseFirestore)
-        guard let hh = household else { return }
-        Task { try? await db.collection("households").document(hh.id)
-            .updateData(["parentPinHash": blob]) }
+        guard let hh = household else { return false }
+        let ref = db.collection("households").document(hh.id)
+        var outcome = await confirmedMerge(ref, ["parentPinHash": blob], timeout: 6)
+        if outcome == .denied {
+            await reassertMembership()
+            outcome = await confirmedMerge(ref, ["parentPinHash": blob], timeout: 6)
+        }
+        // .queued = offline but accepted into Firestore's own queue (and its local
+        // cache, which the gate reads) — it reaches the family on reconnect.
+        return outcome == .ok || outcome == .queued
+        #else
+        return false
         #endif
     }
 

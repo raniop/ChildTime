@@ -81,6 +81,9 @@ struct ChildSettingsView: View {
     @State private var confirmReset = false
     @State private var confirmDelete = false
     @State private var remoteNote: String? = nil
+    /// What just happened on "עוד הגדרות" (refresh sent, progress reset) — on
+    /// THAT page; an alert on the settings root underneath never comes up.
+    @State private var moreNote: String? = nil
 
     private var profile: Profile? { profiles.profiles.first { $0.id == profileID } }
 
@@ -307,6 +310,7 @@ struct ChildSettingsView: View {
                 row("🔄", tr("רענון נתונים בכל המכשירים"), chevron: false) {
                     Haptic.warning()
                     RemoteSyncManager.shared.purgeChildCaches(childID: p.id)
+                    moreNote = tr("נשלחה בקשת רענון לכל המכשירים של \(p.name). זה קורה בפתיחה הבאה של טופי בכל מכשיר.")
                 }
                 row("↩️", tr("איפוס התקדמות"), destructive: true, chevron: false) { confirmReset = true }
                 row("🚮", p.gender == .girl ? tr("מחיקת הילדה") : tr("מחיקת הילד"),
@@ -320,7 +324,10 @@ struct ChildSettingsView: View {
         // the settings root underneath, the alert never came up from here —
         // "איפוס" did nothing at all (Eli, 9.10).
         .alert(tr("לאפס את ההתקדמות של \(p.name)?"), isPresented: $confirmReset) {
-                Button(tr("אפס דקות + ניקוד"), role: .destructive) { onResetProgress(p) }
+                Button(tr("אפס דקות + ניקוד"), role: .destructive) {
+                    onResetProgress(p)
+                    moreNote = tr("ההתקדמות של \(p.name) אופסה.")
+                }
                 Button(tr("בטל"), role: .cancel) {}
             } message: {
                 Text(tr("פעולה זו תאפס דקות משחק שנצברו, ניקוד הסשן ועונש טעויות. לא יימחקו שמות, פרופילים או פריטי קוסמטיקה."))
@@ -342,6 +349,10 @@ struct ChildSettingsView: View {
             } message: {
                 Text(tr("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק."))
             }
+        .alert(moreNote ?? "", isPresented: Binding(get: { moreNote != nil },
+                                                    set: { if !$0 { moreNote = nil } })) {
+            Button(tr("הבנתי"), role: .cancel) {}
+        }
         .navigationTitle(tr("עוד הגדרות"))
         .navigationBarTitleDisplayMode(.inline)
         .environment(\.layoutDirection, .app)

@@ -355,9 +355,13 @@ final class RemoteSyncManager: ObservableObject {
             // If the wallet cannot be credited, do NOT consume the command —
             // better to deliver it again than to acknowledge minutes that were
             // never paid.
-            guard var cloud = stateDoc?.data().flatMap(ProgressSnapshot.fromFirestore) else {
-                return 0
-            }
+            // A never-played child has no state doc yet → a blank wallet, credit it.
+            guard let stateDoc else { return 0 }
+            var cloud: ProgressSnapshot
+            if stateDoc.exists {
+                guard let s = stateDoc.data().flatMap(ProgressSnapshot.fromFirestore) else { return 0 }
+                cloud = s
+            } else { cloud = .blank }
             var update: [String: Any] = ["pendingGiftAdjustment": 0]
             if let sentAt = doc?.data()?["giftSentAt"] as? Double {
                 update["giftAppliedAt"] = sentAt
@@ -380,7 +384,10 @@ final class RemoteSyncManager: ObservableObject {
             // Mirror it locally so the child sees it instantly. The cloud value is
             // authoritative and arrives via the listener a beat later; both hold
             // the same number, so there is nothing to reconcile.
-            Task { @MainActor in ProgressStore.shared.addParentGiftMinutes(adj) }
+            Task { @MainActor in
+                guard ProgressStore.shared.holdsData(for: childID) else { return }
+                ProgressStore.shared.addParentGiftMinutes(adj)
+            }
         }
         #endif
     }
@@ -556,9 +563,27 @@ final class RemoteSyncManager: ObservableObject {
     private func applyPendingGiftRevoke(childID: UUID) {
         #if canImport(FirebaseFirestore)
         let ref = db.collection("children").document(childID.uuidString)
+        let stateRef = ref.collection("state").document("current")
         db.runTransaction({ txn, _ -> Any? in
             let doc = try? txn.getDocument(ref)
+            let stateDoc = try? txn.getDocument(stateRef)
             guard let stamp = doc?.data()?["revokeGiftAt"] as? Double else { return nil }
+            // 🧹 Erase the gift pocket IN THE CLOUD, in this same transaction. It
+            // used to be a local debit + a max-merging push, so any gift seconds
+            // this device didn't know about (consumed on the child's other device)
+            // survived — the parent saw "✅ נמחקו" and the gift was still there.
+            if let stateDoc, stateDoc.exists,
+               var cloud = stateDoc.data().flatMap(ProgressSnapshot.fromFirestore),
+               (cloud.giftSecondsIn ?? 0) > (cloud.giftSecondsOut ?? 0) {
+                cloud.giftSecondsOut = cloud.giftSecondsIn
+                cloud.syncWalletMirrors()
+                cloud.revision += 1
+                cloud.lastModifiedAt = Date()
+                cloud.deviceID = ProgressSnapshot.thisDeviceID
+                if let enc = ProgressSnapshot.toFirestore(cloud) {
+                    txn.setData(enc, forDocument: stateRef, merge: true)
+                }
+            }
             // Only clear the command. A non-zero pendingGiftAdjustment seen
             // alongside it is a NEWER "+10" (revokeChildGift zeroed the field
             // atomically with the stamp) — it must survive and apply after.
@@ -572,6 +597,7 @@ final class RemoteSyncManager: ObservableObject {
             guard result is Double else { return }
             Task { @MainActor in
                 TofyLink("applyPendingGiftRevoke: parent revoked gift for \(childID.uuidString.prefix(8))")
+                guard ProgressStore.shared.holdsData(for: childID) else { return }
                 let closed = ProgressStore.shared.revokeAllParentTime()
                 if closed {
                     ShieldManager.shared.cancelScheduledReshield()
@@ -657,9 +683,15 @@ final class RemoteSyncManager: ObservableObject {
             let stateDoc = try? txn.getDocument(stateRef)
             let adj = (doc?.data()?["pendingMinuteAdjustment"] as? Int) ?? 0
             guard adj != 0 else { return 0 }
-            guard var cloud = stateDoc?.data().flatMap(ProgressSnapshot.fromFirestore) else {
-                return 0          // don't consume what we cannot pay
-            }
+            // A child who never played has NO state doc yet — that is a known
+            // blank wallet, not an unreadable one (a gift to a brand-new child
+            // waited forever). Only a failed READ means "can't pay → don't consume".
+            guard let stateDoc else { return 0 }
+            var cloud: ProgressSnapshot
+            if stateDoc.exists {
+                guard let s = stateDoc.data().flatMap(ProgressSnapshot.fromFirestore) else { return 0 }
+                cloud = s
+            } else { cloud = .blank }
             txn.updateData(["pendingMinuteAdjustment": 0], forDocument: ref)
             if adj > 0 { cloud.earnedSecondsIn = (cloud.earnedSecondsIn ?? 0) + adj * 60 }
             else { cloud.earnedSecondsOut = (cloud.earnedSecondsOut ?? 0) + min(-adj * 60, cloud.earnedSecondsAvailable) }
@@ -674,6 +706,8 @@ final class RemoteSyncManager: ObservableObject {
         }) { [weak self] result, _ in
             let adj = (result as? Int) ?? 0
             guard adj != 0 else { return }
+            // Mirror into the live store only if it really holds this child.
+            guard ProgressStore.shared.holdsData(for: childID) else { return }
             ProgressStore.shared.addPendingMinutes(adj)
             // Publish immediately, not after the ~3s debounce. The command has
             // ALREADY been zeroed (exactly-once), so until this credit reaches the
