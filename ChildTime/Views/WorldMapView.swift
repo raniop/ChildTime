@@ -1,8 +1,20 @@
 import SwiftUI
+import Combine
 
 struct WorldMapView: View {
     @AppStorage(ChildLockSetup.pendingKey) private var lockSetupPending = false
-    @EnvironmentObject var progress: ProgressStore
+    /// NOT observed directly. Every answer changes ⭐ 💎 and the wallet, and the
+    /// whole home — hidden under the question screen — re-built and re-laid-out
+    /// on each correct answer: the stutter Rani felt only on RIGHT answers
+    /// (measured: the home's body was the biggest thing on the main thread
+    /// while a child answered). The home follows the store through
+    /// `progressTick` instead, and pauses while a game or questions cover it.
+    private var progress: ProgressStore { ProgressStore.shared }
+    @State private var progressTick = 0
+    private var coveredByPlay: Bool {
+        selectedWorld != nil || showingSmartFeed || showingGames || showingWheel
+            || showDailyChest || askWorld != nil
+    }
     @EnvironmentObject var settings: ParentSettings
     @EnvironmentObject var shields: ShieldManager
     @EnvironmentObject var profiles: ProfileStore
@@ -398,6 +410,7 @@ struct WorldMapView: View {
     private var closedFoldable: Bool { display.hasBarStrip && !display.isWideShort }
 
     var body: some View {
+        let _ = progressTick   // re-render when the store changes (see `progress`)
         ZStack {
             // Layered background
             GlassBackdrop()
@@ -669,6 +682,12 @@ struct WorldMapView: View {
         }
         // 📐 The header and the floating buddy measure in the same space.
         .coordinateSpace(name: "home")
+        .onReceive(ProgressStore.shared.objectWillChange) { _ in
+            if !coveredByPlay { progressTick &+= 1 }
+        }
+        .onChangeCompat(of: coveredByPlay) { _, covered in
+            if !covered { progressTick &+= 1 }   // catch up once, on the way back
+        }
         // 🎚 The kid's own rail in the foldable's bar strip: the three round
         // buttons that used to head the screen. ⭐ and 💎 stay on the screen
         // itself, beside the child's name (Rani) — they are part of the card,

@@ -690,6 +690,13 @@ struct SupportImageComposer: View {
 
     private var img: UIImage { current ?? image }
 
+    /// The window's own safe area — this cover came up laid out edge to edge on
+    /// a real phone, the ✂️ ✏️ row under the clock (Rani).
+    private var windowInsets: UIEdgeInsets {
+        UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows).first { $0.isKeyWindow }?.safeAreaInsets ?? .zero
+    }
+
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
@@ -700,6 +707,12 @@ struct SupportImageComposer: View {
                 }
                 bottomRow
             }
+            // Edge to edge, then the window's insets by hand — the same on every
+            // presenter (inside the chat sheet the row went under the clock).
+            // The keyboard is still avoided: only the container area is ignored.
+            .padding(.top, windowInsets.top)
+            .padding(.bottom, windowInsets.bottom)
+            .ignoresSafeArea(.container, edges: .vertical)
         }
         .environment(\.layoutDirection, .app)
     }
