@@ -152,7 +152,27 @@ final class HouseholdManager: ObservableObject {
     /// The family load FAILED and no family is here — the moment to block what
     /// would create cloud data on a local copy only (a child, the family name).
     /// Not merely "no household": a brand-new parent has none on purpose.
-    var familyLinkBroken: Bool { household == nil && cloudLinkProblem != nil }
+    var familyLinkBroken: Bool {
+        guard isRealParentSession else { return false }
+        if cloudLinkProblem != nil { return true }            // a load or a live listener failed
+        return familyNotLoaded && !isLoading                  // still nothing after the first wait
+    }
+    /// A signed-in PARENT whose family hasn't come down (yet). Not a new parent
+    /// choosing new-vs-join, not one with a pending email invite — those have no
+    /// family on purpose. Blocks family writes even during the first seconds.
+    var familyNotLoaded: Bool {
+        isRealParentSession && household == nil && !needsFamilyChoice && pendingEmailInvite == nil
+    }
+    private var isRealParentSession: Bool {
+        #if DEBUG
+        if Self.testsActAsSignedInParent { return true }
+        #endif
+        return uid != nil && !Self.skipsCloudSync && ((email?.isEmpty == false) || (displayName?.isEmpty == false))
+    }
+    #if DEBUG
+    /// Tests: behave like a signed-in parent (no cloud is touched).
+    static var testsActAsSignedInParent = false
+    #endif
     /// "מתחברים למשפחה…" asked for by a blocked action — the dashboard shows it.
     @Published var connectionNotice = false
 
@@ -160,12 +180,20 @@ final class HouseholdManager: ObservableObject {
     /// says so, tries again, and returns true (= don't proceed).
     @discardableResult
     func refuseIfDisconnected() -> Bool {
-        guard familyLinkBroken else { return false }
+        guard familyLinkBroken || familyNotLoaded else { return false }
         connectionNotice = true
         retryFamilyLoadIfNeeded()
         return true
     }
     private var bootstrapRetry: Task<Void, Never>?
+    /// One bootstrap at a time; results of a bootstrap from before the latest
+    /// start()/stop() are thrown away (a sign-out mid-flight must not re-attach
+    /// the previous account's family).
+    private var bootstrapInFlight = false
+    private var bootstrapGeneration = 0
+    private struct FamilyLoadTimeout: LocalizedError {
+        var errorDescription: String? { "family load timed out (offline?)" }
+    }
     /// The network came back → a parent still without the family retries at once.
     private lazy var pathMonitor: NWPathMonitor = {
         let m = NWPathMonitor()
@@ -222,14 +250,21 @@ final class HouseholdManager: ObservableObject {
     #if DEBUG
     /// Tests: put the manager in / out of the "family load failed" state.
     func setLinkProblemForTesting(_ message: String?) { cloudLinkProblem = message; connectionNotice = false }
+    func setLoadingForTesting(_ loading: Bool) { isLoading = loading }
     #endif
 
     /// Back in the app, or the network returned: a parent still without the
     /// family tries again NOW instead of waiting for the next back-off step.
     func retryFamilyLoadIfNeeded() {
         #if canImport(FirebaseFirestore)
-        guard let uid, household == nil, !Self.skipsCloudSync else { return }
-        guard bootstrapAttempts > 0 || cloudLinkProblem != nil else { return }   // only after a real failure
+        guard let uid, !Self.skipsCloudSync else { return }
+        // A live listener died with the family still here → re-attach it.
+        if let hh = household, cloudLinkProblem != nil {
+            reattachListeners(hh.id)
+            return
+        }
+        guard household == nil, !needsFamilyChoice, pendingEmailInvite == nil else { return }
+        guard !bootstrapInFlight else { return }
         bootstrapRetry?.cancel()
         let email = self.email, name = self.displayName
         Task { await self.bootstrap(uid: uid, email: email, displayName: name) }
@@ -307,6 +342,19 @@ final class HouseholdManager: ObservableObject {
             self.markLoaded()
         }
         _ = pathMonitor   // start watching for the network coming back
+        bootstrapGeneration &+= 1
+        let gen = bootstrapGeneration
+        // ⏱ Offline, Firestore writes never complete and never throw, so a
+        // bootstrap can hang with no error at all — no banner, no retry. After
+        // 15s with nothing, call it what it is: a failed load.
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: 15_000_000_000)
+            guard let self, self.bootstrapGeneration == gen, self.uid == uid,
+                  self.household == nil, !self.needsFamilyChoice, self.pendingEmailInvite == nil,
+                  self.cloudLinkProblem == nil else { return }
+            self.bootstrapInFlight = false
+            self.bootstrapFailed(FamilyLoadTimeout(), uid: uid, email: email, displayName: displayName)
+        }
         Task { await bootstrap(uid: uid, email: email, displayName: displayName) }
         #endif
     }
@@ -323,7 +371,12 @@ final class HouseholdManager: ObservableObject {
         devicesByChild = [:]
         bootstrapRetry?.cancel(); bootstrapRetry = nil
         bootstrapAttempts = 0
+        bootstrapGeneration &+= 1          // any bootstrap still in flight is now stale
+        listenerRetry?.cancel(); listenerRetry = nil
         cloudLinkProblem = nil
+        needsFamilyChoice = false
+        pendingEmailInvite = nil
+        connectionNotice = false
         household = nil
         parentAccount = nil
         linkedParentSummaries = []
@@ -337,6 +390,12 @@ final class HouseholdManager: ObservableObject {
 
     #if canImport(FirebaseFirestore)
     private func bootstrap(uid: String, email: String?, displayName: String?) async {
+        guard !bootstrapInFlight else { return }
+        bootstrapInFlight = true
+        defer { bootstrapInFlight = false }
+        let gen = bootstrapGeneration
+        /// A sign-out / another sign-in happened while we were waiting.
+        func stale() -> Bool { gen != bootstrapGeneration || self.uid != uid }
         do {
             try await ensureParentDoc(uid: uid, email: email, displayName: displayName)
             parentDocReadyUID = uid
@@ -349,7 +408,9 @@ final class HouseholdManager: ObservableObject {
             #if DEBUG
             if AuthManager.testNewParent { realAccount = true }   // 🧪 see AuthManager.testNewParent
             #endif
-            if let hh = try await ensureHousehold(uid: uid, canCreate: false) {
+            let found = try await ensureHousehold(uid: uid, canCreate: false)
+            guard !stale() else { TofyLink("bootstrap: result dropped — signed out meanwhile"); return }
+            if let hh = found {
                 TofyLink("bootstrap: household \(hh.id.prefix(8)) loaded — pin=\(hh.parentPinHash != nil) kids=\(hh.childIDs.count)")
                 bootstrapSucceeded(uid: uid)
                 finishBootstrap(hh)
@@ -372,6 +433,7 @@ final class HouseholdManager: ObservableObject {
             needsFamilyChoice = true
             markLoaded()
         } catch {
+            guard !stale() else { return }
             bootstrapFailed(error, uid: uid, email: email, displayName: displayName)
             markLoaded()   // the UI proceeds — and the retry keeps trying behind it
         }
@@ -422,16 +484,31 @@ final class HouseholdManager: ObservableObject {
 
     /// Explicit "צרו משפחה חדשה" from the choice screen — the ONLY way a new
     /// cloud household is ever minted now.
-    func createOwnHousehold() async {
+    /// Returns false when it couldn't (offline) — the screen says so.
+    @discardableResult
+    func createOwnHousehold() async -> Bool {
         #if canImport(FirebaseFirestore)
-        guard let uid else { return }
+        guard let uid else { return false }
         do {
+            // 🛡 Never a SECOND family: if this account already belongs to one
+            // (the choice screen was stale, or the family arrived meanwhile),
+            // load it instead of minting another.
+            // If that check can't reach the server, do NOT create on a guess.
+            if let existing = try await ensureHousehold(uid: uid, canCreate: false) {
+                TofyLink("createOwnHousehold: already a member of \(existing.id.prefix(8)) — loading it instead")
+                bootstrapSucceeded(uid: uid)
+                finishBootstrap(existing)
+                return true
+            }
             let hh = Household(parentUIDs: [uid], createdBy: uid)
             try await db.collection("households").document(hh.id).setData(Self.encode(hh))
             try await parentRef(uid).updateData(["householdIDs": FieldValue.arrayUnion([hh.id])])
             TofyLink("createOwnHousehold: \(hh.id.prefix(8))")
             finishBootstrap(hh)
-        } catch { lastError = error.localizedDescription }
+            return true
+        } catch { lastError = error.localizedDescription; return false }
+        #else
+        return false
         #endif
     }
 
@@ -522,22 +599,53 @@ final class HouseholdManager: ObservableObject {
         // child's progress/devices get "permission denied" and the parent stops
         // seeing updates. The rules allow a non-member to add ONLY their own uid,
         // so this re-grants access without a re-scan.
+        let isRealAccount = (email?.isEmpty == false) || (displayName?.isEmpty == false)
         if let preferred = UserDefaults.standard.string(forKey: preferredHouseholdKey) {
-            // arrayUnion adds our uid (no-op if already present); allowed for
-            // members AND for non-members adding just themselves.
-            try? await db.collection("households").document(preferred)
-                .updateData(["parentUIDs": FieldValue.arrayUnion([uid])])
-            // Now that we're a member we can read it.
-            if let doc = try? await db.collection("households").document(preferred).getDocument(),
-               let data = doc.data(), let hh = Self.decodeHousehold(id: preferred, data) {
-                try? await parentRef(uid).updateData(["householdIDs": FieldValue.arrayUnion([preferred])])
-                return hh
+            // 🛡 A REAL account adopts a remembered family only if its own parent
+            // doc lists it. The key outlived resets and hand-overs: a co-parent's
+            // iPad, reset and given to someone else, added the new owner's uid
+            // to the OLD family on their first sign-in. Child devices (anonymous,
+            // whose uid can drift) keep the self-heal exactly as before.
+            let mine = parentAccount?.householdIDs.contains(preferred) ?? false
+            if !isRealAccount || mine {
+                // arrayUnion adds our uid (no-op if already present); allowed for
+                // members AND for non-members adding just themselves. NOT awaited:
+                // offline, a write never completes — awaiting it hung the whole
+                // family load with no error, so nothing ever retried.
+                db.collection("households").document(preferred)
+                    .updateData(["parentUIDs": FieldValue.arrayUnion([uid])]) { _ in }
+                if let doc = try? await db.collection("households").document(preferred).getDocument(),
+                   let data = doc.data(), let hh = Self.decodeHousehold(id: preferred, data) {
+                    parentRef(uid).updateData(["householdIDs": FieldValue.arrayUnion([preferred])]) { _ in }
+                    return hh
+                }
             }
         }
         // Find a household that already lists this uid.
         let query = db.collection("households").whereField("parentUIDs", arrayContains: uid)
         let results = try await query.getDocuments()
-        if let doc = results.documents.first, let hh = Self.decodeHousehold(id: doc.documentID, doc.data()) {
+        var docs = results.documents
+        if docs.isEmpty, results.metadata.isFromCache {
+            // "No family" from the CACHE is not an answer — a device that cached
+            // this account before it joined a family would send it to new-vs-join
+            // and on to a second family. Ask the server; offline that throws, and
+            // the load is retried instead of believed.
+            docs = try await query.getDocuments(source: .server).documents
+        }
+        // Several families (one created by accident, the partner's joined later):
+        // never "whichever came first" — prefer the one the parent doc names
+        // last, then one that has children.
+        let named = parentAccount?.householdIDs ?? []
+        let ranked = docs.sorted { a, b in
+            let ra = named.lastIndex(of: a.documentID) ?? -1, rb = named.lastIndex(of: b.documentID) ?? -1
+            if ra != rb { return ra > rb }
+            let ca = (a.data()["childIDs"] as? [Any])?.count ?? 0, cb = (b.data()["childIDs"] as? [Any])?.count ?? 0
+            return ca > cb
+        }
+        if docs.count > 1 {
+            TofyLink("ensureHousehold: \(docs.count) memberships — picked \(ranked.first?.documentID.prefix(8) ?? "?")")
+        }
+        if let doc = ranked.first, let hh = Self.decodeHousehold(id: doc.documentID, doc.data()) {
             return hh
         }
         // None — create a fresh household owned by this parent (real accounts
@@ -552,10 +660,57 @@ final class HouseholdManager: ObservableObject {
         return hh
     }
 
+    // MARK: - 🔌 Live listeners that heal themselves
+    //
+    // A Firestore listener that errors (permission denied after the parent was
+    // dropped from parentUIDs, a server hiccup) is DEAD — it never fires again.
+    // These three used to ignore the error, so the dashboard froze on its last
+    // numbers while still looking connected. Now: say so, re-assert membership,
+    // and re-attach with the same back-off as the family load.
+    private var listenerRetry: Task<Void, Never>?
+    private var listenerFailures = 0
+
+    private func familyListenerFailed(_ hid: String, _ err: Error) {
+        TofyLink("family listener FAILED (\(hid.prefix(8))): \(err.localizedDescription)")
+        Task { @MainActor in
+            self.cloudLinkProblem = err.localizedDescription
+            self.listenerFailures += 1
+            let delay = Self.retryDelay(attempt: self.listenerFailures)
+            self.listenerRetry?.cancel()
+            self.listenerRetry = Task { @MainActor [weak self] in
+                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                guard let self, !Task.isCancelled, self.household?.id == hid else { return }
+                self.reattachListeners(hid)
+            }
+        }
+    }
+
+    /// A good snapshot after trouble: the link is back.
+    private func familyListenerHealthy() {
+        guard listenerFailures > 0 || (household != nil && cloudLinkProblem != nil) else { return }
+        listenerFailures = 0
+        listenerRetry?.cancel(); listenerRetry = nil
+        Task { @MainActor in self.cloudLinkProblem = nil }
+    }
+
+    func reattachListeners(_ hid: String) {
+        Task {
+            _ = await self.reassertMembership()
+            await MainActor.run {
+                guard self.household?.id == hid else { return }
+                self.listenToHousehold(hid)
+                self.listenToChildren(in: hid)
+                self.listenToTombstones(in: hid)
+            }
+        }
+    }
+
     private func listenToHousehold(_ id: String) {
         householdListener?.remove()
         householdListener = db.collection("households").document(id)
-            .addSnapshotListener { [weak self] doc, _ in
+            .addSnapshotListener { [weak self] doc, err in
+                if let err { self?.familyListenerFailed(id, err); return }
+                self?.familyListenerHealthy()
                 guard let self, let doc, let data = doc.data(),
                       let hh = Self.decodeHousehold(id: doc.documentID, data) else { return }
                 self.household = hh
@@ -599,8 +754,10 @@ final class HouseholdManager: ObservableObject {
         childrenListener?.remove()
         childrenListener = db.collection("children")
             .whereField("householdID", isEqualTo: householdID)
-            .addSnapshotListener { [weak self] snap, _ in
+            .addSnapshotListener { [weak self] snap, err in
+                if let err { self?.familyListenerFailed(householdID, err); return }
                 guard let self, let snap else { return }
+                self.familyListenerHealthy()
                 let records = snap.documents.compactMap {
                     Self.decodeChild(id: $0.documentID, $0.data())
                 }
@@ -675,7 +832,8 @@ final class HouseholdManager: ObservableObject {
         tombstoneListener?.remove()
         tombstoneListener = db.collection("deletedChildren")
             .whereField("householdID", isEqualTo: householdID)
-            .addSnapshotListener { [weak self] snap, _ in
+            .addSnapshotListener { [weak self] snap, err in
+                if let err { self?.familyListenerFailed(householdID, err); return }
                 guard let snap else { return }
                 let ids = snap.documents.compactMap { UUID(uuidString: $0.documentID) }
                 Task { @MainActor in
@@ -956,15 +1114,23 @@ final class HouseholdManager: ObservableObject {
                 // Second line of defense against resurrecting a deleted child
                 // (the single cloud write path for children): if a tombstone
                 // exists for this id, drop it locally instead of uploading.
-                let tomb = try? await db.collection("deletedChildren").document(record.id).getDocument()
-                if tomb?.exists == true {
+                // A failed check is NOT "no tombstone": skip this upload and let
+                // the next one decide (it used to go ahead and resurrect).
+                let tomb: DocumentSnapshot
+                do { tomb = try await db.collection("deletedChildren").document(record.id).getDocument() }
+                catch { TofyLink("upsertChild: tombstone check failed for \(record.id.prefix(8)) — skipped"); return }
+                if tomb.exists {
                     TofyLink("upsertChild: \(record.id.prefix(8)) is TOMBSTONED → dropping locally, not uploading")
                     await MainActor.run { ProfileStore.shared.removeLocalOnly(profile.id) }
                     return
                 }
                 if onlyIfMissing {
-                    let existing = try? await db.collection("children").document(record.id).getDocument()
-                    if existing?.exists == true {
+                    // Heal mode: only a CERTAIN "missing" uploads. On an error, a
+                    // weeks-old local record used to be merged over the live one.
+                    let existing: DocumentSnapshot
+                    do { existing = try await db.collection("children").document(record.id).getDocument(source: .server) }
+                    catch { TofyLink("upsertChild(heal): check failed for \(record.id.prefix(8)) — skipped"); return }
+                    if existing.exists {
                         TofyLink("upsertChild(heal): \(record.id.prefix(8)) already in cloud — not overwriting")
                         return
                     }
@@ -1685,6 +1851,10 @@ final class HouseholdManager: ObservableObject {
         s.deviceRole = .child
         s.justDisconnected = true
         s.sessionUnlocked = false   // re-lock the parent gate after a disconnect
+        // Forget the old family too: the join screen fell back to its only child.
+        householdListener?.remove(); householdListener = nil
+        childrenListener?.remove(); childrenListener = nil
+        household = nil
         #endif
     }
 

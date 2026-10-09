@@ -1005,7 +1005,10 @@ struct ParentDashboardView: View {
         .padding(AppSpacing.lg)
         .onAppear {
             // 🧭 Step ② straight after the parent code — no empty home between.
-            guard isRoot, ParentOnboarding.isActive, profiles.profiles.isEmpty else { return }
+            // Only into a family that's really here — never on top of one still
+            // coming down (that is how Eli's second אורית was born).
+            guard isRoot, ParentOnboarding.isActive, profiles.profiles.isEmpty,
+                  household.household != nil else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { showingCreateChild = true }
         }
     }

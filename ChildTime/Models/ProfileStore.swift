@@ -123,6 +123,9 @@ final class ProfileStore: ObservableObject {
     }
 
     func remove(_ profile: Profile) {
+        // 🔌 Deleting while the family isn't loaded deleted HERE only — the child
+        // came back on reconnect. Refuse and say so (the dashboard shows why).
+        if HouseholdManager.shared.refuseIfDisconnected() { return }
         profiles.removeAll { $0.id == profile.id }
         if activeID == profile.id {
             activate(fallbackActiveID())

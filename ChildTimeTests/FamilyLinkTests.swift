@@ -26,17 +26,50 @@ struct FamilyLinkTests {
     @Test func disconnectedBlocksFamilyWritesAndSaysSo() {
         let h = HouseholdManager.shared
         guard h.household == nil else { return }   // only meaningful without a family
-        defer { h.setLinkProblemForTesting(nil) }
+        HouseholdManager.testsActAsSignedInParent = true
+        defer {
+            HouseholdManager.testsActAsSignedInParent = false
+            h.setLinkProblemForTesting(nil)
+            h.setLoadingForTesting(false)
+            h.needsFamilyChoice = false
+        }
 
+        // A brand-new parent choosing new-vs-join has no family ON PURPOSE.
         h.setLinkProblemForTesting(nil)
+        h.needsFamilyChoice = true
+        #expect(h.familyNotLoaded == false)
         #expect(h.familyLinkBroken == false)
-        #expect(h.refuseIfDisconnected() == false)     // a brand-new parent may create
-        #expect(h.connectionNotice == false)
+        #expect(h.refuseIfDisconnected() == false)
+        h.needsFamilyChoice = false
 
+        // Family still on its way (first seconds): writes blocked, no alarm yet.
+        h.setLoadingForTesting(true)
+        #expect(h.familyNotLoaded == true)
+        #expect(h.familyLinkBroken == false)
+        #expect(h.refuseIfDisconnected() == true)
+
+        // Loading over and still nothing (a slow/hung load): that IS broken.
+        h.setLoadingForTesting(false)
+        #expect(h.familyLinkBroken == true)
+
+        // A real failure: blocked, and the parent is told.
         h.setLinkProblemForTesting("The Internet connection appears to be offline.")
         #expect(h.familyLinkBroken == true)
-        #expect(h.refuseIfDisconnected() == true)      // blocked …
-        #expect(h.connectionNotice == true)            // … and the parent is told
+        #expect(h.refuseIfDisconnected() == true)
+        #expect(h.connectionNotice == true)
+    }
+
+    /// Outside a signed-in parent session (child devices, tests, demos) none of
+    /// this may ever block anything.
+    @Test func childDevicesAreNeverBlocked() {
+        let h = HouseholdManager.shared
+        guard h.household == nil else { return }
+        HouseholdManager.testsActAsSignedInParent = false
+        h.setLinkProblemForTesting("boom")
+        defer { h.setLinkProblemForTesting(nil) }
+        #expect(h.familyLinkBroken == false)
+        #expect(h.familyNotLoaded == false)
+        #expect(h.refuseIfDisconnected() == false)
     }
 
     // MARK: - "Today" means today
@@ -77,11 +110,11 @@ struct FamilyLinkTests {
         progress.applyChestReward(ChestReward(stars: 40, diamonds: 12, minutes: 9))
         #expect(progress.stars >= 40)
 
-        // … she is removed (Eli deleted both אורית) and the active slot empties …
-        store.removeLocalOnly(a.id)
-        store.signOutCurrentProfile()          // no active child — Eli's exact state
+        // … and the active slot empties while her numbers are still live in the
+        // store (Eli's exact state after deleting both אורית).
+        store.signOutCurrentProfile()
         #expect(store.activeID == nil)
-        #expect(progress.stars >= 40)          // A's numbers are still live in the store
+        #expect(progress.stars >= 40)
 
         // … and a new child is created.
         let b = Profile(name: "בדיקה ב", gender: .girl, age: .grade1)
@@ -96,6 +129,7 @@ struct FamilyLinkTests {
         #expect(slot.stars == 0 && slot.pendingMinutes == 0 && slot.revision == 0)
 
         // Clean up: back to how the test found it.
+        store.removeLocalOnly(a.id)
         store.removeLocalOnly(b.id)
         if let prev = previousActive, store.profiles.contains(where: { $0.id == prev }) { store.setActiveID(prev) }
         #expect(store.profiles.map(\.id) == before)

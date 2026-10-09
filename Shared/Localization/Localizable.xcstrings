@@ -22315,6 +22315,28 @@
         }
       }
     },
+    "אין חיבור לאינטרנט" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد اتصال بالإنترنت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No internet connection"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет подключения к интернету"
+          }
+        }
+      }
+    },
     "אין חיבור לאינטרנט — בדקו את הרשת ונסו שוב" : {
       "localizations" : {
         "ar" : {
@@ -22399,6 +22421,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сейчас нет"
+          }
+        }
+      }
+    },
+    "אין כרגע חיבור למשפחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد اتصال بالعائلة حاليًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not connected to your family right now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас нет связи с семьёй"
           }
         }
       }
@@ -47833,6 +47877,28 @@
         }
       }
     },
+    "הטלפון עדיין לא מחובר למשפחה, אז אי אפשר לעשות את זה כרגע. בדקו שיש אינטרנט — אנחנו מנסים להתחבר שוב לבד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا الهاتف غير متصل بالعائلة بعد، لذا لا يمكن تنفيذ ذلك الآن. تحقّقوا من الإنترنت — نعيد الاتصال تلقائيًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This phone isn't connected to your family yet, so this can't be done right now. Check your internet — we're reconnecting on our own."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Телефон ещё не подключён к семье, поэтому сейчас это сделать нельзя. Проверьте интернет — мы переподключаемся сами."
+          }
+        }
+      }
+    },
     "הטלפון של %@ לא ענה — כנראה הוא כבוי או בלי אינטרנט, או שטופי סגור בו לגמרי. כשטופי ייפתח בו, המיקום יתעדכן" : {
       "localizations" : {
         "ar" : {
@@ -55335,6 +55401,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Это всё"
+          }
+        }
+      }
+    },
+    "זה לוקח יותר מהרגיל. בדקו שיש חיבור לאינטרנט — אנחנו ממשיכים לנסות לבד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يستغرق هذا وقتًا أطول من المعتاد. تحقّقوا من الاتصال بالإنترنت — نواصل المحاولة تلقائيًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is taking longer than usual. Check your internet connection — we keep trying on our own."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это занимает больше времени, чем обычно. Проверьте интернет — мы продолжаем пытаться сами."
           }
         }
       }
@@ -75627,6 +75715,28 @@
         }
       }
     },
+    "לא הצלחנו ליצור את המשפחה כרגע. בדקו את החיבור ונסו שוב." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعذّر إنشاء العائلة الآن. تحقّقوا من الاتصال وحاولوا مرة أخرى."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We couldn't create the family right now. Check your connection and try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас не удалось создать семью. Проверьте подключение и попробуйте снова."
+          }
+        }
+      }
+    },
     "לא הצלחנו לקבל את ההרשאה (%@)." : {
       "localizations" : {
         "ar" : {
@@ -75711,6 +75821,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Неизвестно"
+          }
+        }
+      }
+    },
+    "לא מחובר כרגע למשפחה — מנסים שוב לבד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "غير متصل بالعائلة — نعيد المحاولة تلقائيًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not connected to your family — retrying on our own"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет связи с семьёй — пробуем снова сами"
           }
         }
       }
@@ -85233,6 +85365,28 @@
         }
       }
     },
+    "מה שמוצג עלול להיות ישן. מנסים להתחבר שוב לבד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قد يكون المعروض قديمًا. نعيد الاتصال تلقائيًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you see may be out of date. We're reconnecting on our own."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показанное может быть устаревшим. Мы переподключаемся сами."
+          }
+        }
+      }
+    },
     "מהרגע שמאשרים זמן מסך בטלפון של הילד, הכל נעול חוץ מטופי עד שמרוויחים זמן — גם אפליקציה שיתקין מחר. בלי לבחור או לסמן כלום" : {
       "localizations" : {
         "ar" : {
@@ -85825,6 +85979,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Здесь обновления за последние две недели. Они остаются только внутри вашей семьи."
+          }
+        }
+      }
+    },
+    "מורידים את הילדים וההגדרות של המשפחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نحمّل أطفال العائلة وإعداداتها"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading your family's children and settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Загружаем детей и настройки семьи"
           }
         }
       }
@@ -88786,6 +88962,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Тренируется"
+          }
+        }
+      }
+    },
+    "מתחברים למשפחה…" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جارٍ الاتصال بالعائلة…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connecting to your family…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключаемся к семье…"
           }
         }
       }

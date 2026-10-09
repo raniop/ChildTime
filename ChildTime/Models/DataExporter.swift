@@ -74,7 +74,10 @@ enum DataExporter {
             group.removeObject(forKey: "learningHistory.\(id)")
         }
         for key in ["profiles.list", "profiles.activeID", "profiles.didMigrateLegacyKid",
-                    "profiles.createdHereIDs", "household.didMigrate", "auth.cachedUser"] {
+                    "profiles.createdHereIDs", "household.didMigrate", "auth.cachedUser",
+                    // 🛡 the remembered family — kept, it re-added this device's next
+                    // account (a hand-over, a removed child device) to the old family.
+                    "preferredHouseholdID"] {
             standard.removeObject(forKey: key)
             group.removeObject(forKey: key)
         }

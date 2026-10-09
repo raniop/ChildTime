@@ -8,6 +8,7 @@ struct FamilyChoiceView: View {
     @EnvironmentObject var settings: ParentSettings
     @StateObject private var household = HouseholdManager.shared
     @State private var creating = false
+    @State private var createFailed = false
     @State private var familyName = ""
     @State private var prefilled = false
 
@@ -30,6 +31,15 @@ struct FamilyChoiceView: View {
     }
 
     var body: some View {
+        bodyContent
+            .alert(tr("אין חיבור לאינטרנט"), isPresented: $createFailed) {
+                Button(tr("הבנתי"), role: .cancel) {}
+            } message: {
+                Text(tr("לא הצלחנו ליצור את המשפחה כרגע. בדקו את החיבור ונסו שוב."))
+            }
+    }
+
+    private var bodyContent: some View {
         ZStack {
             GlassBackdrop()
             SparkleField(count: 12, size: 11)
@@ -131,7 +141,13 @@ struct FamilyChoiceView: View {
         settings.consentVersionAccepted = Consent.currentVersion
         ParentOnboarding.begin()
         Task {
-            await household.createOwnHousehold()
+            // Offline the family can't be created (and must not be guessed) —
+            // say so instead of moving on with nothing behind it.
+            guard await household.createOwnHousehold() else {
+                creating = false
+                createFailed = true
+                return
+            }
             household.recordConsent(version: Consent.currentVersion)
             let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty { household.setFamilyName(trimmed) }
