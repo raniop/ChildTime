@@ -1338,6 +1338,7 @@ struct QuestionRunnerView: View {
         #if DEBUG
         // 📏 DEMO_AUTOTAP: answer each question correctly after 2.5s, to time the tap path.
         HitchMonitor.shared.start()
+        HitchMonitor.shared.watchStores()
         if ProcessInfo.processInfo.environment["DEMO_WAND"] != nil {   // two misses + the buddy talking
             consecutiveWrong = 2
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { companion.cheer(ProcessInfo.processInfo.environment["DEMO_BUBBLE"] ?? tr("אַלּוּפָה!")) }
@@ -1486,7 +1487,7 @@ struct QuestionRunnerView: View {
             Haptic.success()
             burstTrigger += 1
             let answeredAt = Date()
-            afterFeedbackSettles { handleCorrect(q: q, answeredAt: answeredAt) }
+            afterFeedbackSettles { PerfMark.run("handleCorrect") { handleCorrect(q: q, answeredAt: answeredAt) } }
             // If the child stumbled on this one, queue it to re-ask later — the
             // only question that's allowed to repeat in a session.
             if hadMistakeThisQuestion, !reAskQueue.contains(where: { $0.question.prompt == q.prompt }) {
@@ -1494,7 +1495,7 @@ struct QuestionRunnerView: View {
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 questionIndex += 1
-                nextQuestion()
+                PerfMark.run("nextQuestion") { nextQuestion() }
             }
         } else if isBonusQuestion {
             // 💫 Bonus: the rare event is its own challenge — flash the pick red,

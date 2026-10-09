@@ -109,6 +109,10 @@ struct WorldGameChooserView: View {
             }
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) { appeared = true }
             // 🏆 First time in this world: the 💎 nudge for trying something new.
+            #if DEBUG
+            // DEMO_FIRSTVISIT=1: show the first-visit chip without spending a visit.
+            if ProcessInfo.processInfo.environment["DEMO_FIRSTVISIT"] != nil { firstVisitPaid = 20 }
+            #endif
             if !inertPreview, !world.isBonusWorld {
                 let paid = progress.markVisited(world.id)
                 if paid > 0 {
@@ -190,11 +194,15 @@ struct WorldGameChooserView: View {
                             .font(.system(size: isCompact ? 13 : 15, weight: .heavy, design: .rounded))
                             .foregroundStyle(AppColor.diamondBlue)
                             .padding(.horizontal, 10).padding(.vertical, 4)
+                            .lineLimit(1).minimumScaleFactor(0.75)
                             .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.9)))
                             .transition(.scale.combined(with: .opacity))
                     }
                 }
-                Spacer(minLength: 0)
+                // The column takes the whole row. With a Spacer beside it the
+                // two split the space and the column shrank to the 150pt room
+                // bar — "חֶדֶר 1 מִתּוֹךְ…" cut off and the 💎 wrapped (Rani).
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             HStack(spacing: 10) {
@@ -251,6 +259,7 @@ struct WorldGameChooserView: View {
             Text(roomLine)
                 .font(.system(size: isCompact ? 13 : 15, weight: .semibold, design: .rounded))
                 .foregroundStyle(GlassInk.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 

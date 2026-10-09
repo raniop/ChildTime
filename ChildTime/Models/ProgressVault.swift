@@ -209,7 +209,7 @@ final class ProgressVault {
             try? await Task.sleep(nanoseconds: 3_000_000_000)
             guard let self, !Task.isCancelled else { return }
             guard let pid = self.boundProfileID else { return }
-            self.write(ProgressStore.shared.captureSnapshot(), for: pid)
+            PerfMark.run("vault.save") { self.write(ProgressStore.shared.captureSnapshot(), for: pid) }
         }
     }
 }

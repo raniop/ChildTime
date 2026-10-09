@@ -463,6 +463,13 @@ struct ChildTimeApp: App {
         case "surpriseround":                               // DEMO_SCREEN=surpriseround [DEMO_WORLD=soccer] [DEMO_GAME=balloon] — ⚡ the interstitial → the game
             MiniGameDemoHost(screen: name)
         case "wheel":    LuckyWheelView(onClose: {})
+        // 🎁 "אֵיזֶה נִצָּחוֹן!" — the chest after a session (test profile only).
+        case "reward":
+            RewardScreenView(kind: .gold, correctInSession: 10, world: Worlds.all[0],
+                             startedLevel: ProgressStore.shared.companionLevel, onDismiss: {})
+                .environmentObject(ParentSettings.shared)
+                .environmentObject(ProgressStore.shared)
+                .environmentObject(ShieldManager.shared)
         case "dashboard": ParentDashboardView(isRoot: true)
         // DEMO_SCREEN=childreport [DEMO_REPORT_PERIOD=week] [DEMO_REPORT_SCROLL=topics|worlds]
         case "childreport": ParentDashboardView(isRoot: true, demoOpenFirstChild: true)

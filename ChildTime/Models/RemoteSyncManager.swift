@@ -791,7 +791,7 @@ final class RemoteSyncManager: ObservableObject {
         // value with a lower local one (this is how a restored 4100★ could drop
         // back to a device's local 153★). Ratchet-merging with the cloud means an
         // upload can only ever raise accumulators, never lower them.
-        let local = ProgressStore.shared.captureSnapshot()
+        let local = PerfMark.run("sync.capture") { ProgressStore.shared.captureSnapshot() }
         let editSeqAtCapture = ProgressStore.shared.localEditSeq
         let ref = db.collection("children").document(pid.uuidString)
             .collection("state").document("current")
@@ -928,8 +928,10 @@ final class RemoteSyncManager: ObservableObject {
                 .addSnapshotListener { [weak self] doc, err in
                     if let err { self?.listenerFailed(id, err); return }
                     guard let self, let doc, let raw = doc.data() else { return }
-                    guard let snap = Self.decode(raw) else { return }
-                    self.handleRemoteSnapshot(snap, profileID: profile.id)
+                    PerfMark.run("sync.remoteSnapshot") {
+                        guard let snap = Self.decode(raw) else { return }
+                        self.handleRemoteSnapshot(snap, profileID: profile.id)
+                    }
                 }
             listeners[id] = listener
 

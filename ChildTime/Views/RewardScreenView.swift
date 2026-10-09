@@ -18,7 +18,7 @@ struct RewardScreenView: View {
     private var titleFont: Font {
         isCompact ? .system(size: 36, weight: .bold, design: .rounded) : .system(size: 56, weight: .bold, design: .rounded)
     }
-    private var companionSize: CGFloat { isCompact ? 64 : 80 }
+    private var companionSize: CGFloat { isCompact ? 70 : 90 }
 
     @State private var stage: ChestStage = .closed
     @State private var taps: Int = 0
@@ -98,14 +98,18 @@ struct RewardScreenView: View {
                     }
                 }
 
-                // Companion in corner — positioned so it never overlaps
-                // the CTA stack.
-                companionCorner
-                    .padding(.bottom, AppSpacing.md)
-                    .padding(.leading, AppSpacing.md)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity,
-                           alignment: .bottomLeading)
-                    .allowsHitTesting(true)
+                // The child's OWN character, the same floating buddy as on the
+                // home and the daily chest — its words ride on it. The corner
+                // lion here was the brand mascot, not the kid's pick, and its
+                // bubble floated off on its own (Rani, Dan's phone).
+                FloatingCompanion(controller: companion,
+                                  profile: ProfileStore.shared.active,
+                                  size: companionSize,
+                                  topInset: 140,
+                                  // Above the reward rows and "הַמְשֵׁךְ" — at 40 it
+                                  // walked onto the button and hid it.
+                                  bottomInset: isCompact ? 310 : 360,
+                                  horizontalInset: AppSpacing.lg)
 
                 // Tap ANYWHERE (not only the small chest) to open while it's
                 // glowing — a child shouldn't have to aim at the chest.
@@ -216,20 +220,6 @@ struct RewardScreenView: View {
         else { Haptic.light() }
         SoundPlayer.shared.play(.uiTap)
         if taps >= tapsToOpen { openChest() }
-    }
-
-    // MARK: - Companion corner
-
-    private var companionCorner: some View {
-        ZStack(alignment: .topLeading) {
-            if let bubble = companion.bubbleText {
-                BubbleSpeech(text: bubble)
-                    .offset(x: companionSize * 0.7, y: -companionSize * 0.2)
-                    .transition(.scale.combined(with: .opacity))
-            }
-            CompanionView(controller: companion, size: companionSize)
-        }
-        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: companion.bubbleText)
     }
 
     // MARK: - Reward items

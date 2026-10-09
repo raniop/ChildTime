@@ -581,13 +581,7 @@ struct ParentDashboardView: View {
             }
             // Push a full child page when a grid card is tapped (path-based so a
             // delete inside the page can pop back to the grid on its own).
-            .onAppear {
-                if demoOpenFirstChild, navPath.isEmpty, let first = rows.first?.profile.id {
-                    // selectChild: open, the child fills the revealed half — a push
-                    // there drew the same page in BOTH halves.
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { selectChild(first) }
-                }
-            }
+            .onAppear(perform: openFirstChildForDemo)
             .navigationDestination(for: UUID.self) { id in
                 childDetailScreen(for: id)
             }
@@ -2458,6 +2452,17 @@ struct ParentDashboardView: View {
         .background(Color.white.opacity(0.22), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
         .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    /// DEMO: open the first child. A method, not an inline closure — inline it
+    /// tipped the dashboard's long modifier chain past the type-checker's time
+    /// limit on a busy machine.
+    private func openFirstChildForDemo() {
+        if demoOpenFirstChild, navPath.isEmpty, let first = rows.first?.profile.id {
+            // selectChild: open, the child fills the revealed half — a push
+            // there drew the same page in BOTH halves.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { selectChild(first) }
+        }
     }
 
     /// "⚙️ הגדרות של X ›" — the one door to everything that is SET about the
