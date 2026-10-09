@@ -29,12 +29,19 @@ import com.rani.tofy.ui.settings.SettingsScreen
 fun AppNav() {
     val state by FamilyRepository.state.collectAsState()
     val hh = state.household
-    if (hh == null) return
-    if (hh.parentPinHash == null) { ParentPinSetupScreen(onDone = {}); return }
+    // 🔌 No family yet / listeners down at start: say so, with "נסו שוב" — this
+    // used to `return` and draw a blank screen with no way out.
+    if (hh == null) { com.rani.tofy.ui.common.FamilyConnectingScreen(failed = state.linkProblem != null) { FamilyRepository.retryNow() }; return }
+    // The PIN setup only on a SERVER-confirmed family: a cold cached doc without
+    // the hash would let this phone overwrite the code the other parent set.
+    if (hh.parentPinHash == null) {
+        if (!state.householdFromServer) { com.rani.tofy.ui.common.FamilyConnectingScreen { FamilyRepository.retryNow() }; return }
+        ParentPinSetupScreen(onDone = {}); return
+    }
     // Stays in the flow after step 2 writes the child (the flag is set before the
     // save), so steps 3–4 — device + lock — still show for the first child.
     val onboarding = com.rani.tofy.ui.onboarding.rememberOnboardingActive()
-    if (!state.childrenLoaded) return
+    if (!state.childrenLoaded) { com.rani.tofy.ui.common.FamilyConnectingScreen(failed = state.linkProblem != null) { FamilyRepository.retryNow() }; return }
     if (state.children.isEmpty() || onboarding) { AddChildFlow(firstChild = true, onDone = {}, onCancel = {}); return }
 
     val nav = rememberNavController()

@@ -102,12 +102,19 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 item { Header(state, onSettings, onBell, bellBadge) }
+                // 🔌 A live listener is down: say so, with "נסו שוב".
+                if (state.linkProblem != null) {
+                    item { com.rani.tofy.ui.common.FamilyLinkBanner { com.rani.tofy.data.FamilyRepository.retryNow() } }
+                }
                 item { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { banners() } }
                 item {
                     RowSpaced {
                         GlassButton(tr("＋ צרו ילד/ה"), Modifier.weight(1f).coachMark("p.newChild")) { onAddChild() }
                         GlassButton(tr("🧹 מטלות"), Modifier.weight(1f).coachMark("p.chores")) { onChores() }
-                        GlassButton(tr("📍 מיקום"), Modifier.weight(1f)) { onLocation(null) }
+                        // 📍 Only once a child has a device of their own (Rani, 9.10).
+                        if (state.orderedChildren.any { state.devicesOf(it.id).isNotEmpty() }) {
+                            GlassButton(tr("📍 מיקום"), Modifier.weight(1f)) { onLocation(null) }
+                        }
                     }
                 }
                 items(state.orderedChildren, key = { it.id }) { child ->

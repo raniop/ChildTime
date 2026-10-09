@@ -4,6 +4,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.Source
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
@@ -32,13 +39,32 @@ object AccountRepository {
 
     private fun parentRef(uid: String) = db.collection("parents").document(uid)
 
+    // 🔌 A failed family load used to sit on "Failed" with the raw error until
+    // the app was killed. Now it retries by itself (3s → a minute), and on
+    // "נסו שוב" / returning to the app (HouseholdManager.swift, Eli 9.10).
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private var retryJob: Job? = null
+    private var attempts = 0
+    private fun retryDelayMs(attempt: Int): Long = (minOf(60.0, 3.0 * Math.pow(2.0, (minOf(maxOf(attempt, 1) - 1, 5)).toDouble())) * 1000).toLong()
+
+    /** Try again now — the connecting screen's button, and app resume. */
+    fun retryNow() {
+        if (_boot.value !is Bootstrap.Failed) return
+        retryJob?.cancel()
+        scope.launch { bootstrap() }
+    }
+
     suspend fun bootstrap() {
         val user = auth.currentUser ?: return
+        retryJob?.cancel()
         _boot.value = Bootstrap.Loading
         try {
             ensureParentDoc(user.uid, user.email, user.displayName)
             val hid = findMembership(user.uid)
-            if (hid != null) { finish(hid); return }
+            if (hid != null) {
+                if (finish(hid)) { attempts = 0; return }
+                throw IllegalStateException("family not loaded")
+            }
             val mail = user.email?.lowercase()
             if (!mail.isNullOrBlank()) {
                 val inv = db.collection("households").whereArrayContains("invitedParentEmails", mail).limit(1).get().await()
@@ -49,6 +75,9 @@ object AccountRepository {
             _boot.value = Bootstrap.NeedsFamilyChoice
         } catch (e: Exception) {
             _boot.value = Bootstrap.Failed(e.message ?: "error")
+            attempts += 1
+            val wait = retryDelayMs(attempts)
+            retryJob = scope.launch { delay(wait); if (_boot.value is Bootstrap.Failed) bootstrap() }
         }
     }
 
@@ -66,24 +95,33 @@ object AccountRepository {
     }
 
     private suspend fun findMembership(uid: String): String? {
-        val q = db.collection("households").whereArrayContains("parentUIDs", uid).get().await()
+        val query = db.collection("households").whereArrayContains("parentUIDs", uid)
+        var q = query.get().await()
+        // "No family" from the CACHE is not an answer — ask the server (offline
+        // that throws → retry), or a cached empty result leads to a SECOND family.
+        if (q.isEmpty && q.metadata.isFromCache) q = query.get(Source.SERVER).await()
         val ids = q.documents.map { it.id }
         if (ids.isEmpty()) return null
         val preferred = (parentRef(uid).get().await().get("householdIDs") as? List<*>)?.filterIsInstance<String>().orEmpty()
         return preferred.firstOrNull { it in ids } ?: ids.first()
     }
 
-    private suspend fun finish(hid: String) {
-        val user = auth.currentUser ?: return
-        FamilyRepository.start(user.uid)
+    /** False when the family's listeners could not start — the caller retries. */
+    private suspend fun finish(hid: String): Boolean {
+        val user = auth.currentUser ?: return false
+        if (!FamilyRepository.start(user.uid)) return false
         recordMyParentName(hid)
         recordTimeZone(hid)
         _boot.value = Bootstrap.Ready(hid)
+        return true
     }
 
     /** "צרו משפחה חדשה" — the ONLY way a household is minted. */
     suspend fun createOwnHousehold(familyName: String?) {
         val uid = auth.currentUser?.uid ?: return
+        // 🛡 Never a SECOND family: if this account already belongs to one, load
+        // it. If that check can't reach the server, this throws — no guessing.
+        findMembership(uid)?.let { finish(it); return }
         val id = UUID.randomUUID().toString().uppercase()
         val data = mutableMapOf<String, Any?>(
             "id" to id, "parentUIDs" to listOf(uid), "childIDs" to emptyList<String>(),

@@ -134,7 +134,8 @@ private fun ParentRoot() {
         boot is Bootstrap.NeedsFamilyChoice && joining -> JoinFamilyScreen(onBack = { joining = false })
         boot is Bootstrap.NeedsFamilyChoice -> FamilyChoiceScreen(onJoin = { joining = true })
         boot is Bootstrap.EmailInvite -> com.rani.tofy.ui.onboarding.EmailInviteScreen(boot as Bootstrap.EmailInvite)
-        boot is Bootstrap.Failed -> Loading((boot as Bootstrap.Failed).message)
+        // 🔌 Never a raw exception and a dead end: retry by itself, and a button.
+        boot is Bootstrap.Failed -> com.rani.tofy.ui.common.FamilyConnectingScreen(failed = true) { AccountRepository.retryNow() }
         else -> AppNav()
     }
 }

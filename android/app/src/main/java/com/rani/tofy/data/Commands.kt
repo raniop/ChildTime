@@ -125,8 +125,34 @@ object Commands {
     fun allowAppRemoval(childID: String) = scope.launch { deviceCommand(childID, mapOf("appRemovalUnlockAt" to nowSecs()), null) }
 
     /** Reset: the child's device does the authoritative wipe. */
-    suspend fun resetProgress(childID: String): WriteOutcome =
-        childCommand(childID, mapOf("resetRequestedAt" to nowSecs(), "pendingMinuteAdjustment" to 0, "pendingGiftAdjustment" to 0))
+    suspend fun resetProgress(childID: String): WriteOutcome {
+        val out = childCommand(childID, mapOf("resetRequestedAt" to nowSecs(), "pendingMinuteAdjustment" to 0, "pendingGiftAdjustment" to 0))
+        // 👨‍👧 No device of the child's own (she plays in Kid Mode on a parent's
+        // phone) → nobody would consume the command until Kid Mode is next
+        // opened, and the dashboard kept the old numbers. Consume it here, in ONE
+        // transaction: read the command, write the blank at a higher revision and
+        // reset epoch, clear the command (RemoteSyncManager.applyPendingReset).
+        if (out != WriteOutcome.DENIED && out != WriteOutcome.ERROR &&
+            FamilyRepository.state.value.devicesOf(childID).isEmpty()) {
+            runCatching { consumeResetHere(childID) }
+        }
+        return out
+    }
+
+    private suspend fun consumeResetHere(childID: String) {
+        val childRef = db.collection("children").document(childID)
+        val stateRef = childRef.collection("state").document("current")
+        db.runTransaction { txn ->
+            if (txn.get(childRef).data?.get("resetRequestedAt") == null) return@runTransaction null
+            val cloud = txn.get(stateRef).data?.let { com.rani.tofy.kid.core.ProgressSnapshot.fromFirestore(it) }
+            val blank = com.rani.tofy.kid.core.ProgressSnapshot(lastModifiedAt = com.rani.tofy.kid.core.AppleTime.now())
+            blank.revision = (cloud?.revision ?: 0) + 1
+            blank.resetEpoch = (cloud?.resetEpoch ?: 0) + 1
+            txn.set(stateRef, blank.toFirestore())   // NOT merge
+            txn.update(childRef, hashMapOf<String, Any?>("resetRequestedAt" to FieldValue.delete()))
+            null
+        }.await()
+    }
 
     suspend fun purgeCaches(childID: String): WriteOutcome =
         confirmedMerge(db.collection("children").document(childID).collection("state").document("current"), mapOf("purgeCacheAt" to nowSecs()))

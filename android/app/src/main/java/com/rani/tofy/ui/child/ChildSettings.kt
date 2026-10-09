@@ -217,7 +217,7 @@ private fun MainList(
                         else tr("אין כרגע מכשיר מחובר ל%@ — החלון ייפתח ברגע שהמכשיר יתחבר.", child.name)
                 }
             }
-            if (onLocation != null) {
+            if (onLocation != null && connected) {   // 📍 nothing to locate without a device
                 RowDivider()
                 SettingsRow("📍", tr("איפה %@", child.name), tr("מפה, מקומות וצפצוף לטלפון")) { onLocation() }
             }

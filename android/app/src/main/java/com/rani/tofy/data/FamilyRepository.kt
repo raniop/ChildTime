@@ -3,6 +3,13 @@ package com.rani.tofy.data
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Source
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -19,6 +26,10 @@ data class FamilyState(
     val error: String? = null,
     /** The first SERVER children snapshot has arrived — before it, "no children" means "not loaded yet". */
     val childrenLoaded: Boolean = false,
+    /** The household doc came from the SERVER at least once (not a cold cache). */
+    val householdFromServer: Boolean = false,
+    /** A live listener failed — the screen says "not connected" and it re-attaches. */
+    val linkProblem: String? = null,
 ) {
     /** The family's order (households.childOrder), then oldest first — same as iOS. */
     val orderedChildren: List<Child>
@@ -45,19 +56,65 @@ object FamilyRepository {
     private val regs = mutableListOf<ListenerRegistration>()
     private val childRegs = mutableMapOf<String, List<ListenerRegistration>>()
 
-    suspend fun start(uid: String) {
-        if (this.uid == uid && _state.value.household != null) return
+    /** False when no family could be resolved — AccountRepository retries. */
+    suspend fun start(uid: String): Boolean {
+        if (this.uid == uid && _state.value.household != null) return true
         stop()
         this.uid = uid
         _state.value = FamilyState(loading = true)
         val hid = try { resolveHousehold(uid) } catch (e: Exception) {
-            _state.value = FamilyState(loading = false, error = e.message); return
+            _state.value = FamilyState(loading = false, error = e.message); return false
         }
-        if (hid == null) { _state.value = FamilyState(loading = false); return }
+        if (hid == null) { _state.value = FamilyState(loading = false); return false }
         listen(hid)
+        return true
+    }
+
+    // 🔌 A Firestore listener that errors is DEAD for good. These used to ignore
+    // the error, so the dashboard froze on its last numbers. Now: say so,
+    // re-assert membership and re-attach with a back-off.
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private var relistenJob: Job? = null
+    private var listenerFailures = 0
+
+    private fun listenerFailed(hid: String, msg: String?) {
+        _state.update { it.copy(linkProblem = msg ?: "error", loading = false) }
+        listenerFailures += 1
+        val wait = (minOf(60.0, 3.0 * Math.pow(2.0, (minOf(listenerFailures - 1, 5)).toDouble())) * 1000).toLong()
+        relistenJob?.cancel()
+        relistenJob = scope.launch {
+            delay(wait)
+            if (householdID != hid) return@launch
+            reassertMembership(hid)
+            regs.forEach { it.remove() }; regs.clear()
+            childRegs.values.flatten().forEach { it.remove() }; childRegs.clear()
+            listen(hid)
+        }
+    }
+
+    private fun listenerHealthy() {
+        if (listenerFailures == 0 && _state.value.linkProblem == null) return
+        listenerFailures = 0
+        relistenJob?.cancel(); relistenJob = null
+        _state.update { it.copy(linkProblem = null) }
+    }
+
+    /** "נסו שוב" on the banner. */
+    fun retryNow() {
+        val hid = householdID ?: return
+        listenerFailures = 0
+        relistenJob?.cancel()
+        scope.launch {
+            reassertMembership(hid)
+            regs.forEach { it.remove() }; regs.clear()
+            childRegs.values.flatten().forEach { it.remove() }; childRegs.clear()
+            listen(hid)
+        }
     }
 
     fun stop() {
+        relistenJob?.cancel(); relistenJob = null
+        listenerFailures = 0
         regs.forEach { it.remove() }; regs.clear()
         childRegs.values.flatten().forEach { it.remove() }; childRegs.clear()
         uid = null
@@ -74,23 +131,30 @@ object FamilyRepository {
             val ok = runCatching { db.collection("households").document(hid).get().await() }.getOrNull()
             if (ok?.exists() == true && (ok.get("parentUIDs") as? List<*>)?.contains(uid) == true) return hid
         }
-        val q = db.collection("households").whereArrayContains("parentUIDs", uid).get().await()
+        val query = db.collection("households").whereArrayContains("parentUIDs", uid)
+        var q = query.get().await()
+        if (q.isEmpty && q.metadata.isFromCache) q = query.get(Source.SERVER).await()
         return q.documents.firstOrNull()?.id
     }
 
     private fun listen(hid: String) {
         regs += db.collection("households").document(hid).addSnapshotListener { doc, err ->
-            if (err != null) { _state.update { it.copy(loading = false, error = err.message) }; return@addSnapshotListener }
+            if (err != null) { listenerFailed(hid, err.message); return@addSnapshotListener }
+            listenerHealthy()
             val d = doc?.data ?: return@addSnapshotListener
-            _state.update { it.copy(household = Household.from(hid, d), loading = false) }
+            val server = doc.metadata.isFromCache.not()
+            _state.update { it.copy(household = Household.from(hid, d), loading = false,
+                householdFromServer = it.householdFromServer || server) }
         }
-        regs += db.collection("children").whereEqualTo("householdID", hid).addSnapshotListener { snap, _ ->
+        regs += db.collection("children").whereEqualTo("householdID", hid).addSnapshotListener { snap, err ->
+            if (err != null) { listenerFailed(hid, err.message); return@addSnapshotListener }
             snap ?: return@addSnapshotListener
             val kids = snap.documents.mapNotNull { doc -> doc.data?.let { Child.from(doc.id, it) } }
             _state.update { it.copy(children = kids, childrenLoaded = it.childrenLoaded || !snap.metadata.isFromCache || kids.isNotEmpty()) }
             syncChildListeners(kids.map { it.id }.toSet())
         }
-        regs += db.collection("childDevices").whereEqualTo("householdID", hid).addSnapshotListener { snap, _ ->
+        regs += db.collection("childDevices").whereEqualTo("householdID", hid).addSnapshotListener { snap, err ->
+            if (err != null) { listenerFailed(hid, err.message); return@addSnapshotListener }
             snap ?: return@addSnapshotListener
             _state.update { s -> s.copy(devices = snap.documents.mapNotNull { d -> d.data?.let { ChildDevice.from(d.id, it) } }) }
         }
@@ -114,8 +178,8 @@ object FamilyRepository {
     }
 
     /** Re-add our uid to parentUIDs — the rules let anyone add ONLY themselves. */
-    suspend fun reassertMembership() {
-        val u = uid ?: return; val hid = householdID ?: return
+    suspend fun reassertMembership(forHousehold: String? = null) {
+        val u = uid ?: return; val hid = forHousehold ?: householdID ?: return
         runCatching { db.collection("households").document(hid).update("parentUIDs", FieldValue.arrayUnion(u)).await() }
     }
 }
