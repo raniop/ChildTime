@@ -4,6 +4,7 @@ import SwiftUI
 /// parent created for this child. On success the device joins the family and
 /// lands straight on that child, ready to play.
 struct ChildJoinView: View {
+    @ObservedObject private var display = DisplayGeometry.shared
     @ObservedObject private var household = HouseholdManager.shared
     @EnvironmentObject var profiles: ProfileStore
     @EnvironmentObject var settings: ParentSettings
@@ -52,12 +53,18 @@ struct ChildJoinView: View {
             ScrollViewReader { scroller in
             ScrollView {
                 VStack(spacing: AppSpacing.lg) {
-                    // 🧭 Step ③ of the new-parent flow, seen from the child's phone.
-                    if !settings.justDisconnected {
-                        OnboardingStepsBar(current: 3, note: tr("בטלפון של הילד"))
-                            .padding(.top, 44)
-                    }
-                    CompanionView(controller: companion, size: 120)
+                // 🧭 Step ③ of the new-parent flow, seen from the child's phone —
+                // the same bar as every step, at its own width (inside the 340pt
+                // column it was squeezed to half and its labels were cut).
+                if !settings.justDisconnected {
+                    OnboardingStepsBar(current: 3, note: tr("בטלפון של הילד"))
+                        .padding(.top, 44)
+                        .padding(.horizontal, AppSpacing.lg)
+                }
+                VStack(spacing: AppSpacing.lg) {
+                    // Smaller on the short, wide glass, so the title sits on one line
+                    // and the code row is in view without scrolling.
+                    CompanionView(controller: companion, size: display.isWideShort ? 84 : 120)
                     if settings.justDisconnected {
                         Text(tr("הַמַּכְשִׁיר נוּתַּק"))
                             .font(.system(size: 30, weight: .heavy, design: .rounded))
@@ -194,11 +201,13 @@ struct ChildJoinView: View {
                     .padding(.top, 8)
                 }
                 .padding(.horizontal, AppSpacing.lg)
-                .padding(.vertical, AppSpacing.xl)
+                .padding(.bottom, AppSpacing.xl)
+                .padding(.top, settings.justDisconnected ? AppSpacing.xl : 0)
                 // One column width for the QR button, the code field and the steps
                 // box (Rani: "הכפתורים תתאים לגודל התאים למטה").
-                .frame(maxWidth: 340)
+                .frame(maxWidth: display.isWideShort ? 440 : 340)
                 .frame(maxWidth: .infinity)
+                }
             }
             }
         }
