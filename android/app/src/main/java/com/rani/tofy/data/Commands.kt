@@ -132,11 +132,29 @@ object Commands {
         // opened, and the dashboard kept the old numbers. Consume it here, in ONE
         // transaction: read the command, write the blank at a higher revision and
         // reset epoch, clear the command (RemoteSyncManager.applyPendingReset).
-        if (out != WriteOutcome.DENIED && out != WriteOutcome.ERROR &&
-            FamilyRepository.state.value.devicesOf(childID).isEmpty()) {
+        if (out != WriteOutcome.DENIED && out != WriteOutcome.ERROR && childHasOwnDevice(childID) == false) {
             runCatching { consumeResetHere(childID) }
         }
         return out
+    }
+
+    /**
+     * Asked of the SERVER (the listener may not have loaded yet, and an empty
+     * unloaded list would take the wipe away from a real device). Kid Mode rows
+     * are a parent's phone, told apart by the `parent_<install>` row with the
+     * same deviceID (HouseholdManager.childHasOwnDevice). null = couldn't ask.
+     */
+    private suspend fun childHasOwnDevice(childID: String): Boolean? {
+        val hid = FamilyRepository.householdID ?: return null
+        val docs = runCatching {
+            db.collection("childDevices").whereEqualTo("householdID", hid)
+                .get(com.google.firebase.firestore.Source.SERVER).await().documents
+        }.getOrNull() ?: return null
+        val parentPhones = docs.filter { it.getString("role") == "parent" }.mapNotNull { it.getString("deviceID") }.toSet()
+        return docs.any {
+            it.getString("childID") == childID && it.getString("role") != "parent" &&
+                it.getBoolean("removed") != true && it.getString("deviceID") !in parentPhones
+        }
     }
 
     private suspend fun consumeResetHere(childID: String) {

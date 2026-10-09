@@ -935,12 +935,20 @@ final class HouseholdManager: ObservableObject {
             .whereField("householdID", isEqualTo: hid)
             .getDocuments(source: .server) else { return nil }
         let id = childID.uuidString
+        // Kid Mode rows are a PARENT's phone playing as the child — not her own
+        // device. Every parent phone also has its `parent_<install>` row with the
+        // same deviceID, which is how they're told apart (this phone's, a
+        // co-parent's, or one left behind by an older build).
+        let parentPhones = Set(snap.documents.compactMap { doc -> String? in
+            let d = doc.data()
+            return (d["role"] as? String) == "parent" ? d["deviceID"] as? String : nil
+        })
         return snap.documents.contains { doc in
             let d = doc.data()
-            // THIS phone's own Kid Mode row is not "her own device" — this phone
-            // is the one asking, and it is exactly where she plays.
+            let device = d["deviceID"] as? String ?? ""
             return (d["childID"] as? String) == id
-                && (d["deviceID"] as? String) != DeviceIdentity.installID
+                && device != DeviceIdentity.installID
+                && !parentPhones.contains(device)
                 && (d["role"] as? String) != "parent"
                 && (d["removed"] as? Bool) != true
         }
