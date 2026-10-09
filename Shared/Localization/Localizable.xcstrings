@@ -63180,6 +63180,28 @@
         }
       }
     },
+    "ילד שמנסה להירשם כהורה מקבל מסך שמבקש לפנות לאבא או לאמא — הגיל נבדק דרך אפל או לפי שנת הלידה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الطفل الذي يحاول التسجيل كأحد الوالدين يرى شاشة تطلب منه التوجه إلى أمي أو أبي — يُتحقق من العمر عبر Apple أو حسب سنة الميلاد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A child who tries to sign up as a parent gets a screen asking them to go to Mom or Dad — age is checked through Apple or by year of birth"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ребёнок, который пытается зарегистрироваться как родитель, видит экран с просьбой обратиться к маме или папе — возраст проверяется через Apple или по году рождения"
+          }
+        }
+      }
+    },
     "ילד שמצליח מקבל שאלות קשות מכיתה אחת מעליו, במקום לחזור לשאלות של גן. ותשובות שנראו אותו דבר בלי ניקוד הוחלפו" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -104649,6 +104671,28 @@
         }
       }
     },
+    "צליל רק במכשיר שבו עונים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الصوت فقط على الجهاز الذي تُجيب عليه"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sound only on the device you answer on"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Звук только на том устройстве, где отвечают"
+          }
+        }
+      }
+    },
     "צלילים" : {
       "localizations" : {
         "ar" : {
@@ -110120,6 +110164,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Только родитель"
+          }
+        }
+      }
+    },
+    "רק הורה פותח משפחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فقط أحد الوالدين يفتح العائلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only a parent opens a family"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Семью открывает только родитель"
           }
         }
       }
@@ -117876,6 +117942,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ответ = минуты экрана"
+          }
+        }
+      }
+    },
+    "תשובה נכונה בטאבלט כבר לא משמיעה צליל בטלפון של אותו ילד, והזמזום מהרמקולים נעלם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإجابة الصحيحة على الجهاز اللوحي لم تعد تُصدر صوتاً على هاتف الطفل نفسه، واختفى الطنين من السماعات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A right answer on the tablet no longer plays a sound on the same child's phone, and the hum from the speakers is gone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Правильный ответ на планшете больше не звучит на телефоне того же ребёнка, а гул из динамиков исчез"
           }
         }
       }
