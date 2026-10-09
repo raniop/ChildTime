@@ -30,6 +30,9 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         runCatching { com.rani.tofy.billing.BillingRepository.resume(this) }
+        // 🔌 Back in the app: a failed family load / a broken listener tries again now.
+        com.rani.tofy.data.AccountRepository.retryNow()
+        com.rani.tofy.data.FamilyRepository.retryIfBroken()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

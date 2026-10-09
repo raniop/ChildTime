@@ -3,6 +3,7 @@ package com.rani.tofy.data
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.MetadataChanges
 import com.google.firebase.firestore.Source
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -76,15 +77,22 @@ object FamilyRepository {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var relistenJob: Job? = null
     private var listenerFailures = 0
+    /** The family we're listening to — kept here, not read from `state.household`,
+     *  which is still null when the very first snapshot fails (then nothing could
+     *  ever re-attach, and "נסו שוב" was a dead button). */
+    private var listeningHid: String? = null
+    /** Which listeners are failing right now — the banner clears only when ALL are back. */
+    private val failing = mutableSetOf<String>()
 
-    private fun listenerFailed(hid: String, msg: String?) {
+    private fun listenerFailed(hid: String, msg: String?, which: String = "household") {
+        failing += which
         _state.update { it.copy(linkProblem = msg ?: "error", loading = false) }
         listenerFailures += 1
         val wait = (minOf(60.0, 3.0 * Math.pow(2.0, (minOf(listenerFailures - 1, 5)).toDouble())) * 1000).toLong()
         relistenJob?.cancel()
         relistenJob = scope.launch {
             delay(wait)
-            if (householdID != hid) return@launch
+            if (listeningHid != hid) return@launch
             reassertMembership(hid)
             regs.forEach { it.remove() }; regs.clear()
             childRegs.values.flatten().forEach { it.remove() }; childRegs.clear()
@@ -92,16 +100,21 @@ object FamilyRepository {
         }
     }
 
-    private fun listenerHealthy() {
+    private fun listenerHealthy(which: String = "household") {
+        failing -= which
+        if (failing.isNotEmpty()) return
         if (listenerFailures == 0 && _state.value.linkProblem == null) return
         listenerFailures = 0
         relistenJob?.cancel(); relistenJob = null
         _state.update { it.copy(linkProblem = null) }
     }
 
+    /** Back in the app: re-attach only if something is actually broken. */
+    fun retryIfBroken() { if (_state.value.linkProblem != null) retryNow() }
+
     /** "נסו שוב" on the banner. */
     fun retryNow() {
-        val hid = householdID ?: return
+        val hid = listeningHid ?: return
         listenerFailures = 0
         relistenJob?.cancel()
         scope.launch {
@@ -114,6 +127,8 @@ object FamilyRepository {
 
     fun stop() {
         relistenJob?.cancel(); relistenJob = null
+        listeningHid = null
+        failing.clear()
         listenerFailures = 0
         regs.forEach { it.remove() }; regs.clear()
         childRegs.values.flatten().forEach { it.remove() }; childRegs.clear()
@@ -138,34 +153,47 @@ object FamilyRepository {
     }
 
     private fun listen(hid: String) {
-        regs += db.collection("households").document(hid).addSnapshotListener { doc, err ->
-            if (err != null) { listenerFailed(hid, err.message); return@addSnapshotListener }
-            listenerHealthy()
+        listeningHid = hid
+        failing.clear()
+        // INCLUDE metadata changes: a server CONFIRMING the cached doc (no data
+        // change) is otherwise silent, so `householdFromServer` never turned true
+        // and the PIN gate waited forever on "מתחברים".
+        regs += db.collection("households").document(hid).addSnapshotListener(MetadataChanges.INCLUDE) { doc, err ->
+            if (err != null) { listenerFailed(hid, err.message, "household"); return@addSnapshotListener }
+            listenerHealthy("household")
             val d = doc?.data ?: return@addSnapshotListener
             val server = doc.metadata.isFromCache.not()
             _state.update { it.copy(household = Household.from(hid, d), loading = false,
                 householdFromServer = it.householdFromServer || server) }
         }
-        regs += db.collection("children").whereEqualTo("householdID", hid).addSnapshotListener { snap, err ->
-            if (err != null) { listenerFailed(hid, err.message); return@addSnapshotListener }
+        regs += db.collection("children").whereEqualTo("householdID", hid).addSnapshotListener(MetadataChanges.INCLUDE) { snap, err ->
+            if (err != null) { listenerFailed(hid, err.message, "children"); return@addSnapshotListener }
+            listenerHealthy("children")
             snap ?: return@addSnapshotListener
             val kids = snap.documents.mapNotNull { doc -> doc.data?.let { Child.from(doc.id, it) } }
             _state.update { it.copy(children = kids, childrenLoaded = it.childrenLoaded || !snap.metadata.isFromCache || kids.isNotEmpty()) }
             syncChildListeners(kids.map { it.id }.toSet())
         }
         regs += db.collection("childDevices").whereEqualTo("householdID", hid).addSnapshotListener { snap, err ->
-            if (err != null) { listenerFailed(hid, err.message); return@addSnapshotListener }
+            if (err != null) { listenerFailed(hid, err.message, "devices"); return@addSnapshotListener }
+            listenerHealthy("devices")
             snap ?: return@addSnapshotListener
             _state.update { s -> s.copy(devices = snap.documents.mapNotNull { d -> d.data?.let { ChildDevice.from(d.id, it) } }) }
         }
     }
 
     private fun syncChildListeners(ids: Set<String>) {
-        (childRegs.keys - ids).forEach { gone -> childRegs.remove(gone)?.forEach { it.remove() } }
+        (childRegs.keys - ids).forEach { gone ->
+            childRegs.remove(gone)?.forEach { it.remove() }
+            failing -= "progress:$gone"   // a deleted child's failed listener can't hold the banner up
+        }
         (ids - childRegs.keys).forEach { id ->
             val state = db.collection("children").document(id).collection("state")
             childRegs[id] = listOf(
-                state.document("current").addSnapshotListener { doc, _ ->
+                state.document("current").addSnapshotListener { doc, err ->
+                    // An error is NOT "zero progress" — keep the last numbers and heal.
+                    if (err != null) { listeningHid?.let { listenerFailed(it, err.message, "progress:$id") }; return@addSnapshotListener }
+                    listenerHealthy("progress:$id")
                     val p = doc?.data?.let { Progress.from(it) } ?: Progress.EMPTY
                     _state.update { it.copy(progress = it.progress + (id to p)) }
                 },

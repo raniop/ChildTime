@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.Source
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -56,7 +57,11 @@ object AccountRepository {
 
     suspend fun bootstrap() {
         val user = auth.currentUser ?: return
-        retryJob?.cancel()
+        // Cancel a pending retry — but never the job we are running INSIDE: the
+        // auto-retry called bootstrap(), which cancelled itself, and every later
+        // await threw CancellationException → "Failed" → retry → cancel… forever.
+        val me = kotlin.coroutines.coroutineContext[Job]
+        if (retryJob != me) retryJob?.cancel()
         _boot.value = Bootstrap.Loading
         try {
             ensureParentDoc(user.uid, user.email, user.displayName)
@@ -73,6 +78,8 @@ object AccountRepository {
                 }
             }
             _boot.value = Bootstrap.NeedsFamilyChoice
+        } catch (e: CancellationException) {
+            throw e   // a cancelled launch (rotation) is not a failed load
         } catch (e: Exception) {
             _boot.value = Bootstrap.Failed(e.message ?: "error")
             attempts += 1
@@ -121,7 +128,7 @@ object AccountRepository {
         val uid = auth.currentUser?.uid ?: return
         // 🛡 Never a SECOND family: if this account already belongs to one, load
         // it. If that check can't reach the server, this throws — no guessing.
-        findMembership(uid)?.let { finish(it); return }
+        findMembership(uid)?.let { if (!finish(it)) error("family not loaded"); return }
         val id = UUID.randomUUID().toString().uppercase()
         val data = mutableMapOf<String, Any?>(
             "id" to id, "parentUIDs" to listOf(uid), "childIDs" to emptyList<String>(),
@@ -130,7 +137,7 @@ object AccountRepository {
         familyName?.trim()?.takeIf { it.isNotEmpty() }?.let { data["familyName"] = it }
         db.collection("households").document(id).set(data).await()
         parentRef(uid).update("householdIDs", FieldValue.arrayUnion(id)).await()
-        finish(id)
+        if (!finish(id)) error("family not loaded")
     }
 
     suspend fun acceptEmailInvite(hid: String) {
@@ -140,7 +147,7 @@ object AccountRepository {
         user.email?.lowercase()?.let {
             runCatching { db.collection("households").document(hid).update("invitedParentEmails", FieldValue.arrayRemove(it)).await() }
         }
-        finish(hid)
+        if (!finish(hid)) error("family not loaded")   // the screen shows its error, not an endless spinner
     }
 
     /** Join a co-parent's family by the 6-char code (redeemInvite, bringLocalChildren=false). */
@@ -156,7 +163,7 @@ object AccountRepository {
         db.collection("households").document(hid).update("parentUIDs", FieldValue.arrayUnion(user.uid)).await()
         parentRef(user.uid).update("householdIDs", FieldValue.arrayUnion(hid)).await()
         db.collection("invites").document(code).update("redeemedBy", user.uid).await()
-        finish(hid)
+        if (!finish(hid)) error("family not loaded")
     }
 
     private suspend fun recordMyParentName(hid: String) {

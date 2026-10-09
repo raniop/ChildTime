@@ -145,7 +145,10 @@ object Commands {
         db.runTransaction { txn ->
             if (txn.get(childRef).data?.get("resetRequestedAt") == null) return@runTransaction null
             val cloud = txn.get(stateRef).data?.let { com.rani.tofy.kid.core.ProgressSnapshot.fromFirestore(it) }
-            val blank = com.rani.tofy.kid.core.ProgressSnapshot(lastModifiedAt = com.rani.tofy.kid.core.AppleTime.now())
+            // deviceID = the PARENT, not this install: Kid Mode on this same phone
+            // uses the install id and would skip the blank as "our own echo".
+            val blank = com.rani.tofy.kid.core.ProgressSnapshot(lastModifiedAt = com.rani.tofy.kid.core.AppleTime.now(),
+                deviceID = "parent-" + (uid ?: "unknown"))
             blank.revision = (cloud?.revision ?: 0) + 1
             blank.resetEpoch = (cloud?.resetEpoch ?: 0) + 1
             txn.set(stateRef, blank.toFirestore())   // NOT merge
