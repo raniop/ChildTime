@@ -2218,7 +2218,7 @@ struct WorldMapView: View {
                 } else {
                     HStack(spacing: 4) {
                         Text("💝").font(.system(size: 18))
-                        Text(title).font(.system(size: 16, weight: .black, design: .rounded)).lineLimit(1).minimumScaleFactor(0.5)
+                        Text(title).font(.system(size: 16, weight: .black, design: .rounded))
                     }
                     Text(tr("מַתָּנָה · פִּתְחוּ!")).font(.system(size: 11, weight: .heavy, design: .rounded)).opacity(0.95)
                 }
@@ -2233,7 +2233,7 @@ struct WorldMapView: View {
         }
         .buttonStyle(.juicy)
         .disabled(isOpening)
-        .frame(width: 112)   // fixed, like the code key — the minutes take the rest
+        .frame(maxWidth: .infinity)   // the same width as the minutes beside it (Rani)
         .accessibilityLabel(giftButtonTitle)
     }
 
@@ -2264,14 +2264,15 @@ struct WorldMapView: View {
                         } else {
                             HStack(spacing: 5) {
                                 Image(systemName: "gamecontroller.fill").font(.system(size: 15, weight: .bold)).foregroundStyle(Color(hex: "8CFFC4"))
-                                // Exact minutes AND seconds (Rani) — "74:49 דק׳ לשחק" was cut
-                                // to "…לש"; it shrinks to fit whole instead.
-                                Text(tr("\(Self.timeLabel(demoPlaySeconds ?? progress.redeemableSecondsNow)) דַּקּ׳ לְשַׂחֵק"))
+                                // Exact minutes AND seconds, in the gift key's own shape
+                                // ("17:32 דק׳" / "מתנה · פתחו!") — one size for both titles
+                                // (Rani: "74:49 דק׳ לשחק" was cut, then shrank smaller
+                                // than the gift beside it).
+                                Text(tr("\(Self.timeLabel(demoPlaySeconds ?? progress.redeemableSecondsNow)) דַּקּ׳"))
                                     .font(.system(size: 16, weight: .black, design: .rounded))
-                                    .lineLimit(1).minimumScaleFactor(0.5)
-                                    .layoutPriority(1)
+                                    .lineLimit(1).minimumScaleFactor(0.7)
                             }
-                            Text(tr("לְחִיצָה לִפְתִּיחָה ▶")).font(.system(size: 11, weight: .heavy, design: .rounded))
+                            Text(tr("לְשַׂחֵק · פִּתְחוּ!")).font(.system(size: 11, weight: .heavy, design: .rounded))
                                 .foregroundStyle(Color(hex: "8CFFC4"))
                         }
                     }
@@ -2331,7 +2332,7 @@ struct WorldMapView: View {
             }
         }
         .buttonStyle(.plain)
-        .frame(width: 84)   // a small key — the minutes are the wide one
+        .frame(width: 68)   // a small key (Rani: smaller) — the gift and the minutes share the rest
         .accessibilityLabel(p.hasPlayPIN ? tr("הַדַּקּוֹת שֶׁלִּי מוּגָנוֹת בְּקוֹד") : tr("קוֹד סוֹדִי לַדַּקּוֹת שֶׁלִּי"))
     }
 

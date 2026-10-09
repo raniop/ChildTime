@@ -830,7 +830,10 @@ final class ProgressStore: ObservableObject {
     /// parent enabled them: enabled → 0.6 (slight head-start), else 0.4.
     func affinity(for topic: Topic) -> Double {
         if let a = topicAffinity[topic.rawValue] { return a }
-        return (ProfileStore.shared.active?.playableTopics ?? ParentSettings.shared.enabledTopics).contains(topic) ? 0.6 : 0.4
+        // One topic's check — building the whole playable set for each topic made
+        // every next question cost ~50ms (Rani: the stutter between questions).
+        let open = ProfileStore.shared.active.map { $0.allows(topic) } ?? ParentSettings.shared.enabledTopics.contains(topic)
+        return open ? 0.6 : 0.4
     }
 
     /// Rolling average response time (ms) for a topic; nil if never answered.

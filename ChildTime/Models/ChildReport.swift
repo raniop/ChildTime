@@ -34,7 +34,17 @@ enum SkillCatalog {
         "probability":    tr("הסתברות"),
         "circle":         tr("מעגל"),
     ] }
-    static func name(_ key: String) -> String { names[key] ?? key }
+    /// Built once per language: rebuilding ~25 translated names on EVERY call
+    /// cost ~30ms each time the question card redrew (Rani: the stutter after
+    /// an answer).
+    nonisolated(unsafe) private static var cache: (lang: String, names: [String: String])?
+    private static let cacheLock = NSLock()
+    static func name(_ key: String) -> String {
+        let lang = LanguageStore.shared.current.rawValue
+        cacheLock.lock(); defer { cacheLock.unlock() }
+        if cache?.lang != lang { cache = (lang, names) }
+        return cache?.names[key] ?? key
+    }
 }
 
 /// The three windows the parent report can be filtered to.

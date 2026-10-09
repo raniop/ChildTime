@@ -47,7 +47,10 @@ struct QuestionRunnerView: View {
     private var portalEmojiSize: CGFloat { isCompact ? 130 : 180 }
     private var portalTitleSize: CGFloat { isCompact ? 36 : 56 }
 
-    @StateObject private var companion = CompanionController()
+    /// Held, not observed: every cheer and bubble republished the WHOLE question
+    /// screen (~45ms a time on the simulator, more on a phone) — the stutter after
+    /// an answer (Rani). Only the buddy views that show it observe it.
+    @State private var companion = CompanionController()
     @State private var current: Question?
     @State private var questionIndex: Int = 0
     @State private var correctInSession: Int = 0
@@ -1317,6 +1320,7 @@ struct QuestionRunnerView: View {
         if preReader { SpeechReader.shared.speak(q.readAloudText) }
         #if DEBUG
         // 📏 DEMO_AUTOTAP: answer each question correctly after 2.5s, to time the tap path.
+        HitchMonitor.shared.start()
         if ProcessInfo.processInfo.environment["DEMO_AUTOTAP"] != nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { pickOption(q.correctIndex, q: q) }
         }
@@ -1422,6 +1426,9 @@ struct QuestionRunnerView: View {
     }
 
     private func pickOption(_ idx: Int, q: Question) {
+        #if DEBUG
+        HitchMonitor.shared.lastTap = CACurrentMediaTime()
+        #endif
         SpeechReader.shared.stop()   // the child answered — don't keep reading a question that's gone
         // A tap must belong to the question ON SCREEN. If a stale option view
         // (mid-removal during the question swap) fires its captured closure,

@@ -72077,6 +72077,28 @@
         }
       }
     },
+    "לְשַׂחֵק · פִּתְחוּ!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "للعب · افتحوها!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play · open it!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Играть · открой!"
+          }
+        }
+      }
+    },
     "לְשַׂחֵק וְלִלְמוֹד · מַתְחִילִים קֹדֶם בַּמַּכְשִׁיר שֶׁל הַהוֹרֶה" : {
       "extractionState" : "stale",
       "localizations" : {
