@@ -1014,9 +1014,15 @@ final class HouseholdManager: ObservableObject {
         ShieldManager.shared.refreshStatus()
         device.shieldAuthorized = ShieldManager.shared.isAuthorized
         device.newAppsLocked = ParentSettings.shared.newAppLockArmed
+        // Kid Mode on a parent's phone: if the parent leaves Kid Mode while the
+        // read below is in flight, exit() has already deleted this row — writing
+        // it now would bring it back for good (a "device" the child doesn't have).
+        let viaKidMode = KidModeManager.shared.active && ParentSettings.shared.deviceRole != .child
+        var kidModeEnded: Bool { viaKidMode && !KidModeManager.shared.active }
         do {
             // Don't clobber the original joinedAt on relaunch.
             let existing = try? await db.collection("childDevices").document(docID).getDocument()
+            if kidModeEnded { return }
             if let data = existing?.data(), let prior = Self.decode(ChildDevice.self, data) {
                 // The parent removed this device while it was closed → reset to a
                 // fresh install instead of re-registering (and don't reappear).
@@ -1036,6 +1042,7 @@ final class HouseholdManager: ObservableObject {
         // כאן" button silently never appeared on the sibling device.
         // Stamp the build this device runs, so "which version is this phone on?"
         // is answerable from the dashboard instead of by asking.
+        if kidModeEnded { return }
         try? await db.collection("childDevices").document(docID)
             .setData(["appVersion": AppInfo.versionLine], merge: true)
         startReportingTimeState(childID: childID)
@@ -1124,6 +1131,7 @@ final class HouseholdManager: ObservableObject {
             var outcome = await confirmedMerge(ref, data)
             if outcome == .denied {
                 await self.reassertMembership()
+                guard Self.reportsTimeState else { return }   // Kid Mode ended meanwhile
                 outcome = await confirmedMerge(ref, data)
             }
             if outcome == .denied || outcome == .error {

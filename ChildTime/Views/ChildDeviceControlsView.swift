@@ -222,6 +222,7 @@ struct ChildDeviceControlsView: View {
                     .environmentObject(profiles)
                     .environmentObject(settings)
                     .environment(\.layoutDirection, .app)
+                    .familyConnectionAlert()   // 🔌 a refused "סיום" says why
             }
         }
     }
