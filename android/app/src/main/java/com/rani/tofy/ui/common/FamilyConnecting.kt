@@ -26,7 +26,10 @@ import kotlinx.coroutines.delay
 @Composable
 fun FamilyConnectingScreen(failed: Boolean = false, onRetry: () -> Unit) {
     var slow by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { delay(10_000); slow = true }
+    // After a minute, a way out — a load that fails for good (not the network)
+    // must not trap the parent here with only "נסו שוב" (FamilyConnectingView).
+    var stuck by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { delay(10_000); slow = true; delay(50_000); stuck = true }
     GlassBackdrop {
         Column(
             Modifier.fillMaxSize().padding(horizontal = 32.dp),
@@ -53,6 +56,16 @@ fun FamilyConnectingScreen(failed: Boolean = false, onRetry: () -> Unit) {
                 ) {
                     Text(tr("נסו שוב"), color = Color(0xFF2A1E5C), fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
                 }
+            }
+            if (stuck) {
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    tr("התנתקות והתחברות מחדש"),
+                    color = Color.White.copy(alpha = 0.85f), fontSize = 15.sp, fontWeight = FontWeight.Bold,
+                    textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
+                    // The family stays in the cloud; signing in again starts clean.
+                    modifier = Modifier.clickable { com.rani.tofy.data.AccountRepository.signOut() }.padding(8.dp),
+                )
             }
         }
     }

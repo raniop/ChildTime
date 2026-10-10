@@ -63,6 +63,10 @@ object AccountRepository {
         // Cancel a pending retry — but never the job we are running INSIDE: the
         // auto-retry called bootstrap(), which cancelled itself, and every later
         // await threw CancellationException → "Failed" → retry → cancel… forever.
+        // Rotation / dark mode / locale recreate the activity and run this again:
+        // a family already loaded for this account stays — the dashboard used to
+        // turn into a spinner (and offline, stay one).
+        if (_boot.value is Bootstrap.Ready && FamilyRepository.isRunningFor(user.uid)) return
         val me = kotlin.coroutines.coroutineContext[Job]
         if (retryJob != me) retryJob?.cancel()
         _boot.value = Bootstrap.Loading
@@ -120,8 +124,9 @@ object AccountRepository {
     private suspend fun finish(hid: String): Boolean {
         val user = auth.currentUser ?: return false
         if (!FamilyRepository.start(user.uid)) return false
-        recordMyParentName(hid)
-        recordTimeZone(hid)
+        // NOT awaited: offline a write never completes, and awaiting these two
+        // left the parent on a bare spinner with no way out (HouseholdManager.swift).
+        scope.launch { recordMyParentName(hid); recordTimeZone(hid) }
         _boot.value = Bootstrap.Ready(hid)
         return true
     }

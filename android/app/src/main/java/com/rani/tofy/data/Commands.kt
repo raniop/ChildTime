@@ -160,7 +160,10 @@ object Commands {
         }
         return docs.any {
             val dev = it.get("deviceID") as? String ?: ""
-            val kidMode = parentLastSeen[dev]?.let { seen -> seen >= secs(it.get("joinedAt")) } ?: false
+            // This phone's own Kid Mode row (Android parents have no parent row to
+            // tell it apart by) — the phone asking is exactly where she plays.
+            val kidMode = dev == com.rani.tofy.kid.core.KidIdentity.installID ||
+                (parentLastSeen[dev]?.let { seen -> seen >= secs(it.get("joinedAt")) } ?: false)
             it.get("childID") as? String == childID && it.get("role") as? String != "parent" &&
                 it.get("removed") as? Boolean != true && !kidMode
         }

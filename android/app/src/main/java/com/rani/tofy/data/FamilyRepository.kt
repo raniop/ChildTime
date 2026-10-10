@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.MetadataChanges
 import com.google.firebase.firestore.Source
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -63,7 +64,9 @@ object FamilyRepository {
         stop()
         this.uid = uid
         _state.value = FamilyState(loading = true)
-        val hid = try { resolveHousehold(uid) } catch (e: Exception) {
+        val hid = try { resolveHousehold(uid) } catch (e: CancellationException) {
+            throw e   // a cancelled load is not a failed one (it used to show "Failed")
+        } catch (e: Exception) {
             _state.value = FamilyState(loading = false, error = e.message); return false
         }
         if (hid == null) { _state.value = FamilyState(loading = false); return false }
@@ -140,12 +143,16 @@ object FamilyRepository {
 
     val householdID: String? get() = _state.value.household?.id
 
+    /** This account's family is loaded and its listeners are up. */
+    fun isRunningFor(uid: String): Boolean = this.uid == uid && _state.value.household != null
+
     /** The household that lists this uid; prefers the one on parents/{uid}. */
     private suspend fun resolveHousehold(uid: String): String? {
         val parent = db.collection("parents").document(uid).get().await()
         val preferred = (parent.get("householdIDs") as? List<*>)?.filterIsInstance<String>().orEmpty()
         for (hid in preferred) {
-            val ok = runCatching { db.collection("households").document(hid).get().await() }.getOrNull()
+            val ok = try { db.collection("households").document(hid).get().await() }
+                catch (e: CancellationException) { throw e } catch (e: Exception) { null }
             if (ok?.exists() == true && (ok.get("parentUIDs") as? List<*>)?.contains(uid) == true) return hid
         }
         val query = db.collection("households").whereArrayContains("parentUIDs", uid)
