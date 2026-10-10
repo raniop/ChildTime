@@ -524,6 +524,9 @@ struct ChildTimeApp: App {
         case "onboarding": OnboardingView()             // DEMO_SCREEN=onboarding — parent sign-up
         case "childjoin": ChildJoinView()               // DEMO_SCREEN=childjoin
         case "familychoice": FamilyChoiceView()         // DEMO_SCREEN=familychoice
+        case "logingate": LoginGateView(limitBanner: false)   // DEMO_SCREEN=logingate — the parent sign-in
+        case "emailinvite": EmailInviteWelcomeView()    // DEMO_SCREEN=emailinvite — "המשפחה מחכה לכם"
+        case "joinfamily": JoinFamilyFlowView()         // DEMO_SCREEN=joinfamily — join with a code
         case "applock": ChildAppLockSetupView()         // DEMO_SCREEN=applock
         case "devicecontrols":                          // DEMO_SCREEN=devicecontrols — the child device's parent screen
             ChildDeviceControlsView()
