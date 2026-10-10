@@ -385,6 +385,7 @@ struct ChildTimeApp: App {
                     // nothing was played. NOT fired per-adventure, which spammed the parent.
                     if phase == .background, Self.demoScreen == nil {
                         progress.endSittingAndReport()
+                        ProgressVault.shared.saveNow()   // the slot must not lag the live store on relaunch
                         // Flush the debounced (~3s) snapshot upload BEFORE iOS
                         // suspends us: a kid who stops play and immediately leaves
                         // Tofy otherwise keeps the parent's dashboard stale (a

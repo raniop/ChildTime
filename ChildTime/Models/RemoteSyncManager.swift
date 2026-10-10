@@ -656,7 +656,16 @@ final class RemoteSyncManager: ObservableObject {
                 TofyLink("applyPendingReset: \(childID.uuidString.prefix(8)) wiped at rev \(rev) epoch \(epoch)")
                 if ProgressStore.shared.holdsData(for: childID) {
                     let wasOpen = ProgressStore.shared.isUnlocked
+                    let leaseID = ProgressStore.shared.activeLeaseID
                     ProgressVault.shared.resetProfile(childID)
+                    // The open window's lease was only cleared LOCALLY — still held
+                    // in the cloud, a later parent "נעל" force-released it and
+                    // refunded the old leftover into the wiped wallet. Hand it back
+                    // now, refund 0 (like revokeAllParentTime): a reset is total.
+                    if PlayWindowLeaseManager.isEnabled, let leaseID {
+                        Task { await PlayWindowLeaseManager.shared.release(childID: childID, leaseID: leaseID,
+                                                                           localRemainingSeconds: 0) }
+                    }
                     ProgressStore.shared.adoptRevision(rev)
                     ProgressStore.shared.adoptResetEpoch(epoch)
                     ProgressVault.shared.write(ProgressStore.shared.captureSnapshot(), for: childID)

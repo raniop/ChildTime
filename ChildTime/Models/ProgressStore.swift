@@ -1687,7 +1687,17 @@ final class ProgressStore: ObservableObject {
     /// Per-profile suffix so two siblings on ONE shared device don't share the
     /// daily topic-balance counters (sibling A's 30 math answers used to start
     /// sibling B at half-rate).
-    private var balanceKeySuffix: String { ProfileStore.shared.activeID.map { ".\($0.uuidString)" } ?? "" }
+    private var balanceKeySuffix: String { (keyOwner ?? ProfileStore.shared.activeID).map { ".\($0.uuidString)" } ?? "" }
+    /// Set while a profile switch applies the INCOMING child's snapshot — the
+    /// active id still names the outgoing child then, and her variety-bonus day
+    /// landed under her sibling's key (one got it twice, the other never).
+    private var keyOwner: UUID?
+
+    func apply(_ s: ProgressSnapshot, owner: UUID) {
+        keyOwner = owner
+        defer { keyOwner = nil }
+        apply(s)
+    }
     private var topicAnsweredKey: String { "topicAnsweredToday" + balanceKeySuffix }
     private var topicAnsweredDateKey: String { "topicAnsweredDate" + balanceKeySuffix }
     private var varietyBonusDateKey: String { "varietyBonusDate" + balanceKeySuffix }

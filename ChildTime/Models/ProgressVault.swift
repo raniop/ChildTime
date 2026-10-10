@@ -145,7 +145,7 @@ final class ProgressVault {
             ProgressStore.shared.clearInFlightRefund()   // the outgoing child's pending refund isn't theirs
             ProgressStore.shared.clearSecondsCarry()     // …nor their sub-minute leftover
         }
-        ProgressStore.shared.apply(incoming)
+        ProgressStore.shared.apply(incoming, owner: profileID)
         // 3. Bind — the store now holds THIS child's data, and says so. Every
         //    path that writes it out (vault save, cloud upload) checks this.
         ProgressStore.shared.bind(to: profileID)
@@ -229,6 +229,15 @@ final class ProgressVault {
                 self?.scheduleSave()
             }
             .store(in: &cancellables)
+    }
+
+    /// Leaving the app: the 3s debounce may never fire before iOS suspends us,
+    /// and on relaunch the OLDER slot was applied over the newer live progress
+    /// (a character bought just before leaving came back unbought).
+    func saveNow() {
+        saveDebounce?.cancel()
+        guard let pid = boundProfileID, ProgressStore.shared.holdsData(for: pid) else { return }
+        write(ProgressStore.shared.captureSnapshot(), for: pid)
     }
 
     private func scheduleSave() {
