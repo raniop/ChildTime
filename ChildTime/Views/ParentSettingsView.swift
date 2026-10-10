@@ -196,6 +196,9 @@ struct ParentSettingsView: View {
                           prompt: Text(tr("למשל: משפחת גולן")).foregroundColor(.white.opacity(0.6)))
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
+                    // Beside the 👪, on the reading side — in Hebrew the words sat
+                    // at the far LEFT of the row (Rani, 2026-10-10).
+                    .fieldOnReadingSide()
                     .submitLabel(.done)
                     .onSubmit { if !household.refuseIfDisconnected() { household.setFamilyName(familyNameDraft) } }
                 if familyNameDraft != (household.familyNameShown ?? "") {
@@ -1127,4 +1130,21 @@ struct ChangePINView: View {
         .environmentObject(ProgressStore.shared)
         .environmentObject(ProfileStore.shared)
         .environment(\.layoutDirection, .app)
+}
+
+extension View {
+    /// A `TextField`'s words on the reading side of the APP's language.
+    ///
+    /// Measured (2026-10-10): on a text field `.leading` means the SYSTEM's
+    /// natural side — Tofy in Hebrew on an iPhone set to English put the words
+    /// at the far left of the row — while `.trailing` IS resolved by the SwiftUI
+    /// direction. So the side is pinned with `.trailing` under the opposite
+    /// direction: right for Hebrew and Arabic, left otherwise, whatever the
+    /// system language. (Only the field's own direction changes; what is typed
+    /// keeps its own.)
+    func fieldOnReadingSide() -> some View {
+        let appRTL = LanguageStore.shared.current.isRightToLeft
+        return multilineTextAlignment(.trailing)
+            .environment(\.layoutDirection, appRTL ? .leftToRight : .rightToLeft)
+    }
 }

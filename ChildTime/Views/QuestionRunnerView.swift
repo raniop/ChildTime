@@ -1356,6 +1356,16 @@ struct QuestionRunnerView: View {
         nextSurpriseAt = SurpriseRound.nextGap()
         QuestionMemory.shared.beginSession()   // no repeats within this session
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            #if DEBUG
+            // 🧪 DEMO_BUBBLE=cap|hint — the buddy's LONGEST lines, to see how the bubble sits.
+            switch ProcessInfo.processInfo.environment["DEMO_BUBBLE"] {
+            case "cap":
+                companion.wow(Gendered.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת"), tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת"))); return
+            case "hint":
+                companion.cheer(HintContent.explain(.english)); return
+            default: break
+            }
+            #endif
             companion.cheer(mode.isFeed ? tr("טוֹפִי טַיים — קָדִימָה! 🧠") : Gendered.g(tr("מוּכָן? קָדִימָה!"), tr("מוּכָנָה? קָדִימָה!")))
         }
         nextQuestion()
@@ -2025,7 +2035,10 @@ private struct ShelfBuddy: View {
         // The bubble at the buddy's middle, its arrow touching him (Rani). The
         // character art has more empty air on the side the bubble meets in
         // right-to-left — measured ~30pt there vs ~12pt in left-to-right.
-        HStack(alignment: .center, spacing: rtl ? -26 : -10) {   // the image has air around the buddy
+        // Bottom-aligned, with the bubble's own guide doing the placing (below):
+        // the row is taller than its frame when the bubble is, and a centred row
+        // was simply re-centred — the bubble stayed where it was.
+        HStack(alignment: .bottom, spacing: rtl ? -26 : -10) {   // the image has air around the buddy
             InlineBuddy(controller: controller, profile: profile, width: size)
             if let text = controller.bubbleText {
                 // Hugs its words: a short "כן!" used to sit centred in a 230pt box,
@@ -2040,9 +2053,14 @@ private struct ShelfBuddy: View {
                     .frame(maxWidth: 230, alignment: .leading)
                     .id(text)
                     .transition(.scale(scale: 0.85, anchor: .leading).combined(with: .opacity))
+                    // A short line sits at the buddy's middle. A long one (the
+                    // daily-maximum message, a hint's explanation — five lines in
+                    // English and Russian) grows UPWARD from just above the shelf:
+                    // centred on him it hung down over the streak bar and the time.
+                    .alignmentGuide(.bottom) { d in max(d.height / 2 + size * 0.65, d.height + 8) }
             }
         }
-        .frame(height: size * 1.3)
+        .frame(height: size * 1.3, alignment: .bottom)
         .padding(.leading, 6)
         // Feet on the shelf's edge: lifted its own height, minus 6pt into the glass.
         .offset(y: -(size * 1.3 - 6))
