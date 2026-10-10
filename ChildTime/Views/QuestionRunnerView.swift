@@ -801,7 +801,10 @@ struct QuestionRunnerView: View {
                 // that way just rebuilt the same empty rectangle one ceiling lower.
                 // An exact height, read from the text itself, is the only thing that
                 // hugs short content and still caps a long passage.
-                let ceiling: CGFloat = isCompact ? (display.isShort ? 150 : 210) : 280
+                // 170 on a phone: at 210 a long passage + two-line answers ran the
+                // shelf off the bottom ("רמז" cut in half, 2026-10-10). The passage
+                // scrolls inside this box, so nothing is lost.
+                let ceiling: CGFloat = isCompact ? (display.isShort ? 150 : 170) : 280
                 ScrollView {
                     passageText(passage)
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
@@ -867,18 +870,17 @@ struct QuestionRunnerView: View {
         // 💬 What it says sits BESIDE it with a side arrow pointing at it (Rani,
         // 2026-10-10) — one row, so right-to-left and left-to-right both work.
         let rtl = LanguageStore.shared.current.isRightToLeft
-        return HStack(alignment: .top, spacing: -10) {   // the image has air around the buddy
+        return HStack(alignment: .center, spacing: -10) {   // the bubble at the buddy's middle (Rani)   // the image has air around the buddy
             InlineBuddy(controller: companion, profile: profiles.active, width: shelfBuddySize)
             if let text = companion.bubbleText {
                 BubbleSpeech(text: text, pointDirection: rtl ? .trailing : .leading)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: 230, alignment: .leading)
-                    .padding(.top, 6)
                     .id(text)
                     .transition(.scale(scale: 0.85, anchor: .leading).combined(with: .opacity))
             }
         }
-        .frame(height: shelfBuddySize * 1.3, alignment: .top)
+        .frame(height: shelfBuddySize * 1.3)
         .padding(.leading, 6)
         // Feet on the shelf's edge: lifted its own height, minus 6pt into the glass.
         .offset(y: -(shelfBuddySize * 1.3 - 6))
