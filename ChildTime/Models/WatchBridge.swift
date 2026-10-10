@@ -113,12 +113,12 @@ final class WatchBridge: NSObject, WCSessionDelegate {
             let allowed = min(want, ProgressStore.minutesUntilMidnight())
             guard allowed > 0 else { return ["ok": false, "reason": "midnight"] }
             let actionID = beginTracking(childID: cid, kind: "gift", minutes: allowed)
-            RemoteSyncManager.shared.giftChildMinutes(childID: id, minutes: allowed)
+            RemoteSyncManager.shared.giftChildMinutes(childID: id, minutes: allowed, fromWatch: true)
             refreshActionStatus()
             return ["ok": true, "minutes": allowed, "actionID": actionID]
         case "lock":
             let actionID = beginTracking(childID: cid, kind: "lock", minutes: 0)
-            HouseholdManager.shared.lockRemoteScreenTime(toChildID: id)
+            HouseholdManager.shared.lockRemoteScreenTime(toChildID: id, fromWatch: true)
             return ["ok": true, "actionID": actionID]
         case "beep":
             let fix = LocationSharing.shared.shownFix(cid)

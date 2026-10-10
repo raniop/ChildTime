@@ -293,7 +293,9 @@ final class RemoteSyncManager: ObservableObject {
     /// echoes `giftSentAt` back as `giftAppliedAt` in the consume transaction.
     @Published var giftSendTracker: [UUID: GiftRevokeTracker] = [:]
 
-    func giftChildMinutes(childID: UUID, minutes: Int) {
+    /// `fromWatch`: nobody is looking at the phone's status sheet, so the server
+    /// pushes "the gift arrived" for THIS gift even when the ack is instant.
+    func giftChildMinutes(childID: UUID, minutes: Int, fromWatch: Bool = false) {
         #if canImport(FirebaseFirestore)
         guard minutes != 0 else { return }
         pendingGifts[childID, default: 0] += minutes
@@ -303,6 +305,7 @@ final class RemoteSyncManager: ObservableObject {
         var fields: [String: Any] = ["pendingGiftAdjustment": FieldValue.increment(Int64(minutes)),
                                      "giftSentAt": stamp]
         if let uid = AuthManager.shared.userID { fields["giftCommandBy"] = uid }
+        if fromWatch { fields["giftWatchStamp"] = stamp }
         // 🔔 One feed row for the gift, keyed on the same stamp the ack echoes
         // back, so "המכשיר אישר" can land on it later.
         ActivityLog.record(.giftSent, childID: childID.uuidString,

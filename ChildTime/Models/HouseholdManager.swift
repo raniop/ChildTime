@@ -1850,14 +1850,18 @@ final class HouseholdManager: ObservableObject {
     /// `remoteLockAt` stamp onto the child's device rows; the device applies it
     /// once (ends any open play window + re-applies the shield). Mirror of
     /// `grantRemoteScreenTime`.
-    func lockRemoteScreenTime(toChildID childID: UUID) {
+    /// `fromWatch`: the server pushes "locked" for THIS lock even when the ack is
+    /// instant — see `RemoteSyncManager.giftChildMinutes(fromWatch:)`.
+    func lockRemoteScreenTime(toChildID childID: UUID, fromWatch: Bool = false) {
         #if canImport(FirebaseFirestore)
         guard let hh = household else { return }
         let cid = childID.uuidString
         let stamp = Date().timeIntervalSince1970
         Task {
+            var fields: [String: Any] = ["remoteLockAt": stamp]
+            if fromWatch { fields["watchLockStamp"] = stamp }
             await sendDeviceCommand(childID: cid, householdID: hh.id, kind: .lock, stamp: stamp,
-                                    fields: ["remoteLockAt": stamp])
+                                    fields: fields)
             // Rani: a dead device must not strand the child. The command above
             // needs the device to wake up and obey — so we give it a short grace
             // to do exactly that, and only take the window away ourselves if it

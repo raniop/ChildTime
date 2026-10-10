@@ -49907,28 +49907,6 @@
         }
       }
     },
-    "המכשיר לא זמין כרגע" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الجهاز غير متاح الآن"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The device is unavailable right now"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Устройство сейчас недоступно"
-          }
-        }
-      }
-    },
     "המכשיר מוגבל (זמן מסך / ניהול ארגוני). בטלו את ההגבלה ונסו שוב." : {
       "localizations" : {
         "ar" : {
@@ -94188,6 +94166,28 @@
         }
       }
     },
+    "נשלח, נודיע כשיתקבל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أُرسل — سنُعلمكم عند الوصول"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sent — we'll notify you when it arrives"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отправлено — сообщим, когда дойдёт"
+          }
+        }
+      }
+    },
     "נשלחה בקשת בדיקה — ההתראה אמורה להגיע תוך כמה שניות" : {
       "localizations" : {
         "ar" : {
@@ -118482,28 +118482,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сохранить"
-          }
-        }
-      }
-    },
-    "שמור, המכשיר לא זמין" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "محفوظة — الجهاز غير متاح"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saved — the device is unavailable"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сохранено — устройство недоступно"
           }
         }
       }

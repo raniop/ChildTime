@@ -1392,6 +1392,30 @@ function shieldLostMessage(found, lang, platform) {
   return { title: `🔓 הנעילה של טופי כובתה בטלפון של ${n}`, body: `כיבו לטופי את הגישה לזמן מסך, ועכשיו כל האפליקציות שם פתוחות. כדי להחזיר: פותחים את טופי בטלפון של ${n} ומאשרים זמן מסך. קוד לזמן מסך ימנע את זה בפעם הבאה.` };
 }
 
+// ⌚️ Sent from the Apple Watch: nobody is looking at the phone's live status
+// sheet, so the ack is ALWAYS pushed — even an instant one — and worded as plain
+// news ("got it"), not as "came back online".
+function ackMessageNow(kind, found, lang) {
+  if (lang === "en") {
+    const whose = found ? `${found}'s` : "Your child's";
+    return kind === "gift" ? { title: "💝 The gift arrived", body: `${whose} device received the gift minutes.` }
+                           : { title: "✅ Device locked", body: `${whose} device is now locked.` };
+  }
+  if (lang === "ru") {
+    const whose = found ? `ребёнка ${found}` : "вашего ребёнка";
+    return kind === "gift" ? { title: "💝 Подарок доставлен", body: `Устройство ${whose} получило подаренные минуты.` }
+                           : { title: "✅ Устройство заблокировано", body: `Устройство ${whose} теперь заблокировано.` };
+  }
+  if (lang === "ar") {
+    const whose = found ? `الطفل ${found}` : "طفلكم";
+    return kind === "gift" ? { title: "💝 وصلت الهدية", body: `استلم جهاز ${whose} دقائق الهدية.` }
+                           : { title: "✅ قُفل الجهاز", body: `جهاز ${whose} مقفل الآن.` };
+  }
+  const name = found || "הילד/ה";
+  return kind === "gift" ? { title: "💝 המתנה הגיעה", body: `המכשיר של ${name} קיבל את דקות המתנה.` }
+                         : { title: "✅ הנעילה בוצעה", body: `המכשיר של ${name} נעול עכשיו.` };
+}
+
 function ackMessage(kind, found, deviceName, lang) {
   if (lang === "en") {
     const whose = found ? `${found}'s` : "Your child's";
@@ -1461,10 +1485,14 @@ exports.wakeOnChildCommand = onDocumentWritten("children/{childID}", async (even
     await notifyParentsAckApplied(after.householdID, (lang) => ackMessage("revoke", found, null, lang));
   }
   const giftAck = newAck(before, after, "giftAppliedAt");
-  if (giftAck && Date.now() / 1000 - giftAck > ACK_LATE_SECONDS
+  // (`giftWatchStamp` = the stamp of a gift sent from the watch — see ackMessageNow.)
+  const giftLate = giftAck && Date.now() / 1000 - giftAck > ACK_LATE_SECONDS;
+  const giftFromWatch = giftAck && Number(after.giftWatchStamp || 0) === giftAck;
+  if ((giftLate || giftFromWatch)
       && await claimOnce(`giftack_${event.params.childID}_${giftAck}`)) {
     const found = await childNameFor(event.params.childID, after.name || null);
-    await notifyParentsAckApplied(after.householdID, (lang) => ackMessage("gift", found, null, lang));
+    await notifyParentsAckApplied(after.householdID,
+      (lang) => (giftLate ? ackMessage("gift", found, null, lang) : ackMessageNow("gift", found, lang)));
   }
 });
 
@@ -1500,10 +1528,15 @@ exports.wakeOnDeviceCommand = onDocumentWritten("childDevices/{id}", async (even
   // Lock ACK from the device → close the loop for a parent who already left.
   // Late-only (instant acks show live in the sheet), sender's devices excluded.
   const ack = newAck(before, after, "remoteLockAppliedAt");
-  if (ack && Date.now() / 1000 - ack > ACK_LATE_SECONDS
-      && await claimOnce(`lockack_${event.params.id}_${ack}`)) {
+  const lockLate = ack && Date.now() / 1000 - ack > ACK_LATE_SECONDS;
+  const lockFromWatch = ack && Number(after.watchLockStamp || 0) === ack;
+  // From the watch: ONE push per lock, whichever of the child's devices answers
+  // first (a late one keeps its own per-device push, as before).
+  const lockKey = lockFromWatch && !lockLate ? `lockack_${after.childID}_${ack}` : `lockack_${event.params.id}_${ack}`;
+  if ((lockLate || lockFromWatch) && await claimOnce(lockKey)) {
     const found = await childNameFor(after.childID, null);
-    await notifyParentsAckApplied(after.householdID, (lang) => ackMessage("lock", found, after.name, lang));
+    await notifyParentsAckApplied(after.householdID,
+      (lang) => (lockLate ? ackMessage("lock", found, after.name, lang) : ackMessageNow("lock", found, lang)));
   }
 });
 

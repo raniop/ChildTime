@@ -21,14 +21,16 @@ struct WatchChildGlance: Identifiable {
 /// phone shows: sending → sent → the child's device confirmed (Rani, 2026-10-10).
 struct WatchActionStatus: Equatable {
     enum State: String {
-        case sending, queued, sent, unavailable, confirmed, failed
+        /// `willNotify`: sent, and no answer on the wrist yet — the phone's
+        /// notification ("המתנה הגיעה") is what tells the rest.
+        case sending, queued, sent, willNotify, confirmed, failed
         /// Later states win; an older message never takes a newer one back.
         var rank: Int {
             switch self {
             case .sending: return 0
             case .queued: return 1
             case .sent: return 2
-            case .unavailable: return 3
+            case .willNotify: return 3
             case .confirmed: return 4
             case .failed: return 5
             }
@@ -65,7 +67,7 @@ final class WatchFamilyModel: NSObject, ObservableObject, WCSessionDelegate {
                       playingNow: false, pendingChores: 2, moneyBalance: 7),
             ]
             updatedAt = Date()
-            // WATCH_DEMO_STATUS=sending|sent|confirmed|unavailable — the status row.
+            // WATCH_DEMO_STATUS=sending|sent|confirmed|willNotify — the status row.
             if let raw = ProcessInfo.processInfo.environment["WATCH_DEMO_STATUS"],
                let state = WatchActionStatus.State(rawValue: raw) {
                 action = WatchActionStatus(id: "demo", childID: "1", kind: "gift", minutes: 30,
@@ -136,18 +138,31 @@ final class WatchFamilyModel: NSObject, ObservableObject, WCSessionDelegate {
         }
     }
 
-    /// 45 seconds without the child's device answering: say so, instead of a
-    /// spinner that never ends. (The gift is safe either way — it waits in the cloud.)
+    /// 20 seconds without the child's device answering ON THE WRIST: say what is
+    /// true — it was sent, and a notification follows — and then get out of the
+    /// way. (The first version said "the device is unavailable" here and kept
+    /// saying it for good, about a gift the child had already received: the
+    /// phone had gone back to sleep before the answer came — Rani, 2026-10-10.)
     private func armTimeout(for startedAt: Date) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 45) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 20) {
             guard var a = self.action, a.startedAt == startedAt else { return }
             switch a.state {
-            case .sent: a.state = .unavailable
+            case .sent: a.state = .willNotify
             case .sending: a.state = .queued          // the PHONE hasn't reached the cloud yet
             default: return
             }
             self.action = a
         }
+        // Whatever it says by then, the row never stays: a minute and a half, and it clears.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 90) {
+            if self.action?.startedAt == startedAt { withAnimation { self.action = nil } }
+        }
+    }
+
+    /// Timers don't run while the watch app sleeps — so on every wake, a row
+    /// older than two minutes is simply dropped.
+    func dropStaleAction() {
+        if let a = action, Date().timeIntervalSince(a.startedAt) > 120 { action = nil }
     }
 
     /// The phone's word on an action: live (`didReceiveMessage`) or in the snapshot.
@@ -166,10 +181,10 @@ final class WatchFamilyModel: NSObject, ObservableObject, WCSessionDelegate {
             self.action = a
             if state == .confirmed {
                 WKInterfaceDevice.current().play(.success)
-                // It has been said — a minute later the row makes room again.
+                // It has been said — half a minute later the row makes room again.
                 let started = a.startedAt
-                DispatchQueue.main.asyncAfter(deadline: .now() + 60) {
-                    if self.action?.startedAt == started { self.action = nil }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
+                    if self.action?.startedAt == started { withAnimation { self.action = nil } }
                 }
             } else if state == .failed {
                 WKInterfaceDevice.current().play(.failure)
@@ -223,6 +238,7 @@ final class WatchFamilyModel: NSObject, ObservableObject, WCSessionDelegate {
 struct WatchHomeView: View {
     @StateObject private var model = WatchFamilyModel()
     @ObservedObject private var language = LanguageStore.shared
+    @Environment(\.scenePhase) private var scenePhase
     /// -1 = the family page. WATCH_DEMO_PAGE=0… opens a child's page (screenshots).
     @State private var page: Int = ProcessInfo.processInfo.environment["WATCH_DEMO_PAGE"].flatMap(Int.init) ?? -1
 
@@ -260,6 +276,8 @@ struct WatchHomeView: View {
         }
         .environment(\.layoutDirection, language.current.layoutDirection)
         .id(language.current)
+        .onChange(of: scenePhase) { _, phase in if phase == .active { model.dropStaleAction() } }
+        .onAppear { model.dropStaleAction() }
     }
 
     // MARK: - Family
@@ -433,8 +451,7 @@ struct WatchHomeView: View {
         case .queued:      line = tr("יישלח כשהאייפון יתחבר"); icon = "⏳"; fill = .white.opacity(0.18)
         case .sent:        line = tr("נשלח, מחכה למכשיר"); icon = "☁️"; fill = .white.opacity(0.18)
         case .confirmed:   line = tr("המכשיר של \(c.name) אישר"); icon = "✅"; fill = Color(tofyHex: "48C774").opacity(0.55)
-        case .unavailable: line = a.kind == "gift" ? tr("שמור, המכשיר לא זמין") : tr("המכשיר לא זמין כרגע")
-                           icon = "⏳"; fill = Color(tofyHex: "FFB84D").opacity(0.5)
+        case .willNotify:  line = tr("נשלח, נודיע כשיתקבל"); icon = "🔔"; fill = .white.opacity(0.18)
         case .failed:      line = tr("לא הצליח — נסו מהאייפון"); icon = "⚠️"; fill = Color(tofyHex: "FFB84D").opacity(0.5)
         }
         return HStack(spacing: 7) {
