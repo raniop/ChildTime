@@ -238,7 +238,7 @@ struct QuestionRunnerView: View {
                 if topBarStyle == .inCard {
                     // ✕ · "שאלה 1/15" · ⭐ 💎 — one row ABOVE the card (Rani, 2026-10-10).
                     cardTopRow
-                        .padding(.horizontal, AppSpacing.md)
+                        .padding(.horizontal, sideInset)
                         .padding(.top, AppSpacing.xs)
                 } else {
                     topBar.clearOfBar()
@@ -451,6 +451,9 @@ struct QuestionRunnerView: View {
     /// question card, the play time on the shelf. `.classic` (the chips + timer
     /// rows) stays for the foldable's rail, and as DEMO_TOPBAR=classic.
     private enum TopBarStyle { case classic, inCard }
+    /// Each block's own side inset, on top of the screen's 12pt: 0 → every
+    /// block 12pt from the edge in the in-card layout (Rani: "12 בקלות").
+    private var sideInset: CGFloat { topBarStyle == .inCard ? 0 : AppSpacing.md }
     /// The play time sits on the shelf (and flashes "+24 שניות" there).
     private var timeOnShelf: Bool { topBarStyle == .inCard }
     private var topBarStyle: TopBarStyle {
@@ -848,7 +851,7 @@ struct QuestionRunnerView: View {
             }
         }
         // The same side margins as the answers and the shelf (Rani, 2026-10-10).
-        .padding(.horizontal, topBarStyle == .inCard ? AppSpacing.md : AppSpacing.sm)
+        .padding(.horizontal, topBarStyle == .inCard ? sideInset : AppSpacing.sm)
     }
 
     /// A consistent round icon button for the question's control row (read-aloud,
@@ -1031,7 +1034,7 @@ struct QuestionRunnerView: View {
                 .overlay(alignment: .topLeading) {
                     if buddyHasFreeStrip { shelfBuddy }
                 }
-                .padding(.horizontal, AppSpacing.md)
+                .padding(.horizontal, sideInset)
                 .overlay(alignment: .trailing) {
                     if !buddyHasFreeStrip {
                         InlineBuddyBubble(controller: companion, clearance: AppSpacing.md + 44 + 6)
@@ -1161,7 +1164,7 @@ struct QuestionRunnerView: View {
             }
         }
         .frame(maxHeight: .infinity)
-        .padding(.horizontal, AppSpacing.md)
+        .padding(.horizontal, sideInset)
         // Answers always number right-to-left — 1 top-right, 2 top-left, 3, 4.
         .environment(\.layoutDirection, .app)
     }
@@ -1181,7 +1184,7 @@ struct QuestionRunnerView: View {
                 }
             }
         }
-        .padding(.horizontal, AppSpacing.md)
+        .padding(.horizontal, sideInset)
         // Answers always number right-to-left — 1 top-right, 2 top-left, 3, 4 —
         // no matter how the screen was presented (a fullScreenCover can arrive
         // LTR, and on Rani's phone 1 landed top-left).
