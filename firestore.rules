@@ -40,9 +40,14 @@ service cloud.firestore {
     match /households/{hid} {
       // Members read their household; an email-invited co-parent may also read
       // it (that's how "משפחת X מחכה לך" finds the family before joining).
+      // …and only with an address that is PROVEN theirs (Google / Apple, or a
+      // verified email): an account made with someone else's address must not
+      // see the family that invited that address.
       allow read:   if signedIn() && (
         request.auth.uid in resource.data.parentUIDs ||
         (request.auth.token.email != null &&
+         (request.auth.token.email_verified == true
+          || request.auth.token.firebase.sign_in_provider in ['google.com', 'apple.com']) &&
          request.auth.token.email.lower() in resource.data.get('invitedParentEmails', []))
       );
       allow create: if signedIn() && request.auth.uid in request.resource.data.parentUIDs;
