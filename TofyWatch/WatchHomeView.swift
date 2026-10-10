@@ -1,5 +1,6 @@
 import SwiftUI
 import WatchConnectivity
+import WatchKit
 
 /// One child's glance row, as sent from the iPhone (see WatchBridge.swift).
 struct WatchChildGlance: Identifiable {
@@ -14,6 +15,32 @@ struct WatchChildGlance: Identifiable {
     var hasDevice: Bool = false
     /// "🏠 בבית · לפני 3 דק׳" — empty when location sharing is off.
     var whereText: String = ""
+}
+
+/// 📶 Where the last gift / lock sent from the wrist stands — the same chain the
+/// phone shows: sending → sent → the child's device confirmed (Rani, 2026-10-10).
+struct WatchActionStatus: Equatable {
+    enum State: String {
+        case sending, queued, sent, unavailable, confirmed, failed
+        /// Later states win; an older message never takes a newer one back.
+        var rank: Int {
+            switch self {
+            case .sending: return 0
+            case .queued: return 1
+            case .sent: return 2
+            case .unavailable: return 3
+            case .confirmed: return 4
+            case .failed: return 5
+            }
+        }
+    }
+    /// The phone's id for it — nil until the phone answers.
+    var id: String?
+    let childID: String
+    let kind: String        // "gift" | "lock"
+    var minutes: Int
+    var state: State
+    let startedAt: Date
 }
 
 /// Receives the family snapshot the iPhone pushes via applicationContext.
@@ -38,6 +65,12 @@ final class WatchFamilyModel: NSObject, ObservableObject, WCSessionDelegate {
                       playingNow: false, pendingChores: 2, moneyBalance: 7),
             ]
             updatedAt = Date()
+            // WATCH_DEMO_STATUS=sending|sent|confirmed|unavailable — the status row.
+            if let raw = ProcessInfo.processInfo.environment["WATCH_DEMO_STATUS"],
+               let state = WatchActionStatus.State(rawValue: raw) {
+                action = WatchActionStatus(id: "demo", childID: "1", kind: "gift", minutes: 30,
+                                           state: state, startedAt: Date())
+            }
             return
         }
         guard WCSession.isSupported() else { return }
@@ -56,8 +89,10 @@ final class WatchFamilyModel: NSObject, ObservableObject, WCSessionDelegate {
         apply(applicationContext)
     }
 
-    /// "נשלח ✓" / "יישלח כשהאייפון יתחבר" after an action.
+    /// "נשלח ✓" / "האייפון לא זמין כרגע" — for the beep, and for what can't even start.
     @Published var note: String?
+    /// The last gift / lock and how far it got (see `WatchActionStatus`).
+    @Published var action: WatchActionStatus?
 
     /// ⚡ Ask the phone to do it (gift / lock / beep). Live when the phone is in
     /// reach; otherwise queued, and it runs when they reconnect.
@@ -66,22 +101,84 @@ final class WatchFamilyModel: NSObject, ObservableObject, WCSessionDelegate {
         if minutes > 0 { msg["minutes"] = minutes }
         let session = WCSession.default
         guard WCSession.isSupported(), session.activationState == .activated else { show(tr("האייפון לא זמין כרגע")); return }
-        if session.isReachable {
-            session.sendMessage(msg, replyHandler: { r in
-                let ok = r["ok"] as? Bool ?? false
-                if ok, let m = r["minutes"] as? Int, m < minutes {
-                    self.show(tr("נשלח ✓ · \(m) דק׳ — עד חצות"))
-                } else {
-                    self.show(ok ? tr("נשלח ✓") : tr("לא הצליח — נסו מהאייפון"))
-                }
-            }, errorHandler: { _ in
-                session.transferUserInfo(msg)
-                self.show(tr("יישלח כשהאייפון יתחבר"))
-            })
-        } else {
-            session.transferUserInfo(msg)
-            show(tr("יישלח כשהאייפון יתחבר"))
+        // The beep has no answer to wait for — a short note is all there is to say.
+        let tracked = action == "gift" || action == "lock"
+        let started = Date()
+        if tracked {
+            DispatchQueue.main.async {
+                self.action = WatchActionStatus(id: nil, childID: childID, kind: action, minutes: minutes,
+                                                state: .sending, startedAt: started)
+            }
+            armTimeout(for: started)
         }
+        func queued() {
+            session.transferUserInfo(msg)
+            if tracked { advance(startedAt: started) { $0.state = .queued } }
+            else { show(tr("יישלח כשהאייפון יתחבר")) }
+        }
+        guard session.isReachable else { queued(); return }
+        session.sendMessage(msg, replyHandler: { r in
+            let ok = r["ok"] as? Bool ?? false
+            guard tracked else { self.show(ok ? tr("נשלח ✓") : tr("לא הצליח — נסו מהאייפון")); return }
+            self.advance(startedAt: started) {
+                guard ok else { $0.state = .failed; return }
+                $0.id = r["actionID"] as? String
+                if let m = r["minutes"] as? Int, m > 0 { $0.minutes = m }   // capped at midnight
+            }
+        }, errorHandler: { _ in queued() })
+    }
+
+    /// Change the action that began at `startedAt` — if it is still the current one.
+    private func advance(startedAt: Date, _ change: @escaping (inout WatchActionStatus) -> Void) {
+        DispatchQueue.main.async {
+            guard var a = self.action, a.startedAt == startedAt else { return }
+            change(&a); self.action = a
+        }
+    }
+
+    /// 45 seconds without the child's device answering: say so, instead of a
+    /// spinner that never ends. (The gift is safe either way — it waits in the cloud.)
+    private func armTimeout(for startedAt: Date) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 45) {
+            guard var a = self.action, a.startedAt == startedAt else { return }
+            switch a.state {
+            case .sent: a.state = .unavailable
+            case .sending: a.state = .queued          // the PHONE hasn't reached the cloud yet
+            default: return
+            }
+            self.action = a
+        }
+    }
+
+    /// The phone's word on an action: live (`didReceiveMessage`) or in the snapshot.
+    private func applyStatus(_ st: [String: Any]) {
+        guard let id = st["id"] as? String, let raw = st["state"] as? String,
+              let state = WatchActionStatus.State(rawValue: raw) else { return }
+        DispatchQueue.main.async {
+            guard var a = self.action else { return }
+            // Ours: the id the phone gave us — or, before its reply landed, the
+            // same child and kind, stamped after we sent it.
+            let mine = a.id == id || (a.id == nil
+                && a.childID == (st["childID"] as? String) && a.kind == (st["kind"] as? String)
+                && (st["at"] as? Double ?? 0) >= a.startedAt.timeIntervalSince1970 - 2)
+            guard mine, state.rank > a.state.rank else { return }
+            a.id = id; a.state = state
+            self.action = a
+            if state == .confirmed {
+                WKInterfaceDevice.current().play(.success)
+                // It has been said — a minute later the row makes room again.
+                let started = a.startedAt
+                DispatchQueue.main.asyncAfter(deadline: .now() + 60) {
+                    if self.action?.startedAt == started { self.action = nil }
+                }
+            } else if state == .failed {
+                WKInterfaceDevice.current().play(.failure)
+            }
+        }
+    }
+
+    func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        if let st = message["actionStatus"] as? [String: Any] { applyStatus(st) }
     }
 
     private func show(_ text: String) {
@@ -92,6 +189,7 @@ final class WatchFamilyModel: NSObject, ObservableObject, WCSessionDelegate {
     }
 
     private func apply(_ ctx: [String: Any]) {
+        if let st = ctx["actionStatus"] as? [String: Any] { applyStatus(st) }
         if let code = ctx["language"] as? String, let lang = AppLanguage(rawValue: code) {
             DispatchQueue.main.async { LanguageStore.shared.set(lang) }
         }
@@ -287,6 +385,10 @@ struct WatchHomeView: View {
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .lineLimit(1).minimumScaleFactor(0.7)
+                if let a = model.action, a.childID == c.id {
+                    statusRow(a, child: c)
+                        .transition(.opacity)
+                }
                 if c.hasDevice {
                     NavigationLink {
                         giftPicker(c)
@@ -322,6 +424,36 @@ struct WatchHomeView: View {
         }
     }
 
+    /// 📶 One row, always in the same place: what was sent, and how far it got.
+    private func statusRow(_ a: WatchActionStatus, child c: WatchChildGlance) -> some View {
+        let title = a.kind == "gift" ? "💝 " + tr("\(a.minutes) דק׳") : "🔒 " + tr("נעילה")
+        let line: String, icon: String, fill: Color
+        switch a.state {
+        case .sending:     line = tr("שולח…"); icon = ""; fill = .white.opacity(0.18)
+        case .queued:      line = tr("יישלח כשהאייפון יתחבר"); icon = "⏳"; fill = .white.opacity(0.18)
+        case .sent:        line = tr("נשלח, מחכה למכשיר"); icon = "☁️"; fill = .white.opacity(0.18)
+        case .confirmed:   line = tr("המכשיר של \(c.name) אישר"); icon = "✅"; fill = Color(tofyHex: "48C774").opacity(0.55)
+        case .unavailable: line = a.kind == "gift" ? tr("שמור, המכשיר לא זמין") : tr("המכשיר לא זמין כרגע")
+                           icon = "⏳"; fill = Color(tofyHex: "FFB84D").opacity(0.5)
+        case .failed:      line = tr("לא הצליח — נסו מהאייפון"); icon = "⚠️"; fill = Color(tofyHex: "FFB84D").opacity(0.5)
+        }
+        return HStack(spacing: 7) {
+            if icon.isEmpty { ProgressView().tint(.white).frame(width: 18, height: 18) }
+            else { Text(icon).font(.system(size: 15)) }
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title).font(.system(size: 12.5, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                Text(line).font(.system(size: 11.5, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .lineLimit(2).minimumScaleFactor(0.75)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 9).padding(.vertical, 6)
+        .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(fill))
+        .animation(.easeInOut(duration: 0.25), value: a.state)
+    }
+
     private func actionLabel(_ emoji: String, _ title: String, fill: Color) -> some View {
         HStack(spacing: 6) {
             Text(emoji).font(.system(size: 15))
@@ -333,6 +465,8 @@ struct WatchHomeView: View {
     }
 
     private func giftPicker(_ c: WatchChildGlance) -> some View {
+        // Chosen → back to the actions page, where the status row tells the rest.
+        SelfClosing { close in
         ScrollView {
             VStack(spacing: 6) {
                 Text(tr("מתנת דקות ל\(c.name)"))
@@ -341,6 +475,7 @@ struct WatchHomeView: View {
                 ForEach([(15, tr("רבע שעה")), (30, tr("חצי שעה")), (60, tr("שעה")), (120, tr("שעתיים"))], id: \.0) { m, label in
                     Button {
                         model.send("gift", childID: c.id, minutes: m)
+                        close()
                     } label: {
                         actionLabel("💝", label, fill: Color(tofyHex: "FF5FA8").opacity(0.85))
                     }
@@ -350,9 +485,11 @@ struct WatchHomeView: View {
             .padding(.horizontal, 6)
         }
         .background(WatchBackdrop())
+        }
     }
 
     private func lockConfirm(_ c: WatchChildGlance) -> some View {
+        SelfClosing { close in
         VStack(spacing: 8) {
             Text("🔒").font(.system(size: 28))
             Text(tr("לנעול את \(c.name) עכשיו?"))
@@ -360,6 +497,7 @@ struct WatchHomeView: View {
                 .multilineTextAlignment(.center)
             Button {
                 model.send("lock", childID: c.id)
+                close()
             } label: {
                 actionLabel("🔒", tr("נעל עכשיו"), fill: Color(tofyHex: "EF4655"))
             }
@@ -367,6 +505,7 @@ struct WatchHomeView: View {
         }
         .padding(.horizontal, 8)
         .background(WatchBackdrop())
+        }
     }
 
     private func row(_ emoji: String, _ text: String) -> some View {
@@ -396,4 +535,11 @@ struct WatchHomeView: View {
         }
         .padding(.horizontal, 10)
     }
+}
+
+/// A pushed page that closes itself once its one job is done.
+private struct SelfClosing<Content: View>: View {
+    @Environment(\.dismiss) private var dismiss
+    @ViewBuilder let content: (_ close: @escaping () -> Void) -> Content
+    var body: some View { content { dismiss() } }
 }

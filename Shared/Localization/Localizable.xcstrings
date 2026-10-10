@@ -49863,6 +49863,28 @@
         }
       }
     },
+    "המכשיר לא זמין כרגע" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الجهاز غير متاح الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The device is unavailable right now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Устройство сейчас недоступно"
+          }
+        }
+      }
+    },
     "המכשיר מוגבל (זמן מסך / ניהול ארגוני). בטלו את ההגבלה ונסו שוב." : {
       "localizations" : {
         "ar" : {
@@ -49903,6 +49925,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Устройство: %@"
+          }
+        }
+      }
+    },
+    "המכשיר של %@ אישר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جهاز %@ أكّد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s device confirmed"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Устройство подтвердило — %@"
           }
         }
       }
@@ -94012,6 +94056,28 @@
         }
       }
     },
+    "נשלח, מחכה למכשיר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أُرسل، بانتظار الجهاز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sent, waiting for the device"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отправлено, ждём устройство"
+          }
+        }
+      }
+    },
     "נשלחה בקשת בדיקה — ההתראה אמורה להגיע תוך כמה שניות" : {
       "localizations" : {
         "ar" : {
@@ -118306,6 +118372,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сохранить"
+          }
+        }
+      }
+    },
+    "שמור, המכשיר לא זמין" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "محفوظة — الجهاز غير متاح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved — the device is unavailable"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранено — устройство недоступно"
           }
         }
       }
