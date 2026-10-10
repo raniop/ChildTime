@@ -440,7 +440,8 @@ struct WorldMapView: View {
                     // (The limited-time event banner is now a transient TOAST —
                     // see eventToastOverlay — instead of a permanent row here
                     // that ate a full line of the map all day.)
-                    if kidMode.active { kidExitBar }
+                    // (Pinned above the scroll on a phone — see the safeAreaInset
+                    // below; the sidebar layout keeps it in its own column.)
                     VStack(spacing: AppSpacing.lg) {
                         // The brand + "בחר עולם" line live UNDER the daily
                         // challenge, heading the world grid (Rani tried it as a
@@ -600,6 +601,24 @@ struct WorldMapView: View {
                     // The toolbar is one bar now, so the room is what it measures.
                     .padding(.bottom, useSidebar ? AppSpacing.lg
                              : (bottomPanelHeight > 0 ? bottomPanelHeight + 8 : (isCompact ? 220 : 190)))
+                }
+            }
+            // 🔓 "יציאה ממצב ילד" stays at the top while the home scrolls (Rani,
+            // 2026-10-10) — a parent taking the phone back shouldn't have to
+            // scroll up to find it. A soft fade under it so the worlds don't
+            // show through the bar's edges.
+            .safeAreaInset(edge: .top, spacing: 0) {
+                if kidMode.active || Self.demoKidExit, !useSidebar {
+                    kidExitBar
+                        .padding(.horizontal, homeHPad)
+                        .padding(.bottom, 10)
+                        .background(
+                            LinearGradient(stops: [.init(color: Color(hex: "7A5CFF"), location: 0),
+                                                   .init(color: Color(hex: "7A5CFF"), location: 0.82),
+                                                   .init(color: Color(hex: "7A5CFF").opacity(0), location: 1)],
+                                           startPoint: .top, endPoint: .bottom)
+                                .ignoresSafeArea(edges: .top)
+                        )
                 }
             }
             }
@@ -1167,6 +1186,15 @@ struct WorldMapView: View {
 
     /// Slim "exit Kid Mode" bar shown UNDER the top-bar buttons while the parent's
     /// phone is acting as a kid device — so it never overlaps the action buttons.
+    /// 🧪 DEMO_KIDEXIT=1 (DEBUG): show the pinned exit bar without entering Kid Mode.
+    private static let demoKidExit: Bool = {
+        #if DEBUG
+        return ProcessInfo.processInfo.environment["DEMO_KIDEXIT"] != nil
+        #else
+        return false
+        #endif
+    }()
+
     private var kidExitBar: some View {
         Button {
             Haptic.light()

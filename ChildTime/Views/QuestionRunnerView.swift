@@ -892,10 +892,19 @@ struct QuestionRunnerView: View {
         // The bubble at the buddy's middle, its arrow touching him (Rani). The
         // character art has more empty air on the side the bubble meets in
         // right-to-left — measured ~30pt there vs ~12pt in left-to-right.
-        return HStack(alignment: .center, spacing: rtl ? -32 : -10) {   // the image has air around the buddy
+        return HStack(alignment: .center, spacing: rtl ? -26 : -10) {   // the image has air around the buddy
             InlineBuddy(controller: companion, profile: profiles.active, width: shelfBuddySize)
             if let text = companion.bubbleText {
-                BubbleSpeech(text: text, pointDirection: rtl ? .trailing : .leading)
+                // Hugs its words: a short "כן!" used to sit centred in a 230pt box,
+                // far from the buddy (Rani, 2026-10-10). One line when it fits,
+                // wrapped at 230 when it doesn't. And no typewriter here — the
+                // shelf is rebuilt on every new question, so the words were
+                // typed, wiped and typed again.
+                ViewThatFits(in: .horizontal) {
+                    BubbleSpeech(text: text, pointDirection: rtl ? .trailing : .leading, animated: false, hugs: true)
+                    BubbleSpeech(text: text, pointDirection: rtl ? .trailing : .leading, animated: false)
+                        .frame(width: 230)
+                }
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: 230, alignment: .leading)
                     .id(text)
