@@ -43,6 +43,7 @@ final class ParentSettings: ObservableObject {
         static let hasPromptedChildAppLock = "hasPromptedChildAppLock"
         static let dailyCapCardDone = "dailyCapCardDone"
         static let pendingJoinFamily = "pendingJoinFamily"
+        static let joinFamilySucceeded = "joinFamilySucceeded"
         static let pendingJoinPayload = "pendingJoinPayload"
         static let joinedChildID = "joinedChildID"
         static let hasSetParentPIN = "hasSetParentPIN"
@@ -296,7 +297,16 @@ final class ParentSettings: ObservableObject {
     /// After they sign in, the dashboard auto-opens the family-linking sheet so
     /// they can enter the invite code instead of starting a fresh family.
     @Published var pendingJoinFamily: Bool {
-        didSet { defaults.set(pendingJoinFamily, forKey: Key.pendingJoinFamily) }
+        didSet {
+            defaults.set(pendingJoinFamily, forKey: Key.pendingJoinFamily)
+            if !pendingJoinFamily { defaults.removeObject(forKey: Key.joinFamilySucceeded) }
+        }
+    }
+    /// Written the moment a join succeeds — see `init`, where a leftover one
+    /// means the app was closed on the "הצטרפתם למשפחה!" screen.
+    var joinFamilySucceeded: Bool {
+        get { defaults.bool(forKey: Key.joinFamilySucceeded) }
+        set { defaults.set(newValue, forKey: Key.joinFamilySucceeded) }
     }
     /// A child-join payload ("CODE|childID") captured from a scanned Universal
     /// Link (native Camera). The child connect screen redeems it automatically.
@@ -434,7 +444,12 @@ final class ParentSettings: ObservableObject {
         self.hasSeenWelcome = d.bool(forKey: Key.hasSeenWelcome)
         self.hasPromptedChildAppLock = d.bool(forKey: Key.hasPromptedChildAppLock)
         self.dailyCapCardDone = d.bool(forKey: Key.dailyCapCardDone)
-        self.pendingJoinFamily = d.bool(forKey: Key.pendingJoinFamily)
+        // The join screen is kept up after a successful join (it shows "הצטרפתם
+        // למשפחה!" until "המשיכו"). An app closed at that moment used to open on
+        // the code screen again — for a parent who is already in the family.
+        let joinedAlready = d.bool(forKey: Key.joinFamilySucceeded)
+        self.pendingJoinFamily = d.bool(forKey: Key.pendingJoinFamily) && !joinedAlready
+        if joinedAlready { d.set(false, forKey: Key.pendingJoinFamily); d.removeObject(forKey: Key.joinFamilySucceeded) }
         self.pendingJoinPayload = d.string(forKey: Key.pendingJoinPayload)
         self.joinedChildID = d.string(forKey: Key.joinedChildID)
         self.hasSetParentPIN = d.bool(forKey: Key.hasSetParentPIN)

@@ -21609,6 +21609,28 @@
         }
       }
     },
+    "אזור הזמן של המשפחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المنطقة الزمنية للعائلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The family's time zone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Часовой пояс семьи"
+          }
+        }
+      }
+    },
     "אחבר אחר כך" : {
       "localizations" : {
         "ar" : {
@@ -48119,6 +48141,28 @@
         }
       }
     },
+    "הטלפון הזה: %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا الهاتف: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This phone: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этот телефон: %@"
+          }
+        }
+      }
+    },
     "הטלפון יחזור למצב רגיל והנעילה תוסר." : {
       "localizations" : {
         "ar" : {
@@ -50412,6 +50456,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Семья, дети и прогресс сохранены в облаке — войдите снова, и всё вернётся."
+          }
+        }
+      }
+    },
+    "המשפחה: %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "العائلة: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The family: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Семья: %@"
           }
         }
       }
@@ -77216,6 +77282,28 @@
         }
       }
     },
+    "להעביר את המשפחה לאזור הזמן של הטלפון הזה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نقل العائلة إلى المنطقة الزمنية لهذا الهاتف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move the family to this phone's time zone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перевести семью на часовой пояс этого телефона"
+          }
+        }
+      }
+    },
     "להפוך את האייפד הזה למכשיר של ילד" : {
       "localizations" : {
         "ar" : {
@@ -79019,6 +79107,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "По теме, %@"
+          }
+        }
+      }
+    },
+    "לפיו נקבעות השעות והתאריכים בהתראות — לכל ההורים במשפחה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تُحدَّد بها الساعات والتواريخ في الإشعارات — لكل الوالدين في العائلة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It sets the hours and dates in notifications — for every parent in the family."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "По нему определяются время и даты в уведомлениях — для всех родителей в семье."
           }
         }
       }

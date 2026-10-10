@@ -579,6 +579,7 @@ final class HouseholdManager: ObservableObject {
             let hh = Household(parentUIDs: [uid], createdBy: uid)
             try await db.collection("households").document(hh.id).setData(Self.encode(hh))
             try await parentRef(uid).updateData(["householdIDs": FieldValue.arrayUnion([hh.id])])
+            rememberChosenFamily(hh.id, uid: uid)
             TofyLink("createOwnHousehold: \(hh.id.prefix(8))")
             finishBootstrap(hh)
             return .created
@@ -598,6 +599,7 @@ final class HouseholdManager: ObservableObject {
                 .updateData(["parentUIDs": FieldValue.arrayUnion([uid])])
             try await parentRef(uid).updateData(["householdIDs": FieldValue.arrayUnion([invite.id])])
             UserDefaults.standard.set(invite.id, forKey: preferredHouseholdKey)
+            rememberChosenFamily(invite.id, uid: uid)
             if let mail = email {
                 try? await db.collection("households").document(invite.id)
                     .updateData(["invitedParentEmails": FieldValue.arrayRemove([mail.lowercased()])])
@@ -718,6 +720,10 @@ final class HouseholdManager: ObservableObject {
                 if let doc = try? await db.collection("households").document(preferred).getDocument(),
                    let data = doc.data(), let hh = Self.decodeHousehold(id: preferred, data) {
                     parentRef(uid).updateData(["householdIDs": FieldValue.arrayUnion([preferred])]) { _ in }
+                    // A parent who joined before this was recorded: this phone
+                    // still knows which family they chose — write it down for
+                    // their next phone.
+                    if isRealAccount { rememberChosenFamily(preferred, uid: uid) }
                     return hh
                 }
             }
@@ -737,8 +743,13 @@ final class HouseholdManager: ObservableObject {
         // earlier): never "whichever came first". The one WITH children wins —
         // an accidental family is the empty one, and it is also the one listed
         // LAST on the parent doc (arrayUnion appends), so order comes second.
+        // …and before both: the family this account CHOSE, if it is still a
+        // member of it (recorded on its own parent doc — the same answer on an
+        // iPhone, an Android and a brand-new phone).
         let named = parentAccount?.householdIDs ?? []
+        let chosen = parentAccount?.activeHouseholdID
         let ranked = docs.sorted { a, b in
+            if (a.documentID == chosen) != (b.documentID == chosen) { return a.documentID == chosen }
             let ca = (a.data()["childIDs"] as? [Any])?.count ?? 0, cb = (b.data()["childIDs"] as? [Any])?.count ?? 0
             if (ca > 0) != (cb > 0) { return ca > 0 }
             let ra = named.firstIndex(of: a.documentID) ?? Int.max, rb = named.firstIndex(of: b.documentID) ?? Int.max
@@ -854,10 +865,13 @@ final class HouseholdManager: ObservableObject {
 
     /// 🌍 The family's time zone, so dates and hours in server notifications
     /// ("the gift ends on Tuesday", the evening push) are the family's own —
-    /// not Israel's. Written only when it changed.
+    /// not Israel's. Written ONCE, when the family has none: every phone used to
+    /// write its own, so with one parent abroad the two phones kept replacing
+    /// each other's value, back and forth, for as long as both were on. A parent
+    /// changes it on purpose in Settings (`setFamilyTimeZone`).
     private func recordTimeZone(in hh: Household) {
         let tz = TimeZone.current.identifier
-        guard uid != nil, hh.timeZone != tz else { return }
+        guard uid != nil, (hh.timeZone ?? "").isEmpty else { return }
         Task {
             try? await db.collection("households").document(hh.id).updateData(["timeZone": tz])
         }
@@ -1539,6 +1553,26 @@ final class HouseholdManager: ObservableObject {
         let words = (displayName ?? "").split(separator: " ").map(String.init).filter { !$0.isEmpty }
         guard let last = words.last, words.count >= 2 else { return nil }
         return tr("משפחת \(last)")
+    }
+
+    /// Record, on this account's own doc, the family it just chose (see
+    /// `ParentAccount.activeHouseholdID`). Real accounts only; never awaited.
+    private func rememberChosenFamily(_ hid: String, uid: String) {
+        #if canImport(FirebaseFirestore)
+        guard (email?.isEmpty == false) || (displayName?.isEmpty == false),
+              parentAccount?.activeHouseholdID != hid else { return }
+        if parentAccount?.id == uid { parentAccount?.activeHouseholdID = hid }
+        parentRef(uid).updateData(["activeHouseholdID": hid]) { _ in }
+        #endif
+    }
+
+    /// 🌍 A parent moves the family to another time zone (see `recordTimeZone`).
+    func setFamilyTimeZone(_ identifier: String) {
+        household?.timeZone = identifier
+        #if canImport(FirebaseFirestore)
+        guard let hh = household else { return }
+        Task { try? await db.collection("households").document(hh.id).updateData(["timeZone": identifier]) }
+        #endif
     }
 
     /// The parent names the family ("משפחת גולן"). Empty clears it.
@@ -2360,6 +2394,7 @@ final class HouseholdManager: ObservableObject {
 
             // Adopt the joined household as my canonical one + switch listeners.
             UserDefaults.standard.set(invite.householdID, forKey: preferredHouseholdKey)
+            rememberChosenFamily(invite.householdID, uid: uid)
             // The membership writes above already succeeded — the join is done.
             // Re-reading the household right after a fresh anonymous session
             // (an iPad just converted from a parent device) was refused for a
@@ -2502,6 +2537,7 @@ final class HouseholdManager: ObservableObject {
                 .updateData(["status": "approved"])
             try await parentRef(uid).updateData(["householdIDs": FieldValue.arrayUnion([req.fromHouseholdID])])
             UserDefaults.standard.set(req.fromHouseholdID, forKey: preferredHouseholdKey)
+            rememberChosenFamily(req.fromHouseholdID, uid: uid)
             // 4) Re-point my listeners at the shared household.
             let hhDoc = try await db.collection("households").document(req.fromHouseholdID).getDocument()
             if let data = hhDoc.data(), let hh = Self.decodeHousehold(id: req.fromHouseholdID, data) {

@@ -102,6 +102,10 @@ struct ParentAccount: Codable, Identifiable, Equatable {
     var twoFactorEnabled: Bool
     var consentVersion: Int        // 0 = not yet consented
     var consentAt: Date?
+    /// The family this account last CHOSE (created, joined by code or invite).
+    /// An account can be listed in two — one opened by accident before joining
+    /// the partner's — and on a new phone nothing else says which one is theirs.
+    var activeHouseholdID: String? = nil
 
     init(id: String,
          email: String? = nil,

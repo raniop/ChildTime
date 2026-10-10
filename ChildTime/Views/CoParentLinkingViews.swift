@@ -341,7 +341,7 @@ struct JoinFamilyFlowView: View {
         Task {
             working = true; error = nil
             let ok = await household.redeemInvite(code: trimmed)
-            if ok { Haptic.success(); withAnimation(.spring) { joined = true } }
+            if ok { settings.joinFamilySucceeded = true; Haptic.success(); withAnimation(.spring) { joined = true } }
             else { error = household.lastError ?? tr("קוד לא תקין"); Haptic.warning() }
             working = false
         }
@@ -495,7 +495,7 @@ struct JoinConfirmView: View {
             working = true; note = nil
             let ok = await household.redeemInvite(code: coord.code, bringLocalChildren: true)
             working = false
-            if ok { Haptic.success(); withAnimation(.spring) { joined = true } }
+            if ok { settings.joinFamilySucceeded = true; Haptic.success(); withAnimation(.spring) { joined = true } }
             else { note = household.lastError ?? tr("לא הצלחנו להצטרף"); Haptic.warning() }
         }
     }

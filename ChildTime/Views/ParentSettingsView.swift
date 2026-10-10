@@ -50,7 +50,18 @@ struct ParentSettingsView: View {
             .familyConnectionAlert()
     }
 
-    private var settingsStack: some View {
+    @ViewBuilder private var settingsStack: some View {
+        #if DEBUG
+        // 🧪 DEMO_SETTINGS_PAGE=family — the family page on its own (screenshots).
+        if ProcessInfo.processInfo.environment["DEMO_SETTINGS_PAGE"] == "family" {
+            NavigationStack { subScreen(tr("המשפחה")) { familySection; timeZoneSection; childOrderSection; syncSection } }
+        } else { settingsMenu }
+        #else
+        settingsMenu
+        #endif
+    }
+
+    private var settingsMenu: some View {
         NavigationStack {
             // Five doors, each with a one-line summary (Rani: the old single
             // form was "a pile nobody would open"). Tofy+ lives on the home.
@@ -79,7 +90,7 @@ struct ParentSettingsView: View {
                         .buttonStyle(.plain)
                     }
                     menuRow("👪", tr("המשפחה"), familySummary) {
-                        subScreen(tr("המשפחה")) { familySection; childOrderSection; syncSection }
+                        subScreen(tr("המשפחה")) { familySection; timeZoneSection; childOrderSection; syncSection }
                     }
                     // 📱 A parent iPad is usually the KID's iPad that got set up
                     // first — offer the one-tap fix (the dashboard behind this
@@ -202,6 +213,51 @@ struct ParentSettingsView: View {
             Text(tr("מופיע במסך ההורים ובהודעות — לכל ההורים במשפחה."))
         }
         .glassRows()
+    }
+
+    /// 🌍 Only when this phone's clock differs from the family's: the family's
+    /// time zone is set once (see `HouseholdManager.recordTimeZone`), and this
+    /// is where a parent moves it on purpose — a family that relocated.
+    @ViewBuilder private var timeZoneSection: some View {
+        let phone = TimeZone.current
+        #if DEBUG
+        let stored = ProcessInfo.processInfo.environment["DEMO_FAMILY_TZ"] ?? household.household?.timeZone
+        #else
+        let stored = household.household?.timeZone
+        #endif
+        if let stored, let family = TimeZone(identifier: stored),
+           family.secondsFromGMT() != phone.secondsFromGMT() {
+            Section {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(tr("המשפחה: \(Self.zoneName(family))"))
+                    Text(tr("הטלפון הזה: \(Self.zoneName(phone))"))
+                }
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white)
+                Button {
+                    if !household.refuseIfDisconnected() { household.setFamilyTimeZone(phone.identifier) }
+                } label: {
+                    Text(tr("להעביר את המשפחה לאזור הזמן של הטלפון הזה"))
+                        .font(.system(size: 15, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "4B3FBF"))
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 12).padding(.vertical, 10)
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
+                }
+                .buttonStyle(.plain)
+            } header: {
+                Text(tr("אזור הזמן של המשפחה"))
+            } footer: {
+                Text(tr("לפיו נקבעות השעות והתאריכים בהתראות — לכל ההורים במשפחה."))
+            }
+            .glassRows()
+        }
+    }
+
+    /// "שעון ישראל" / "Eastern Time" — in the app's language.
+    private static func zoneName(_ zone: TimeZone) -> String {
+        zone.localizedName(for: .generic, locale: LanguageStore.shared.current.locale) ?? zone.identifier
     }
 
     /// The children in the home's manual order (unordered ones after, by name).
