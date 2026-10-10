@@ -870,7 +870,10 @@ struct QuestionRunnerView: View {
         // 💬 What it says sits BESIDE it with a side arrow pointing at it (Rani,
         // 2026-10-10) — one row, so right-to-left and left-to-right both work.
         let rtl = LanguageStore.shared.current.isRightToLeft
-        return HStack(alignment: .center, spacing: -10) {   // the bubble at the buddy's middle (Rani)   // the image has air around the buddy
+        // The bubble at the buddy's middle, its arrow touching him (Rani). The
+        // character art has more empty air on the side the bubble meets in
+        // right-to-left — measured ~30pt there vs ~12pt in left-to-right.
+        return HStack(alignment: .center, spacing: rtl ? -32 : -10) {   // the image has air around the buddy
             InlineBuddy(controller: companion, profile: profiles.active, width: shelfBuddySize)
             if let text = companion.bubbleText {
                 BubbleSpeech(text: text, pointDirection: rtl ? .trailing : .leading)
