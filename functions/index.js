@@ -824,6 +824,64 @@ exports.onHouseholdDeleted = onDocumentDeleted("households/{hid}", async (event)
   }
 });
 
+// ---- ✉️ "הוזמנתם למשפחה" — the email a co-parent gets when invited by email ----
+// "הזמינו באימייל" only wrote the address onto the household; the invited parent
+// heard nothing unless their partner told them (Rani, 2026-10-10: "הוא מקבל איזה
+// מייל?"). Now each NEWLY added address gets one short email with the three
+// steps. One per family + address per day (inviteMails/{hid}_{address}).
+function inviteMailText(familyName, email) {
+  const fam = familyName ? `משפחת ${String(familyName).replace(/^משפחת\s+/, "")}` : "המשפחה שלכם";
+  return {
+    subject: `הוזמנתם להצטרף ל${fam} בטופי 👪`,
+    lines: [
+      `שלום,`,
+      ``,
+      `הוזמנתם להצטרף כהורה ל${fam} באפליקציית טופי.`,
+      ``,
+      `כך מצטרפים:`,
+      `1. מורידים את טופי: https://tofyapp.com`,
+      `2. בוחרים "המכשיר שלי (הורה)" ומתחברים עם הכתובת הזו: ${email}`,
+      `3. מופיע המסך "המשפחה מחכה לכם" — לוחצים "הצטרפו למשפחה", וזהו.`,
+      ``,
+      `תראו את אותם הילדים, אותה התקדמות ואותן הגדרות כמו ההורה שהזמין אתכם.`,
+      ``,
+      `לא ביקשתם להצטרף? אפשר פשוט להתעלם מהמייל הזה.`,
+      ``,
+      `צוות טופי 🦁`,
+    ],
+  };
+}
+exports.inviteMailText = inviteMailText;   // for the unit test
+
+exports.onParentInvitedByEmail = onDocumentWritten(
+  { document: "households/{hid}", secrets: [GMAIL_USER, GMAIL_PASS] },
+  async (event) => {
+    const before = (event.data.before && event.data.before.data()) || null;
+    const after = (event.data.after && event.data.after.data()) || null;
+    if (!after) return;                                     // the family was deleted
+    const norm = (a) => (Array.isArray(a) ? a : []).filter((x) => typeof x === "string").map((x) => x.trim().toLowerCase());
+    const had = new Set(norm(before && before.invitedParentEmails));
+    const added = norm(after.invitedParentEmails).filter((e) => !had.has(e) && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e));
+    if (!added.length) return;
+    const user = GMAIL_USER.value(), pass = GMAIL_PASS.value();
+    if (!user || !pass) { console.warn("[invite-mail] GMAIL secrets not set — skipping"); return; }
+    const transporter = nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
+    for (const email of added.slice(0, 5)) {
+      const ref = db.collection("inviteMails").doc(`${event.params.hid}_${email}`.replace(/[\/#?]/g, "_"));
+      try {
+        const prev = await ref.get();
+        if (prev.exists && Date.now() / 1000 - ((prev.data() || {}).sentAt || 0) < 86400) continue;   // once a day
+        const m = inviteMailText(after.familyName, email);
+        await transporter.sendMail({ from: `טופי <${user}>`, to: email, subject: m.subject,
+          text: m.lines.join("\n"), html: rtlBody(m.lines) });
+        await ref.set({ householdID: event.params.hid, sentAt: Date.now() / 1000 });
+        console.log("[invite-mail] sent for household", event.params.hid);
+      } catch (e) {
+        console.error("[invite-mail] failed for household", event.params.hid, e && e.message);
+      }
+    }
+  });
+
 // ---- 1a) Wake the child's device for a parent command -----------------------
 // Parent commands (±minutes, gift, reset, revoke, remote lock/unlock) are written
 // to Firestore and consumed by the child's device listener — but a BACKGROUNDED
