@@ -74,6 +74,7 @@ struct WorldMapView: View {
     @State private var showingChores = false
     @StateObject private var choreStore = ChoreStore.shared
     @State private var showingLeaderboard = false
+    @State private var showingBackdrops = false
     @State private var showingSmartFeed = false
     @State private var showingChildSettings = false
     @State private var showingPaywall = false
@@ -614,9 +615,10 @@ struct WorldMapView: View {
                         .padding(.horizontal, homeHPad)
                         .padding(.bottom, 10)
                         .background(
-                            LinearGradient(stops: [.init(color: Color(hex: "7A5CFF"), location: 0),
-                                                   .init(color: Color(hex: "7A5CFF"), location: 0.82),
-                                                   .init(color: Color(hex: "7A5CFF").opacity(0), location: 1)],
+                            // (the top colour of the child's own backdrop)
+                            LinearGradient(stops: [.init(color: kidExitFade, location: 0),
+                                                   .init(color: kidExitFade, location: 0.82),
+                                                   .init(color: kidExitFade.opacity(0), location: 1)],
                                            startPoint: .top, endPoint: .bottom)
                                 .ignoresSafeArea(edges: .top)
                         )
@@ -1038,6 +1040,9 @@ struct WorldMapView: View {
         }
         .fullScreenCover(isPresented: $showingWheel) {
             LuckyWheelView { showingWheel = false }
+        }
+        .fullScreenCover(isPresented: $showingBackdrops) {
+            if let id = profiles.activeID { BackdropPickerView(owner: .child(id)) }
         }
         .fullScreenCover(isPresented: $showingSmartFeed) {
             // Smart Feed play — grants minutes (capped by the daily maximum).
@@ -1653,6 +1658,12 @@ struct WorldMapView: View {
     /// Three, not four (Rani, 2026-09-06): 🛍️ shop · 🏆 friends (leaderboard +
     /// the live tournament live inside it; a waiting invite lights the badge) ·
     /// ⚙️ the parent's corner. Order (LTR): 🛍️ · 🏆 · ⚙️.
+    /// What the pinned exit bar fades into: the top of the backdrop behind it.
+    private var kidExitFade: Color {
+        let look = BackdropStore.shared.look
+        return look.photo != nil ? Color(hex: "1B1D24") : Color(hex: look.theme.colors.first ?? "7A5CFF")
+    }
+
     private func navButtonsRow(size: CGFloat) -> some View {
         HStack(spacing: isCompact ? 6 : 9) {
             // Rani (2026-09-06): the shop and the friends screen are NOT behind
@@ -1665,6 +1676,10 @@ struct WorldMapView: View {
                 Haptic.light(); showingLeaderboard = true
             }
             .coachMark("k.friends")
+            // 🎨 The child's own backdrop (free — every one of them).
+            navButton("🎨", badge: false, size: size) {
+                Haptic.light(); showingBackdrops = true
+            }
             navButton("⚙️", badge: false, size: size, longPress: { showingDemo = true }) {
                 showingParentGate = true
             }

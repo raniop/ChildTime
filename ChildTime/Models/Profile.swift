@@ -21,6 +21,11 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// roster re-upload silently reverted the kid's new pick (hedgehog →
     /// rabbit). nil (legacy data) = distant past — any stamped pick wins.
     var characterUpdatedAt: Date? = nil
+    /// 🎨 The backdrop this child chose (`BackdropTheme.id`, or "photo" for a
+    /// picture of their own); nil → the default. `backdropUpdatedAt` is its
+    /// freshness stamp, exactly like the character's: the fresher pick wins.
+    var backdropID: String? = nil
+    var backdropUpdatedAt: Date? = nil
     var createdAt: Date
 
     // MARK: - Learning identity (Parent Platform)
@@ -221,6 +226,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         case ownedPacks, packExpiry, disabledPacks
         case onlyRegularQuestions
         case quietHours
+        case backdropID, backdropUpdatedAt
     }
 
     init(from decoder: Decoder) throws {
@@ -233,6 +239,8 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.avatarPresetID = try c.decode(String.self, forKey: .avatarPresetID)
         self.character3DID = try c.decodeIfPresent(String.self, forKey: .character3DID)
         self.characterUpdatedAt = try? c.decodeIfPresent(Date.self, forKey: .characterUpdatedAt)
+        self.backdropID = try? c.decodeIfPresent(String.self, forKey: .backdropID)
+        self.backdropUpdatedAt = try? c.decodeIfPresent(Date.self, forKey: .backdropUpdatedAt)
         self.createdAt = try c.decode(Date.self, forKey: .createdAt)
         self.grade = try c.decodeIfPresent(Int.self, forKey: .grade)
         self.gradeSchoolYear = try c.decodeIfPresent(Int.self, forKey: .gradeSchoolYear)

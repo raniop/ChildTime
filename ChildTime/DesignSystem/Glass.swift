@@ -109,24 +109,54 @@ extension View {
 /// blurred. Every glass screen sits on this — the panes are 14 % white, so
 /// THIS is what gives them their colour.
 struct GlassBackdrop: View {
+    // 🎨 The colours are no longer fixed: each child (and the parent) picks a
+    // backdrop — see Backdrop.swift. The default is the one described above.
+    @ObservedObject private var store = BackdropStore.shared
+    @ObservedObject private var profiles = ProfileStore.shared
+    @ObservedObject private var kidMode = KidModeManager.shared
+
     var body: some View {
+        let look = store.look
         GeometryReader { g in
             ZStack {
-                LinearGradient(colors: [Color(hex: "7A5CFF"), Color(hex: "5E60CE"), Color(hex: "3E8BF0")],
-                               startPoint: UnitPoint(x: 0.62, y: 0), endPoint: UnitPoint(x: 0.38, y: 1))
-                Circle().fill(Color(hex: "FF7BD3"))
-                    .frame(width: 280, height: 280)
-                    .blur(radius: 44)
-                    .opacity(0.8)
-                    .position(x: 40, y: 250)
-                Circle().fill(Color(hex: "37E2D5"))
-                    .frame(width: 320, height: 320)
-                    .blur(radius: 44)
-                    .opacity(0.8)
-                    .position(x: g.size.width - 30, y: g.size.height - 200)
+                if let photo = look.photo {
+                    // A photo of their own: filled edge to edge, under a dark veil so
+                    // the white text and the glass panes stay readable on any picture.
+                    Image(uiImage: photo).resizable().scaledToFill()
+                        .frame(width: g.size.width, height: g.size.height).clipped()
+                    Color.black.opacity(0.30)
+                } else {
+                    BackdropArt(theme: look.theme, size: g.size)
+                }
             }
         }
         .ignoresSafeArea()
+        .task(id: store.photoSyncKey) { await store.fetchPhotoIfNeeded() }
+    }
+}
+
+/// One built-in backdrop, drawn: the gradient and its two blurred orbs. `scale`
+/// shrinks the orbs for the picker's small previews.
+struct BackdropArt: View {
+    let theme: BackdropTheme
+    let size: CGSize
+    var scale: CGFloat = 1
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: theme.colors.map { Color(hex: $0) },
+                           startPoint: UnitPoint(x: 0.62, y: 0), endPoint: UnitPoint(x: 0.38, y: 1))
+            Circle().fill(Color(hex: theme.orbTop))
+                .frame(width: 280 * scale, height: 280 * scale)
+                .blur(radius: 44 * scale)
+                .opacity(theme.orbOpacity)
+                .position(x: 40 * scale, y: 250 * scale)
+            Circle().fill(Color(hex: theme.orbBottom))
+                .frame(width: 320 * scale, height: 320 * scale)
+                .blur(radius: 44 * scale)
+                .opacity(theme.orbOpacity)
+                .position(x: size.width - 30 * scale, y: size.height - 200 * scale)
+        }
     }
 }
 

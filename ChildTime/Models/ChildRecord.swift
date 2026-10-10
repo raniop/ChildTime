@@ -129,6 +129,9 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     /// `languageUpdatedAt` decides between them: last press wins.
     var language: String?
     var languageUpdatedAt: Date?
+    /// 🎨 The child's backdrop — see Profile.backdropID.
+    var backdropID: String?
+    var backdropUpdatedAt: Date?
     /// Topics (worlds) the parent enabled for this child (topic.rawValues).
     /// nil → all topics enabled (also the backward-compatible default).
     var enabledTopics: [String]?
@@ -176,6 +179,8 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         self.dailyCapMinutes = profile.dailyCapMinutes
         self.language = profile.language
         self.languageUpdatedAt = profile.languageUpdatedAt
+        self.backdropID = profile.backdropID
+        self.backdropUpdatedAt = profile.backdropUpdatedAt
         // Store only when the parent narrowed it (all-enabled stays nil → smaller doc).
         // Only base topics are stored (packs are gated by `packs`, not here).
         let base = profile.enabledTopics.filter { !$0.isPack }
@@ -231,6 +236,8 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         p.onlyRegularQuestions = onlyRegularQuestions ?? false
         p.quietHours = quietHours
         p.characterUpdatedAt = characterUpdatedAt
+        p.backdropID = backdropID
+        p.backdropUpdatedAt = backdropUpdatedAt
         return p
     }
 

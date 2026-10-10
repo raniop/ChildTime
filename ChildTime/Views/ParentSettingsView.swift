@@ -89,6 +89,9 @@ struct ParentSettingsView: View {
                         }
                         .buttonStyle(.plain)
                     }
+                    menuRow("🎨", tr("רקע"), backdropSummary) {
+                        BackdropPickerView(owner: .parent).navigationBarBackButtonHidden(true)
+                    }
                     menuRow("👪", tr("המשפחה"), familySummary) {
                         subScreen(tr("המשפחה")) { familySection; timeZoneSection; childOrderSection; syncSection }
                     }
@@ -183,6 +186,11 @@ struct ParentSettingsView: View {
         // 🎚 Outside the NavigationStack, so the rail is drawn at the edge
         // of the glass and not at the edge of the content.
         .railDismiss(tr("סיום"), systemImage: "checkmark") { dismiss() }
+    }
+
+    private var backdropSummary: String {
+        let id = BackdropStore.shared.parentBackdropID
+        return id == BackdropTheme.photoID ? tr("התמונה שלי") : Question.stripNiqqud(BackdropTheme.find(id).displayName)
     }
 
     /// "משפחת גולן" — one name for the whole household (Rani: the dashboard

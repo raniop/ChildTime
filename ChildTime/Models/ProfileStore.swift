@@ -258,6 +258,15 @@ final class ProfileStore: ObservableObject {
                     merged.languageUpdatedAt = working[idx].languageUpdatedAt
                     localCharacterWinners.append(merged)     // heal the stale cloud doc
                 }
+                // 🎨 Backdrop: the fresher pick wins too (an older build's roster
+                // upload carries no backdrop at all — it must not undo the child's).
+                let localBackdropStamp = working[idx].backdropUpdatedAt ?? .distantPast
+                let remoteBackdropStamp = remote.backdropUpdatedAt ?? .distantPast
+                if localBackdropStamp > remoteBackdropStamp {
+                    merged.backdropID = working[idx].backdropID
+                    merged.backdropUpdatedAt = working[idx].backdropUpdatedAt
+                    localCharacterWinners.append(merged)     // heal the stale cloud doc
+                }
                 // Play-protection code: a MISSING remote field (pre-field doc /
                 // stale writer) must not wipe a code the child just set locally —
                 // but an EMPTY string is a deliberate clear (parent reset), and

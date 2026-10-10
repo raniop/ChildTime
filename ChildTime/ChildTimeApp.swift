@@ -513,6 +513,10 @@ struct ChildTimeApp: App {
                     }
                 }
         case "parentsettings": ParentSettingsView()   // DEMO_SCREEN=parentsettings
+        // 🎨 DEMO_SCREEN=backdrops | parentbackdrops — the backdrop picker (child's / parent's)
+        case "backdrops":
+            if let id = ProfileStore.shared.activeID { BackdropPickerView(owner: .child(id)) }
+        case "parentbackdrops": BackdropPickerView(owner: .parent)
         case "splash": SplashScreenView { }             // DEMO_SCREEN=splash
         case "welcome": WelcomeIntroView()              // DEMO_SCREEN=welcome
         case "rolepicker": RolePickerView()             // DEMO_SCREEN=rolepicker

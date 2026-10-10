@@ -59,7 +59,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>סריקת קוד QR כדי לקשר בין מכשירים במשפחה.</string>
+	<string>סריקת קוד QR לקישור מכשירים במשפחה, וצילום תמונות למטלות ולרקע.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>פתיחת הגדרות ההורה באמצעות Face ID במקום הקלדת הקוד.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

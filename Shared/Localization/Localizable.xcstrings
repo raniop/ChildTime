@@ -18033,6 +18033,28 @@
         }
       }
     },
+    "אֵשׁ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نار"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fire"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Огонь"
+          }
+        }
+      }
+    },
     "אֶבְחַר אַחַר כָּךְ" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -43852,6 +43874,28 @@
         }
       }
     },
+    "הַתְּמוּנָה שֶׁלִּי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "صورتي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My photo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Моё фото"
+          }
+        }
+      }
+    },
     "הַתְּשׁוּבָה הִיא…" : {
       "localizations" : {
         "ar" : {
@@ -45195,6 +45239,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "הָרֶקַע שֶׁלִּי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خلفيّتي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My background"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мой фон"
           }
         }
       }
@@ -53600,6 +53666,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Изображение слишком большое — попробуйте другой снимок экрана"
+          }
+        }
+      }
+    },
+    "התמונה שלי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "صورتي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My photo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Моё фото"
           }
         }
       }
@@ -63900,6 +63988,28 @@
         }
       }
     },
+    "יַעַר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "غابة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forest"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лес"
+          }
+        }
+      }
+    },
     "יַעַר הַסִּפּוּרִים" : {
       "localizations" : {
         "ar" : {
@@ -64006,6 +64116,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Единственное число"
+          }
+        }
+      }
+    },
+    "יָם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بحر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sea"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Море"
           }
         }
       }
@@ -66990,6 +67122,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Классы 3–4"
+          }
+        }
+      }
+    },
+    "כֵּהֶה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "داكن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dark"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тёмный"
           }
         }
       }
@@ -74145,6 +74299,28 @@
         }
       }
     },
+    "לְצַלֵּם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التقاط صورة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take a photo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сфотографировать"
+          }
+        }
+      }
+    },
     "לְקַפֵּל גַּרְבַּיִם קְטַנִּים 🧦" : {
       "localizations" : {
         "ar" : {
@@ -75079,6 +75255,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "для детей"
+          }
+        }
+      }
+    },
+    "לַיְלָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ليل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Night"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ночь"
           }
         }
       }
@@ -81321,6 +81519,28 @@
         }
       }
     },
+    "מִנְתָּה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نعناع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mint"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мята"
+          }
+        }
+      }
+    },
     "מִנּוּי לַטֶּלֶפוֹן" : {
       "localizations" : {
         "ar" : {
@@ -82613,6 +82833,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "От родителей 💝"
+          }
+        }
+      }
+    },
+    "מֵהָאַלְבּוֹם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "من الألبوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From photos"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Из галереи"
           }
         }
       }
@@ -108593,6 +108835,28 @@
         }
       }
     },
+    "קֶשֶׁת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قوس قزح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rainbow"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Радуга"
+          }
+        }
+      }
+    },
     "קַל" : {
       "localizations" : {
         "ar" : {
@@ -110977,6 +111241,28 @@
         }
       }
     },
+    "רֶקַע" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخلفية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Background"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фон"
+          }
+        }
+      }
+    },
     "רַבִּים" : {
       "localizations" : {
         "ar" : {
@@ -111306,6 +111592,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Обычный"
+          }
+        }
+      }
+    },
+    "רָגוּעַ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هادئ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calm"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спокойный"
           }
         }
       }
@@ -113072,6 +113380,28 @@
         }
       }
     },
+    "רקע" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخلفية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Background"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фон"
+          }
+        }
+      }
+    },
     "שְׁאֵלַת בּוֹנוּס — פִּי 3 כּוֹכָבִים! 🌀" : {
       "localizations" : {
         "ar" : {
@@ -114194,6 +114524,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Фасоль"
+          }
+        }
+      }
+    },
+    "שְׁקִיעָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "غروب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunset"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закат"
           }
         }
       }
