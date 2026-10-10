@@ -44,6 +44,10 @@ class MainActivity : ComponentActivity() {
         // --es demoGame VAULT [--es demoGrade 6]` opens one mini-game on its own,
         // so a game can be checked without walking the whole app to it.
         val demoGame = if (BuildConfig.DEBUG) intent?.getStringExtra("demoGame") else null
+        // 🧪 `--es demoQuiz 1` opens the quiz screen on its own (the device's own child).
+        val demoQuiz = BuildConfig.DEBUG && intent?.getStringExtra("demoQuiz") != null
+        // 🧪 `--es demoScreen familychoice|joinfamily` — the new-parent screens, without an account.
+        val demoScreen = if (BuildConfig.DEBUG) intent?.getStringExtra("demoScreen") else null
         if (BuildConfig.DEBUG) intent?.getStringExtra("demoGrade")?.toIntOrNull()?.let {
             com.rani.tofy.kid.ui.games.MiniGameLevel.debugGrade = it
         }
@@ -61,10 +65,16 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val demo = demoGame?.let { g -> com.rani.tofy.kid.ui.games.MiniGameKind.entries.firstOrNull { it.name.equals(g, true) } }
                     // Be the device's own child, so the ⭐/💎 chips show the real wallet.
-                    if (demo != null) androidx.compose.runtime.LaunchedEffect(Unit) {
-                        com.rani.tofy.DeviceRole.joinedChildID?.let { com.rani.tofy.kid.core.KidSession.bind(it, false) }
+                    if (demo != null || demoQuiz) androidx.compose.runtime.LaunchedEffect(Unit) {
+                        // (The quiz demo falls back to a made-up child — nothing of it can be
+                        // written: the rules know no such child or family.)
+                        (com.rani.tofy.DeviceRole.joinedChildID ?: if (demoQuiz) "DEMO-QUIZ-CHILD" else null)
+                            ?.let { com.rani.tofy.kid.core.KidSession.bind(it, false) }
                     }
                     if (demo != null) com.rani.tofy.kid.ui.games.MiniGameScreen(demo, null) { finish() }
+                    else if (demoQuiz) com.rani.tofy.kid.ui.play.QuestionRunnerScreen(com.rani.tofy.kid.content.ContentMode.SmartFeed) { finish() }
+                    else if (demoScreen == "familychoice") com.rani.tofy.ui.onboarding.FamilyChoiceScreen(onJoin = {})
+                    else if (demoScreen == "joinfamily") com.rani.tofy.ui.onboarding.JoinFamilyScreen(onBack = {})
                     else Root()
                     ForcedUpdateOverlay()
                 }

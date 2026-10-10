@@ -30,7 +30,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.scaleOut
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -71,7 +79,8 @@ import com.rani.tofy.kid.content.ContentMode
 import com.rani.tofy.kid.content.Question
 import com.rani.tofy.kid.core.KidSession
 import com.rani.tofy.kid.core.RewardEngine
-import com.rani.tofy.kid.ui.games.EarnedBalanceRow
+import com.rani.tofy.kid.ui.games.GoldBar
+import com.rani.tofy.kid.ui.games.Ltr
 import com.rani.tofy.kid.ui.games.GameEnv
 import com.rani.tofy.kid.ui.games.SurpriseRoundOverlay
 import com.rani.tofy.ui.child.skillName
@@ -140,12 +149,17 @@ private fun RunnerPlaying(r: RunnerController, onClose: () -> Unit) {
     LaunchedEffect(reply) { reply?.let { r.applyParentHelp(it) } }
 
     val shake = rumbleOffset(r.rumbleTrigger)
+    // The layout Rani approved on the iPhone (2026-10-10, QuestionRunnerView
+    // `.inCard`): ONE row above the card, the play time on the shelf, the buddy
+    // standing on the shelf beside its bubble. 12dp from the edges; 30 on a tablet.
+    val tablet = LocalConfiguration.current.screenWidthDp >= 600
     GlassBackdrop {
         Column(
-            Modifier.fillMaxSize().systemBarsPadding().graphicsLayer { translationX = shake * density }.padding(horizontal = 16.dp),
+            Modifier.fillMaxSize().systemBarsPadding().graphicsLayer { translationX = shake * density }
+                .padding(horizontal = if (tablet) 30.dp else 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            TopBar(r, kid?.snapshot?.stars ?: 0, kid?.snapshot?.diamonds ?: 0, onClose)
+            TopRow(r, kid?.snapshot?.stars ?: 0, kid?.snapshot?.diamonds ?: 0, tablet, onClose)
             val q = r.current
             if (q != null) {
                 val serial = r.serial
@@ -154,17 +168,15 @@ private fun RunnerPlaying(r: RunnerController, onClose: () -> Unit) {
                         Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        Spacer(Modifier.height(2.dp))
                         // The question reads in its CONTENT language's direction (a ru child on a he phone).
                         CompositionLocalProvider(LocalLayoutDirection provides if (r.contentLang.rtl) LayoutDirection.Rtl else LayoutDirection.Ltr) {
                             QuestionHeader(r, q)
-                            Spacer(Modifier.height(4.dp))
                             AnswersGrid(r, q, serial)
                         }
-                        StreakAndWorth(kid?.snapshot?.currentStreak ?: 0)
                     }
                 }
-                ToolRow(r, q, waiting = HelpRequestSender.hasActiveRequest && activeQuestion == q.prompt,
+                Shelf(r, q, kid?.snapshot?.currentStreak ?: 0, tablet,
+                    waiting = HelpRequestSender.hasActiveRequest && activeQuestion == q.prompt,
                     onAssist = { if (r.askParentTapped(q, HelpRequestSender.hasActiveRequest && activeQuestion == q.prompt)) showAssist = true },
                     onReport = { showReport = true })
             } else Spacer(Modifier.weight(1f))
@@ -173,9 +185,6 @@ private fun RunnerPlaying(r: RunnerController, onClose: () -> Unit) {
         StarBurstOverlay(r.burstTrigger)
         ConfettiOverlay(r.confettiTrigger)
         EarnedMinutesPopup(r.lastEarnedMinutes, r.earnedPopupTrigger, Modifier.align(Alignment.Center))
-        SecondsFlash(r)
-        // 💬 What the buddy says — just above its slot at the end of the tool row.
-        CompanionBubble(r.companion.bubble, Modifier.align(Alignment.BottomEnd).systemBarsPadding().padding(end = 16.dp, bottom = 72.dp))
 
         AnimatedVisibility(r.showBonusIntro, Modifier.fillMaxSize(), enter = fadeIn(), exit = fadeOut()) { BonusIntro() }
         AnimatedVisibility(r.showPortalIntro, Modifier.fillMaxSize(), enter = fadeIn(), exit = fadeOut()) { PortalIntro() }
@@ -200,19 +209,33 @@ private fun RunnerPlaying(r: RunnerController, onClose: () -> Unit) {
 
 // ── top bar ─────────────────────────────────────────────────────────────────
 
+/** ✕ · "🧩 שאלה 1/15" + a thin gold bar · "⭐ 30 💎 15" (no frame) — one row above the card. */
 @Composable
-private fun TopBar(r: RunnerController, stars: Int, diamonds: Int, onClose: () -> Unit) {
+private fun TopRow(r: RunnerController, stars: Int, diamonds: Int, tablet: Boolean, onClose: () -> Unit) {
     val total = maxOf(1, r.totalQuestions)
     val done = minOf(r.questionIndex + 1, total)
-    Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            QuizChip("✕", onClick = onClose)
-            Spacer(Modifier.weight(1f))
-            QuizChip("💎 ${diamonds.currencyShort()}", KidColor.diamondBlue)
-            QuizChip("⭐ ${stars.currencyShort()}", KidColor.starGold)
-            QuizChip(tr("%@ שְׁאֵלָה %lld/%lld", r.current?.topic?.emoji ?: r.world.emoji, done, total))
+    val topic = r.current?.topic
+    Row(Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(32.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.16f)).clickable(onClick = onClose),
+            contentAlignment = Alignment.Center) {
+            Text("✕", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 13.sp)
         }
-        EarnedBalanceRow(Modifier.fillMaxWidth().glassPane(16.dp).padding(horizontal = 14.dp, vertical = 10.dp), size = 14f)
+        // A tablet has the room: the world's icon and name beside ✕.
+        if (tablet && topic != null) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(topic.emoji, fontSize = 14.sp)
+                Text(topic.displayName, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, maxLines = 1)
+            }
+        }
+        if (total < 1000) {   // free play has no end
+            Text(
+                if (tablet) tr("שְׁאֵלָה %lld/%lld", done, total) else tr("%@ שְׁאֵלָה %lld/%lld", topic?.emoji ?: r.world.emoji, done, total),
+                color = Color.White.copy(alpha = 0.9f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp, maxLines = 1,
+            )
+            GoldBar(done / total.toFloat(), Modifier.weight(1f).height(6.dp))
+        } else Spacer(Modifier.weight(1f))
+        Text("⭐ ${stars.currencyShort()}  💎 ${diamonds.currencyShort()}", color = Color.White, fontFamily = Rounded,
+            fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, maxLines = 1)
     }
 }
 
@@ -247,11 +270,13 @@ private fun promptSize(prompt: String, passage: Boolean): Float {
 private fun QuestionHeader(r: RunnerController, q: Question) {
     val golden = r.isSuperQuestion || r.isBonusQuestion || r.isArena
     Column(
-        Modifier.fillMaxWidth().padding(horizontal = 8.dp).glassPane(16.dp)
+        Modifier.fillMaxWidth().glassPane(16.dp)
             .then(if (golden) Modifier.border(2.dp, KidColor.starGold.copy(alpha = 0.9f), RoundedCornerShape(16.dp)) else Modifier)
             .padding(start = 14.dp, end = 14.dp, top = 12.dp, bottom = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        // The plain topic is the emoji beside "שאלה 1/15" now — its own line cost a whole row.
+        if (r.isBonusQuestion || r.isArena || r.isSuperQuestion || r.isInPortal)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(q.topic.emoji, fontSize = 28.sp)
             val (label, color, size) = when {
@@ -266,7 +291,7 @@ private fun QuestionHeader(r: RunnerController, q: Question) {
 
         // 📖 The passage card — the child reads here, then answers below (scrolls inside a ceiling).
         q.passage?.let { passage ->
-            Box(Modifier.fillMaxWidth().heightIn(max = 210.dp).glassInset(16.dp).verticalScroll(rememberScrollState())) {
+            Box(Modifier.fillMaxWidth().heightIn(max = 170.dp).glassInset(16.dp).verticalScroll(rememberScrollState())) {
                 Text(passage, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 17.sp,
                     lineHeight = 24.sp, modifier = Modifier.fillMaxWidth().padding(16.dp))
             }
@@ -284,9 +309,9 @@ private fun QuestionHeader(r: RunnerController, q: Question) {
 /** Two rows of two equal tiles; 1 sits at the reading start (top-right in RTL). */
 @Composable
 private fun AnswersGrid(r: RunnerController, q: Question, serial: Int) {
-    Column(Modifier.fillMaxWidth().padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(Modifier.fillMaxWidth().padding(top = 10.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
         q.options.indices.chunked(2).forEach { row ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 row.forEach { idx ->
                     OptionCard(q.options[idx], r.feedback[idx] ?: OptionFeedback.NORMAL, idx, minHeight = 80.dp, modifier = Modifier.weight(1f)) {
                         r.pickOption(idx, serial)
@@ -298,49 +323,91 @@ private fun AnswersGrid(r: RunnerController, q: Question, serial: Int) {
     }
 }
 
-@Composable
-private fun StreakAndWorth(streak: Int) {
-    val s = KidSession.engine()?.settings
-    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        // "🔥 3 ברצף!" in gold under the answers (no "עוד 2 ובונוס" — there are no batches any more).
-        if (streak >= 2) {
-            Text(tr("🔥 %lld בְּרֶצֶף", streak) + "!",
-                color = KidColor.starGold, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
-        }
-        // What a right answer is worth.
-        GlassLine(tr("💡 כָּל תְּשׁוּבָה נְכוֹנָה = %lld שְׁנִיּוֹת שֶׁל מִשְׂחָק", s?.secondsPerCorrect ?: 24))
-        Spacer(Modifier.height(4.dp))
-    }
-}
-
-// ── tool row: 🚩 🔊 🙋 · 💡 hint · 🪄 wand · buddy ──────────────────────────
+// ── the glass shelf: 🔥 streak · the play time · 🚩 🔊 🙋 · 💡 hint — and the buddy on its edge ──
 
 @Composable
-private fun ToolRow(r: RunnerController, q: Question, waiting: Boolean, onAssist: () -> Unit, onReport: () -> Unit) {
+private fun Shelf(r: RunnerController, q: Question, streak: Int, tablet: Boolean, waiting: Boolean, onAssist: () -> Unit, onReport: () -> Unit) {
     val stuck = r.consecutiveWrong >= 2 && !r.receivedHelpThisQuestion && !waiting && !r.showFeedback
     val pulse = rememberInfiniteTransition(label = "stuck")
     val pulseScale by pulse.animateFloat(1f, 1.08f, infiniteRepeatable(tween(700), RepeatMode.Reverse), label = "s")
-    Box(Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
-        Row(Modifier.fillMaxWidth().height(56.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            RoundIconButton("🚩", Color.White.copy(alpha = 0.14f)) { onReport() }
-            RoundIconButton("🔊", Color.White.copy(alpha = 0.22f)) { r.readAloud(q) }
-            if (!r.isPreReader) {
-                RoundIconButton(
-                    if (waiting) "⏳" else "🙋",
-                    if (waiting) KidColor.starGold.copy(alpha = 0.55f) else Color.White.copy(alpha = if (stuck) 0.34f else 0.22f),
-                    glow = stuck, modifier = Modifier.scale(if (stuck) pulseScale else 1f),
-                ) { onAssist() }
+    val buddy: Dp = if (tablet) 80.dp else 64.dp
+    // The strip above the shelf is exactly the buddy's height (it stands 6dp into the glass).
+    Box(Modifier.fillMaxWidth().padding(top = buddy - 6.dp, bottom = if (tablet) 28.dp else 8.dp)) {
+        Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(Modifier.fillMaxWidth().heightIn(min = 30.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // No "🔥 0" after a miss — the count shows from the first right answer.
+                if (streak > 0) {
+                    Text(tr("🔥 %lld בְּרֶצֶף", streak), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, maxLines = 1)
+                }
+                GoldBar(minOf(streak, 10) / 10f, Modifier.weight(1f).height(12.dp), colors = listOf(Color(0xFFFFB347), Color(0xFFFF5E62)))
+                TimeChip(r)
             }
-            // Hint in the middle; the wand joins it after two misses in a row. Both
-            // shrink as one label rather than squeezing the buddy out of the row.
-            Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically) {
-                if (!r.showFeedback) HintPill(r, q, Modifier.weight(1f, fill = false))
-                if (r.consecutiveWrong >= 2 && !r.showFeedback) {
-                    Pill("🪄 " + r.g(tr("הַחְלֵף שְׁאֵלָה"), tr("הַחְלִיפִי שְׁאֵלָה")), enabled = true, modifier = Modifier.weight(1f, fill = false)) { r.magicWand() }
+            Row(Modifier.fillMaxWidth().height(46.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                RoundIconButton("🚩", Color.White.copy(alpha = 0.14f)) { onReport() }
+                RoundIconButton("🔊", Color.White.copy(alpha = 0.22f)) { r.readAloud(q) }
+                if (!r.isPreReader) {
+                    RoundIconButton(
+                        if (waiting) "⏳" else "🙋",
+                        if (waiting) KidColor.starGold.copy(alpha = 0.55f) else Color.White.copy(alpha = if (stuck) 0.34f else 0.22f),
+                        glow = stuck, modifier = Modifier.scale(if (stuck) pulseScale else 1f),
+                    ) { onAssist() }
+                }
+                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End), verticalAlignment = Alignment.CenterVertically) {
+                    if (r.consecutiveWrong >= 2 && !r.showFeedback) {
+                        Pill("🪄 " + r.g(tr("הַחְלֵף שְׁאֵלָה"), tr("הַחְלִיפִי שְׁאֵלָה")), enabled = true, modifier = Modifier.weight(1f, fill = false)) { r.magicWand() }
+                    }
+                    if (!r.showFeedback) HintPill(r, q, Modifier.weight(1f, fill = false))
                 }
             }
-            CompanionBuddy(r.companion, r.child?.character3DID, 48.dp)
+        }
+        // 🧸 The buddy is PART of the shelf — always right above "🔥 ברצף" — and what
+        // it says sits beside it, an arrow pointing at it.
+        Row(Modifier.align(Alignment.TopStart).offset(y = -(buddy - 6.dp)).padding(start = 6.dp).height(buddy),
+            verticalAlignment = Alignment.CenterVertically) {
+            CompanionBuddy(r.companion, r.child?.character3DID, buddy)
+            SideBubble(r.companion.bubble)
+        }
+    }
+}
+
+/** The play time to the second; a right answer turns it into "+24 שניות" for a moment. */
+@Composable
+private fun TimeChip(r: RunnerController) {
+    val state by KidSession.state.collectAsState()
+    val secs = remember(state) { KidSession.engine()?.openableSeconds(false) ?: 0 }
+    val flash = r.secondsFlash
+    AnimatedContent(flash, transitionSpec = { (scaleIn(initialScale = 0.7f) + fadeIn()) togetherWith (scaleOut(targetScale = 0.7f) + fadeOut()) }, label = "time") { f ->
+        if (f != null) {
+            Text(f.first, color = if (f.second) Color(0xFF053D2E) else Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, maxLines = 1,
+                modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(if (f.second) KidColor.successMint else KidColor.flameOrange)
+                    .padding(horizontal = 10.dp, vertical = 5.dp))
+        } else {
+            Row(Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.16f))
+                .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).padding(horizontal = 10.dp, vertical = 5.dp),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text("⏱", fontSize = 13.sp)
+                Ltr { Text("%d:%02d".format(secs / 60, secs % 60), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp) }
+            }
+        }
+    }
+}
+
+/** The buddy's bubble BESIDE it: a small arrow on the buddy's side, then the words. */
+@Composable
+private fun SideBubble(text: String?) {
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    AnimatedVisibility(text != null, enter = scaleIn(initialScale = 0.85f) + fadeIn(), exit = fadeOut()) {
+        var last by remember { mutableStateOf("") }
+        if (text != null) last = text
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Canvas(Modifier.size(width = 9.dp, height = 18.dp)) {
+                val tipX = if (rtl) size.width else 0f          // the tip points at the buddy (the row's start)
+                val baseX = if (rtl) 0f else size.width
+                drawPath(Path().apply { moveTo(baseX, 0f); lineTo(tipX, size.height / 2); lineTo(baseX, size.height); close() }, Color.White)
+            }
+            Text(last, color = Ink.deep, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, lineHeight = 19.sp,
+                modifier = Modifier.widthIn(max = 230.dp).clip(RoundedCornerShape(16.dp)).background(Color.White)
+                    .padding(horizontal = 14.dp, vertical = 10.dp))
         }
     }
 }
@@ -365,26 +432,6 @@ private fun Pill(text: String, enabled: Boolean, gold: Boolean = false, modifier
 
 // ── overlays ────────────────────────────────────────────────────────────────
 
-@Composable
-private fun SecondsFlash(r: RunnerController) {
-    val f = r.secondsFlash
-    var last by remember { mutableStateOf<Pair<String, Boolean>?>(null) }
-    if (f != null) last = f
-    Box(Modifier.fillMaxSize().padding(top = 140.dp), contentAlignment = Alignment.TopCenter) {
-        AnimatedVisibility(f != null, enter = scaleIn(initialScale = 0.5f) + fadeIn(), exit = slideOutVertically { -it } + fadeOut()) {
-            last?.let { (text, positive) ->
-                Text(
-                    text, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp,
-                    modifier = Modifier.clip(RoundedCornerShape(16.dp))
-                        .background((if (positive) KidColor.successMint else KidColor.flameOrange).copy(alpha = 0.95f))
-                        .padding(horizontal = 16.dp, vertical = 9.dp),
-                )
-            }
-        }
-    }
-}
-
-/** 💫 Full-screen announcement before the rare really-hard bonus question — the promise here is MINUTES. */
 @Composable
 private fun BonusIntro() {
     val t = rememberInfiniteTransition(label = "bonus")

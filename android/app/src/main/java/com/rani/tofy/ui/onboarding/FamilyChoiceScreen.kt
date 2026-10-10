@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
 import com.rani.tofy.data.AccountRepository
 import com.rani.tofy.i18n.tr
@@ -34,6 +35,28 @@ fun FamilyChoiceScreen(onJoin: () -> Unit) {
     var name by remember { mutableStateOf(last?.let { tr("משפחת %@", it) } ?: "") }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    // 🔀 The fork comes FIRST (FamilyChoiceView.forkContent, Rani 2026-10-10): a
+    // second parent landed on "what's the family called?" with a big "המשך" and
+    // the way to JOIN was a small link — so spouses opened a second family.
+    var naming by remember { mutableStateOf(false) }
+
+    if (!naming) {
+        GlassBackdrop {
+            Column(
+                Modifier.contentColumn().fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                OnboardingProgress(step = 1)
+                Text("👪", fontSize = 56.sp)
+                H(if (first.isNotEmpty()) tr("ברוכים הבאים, %@! 👋", first) else tr("ברוכים הבאים! 👋"), 25, align = TextAlign.Center)
+                P(tr("איך תרצו להתחיל?"), 16f, align = TextAlign.Center)
+                ForkCard("✨", tr("משפחה חדשה"), tr("אני ההורה הראשון במשפחה שנרשם לטופי")) { naming = true }
+                ForkCard("🤝", tr("להצטרף למשפחה קיימת"), tr("הורה אחר במשפחה כבר נרשם, ומצטרפים אליו עם קוד"), onJoin)
+            }
+        }
+        return
+    }
 
     GlassBackdrop {
         Column(
@@ -55,13 +78,29 @@ fun FamilyChoiceScreen(onJoin: () -> Unit) {
                     }.onFailure { error = tr("אין כרגע חיבור, אז לא הצלחנו ליצור את המשפחה. בדקו את האינטרנט ונסו שוב."); busy = false }
                 }
             }
-            P(tr("הוזמנתם על ידי הורה אחר? הצטרפו למשפחה"), 15f, Modifier.clickable(onClick = onJoin), color = Ink.primary, weight = FontWeight.Bold, align = TextAlign.Center)
+            P(tr("חזרה"), 15f, Modifier.clickable { naming = false }, color = Ink.primary, weight = FontWeight.Bold, align = TextAlign.Center)
             P(tr("בהמשך אתם מאשרים כהורים את תנאי השימוש ואת מדיניות הפרטיות"), 12.5f, color = Ink.tertiary, align = TextAlign.Center)
             Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
                 P(tr("תנאי שימוש"), 13f, Modifier.clickable { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://tofyapp.com/terms.html"))) }, weight = FontWeight.Bold)
                 P(tr("מדיניות פרטיות"), 13f, Modifier.clickable { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://tofyapp.com/privacy.html"))) }, weight = FontWeight.Bold)
             }
         }
+    }
+}
+
+/** One of the two equal choices on the fork. */
+@Composable
+private fun ForkCard(emoji: String, title: String, line: String, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().glassPane().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 18.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        Text(emoji, fontSize = 32.sp)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            H(title, 19)
+            P(line, 14f)
+        }
+        Text("›", color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 22.sp)
     }
 }
 

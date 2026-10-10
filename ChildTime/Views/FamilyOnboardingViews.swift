@@ -11,6 +11,11 @@ struct FamilyChoiceView: View {
     @State private var createFailed = false
     @State private var familyName = ""
     @State private var prefilled = false
+    /// 🔀 The fork comes FIRST again (Rani, 2026-10-10): a second parent who
+    /// signed in landed straight on "what's the family called?" with a big
+    /// "המשך", and the way to JOIN was a small link under it — so spouses opened
+    /// a second family. nil = the question; true = naming a new family.
+    @State private var namingNewFamily = false
 
     /// 🧭 Step ① of the new-parent flow (`ParentOnboarding`), and the first
     /// screen after sign-up. It used to be a fork — "new to Tofy / the other
@@ -31,12 +36,76 @@ struct FamilyChoiceView: View {
     }
 
     var body: some View {
-        bodyContent
+        Group {
+            if namingNewFamily { bodyContent } else { forkContent }
+        }
             .alert(tr("אין חיבור לאינטרנט"), isPresented: $createFailed) {
                 Button(tr("הבנתי"), role: .cancel) {}
             } message: {
                 Text(tr("לא הצלחנו ליצור את המשפחה כרגע. בדקו את החיבור ונסו שוב."))
             }
+    }
+
+    /// "New family, or joining one?" — two equal choices, nothing pre-selected.
+    private var forkContent: some View {
+        ZStack {
+            GlassBackdrop()
+            SparkleField(count: 12, size: 11)
+            VStack(spacing: AppSpacing.lg) {
+                OnboardingStepsBar(current: 1)
+                    .padding(.top, 8)
+                Spacer(minLength: 8)
+                Text("👪").font(.system(size: 60))
+                Text(firstName.isEmpty ? tr("ברוכים הבאים! 👋") : tr("ברוכים הבאים, \(firstName)! 👋"))
+                    .font(.system(size: 26, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(tr("איך תרצו להתחיל?"))
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.85))
+                forkCard(emoji: "✨", title: tr("משפחה חדשה"),
+                         line: tr("אני ההורה הראשון במשפחה שנרשם לטופי")) {
+                    withAnimation(.easeInOut(duration: 0.2)) { namingNewFamily = true }
+                }
+                forkCard(emoji: "🤝", title: tr("להצטרף למשפחה קיימת"),
+                         line: tr("הורה אחר במשפחה כבר נרשם, ומצטרפים אליו עם קוד")) {
+                    settings.pendingJoinFamily = true
+                }
+                Spacer(minLength: 8)
+            }
+            .padding(.horizontal, OnboardingFooter.sidePadding)
+            .frame(maxWidth: 520)
+        }
+    }
+
+    private func forkCard(emoji: String, title: String, line: String, action: @escaping () -> Void) -> some View {
+        Button {
+            Haptic.light()
+            action()
+        } label: {
+            HStack(spacing: 14) {
+                Text(emoji).font(.system(size: 34))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.system(size: 19, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                    Text(line)
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.forward")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.7))
+            }
+            .padding(.horizontal, 16).padding(.vertical, 18)
+            .frame(maxWidth: .infinity)
+            .glassPane(radius: 16)
+        }
+        .buttonStyle(.juicy)
     }
 
     private var bodyContent: some View {
@@ -61,8 +130,8 @@ struct FamilyChoiceView: View {
                 Spacer(minLength: 8)
                 consentLine
                 OnboardingFooter(title: tr("המשך"), busy: creating,
-                                 link: tr("הוזמנתם על ידי הורה אחר? הצטרפו למשפחה"),
-                                 onLink: { settings.pendingJoinFamily = true }) {
+                                 link: tr("חזרה"),
+                                 onLink: { withAnimation(.easeInOut(duration: 0.2)) { namingNewFamily = false } }) {
                     createFamily(named: familyName)
                 }
             }

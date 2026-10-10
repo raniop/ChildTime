@@ -22116,6 +22116,28 @@
         }
       }
     },
+    "איך תרצו להתחיל?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كيف تودّون أن تبدؤوا؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How would you like to start?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Как вы хотите начать?"
+          }
+        }
+      }
+    },
     "אילו אפליקציות לחסום?" : {
       "localizations" : {
         "ar" : {
@@ -23413,6 +23435,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Мы на связи"
+          }
+        }
+      }
+    },
+    "אני ההורה הראשון במשפחה שנרשם לטופי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أنا أول والد في العائلة يسجّل في توفي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I'm the first parent in the family to sign up for Tofy"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Я первый родитель в семье, кто регистрируется в Tofy"
           }
         }
       }
@@ -31521,6 +31565,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Просьба помочь с вопросом"
+          }
+        }
+      }
+    },
+    "ברוכים הבאים! 👋" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أهلًا وسهلًا! 👋"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welcome! 👋"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добро пожаловать! 👋"
+          }
+        }
+      }
+    },
+    "ברוכים הבאים, %@! 👋" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أهلًا وسهلًا، %@! 👋"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welcome, %@! 👋"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добро пожаловать, %@! 👋"
           }
         }
       }
@@ -47541,6 +47629,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Родитель"
+          }
+        }
+      }
+    },
+    "הורה אחר במשפחה כבר נרשם, ומצטרפים אליו עם קוד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "والد آخر في العائلة سجّل من قبل — تنضمّون إليه برمز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Another parent in the family already signed up — you join them with a code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Другой родитель уже зарегистрировался — вы присоединяетесь к нему по коду"
           }
         }
       }
@@ -77216,6 +77326,28 @@
         }
       }
     },
+    "להצטרף למשפחה קיימת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الانضمام إلى عائلة موجودة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Join an existing family"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Присоединиться к семье"
+          }
+        }
+      }
+    },
     "להשקות את העציצים" : {
       "localizations" : {
         "ar" : {
@@ -89093,6 +89225,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Семья"
+          }
+        }
+      }
+    },
+    "משפחה חדשה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عائلة جديدة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new family"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новая семья"
           }
         }
       }
