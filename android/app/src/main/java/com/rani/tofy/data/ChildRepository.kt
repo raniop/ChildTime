@@ -82,6 +82,11 @@ object ChildRepository {
         db.collection("households").document(hid()).update("familyName", name.trim()).await()
     }
 
+    /** 🌍 A parent moves the family to another time zone (HouseholdManager.setFamilyTimeZone). */
+    suspend fun setFamilyTimeZone(identifier: String) {
+        db.collection("households").document(hid()).update("timeZone", identifier).await()
+    }
+
     suspend fun setChildOrder(ids: List<String>) {
         db.collection("households").document(hid()).update("childOrder", ids).await()
     }

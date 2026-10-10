@@ -15,6 +15,8 @@ data class Household(
     val giftUntil: Double?,
     val choresMoneyEnabled: Boolean?,
     val ownedPacks: List<String>,
+    /** 🌍 The family's time zone — set once, moved on purpose in Settings. */
+    val timeZone: String? = null,
     /** 📍 The family's fixed places (FamilyPlace.kt). */
     val places: List<FamilyPlace> = emptyList(),
 ) {
@@ -35,6 +37,7 @@ data class Household(
             giftUntil = d.secs("giftUntil"),
             choresMoneyEnabled = d.bool("choresMoneyEnabled"),
             ownedPacks = d.strList("ownedPacks") ?: emptyList(),
+            timeZone = d.str("timeZone")?.takeIf { it.isNotBlank() },
             places = FamilyPlace.list(d["places"]),
         )
     }

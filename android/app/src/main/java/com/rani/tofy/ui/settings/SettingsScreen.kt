@@ -139,6 +139,17 @@ fun SettingsScreen(onBack: () -> Unit) {
                         FamilyNameRow(hh?.familyName)
                     }
                 }
+                // 🌍 Only when this phone's clock differs from the family's (ParentSettingsView.timeZoneSection).
+                hh?.timeZone?.let { stored ->
+                    val family = java.util.TimeZone.getTimeZone(stored)
+                    val phone = java.util.TimeZone.getDefault()
+                    val now = System.currentTimeMillis()
+                    if (family.getOffset(now) != phone.getOffset(now)) item {
+                        Section(tr("אזור הזמן של המשפחה"), tr("לפיו נקבעות השעות והתאריכים בהתראות — לכל ההורים במשפחה.")) {
+                            FamilyTimeZoneRow(stored, phone.id)
+                        }
+                    }
+                }
                 item {
                     Section(tr("סנכרון בין מכשירים")) {
                         val name = user?.displayName?.takeIf { it.isNotBlank() }
@@ -268,6 +279,28 @@ private fun Section(header: String? = null, footer: String? = null, content: @Co
 }
 
 /** "משפחת גולן" — one name for the whole household; "שִׁמְרוּ" appears once it was edited. */
+/** "שעון ישראל" / "Eastern Time" — in the app's language. */
+private fun zoneName(id: String): String =
+    runCatching {
+        android.icu.util.TimeZone.getTimeZone(id).getDisplayName(false, android.icu.util.TimeZone.LONG_GENERIC, java.util.Locale(I18n.language.code))
+    }.getOrNull()?.takeIf { it.isNotBlank() } ?: id
+
+@Composable
+private fun FamilyTimeZoneRow(familyID: String, phoneID: String) {
+    val scope = rememberCoroutineScope()
+    Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(tr("המשפחה: %@", zoneName(familyID)), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+        Text(tr("הטלפון הזה: %@", zoneName(phoneID)), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+        Text(
+            tr("להעביר את המשפחה לאזור הזמן של הטלפון הזה"),
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.92f))
+                .clickable { scope.launch { SettingsRepository.householdWrite { ChildRepository.setFamilyTimeZone(phoneID) } } }
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            color = Ink.indigo, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
+    }
+}
+
 @Composable
 private fun FamilyNameRow(current: String?) {
     val scope = rememberCoroutineScope()

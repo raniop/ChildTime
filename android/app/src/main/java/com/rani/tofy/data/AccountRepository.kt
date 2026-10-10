@@ -1,6 +1,7 @@
 package com.rani.tofy.data
 
 import com.google.firebase.auth.FirebaseAuth
+import com.rani.tofy.DeviceRole
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -126,9 +127,19 @@ object AccountRepository {
         // that throws → retry), or a cached empty result leads to a SECOND family.
         if (q.isEmpty && q.metadata.isFromCache) q = query.get(Source.SERVER).await()
         val ids = q.documents.map { it.id }
-        val preferred = (parentRef(uid).get().await().get("householdIDs") as? List<*>)?.filterIsInstance<String>().orEmpty()
+        val me = parentRef(uid).get().await()
+        val preferred = (me.get("householdIDs") as? List<*>)?.filterIsInstance<String>().orEmpty()
         if (ids.isEmpty()) return rejoinOwnFamily(uid, preferred)
-        return preferred.firstOrNull { it in ids } ?: ids.first()
+        // Several families (one opened by accident before joining the partner's):
+        // the same order as the iPhone — the one this account CHOSE
+        // (`activeHouseholdID` on its own doc), then the one with children, then
+        // the first one listed. Each platform used to pick by a rule of its own.
+        val chosen = me.getString("activeHouseholdID")
+        return q.documents.sortedWith(compareBy<com.google.firebase.firestore.DocumentSnapshot>(
+            { if (it.id == chosen) 0 else 1 },
+            { if (((it.get("childIDs") as? List<*>)?.size ?: 0) > 0) 0 else 1 },
+            { preferred.indexOf(it.id).let { i -> if (i < 0) Int.MAX_VALUE else i } },
+        )).first().id
     }
 
     /**
@@ -160,7 +171,7 @@ object AccountRepository {
         if (!FamilyRepository.start(user.uid)) return false
         // NOT awaited: offline a write never completes, and awaiting these two
         // left the parent on a bare spinner with no way out (HouseholdManager.swift).
-        scope.launch { recordMyParentName(hid); recordTimeZone(hid) }
+        scope.launch { recordMyParentName(hid); recordTimeZone(hid); registerParentDevice(hid) }
         _boot.value = Bootstrap.Ready(hid)
         return true
     }
@@ -178,14 +189,14 @@ object AccountRepository {
         )
         familyName?.trim()?.takeIf { it.isNotEmpty() }?.let { data["familyName"] = it }
         db.collection("households").document(id).set(data).await()
-        parentRef(uid).update("householdIDs", FieldValue.arrayUnion(id)).await()
+        parentRef(uid).update(mapOf("householdIDs" to FieldValue.arrayUnion(id), "activeHouseholdID" to id)).await()
         if (!finish(id)) error("family not loaded")
     }
 
     suspend fun acceptEmailInvite(hid: String) {
         val user = auth.currentUser ?: return
         db.collection("households").document(hid).update("parentUIDs", FieldValue.arrayUnion(user.uid)).await()
-        parentRef(user.uid).update("householdIDs", FieldValue.arrayUnion(hid)).await()
+        parentRef(user.uid).update(mapOf("householdIDs" to FieldValue.arrayUnion(hid), "activeHouseholdID" to hid)).await()
         user.email?.lowercase()?.let {
             runCatching { db.collection("households").document(hid).update("invitedParentEmails", FieldValue.arrayRemove(it)).await() }
         }
@@ -203,7 +214,7 @@ object AccountRepository {
         if (exp < nowSecs()) error("expired")
         val hid = d.str("householdID") ?: error("code")
         db.collection("households").document(hid).update("parentUIDs", FieldValue.arrayUnion(user.uid)).await()
-        parentRef(user.uid).update("householdIDs", FieldValue.arrayUnion(hid)).await()
+        parentRef(user.uid).update(mapOf("householdIDs" to FieldValue.arrayUnion(hid), "activeHouseholdID" to hid)).await()
         db.collection("invites").document(code).update("redeemedBy", user.uid).await()
         if (!finish(hid)) error("family not loaded")
     }
@@ -214,8 +225,42 @@ object AccountRepository {
         runCatching { db.collection("households").document(hid).update("parentNames.${user.uid}", name).await() }
     }
 
+    /** Written ONCE, when the family has none (HouseholdManager.recordTimeZone): every
+     *  phone used to write its own, and with one parent abroad the two kept replacing
+     *  each other's value. A parent moves it on purpose in Settings. */
     private suspend fun recordTimeZone(hid: String) {
-        runCatching { db.collection("households").document(hid).update("timeZone", TimeZone.getDefault().id).await() }
+        runCatching {
+            val ref = db.collection("households").document(hid)
+            if (!ref.get().await().getString("timeZone").isNullOrBlank()) return
+            ref.update("timeZone", TimeZone.getDefault().id).await()
+        }
+    }
+
+    // ── 📱 this phone as a PARENT device (HouseholdManager.registerParentDevice) ──
+
+    /**
+     * `childDevices/parent_<install>` — the row that says "this install is a parent's
+     * phone". Without it a parent's Android in Kid Mode looked exactly like the child's
+     * own device: a reset waited for it instead of applying, and the iPhone offered to
+     * "remove" it. Same doc id, fields and liveness rule as the iPhone (the parent row's
+     * `lastSeenAt` must be at least the Kid Mode row's `joinedAt`).
+     */
+    suspend fun registerParentDevice(hid: String) {
+        if (DeviceRole.role != DeviceRole.Role.PARENT) return
+        val me = com.rani.tofy.kid.core.KidIdentity
+        runCatching {
+            val ref = db.collection("childDevices").document("parent_${me.installID}")
+            val now = nowSecs()
+            val joinedAt = (kotlinx.coroutines.withTimeoutOrNull(5000) { ref.get().await() }?.get("joinedAt") as? Number)?.toDouble() ?: now
+            ref.set(mapOf(
+                "id" to "parent_${me.installID}", "childID" to "", "householdID" to hid,
+                "platform" to "android", "deviceID" to me.installID,
+                "name" to me.friendlyName, "kind" to me.kind, "systemVersion" to me.systemVersion,
+                "joinedAt" to joinedAt, "lastSeenAt" to now,
+                "role" to "parent", "appVersion" to me.appVersion,
+                "kidModeChildID" to (DeviceRole.kidModeChildID ?: FieldValue.delete()),
+            ), SetOptions.merge()).await()
+        }
     }
 
     suspend fun recordConsent(version: Int = 1) {
@@ -230,6 +275,8 @@ object AccountRepository {
 
     fun signOut() {
         retryJob?.cancel(); attempts = 0; answeredFor = null
+        // This phone is no longer a parent's (not awaited — offline it never completes).
+        runCatching { db.collection("childDevices").document("parent_${com.rani.tofy.kid.core.KidIdentity.installID}").delete() }
         FamilyRepository.stop()
         auth.signOut()
         _boot.value = Bootstrap.Loading

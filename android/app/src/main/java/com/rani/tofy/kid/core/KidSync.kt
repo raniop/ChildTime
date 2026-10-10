@@ -441,6 +441,12 @@ class KidSync internal constructor(
         session.shieldAuthorized?.let { data["shieldAuthorized"] = it }
         session.newAppsLocked?.let { data["newAppsLocked"] = it }
         val ok = withTimeoutOrNull(5000) { runCatching { ref.set(data, SetOptions.merge()).await() }.isSuccess } ?: true
+        // A PARENT's phone in Kid Mode: keep its own "parent_<install>" row fresh,
+        // AFTER this row — that order is what tells the two apart (see
+        // AccountRepository.registerParentDevice).
+        if (com.rani.tofy.DeviceRole.role == com.rani.tofy.DeviceRole.Role.PARENT && com.rani.tofy.DeviceRole.kidModeChildID != null) {
+            withTimeoutOrNull(6000) { com.rani.tofy.data.AccountRepository.registerParentDevice(hid) }
+        }
         if (ok) watchOwnDevice(cid)
         ref.set(hashMapOf<String, Any?>("appVersion" to KidIdentity.appVersion), SetOptions.merge())
         reportTimeState()
