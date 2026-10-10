@@ -928,6 +928,16 @@ final class HouseholdManager: ObservableObject {
     /// for a whole session (a warm cache that the server merely confirms raises
     /// no new snapshot), and then a Kid-Mode-only child's reset never ran.
     /// nil = couldn't ask (offline) → the caller must not guess.
+    /// Firestore's "permission denied". For a single-doc read under a rule that
+    /// reads `resource.data`, this is also how a MISSING doc answers.
+    static func isPermissionDenied(_ e: NSError) -> Bool {
+        #if canImport(FirebaseFirestore)
+        return e.domain == FirestoreErrorDomain && e.code == FirestoreErrorCode.permissionDenied.rawValue
+        #else
+        return false
+        #endif
+    }
+
     func childHasOwnDevice(_ childID: UUID) async -> Bool? {
         #if canImport(FirebaseFirestore)
         guard let hid = household?.id else { return nil }
@@ -1193,10 +1203,15 @@ final class HouseholdManager: ObservableObject {
                 // exists for this id, drop it locally instead of uploading.
                 // A failed check is NOT "no tombstone": skip this upload and let
                 // the next one decide (it used to go ahead and resurrect).
-                let tomb: DocumentSnapshot
-                do { tomb = try await db.collection("deletedChildren").document(record.id).getDocument() }
+                // …but "permission denied" IS the normal answer for a child with
+                // NO tombstone: the read rule needs resource.data, and a missing
+                // doc has none. Treating that as a failure skipped EVERY upload of
+                // a live child — new children and every parent edit (10.10).
+                var tombExists = false
+                do { tombExists = try await db.collection("deletedChildren").document(record.id).getDocument().exists }
+                catch let e as NSError where Self.isPermissionDenied(e) { tombExists = false }
                 catch { TofyLink("upsertChild: tombstone check failed for \(record.id.prefix(8)) — skipped"); return }
-                if tomb.exists {
+                if tombExists {
                     TofyLink("upsertChild: \(record.id.prefix(8)) is TOMBSTONED → dropping locally, not uploading")
                     await MainActor.run { ProfileStore.shared.removeLocalOnly(profile.id) }
                     return
@@ -1204,10 +1219,13 @@ final class HouseholdManager: ObservableObject {
                 if onlyIfMissing {
                     // Heal mode: only a CERTAIN "missing" uploads. On an error, a
                     // weeks-old local record used to be merged over the live one.
-                    let existing: DocumentSnapshot
-                    do { existing = try await db.collection("children").document(record.id).getDocument(source: .server) }
+                    // (A MISSING child doc reads as "permission denied" — same rule
+                    // shape — and missing is exactly what heal mode is for.)
+                    var existingExists = false
+                    do { existingExists = try await db.collection("children").document(record.id).getDocument(source: .server).exists }
+                    catch let e as NSError where Self.isPermissionDenied(e) { existingExists = false }
                     catch { TofyLink("upsertChild(heal): check failed for \(record.id.prefix(8)) — skipped"); return }
-                    if existing.exists {
+                    if existingExists {
                         TofyLink("upsertChild(heal): \(record.id.prefix(8)) already in cloud — not overwriting")
                         return
                     }
