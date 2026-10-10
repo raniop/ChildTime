@@ -133,12 +133,15 @@ private fun ParentRoot() {
     }
     when {
         !real -> LoginScreen()
+        // 🔌 Failed, or a retry of a failure in flight: ONE screen for both, so
+        // its timers ("נסו שוב" at 10s, the sign-out way out at a minute) keep
+        // running — every retry swapped it for a spinner and restarted them.
+        boot is Bootstrap.Failed || (boot is Bootstrap.Loading && AccountRepository.retrying) ->
+            com.rani.tofy.ui.common.FamilyConnectingScreen(failed = true) { AccountRepository.retryNow() }
         boot is Bootstrap.Loading -> Loading()
         boot is Bootstrap.NeedsFamilyChoice && joining -> JoinFamilyScreen(onBack = { joining = false })
         boot is Bootstrap.NeedsFamilyChoice -> FamilyChoiceScreen(onJoin = { joining = true })
         boot is Bootstrap.EmailInvite -> com.rani.tofy.ui.onboarding.EmailInviteScreen(boot as Bootstrap.EmailInvite)
-        // 🔌 Never a raw exception and a dead end: retry by itself, and a button.
-        boot is Bootstrap.Failed -> com.rani.tofy.ui.common.FamilyConnectingScreen(failed = true) { AccountRepository.retryNow() }
         else -> AppNav()
     }
 }

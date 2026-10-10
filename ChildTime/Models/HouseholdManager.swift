@@ -396,6 +396,7 @@ final class HouseholdManager: ObservableObject {
         bootstrapGeneration &+= 1          // any bootstrap still in flight is now stale
         listenerRetry?.cancel(); listenerRetry = nil
         listenerFailures = 0
+        failingListeners = []
         cloudLinkProblem = nil
         needsFamilyChoice = false
         pendingEmailInvite = nil
@@ -718,10 +719,15 @@ final class HouseholdManager: ObservableObject {
     // and re-attach with the same back-off as the family load.
     private var listenerRetry: Task<Void, Never>?
     private var listenerFailures = 0
+    /// Which of the family's listeners are down. ONE healthy listener used to
+    /// clear the alarm for all — the household doc's server echo hid a dead
+    /// children listener (frozen kids behind a green ✓). Like Android's set.
+    private var failingListeners: Set<String> = []
 
-    private func familyListenerFailed(_ hid: String, _ err: Error) {
-        TofyLink("family listener FAILED (\(hid.prefix(8))): \(err.localizedDescription)")
+    private func familyListenerFailed(_ hid: String, _ err: Error, _ which: String) {
+        TofyLink("family listener FAILED (\(which), \(hid.prefix(8))): \(err.localizedDescription)")
         Task { @MainActor in
+            self.failingListeners.insert(which)
             self.cloudLinkProblem = err.localizedDescription
             self.listenerFailures += 1
             let delay = Self.retryDelay(attempt: self.listenerFailures)
@@ -734,8 +740,10 @@ final class HouseholdManager: ObservableObject {
         }
     }
 
-    /// A good snapshot after trouble: the link is back.
-    private func familyListenerHealthy() {
+    /// A good SERVER snapshot from `which`: once every listener is back, so is the link.
+    private func familyListenerHealthy(_ which: String) {
+        failingListeners.remove(which)
+        guard failingListeners.isEmpty else { return }
         guard listenerFailures > 0 || (household != nil && cloudLinkProblem != nil) else { return }
         listenerFailures = 0
         listenerRetry?.cancel(); listenerRetry = nil
@@ -764,8 +772,8 @@ final class HouseholdManager: ObservableObject {
         // and a family that kept failing was retried every few seconds forever).
         householdListener = db.collection("households").document(id)
             .addSnapshotListener(includeMetadataChanges: true) { [weak self] doc, err in
-                if let err { self?.familyListenerFailed(id, err); return }
-                if doc?.metadata.isFromCache == false { self?.familyListenerHealthy() }
+                if let err { self?.familyListenerFailed(id, err, "household"); return }
+                if doc?.metadata.isFromCache == false { self?.familyListenerHealthy("household") }
                 guard let self, let doc, let data = doc.data(),
                       let hh = Self.decodeHousehold(id: doc.documentID, data) else { return }
                 self.household = hh
@@ -807,12 +815,17 @@ final class HouseholdManager: ObservableObject {
 
     private func listenToChildren(in householdID: String) {
         childrenListener?.remove()
+        // Metadata changes too: a server answer identical to the cache is
+        // otherwise silent, and this listener could never report "back".
         childrenListener = db.collection("children")
             .whereField("householdID", isEqualTo: householdID)
-            .addSnapshotListener { [weak self] snap, err in
-                if let err { self?.familyListenerFailed(householdID, err); return }
+            .addSnapshotListener(includeMetadataChanges: true) { [weak self] snap, err in
+                if let err { self?.familyListenerFailed(householdID, err, "children"); return }
                 guard let self, let snap else { return }
-                if !snap.metadata.isFromCache { self.familyListenerHealthy() }
+                if !snap.metadata.isFromCache { self.familyListenerHealthy("children") }
+                // A metadata-only event (nothing in the family changed) — the
+                // merge below ran only on real changes before; keep it that way.
+                if snap.documentChanges.isEmpty, self.didReceiveChildren { return }
                 let records = snap.documents.compactMap {
                     Self.decodeChild(id: $0.documentID, $0.data())
                 }
@@ -887,9 +900,11 @@ final class HouseholdManager: ObservableObject {
         tombstoneListener?.remove()
         tombstoneListener = db.collection("deletedChildren")
             .whereField("householdID", isEqualTo: householdID)
-            .addSnapshotListener { [weak self] snap, err in
-                if let err { self?.familyListenerFailed(householdID, err); return }
+            .addSnapshotListener(includeMetadataChanges: true) { [weak self] snap, err in
+                if let err { self?.familyListenerFailed(householdID, err, "tombstones"); return }
                 guard let snap else { return }
+                if !snap.metadata.isFromCache { self?.familyListenerHealthy("tombstones") }
+                if snap.documentChanges.isEmpty { return }   // metadata only — nothing new
                 let ids = snap.documents.compactMap { UUID(uuidString: $0.documentID) }
                 Task { @MainActor in
                     for id in ids { ProfileStore.shared.removeLocalOnly(id) }

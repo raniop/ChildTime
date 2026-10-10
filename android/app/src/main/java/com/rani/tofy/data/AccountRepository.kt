@@ -46,6 +46,8 @@ object AccountRepository {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var retryJob: Job? = null
     private var attempts = 0
+    /** A load is being retried after a failure (MainActivity keeps the connecting screen up). */
+    val retrying: Boolean get() = attempts > 0
     private fun retryDelayMs(attempt: Int): Long = (minOf(60.0, 3.0 * Math.pow(2.0, (minOf(maxOf(attempt, 1) - 1, 5)).toDouble())) * 1000).toLong()
 
     /** Try again now — the connecting screen's button, and app resume. */
@@ -81,9 +83,11 @@ object AccountRepository {
             if (!mail.isNullOrBlank()) {
                 val inv = db.collection("households").whereArrayContains("invitedParentEmails", mail).limit(1).get().await()
                 inv.documents.firstOrNull()?.let {
+                    attempts = 0
                     _boot.value = Bootstrap.EmailInvite(it.id, it.getString("familyName")); return
                 }
             }
+            attempts = 0
             _boot.value = Bootstrap.NeedsFamilyChoice
         } catch (e: CancellationException) {
             throw e   // a cancelled launch (rotation) is not a failed load
@@ -195,6 +199,7 @@ object AccountRepository {
     }
 
     fun signOut() {
+        retryJob?.cancel(); attempts = 0
         FamilyRepository.stop()
         auth.signOut()
         _boot.value = Bootstrap.Loading

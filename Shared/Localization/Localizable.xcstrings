@@ -67188,7 +67188,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ — сколько их всего?"
+            "value" : "Сколько всего: %@?"
           }
         }
       }
@@ -67210,7 +67210,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ — сколько осталось?"
+            "value" : "Сколько осталось: %@?"
           }
         }
       }
@@ -67232,7 +67232,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ — сколько их?"
+            "value" : "Сколько здесь: %@?"
           }
         }
       }
