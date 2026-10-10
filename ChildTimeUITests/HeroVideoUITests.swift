@@ -77,7 +77,10 @@ final class HeroVideoUITests: XCTestCase {
                 // was dropped and the "4" badge — sitting on tile "1" — was tapped:
                 // a red wrong answer in the Arabic take. The tile's number is set far
                 // larger than its badge, so the tallest match is the tile.
-                .filter { $0.isHittable && $0.frame.midY > screen.height * 0.35 }
+                // (2026.10.8: the answers moved up — the top row now starts at ~22% —
+                // and with the old 35% cut the top-row tile was dropped again, so the
+                // badge carrying the same digit was tapped: a red answer in Russian.)
+                .filter { $0.isHittable && $0.frame.midY > screen.height * 0.20 }
                 .sorted { $0.frame.height > $1.frame.height }
                 .first
             guard let option else { app.terminate(); wait(0.5); continue }
@@ -134,6 +137,19 @@ final class HeroVideoUITests: XCTestCase {
 
     @MainActor
     func testKidFlowForHeroLoop() throws {
+        // A throwaway launch first: the take is recorded on a FRESH install (the
+        // recording script uninstalls the app — a play window left open by the
+        // previous take, or its lease, made the next gift refuse to open), and a
+        // cold first launch lands on the splash while the demo data is seeded.
+        let warmUp = XCUIApplication()
+        warmUp.launchEnvironment["DEMO_SCREEN"] = "kidhome"
+        warmUp.launchEnvironment["DEMO_LANG"] = lang
+        warmUp.launchEnvironment["DEMO_GIFT_MINUTES"] = "10"
+        warmUp.launch()
+        wait(6.0)
+        warmUp.terminate()
+        wait(1.0)
+
         let app = XCUIApplication()
         app.launchEnvironment["DEMO_SCREEN"] = "kidflow"
         app.launchEnvironment["DEMO_LANG"] = lang
@@ -144,7 +160,7 @@ final class HeroVideoUITests: XCTestCase {
         // on the Tofy+ paywall instead of the running clock.
         app.launchEnvironment["DEMO_GIFT_MINUTES"] = "10"
         app.launch()
-        wait(3.0)                                   // the home screen settles
+        wait(3.5)                                   // the home screen settles
 
         // 1) Open the first world tile. The Hebrew label is vocalised
         //    ("טוֹפִי טַיים"), and the Hebrew home is mirrored — an unvocalised
@@ -154,14 +170,27 @@ final class HeroVideoUITests: XCTestCase {
         wait(4.0)                                   // the question appears and is readable
 
         // 2) Back to the home screen, then open the play time the parents gifted.
-        tapFirst(in: app, ["xmark", "✕", "X"], fallback: CGVector(dx: 0.08, dy: 0.07))
+        // (The ✕ carries a spoken label now, and sits on the leading side — the
+        // right in Hebrew and Arabic.)
+        tapFirst(in: app, ["סגור", "סגרי", "Close", "Закрыть", "إغلاق", "xmark"],
+                 fallback: CGVector(dx: hebrew || lang == "ar" ? 0.92 : 0.08, dy: 0.07))
         wait(2.5)
-        tapFirst(in: app, ["💝", "Gift from your parents", "מתנה מההורים", "Подарок от родителей", "هديّة من الوالدين", "هدية"],
-                 fallback: CGVector(dx: 0.5, dy: 0.80))
-        wait(3.0)                                   // the gift lands in the bank…
-        // …and the minutes still have to be opened: the banner is replaced by
-        // "Unlock N minutes to play", and THAT is what starts the clock.
-        tapFirst(in: app, ["Unlock", "פתחו לי", "לשחק", "Открыть", "Открой", "افتحوا", "افتح"], fallback: CGVector(dx: 0.5, dy: 0.87))
+        // The home's bottom bar (2026.10.8): ONE tap on "💝 10 דק׳ · מתנה · פתחו!"
+        // opens the gift — the old two-step ("the gift lands in the bank", then
+        // "unlock N minutes") is gone, and a second tap here would now land on
+        // "stop and save the time" and end the clock the take is meant to show.
+        let giftLabels = ["מתנה · פתחו", "Gift · open", "Подарок · открой", "هدية · افتحوها"]
+        tapFirst(in: app, giftLabels + ["💝"],
+                 fallback: CGVector(dx: hebrew || lang == "ar" ? 0.80 : 0.20, dy: 0.93))
+        wait(3.5)
+        // Still on the home screen ("one moment, I'll check your gift — try again")?
+        // Then do what the child would: tap it once more.
+        let stillThere = giftLabels.contains { label in
+            app.descendants(matching: .any)
+                .matching(NSPredicate(format: "label CONTAINS[cd] %@", label))
+                .allElementsBoundByIndex.contains { $0.isHittable }
+        }
+        if stillThere { tapFirst(in: app, giftLabels, fallback: CGVector(dx: 0.5, dy: 0.5)); wait(3.5) }
         wait(9.0)                                   // "your time is on its way" → the running clock
     }
 
