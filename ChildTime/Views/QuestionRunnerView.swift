@@ -102,9 +102,7 @@ struct QuestionRunnerView: View {
     /// an expanded block drawn with the content-sized `LazyVGrid` just moves the
     /// empty space into the middle of the screen instead of the bottom.
     private func answersFill(_ q: Question) -> Bool {
-        // In-card header: the room the top bar gave back goes to the answers
-        // (bigger targets) instead of an empty gap above the buddy.
-        (display.hasRail && q.passage == nil) || !isCompact || (topBarStyle == .inCard && q.passage == nil)
+        (display.hasRail && q.passage == nil) || !isCompact
     }
 
     /// Is there a real strip under the answers for the floating buddy to stand in?
@@ -181,7 +179,9 @@ struct QuestionRunnerView: View {
     @ViewBuilder
     private func questionColumn(_ q: Question) -> some View {
         VStack(spacing: display.isShort ? AppSpacing.sm : AppSpacing.md) {
-            Spacer().frame(height: 6)
+            // In-card layout: the same tight gap above the card and below it
+            // (Rani, 2026-10-10) — no extra spacers.
+            if topBarStyle != .inCard { Spacer().frame(height: 6) }
             // .id(q.id): each question gets a FRESH subtree, so a new
             // prompt can never render above the previous question's
             // option cards (the reused position-keyed views used to
@@ -190,9 +190,12 @@ struct QuestionRunnerView: View {
             // the bonus arena; must never happen).
             questionHeader(q)
                 .id("question-\(q.id)")
-            Spacer().frame(height: 10)
+            if topBarStyle != .inCard { Spacer().frame(height: 10) }
             answersBlock(q)
                 .id("answers-\(q.id)")
+                // The answers' number badges stick ~12pt up out of their cards —
+                // counted in, so the gap LOOKS the same as the one above the card.
+                .padding(.top, topBarStyle == .inCard ? 10 : 0)
                 // The answers take whatever the card gave back. Hugging the passage
                 // freed ~140pt on an iPad and it all pooled at the bottom as one
                 // empty third — the same wasted glass Rani objected to, moved down
@@ -232,7 +235,12 @@ struct QuestionRunnerView: View {
                 // Beside the foldable's clock: the top rows stop short of it, and
                 // the question starts BELOW the clock (Rani: "תוריד קצת את
                 // השאלות למטה") — full width, never under the Wi-Fi.
-                if topBarStyle != .inCard {
+                if topBarStyle == .inCard {
+                    // ✕ · "שאלה 1/15" · ⭐ 💎 — one row ABOVE the card (Rani, 2026-10-10).
+                    cardTopRow
+                        .padding(.horizontal, AppSpacing.md)
+                        .padding(.top, AppSpacing.xs)
+                } else {
                     topBar.clearOfBar()
                         .fillsTopBand(above: DisplayProbeView.minimumTopMargin, alignment: .top)
                 }
@@ -738,7 +746,6 @@ struct QuestionRunnerView: View {
         // Mockup `.qcard`: ONE glass card — topic line (with the two small
         // controls at its ends), the passage / prompt, "בחרו תשובה אחת".
         VStack(spacing: 12) {
-            if topBarStyle == .inCard { cardTopRow }
             // The topic line: only when it says something special in the in-card
             // layout (a bonus / gold / portal question) — the plain topic is the
             // emoji beside "שאלה 1/15" now.
@@ -840,7 +847,8 @@ struct QuestionRunnerView: View {
                     .strokeBorder(AppColor.starGold.opacity(0.9), lineWidth: 2)
             }
         }
-        .padding(.horizontal, AppSpacing.sm)
+        // The same side margins as the answers and the shelf (Rani, 2026-10-10).
+        .padding(.horizontal, topBarStyle == .inCard ? AppSpacing.md : AppSpacing.sm)
     }
 
     /// A consistent round icon button for the question's control row (read-aloud,
@@ -1135,7 +1143,7 @@ struct QuestionRunnerView: View {
         // Two rows of two ran off the bottom of its 640pt (Rani: 3 and 4 were cut).
         let perRow = display.isWideShort ? max(1, opts.count) : 2
         let rows = stride(from: 0, to: opts.count, by: perRow).map { Array(opts[$0..<min($0 + perRow, opts.count)]) }
-        return VStack(spacing: AppSpacing.md) {
+        return VStack(spacing: AppSpacing.md + 10) {   // room for the number badges
             ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
                 HStack(spacing: AppSpacing.md) {
                     ForEach(row, id: \.offset) { idx, opt in
@@ -1160,7 +1168,9 @@ struct QuestionRunnerView: View {
 
     private func optionsGrid(for q: Question) -> some View {
         let columns = [GridItem(.flexible(), spacing: AppSpacing.md), GridItem(.flexible(), spacing: AppSpacing.md)]
-        return LazyVGrid(columns: columns, spacing: AppSpacing.md) {
+        // Rows a little further apart: the number badge sticks ~12pt up out of
+        // each card, and 3 / 4 sat right on answers 1 / 2 (Rani, 2026-10-10).
+        return LazyVGrid(columns: columns, spacing: AppSpacing.md + 10) {
             ForEach(Array(q.options.enumerated()), id: \.offset) { idx, opt in
                 OptionCard(
                     text: opt,
