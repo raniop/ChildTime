@@ -102,7 +102,10 @@ struct QuestionRunnerView: View {
     /// an expanded block drawn with the content-sized `LazyVGrid` just moves the
     /// empty space into the middle of the screen instead of the bottom.
     private func answersFill(_ q: Question) -> Bool {
-        (display.hasRail && q.passage == nil) || !isCompact
+        // The in-card layout keeps the answers their own size on an iPad too —
+        // stretched to fill, they took half the screen (Rani, 2026-10-10).
+        topBarStyle == .inCard ? (display.hasRail && q.passage == nil)
+                               : ((display.hasRail && q.passage == nil) || !isCompact)
     }
 
     /// Is there a real strip under the answers for the floating buddy to stand in?
@@ -527,10 +530,16 @@ struct QuestionRunnerView: View {
             }
             // iPad has the room: the world's name beside ✕ (Rani, 2026-10-10).
             if !isCompact, let topic = current?.topic {
-                Text(topic.displayName)
-                    .font(.system(size: 13, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .lineLimit(1).fixedSize()
+                // The world's icon before its name (on its right in Hebrew),
+                // centred on the name's height — inline, it rode high.
+                HStack(spacing: 5) {
+                    Text(verbatim: topic.emoji).font(.system(size: 14))
+                        .offset(y: 1)   // the pointed vowels pull the name's middle down
+                    Text(topic.displayName)
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                }
+                .lineLimit(1).fixedSize()
             }
             if totalQuestions < 1000 { cardProgress } else { Spacer(minLength: 0) }   // free play has no end
             Text("⭐ \(progress.stars.currencyShort)  💎 \(progress.diamonds.currencyShort)")
@@ -550,7 +559,9 @@ struct QuestionRunnerView: View {
         return HStack(spacing: 10) {
             // The topic's emoji rides here — its own line under it cost a whole
             // row for "🏛️ היסטוריה" (Rani, 2026-10-10).
-            Text(tr("\(current?.topic.emoji ?? themeWorld.emoji) שְׁאֵלָה \(done)/\(total)"))
+            // The icon rides here on a phone; an iPad shows it with the world's name.
+            Text(isCompact ? tr("\(current?.topic.emoji ?? themeWorld.emoji) שְׁאֵלָה \(done)/\(total)")
+                           : tr("שְׁאֵלָה \(done)/\(total)"))
                 .font(.system(size: 12.5, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
                 .monospacedDigit()
@@ -1063,7 +1074,7 @@ struct QuestionRunnerView: View {
                 }
                 .animation(.spring(response: 0.4, dampingFraction: 0.7), value: consecutiveWrong)
                 // iPad: clear of the home indicator — the shelf ran into the edge.
-                .padding(.bottom, isCompact ? 0 : AppSpacing.lg)
+                .padding(.bottom, isCompact ? 0 : 28)
             }
         }
     }
