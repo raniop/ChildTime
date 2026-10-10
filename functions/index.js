@@ -853,6 +853,14 @@ function inviteMailText(familyName, email) {
 }
 exports.inviteMailText = inviteMailText;   // for the unit test
 
+/** The designed version (emails/parent-invite.html) — the plain lines stay as the text fallback. */
+function inviteMailHtml(familyName, email) {
+  const fam = familyName ? `משפחת ${String(familyName).replace(/^משפחת\s+/, "")}` : "המשפחה שלכם";
+  return fs.readFileSync(path.join(__dirname, "emails", "parent-invite.html"), "utf8")
+    .split("{{FAMILY}}").join(escapeHtml(fam)).split("{{EMAIL}}").join(escapeHtml(email));
+}
+exports.inviteMailHtml = inviteMailHtml;
+
 exports.onParentInvitedByEmail = onDocumentWritten(
   { document: "households/{hid}", secrets: [GMAIL_USER, GMAIL_PASS] },
   async (event) => {
@@ -873,7 +881,9 @@ exports.onParentInvitedByEmail = onDocumentWritten(
         if (prev.exists && Date.now() / 1000 - ((prev.data() || {}).sentAt || 0) < 86400) continue;   // once a day
         const m = inviteMailText(after.familyName, email);
         await transporter.sendMail({ from: `טופי <${user}>`, to: email, subject: m.subject,
-          text: m.lines.join("\n"), html: rtlBody(m.lines) });
+          text: m.lines.join("\n"), html: inviteMailHtml(after.familyName, email),
+          attachments: [{ filename: "tofy-lion.png", content: fs.readFileSync(path.join(__dirname, "emails", "lion.png")),
+            cid: "tofy-lion", contentDisposition: "inline" }] });
         await ref.set({ householdID: event.params.hid, sentAt: Date.now() / 1000 });
         console.log("[invite-mail] sent for household", event.params.hid);
       } catch (e) {
