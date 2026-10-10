@@ -133,6 +133,11 @@ struct WatchHomeView: View {
             WatchBackdrop()
             if model.children.isEmpty {
                 emptyState
+            } else if ProcessInfo.processInfo.environment["WATCH_DEMO_ACTIONS"] == "1" {
+                // WATCH_DEMO_ACTIONS=1 — the actions page on its own (screenshots).
+                NavigationStack {
+                    actionsPage(model.children[min(max(page, 0), model.children.count - 1)])
+                }
             } else {
                 NavigationStack {
                 TabView(selection: $page) {
@@ -272,8 +277,6 @@ struct WatchHomeView: View {
             }
             .padding(.horizontal, 6)
         }
-        // WATCH_DEMO_ACTIONS=1 — screenshots of the action buttons.
-        .defaultScrollAnchor(ProcessInfo.processInfo.environment["WATCH_DEMO_ACTIONS"] == "1" ? .bottom : .top)
     }
 
     /// The same actions as the phone's "פעולות" — each is sent to the phone.

@@ -887,7 +887,8 @@ struct QuestionRunnerView: View {
     /// report) — both the same size so the row reads tidy.
     /// The buddy standing on the shelf — a little smaller than the old roaming
     /// one, so the room above the shelf doesn't push the question off the top.
-    private var shelfBuddySize: CGFloat { isCompact ? 64 : 80 }
+    /// A little smaller on the closed foldable, where every point of height counts.
+    private var shelfBuddySize: CGFloat { isCompact ? (display.isShort && display.hasBarStrip ? 52 : 64) : 80 }
 
     /// The child's buddy standing on the shelf's top edge, ALWAYS right above
     /// "🔥 ברצף" (Rani, 2026-10-10) — not draggable any more: dragged, it hid

@@ -19,7 +19,14 @@ struct OptionCard: View {
     private var isCompact: Bool { hsc == .compact }
     /// 📐 A little shorter on a short screen, so four answers + the buddy fit.
     @ObservedObject private var display = DisplayGeometry.shared
-    private var minHeight: CGFloat { isCompact ? (display.isShort ? 68 : 80) : 110 }
+    /// …and shorter still on the closed foldable: the clock takes the top 170pt
+    /// there, and with a two-line question the shelf's hint row was cut off at
+    /// the bottom of the screen (found on the store screenshots, 2026-10-10).
+    private var minHeight: CGFloat {
+        guard isCompact else { return 110 }
+        if display.isShort { return display.hasBarStrip ? 52 : 68 }
+        return 80
+    }
     /// Big by default; shrinks for a long answer / long word so it never breaks
     /// mid-word across lines.
     private var fontSize: CGFloat {
