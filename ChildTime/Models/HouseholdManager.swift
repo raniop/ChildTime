@@ -291,7 +291,13 @@ final class HouseholdManager: ObservableObject {
         guard household == nil, !needsFamilyChoice, pendingEmailInvite == nil else { return }
         // A child device without a family is on purpose (removed by the parent,
         // or not joined yet) — re-loading would re-adopt the family it just left.
-        guard isRealParentSession else { return }
+        // …but a child device that still BELIEVES it is linked (it was never
+        // removed or reset) and came up with no family — a drifted anonymous uid
+        // whose self-heal lost the race — must get another go when it comes back
+        // to the front; until now only a relaunch brought its family back.
+        let ps = ParentSettings.shared
+        let boundChildDevice = ps.deviceRole == .child && ps.joinedChildID != nil && !ps.justDisconnected
+        guard isRealParentSession || boundChildDevice else { return }
         guard !bootstrapInFlight else { return }
         bootstrapRetry?.cancel()
         let email = self.email, name = self.displayName
@@ -307,6 +313,9 @@ final class HouseholdManager: ObservableObject {
     #if canImport(FirebaseFirestore)
     private var db: Firestore { Firestore.firestore() }
     private var householdListener: ListenerRegistration?
+    /// The family whose listeners `finishBootstrap` attached (or is attaching).
+    /// `household` alone doesn't say that — a one-shot refresh publishes it too.
+    private var wiredFamilyID: String?
     private var childrenListener: ListenerRegistration?
     private var childLinkListener: ListenerRegistration?
     private var sentChildLinkListener: ListenerRegistration?
@@ -411,6 +420,12 @@ final class HouseholdManager: ObservableObject {
         pendingEmailInvite = nil
         connectionNotice = false
         household = nil
+        wiredFamilyID = nil
+        // The name typed for a family that was still on its way belongs to THAT
+        // account: left behind, the next account on this phone wrote it onto its
+        // own (nameless) family.
+        localFamilyName = nil
+        UserDefaults.standard.removeObject(forKey: "family.name")
         parentAccount = nil
         linkedParentSummaries = []
         pendingChildLink = nil
@@ -447,7 +462,11 @@ final class HouseholdManager: ObservableObject {
             #endif
             let found = try await ensureHousehold(uid: uid, canCreate: false)
             guard !stale() else { TofyLink("bootstrap: result dropped — signed out meanwhile"); return }
-            if let hh = found, self.household?.id == hh.id {
+            // (Only when its listeners are really on the way: the parent gate's
+            // one-shot refresh also publishes `household` — for a parent who
+            // JOINED a family it usually beat this load, which then returned
+            // here and left the family with no live listeners for the session.)
+            if let hh = found, self.household?.id == hh.id, wiredFamilyID == hh.id {
                 bootstrapSucceeded(uid: uid)    // a parallel load already finished it
                 return
             }
@@ -486,6 +505,7 @@ final class HouseholdManager: ObservableObject {
     /// created, or joined via an email invite.
     private func finishBootstrap(_ hh: Household) {
         self.household = hh
+        wiredFamilyID = hh.id
         needsFamilyChoice = false
         pendingEmailInvite = nil
         listenToTombstones(in: hh.id)
@@ -502,6 +522,7 @@ final class HouseholdManager: ObservableObject {
                 // family's listeners must NOT come back — a dead listener's
                 // self-heal would then add the NEXT account to this family.
                 guard self.uid == owner, self.household?.id == hh.id else {
+                    if self.wiredFamilyID == hh.id { self.wiredFamilyID = nil }
                     TofyLink("finishBootstrap: dropped — signed out meanwhile"); return
                 }
                 for id in tombstoned { ProfileStore.shared.removeLocalOnly(id) }
@@ -994,6 +1015,7 @@ final class HouseholdManager: ObservableObject {
                 }
                 guard let snap else { return }
                 self.childDevicesHealAttempted = false   // healthy again
+                let firstLoad = !self.childDevicesLoaded
                 if !snap.metadata.isFromCache { self.childDevicesLoaded = true }
                 let devices = snap.documents.compactMap {
                     Self.decode(ChildDevice.self, $0.data())
@@ -1011,11 +1033,15 @@ final class HouseholdManager: ObservableObject {
                 for key in grouped.keys {
                     grouped[key]?.sort { $0.lastSeenAt > $1.lastSeenAt }
                 }
+                let hadDevice = Set(self.devicesByChild.filter { !$0.value.isEmpty }.keys)
                 self.devicesByChild = grouped
                 self.syncCommandAcksToFeed()   // 🔔 "המכשיר אישר" in the feed
                 // ⌚️ "has a device" just changed (or just loaded) — the watch's
                 // actions depend on it, and nothing else re-sent the glance.
-                WidgetBridge.refreshFamilySoon()
+                // (Not on every snapshot: each device's 15-second heartbeat lands here.)
+                if firstLoad || hadDevice != Set(grouped.filter { !$0.value.isEmpty }.keys) {
+                    WidgetBridge.refreshFamilySoon()
+                }
             }
     }
 
@@ -1473,11 +1499,14 @@ final class HouseholdManager: ObservableObject {
         #if canImport(FirebaseFirestore)
         let id = household?.id
             ?? UserDefaults.standard.string(forKey: preferredHouseholdKey)
-        guard let id, !id.isEmpty else { return }
+        guard let id, !id.isEmpty, let owner = uid else { return }
         Task { @MainActor in
             if let doc = try? await db.collection("households").document(id).getDocument(),
                let data = doc.data(),
-               let hh = Self.decodeHousehold(id: id, data) {
+               let hh = Self.decodeHousehold(id: id, data),
+               // Signed out / another account / another family meanwhile: a late
+               // answer must not put the old family back.
+               self.uid == owner, self.household == nil || self.household?.id == id {
                 self.household = hh
             }
         }
@@ -2070,6 +2099,7 @@ final class HouseholdManager: ObservableObject {
         householdListener?.remove(); householdListener = nil
         childrenListener?.remove(); childrenListener = nil
         household = nil
+        wiredFamilyID = nil
         #endif
     }
 

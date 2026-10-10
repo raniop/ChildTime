@@ -240,9 +240,14 @@ struct QuestionRunnerView: View {
                 // השאלות למטה") — full width, never under the Wi-Fi.
                 if topBarStyle == .inCard {
                     // ✕ · "שאלה 1/15" · ⭐ 💎 — one row ABOVE the card (Rani, 2026-10-10).
+                    // On the foldable: ✕ in the corner away from the clock, the row
+                    // clear of it, and the card below it (no-ops everywhere else).
                     cardTopRow
+                        .awayFromBar(.leading)
                         .padding(.horizontal, sideInset)
                         .padding(.top, AppSpacing.xs)
+                        .clearOfBar()
+                        .fillsTopBand(above: DisplayProbeView.minimumTopMargin, alignment: .top)
                 } else {
                     topBar.clearOfBar()
                         .fillsTopBand(above: DisplayProbeView.minimumTopMargin, alignment: .top)
@@ -524,9 +529,11 @@ struct QuestionRunnerView: View {
                         .foregroundStyle(.white)
                         .frame(width: 32, height: 32)
                         .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
-                        .contentShape(Rectangle())
+                        // A 44pt target without moving anything on the row.
+                        .padding(6).contentShape(Rectangle()).padding(-6)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(Gendered.g(tr("סְגֹר"), tr("סִגְרִי")))
             }
             // iPad has the room: the world's name beside ✕ (Rani, 2026-10-10).
             if !isCompact, let topic = current?.topic {
@@ -886,37 +893,7 @@ struct QuestionRunnerView: View {
     /// "🔥 ברצף" (Rani, 2026-10-10) — not draggable any more: dragged, it hid
     /// answers, and in right-to-left it could be thrown off the screen.
     private var shelfBuddy: some View {
-        // 💬 What it says sits BESIDE it with a side arrow pointing at it (Rani,
-        // 2026-10-10) — one row, so right-to-left and left-to-right both work.
-        let rtl = LanguageStore.shared.current.isRightToLeft
-        // The bubble at the buddy's middle, its arrow touching him (Rani). The
-        // character art has more empty air on the side the bubble meets in
-        // right-to-left — measured ~30pt there vs ~12pt in left-to-right.
-        return HStack(alignment: .center, spacing: rtl ? -26 : -10) {   // the image has air around the buddy
-            InlineBuddy(controller: companion, profile: profiles.active, width: shelfBuddySize)
-            if let text = companion.bubbleText {
-                // Hugs its words: a short "כן!" used to sit centred in a 230pt box,
-                // far from the buddy (Rani, 2026-10-10). One line when it fits,
-                // wrapped at 230 when it doesn't. And no typewriter here — the
-                // shelf is rebuilt on every new question, so the words were
-                // typed, wiped and typed again.
-                ViewThatFits(in: .horizontal) {
-                    BubbleSpeech(text: text, pointDirection: rtl ? .trailing : .leading, animated: false, hugs: true)
-                    BubbleSpeech(text: text, pointDirection: rtl ? .trailing : .leading, animated: false)
-                        .frame(width: 230)
-                }
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: 230, alignment: .leading)
-                    .id(text)
-                    .transition(.scale(scale: 0.85, anchor: .leading).combined(with: .opacity))
-            }
-        }
-        .frame(height: shelfBuddySize * 1.3)
-        .padding(.leading, 6)
-        // Feet on the shelf's edge: lifted its own height, minus 6pt into the glass.
-        .offset(y: -(shelfBuddySize * 1.3 - 6))
-        .allowsHitTesting(false)
-        .animation(.spring(response: 0.4, dampingFraction: 0.75), value: companion.bubbleText)
+        ShelfBuddy(controller: companion, profile: profiles.active, size: shelfBuddySize)
     }
 
     /// How full the shelf's flame bar is: the streak toward ten in a row.
@@ -1926,7 +1903,7 @@ struct QuestionRunnerView: View {
         // Personal-best streak — the headline celebration, takes priority.
         if progress.newStreakRecord {
             progress.newStreakRecord = false
-            companion.wow(tr("שִׂיא חָדָשׁ! 🏆 \(progress.currentStreak) בָּרֶצֶף!"))
+            companion.wow(tr("שִׂיא חָדָשׁ! 🏆 \(progress.currentStreak) בְּרֶצֶף!"))
             confettiTrigger += 1
             rumbleTrigger += 1
             SoundPlayer.shared.play(.levelUp)
@@ -1946,7 +1923,7 @@ struct QuestionRunnerView: View {
             companion.wow(tr("שְׁאֵלַת בּוֹנוּס — פִּי 3 כּוֹכָבִים! 🌀"))
             confettiTrigger += 1
         } else if EventEngine.shouldFireComboEvent(streak: progress.currentStreak) {
-            companion.hype(tr("🔥 \(progress.currentStreak) בָּרֶצֶף!"))
+            companion.hype(tr("🔥 \(progress.currentStreak) בְּרֶצֶף!"))
             confettiTrigger += 1
             rumbleTrigger += 1
         } else {
@@ -2027,4 +2004,48 @@ struct QuestionRunnerView: View {
         .environmentObject(ProgressStore.shared)
         .environmentObject(ProfileStore.shared)
         .environment(\.layoutDirection, .app)
+}
+
+/// The quiz's buddy on the shelf, with what it says BESIDE it (a side arrow
+/// pointing at it — Rani, 2026-10-10). Its own view so IT observes the
+/// controller: read from the runner (which only holds the controller), a bubble
+/// appeared and left only when something else redrew the screen — "כֵּן!" stayed
+/// until the next tap, and a message with no other change never showed at all.
+private struct ShelfBuddy: View {
+    @ObservedObject var controller: CompanionController
+    var profile: Profile?
+    let size: CGFloat
+    /// The row's real direction — not the app language: a cover can arrive
+    /// left-to-right in a Hebrew app, and the arrow must still face the buddy.
+    @Environment(\.layoutDirection) private var layoutDirection
+
+    var body: some View {
+        let rtl = layoutDirection == .rightToLeft
+        // The bubble at the buddy's middle, its arrow touching him (Rani). The
+        // character art has more empty air on the side the bubble meets in
+        // right-to-left — measured ~30pt there vs ~12pt in left-to-right.
+        HStack(alignment: .center, spacing: rtl ? -26 : -10) {   // the image has air around the buddy
+            InlineBuddy(controller: controller, profile: profile, width: size)
+            if let text = controller.bubbleText {
+                // Hugs its words: a short "כן!" used to sit centred in a 230pt box,
+                // far from the buddy (Rani, 2026-10-10). One line when it fits,
+                // wrapped at 230 when it doesn't. And no typewriter here.
+                ViewThatFits(in: .horizontal) {
+                    BubbleSpeech(text: text, pointDirection: rtl ? .trailing : .leading, animated: false, hugs: true)
+                    BubbleSpeech(text: text, pointDirection: rtl ? .trailing : .leading, animated: false)
+                        .frame(width: 230)
+                }
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: 230, alignment: .leading)
+                    .id(text)
+                    .transition(.scale(scale: 0.85, anchor: .leading).combined(with: .opacity))
+            }
+        }
+        .frame(height: size * 1.3)
+        .padding(.leading, 6)
+        // Feet on the shelf's edge: lifted its own height, minus 6pt into the glass.
+        .offset(y: -(size * 1.3 - 6))
+        .allowsHitTesting(false)
+        .animation(.spring(response: 0.4, dampingFraction: 0.75), value: controller.bubbleText)
+    }
 }

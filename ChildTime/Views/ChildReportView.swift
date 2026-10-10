@@ -580,7 +580,13 @@ struct ChildReportView: View {
                         // confirms before anything happens. Not for a PARENT's
                         // phone in Kid Mode: that row goes away by itself when Kid
                         // Mode ends, and "removing" it reset that parent's phone.
-                        if !HouseholdManager.shared.parentDevices.contains(where: { $0.deviceID == d.deviceID }) {
+                        // (Same liveness rule as `childHasOwnDevice`: the parent
+                        // row must have been alive when this row appeared — a phone
+                        // that WAS a parent's and is now the child's own, or a row
+                        // an old build left behind, stays removable.)
+                        if !HouseholdManager.shared.parentDevices.contains(where: {
+                            $0.deviceID == d.deviceID && $0.lastSeenAt >= d.joinedAt
+                        }) {
                         Menu {
                             Button(role: .destructive) { onRemoveDevice(d) } label: {
                                 Label(tr("הסר מכשיר"), systemImage: "minus.circle")

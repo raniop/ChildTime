@@ -214,6 +214,9 @@ struct FamilyChoiceView: View {
             // say so instead of moving on with nothing behind it.
             let outcome = await household.createOwnHousehold()
             guard outcome != .failed else {
+                // Nothing was created: the walk-through must not stay armed for
+                // a parent who now goes back and JOINS an existing family.
+                ParentOnboarding.finish()
                 creating = false
                 createFailed = true
                 return

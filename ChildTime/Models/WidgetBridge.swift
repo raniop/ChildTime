@@ -151,6 +151,11 @@ enum WidgetBridge {
                         hasDevice: !(HouseholdManager.shared.devicesByChild[cid] ?? []).isEmpty,
                         whereText: place)
                 }
+                // Not before the device list has answered: "no device" on a guess
+                // took the watch's actions away until the next push. (The devices
+                // listener calls this again the moment it loads.)
+                guard HouseholdManager.shared.childDevicesLoaded
+                        || !HouseholdManager.shared.devicesByChild.isEmpty else { return }
                 WatchBridge.shared.pushFamilyGlance(glances)
             }
         }

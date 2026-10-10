@@ -610,6 +610,7 @@ struct WorldMapView: View {
             .safeAreaInset(edge: .top, spacing: 0) {
                 if kidMode.active || Self.demoKidExit, !useSidebar {
                     kidExitBar
+                        .clearOfBar()   // the foldable: not under the clock (taps die there)
                         .padding(.horizontal, homeHPad)
                         .padding(.bottom, 10)
                         .background(
@@ -1041,6 +1042,7 @@ struct WorldMapView: View {
         .fullScreenCover(isPresented: $showingSmartFeed) {
             // Smart Feed play — grants minutes (capped by the daily maximum).
             QuestionRunnerView(mode: .smartFeed, purpose: .earnTime)
+                .environment(\.layoutDirection, .app)   // a cover can arrive left-to-right
         }
         .fullScreenCover(item: $infoSheet) { sheet in
             challengeInfoScreen(for: sheet)
