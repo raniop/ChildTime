@@ -864,18 +864,26 @@ struct QuestionRunnerView: View {
     /// "🔥 ברצף" (Rani, 2026-10-10) — not draggable any more: dragged, it hid
     /// answers, and in right-to-left it could be thrown off the screen.
     private var shelfBuddy: some View {
-        InlineBuddy(controller: companion, profile: profiles.active, width: shelfBuddySize)
-            .overlay(alignment: .topLeading) {
-                // 💬 What it says, beside its head, opening toward the middle.
-                InlineBuddyBubble(controller: companion, clearance: 0)
-                    .frame(width: 220, alignment: .leading)
-                    .alignmentGuide(.leading) { d in d[.leading] - shelfBuddySize - 4 }
-                    .alignmentGuide(.top) { d in d[.top] - 4 }
+        // 💬 What it says sits BESIDE it with a side arrow pointing at it (Rani,
+        // 2026-10-10) — one row, so right-to-left and left-to-right both work.
+        let rtl = LanguageStore.shared.current.isRightToLeft
+        return HStack(alignment: .top, spacing: -10) {   // the image has air around the buddy
+            InlineBuddy(controller: companion, profile: profiles.active, width: shelfBuddySize)
+            if let text = companion.bubbleText {
+                BubbleSpeech(text: text, pointDirection: rtl ? .trailing : .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: 230, alignment: .leading)
+                    .padding(.top, 6)
+                    .id(text)
+                    .transition(.scale(scale: 0.85, anchor: .leading).combined(with: .opacity))
             }
-            .padding(.leading, 6)
-            // Feet on the shelf's edge: lifted its own height, minus 6pt into the glass.
-            .offset(y: -(shelfBuddySize * 1.3 - 6))
-            .allowsHitTesting(false)
+        }
+        .frame(height: shelfBuddySize * 1.3, alignment: .top)
+        .padding(.leading, 6)
+        // Feet on the shelf's edge: lifted its own height, minus 6pt into the glass.
+        .offset(y: -(shelfBuddySize * 1.3 - 6))
+        .allowsHitTesting(false)
+        .animation(.spring(response: 0.4, dampingFraction: 0.75), value: companion.bubbleText)
     }
 
     /// How full the shelf's flame bar is: the streak toward ten in a row.

@@ -19,6 +19,16 @@ struct BubbleSpeech: View {
     var perWord: Double = 0.16
 
     @State private var shownWords: Int = 0
+    @Environment(\.layoutDirection) private var layoutDirection
+
+    /// A tail on the side (`.trailing` = the SCREEN's right, `.leading` = its
+    /// left — the shape is drawn left-to-right): for a bubble standing beside
+    /// the one who speaks (the quiz buddy, Rani 2026-10-10).
+    private var sideTail: Bool { showTail && (pointDirection == .leading || pointDirection == .trailing) }
+    /// The layout edge that is that screen side.
+    private var sideTailEdge: Edge.Set {
+        (pointDirection == .trailing) == (layoutDirection == .leftToRight) ? .trailing : .leading
+    }
 
     private var words: [Substring] {
         text.split(separator: " ", omittingEmptySubsequences: false)
@@ -39,7 +49,8 @@ struct BubbleSpeech: View {
         .foregroundStyle(AppColor.textOnLight)
         .padding(.horizontal, AppSpacing.lg)
         .padding(.vertical, AppSpacing.md)
-        .padding(.bottom, showTail ? 8 : 0)   // reserve room for the tail
+        .padding(.bottom, showTail && !sideTail ? 8 : 0)   // reserve room for the tail
+        .padding(sideTailEdge, sideTail ? 10 : 0)
         .background {
             BubbleShape(pointDirection: pointDirection, tailInsetFromRight: tailInsetFromRight, tailInsetFromLeft: tailInsetFromLeft, showTail: showTail)
                 .fill(.white)
@@ -77,13 +88,36 @@ struct BubbleShape: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
         let r: CGFloat = 18
-        let tailH: CGFloat = showTail ? 11 : 0
+        let side = showTail && (pointDirection == .leading || pointDirection == .trailing)
+        let tailH: CGFloat = showTail && !side ? 11 : 0
         let tailW: CGFloat = 22
 
-        // Body fills everything except the reserved tail strip at the bottom.
-        let body = CGRect(x: rect.minX, y: rect.minY,
+        // Body fills everything except the reserved tail strip at the bottom
+        // (or, for a side tail, at that side).
+        var body = CGRect(x: rect.minX, y: rect.minY,
                           width: rect.width, height: rect.height - tailH)
+        if side {
+            let depth: CGFloat = 10
+            body.size.width -= depth
+            if pointDirection == .leading { body.origin.x += depth }
+        }
         path.addRoundedRect(in: body, cornerSize: CGSize(width: r, height: r))
+
+        // A side tail at the body's middle, pointing out sideways.
+        if side {
+            let cy = body.midY
+            let half: CGFloat = 9
+            if pointDirection == .trailing {
+                path.move(to: CGPoint(x: body.maxX - 1, y: cy - half))
+                path.addLine(to: CGPoint(x: rect.maxX, y: cy))
+                path.addLine(to: CGPoint(x: body.maxX - 1, y: cy + half))
+            } else {
+                path.move(to: CGPoint(x: body.minX + 1, y: cy - half))
+                path.addLine(to: CGPoint(x: rect.minX, y: cy))
+                path.addLine(to: CGPoint(x: body.minX + 1, y: cy + half))
+            }
+            path.closeSubpath()
+        }
 
         // A clean downward tail whose base sits flush ON the body's bottom edge
         // (1pt overlap) so it merges seamlessly — no notch, no gap.
