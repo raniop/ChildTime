@@ -453,7 +453,8 @@ struct QuestionRunnerView: View {
     private enum TopBarStyle { case classic, inCard }
     /// Each block's own side inset, on top of the screen's 12pt: 0 → every
     /// block 12pt from the edge in the in-card layout (Rani: "12 בקלות").
-    private var sideInset: CGFloat { topBarStyle == .inCard ? 0 : AppSpacing.md }
+    /// iPad: 18 → 30pt from the edge (Rani, 2026-10-10).
+    private var sideInset: CGFloat { topBarStyle == .inCard ? (isCompact ? 0 : 18) : AppSpacing.md }
     /// The play time sits on the shelf (and flashes "+24 שניות" there).
     private var timeOnShelf: Bool { topBarStyle == .inCard }
     private var topBarStyle: TopBarStyle {
@@ -523,6 +524,13 @@ struct QuestionRunnerView: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+            }
+            // iPad has the room: the world's name beside ✕ (Rani, 2026-10-10).
+            if !isCompact, let topic = current?.topic {
+                Text(topic.displayName)
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1).fixedSize()
             }
             if totalQuestions < 1000 { cardProgress } else { Spacer(minLength: 0) }   // free play has no end
             Text("⭐ \(progress.stars.currencyShort)  💎 \(progress.diamonds.currencyShort)")
@@ -1054,6 +1062,8 @@ struct QuestionRunnerView: View {
                     }
                 }
                 .animation(.spring(response: 0.4, dampingFraction: 0.7), value: consecutiveWrong)
+                // iPad: clear of the home indicator — the shelf ran into the edge.
+                .padding(.bottom, isCompact ? 0 : AppSpacing.lg)
             }
         }
     }
