@@ -135,7 +135,7 @@ private fun Root() {
 private fun ParentRoot() {
     val user by AuthRepository.user.collectAsState(initial = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser)
     val boot by AccountRepository.boot.collectAsState()
-    var joining by remember { mutableStateOf(false) }
+    var joining by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
 
     val real = user?.let { !it.isAnonymous } == true
     LaunchedEffect(user?.uid) {

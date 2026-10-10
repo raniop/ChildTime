@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -152,7 +153,9 @@ private fun RunnerPlaying(r: RunnerController, onClose: () -> Unit) {
     // The layout Rani approved on the iPhone (2026-10-10, QuestionRunnerView
     // `.inCard`): ONE row above the card, the play time on the shelf, the buddy
     // standing on the shelf beside its bubble. 12dp from the edges; 30 on a tablet.
-    val tablet = LocalConfiguration.current.screenWidthDp >= 600
+    // (The device's SHORT side: a phone turned on its side is 600dp+ wide too,
+    // and got the tablet's margins and big buddy on a 360dp-tall screen.)
+    val tablet = LocalConfiguration.current.smallestScreenWidthDp >= 600
     GlassBackdrop {
         Column(
             Modifier.fillMaxSize().systemBarsPadding().graphicsLayer { translationX = shake * density }
@@ -342,6 +345,16 @@ private fun Shelf(r: RunnerController, q: Question, streak: Int, tablet: Boolean
                 GoldBar(minOf(streak, 10) / 10f, Modifier.weight(1f).height(12.dp), colors = listOf(Color(0xFFFFB347), Color(0xFFFF5E62)))
                 TimeChip(r)
             }
+            // 🪄 After two misses the wand joins the hint — the two pills get a row
+            // of their own, at full size (as on the iPhone). Squeezed in beside
+            // 🚩 🔊 🙋 the hint read "Hint (12" and the Hebrew wand lost its words.
+            val wandShowing = r.consecutiveWrong >= 2 && !r.showFeedback
+            if (wandShowing) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
+                    HintPill(r, q, Modifier.weight(1f, fill = false))
+                    Pill("🪄 " + r.g(tr("הַחְלֵף שְׁאֵלָה"), tr("הַחְלִיפִי שְׁאֵלָה")), enabled = true, modifier = Modifier.weight(1f, fill = false)) { r.magicWand() }
+                }
+            }
             Row(Modifier.fillMaxWidth().height(46.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 RoundIconButton("🚩", Color.White.copy(alpha = 0.14f)) { onReport() }
                 RoundIconButton("🔊", Color.White.copy(alpha = 0.22f)) { r.readAloud(q) }
@@ -353,10 +366,7 @@ private fun Shelf(r: RunnerController, q: Question, streak: Int, tablet: Boolean
                     ) { onAssist() }
                 }
                 Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End), verticalAlignment = Alignment.CenterVertically) {
-                    if (r.consecutiveWrong >= 2 && !r.showFeedback) {
-                        Pill("🪄 " + r.g(tr("הַחְלֵף שְׁאֵלָה"), tr("הַחְלִיפִי שְׁאֵלָה")), enabled = true, modifier = Modifier.weight(1f, fill = false)) { r.magicWand() }
-                    }
-                    if (!r.showFeedback) HintPill(r, q, Modifier.weight(1f, fill = false))
+                    if (!r.showFeedback && !wandShowing) HintPill(r, q, Modifier.weight(1f, fill = false))
                 }
             }
         }
@@ -365,7 +375,10 @@ private fun Shelf(r: RunnerController, q: Question, streak: Int, tablet: Boolean
         Row(Modifier.align(Alignment.TopStart).offset(y = -(buddy - 6.dp)).padding(start = 6.dp).height(buddy),
             verticalAlignment = Alignment.CenterVertically) {
             CompanionBuddy(r.companion, r.child?.character3DID, buddy)
-            SideBubble(r.companion.bubble)
+            // Taller than the buddy's row when the line is long (a hint's
+            // explanation): free to grow, centred on the buddy — in the
+            // fixed-height row everything past the second line was cut off.
+            Box(Modifier.wrapContentHeight(Alignment.CenterVertically, unbounded = true)) { SideBubble(r.companion.bubble) }
         }
     }
 }

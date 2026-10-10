@@ -60,6 +60,9 @@ object AccountRepository {
         retryJob = scope.launch { bootstrap() }
     }
 
+    /** The account the current "no family yet" answer (choice / email invite) is for. */
+    private var answeredFor: String? = null
+
     suspend fun bootstrap() {
         val user = auth.currentUser ?: return
         // Cancel a pending retry — but never the job we are running INSIDE: the
@@ -69,6 +72,10 @@ object AccountRepository {
         // a family already loaded for this account stays — the dashboard used to
         // turn into a spinner (and offline, stay one).
         if (_boot.value is Bootstrap.Ready && FamilyRepository.isRunningFor(user.uid)) return
+        // Same for "no family yet": the answer for THIS account stands. Loading
+        // again on a rotation threw the parent off the name / code screen, back
+        // to the fork, with what they typed gone.
+        if ((_boot.value is Bootstrap.NeedsFamilyChoice || _boot.value is Bootstrap.EmailInvite) && answeredFor == user.uid) return
         val me = kotlin.coroutines.coroutineContext[Job]
         if (retryJob != me) retryJob?.cancel()
         _boot.value = Bootstrap.Loading
@@ -83,11 +90,11 @@ object AccountRepository {
             if (!mail.isNullOrBlank()) {
                 val inv = db.collection("households").whereArrayContains("invitedParentEmails", mail).limit(1).get().await()
                 inv.documents.firstOrNull()?.let {
-                    attempts = 0
+                    attempts = 0; answeredFor = user.uid
                     _boot.value = Bootstrap.EmailInvite(it.id, it.getString("familyName")); return
                 }
             }
-            attempts = 0
+            attempts = 0; answeredFor = user.uid
             _boot.value = Bootstrap.NeedsFamilyChoice
         } catch (e: CancellationException) {
             throw e   // a cancelled launch (rotation) is not a failed load
@@ -222,7 +229,7 @@ object AccountRepository {
     }
 
     fun signOut() {
-        retryJob?.cancel(); attempts = 0
+        retryJob?.cancel(); attempts = 0; answeredFor = null
         FamilyRepository.stop()
         auth.signOut()
         _boot.value = Bootstrap.Loading

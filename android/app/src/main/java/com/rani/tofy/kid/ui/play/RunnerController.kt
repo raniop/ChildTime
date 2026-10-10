@@ -410,7 +410,7 @@ class RunnerController(
         }
         val streak = KidSession.engine()?.snapshot?.currentStreak ?: 0
         if (out?.newStreakRecord == true) {
-            companion.wow(tr("שִׂיא חָדָשׁ! 🏆 %lld בָּרֶצֶף!", streak))
+            companion.wow(tr("שִׂיא חָדָשׁ! 🏆 %lld בְּרֶצֶף!", streak))
             confettiTrigger++; rumbleTrigger++
             KidSounds.play(AppSound.LEVEL_UP)
             return
@@ -424,7 +424,7 @@ class RunnerController(
             isSuperQuestion -> { companion.wow(tr("שְׁאֵלַת זָהָב! ⭐")); confettiTrigger++ }
             isInPortal -> { companion.wow(tr("שְׁאֵלַת בּוֹנוּס — פִּי 3 כּוֹכָבִים! 🌀")); confettiTrigger++ }
             EventEngine.shouldFireComboEvent(streak) -> {
-                companion.hype(tr("🔥 %lld בָּרֶצֶף!", streak))
+                companion.hype(tr("🔥 %lld בְּרֶצֶף!", streak))
                 confettiTrigger++; rumbleTrigger++
             }
             else -> companion.cheer(listOf(tr("יֵשׁ!"), tr("טוֹב!"), tr("כֵּן!"), tr("וָואוּ!"), g(tr("אַלּוּף!"), tr("אַלּוּפָה!"))).random())

@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,13 +33,16 @@ fun FamilyChoiceScreen(onJoin: () -> Unit) {
     val user = FirebaseAuth.getInstance().currentUser
     val first = user?.displayName?.trim()?.split(" ")?.firstOrNull().orEmpty()
     val last = user?.displayName?.trim()?.split(" ")?.drop(1)?.lastOrNull()
-    var name by remember { mutableStateOf(last?.let { tr("משפחת %@", it) } ?: "") }
+    // Saveable: turning the phone used to wipe the typed name and jump back to the fork.
+    var name by rememberSaveable { mutableStateOf(last?.let { tr("משפחת %@", it) } ?: "") }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     // 🔀 The fork comes FIRST (FamilyChoiceView.forkContent, Rani 2026-10-10): a
     // second parent landed on "what's the family called?" with a big "המשך" and
     // the way to JOIN was a small link — so spouses opened a second family.
-    var naming by remember { mutableStateOf(false) }
+    var naming by rememberSaveable { mutableStateOf(false) }
+    // The system Back on the name screen goes back to the fork (it closed the app).
+    androidx.activity.compose.BackHandler(enabled = naming && !busy) { naming = false }
 
     if (!naming) {
         GlassBackdrop {
@@ -78,7 +82,7 @@ fun FamilyChoiceScreen(onJoin: () -> Unit) {
                     }.onFailure { error = tr("אין כרגע חיבור, אז לא הצלחנו ליצור את המשפחה. בדקו את האינטרנט ונסו שוב."); busy = false }
                 }
             }
-            P(tr("חזרה"), 15f, Modifier.clickable { naming = false }, color = Ink.primary, weight = FontWeight.Bold, align = TextAlign.Center)
+            P(tr("חזרה"), 15f, Modifier.clickable(enabled = !busy) { naming = false }, color = Ink.primary, weight = FontWeight.Bold, align = TextAlign.Center)
             P(tr("בהמשך אתם מאשרים כהורים את תנאי השימוש ואת מדיניות הפרטיות"), 12.5f, color = Ink.tertiary, align = TextAlign.Center)
             Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
                 P(tr("תנאי שימוש"), 13f, Modifier.clickable { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://tofyapp.com/terms.html"))) }, weight = FontWeight.Bold)
@@ -118,7 +122,7 @@ fun OnboardingProgress(step: Int, total: Int = 4) {
 @Composable
 fun JoinFamilyScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
-    var code by remember { mutableStateOf("") }
+    var code by rememberSaveable { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     androidx.activity.compose.BackHandler(onBack = onBack)

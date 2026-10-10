@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import com.rani.tofy.i18n.tr
 import com.rani.tofy.ui.theme.GlassBackdrop
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * 🔌 "מתחברים למשפחה…" — FamilyConnectionViews.swift. Shown while the family
@@ -25,6 +26,7 @@ import kotlinx.coroutines.delay
  */
 @Composable
 fun FamilyConnectingScreen(failed: Boolean = false, onRetry: () -> Unit) {
+    val scope = rememberCoroutineScope()
     var slow by remember { mutableStateOf(false) }
     // After a minute, a way out — a load that fails for good (not the network)
     // must not trap the parent here with only "נסו שוב" (FamilyConnectingView).
@@ -64,7 +66,14 @@ fun FamilyConnectingScreen(failed: Boolean = false, onRetry: () -> Unit) {
                     color = Color.White.copy(alpha = 0.85f), fontSize = 15.sp, fontWeight = FontWeight.Bold,
                     textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
                     // The family stays in the cloud; signing in again starts clean.
-                    modifier = Modifier.clickable { com.rani.tofy.data.AccountRepository.signOut() }.padding(8.dp),
+                    // …and this phone stops getting the family's pushes, like the
+                    // sign-out in Settings — but never waiting on a dead connection.
+                    modifier = Modifier.clickable {
+                        scope.launch {
+                            kotlinx.coroutines.withTimeoutOrNull(3000) { com.rani.tofy.push.PushRegistrar.unregister() }
+                            com.rani.tofy.data.AccountRepository.signOut()
+                        }
+                    }.padding(8.dp),
                 )
             }
         }
