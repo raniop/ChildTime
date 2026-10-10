@@ -178,6 +178,11 @@ final class HouseholdManager: ObservableObject {
     #endif
     /// "מתחברים למשפחה…" asked for by a blocked action — the dashboard shows it.
     @Published var connectionNotice = false
+    /// 📡 The device has no network at all (Wi-Fi and cellular both down).
+    /// The family still shows from the local copy — this is only so the
+    /// dashboard can SAY so ("אין אינטרנט"), and so a kid-side profile edit
+    /// that could not reach the cloud isn't accepted (Rani, 2026-10-10).
+    @Published private(set) var networkOffline = false
 
     /// Call before an action that writes the family: when the link is broken it
     /// says so, tries again, and returns true (= don't proceed).
@@ -211,8 +216,12 @@ final class HouseholdManager: ObservableObject {
     private lazy var pathMonitor: NWPathMonitor = {
         let m = NWPathMonitor()
         m.pathUpdateHandler = { [weak self] path in
-            guard path.status == .satisfied else { return }
-            DispatchQueue.main.async { self?.retryFamilyLoadIfNeeded() }
+            let online = path.status == .satisfied
+            DispatchQueue.main.async {
+                guard let self else { return }
+                if self.networkOffline == online { self.networkOffline = !online }
+                if online { self.retryFamilyLoadIfNeeded() }
+            }
         }
         m.start(queue: DispatchQueue(label: "tofy.household.path"))
         return m

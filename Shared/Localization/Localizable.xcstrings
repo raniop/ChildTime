@@ -22226,6 +22226,28 @@
         }
       }
     },
+    "אין אינטרנט · מוצג המידע האחרון שנשמר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد إنترنت · تُعرض آخر المعلومات المحفوظة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No internet · showing the last saved information"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет интернета · показаны последние сохранённые данные"
+          }
+        }
+      }
+    },
     "אין בקשות ממתינות · ניהול מטלות ופרסים" : {
       "localizations" : {
         "ar" : {
@@ -65820,6 +65842,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Чтобы купить набор вопросов — введите код"
+          }
+        }
+      }
+    },
+    "כְּדֵי לִשְׁמֹר צָרִיךְ אִינְטֶרְנֶט — נְנַסֶּה שׁוּב עוֹד מְעַט 😊" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الحفظ يحتاج إلى الإنترنت — لنحاول مرة أخرى بعد قليل 😊"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving needs the internet — let's try again in a little while 😊"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чтобы сохранить, нужен интернет — попробуем ещё раз чуть позже 😊"
           }
         }
       }

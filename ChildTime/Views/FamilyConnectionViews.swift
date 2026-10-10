@@ -76,6 +76,20 @@ struct FamilyLinkBanner: View {
     @ObservedObject private var household = HouseholdManager.shared
 
     var body: some View {
+        if !household.familyLinkBroken, household.networkOffline, household.household != nil {
+            // 📡 The family is here (from this device's copy) but there is no
+            // network — say so, quietly (Rani, 2026-10-10). Not an alarm.
+            HStack(spacing: 8) {
+                Image(systemName: "wifi.slash").font(.system(size: 14, weight: .bold))
+                Text(tr("אין אינטרנט · מוצג המידע האחרון שנשמר"))
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+            }
+            .foregroundStyle(.white.opacity(0.9))
+            .padding(.horizontal, 12).padding(.vertical, 9)
+            .glassPane(radius: 16)
+        }
         if household.familyLinkBroken {
             HStack(spacing: 10) {
                 Text(verbatim: "⚠️").font(.system(size: 20))

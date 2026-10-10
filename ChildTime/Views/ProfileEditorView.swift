@@ -31,6 +31,8 @@ struct ProfileEditorView: View {
     @State private var showPicker = false
     @State private var pendingCrop: PendingCrop? = nil
     @State private var showDeleteConfirm = false
+    /// A kid-side save with no internet — a gentle "later", never a failure.
+    @State private var needsInternet = false
     /// ⏱ The create flow's last step (parent only): the daily screen-time ceiling.
     @State private var showCapStep = false
     @State private var capMinutes: Int = DailyCapChoice.defaultMinutes
@@ -198,6 +200,9 @@ struct ProfileEditorView: View {
                         .fontWeight(.bold)
                     }
                 }
+            }
+            .alert(tr("כְּדֵי לִשְׁמֹר צָרִיךְ אִינְטֶרְנֶט — נְנַסֶּה שׁוּב עוֹד מְעַט 😊"), isPresented: $needsInternet) {
+                Button(tr("הֵבַנְתִּי"), role: .cancel) {}
             }
             .onAppear {
                 hydrateFromMode()
@@ -786,6 +791,17 @@ struct ProfileEditorView: View {
         // Never in Kid Mode: that's the CHILD editing her own avatar, a local edit.
         if case .edit = mode, !KidModeManager.shared.active,
            HouseholdManager.shared.refuseIfDisconnected() { return }
+        // 🧒 The CHILD editing her own profile (Kid Mode, or her own device): with
+        // no internet or no family the change stayed on this device only, and the
+        // family's copy quietly put the old name/photo back later. Not now, then.
+        if case .edit = mode,
+           KidModeManager.shared.active || ParentSettings.shared.deviceRole == .child,
+           !HouseholdManager.skipsCloudSync,
+           HouseholdManager.shared.networkOffline || HouseholdManager.shared.household == nil {
+            Haptic.light()
+            needsInternet = true
+            return
+        }
         Haptic.success()
         SoundPlayer.shared.play(.companionCheer)
         onSave(p)
