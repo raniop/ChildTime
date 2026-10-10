@@ -11,7 +11,7 @@
  * Requires: APNs key uploaded to Firebase (Project Settings → Cloud Messaging),
  *           Push Notifications capability on the iOS app.
  */
-const { onDocumentCreated, onDocumentWritten, onDocumentDeleted } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentWritten, onDocumentDeleted, onDocumentWrittenWithAuthContext } = require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
@@ -777,60 +777,143 @@ exports.blockTombstonedChild = onDocumentCreated("children/{childID}", async (ev
 // household doc is deleted (by the app, the admin, or retention) this sweeps the
 // rest, and tombstones the children so a device that was switched off during the
 // deletion cannot bring a child (or its public friend card) back.
-exports.onHouseholdDeleted = onDocumentDeleted("households/{hid}", async (event) => {
-  const hid = event.params.hid;
-  const d = (event.data && event.data.data()) || {};
-  const now = Date.now() / 1000;
-  const out = { children: 0, devices: 0, invites: 0, records: 0 };
-  try {
-    // Every child that IS this family's: listed on the doc, or pointing at it.
-    // A listed id whose doc now belongs to ANOTHER family is left alone.
-    const ids = new Set((d.childIDs || []).filter((x) => typeof x === "string" && x));
-    (await db.collection("children").where("householdID", "==", hid).get()).forEach((k) => ids.add(k.id));
-    for (const id of ids) {
-      const ref = db.collection("children").doc(id);
-      const snap = await ref.get();
-      if (snap.exists && (snap.data() || {}).householdID !== hid) continue;
-      await db.collection("deletedChildren").doc(id).set(
-        { householdID: hid, deletedAt: now, reason: "household-deleted" }, { merge: true });
-      await db.recursiveDelete(ref);                                   // + location, placeEvents, events, state, dailyStats
-      await db.recursiveDelete(db.collection("friendCards").doc(id)).catch(() => {});   // + its requests inbox
-      await db.recursiveDelete(db.collection("weeklyReports").doc(id)).catch(() => {});
-      // Requests this child SENT to other kids (doc id = the sender's child id).
-      const sent = await db.collectionGroup("requests").where("fromID", "==", id).get().catch(() => ({ docs: [] }));
-      for (const r of sent.docs) await r.ref.delete().catch(() => {});
+/** parents/{uid}.lastSyncRecovery is written by the phone — pass on only short
+ *  strings and FINITE numbers (a NaN there broke the whole admin callable). */
+function cleanSyncRecovery(r) {
+  if (!r || typeof r !== "object") return null;
+  const num = (v) => (typeof v === "number" && Number.isFinite(v) ? v : null);
+  const str = (v, n) => (v == null ? null : String(v).slice(0, n));
+  const out = { error: str(r.error, 200), build: str(r.build, 20), at: num(r.at), recoveredAt: num(r.recoveredAt) };
+  return out.recoveredAt ? out : null;
+}
+
+/** A child id is a UUID — nothing else is ever used as a document path here
+ *  (a listed "a/b/c" would otherwise resolve to SOMEONE ELSE's subcollection). */
+const CHILD_ID_RE = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$/;
+
+/** Everything that hangs off a child once its doc is gone: its subcollections
+ *  (location, placeEvents, events, state, dailyStats), its public card and the
+ *  card's inbox, its weekly reports, and the friend requests it sent. */
+async function sweepChildLeftovers(id) {
+  if (!CHILD_ID_RE.test(id)) return;
+  await db.recursiveDelete(db.collection("children").doc(id));
+  await db.recursiveDelete(db.collection("friendCards").doc(id));
+  await db.recursiveDelete(db.collection("weeklyReports").doc(id));
+  const sent = await db.collectionGroup("requests").where("fromID", "==", id).get();
+  for (const r of sent.docs) await r.ref.delete();
+}
+
+/** An event older than this is not retried any more (retry is on; a bug that
+ *  always throws must not spin for a day). */
+const SWEEP_GIVE_UP_MS = 2 * 60 * 60 * 1000;
+const sweepTooOld = (event) => event.time && Date.now() - Date.parse(event.time) > SWEEP_GIVE_UP_MS;
+
+// A CHILD doc was deleted. Firestore never cascades, so what it left behind
+// (location history, events, daily stats, its public card…) has to be swept.
+//   • removed by a parent  → the app wrote a tombstone first → sweep now.
+//   • its family is gone   → sweep now.
+//   • anything else (the app deleting the children one by one on the way to
+//     deleting the account — or a deletion nobody meant, which the child's own
+//     device heals by uploading the doc again) → DON'T touch the data; leave a
+//     note so the household sweep finds this child once the family is deleted
+//     (by then the app has already taken it off the family's list).
+exports.onChildDeleted = onDocumentDeleted(
+  { document: "children/{childID}", timeoutSeconds: 300, memory: "512MiB", retry: true },
+  async (event) => {
+    const id = event.params.childID;
+    if (!CHILD_ID_RE.test(id) || sweepTooOld(event)) return;
+    const hid = ((event.data && event.data.data()) || {}).householdID;
+    // Re-created meanwhile (a restore, or a device that uploaded it again)? Then
+    // its data is live — leave everything alone.
+    if ((await db.collection("children").doc(id).get()).exists) return;
+    const deliberate = (await db.collection("deletedChildren").doc(id).get()).exists
+      || (typeof hid === "string" && hid && !(await db.collection("households").doc(hid).get()).exists);
+    if (!deliberate) {
+      if (!(typeof hid === "string" && hid)) return;
+      await db.collection("orphanChildren").doc(id).set({ householdID: hid, at: Date.now() / 1000 });
+      // The family may have been deleted between the check and the note (its
+      // own sweep would then have missed the note) — look once more.
+      if ((await db.collection("households").doc(hid).get()).exists) return;
+    }
+    await sweepChildLeftovers(id);
+    await db.collection("orphanChildren").doc(id).delete();
+    console.log("[child-deleted] swept", id);
+  });
+
+exports.onHouseholdDeleted = onDocumentDeleted(
+  { document: "households/{hid}", timeoutSeconds: 540, memory: "512MiB", retry: true },
+  async (event) => {
+    const hid = event.params.hid;
+    if (sweepTooOld(event)) return;
+    const d = (event.data && event.data.data()) || {};
+    const now = Date.now() / 1000;
+    const out = { children: 0, devices: 0, invites: 0, records: 0 };
+    // The children that ARE this family's — and only those. `childIDs` on the
+    // doc is written by clients (anyone can create a household listing ANOTHER
+    // family's child and delete it), so a listed id counts only if its doc
+    // points here, or has no doc at all (already deleted — only orphans left).
+    const candidates = new Set((Array.isArray(d.childIDs) ? d.childIDs : []).filter((x) => typeof x === "string"));
+    for (const name of ["children", "deletedChildren", "orphanChildren"]) {
+      (await db.collection(name).where("householdID", "==", hid).get()).forEach((k) => candidates.add(k.id));
+    }
+    const mine = new Set();
+    for (const id of candidates) {
+      if (!CHILD_ID_RE.test(id)) continue;
+      const snap = await db.collection("children").doc(id).get();
+      if (snap.exists && (snap.data() || {}).householdID !== hid) continue;   // another family's now
+      mine.add(id);
+    }
+    for (const id of mine) {
+      // A tombstone, so a device that was off during the deletion can't bring the
+      // child back — never overwriting the reason an earlier delete recorded.
+      const tomb = db.collection("deletedChildren").doc(id);
+      if (!(await tomb.get()).exists) await tomb.set({ householdID: hid, deletedAt: now, reason: "household-deleted" });
+      await sweepChildLeftovers(id);
+      await db.collection("orphanChildren").doc(id).delete();
       out.children += 1;
     }
-    // Device rows (children's and the parents' own), invites, request records.
+    // Device rows: this family's, and its children's rows that carry no family
+    // of their own. NEVER a row that belongs to another household.
     const rows = new Map();
     (await db.collection("childDevices").where("householdID", "==", hid).get()).forEach((x) => rows.set(x.id, x.ref));
-    for (const id of ids) {
-      (await db.collection("childDevices").where("childID", "==", id).get()).forEach((x) => rows.set(x.id, x.ref));
+    for (const id of mine) {
+      (await db.collection("childDevices").where("childID", "==", id).get()).forEach((x) => {
+        const owner = (x.data() || {}).householdID;
+        if (!owner || owner === hid) rows.set(x.id, x.ref);
+      });
     }
-    for (const ref of rows.values()) { await ref.delete().catch(() => {}); out.devices += 1; }
+    for (const ref of rows.values()) { await ref.delete(); out.devices += 1; }
     for (const inv of (await db.collection("invites").where("householdID", "==", hid).get()).docs) {
-      await inv.ref.delete().catch(() => {}); out.invites += 1;
+      await inv.ref.delete(); out.invites += 1;
     }
-    for (const name of ["helpRequests", "timeTransfers"]) {
-      const snap = await db.collection(name).where("householdID", "==", hid).get().catch(() => ({ docs: [] }));
-      for (const doc of snap.docs) { await db.recursiveDelete(doc.ref).catch(() => {}); out.records += 1; }
+    for (const name of ["helpRequests", "timeTransfers", "inviteMails"]) {
+      const snap = await db.collection(name).where("householdID", "==", hid).get();
+      for (const doc of snap.docs) { await db.recursiveDelete(doc.ref); out.records += 1; }
     }
     // What hung under the (now deleted) household doc, and the family's support chat.
-    await db.recursiveDelete(db.collection("households").doc(hid)).catch(() => {});   // activity, chores, choreStats
-    await db.recursiveDelete(db.collection("supportChats").doc(hid)).catch(() => {});
+    if (!(await db.collection("households").doc(hid).get()).exists) {
+      await db.recursiveDelete(db.collection("households").doc(hid));   // activity, chores, choreStats
+      await db.recursiveDelete(db.collection("supportChats").doc(hid));
+    }
     console.log("[household-deleted]", hid, JSON.stringify(out));
-  } catch (e) {
-    console.error("[household-deleted] sweep failed for", hid, e && e.message);
-  }
-});
+  });
 
 // ---- ✉️ "הוזמנתם למשפחה" — the email a co-parent gets when invited by email ----
 // "הזמינו באימייל" only wrote the address onto the household; the invited parent
 // heard nothing unless their partner told them (Rani, 2026-10-10: "הוא מקבל איזה
 // מייל?"). Now each NEWLY added address gets one short email with the three
 // steps. One per family + address per day (inviteMails/{hid}_{address}).
+/** The family's name as it may appear in an email WE send: a client writes it,
+ *  so no links, no control characters, short. Anything doubtful → generic. */
+function safeFamilyLabel(familyName) {
+  let n = typeof familyName === "string" ? familyName : "";
+  n = n.replace(/[\u0000-\u001F\u007F<>]/g, " ").replace(/\s+/g, " ").trim().replace(/^משפחת\s+/, "");
+  if (!n || n.length > 30 || /https?:|www\.|[\/\\@]|\.[a-z]{2,}/i.test(n)) return "המשפחה שלכם";
+  return `משפחת ${n}`;
+}
+
 function inviteMailText(familyName, email) {
-  const fam = familyName ? `משפחת ${String(familyName).replace(/^משפחת\s+/, "")}` : "המשפחה שלכם";
+  const fam = safeFamilyLabel(familyName);
   return {
     subject: `הוזמנתם להצטרף ל${fam} בטופי 👪`,
     lines: [
@@ -855,41 +938,76 @@ exports.inviteMailText = inviteMailText;   // for the unit test
 
 /** The designed version (emails/parent-invite.html) — the plain lines stay as the text fallback. */
 function inviteMailHtml(familyName, email) {
-  const fam = familyName ? `משפחת ${String(familyName).replace(/^משפחת\s+/, "")}` : "המשפחה שלכם";
   return fs.readFileSync(path.join(__dirname, "emails", "parent-invite.html"), "utf8")
-    .split("{{FAMILY}}").join(escapeHtml(fam)).split("{{EMAIL}}").join(escapeHtml(email));
+    .replace(/<!--[\s\S]*?-->/g, "")           // the template's own notes don't ship
+    .split("{{FAMILY}}").join(escapeHtml(safeFamilyLabel(familyName))).split("{{EMAIL}}").join(escapeHtml(email));
 }
 exports.inviteMailHtml = inviteMailHtml;
 
-exports.onParentInvitedByEmail = onDocumentWritten(
+// Limits — this sends from OUR mailbox to an address a CLIENT typed, so it must
+// not be usable as a mail relay: only a signed-in, non-anonymous PARENT who is a
+// member of an EXISTING family triggers it; one mail per address per day (across
+// all families), a few per family per day, and a global daily ceiling.
+const INVITE_MAIL = { perWrite: 3, perFamilyDay: 5, globalDay: 150 };
+
+exports.onParentInvitedByEmail = onDocumentWrittenWithAuthContext(
   { document: "households/{hid}", secrets: [GMAIL_USER, GMAIL_PASS] },
   async (event) => {
     const before = (event.data.before && event.data.before.data()) || null;
     const after = (event.data.after && event.data.after.data()) || null;
-    if (!after) return;                                     // the family was deleted
+    if (!before || !after) return;                          // created or deleted — never a mail
     const norm = (a) => (Array.isArray(a) ? a : []).filter((x) => typeof x === "string").map((x) => x.trim().toLowerCase());
-    const had = new Set(norm(before && before.invitedParentEmails));
-    const added = norm(after.invitedParentEmails).filter((e) => !had.has(e) && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e));
+    const had = new Set(norm(before.invitedParentEmails));
+    const added = norm(after.invitedParentEmails)
+      .filter((e) => !had.has(e) && e.length <= 120 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e));
     if (!added.length) return;
+    // WHO wrote it: a real (non-anonymous) account that is a parent of this family.
+    // (authId is the Firebase uid for a write from the app; a server or console
+    // write carries a service identity, which is no parent of anything.)
+    const uid = typeof event.authId === "string" ? event.authId : "";
+    const isParent = !!uid && Array.isArray(after.parentUIDs) && after.parentUIDs.includes(uid);
+    const writer = isParent ? await admin.auth().getUser(uid).catch(() => null) : null;
+    if (!writer || !writer.email || !(writer.providerData || []).length) {          // anonymous / child device / server
+      console.log("[invite-mail] not sent — writer is not a signed-in parent:", event.authType, "household", event.params.hid);
+      return;
+    }
     const user = GMAIL_USER.value(), pass = GMAIL_PASS.value();
     if (!user || !pass) { console.warn("[invite-mail] GMAIL secrets not set — skipping"); return; }
+    const crypto = require("crypto");
+    const day = new Date().toISOString().slice(0, 10);
     const transporter = nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
-    for (const email of added.slice(0, 5)) {
-      const ref = db.collection("inviteMails").doc(`${event.params.hid}_${email}`.replace(/[\/#?]/g, "_"));
+    for (const email of added.slice(0, INVITE_MAIL.perWrite)) {
+      const key = crypto.createHash("sha256").update(email).digest("hex").slice(0, 32);
+      const addrRef = db.collection("inviteMails").doc(`addr_${key}`);
+      const famRef = db.collection("inviteMails").doc(`fam_${event.params.hid}_${day}`);
+      const dayRef = db.collection("inviteMails").doc(`day_${day}`);
       try {
-        const prev = await ref.get();
-        if (prev.exists && Date.now() / 1000 - ((prev.data() || {}).sentAt || 0) < 86400) continue;   // once a day
+        // Reserve under all three limits first, in one transaction.
+        const ok = await db.runTransaction(async (t) => {
+          const [a, f, g] = await Promise.all([t.get(addrRef), t.get(famRef), t.get(dayRef)]);
+          if (a.exists && Date.now() / 1000 - ((a.data() || {}).sentAt || 0) < 86400) return false;
+          if (((f.data() || {}).count || 0) >= INVITE_MAIL.perFamilyDay) return false;
+          if (((g.data() || {}).count || 0) >= INVITE_MAIL.globalDay) return false;
+          t.set(addrRef, { sentAt: Date.now() / 1000 });   // no family on it: deleting a family must not lift the limit
+          t.set(famRef, { count: ((f.data() || {}).count || 0) + 1, householdID: event.params.hid, day });
+          t.set(dayRef, { count: ((g.data() || {}).count || 0) + 1, day });
+          return true;
+        });
+        if (!ok) { console.log("[invite-mail] limit reached — not sent, household", event.params.hid); continue; }
         const m = inviteMailText(after.familyName, email);
         await transporter.sendMail({ from: `טופי <${user}>`, to: email, subject: m.subject,
           text: m.lines.join("\n"), html: inviteMailHtml(after.familyName, email),
           attachments: [{ filename: "tofy-lion.png", content: fs.readFileSync(path.join(__dirname, "emails", "lion.png")),
             cid: "tofy-lion", contentDisposition: "inline" }] });
-        await ref.set({ householdID: event.params.hid, sentAt: Date.now() / 1000 });
         console.log("[invite-mail] sent for household", event.params.hid);
       } catch (e) {
         console.error("[invite-mail] failed for household", event.params.hid, e && e.message);
       }
     }
+    // The per-address notes only matter for a day — don't keep them around.
+    const stale = await db.collection("inviteMails").where("sentAt", "<", Date.now() / 1000 - 7 * 86400).limit(50).get()
+      .catch(() => ({ docs: [] }));
+    for (const doc of stale.docs) await doc.ref.delete().catch(() => {});
   });
 
 // ---- 1a) Wake the child's device for a parent command -----------------------
@@ -2653,7 +2771,7 @@ exports.adminFamiliesOverview = onCall(
         // 🔌 The phone's own note that a family load FAILED and later recovered
         // (HouseholdManager.bootstrapSucceeded) — a disconnection we'd otherwise
         // only hear about if the family wrote to us.
-        syncRecovery: d.lastSyncRecovery || null,
+        syncRecovery: cleanSyncRecovery(d.lastSyncRecovery),
       };
     });
     const kidsByHH = {};

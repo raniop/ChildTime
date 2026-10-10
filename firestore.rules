@@ -282,9 +282,12 @@ service cloud.firestore {
           return get(/databases/$(database)/documents/friendCards/$(childID)).data.ownerUID == request.auth.uid
             || householdHasMe(get(/databases/$(database)/documents/children/$(childID)).data.householdID);
         }
+        // …and only from a child that EXISTS (a deleted child's device must not
+        // be able to drop its name into other kids' inboxes again).
         allow create: if signedIn()
           && request.resource.data.requesterUID == request.auth.uid
-          && fromID == request.resource.data.fromID;
+          && fromID == request.resource.data.fromID
+          && exists(/databases/$(database)/documents/children/$(fromID));
         // The sender may refresh their own pending request (e.g. updated star
         // count) / re-send idempotently — but can't hijack it to another sender.
         allow update: if signedIn()
