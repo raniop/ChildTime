@@ -577,7 +577,10 @@ struct ChildReportView: View {
                 ForEach(devices) { d in
                     HStack {
                         // Remove (e.g. linked to the wrong child) — the dashboard
-                        // confirms before anything happens.
+                        // confirms before anything happens. Not for a PARENT's
+                        // phone in Kid Mode: that row goes away by itself when Kid
+                        // Mode ends, and "removing" it reset that parent's phone.
+                        if !HouseholdManager.shared.parentDevices.contains(where: { $0.deviceID == d.deviceID }) {
                         Menu {
                             Button(role: .destructive) { onRemoveDevice(d) } label: {
                                 Label(tr("הסר מכשיר"), systemImage: "minus.circle")
@@ -590,6 +593,7 @@ struct ChildReportView: View {
                                 .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
+                        }
                         // "אייפד של נועה" — the kind + the child (iOS names every phone
                         // just "iPhone"); a custom device name rides along.
                         Text(tr("\(d.kind == "ipad" ? "📲" : "📱") \(d.kind == "ipad" ? tr("אייפד") : tr("אייפון")) של \(profile.name)")

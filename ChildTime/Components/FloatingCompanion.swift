@@ -36,6 +36,8 @@ struct FloatingCompanion: View {
     @State private var bubbleSize: CGSize = .zero
     /// The child moved a pinned buddy — stop following the pin.
     @State private var movedByChild = false
+    /// Going home after a new question: a quick spring, not the 4s wander ease.
+    @State private var homing = false
 
     /// `pinnedAt` is measured from the LEFT edge (global frames); `.position`
     /// here runs from the leading edge, so a right-to-left screen mirrors it —
@@ -106,7 +108,7 @@ struct FloatingCompanion: View {
                 }
             }
             .position(anchor)
-            .animation(isDragging ? nil : .easeInOut(duration: 4), value: position)
+            .animation(isDragging ? nil : (homing ? .spring(response: 0.5, dampingFraction: 0.8) : .easeInOut(duration: 4)), value: position)
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
@@ -168,7 +170,9 @@ struct FloatingCompanion: View {
             .onChangeCompat(of: homeToken) { _, _ in
                 guard movedByChild, !isDragging, let pin = pinnedAt else { return }
                 movedByChild = false
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) { position = pinPoint(pin, in: geo.size) }
+                homing = true
+                position = pinPoint(pin, in: geo.size)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { homing = false }
             }
             .onChangeCompat(of: topInset) { old, newTop in
                 // Only a real change of band — the question screen re-measured on

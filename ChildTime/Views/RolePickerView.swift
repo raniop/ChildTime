@@ -337,14 +337,9 @@ struct RolePickerView: View {
         case .adult?: choose(.parent)
         case .minor?: ageStep = .minor
         case nil:
-            Task { @MainActor in
-                if let verdict = await AgeGate.askApple() {
-                    AgeGate.verdict = verdict
-                    if verdict == .adult { choose(.parent) } else { ageStep = .minor }
-                } else {
-                    ageStep = .year
-                }
-            }
+            // Straight to the birth-year wheel (Rani, 2026-10-10). Apple's age
+            // check answered nothing useful and took ~5s with a dead-looking tap.
+            ageStep = .year
         }
     }
 

@@ -877,6 +877,7 @@ struct QuestionRunnerView: View {
                                 .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppColor.successMint))
                         }
                     }
+                    .frame(minHeight: 22)   // the same height with or without the 🔥 label
                     HStack(spacing: AppSpacing.sm) {
                         shelfIcon("flag", fg: .white.opacity(0.75)) { showReportConfirm = true }
                         shelfIcon("speaker.wave.2.fill") {

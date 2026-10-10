@@ -137,7 +137,12 @@ object AccountRepository {
                 ref.update("parentUIDs", FieldValue.arrayUnion(uid)).await()   // a deleted family throws
                 val doc = ref.get(Source.SERVER).await()
                 if ((doc.get("parentUIDs") as? List<*>)?.contains(uid) == true) return hid
-            } catch (e: CancellationException) { throw e } catch (e: Exception) { /* next */ }
+            } catch (e: com.google.firebase.firestore.FirebaseFirestoreException) {
+                // Gone / not ours → the next one. Anything else (offline mid-way)
+                // is NOT "no family": rethrow, and the load retries.
+                if (e.code != com.google.firebase.firestore.FirebaseFirestoreException.Code.NOT_FOUND &&
+                    e.code != com.google.firebase.firestore.FirebaseFirestoreException.Code.PERMISSION_DENIED) throw e
+            }
         }
         return null
     }

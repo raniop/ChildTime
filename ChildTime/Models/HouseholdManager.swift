@@ -640,7 +640,7 @@ final class HouseholdManager: ObservableObject {
     /// Rejoin the first family this account's own parent doc lists that still
     /// exists: add our uid back (the self-add the rules allow), then confirm it
     /// from the SERVER. nil = none could be rejoined (deleted / offline).
-    private func rejoinOwnFamily(uid: String, listed: [String]) async -> Household? {
+    private func rejoinOwnFamily(uid: String, listed: [String]) async throws -> Household? {
         for hid in listed {
             let ref = db.collection("households").document(hid)
             do {
@@ -650,9 +650,12 @@ final class HouseholdManager: ObservableObject {
                       hh.parentUIDs.contains(uid) else { continue }
                 TofyLink("ensureHousehold: REJOINED own family \(hid.prefix(8)) (was missing from parentUIDs)")
                 return hh
-            } catch {
-                TofyLink("ensureHousehold: could not rejoin \(hid.prefix(8)): \(error.localizedDescription)")
+            } catch let e as NSError where Self.isPermissionDenied(e)
+                        || (e.domain == FirestoreErrorDomain && e.code == FirestoreErrorCode.notFound.rawValue) {
+                TofyLink("ensureHousehold: own family \(hid.prefix(8)) is gone — not rejoining")
             }
+            // Any other error (offline mid-way) is NOT "no family": it throws, and
+            // the load retries instead of offering a second family on a guess.
         }
         return nil
     }
@@ -724,7 +727,8 @@ final class HouseholdManager: ObservableObject {
         // left on reinstall comes back here). Rejoin it instead of starting a
         // SECOND family (Rani, 2026-10-10). Real accounts only — and the rules
         // let a non-member add only its own uid.
-        if isRealAccount, let back = await rejoinOwnFamily(uid: uid, listed: parentAccount?.householdIDs ?? []) {
+        if isRealAccount, self.uid == uid, parentAccount?.id == uid,   // never another account's list
+           let back = try await rejoinOwnFamily(uid: uid, listed: parentAccount?.householdIDs ?? []) {
             return back
         }
         // None — create a fresh household owned by this parent (real accounts
@@ -1130,7 +1134,12 @@ final class HouseholdManager: ObservableObject {
             if let data = existing?.data(), let prior = Self.decode(ChildDevice.self, data) {
                 // The parent removed this device while it was closed → reset to a
                 // fresh install instead of re-registering (and don't reappear).
-                if prior.removed == true { resetAsRemovedDevice(); return }
+                if prior.removed == true {
+                    // Only a real child device resets; a parent's Kid Mode row
+                    // just comes back un-removed (see watchOwnDeviceRemoval).
+                    if ParentSettings.shared.deviceRole == .child { resetAsRemovedDevice(); return }
+                    device.removed = false
+                }
                 device.joinedAt = prior.joinedAt
             }
             try await db.collection("childDevices").document(docID)
@@ -1865,6 +1874,11 @@ final class HouseholdManager: ObservableObject {
             .addSnapshotListener { [weak self] snap, _ in
                 guard let self, let data = snap?.data() else { return }
                 if (data["removed"] as? Bool) == true {
+                    // A PARENT's phone in Kid Mode is not the child's device: a
+                    // co-parent tapping "הסר" on that row used to turn this phone
+                    // into a disconnected child device. Ignore it here — the next
+                    // registration clears the mark (registerDevice).
+                    guard ParentSettings.shared.deviceRole == .child else { return }
                     self.resetAsRemovedDevice()
                     return
                 }
@@ -2316,7 +2330,8 @@ final class HouseholdManager: ObservableObject {
                     let hhDoc = try await db.collection("households").document(invite.householdID).getDocument()
                     if let hhData = hhDoc.data(), let hh = Self.decodeHousehold(id: invite.householdID, hhData) {
                         self.household = hh
-                        listenToHousehold(hh.id)
+                        failingListeners = []   // the old family's alarms aren't this one's
+                        listenToHousehold(hh.id); listenToTombstones(in: hh.id)
                         listenToChildren(in: hh.id); listenToChildDevices(in: hh.id)
                     }
                     break
@@ -2449,7 +2464,8 @@ final class HouseholdManager: ObservableObject {
             let hhDoc = try await db.collection("households").document(req.fromHouseholdID).getDocument()
             if let data = hhDoc.data(), let hh = Self.decodeHousehold(id: req.fromHouseholdID, data) {
                 self.household = hh
-                listenToHousehold(hh.id)
+                failingListeners = []   // the old family's alarms aren't this one's
+                listenToHousehold(hh.id); listenToTombstones(in: hh.id)
                 listenToChildren(in: hh.id); listenToChildDevices(in: hh.id)
             }
             self.pendingChildLink = nil
