@@ -129,15 +129,27 @@ enum WidgetBridge {
                 // ⌚️ same trigger keeps the Apple Watch glance fresh.
                 let glances = rows.map { row -> WatchBridge.ChildGlance in
                     let s = row.snapshot
+                    // The WHOLE glance, like the dashboard's own push: this one used
+                    // to leave out "has a device" and the place, and — arriving after
+                    // every child update — overwrote the dashboard's, so the watch's
+                    // 💝 🔒 🔔 actions vanished (Rani, 2026-10-10: "אין כלום").
+                    let cid = row.profile.id.uuidString
+                    let place = LocationSharing.shared.shownFix(cid).map { f -> String in
+                        let p = LocationSharing.shared.whereParts(f)
+                        return "\(p.icon) \(p.text) · \(ParentLocationView.relative(f.at, now: Date()))"
+                    }
                     return WatchBridge.ChildGlance(
-                        id: row.profile.id.uuidString,
-                        name: row.profile.name,
+                        id: cid,
+                        name: Question.stripNiqqud(row.profile.name),
                         emoji: row.profile.gender == .girl ? "👧" : "👦",
                         earnedToday: s.minutesEarnedToday,
                         playingNow: (s.unlockEndsAt ?? .distantPast) > Date(),
                         pendingChores: ChoreStore.shared.chores(forChild: row.profile.id)
                             .filter(\.isPendingApproval).count,
-                        moneyBalance: 0)
+                        moneyBalance: 0,
+                        girl: row.profile.gender == .girl,
+                        hasDevice: !(HouseholdManager.shared.devicesByChild[cid] ?? []).isEmpty,
+                        whereText: place)
                 }
                 WatchBridge.shared.pushFamilyGlance(glances)
             }

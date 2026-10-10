@@ -244,6 +244,16 @@ struct WatchHomeView: View {
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundStyle(c.playingNow ? Tofy.mint : .white.opacity(0.65))
 
+                // ⚡ One clear button, right under the name (Rani, 2026-10-10: "בשעון
+                // אני לא רואה כפתור פעולות") — the three actions used to wait at the
+                // very bottom of the page, under a scroll nobody thought to make.
+                NavigationLink {
+                    actionsPage(c)
+                } label: {
+                    actionLabel("⚡", tr("פעולות"), fill: Color(tofyHex: "FF5FA8"))
+                }
+                .buttonStyle(.plain)
+
                 VStack(spacing: 4) {
                     row("🎮", c.girl ? tr("\(c.earnedToday) דקות שהרוויחה היום") : tr("\(c.earnedToday) דקות שהרוויח היום"))
                     if c.pendingChores > 0 {
@@ -259,8 +269,21 @@ struct WatchHomeView: View {
                 }
                 .padding(.vertical, 8).padding(.horizontal, 9)
                 .watchPane(radius: 13, tint: c.playingNow ? Tofy.mint : nil)
+            }
+            .padding(.horizontal, 6)
+        }
+        // WATCH_DEMO_ACTIONS=1 — screenshots of the action buttons.
+        .defaultScrollAnchor(ProcessInfo.processInfo.environment["WATCH_DEMO_ACTIONS"] == "1" ? .bottom : .top)
+    }
 
-                // ⚡ The same actions as the phone's "פעולות" — sent to the phone.
+    /// The same actions as the phone's "פעולות" — each is sent to the phone.
+    private func actionsPage(_ c: WatchChildGlance) -> some View {
+        ScrollView {
+            VStack(spacing: 7) {
+                Text(c.name)
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.7)
                 if c.hasDevice {
                     NavigationLink {
                         giftPicker(c)
@@ -283,11 +306,17 @@ struct WatchHomeView: View {
                     }
                     .buttonStyle(.plain)
                 }
+                // Nothing to do from here without a device of the child's own.
+                if !c.hasDevice, c.whereText.isEmpty {
+                    Text(tr("אין עדיין מכשיר מחובר"))
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.7))
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 6)
+                }
             }
             .padding(.horizontal, 6)
         }
-        // WATCH_DEMO_ACTIONS=1 — screenshots of the action buttons.
-        .defaultScrollAnchor(ProcessInfo.processInfo.environment["WATCH_DEMO_ACTIONS"] == "1" ? .bottom : .top)
     }
 
     private func actionLabel(_ emoji: String, _ title: String, fill: Color) -> some View {

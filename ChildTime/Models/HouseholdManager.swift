@@ -1013,6 +1013,9 @@ final class HouseholdManager: ObservableObject {
                 }
                 self.devicesByChild = grouped
                 self.syncCommandAcksToFeed()   // 🔔 "המכשיר אישר" in the feed
+                // ⌚️ "has a device" just changed (or just loaded) — the watch's
+                // actions depend on it, and nothing else re-sent the glance.
+                WidgetBridge.refreshFamilySoon()
             }
     }
 
