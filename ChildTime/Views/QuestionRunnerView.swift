@@ -289,7 +289,8 @@ struct QuestionRunnerView: View {
                         // 📌 Parked under 🚩 🔊 🙋, not wandering (Rani, 2026-10-09);
                         // a drag still moves it.
                         pinnedAt: CGPoint(x: shelfFrame.minX + AppSpacing.md + shelfBuddySize * 0.55 - field.minX,
-                                          y: shelfFrame.minY - field.minY - shelfBuddySize * 0.65 + 2)
+                                          y: shelfFrame.minY - field.minY - shelfBuddySize * 0.65 + 2),
+                        homeToken: questionIndex   // a dragged buddy goes home on each new question
                     )
                 }
                 .allowsHitTesting(true)
@@ -848,11 +849,15 @@ struct QuestionRunnerView: View {
                 // and the buddy standing on its edge.
                 VStack(spacing: 10) {
                     HStack(spacing: 8) {
-                        Text(tr("🔥 \(progress.currentStreak) בְּרֶצֶף"))
-                            .font(.system(size: 15, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                            .lineLimit(1).fixedSize()
-                            .contentTransition(.numericText())
+                        // No "🔥 0" after a miss (safe negative experience, Rani
+                        // 2026-10-10): the count shows from the first right answer.
+                        if progress.currentStreak > 0 {
+                            Text(tr("🔥 \(progress.currentStreak) בְּרֶצֶף"))
+                                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                                .lineLimit(1).fixedSize()
+                                .contentTransition(.numericText())
+                        }
                         GeometryReader { g in
                             ZStack(alignment: .leading) {
                                 RoundedRectangle(cornerRadius: 6, style: .continuous).fill(.white.opacity(0.18))

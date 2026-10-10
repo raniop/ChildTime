@@ -637,6 +637,26 @@ final class HouseholdManager: ObservableObject {
         return true
     }
 
+    /// Rejoin the first family this account's own parent doc lists that still
+    /// exists: add our uid back (the self-add the rules allow), then confirm it
+    /// from the SERVER. nil = none could be rejoined (deleted / offline).
+    private func rejoinOwnFamily(uid: String, listed: [String]) async -> Household? {
+        for hid in listed {
+            let ref = db.collection("households").document(hid)
+            do {
+                try await ref.updateData(["parentUIDs": FieldValue.arrayUnion([uid])])   // a deleted family throws
+                let doc = try await ref.getDocument(source: .server)
+                guard let data = doc.data(), let hh = Self.decodeHousehold(id: hid, data),
+                      hh.parentUIDs.contains(uid) else { continue }
+                TofyLink("ensureHousehold: REJOINED own family \(hid.prefix(8)) (was missing from parentUIDs)")
+                return hh
+            } catch {
+                TofyLink("ensureHousehold: could not rejoin \(hid.prefix(8)): \(error.localizedDescription)")
+            }
+        }
+        return nil
+    }
+
     /// Returns the parent's household, creating one (with this uid as the sole
     /// parent) if they have none — but ONLY when `canCreate` (a real, named
     /// account). Anonymous uids find/adopt but never mint (→ nil).
@@ -697,6 +717,15 @@ final class HouseholdManager: ObservableObject {
         }
         if let doc = ranked.first, let hh = Self.decodeHousehold(id: doc.documentID, doc.data()) {
             return hh
+        }
+        // 🛡 The server says "no family" — but this account's OWN parent doc
+        // still names one: it was dropped from that family's parentUIDs (a
+        // server clean-up took a real parent out on 30.8, and an account that
+        // left on reinstall comes back here). Rejoin it instead of starting a
+        // SECOND family (Rani, 2026-10-10). Real accounts only — and the rules
+        // let a non-member add only its own uid.
+        if isRealAccount, let back = await rejoinOwnFamily(uid: uid, listed: parentAccount?.householdIDs ?? []) {
+            return back
         }
         // None — create a fresh household owned by this parent (real accounts
         // only; an anonymous device waits to JOIN one instead).

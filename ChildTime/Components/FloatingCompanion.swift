@@ -21,8 +21,11 @@ struct FloatingCompanion: View {
     var horizontalInset: CGFloat = 20
     /// 📌 A fixed spot (in this view's coordinates) instead of wandering: the
     /// quiz parks the buddy under 🚩 🔊 🙋 (Rani, 2026-10-09). The child can
-    /// still drag it; once they do, it stays where they left it.
+    /// still drag it; it stays where they left it until `homeToken` changes.
     var pinnedAt: CGPoint? = nil
+    /// Changes on every new question: a buddy the child dragged goes back to
+    /// its pin (Rani, 2026-10-10) — left on an answer, it hid it for good.
+    var homeToken: Int = 0
 
     @Environment(\.layoutDirection) private var layoutDirection
 
@@ -140,7 +143,9 @@ struct FloatingCompanion: View {
                 if !hasAppeared {
                     hasAppeared = true
                     if let pin = pinnedAt {
-                        position = pinPoint(pin, in: geo.size)
+                        // Straight onto the shelf — not a 4s glide across it.
+                        var t = Transaction(); t.disablesAnimations = true
+                        withTransaction(t) { position = pinPoint(pin, in: geo.size) }
                     } else {
                         position = defaultPosition(in: geo.size)
                         scheduleWander(in: geo.size)
@@ -159,6 +164,11 @@ struct FloatingCompanion: View {
                 guard let pin, !movedByChild, !isDragging else { return }
                 var t = Transaction(); t.disablesAnimations = true
                 withTransaction(t) { position = pinPoint(pin, in: geo.size) }
+            }
+            .onChangeCompat(of: homeToken) { _, _ in
+                guard movedByChild, !isDragging, let pin = pinnedAt else { return }
+                movedByChild = false
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) { position = pinPoint(pin, in: geo.size) }
             }
             .onChangeCompat(of: topInset) { old, newTop in
                 // Only a real change of band — the question screen re-measured on

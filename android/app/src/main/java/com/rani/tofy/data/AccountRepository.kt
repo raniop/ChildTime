@@ -119,9 +119,27 @@ object AccountRepository {
         // that throws → retry), or a cached empty result leads to a SECOND family.
         if (q.isEmpty && q.metadata.isFromCache) q = query.get(Source.SERVER).await()
         val ids = q.documents.map { it.id }
-        if (ids.isEmpty()) return null
         val preferred = (parentRef(uid).get().await().get("householdIDs") as? List<*>)?.filterIsInstance<String>().orEmpty()
+        if (ids.isEmpty()) return rejoinOwnFamily(uid, preferred)
         return preferred.firstOrNull { it in ids } ?: ids.first()
+    }
+
+    /**
+     * 🛡 The server says "no family", but this account's OWN parent doc still
+     * names one — it was dropped from that family's parentUIDs (a server
+     * clean-up on 30.8). Rejoin it (the self-add the rules allow) instead of
+     * starting a SECOND family (HouseholdManager.rejoinOwnFamily).
+     */
+    private suspend fun rejoinOwnFamily(uid: String, listed: List<String>): String? {
+        for (hid in listed) {
+            val ref = db.collection("households").document(hid)
+            try {
+                ref.update("parentUIDs", FieldValue.arrayUnion(uid)).await()   // a deleted family throws
+                val doc = ref.get(Source.SERVER).await()
+                if ((doc.get("parentUIDs") as? List<*>)?.contains(uid) == true) return hid
+            } catch (e: CancellationException) { throw e } catch (e: Exception) { /* next */ }
+        }
+        return null
     }
 
     /** False when the family's listeners could not start — the caller retries. */
