@@ -102,7 +102,9 @@ struct QuestionRunnerView: View {
     /// an expanded block drawn with the content-sized `LazyVGrid` just moves the
     /// empty space into the middle of the screen instead of the bottom.
     private func answersFill(_ q: Question) -> Bool {
-        (display.hasRail && q.passage == nil) || !isCompact
+        // In-card header: the room the top bar gave back goes to the answers
+        // (bigger targets) instead of an empty gap above the buddy.
+        (display.hasRail && q.passage == nil) || !isCompact || (topBarStyle == .inCard && q.passage == nil)
     }
 
     /// Is there a real strip under the answers for the floating buddy to stand in?
@@ -230,8 +232,10 @@ struct QuestionRunnerView: View {
                 // Beside the foldable's clock: the top rows stop short of it, and
                 // the question starts BELOW the clock (Rani: "תוריד קצת את
                 // השאלות למטה") — full width, never under the Wi-Fi.
-                topBar.clearOfBar()
-                    .fillsTopBand(above: DisplayProbeView.minimumTopMargin, alignment: .top)
+                if topBarStyle != .inCard {
+                    topBar.clearOfBar()
+                        .fillsTopBand(above: DisplayProbeView.minimumTopMargin, alignment: .top)
+                }
                 if let q = current {
                     // 📐 Laid out plainly when it fits; when it doesn't (a reading
                     // passage with long answers — in English they run to four lines),
@@ -292,7 +296,7 @@ struct QuestionRunnerView: View {
             .allowsHitTesting(false)
 
             // Per-question seconds feedback — rises toward the timer and fades.
-            if let text = secondsFlashText {
+            if let text = secondsFlashText, !timeOnShelf {
                 Text(text)
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
@@ -435,7 +439,117 @@ struct QuestionRunnerView: View {
 
     // MARK: - Top bar
 
+    /// `.inCard` (Rani, 2026-10-10): no top bar — ✕ ⭐ 💎 and "שאלה 1/15" in the
+    /// question card, the play time on the shelf. `.classic` (the chips + timer
+    /// rows) stays for the foldable's rail, and as DEMO_TOPBAR=classic.
+    private enum TopBarStyle { case classic, inCard }
+    /// The play time sits on the shelf (and flashes "+24 שניות" there).
+    private var timeOnShelf: Bool { topBarStyle == .inCard }
+    private var topBarStyle: TopBarStyle {
+        #if DEBUG
+        switch ProcessInfo.processInfo.environment["DEMO_TOPBAR"] {
+        case "d": return .inCard
+        case "classic": return .classic
+        default: break
+        }
+        #endif
+        // ✅ Rani's pick (2026-10-10): no top bar — ✕ ⭐ 💎 and "שאלה 1/15" inside
+        // the question card, the play time on the shelf. The foldable keeps its
+        // rail layout (✕ lives in the rail there).
+        return display.hasRail ? .classic : .inCard
+    }
+
+    @ViewBuilder
     private var topBar: some View {
+        switch topBarStyle {
+        case .classic: classicTopBar
+        case .inCard: EmptyView()
+        }
+    }
+
+    /// The shelf's time chip: the play time to the second; a right answer turns
+    /// it into "+24 שניות" for a moment, then back to the new time.
+    @ViewBuilder
+    private var shelfTimeChip: some View {
+        if let flash = secondsFlashText {
+            Text(flash)
+                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(secondsFlashPositive ? Color(hex: "053D2E") : .white)
+                .lineLimit(1).fixedSize()
+                .padding(.horizontal, 10).frame(height: 30)
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(secondsFlashPositive ? AppColor.successMint : AppColor.flameOrange))
+                .transition(.scale.combined(with: .opacity))
+        } else {
+            let secs = progress.openableSeconds(gift: false)
+            HStack(spacing: 5) {
+                Image(systemName: "timer").font(.system(size: 13, weight: .bold))
+                Text(String(format: "%d:%02d", secs / 60, secs % 60))
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .monospacedDigit()
+                    .environment(\.layoutDirection, .leftToRight)
+                    .numericTextTransition(Double(secs))
+            }
+            .foregroundStyle(.white)
+            .lineLimit(1).fixedSize()
+            .padding(.horizontal, 10).frame(height: 30)
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+            .transition(.scale.combined(with: .opacity))
+        }
+    }
+
+    /// The card's own top row (style `.inCard`): ✕ on one side, ⭐ 💎 on the
+    /// other, and the small "שאלה 3/15" + its bar between them.
+    private var cardTopRow: some View {
+        HStack(spacing: 10) {
+            if !display.hasRail {
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark").font(.system(size: 12, weight: .heavy))
+                        .foregroundStyle(.white)
+                        .frame(width: 32, height: 32)
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+            if totalQuestions < 1000 { cardProgress } else { Spacer(minLength: 0) }   // free play has no end
+            Text("⭐ \(progress.stars.currencyShort)  💎 \(progress.diamonds.currencyShort)")
+                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .monospacedDigit()
+                .lineLimit(1).fixedSize()
+                .frame(height: 32)   // bare — no frame around them (Rani)
+                .numericTextTransition(Double(progress.stars))
+        }
+    }
+
+    /// "שאלה 3/15" + a thin bar that fills — inside the question card.
+    private var cardProgress: some View {
+        let total = max(1, totalQuestions)
+        let done = min(questionIndex + 1, total)
+        return HStack(spacing: 10) {
+            // The topic's emoji rides here — its own line under it cost a whole
+            // row for "🏛️ היסטוריה" (Rani, 2026-10-10).
+            Text(tr("\(current?.topic.emoji ?? themeWorld.emoji) שְׁאֵלָה \(done)/\(total)"))
+                .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white.opacity(0.9))
+                .monospacedDigit()
+                .fixedSize()
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 3, style: .continuous).fill(.white.opacity(0.2))
+                    RoundedRectangle(cornerRadius: 3, style: .continuous)
+                        .fill(AppGradient.gold)
+                        .frame(width: max(6, geo.size.width * CGFloat(done) / CGFloat(total)))
+                        .animation(.spring(response: 0.45, dampingFraction: 0.8), value: questionIndex)
+                }
+            }
+            .frame(height: 6)
+        }
+    }
+
+    private var classicTopBar: some View {
         // Mockup `.q-top`: ✕ · ⭐ stars · "🧮 שאלה 4/10" as glass chips, then the
         // glass timer row.
         let total = max(1, totalQuestions)
@@ -624,6 +738,11 @@ struct QuestionRunnerView: View {
         // Mockup `.qcard`: ONE glass card — topic line (with the two small
         // controls at its ends), the passage / prompt, "בחרו תשובה אחת".
         VStack(spacing: 12) {
+            if topBarStyle == .inCard { cardTopRow }
+            // The topic line: only when it says something special in the in-card
+            // layout (a bonus / gold / portal question) — the plain topic is the
+            // emoji beside "שאלה 1/15" now.
+            if topBarStyle != .inCard || isBonusQuestion || isBonusArena || isSuperQuestion || isInPortal {
             HStack(spacing: 8) {
                 Spacer(minLength: 4)
                 HStack(spacing: 8) {
@@ -652,6 +771,7 @@ struct QuestionRunnerView: View {
                 }
                 .lineLimit(1).minimumScaleFactor(0.7)
                 Spacer(minLength: 4)
+            }
             }
 
             // 📖 The passage card — the child reads here, then answers below.
@@ -859,7 +979,10 @@ struct QuestionRunnerView: View {
                             .animation(.spring(response: 0.5, dampingFraction: 0.8), value: streakFill)
                         }
                         .frame(height: 12)
-                        if earnsTime {
+                        if earnsTime, timeOnShelf {
+                            shelfTimeChip
+                                .animation(.spring(response: 0.35, dampingFraction: 0.7), value: secondsFlashText)
+                        } else if earnsTime {
                             Text(tr("+\(progress.secondsPerCorrect) שְׁנִיּוֹת"))
                                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                                 .foregroundStyle(Color(hex: "053D2E"))
