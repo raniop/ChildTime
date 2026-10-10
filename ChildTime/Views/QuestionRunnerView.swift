@@ -776,9 +776,8 @@ struct QuestionRunnerView: View {
                                 action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: system)
-                .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(fg)
-                .font(.system(size: 17, weight: .bold))
+                .font(.system(size: 17, weight: .bold))   // the same size as the shelf's other icons
                 .frame(width: 46, height: 46)
                 .background(bg, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.28), lineWidth: 1))
@@ -849,7 +848,7 @@ struct QuestionRunnerView: View {
                 // and the buddy standing on its edge.
                 VStack(spacing: 10) {
                     HStack(spacing: 8) {
-                        Text(tr("🔥 \(progress.currentStreak) בָּרֶצֶף"))
+                        Text(tr("🔥 \(progress.currentStreak) בְּרֶצֶף"))
                             .font(.system(size: 15, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .lineLimit(1).fixedSize()

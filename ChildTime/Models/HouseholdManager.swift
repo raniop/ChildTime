@@ -184,7 +184,14 @@ final class HouseholdManager: ObservableObject {
     @discardableResult
     func refuseIfDisconnected() -> Bool {
         guard familyLinkBroken || familyNotLoaded else { return false }
-        connectionNotice = true
+        // Still true from a notice that never got to show (a sheet was closing)?
+        // Re-raise it, or every later refusal would publish nothing at all.
+        if connectionNotice {
+            connectionNotice = false
+            DispatchQueue.main.async { self.connectionNotice = true }
+        } else {
+            connectionNotice = true
+        }
         retryFamilyLoadIfNeeded()
         return true
     }
@@ -216,6 +223,9 @@ final class HouseholdManager: ObservableObject {
     /// A failed load: remember why (survives relaunch, for the recovery report),
     /// tell the screens, and try again — 3s, 6s, 12s … up to a minute.
     private func bootstrapFailed(_ error: Error, uid: String, email: String?, displayName: String?) {
+        // Another (parallel) load already got an answer — this one's failure
+        // must not paint a working family as disconnected.
+        guard household == nil, !needsFamilyChoice, pendingEmailInvite == nil else { return }
         let message = error.localizedDescription
         Task { @MainActor in self.lastError = message; self.cloudLinkProblem = message }
         TofyLink("bootstrap FAILED (attempt \(bootstrapAttempts + 1)): \(message)")
@@ -270,6 +280,9 @@ final class HouseholdManager: ObservableObject {
             return
         }
         guard household == nil, !needsFamilyChoice, pendingEmailInvite == nil else { return }
+        // A child device without a family is on purpose (removed by the parent,
+        // or not joined yet) — re-loading would re-adopt the family it just left.
+        guard isRealParentSession else { return }
         guard !bootstrapInFlight else { return }
         bootstrapRetry?.cancel()
         let email = self.email, name = self.displayName
@@ -382,6 +395,7 @@ final class HouseholdManager: ObservableObject {
         bootstrapAttempts = 0
         bootstrapGeneration &+= 1          // any bootstrap still in flight is now stale
         listenerRetry?.cancel(); listenerRetry = nil
+        listenerFailures = 0
         cloudLinkProblem = nil
         needsFamilyChoice = false
         pendingEmailInvite = nil
@@ -440,7 +454,9 @@ final class HouseholdManager: ObservableObject {
                 markLoaded()
                 return
             }
-            if let email, let invite = await findEmailInvite(email: email) {
+            let invite = email == nil ? nil : await findEmailInvite(email: email!)
+            guard !stale() else { TofyLink("bootstrap: result dropped — signed out meanwhile"); return }
+            if let invite {
                 TofyLink("bootstrap: email invite found → household \(invite.id.prefix(8))")
                 pendingEmailInvite = invite
                 markLoaded()
@@ -463,6 +479,7 @@ final class HouseholdManager: ObservableObject {
         needsFamilyChoice = false
         pendingEmailInvite = nil
         listenToTombstones(in: hh.id)
+        let owner = uid
         Task {
             // Reconcile must not race the tombstone LISTENER (its first snapshot
             // is async): fetch the tombstones NOW, drop those kids locally, and
@@ -471,6 +488,12 @@ final class HouseholdManager: ObservableObject {
             // its next launch — and every other device pulled the kid back.
             let tombstoned = await fetchTombstonedChildIDs(in: hh.id)
             await MainActor.run {
+                // Signed out (or into another account) while we waited: this
+                // family's listeners must NOT come back — a dead listener's
+                // self-heal would then add the NEXT account to this family.
+                guard self.uid == owner, self.household?.id == hh.id else {
+                    TofyLink("finishBootstrap: dropped — signed out meanwhile"); return
+                }
                 for id in tombstoned { ProfileStore.shared.removeLocalOnly(id) }
                 self.reconcileLocalChildren(into: hh, skipping: tombstoned)
                 self.listenToHousehold(hh.id)
@@ -499,13 +522,18 @@ final class HouseholdManager: ObservableObject {
         #endif
     }
 
+    enum CreateOutcome { case created, loadedExisting, failed }
+
     /// Explicit "צרו משפחה חדשה" from the choice screen — the ONLY way a new
     /// cloud household is ever minted now.
-    /// Returns false when it couldn't (offline) — the screen says so.
+    /// `.failed` when it couldn't (offline) — the screen says so.
+    /// `.loadedExisting` when this account already had a family: the caller must
+    /// NOT rename it or start the new-family walk-through (that renamed the real
+    /// family and offered "צרו ילד/ה" on top of its children still coming down).
     @discardableResult
-    func createOwnHousehold() async -> Bool {
+    func createOwnHousehold() async -> CreateOutcome {
         #if canImport(FirebaseFirestore)
-        guard let uid else { return false }
+        guard let uid else { return .failed }
         do {
             // 🛡 Never a SECOND family: if this account already belongs to one
             // (the choice screen was stale, or the family arrived meanwhile),
@@ -515,17 +543,17 @@ final class HouseholdManager: ObservableObject {
                 TofyLink("createOwnHousehold: already a member of \(existing.id.prefix(8)) — loading it instead")
                 bootstrapSucceeded(uid: uid)
                 finishBootstrap(existing)
-                return true
+                return .loadedExisting
             }
             let hh = Household(parentUIDs: [uid], createdBy: uid)
             try await db.collection("households").document(hh.id).setData(Self.encode(hh))
             try await parentRef(uid).updateData(["householdIDs": FieldValue.arrayUnion([hh.id])])
             TofyLink("createOwnHousehold: \(hh.id.prefix(8))")
             finishBootstrap(hh)
-            return true
-        } catch { lastError = error.localizedDescription; return false }
+            return .created
+        } catch { lastError = error.localizedDescription; return .failed }
         #else
-        return false
+        return .failed
         #endif
     }
 
@@ -581,10 +609,12 @@ final class HouseholdManager: ObservableObject {
         let ref = parentRef(uid)
         let snap = try await ref.getDocument()
         if snap.exists, let data = snap.data() {
+            guard self.uid == uid else { return }   // a late answer for a signed-out account
             self.parentAccount = Self.decodeParent(id: uid, data)
         } else {
             let account = ParentAccount(id: uid, email: email, displayName: displayName)
             try await ref.setData(Self.encode(account), merge: true)
+            guard self.uid == uid else { return }
             self.parentAccount = account
         }
     }
@@ -657,8 +687,8 @@ final class HouseholdManager: ObservableObject {
         let ranked = docs.sorted { a, b in
             let ca = (a.data()["childIDs"] as? [Any])?.count ?? 0, cb = (b.data()["childIDs"] as? [Any])?.count ?? 0
             if (ca > 0) != (cb > 0) { return ca > 0 }
-            let ra = named.lastIndex(of: a.documentID) ?? -1, rb = named.lastIndex(of: b.documentID) ?? -1
-            if ra != rb { return ra > rb }
+            let ra = named.firstIndex(of: a.documentID) ?? Int.max, rb = named.firstIndex(of: b.documentID) ?? Int.max
+            if ra != rb { return ra < rb }
             return ca > cb
         }
         if docs.count > 1 {
@@ -713,7 +743,9 @@ final class HouseholdManager: ObservableObject {
     }
 
     func reattachListeners(_ hid: String) {
+        guard household?.id == hid else { return }   // never re-join a family we no longer have
         Task {
+            guard self.household?.id == hid else { return }
             _ = await self.reassertMembership()
             await MainActor.run {
                 guard self.household?.id == hid else { return }
@@ -726,10 +758,14 @@ final class HouseholdManager: ObservableObject {
 
     private func listenToHousehold(_ id: String) {
         householdListener?.remove()
+        // includeMetadataChanges: the server merely CONFIRMING the cached doc is
+        // otherwise silent — and only a server answer proves the link is back
+        // (a cached first snapshot used to clear the alarm, reset the back-off,
+        // and a family that kept failing was retried every few seconds forever).
         householdListener = db.collection("households").document(id)
-            .addSnapshotListener { [weak self] doc, err in
+            .addSnapshotListener(includeMetadataChanges: true) { [weak self] doc, err in
                 if let err { self?.familyListenerFailed(id, err); return }
-                self?.familyListenerHealthy()
+                if doc?.metadata.isFromCache == false { self?.familyListenerHealthy() }
                 guard let self, let doc, let data = doc.data(),
                       let hh = Self.decodeHousehold(id: doc.documentID, data) else { return }
                 self.household = hh
@@ -776,7 +812,7 @@ final class HouseholdManager: ObservableObject {
             .addSnapshotListener { [weak self] snap, err in
                 if let err { self?.familyListenerFailed(householdID, err); return }
                 guard let self, let snap else { return }
-                self.familyListenerHealthy()
+                if !snap.metadata.isFromCache { self.familyListenerHealthy() }
                 let records = snap.documents.compactMap {
                     Self.decodeChild(id: $0.documentID, $0.data())
                 }

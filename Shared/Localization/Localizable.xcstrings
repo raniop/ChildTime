@@ -67176,7 +67176,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "كم %@ معًا؟"
+            "value" : "%@: كم عددها معًا؟"
           }
         },
         "en" : {
@@ -67188,7 +67188,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сколько всего: %@?"
+            "value" : "%@ — сколько их всего?"
           }
         }
       }
@@ -67198,7 +67198,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "كم %@ بقي؟"
+            "value" : "%@: كم بقي منها؟"
           }
         },
         "en" : {
@@ -67210,7 +67210,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сколько осталось: %@?"
+            "value" : "%@ — сколько осталось?"
           }
         }
       }
@@ -67220,7 +67220,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "كم %@؟"
+            "value" : "%@: كم عددها؟"
           }
         },
         "en" : {
@@ -67232,7 +67232,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сколько %@?"
+            "value" : "%@ — сколько их?"
           }
         }
       }

@@ -143,14 +143,21 @@ struct FamilyChoiceView: View {
         Task {
             // Offline the family can't be created (and must not be guessed) —
             // say so instead of moving on with nothing behind it.
-            guard await household.createOwnHousehold() else {
+            let outcome = await household.createOwnHousehold()
+            guard outcome != .failed else {
                 creating = false
                 createFailed = true
                 return
             }
             household.recordConsent(version: Consent.currentVersion)
-            let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty { household.setFamilyName(trimmed) }
+            if outcome == .loadedExisting {
+                // This account already HAS a family (the screen was stale): keep
+                // its name, and no new-family walk-through over its children.
+                ParentOnboarding.finish()
+            } else {
+                let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !trimmed.isEmpty { household.setFamilyName(trimmed) }
+            }
             creating = false
         }
     }

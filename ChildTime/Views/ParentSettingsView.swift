@@ -487,14 +487,18 @@ struct ParentSettingsView: View {
         }
     }
 
+    /// Green only when the family is here AND its live link works — a loaded
+    /// family whose listeners died is the old "green ✓ for three days".
+    private var familyLinkOK: Bool { household.household != nil && !household.familyLinkBroken }
+
     private var syncSection: some View {
         Section(tr("סנכרון בין מכשירים")) {
             if auth.isSignedIn {
                 HStack(spacing: 12) {
                     // 🔌 Green only when the family really is here. Eli's phone
                     // showed this ✓ for three days with nothing reaching the cloud.
-                    Image(systemName: household.household != nil ? "checkmark.icloud.fill" : "exclamationmark.icloud.fill")
-                        .foregroundStyle(household.household != nil ? .green : .orange)
+                    Image(systemName: familyLinkOK ? "checkmark.icloud.fill" : "exclamationmark.icloud.fill")
+                        .foregroundStyle(familyLinkOK ? .green : .orange)
                         .font(.title3)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(auth.displayName ?? auth.email ?? tr("מחובר"))
@@ -513,7 +517,7 @@ struct ParentSettingsView: View {
                     Spacer()
                 }
                 // 🔌 Signed in but the family isn't here — say it, and offer a retry.
-                if household.household == nil {
+                if !familyLinkOK {
                     HStack(spacing: 10) {
                         Text(tr("לא מחובר כרגע למשפחה — מנסים שוב לבד"))
                             .font(.caption.weight(.semibold))
