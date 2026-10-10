@@ -201,7 +201,7 @@
 // update a phone showed the OLD dashboard (Rani: "לא סודר"). PAGE_STAMP is
 // rewritten on every commit that touches this file (.githooks/pre-commit); if
 // the server holds a newer stamp, reload once from a fresh URL.
-const PAGE_STAMP = "20261009122428";
+const PAGE_STAMP = "20261010110123";
 async function reloadIfStale() {
   try {
     const fresh = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
@@ -541,6 +541,13 @@ function famCard(f) {
     return `<span class="quiet">${d.platform === "android" ? "🤖" : "🍎"} ${esc(k.name)} · ${d.kind === "ipad" ? "אייפד" : d.kind === "iphone" ? "אייפון" : esc(d.name || "מכשיר")}${age ? " · " + age : ""}${d.appVersion ? " · גרסה " + esc(String(d.appVersion).replace(/^.*\((\d+)\)$/, "$1")) : ""}</span>`;
   })).join("");
   const source = j.purchaseSource ? `<span class="quiet">💳 ${esc(SOURCE[j.purchaseSource] || j.purchaseSource)}</span>` : "";
+  // 🔌 A parent phone that lost the family and found it again — how long it was
+  // out, when, and on which build (the phone writes this note itself).
+  const recPills = (f.parents || []).filter((p) => p.syncRecovery && p.syncRecovery.recoveredAt).map((p) => {
+    const r = p.syncRecovery, mins = Math.max(1, Math.round(((r.recoveredAt || 0) - (r.at || r.recoveredAt)) / 60));
+    const span = mins >= 2880 ? Math.round(mins / 1440) + " ימים" : mins >= 120 ? Math.round(mins / 60) + " שעות" : mins + " דק׳";
+    return `<span class="quiet" title="${esc(r.error || "")}">🔌 ${esc(p.email || p.name || "הורה")} היה מנותק ${span} · חזר ${dateShort(r.recoveredAt)}${r.build ? " · גרסה " + esc(String(r.build)) : ""}</span>`;
+  }).join("");
 
   return `<tr class="frow" data-row="${esc(f.hh)}">
     <td class="cname"><div class="fname">${esc(famName(f))}${label}${demo}</div><div class="fmail">${esc(who)}${parents.length > 1 ? " · " + parents.length + " הורים" : ""}</div></td>
@@ -566,7 +573,7 @@ function famCard(f) {
         <button class="danger" data-del="${esc(f.hh)}" data-name="${esc(famName(f))}">🗑 מחיקת המשפחה</button>
       </div></td>
   </tr>
-  <tr class="fdet" data-det="${esc(f.hh)}" hidden><td colspan="10"><div class="pills">${kidPills}${devPills}${source}</div></td></tr>`;
+  <tr class="fdet" data-det="${esc(f.hh)}" hidden><td colspan="10"><div class="pills">${kidPills}${devPills}${source}${recPills}</div></td></tr>`;
 }
 
 /// The table around the rows — the header cells are the sort control.

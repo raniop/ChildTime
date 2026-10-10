@@ -11,7 +11,7 @@
  * Requires: APNs key uploaded to Firebase (Project Settings → Cloud Messaging),
  *           Push Notifications capability on the iOS app.
  */
-const { onDocumentCreated, onDocumentWritten } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentWritten, onDocumentDeleted } = require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
@@ -764,6 +764,63 @@ exports.blockTombstonedChild = onDocumentCreated("children/{childID}", async (ev
     console.log("[tombstone] blocked resurrection of deleted child", childID);
   } catch (e) {
     console.error("[tombstone] cleanup failed for", childID, e && e.message);
+  }
+});
+
+// ---- 1a′) A family was deleted — nothing of it stays behind ------------------
+// The app's "מחק הכול" deletes what the RULES let a parent delete: the child docs,
+// their state/dailyStats, friend cards, device rows, chores, the household. What
+// it cannot reach stayed in the database with no way for anyone to open it: the
+// children's LOCATION fixes and place events, their event feeds, weekly reports,
+// friend requests, the family's activity feed, help requests, time transfers,
+// invites and the support chat. Firestore never cascades — so the moment a
+// household doc is deleted (by the app, the admin, or retention) this sweeps the
+// rest, and tombstones the children so a device that was switched off during the
+// deletion cannot bring a child (or its public friend card) back.
+exports.onHouseholdDeleted = onDocumentDeleted("households/{hid}", async (event) => {
+  const hid = event.params.hid;
+  const d = (event.data && event.data.data()) || {};
+  const now = Date.now() / 1000;
+  const out = { children: 0, devices: 0, invites: 0, records: 0 };
+  try {
+    // Every child that IS this family's: listed on the doc, or pointing at it.
+    // A listed id whose doc now belongs to ANOTHER family is left alone.
+    const ids = new Set((d.childIDs || []).filter((x) => typeof x === "string" && x));
+    (await db.collection("children").where("householdID", "==", hid).get()).forEach((k) => ids.add(k.id));
+    for (const id of ids) {
+      const ref = db.collection("children").doc(id);
+      const snap = await ref.get();
+      if (snap.exists && (snap.data() || {}).householdID !== hid) continue;
+      await db.collection("deletedChildren").doc(id).set(
+        { householdID: hid, deletedAt: now, reason: "household-deleted" }, { merge: true });
+      await db.recursiveDelete(ref);                                   // + location, placeEvents, events, state, dailyStats
+      await db.recursiveDelete(db.collection("friendCards").doc(id)).catch(() => {});   // + its requests inbox
+      await db.recursiveDelete(db.collection("weeklyReports").doc(id)).catch(() => {});
+      // Requests this child SENT to other kids (doc id = the sender's child id).
+      const sent = await db.collectionGroup("requests").where("fromID", "==", id).get().catch(() => ({ docs: [] }));
+      for (const r of sent.docs) await r.ref.delete().catch(() => {});
+      out.children += 1;
+    }
+    // Device rows (children's and the parents' own), invites, request records.
+    const rows = new Map();
+    (await db.collection("childDevices").where("householdID", "==", hid).get()).forEach((x) => rows.set(x.id, x.ref));
+    for (const id of ids) {
+      (await db.collection("childDevices").where("childID", "==", id).get()).forEach((x) => rows.set(x.id, x.ref));
+    }
+    for (const ref of rows.values()) { await ref.delete().catch(() => {}); out.devices += 1; }
+    for (const inv of (await db.collection("invites").where("householdID", "==", hid).get()).docs) {
+      await inv.ref.delete().catch(() => {}); out.invites += 1;
+    }
+    for (const name of ["helpRequests", "timeTransfers"]) {
+      const snap = await db.collection(name).where("householdID", "==", hid).get().catch(() => ({ docs: [] }));
+      for (const doc of snap.docs) { await db.recursiveDelete(doc.ref).catch(() => {}); out.records += 1; }
+    }
+    // What hung under the (now deleted) household doc, and the family's support chat.
+    await db.recursiveDelete(db.collection("households").doc(hid)).catch(() => {});   // activity, chores, choreStats
+    await db.recursiveDelete(db.collection("supportChats").doc(hid)).catch(() => {});
+    console.log("[household-deleted]", hid, JSON.stringify(out));
+  } catch (e) {
+    console.error("[household-deleted] sweep failed for", hid, e && e.message);
   }
 });
 
@@ -2525,6 +2582,10 @@ exports.adminFamiliesOverview = onCall(
         // token's `tokenDevices` stamp. A token from before the stamp has no
         // platform and is an iPhone (the Android app postdates the stamp).
         platforms: parentTokenPlatforms(d),
+        // 🔌 The phone's own note that a family load FAILED and later recovered
+        // (HouseholdManager.bootstrapSucceeded) — a disconnection we'd otherwise
+        // only hear about if the family wrote to us.
+        syncRecovery: d.lastSyncRecovery || null,
       };
     });
     const kidsByHH = {};
@@ -2641,6 +2702,7 @@ exports.adminFamiliesOverview = onCall(
         // (using Tofy without signing up) — not a child device's account.
         isGuestParent: uid === d.createdBy && !parentInfo[uid]?.email,
         lastUpdateAt: parentInfo[uid]?.updatedAt || null,
+        syncRecovery: parentInfo[uid]?.syncRecovery || null,
         // true = owns a device row seen <14d; false = uid-stamped rows exist
         // but none is this uid's (dead account); null = no stamp data yet
         // (old builds) — the page falls back to the update-time signal.

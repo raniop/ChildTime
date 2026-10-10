@@ -248,9 +248,14 @@ service cloud.firestore {
       allow read:   if signedIn();
       // The owning device (it stamps its own uid) creates/updates its card; a
       // parent on the child's household may also update it (to remove a friend).
-      allow create: if signedIn() && request.resource.data.ownerUID == request.auth.uid;
+      // …and only for a child that EXISTS: a device that was switched off while
+      // its family deleted the account used to wake up and publish the child's
+      // name, character and stars again (2026-10-10).
+      allow create: if signedIn() && request.resource.data.ownerUID == request.auth.uid
+        && exists(/databases/$(database)/documents/children/$(childID));
       allow update: if signedIn() && (
-        resource.data.ownerUID == request.auth.uid ||
+        (resource.data.ownerUID == request.auth.uid
+          && exists(/databases/$(database)/documents/children/$(childID))) ||
         householdHasMe(get(/databases/$(database)/documents/children/$(childID)).data.householdID)
       );
       // Deleting a child (or the whole account) must remove the public card too,
