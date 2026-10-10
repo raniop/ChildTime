@@ -56,8 +56,15 @@ enum WhatsNewContent {
     static let releases: [Release] = [
 
         // 2026.10.8 in one list, the most important first (Rani approved the
-        // order; 211 and 212 were TestFlight-only builds of the same version).
-        Release(build: 220, version: "2026.10.8", headline: tr("פעולות פשוטות יותר, וזמן מסך מדויק"), items: [
+        // order; 211, 212 and 220 were builds of the same version — 221 replaced
+        // 220 in review before it shipped, so everything rides on 221).
+        Release(build: 221, version: "2026.10.8", headline: tr("פעולות פשוטות יותר, וזמן מסך מדויק"), items: [
+            Item(emoji: "🧊", title: tr("שאלון מסודר מחדש"),
+                 line: tr("יותר מקום לשאלה ולתשובות, הזמן לשחק מחכה במדף למטה, והדמות עומדת ליד הרצף ומדברת בבועה משלה")),
+            Item(emoji: "🔌", title: tr("חיבור יציב למשפחה"),
+                 line: tr("טלפון שמאבד חיבור למשפחה מנסה שוב לבד ואומר את זה בבירור, במקום להציג נתונים ישנים כאילו הם עדכניים")),
+            Item(emoji: "🔄", title: tr("איפוס שעובד תמיד"),
+                 line: tr("איפוס ההתקדמות מאפס גם את הדקות והמתנות, גם לילד שמשחק רק במצב ילד בטלפון של ההורה")),
             Item(emoji: "🚀", title: tr("שאלון חלק ומהיר יותר"),
                  line: tr("תשובה נכונה מגיבה מיד, בלי תקיעות, והשאלה הבאה מגיעה מהר יותר")),
             Item(emoji: "👶", title: tr("לילדי הגן: כל עולם שונה"),
@@ -71,7 +78,7 @@ enum WhatsNewContent {
             Item(emoji: "⏱", title: tr("זמן המסך נספר נכון"),
                  line: tr("דקות שחזרו לארנק כשחלון משחק נסגר מוקדם לא נספרות יותר כאילו שוחקו, גם בדוח להורה")),
             Item(emoji: "🛡", title: tr("רק הורה פותח משפחה"),
-                 line: tr("ילד שמנסה להירשם כהורה מקבל מסך שמבקש לפנות לאבא או לאמא — הגיל נבדק דרך אפל או לפי שנת הלידה")),
+                 line: tr("ילד שמנסה להירשם כהורה מקבל מסך שמבקש לפנות לאבא או לאמא — הגיל נבדק לפי שנת הלידה")),
             Item(emoji: "✏️", title: tr("עריכה בלחיצה על העיפרון"),
                  line: tr("העיפרון ליד שם הילד פותח ישר את השם, התמונה והכיתה")),
             Item(emoji: "⌚️", title: tr("פעולות מהשעון"),

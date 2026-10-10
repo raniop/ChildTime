@@ -23020,6 +23020,28 @@
         }
       }
     },
+    "איפוס ההתקדמות מאפס גם את הדקות והמתנות, גם לילד שמשחק רק במצב ילד בטלפון של ההורה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إعادة ضبط التقدم تُصفّر الدقائق والهدايا أيضًا — حتى لطفل يلعب فقط في وضع الطفل على هاتف أحد الوالدين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resetting progress also clears the minutes and gifts — even for a child who only plays in Kid Mode on a parent's phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сброс прогресса обнуляет и минуты, и подарки — даже для ребёнка, который играет только в детском режиме на телефоне родителя"
+          }
+        }
+      }
+    },
     "איפוס התקדמות" : {
       "localizations" : {
         "ar" : {
@@ -23038,6 +23060,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сбросить прогресс"
+          }
+        }
+      }
+    },
+    "איפוס שעובד תמיד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إعادة ضبط تعمل دائمًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resets that always work"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сброс, который работает всегда"
           }
         }
       }
@@ -60086,6 +60130,28 @@
         }
       }
     },
+    "חיבור יציב למשפחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اتصال ثابت بالعائلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A steady family connection"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стабильная связь с семьёй"
+          }
+        }
+      }
+    },
     "חיבור מכשיר" : {
       "localizations" : {
         "ar" : {
@@ -62194,6 +62260,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Потерянный телефон"
+          }
+        }
+      }
+    },
+    "טלפון שמאבד חיבור למשפחה מנסה שוב לבד ואומר את זה בבירור, במקום להציג נתונים ישנים כאילו הם עדכניים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الهاتف الذي يفقد الاتصال بالعائلة يحاول من جديد بنفسه ويُخبر بذلك بوضوح، بدلًا من عرض بيانات قديمة كأنها حديثة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A phone that loses its connection to the family tries again on its own and says so clearly, instead of showing old data as if it were current"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Телефон, потерявший связь с семьёй, сам пробует снова и ясно сообщает об этом, а не показывает старые данные как актуальные"
           }
         }
       }
@@ -64543,6 +64631,28 @@
         }
       }
     },
+    "יותר מקום לשאלה ולתשובות, הזמן לשחק מחכה במדף למטה, והדמות עומדת ליד הרצף ומדברת בבועה משלה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مساحة أكبر للسؤال والإجابات، ووقت اللعب ينتظر على الرف في الأسفل، والشخصية تقف بجانب السلسلة وتتحدث في فقاعتها الخاصة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More room for the question and answers, the play time waits on the shelf below, and the character stands by the streak and talks in its own bubble"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Больше места для вопроса и ответов, время для игры ждёт на полке внизу, а персонаж стоит рядом с серией и говорит в своём облачке"
+          }
+        }
+      }
+    },
     "יחס ופרופורציה" : {
       "localizations" : {
         "ar" : {
@@ -64830,24 +64940,24 @@
         }
       }
     },
-    "ילד שמנסה להירשם כהורה מקבל מסך שמבקש לפנות לאבא או לאמא — הגיל נבדק דרך אפל או לפי שנת הלידה" : {
+    "ילד שמנסה להירשם כהורה מקבל מסך שמבקש לפנות לאבא או לאמא — הגיל נבדק לפי שנת הלידה" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الطفل الذي يحاول التسجيل كأحد الوالدين يرى شاشة تطلب منه التوجه إلى أمي أو أبي — يُتحقق من العمر عبر Apple أو حسب سنة الميلاد"
+            "value" : "الطفل الذي يحاول التسجيل كأحد الوالدين يرى شاشة تطلب منه التوجه إلى أمي أو أبي — يُتحقق من العمر حسب سنة الميلاد"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A child who tries to sign up as a parent gets a screen asking them to go to Mom or Dad — age is checked through Apple or by year of birth"
+            "value" : "A child who tries to sign up as a parent gets a screen asking them to go to Mom or Dad — age is checked by year of birth"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ребёнок, который пытается зарегистрироваться как родитель, видит экран с просьбой обратиться к маме или папе — возраст проверяется через Apple или по году рождения"
+            "value" : "Ребёнок, который пытается зарегистрироваться как родитель, видит экран с просьбой обратиться к маме или папе — возраст проверяется по году рождения"
           }
         }
       }
@@ -116239,6 +116349,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Более плавный и быстрый тест"
+          }
+        }
+      }
+    },
+    "שאלון מסודר מחדש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختبار بترتيب جديد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A tidier quiz"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обновлённая викторина"
           }
         }
       }
