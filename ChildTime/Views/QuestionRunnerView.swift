@@ -51,7 +51,6 @@ struct QuestionRunnerView: View {
     /// screen (~45ms a time on the simulator, more on a phone) — the stutter after
     /// an answer (Rani). Only the buddy views that show it observe it.
     /// Global frame of the glass shelf — the buddy stands on its top edge.
-    @State private var shelfFrame: CGRect = .zero
     @State private var companion = CompanionController()
     @State private var current: Question?
     @State private var questionIndex: Int = 0
@@ -207,7 +206,7 @@ struct QuestionRunnerView: View {
                 // …and this reserves exactly the strip the floating buddy stands in.
                 // Without it the filling answers would push him into the tool row on
                 // the very device with the most room for him.
-                Spacer(minLength: display.isShort ? AppSpacing.sm
+                Spacer(minLength: display.isShort || buddyHasFreeStrip ? AppSpacing.sm
                                   : (isCompact ? AppSpacing.xxl : companionSize + 24))
             }
         }
@@ -259,42 +258,16 @@ struct QuestionRunnerView: View {
                 }
             }
             .padding(.horizontal, AppSpacing.md)
+            // Too tall a question (a long one with a bonus banner, Rani 2026-10-10)
+            // used to overflow from the CENTRE — the top bar went up under the
+            // clock and the ✕ couldn't be tapped. Pinned to the top, the ✕ stays.
+            .frame(maxHeight: .infinity, alignment: .top)
 
             // Companion in corner
             VStack {
                 Spacer()
             }
             .padding(.bottom, AppSpacing.sm)
-
-            // The buddy wanders and can be dragged, exactly like on the home
-            // (Rani, 2026-09-07) — kept to the strip under the answers so it never
-            // parks on a choice or on the 🔊 button. `topInset` is now where the
-            // answers REALLY end rather than a fixed 150pt from the bottom, which
-            // was only ever right on the screens it was guessed on.
-            if buddyHasFreeStrip, shelfFrame != .zero {
-                GeometryReader { geo in
-                    // Both frames in the runner's own space — global frames drifted
-                    // ~15pt from what was drawn and the buddy sank into the shelf.
-                    let field = geo.frame(in: .named(Self.runnerSpace))
-                    FloatingCompanion(
-                        controller: companion,
-                        profile: profiles.active,
-                        size: shelfBuddySize,
-                        // A fixed band at the bottom of the screen. Following where
-                        // the answers end moved it on every answer (the streak line
-                        // appearing), and the buddy jumped each time.
-                        topInset: max(120, geo.size.height - companionSize * 1.3 - 60),
-                        bottomInset: 28,
-                        horizontalInset: AppSpacing.md,
-                        // 📌 Parked under 🚩 🔊 🙋, not wandering (Rani, 2026-10-09);
-                        // a drag still moves it.
-                        pinnedAt: CGPoint(x: shelfFrame.minX + AppSpacing.md + shelfBuddySize * 0.55 - field.minX,
-                                          y: shelfFrame.minY - field.minY - shelfBuddySize * 0.65 + 2),
-                        homeToken: questionIndex   // a dragged buddy goes home on each new question
-                    )
-                }
-                .allowsHitTesting(true)
-            }
 
             // 💬 What the rail's buddy says — pinned low, clear of the answers.
             if display.hasRail {
@@ -756,6 +729,24 @@ struct QuestionRunnerView: View {
     /// one, so the room above the shelf doesn't push the question off the top.
     private var shelfBuddySize: CGFloat { isCompact ? 64 : 80 }
 
+    /// The child's buddy standing on the shelf's top edge, ALWAYS right above
+    /// "🔥 ברצף" (Rani, 2026-10-10) — not draggable any more: dragged, it hid
+    /// answers, and in right-to-left it could be thrown off the screen.
+    private var shelfBuddy: some View {
+        InlineBuddy(controller: companion, profile: profiles.active, width: shelfBuddySize)
+            .overlay(alignment: .topLeading) {
+                // 💬 What it says, beside its head, opening toward the middle.
+                InlineBuddyBubble(controller: companion, clearance: 0)
+                    .frame(width: 220, alignment: .leading)
+                    .alignmentGuide(.leading) { d in d[.leading] - shelfBuddySize - 4 }
+                    .alignmentGuide(.top) { d in d[.top] - 4 }
+            }
+            .padding(.leading, 6)
+            // Feet on the shelf's edge: lifted its own height, minus 6pt into the glass.
+            .offset(y: -(shelfBuddySize * 1.3 - 6))
+            .allowsHitTesting(false)
+    }
+
     /// How full the shelf's flame bar is: the streak toward ten in a row.
     private var streakFill: CGFloat { CGFloat(min(progress.currentStreak, 10)) / 10 }
 
@@ -843,7 +834,7 @@ struct QuestionRunnerView: View {
                 }
                 // Room for the buddy standing on the shelf, and the shelf sinks to
                 // the bottom of the screen like in the mockup.
-                if buddyHasFreeStrip { Spacer(minLength: shelfBuddySize * 1.3 - 14) }
+                if buddyHasFreeStrip { Spacer(minLength: shelfBuddySize * 1.3 - 2) }
                 // 🧊 The glass shelf (Rani picked it, 2026-10-09): the streak meter
                 // and what a right answer pays on top, 🚩 🔊 🙋 and the hint below,
                 // and the buddy standing on its edge.
@@ -902,7 +893,13 @@ struct QuestionRunnerView: View {
                 }
                 .padding(12)
                 .glassPane(radius: 16)
-                .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Self.runnerSpace)) } action: { shelfFrame = $0 }
+                // 🧸 The buddy is PART of the shelf now, standing right above
+                // "🔥 ברצף" (Rani, 2026-10-10). Positioned on its own from measured
+                // frames, it was left behind whenever the screen moved — floating
+                // over the answers, or sunk onto the shelf's chips.
+                .overlay(alignment: .topLeading) {
+                    if buddyHasFreeStrip { shelfBuddy }
+                }
                 .padding(.horizontal, AppSpacing.md)
                 .overlay(alignment: .trailing) {
                     if !buddyHasFreeStrip {
