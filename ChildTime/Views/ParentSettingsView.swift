@@ -37,6 +37,7 @@ struct ParentSettingsView: View {
     @State private var testPushMessage: String?
     @State private var removalNote: String?
     @State private var requestingShield = false
+    @State private var shieldNeededNote = false
 
     var body: some View {
         settingsStack
@@ -55,6 +56,9 @@ struct ParentSettingsView: View {
         // 🧪 DEMO_SETTINGS_PAGE=family — the family page on its own (screenshots).
         if ProcessInfo.processInfo.environment["DEMO_SETTINGS_PAGE"] == "family" {
             NavigationStack { subScreen(tr("המשפחה")) { familySection; timeZoneSection; childOrderSection; syncSection } }
+        } else if ProcessInfo.processInfo.environment["DEMO_SETTINGS_PAGE"] == "apps" {
+            // 🧪 DEMO_SETTINGS_PAGE=apps — "אפליקציות ונעילה" as a PARENT's phone shows it.
+            NavigationStack { subScreen(tr("אפליקציות ונעילה")) { thisDeviceOnlyNote; appsSection; soundsSection; deviceSection } }
         } else { settingsMenu }
         #else
         settingsMenu
@@ -115,6 +119,7 @@ struct ParentSettingsView: View {
                     }
                     menuRow("📱", tr("אפליקציות ונעילה"), devicesSummary, soft: true) {
                         subScreen(tr("אפליקציות ונעילה")) {
+                            if settings.deviceRole == .parent { thisDeviceOnlyNote }
                             if settings.deviceRole != .parent || shields.isAuthorized { authorizationSection }
                             appsSection; soundsSection; deviceSection
                         }
@@ -763,15 +768,53 @@ struct ParentSettingsView: View {
     /// locked without anyone touching Tofy. The classic block-list below it is
     /// the fallback that runs until the allow-list has been filled in — see
     /// `ShieldPolicy.swift` for why it cannot arm itself.
+    /// A parent's phone: these lists lock THIS phone, for Kid Mode — not the
+    /// child's own device. A mother opened this page on her iPhone to choose her
+    /// daughter's iPad apps, found Apple's list empty, and reported a bug
+    /// (Sasha, 2026-10-11). Say where each thing is decided, first.
+    private var thisDeviceOnlyNote: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 6) {
+                Label(tr("ההגדרות כאן חלות רק על המכשיר הזה"), systemImage: "iphone")
+                    .font(.headline)
+                Text(tr("הן קובעות מה נעול כשילד משחק כאן במצב ילד. את האפליקציות במכשיר של הילד בוחרים במכשיר שלו: פותחים בו את טופי ← ⚙️ ← ״בחרו מה נשאר פתוח״."))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.vertical, 4)
+        }
+        .glassRows()
+    }
+
+    /// Apple's picker lists nothing until this device has granted Screen Time
+    /// access — it opened as categories with no apps in them, and a search that
+    /// found nothing. Ask for the access first; open the list only once it is there.
+    private func openPicker(_ show: Binding<Bool>) {
+        if shields.isAuthorized { show.wrappedValue = true; return }
+        Task {
+            requestingShield = true
+            await shields.requestAuthorizationIfNeeded(userInitiated: true)
+            requestingShield = false
+            if shields.isAuthorized { show.wrappedValue = true } else { shieldNeededNote = true }
+        }
+    }
+
     private var appsSection: some View {
         Section {
             Toggle(isOn: $settings.lockNewApps) {
                 Label(tr("לנעול גם אפליקציות חדשות"), systemImage: "lock.shield.fill")
             }
+            // On ONE row (a modifier on a multi-row Section is copied onto every row).
+            .alert(tr("צריך גישה ל״זמן מסך״"), isPresented: $shieldNeededNote) {
+                Button(tr("הבנתי"), role: .cancel) {}
+            } message: {
+                Text(tr("כדי לבחור אפליקציות, טופי צריך גישה ל״זמן מסך״ במכשיר הזה. בלי האישור הרשימה של אפל נפתחת ריקה."))
+            }
 
             if settings.lockNewApps {
                 Button {
-                    showAllowedPicker = true
+                    openPicker($showAllowedPicker)
                 } label: {
                     HStack {
                         Image(systemName: "checkmark.shield.fill")
@@ -802,7 +845,7 @@ struct ParentSettingsView: View {
             }
 
             Button {
-                showAppPicker = true
+                openPicker($showAppPicker)
             } label: {
                 HStack {
                     Image(systemName: "app.badge.fill")

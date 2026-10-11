@@ -46462,6 +46462,28 @@
         }
       }
     },
+    "ההגדרות כאן חלות רק על המכשיר הזה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذه الإعدادات تنطبق على هذا الجهاز فقط"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "These settings apply to this device only"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Эти настройки действуют только на этом устройстве"
+          }
+        }
+      }
+    },
     "ההדרכה תוצג שוב במסך הבית ✓" : {
       "localizations" : {
         "ar" : {
@@ -51230,6 +51252,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Подарок появится, как только устройство подключится."
+          }
+        }
+      }
+    },
+    "הן קובעות מה נעול כשילד משחק כאן במצב ילד. את האפליקציות במכשיר של הילד בוחרים במכשיר שלו: פותחים בו את טופי ← ⚙️ ← ״בחרו מה נשאר פתוח״." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تحدد ما يُقفل عندما يلعب الطفل هنا في وضع الطفل. أما تطبيقات جهاز الطفل فتُختار من جهازه نفسه: افتحوا Tofy هناك ← ⚙️ ← «اختاروا ما يبقى مفتوحًا»."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "They decide what is locked when a child plays here in Kid Mode. Apps on your child's own device are chosen on that device: open Tofy there → ⚙️ → “Choose what stays open”."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Они определяют, что заблокировано, когда ребёнок играет здесь в детском режиме. Приложения на устройстве ребёнка выбираются на самом устройстве: откройте там Tofy → ⚙️ → «Выберите, что остаётся открытым»."
           }
         }
       }
@@ -70505,6 +70549,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Для подтверждения введите: %@"
+          }
+        }
+      }
+    },
+    "כדי לבחור אפליקציות, טופי צריך גישה ל״זמן מסך״ במכשיר הזה. בלי האישור הרשימה של אפל נפתחת ריקה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لاختيار التطبيقات يحتاج Tofy إلى الوصول إلى «مدة استخدام الجهاز» في هذا الجهاز. بدونه تُفتح قائمة Apple فارغة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To choose apps, Tofy needs Screen Time access on this device. Without it, Apple's list opens empty."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чтобы выбрать приложения, Tofy нужен доступ к «Экранному времени» на этом устройстве. Без него список Apple открывается пустым."
           }
         }
       }
@@ -108055,6 +108121,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Нужно разрешение Family Controls"
+          }
+        }
+      }
+    },
+    "צריך גישה ל״זמן מסך״" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مطلوب الوصول إلى «مدة استخدام الجهاز»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screen Time access is needed"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нужен доступ к «Экранному времени»"
           }
         }
       }
