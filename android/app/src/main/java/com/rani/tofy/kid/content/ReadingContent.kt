@@ -85,14 +85,65 @@ object PreReaderContent {
         topic == Topic.MATH -> mathRound(rng)
         topic == Topic.HEBREW && com.rani.tofy.i18n.I18n.language == AppLanguage.HE -> lettersRound(rng)
         else -> {
+            // 🧠 A world that has THINKING questions asks them most of the time
+            // (see `pictureQuestion`); the "where is the…" rounds stay for variety.
+            val thinking = if (rng.nextDouble() < 0.6)
+                pictureQuestion(RemoteQuestionBank.questions(topic, com.rani.tofy.i18n.I18n.language), topic, rng) else null
             val pool = themedPool(topic)
-            if (pool != null && rng.nextDouble() < 0.75) findOne(pool, rng, topic)
+            if (thinking != null) thinking
+            else if (pool != null && rng.nextDouble() < 0.75) findOne(pool, rng, topic)
             else when (rng.nextInt(3)) {
                 0 -> findOne(animals, rng)
                 1 -> findOne(shapes, rng)
                 else -> findOne(colors, rng)
             }
         }
+    }
+
+    // ── 🧠 Thinking questions with picture answers (PreReaderContent.pictureQuestion in Swift) ──
+
+    /**
+     * A גן child heard only "where is the elephant?" in every world. These are
+     * the other kind ("מה יקרה לקרח בשמש?"): read aloud, every answer a picture.
+     * From the cloud bank — grade 0 items whose four options are pictures only —
+     * so new ones arrive without a build (Sasha, 2026-10-11).
+     */
+    fun pictureQuestion(bank: List<BankQuestion>, topic: Topic, rng: Random = Random.Default): Question? {
+        val pool = bank.filter { it.inGrade(0) && isPictureOnly(it) }
+        if (pool.size < MIN_PICTURE_POOL) return null      // a handful would repeat within one round
+        val b = pool[rng.nextInt(pool.size)]
+        val options = (listOf(b.correctAnswer) + b.distractors.take(3)).shuffled(rng)
+        val correct = options.indexOf(b.correctAnswer).takeIf { it >= 0 } ?: return null
+        // The card draws `spoken` as the written line and the prompt under it, so the
+        // prompt keeps the picture alone — the whole item would show the question twice.
+        val picture = pictureLine(b.prompt) ?: return Question(topic, b.prompt, options, correct)
+        return Question(topic, picture, options, correct, spoken = spokenText(b.prompt))
+    }
+
+    const val MIN_PICTURE_POOL = 8
+
+    /** Whether this world has a real set of thinking questions for גן right now. */
+    fun hasPictureQuestions(topic: Topic): Boolean =
+        RemoteQuestionBank.questions(topic, com.rani.tofy.i18n.I18n.language)
+            .count { it.inGrade(0) && isPictureOnly(it) } >= MIN_PICTURE_POOL
+
+    /** Every option is a picture: not one letter or digit in any of them. */
+    fun isPictureOnly(q: BankQuestion): Boolean {
+        val options = listOf(q.correctAnswer) + q.distractors
+        return options.size >= 4 && options.all { o -> o.isNotBlank() && o.none { it.isLetterOrDigit() } }
+    }
+
+    /** What to say: the question itself, without the picture line above it. */
+    fun spokenText(prompt: String): String {
+        val spoken = prompt.split("\n").map { it.trim() }.filter { line -> line.any { it.isLetter() } }
+        return if (spoken.isEmpty()) prompt else spoken.joinToString(" ")
+    }
+
+    /** What to draw under the question: the lines that are pictures only. */
+    fun pictureLine(prompt: String): String? {
+        val lines = prompt.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
+        val pictures = lines.filter { line -> line.none { it.isLetter() } }
+        return if (pictures.isEmpty() || pictures.size == lines.size) null else pictures.joinToString(" ")
     }
 
     // ── 🔢 Math: count, add, take away, compare, find the digit ──

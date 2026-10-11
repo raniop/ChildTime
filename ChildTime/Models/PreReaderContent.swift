@@ -19,6 +19,12 @@ enum PreReaderContent {
         case .hebrew where LanguageStore.shared.current == .he:
             return lettersRound()
         default:
+            // 🧠 A world that has THINKING questions asks them most of the time
+            // (see `pictureQuestion`); the "where is the…" rounds stay for variety.
+            if Double.random(in: 0...1) < 0.6,
+               let q = pictureQuestion(from: RemoteQuestionBank.shared.questions(for: topic), topic: topic) {
+                return q
+            }
             // A theme world asks about ITS pictures most of the time; the
             // animals / shapes / colours rounds keep some variety.
             if let pool = themedPool(for: topic), Double.random(in: 0...1) < 0.75 {
@@ -26,6 +32,70 @@ enum PreReaderContent {
             }
             return [findAnimal, findShape, findColor].randomElement()!()
         }
+    }
+
+    // MARK: - 🧠 Thinking questions with picture answers
+
+    /// A גן child heard only "where is the elephant?" in every world — finding a
+    /// named picture, never thinking. A mother asked for the other kind ("מה
+    /// יקרה לקרח בשמש?", "מה מזרים את הדם?"): the question is read aloud and
+    /// every answer is a picture, so a child who cannot read can still reason
+    /// (Sasha, 2026-10-11). They come from the cloud bank — grade 0 items whose
+    /// four options are pictures only — so new ones arrive without a build.
+    static func pictureQuestion(from bank: [BankQuestion], topic: Topic) -> Question? {
+        let pool = bank.filter { $0.grades.contains(0) && isPictureOnly($0) }
+        // A handful would repeat within one round — wait until the world has a real set.
+        guard pool.count >= minPicturePool, let b = pool.randomElement() else { return nil }
+        let options = ([b.correctAnswer] + b.distractors.prefix(3)).shuffled()
+        guard let correct = options.firstIndex(of: b.correctAnswer) else { return nil }
+        // The card draws `spoken` as the written line and `prompt` under it, so
+        // the prompt keeps the picture alone — the whole item would show the
+        // question twice. An item with no picture line is just its question.
+        guard let picture = pictureLine(of: b.prompt) else {
+            return Question(topic: topic, prompt: b.prompt, options: options, correctIndex: correct)
+        }
+        return Question(topic: topic, prompt: picture, options: options, correctIndex: correct,
+                        spoken: spokenText(of: b.prompt))
+    }
+
+    static let minPicturePool = 8
+
+    /// Whether this world has a real set of thinking questions for גן right now.
+    static func hasPictureQuestions(for topic: Topic) -> Bool {
+        RemoteQuestionBank.shared.questions(for: topic)
+            .filter { $0.grades.contains(0) && isPictureOnly($0) }.count >= minPicturePool
+    }
+
+    /// Every option is a picture: not one letter or digit in any of them.
+    static func isPictureOnly(_ q: BankQuestion) -> Bool {
+        let options = [q.correctAnswer] + q.distractors
+        return options.count >= 4 && options.allSatisfy { o in
+            let t = o.trimmingCharacters(in: .whitespacesAndNewlines)
+            return !t.isEmpty && !t.unicodeScalars.contains { isLetter($0) || $0.properties.numericType != nil }
+        }
+    }
+
+    /// A real letter — `CharacterSet.letters` also counts marks, and the emoji
+    /// presentation selector (U+FE0F) is one: "🕷️" would have read as text.
+    private static func isLetter(_ s: Unicode.Scalar) -> Bool {
+        switch s.properties.generalCategory {
+        case .uppercaseLetter, .lowercaseLetter, .titlecaseLetter, .modifierLetter, .otherLetter: return true
+        default: return false
+        }
+    }
+
+    /// What to say: the question itself, without the picture line above it.
+    static func spokenText(of prompt: String) -> String {
+        let lines = prompt.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }
+        let spoken = lines.filter { line in line.unicodeScalars.contains(where: isLetter) }
+        return spoken.isEmpty ? prompt : spoken.joined(separator: " ")
+    }
+
+    /// What to draw under the question: the lines that are pictures only.
+    static func pictureLine(of prompt: String) -> String? {
+        let lines = prompt.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }
+        let pictures = lines.filter { line in !line.isEmpty && !line.unicodeScalars.contains(where: isLetter) }
+        return pictures.isEmpty || pictures.count == lines.count ? nil : pictures.joined(separator: " ")
     }
 
     // MARK: - 🔢 Math: count, add, take away, compare, find the digit

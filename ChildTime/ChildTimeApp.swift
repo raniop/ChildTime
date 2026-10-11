@@ -447,11 +447,22 @@ struct ChildTimeApp: App {
         }
     }
 
+    private static func loadDemoPictureBank() {
+        #if DEBUG
+        if let path = ProcessInfo.processInfo.environment["DEMO_PICTURE_BANK"],
+           let topic = Topic(rawValue: ProcessInfo.processInfo.environment["DEMO_WORLD"] ?? "science") {
+            RemoteQuestionBank.shared.loadDemoBatch(from: path, topic: topic)
+        }
+        #endif
+    }
+
     @ViewBuilder
     private func demoRoot(_ name: String) -> some View {
         switch name {
         case "question": QuestionRunnerView(mode: .smartFeed, purpose: .earnTime)
         case "mathgrade":                                   // DEMO_SCREEN=mathgrade DEMO_GRADE=8 [DEMO_WORLD=reading] — a world at a grade
+            // DEMO_PICTURE_BANK=<drafts.json> — loaded BEFORE the runner draws its first question.
+            let _ = Self.loadDemoPictureBank()
             QuestionRunnerView(mode: .world(Worlds.all.first { $0.topic.rawValue == (ProcessInfo.processInfo.environment["DEMO_WORLD"] ?? "math") } ?? Worlds.all[0]), purpose: .earnTime)
                 .onAppear {
                     // No DEMO_GRADE → the profile is left alone (DEMO_PREREADER=1 shows גן without writing a grade).

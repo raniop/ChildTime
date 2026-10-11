@@ -92,6 +92,20 @@ final class RemoteQuestionBank {
             .map(\.bankQuestion)
     }
 
+    #if DEBUG
+    /// 🧪 DEMO_PICTURE_BANK=<file.json> DEMO_WORLD=science — look at a batch of
+    /// drafts (the admin import format) on a real screen before anyone approves it.
+    func loadDemoBatch(from path: String, topic: Topic) {
+        guard let data = FileManager.default.contents(atPath: path),
+              let rows = (try? JSONSerialization.jsonObject(with: data)) as? [[String: Any]] else { return }
+        let items = rows.enumerated().compactMap { i, row -> Item? in
+            var r = row; r["id"] = "demo-\(i)"; r["status"] = "approved"
+            return Item(r)
+        }
+        lock.lock(); cache.items[topic.rawValue] = items; lock.unlock()
+    }
+    #endif
+
     /// How many cloud items each topic holds — for diagnostics.
     var countsByTopic: [String: Int] {
         lock.lock(); defer { lock.unlock() }

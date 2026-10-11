@@ -48,7 +48,9 @@ fun allWorlds(): List<KidWorld> {
 
 /** WorldSuitability.minGrade — base worlds only (locked pack worlds aren't offered on Android yet). */
 private fun minGrade(t: Topic): Int = when (t) {
-    Topic.READING, Topic.GEOGRAPHY -> 1
+    // 🧠 Geography opens to גן once it has picture questions for a child who cannot read.
+    Topic.GEOGRAPHY -> if (com.rani.tofy.kid.content.PreReaderContent.hasPictureQuestions(t)) 0 else 1
+    Topic.READING -> 1
     Topic.HISTORY, Topic.MONEY -> 2
     else -> 0
 }

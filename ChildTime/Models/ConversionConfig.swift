@@ -87,7 +87,10 @@ enum WorldSuitability {
     static func minGrade(for topic: Topic) -> Int {
         if let pack = topic.pack { return pack.grades.lowerBound }
         switch topic {
-        case .reading, .geography: return 1
+        // 🧠 Geography opens to גן once it has picture questions a child who
+        // cannot read can think about; until then it would only be "where is the dog?".
+        case .geography: return PreReaderContent.hasPictureQuestions(for: .geography) ? 0 : 1
+        case .reading: return 1
         case .history, .money: return 2
         default: return 0
         }
