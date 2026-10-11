@@ -7,7 +7,7 @@
 - App name: טופי: לומדים ומרוויחים זמן מסך (Tofy)
 - Apple ID of the app: 6773805449
 - Bundle ID: com.rani.ChildTime
-- Category: Education (Kids, ages 9–11) — parental-control and learning app
+- Category: Education, Kids Category — a learning and parental-control app
 
 **הטקסט לשדה שמבקש לתאר את השימוש (באנגלית, להעתקה כמו שהוא):**
 
