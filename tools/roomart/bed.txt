@@ -1,0 +1,5 @@
+A single game asset: a cozy child's single bed with a rounded wooden headboard, a puffy blue blanket with small stars, and one plump white pillow.
+
+Same art style as the reference room image — Toca Boca-like toy diorama, soft 3D animated-film render, chunky rounded shapes, smooth matte materials, soft warm lighting from the upper left. Seen from the same camera as the room: straight-on front view, slightly from above, so the top surface is a little visible.
+
+Only this one object, complete and uncropped, centered with some empty margin around it. Fully transparent background. No floor, no wall, no cast shadow on the ground, no text, no characters.
