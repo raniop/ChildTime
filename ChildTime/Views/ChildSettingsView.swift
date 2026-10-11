@@ -81,6 +81,7 @@ struct ChildSettingsView: View {
     @State private var confirmReset = false
     @State private var confirmDelete = false
     @State private var remoteNote: String? = nil
+    @State private var deviceToRemove: ChildDevice? = nil
     /// What just happened on "עוד הגדרות" (refresh sent, progress reset) — on
     /// THAT page; an alert on the settings root underneath never comes up.
     @State private var moreNote: String? = nil
@@ -162,8 +163,18 @@ struct ChildSettingsView: View {
         return Section {
             if devices.isEmpty, let onConnectDevice {
                 row("📱", tr("המכשיר של \(p.name)"), value: deviceValue) { onConnectDevice() }
-            } else {
+            } else if devices.isEmpty {
                 rowLabel("📱", tr("המכשיר של \(p.name)"), value: deviceValue, chevron: false)
+            } else {
+                // With a device connected this row was plain text — the one place a
+                // parent looks for "add another device / remove this one" led
+                // nowhere (Rani, 2026-10-11). Both live at the foot of the child's
+                // report; now here too.
+                NavigationLink {
+                    devicesPage(p)
+                } label: {
+                    rowLabel("📱", tr("המכשיר של \(p.name)"), value: deviceValue, chevron: false)
+                }
             }
             if !devices.isEmpty {
                 row("🗑️", tr("לאפשר מחיקת אפליקציות (5 דק')"), chevron: false) { allowAppRemoval(p) }
@@ -296,6 +307,65 @@ struct ChildSettingsView: View {
             Text(tr("⏱ זמן"))
         }
         .glassRows()
+    }
+
+    /// "המכשירים של X" — every device connected to this child: when it was last
+    /// seen, whether its lock can work, remove it, connect another.
+    private func devicesPage(_ p: Profile) -> some View {
+        let devices = household.devicesByChild[p.id.uuidString] ?? []
+        return Form {
+            ForEach(devices) { d in
+                Section {
+                    rowLabel(d.kind == "ipad" ? "📲" : "📱",
+                             (d.kind == "ipad" ? tr("אייפד") : tr("אייפון"))
+                                + ([tr("אייפד"), tr("אייפון"), "iPhone", "iPad", ""].contains(d.name) ? "" : " · \(d.name)"),
+                             value: Date().timeIntervalSince(d.lastSeenAt) < 120 ? tr("● מחובר") : tr("נראה \(Self.relative(d.lastSeenAt))"),
+                             valueTint: Date().timeIntervalSince(d.lastSeenAt) < 120 ? GlassInk.good : GlassInk.secondary,
+                             chevron: false)
+                    if d.shieldAuthorized == false, d.role != "parent" {
+                        Label(tr("אין הרשאת ״זמן מסך״ במכשיר הזה — נעילת אפליקציות לא תעבוד בו. פתחו בו את טופי ← ⚙️ ← בקש הרשאה."),
+                              systemImage: "exclamationmark.shield.fill")
+                            .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+                            .foregroundStyle(AppColor.flameOrange)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    // Not a PARENT's phone in Kid Mode: that row goes away by itself
+                    // when Kid Mode ends, and removing it reset the parent's phone
+                    // (the same liveness rule as the report's device list).
+                    if !household.parentDevices.contains(where: { $0.deviceID == d.deviceID && $0.lastSeenAt >= d.joinedAt }) {
+                        row("❌", tr("הסר מכשיר"), destructive: true, chevron: false) { deviceToRemove = d }
+                    }
+                }
+                .glassRows()
+            }
+            if let onConnectDevice {
+                Section {
+                    row("🔗", tr("+ חיבור מכשיר נוסף"), chevron: false) { onConnectDevice() }
+                }
+                .glassRows()
+            }
+        }
+        .readableColumn()
+        .glassForm()
+        // On THIS page, beside its rows (an alert on the root underneath never comes up).
+        .alert(deviceToRemove.map { tr("להסיר את \"\($0.name)\"?") } ?? "",
+               isPresented: Binding(get: { deviceToRemove != nil }, set: { if !$0 { deviceToRemove = nil } })) {
+            Button(tr("הסר מכשיר"), role: .destructive) {
+                if let d = deviceToRemove { household.removeChildDevice(id: d.id) }
+                deviceToRemove = nil
+            }
+            Button(tr("ביטול"), role: .cancel) { deviceToRemove = nil }
+        } message: {
+            Text(tr("המכשיר יתנתק אוטומטית מהילד ויחזור למצב התחלתי (כאילו הותקן מחדש). ההתקדמות בענן נשמרת — כדי לחבר אותו שוב (או לילד אחר), סרקו בו מחדש את ה-QR של הילד הנכון."))
+        }
+        .navigationTitle(tr("המכשירים של \(p.name)"))
+    }
+
+    private static func relative(_ d: Date) -> String {
+        let m = Int(Date().timeIntervalSince(d) / 60)
+        if m < 60 { return tr("לפני \(max(1, m)) דק׳") }
+        if m < 60 * 24 { return tr("לפני \(m / 60) שע׳") }
+        return tr("לפני \(m / (60 * 24)) ימים")
     }
 
     /// "עוד הגדרות" — what a parent needs rarely: the child's play code,

@@ -81,20 +81,20 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
             }
             return
         }
-        // 🔔 Beep, like Find My (Rani: "ציפיתי שיעשה צפצוף"): the push wakes
-        // Tofy even in the background, and Tofy itself plays the sound for 30 s
-        // through the `.playback` session — which the silent switch does not mute
-        // (the push's own sound does obey it). The wake window is held open
-        // while it rings; a force-quit app is not woken (Apple's rule), and then
-        // only the push's own sound is left.
+        // 🔔 Beep, like Find My (Rani: "ציפיתי שיעשה צפצוף"). The push itself
+        // carries the sound — `tofy_beep.caf`, 29 seconds — so the phone rings
+        // even when Tofy is closed. While Tofy is OPEN it also plays the sound
+        // itself, through the `.playback` session, which the silent switch does
+        // not mute. (It used to do that from the background as well, which needs
+        // the "audio" background mode — App Review turned 2026.10.8 down for it,
+        // guideline 2.5.4: that mode is for apps whose business is sound. In the
+        // background the push's own 29 seconds are the beep now, and they do
+        // obey the silent switch.)
         if type == "beep" || type == "beep-stop" {
             Task { @MainActor in
                 if type == "beep-stop" { LocationSharing.shared.stopBeep(report: false); completionHandler(.noData); return }
-                let task = UIApplication.shared.beginBackgroundTask(withName: "tofy.beep")
-                LocationSharing.shared.startBeep()
-                try? await Task.sleep(nanoseconds: 28_000_000_000)
+                if application.applicationState == .active { LocationSharing.shared.startBeep() }
                 completionHandler(.newData)
-                if task != .invalid { UIApplication.shared.endBackgroundTask(task) }
             }
             return
         }
@@ -105,6 +105,16 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         guard type == "wake" || type == "remote-lock" else { completionHandler(.noData); return }
         Task { @MainActor in
             TofyLink("silent wake push (\(userInfo["reason"] as? String ?? "")) — letting listeners drain")
+            // 🔓 …and say we are alive. The heartbeat carries whether Screen Time
+            // access is still granted — until now it was sent only while Tofy was
+            // OPEN, and a child whose lock is off has no reason to open Tofy:
+            // Yoav's iPad sat unlocked for 28 hours before the parents' "הנעילה
+            // כובתה" push could go out (2026-10-11). The server's check-in wake
+            // makes this run a few times a day.
+            let ps = ParentSettings.shared
+            if ps.deviceRole == .child, let cid = ps.joinedChildID.flatMap(UUID.init(uuidString:)) {
+                await HouseholdManager.shared.registerDevice(forChildID: cid)
+            }
             // Firestore delivers pending snapshots on wake; give them a moment.
             try? await Task.sleep(nanoseconds: 4_000_000_000)
             completionHandler(.newData)
@@ -666,7 +676,14 @@ struct ChildTimeApp: App {
         // 🏫🌙 DEMO_SCREEN=childsettings | quieteditor [DEMO_QUIET=school|bedtime]
         case "childsettings":
             if let id = ProfileStore.shared.activeID {
-                ChildSettingsView(profileID: id, snapshot: .blank, onResetProgress: { _ in }, onDelete: { _ in })
+                // DEMO_DEVICE=1 — with a connected device (the devices page).
+                ChildSettingsView(profileID: id, snapshot: .blank, onResetProgress: { _ in }, onDelete: { _ in },
+                                  onConnectDevice: {})
+                    .onAppear {
+                        if ProcessInfo.processInfo.environment["DEMO_DEVICE"] != nil {
+                            HouseholdManager.shared.seedDemoLiveWindow(childID: id)
+                        }
+                    }
             }
         case "quieteditor":
             if let id = ProfileStore.shared.activeID {

@@ -566,7 +566,7 @@ private fun Modifier.dashedBorder() = this.drawBehind {
         style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx()))))
 }
 
-private fun relative(t: Double): String {
+internal fun relative(t: Double): String {
     val m = ((nowSecs() - t) / 60).toInt()
     if (m < 60) return tr("לפני %lld דק׳", maxOf(1, m))
     if (m < 60 * 24) return tr("לפני %lld שע׳", m / 60)

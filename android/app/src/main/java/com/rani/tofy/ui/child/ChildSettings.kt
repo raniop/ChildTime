@@ -37,7 +37,7 @@ import com.rani.tofy.ui.home.gradeName
 import com.rani.tofy.ui.theme.*
 import kotlinx.coroutines.launch
 
-private enum class Page { MAIN, PROFILE, LANGUAGE, DIFFICULTY, WORLDS, SCREEN_TIME, FRIENDS, SCHOOL, BEDTIME }
+private enum class Page { MAIN, PROFILE, LANGUAGE, DIFFICULTY, WORLDS, SCREEN_TIME, FRIENDS, SCHOOL, BEDTIME, DEVICES }
 
 /**
  * ChildSettingsView.swift — everything about ONE child that is SET rather than
@@ -87,6 +87,7 @@ internal fun ChildSettingsContent(childID: String, onBack: () -> Unit, onDeleted
                 Page.WORLDS -> WorldsEditor(child, ::back, ::write)
                 Page.SCREEN_TIME -> ScreenTimeEditor(child, ::back, ::write) { pendingCapSave[0] = it }
                 Page.FRIENDS -> FriendsList(child, ::back, note)
+                Page.DEVICES -> DevicesPage(child, state.devicesOf(childID), ::back, onConnect, note)
                 Page.SCHOOL -> QuietEditor(child, QuietKind.SCHOOL, ::back, ::write) { pendingCapSave[0] = it }
                 Page.BEDTIME -> QuietEditor(child, QuietKind.BEDTIME, ::back, ::write) { pendingCapSave[0] = it }
             }
@@ -104,6 +105,50 @@ private fun Scroll(content: @Composable ColumnScope.() -> Unit) =
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).padding(bottom = 60.dp), verticalArrangement = Arrangement.spacedBy(18.dp), content = content)
 
 private val AppLanguage.flag get() = when (this) { AppLanguage.HE -> "🇮🇱"; AppLanguage.EN -> "🇺🇸"; AppLanguage.RU -> "🇷🇺"; AppLanguage.AR -> "🇦🇪" }
+
+// MARK: - The child's devices
+
+/**
+ * "המכשירים של X" — ChildSettingsView.devicesPage: every device connected to this
+ * child: when it was last seen, whether its lock can work, remove it, connect another.
+ */
+@Composable
+private fun DevicesPage(child: Child, devices: List<ChildDevice>, onBack: () -> Unit, onConnect: (() -> Unit)?, note: WriteNote) {
+    val scope = rememberCoroutineScope()
+    var removing by remember { mutableStateOf<ChildDevice?>(null) }
+    Scroll {
+        PageBar(tr("המכשירים של %@", child.name), onBack)
+        devices.forEach { d ->
+            SettingsSection(null) {
+                val ipad = d.kind == "ipad"
+                val generic = listOf(tr("אייפד"), tr("אייפון"), "iPhone", "iPad", "").contains(d.name)
+                val recent = nowSecs() - d.lastSeenAt < 120
+                SettingsRow(if (ipad) "📲" else "📱", (if (ipad) tr("אייפד") else tr("אייפון")) + (if (generic) "" else " · ${d.name}"),
+                    if (recent) tr("● מחובר") else tr("נראה %@", relative(d.lastSeenAt)),
+                    valueColor = if (recent) Ink.good else Ink.secondary, chevron = false, onClick = null)
+                if (d.shieldAuthorized == false && d.role != "parent") {
+                    Text("🛡️ " + tr("אין הרשאת ״זמן מסך״ במכשיר הזה — נעילת אפליקציות לא תעבוד בו. פתחו בו את טופי ← ⚙️ ← בקש הרשאה."),
+                        color = Color(0xFFFF8A3D), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp,
+                        modifier = Modifier.padding(bottom = 8.dp))
+                }
+                RowDivider()
+                SettingsRow("❌", tr("הסר מכשיר"), destructive = true, chevron = false) { removing = d }
+            }
+        }
+        if (onConnect != null) SettingsSection(null) {
+            SettingsRow("🔗", tr("+ חיבור מכשיר נוסף"), chevron = false, onClick = onConnect)
+        }
+    }
+    removing?.let { d ->
+        Confirm(
+            title = tr("להסיר את \"%@\"?", d.name),
+            message = tr("המכשיר יתנתק אוטומטית מהילד ויחזור למצב התחלתי (כאילו הותקן מחדש). ההתקדמות בענן נשמרת — כדי לחבר אותו שוב (או לילד אחר), סרקו בו מחדש את ה-QR של הילד הנכון."),
+            confirm = tr("הסר מכשיר"), cancel = tr("ביטול"),
+            onConfirm = { scope.launch { note.report(ChildReportRepository.withRetry { Commands.removeDevice(d.id) }) } },
+            onDismiss = { removing = null },
+        )
+    }
+}
 
 // MARK: - The list
 
@@ -206,9 +251,12 @@ private fun MainList(
 
         // 📱 The child's own device, the app-deletion window, and the map.
         SettingsSection(tr("📱 מכשיר ומיקום")) {
+            // With a device connected this row led nowhere — the one place a parent
+            // looks for "add another device / remove this one" (Rani, 2026-10-11).
             SettingsRow("📱", tr("המכשיר של %@", child.name),
                 if (connected) tr("מחובר") else if (onConnect != null) tr("עוד לא חובר — לחצו לחיבור") else tr("עוד לא חובר"),
-                chevron = !connected && onConnect != null, onClick = if (!connected && onConnect != null) onConnect else null)
+                chevron = connected || onConnect != null,
+                onClick = if (connected) ({ onOpen(Page.DEVICES) }) else onConnect)
             if (connected) {
                 RowDivider()
                 SettingsRow("🗑️", tr("לאפשר מחיקת אפליקציות (5 דק')"), chevron = false) {
