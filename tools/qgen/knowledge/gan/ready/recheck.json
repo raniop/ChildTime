@@ -1,0 +1,29 @@
+{
+  "science": [
+    {
+      "prompt": "🌿\nאֵיזוֹ חַיָּה בּוֹנָה רֶשֶׁת מִקּוּרִים?",
+      "correctAnswer": "🕷️",
+      "distractors": [
+        "🐝",
+        "🐞",
+        "🐌"
+      ],
+      "tier": "easy",
+      "gradeLo": 0,
+      "gradeHi": 0
+    },
+    {
+      "prompt": "🐾\nלְאֵיזוֹ חַיָּה יֵשׁ דַּבֶּשֶׁת עַל הַגַּב?",
+      "correctAnswer": "🐪",
+      "distractors": [
+        "🐄",
+        "🐎",
+        "🐑"
+      ],
+      "tier": "easy",
+      "gradeLo": 0,
+      "gradeHi": 0
+    }
+  ],
+  "geography": []
+}

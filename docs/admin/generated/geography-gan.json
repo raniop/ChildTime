@@ -16,20 +16,8 @@
     "correctAnswer": "🐚",
     "distractors": [
       "🍄",
-      "⛄",
+      "🌰",
       "🌻"
-    ],
-    "tier": "easy",
-    "gradeLo": 0,
-    "gradeHi": 0
-  },
-  {
-    "prompt": "🌍\nמָה גָּדֵל בַּמִּדְבָּר וְיֵשׁ לוֹ קוֹצִים?",
-    "correctAnswer": "🌵",
-    "distractors": [
-      "🌷",
-      "🌻",
-      "🍄"
     ],
     "tier": "easy",
     "gradeLo": 0,
@@ -39,9 +27,9 @@
     "prompt": "🌍\nמָה יֵשׁ הֲכִי הַרְבֵּה בַּיַּעַר?",
     "correctAnswer": "🌲",
     "distractors": [
-      "🐚",
-      "⛵",
-      "🧊"
+      "🌵",
+      "🌾",
+      "🐚"
     ],
     "tier": "easy",
     "gradeLo": 0,
@@ -66,18 +54,6 @@
       "🏠",
       "🌳",
       "🦒"
-    ],
-    "tier": "easy",
-    "gradeLo": 0,
-    "gradeHi": 0
-  },
-  {
-    "prompt": "🌍\nמָה בּוֹנִים מִשֶּׁלֶג וְשָׂמִים לוֹ גֶּזֶר בִּמְקוֹם אַף?",
-    "correctAnswer": "⛄",
-    "distractors": [
-      "🎈",
-      "🧸",
-      "📚"
     ],
     "tier": "easy",
     "gradeLo": 0,
@@ -188,18 +164,6 @@
       "🌴"
     ],
     "tier": "medium",
-    "gradeLo": 0,
-    "gradeHi": 0
-  },
-  {
-    "prompt": "🐾\nאֵיזוֹ צִפּוֹר חַיָּה בַּיַּעַר וְעֵרָה בַּלַּיְלָה?",
-    "correctAnswer": "🦉",
-    "distractors": [
-      "🐧",
-      "🦆",
-      "🐔"
-    ],
-    "tier": "easy",
     "gradeLo": 0,
     "gradeHi": 0
   },
@@ -336,18 +300,6 @@
     "gradeHi": 0
   },
   {
-    "prompt": "🐾\nאֵיזוֹ חַיָּה מֵאוֹסְטְרַלְיָה קוֹפֶצֶת וְנוֹשֵׂאת גּוּר בַּכִּיס?",
-    "correctAnswer": "🦘",
-    "distractors": [
-      "🦁",
-      "🐧",
-      "🐪"
-    ],
-    "tier": "easy",
-    "gradeLo": 0,
-    "gradeHi": 0
-  },
-  {
     "prompt": "🐾\nאֵיזוֹ חַיָּה אוֹכֶלֶת בַּמְבּוּק?",
     "correctAnswer": "🐼",
     "distractors": [
@@ -372,36 +324,12 @@
     "gradeHi": 0
   },
   {
-    "prompt": "🐾\nלְאֵיזוֹ חַיָּה יֵשׁ צַוָּאר אָרֹךְ מְאוֹד?",
-    "correctAnswer": "🦒",
-    "distractors": [
-      "🦓",
-      "🦁",
-      "🐘"
-    ],
-    "tier": "easy",
-    "gradeLo": 0,
-    "gradeHi": 0
-  },
-  {
     "prompt": "🐾\nאֵיזוֹ חַיָּה מֵאַפְרִיקָה שׁוֹאֶגֶת בְּקוֹל חָזָק?",
     "correctAnswer": "🦁",
     "distractors": [
       "🦒",
       "🦓",
       "🐢"
-    ],
-    "tier": "easy",
-    "gradeLo": 0,
-    "gradeHi": 0
-  },
-  {
-    "prompt": "🐾\nלְאֵיזוֹ חַיָּה יֵשׁ דַּבֶּשֶׁת עַל הַגַּב?",
-    "correctAnswer": "🐪",
-    "distractors": [
-      "🐎",
-      "🐄",
-      "🐑"
     ],
     "tier": "easy",
     "gradeLo": 0,
@@ -447,7 +375,7 @@
     "prompt": "🐾\nלְאֵיזוֹ חַיָּה יֵשׁ קֶרֶן עַל הָאַף?",
     "correctAnswer": "🦏",
     "distractors": [
-      "🦛",
+      "🦓",
       "🐘",
       "🦒"
     ],
@@ -474,18 +402,6 @@
       "🦆",
       "🐧",
       "🦉"
-    ],
-    "tier": "easy",
-    "gradeLo": 0,
-    "gradeHi": 0
-  },
-  {
-    "prompt": "🎒\nמָה מֵגֵן עָלֵינוּ מֵהַגֶּשֶׁם?",
-    "correctAnswer": "☂️",
-    "distractors": [
-      "🕶️",
-      "🧦",
-      "👡"
     ],
     "tier": "easy",
     "gradeLo": 0,
@@ -582,18 +498,6 @@
       "👢",
       "⛸️",
       "🥾"
-    ],
-    "tier": "easy",
-    "gradeLo": 0,
-    "gradeHi": 0
-  },
-  {
-    "prompt": "🚦\nבְּמָה חוֹצִים אֶת הַיָּם עַל הַמַּיִם?",
-    "correctAnswer": "🚢",
-    "distractors": [
-      "🚌",
-      "🚂",
-      "🚲"
     ],
     "tier": "easy",
     "gradeLo": 0,
@@ -951,9 +855,9 @@
     "prompt": "🎒\nמָה עוֹזֵר לָנוּ לִמְצֹא אֶת הַדֶּרֶךְ בְּטִיּוּל?",
     "correctAnswer": "🗺️",
     "distractors": [
-      "🎈",
-      "🧸",
-      "🥄"
+      "⏰",
+      "🌡️",
+      "📏"
     ],
     "tier": "easy",
     "gradeLo": 0,
@@ -963,7 +867,7 @@
     "prompt": "🌍\nמָה מַרְאֶה לָנוּ אֵיפֹה הַצָּפוֹן?",
     "correctAnswer": "🧭",
     "distractors": [
-      "⏰",
+      "📏",
       "🌡️",
       "🔦"
     ],
@@ -984,60 +888,12 @@
     "gradeHi": 0
   },
   {
-    "prompt": "🧭\nמָה לָבָן וְקַר וּמְכַסֶּה רָאשֵׁי הָרִים גְּבוֹהִים?",
-    "correctAnswer": "❄️",
-    "distractors": [
-      "🌴",
-      "🐚",
-      "🌵"
-    ],
-    "tier": "easy",
-    "gradeLo": 0,
-    "gradeHi": 0
-  },
-  {
-    "prompt": "🧭\nמָה מֵאִיר בַּשָּׁמַיִם בַּלַּיְלָה וּמְשַׁנֶּה אֶת צוּרָתוֹ?",
-    "correctAnswer": "🌙",
-    "distractors": [
-      "☀️",
-      "☁️",
-      "🌈"
-    ],
-    "tier": "medium",
-    "gradeLo": 0,
-    "gradeHi": 0
-  },
-  {
     "prompt": "🧭\nבְּאֵיזֶה צֶבַע מְצַיְּרִים אֶת הַיָּם בַּמַּפָּה?",
     "correctAnswer": "🔵",
     "distractors": [
       "🔴",
       "🟡",
       "🟠"
-    ],
-    "tier": "easy",
-    "gradeLo": 0,
-    "gradeHi": 0
-  },
-  {
-    "prompt": "🧭\nבְּעֶזְרַת מָה מִסְתַּכְּלִים עַל כּוֹכָבִים רְחוֹקִים?",
-    "correctAnswer": "🔭",
-    "distractors": [
-      "🕶️",
-      "🔦",
-      "📏"
-    ],
-    "tier": "medium",
-    "gradeLo": 0,
-    "gradeHi": 0
-  },
-  {
-    "prompt": "🧭\nבְּמָה מְאִירִים אֶת הַדֶּרֶךְ בַּחֹשֶׁךְ?",
-    "correctAnswer": "🔦",
-    "distractors": [
-      "🗺️",
-      "🕶️",
-      "🥄"
     ],
     "tier": "easy",
     "gradeLo": 0,

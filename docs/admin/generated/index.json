@@ -15,6 +15,16 @@
     },
     {
       "topic": "geography",
+      "file": "geography-gan.json",
+      "label": "gan",
+      "count": 80,
+      "byGrade": {
+        "0": 80
+      },
+      "generatedAt": "2026-10-11T18:09:03.387Z"
+    },
+    {
+      "topic": "geography",
       "file": "geography.json",
       "label": "",
       "count": 386,
@@ -73,6 +83,16 @@
         "8": 200
       },
       "generatedAt": "2026-09-11T07:13:56.869Z"
+    },
+    {
+      "topic": "science",
+      "file": "science-gan.json",
+      "label": "gan",
+      "count": 124,
+      "byGrade": {
+        "0": 124
+      },
+      "generatedAt": "2026-10-11T18:17:05.587Z"
     },
     {
       "topic": "science",
