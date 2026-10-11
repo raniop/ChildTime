@@ -14903,6 +14903,28 @@
         }
       }
     },
+    "15 רקעים לבחירה, או תמונה משלכם מהמצלמה או מהאלבום — לכל ילד בנפרד, וגם להורים בהגדרות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 خلفية للاختيار، أو صورة خاصة بكم من الكاميرا أو الألبوم — لكل طفل على حدة، وللوالدين في الإعدادات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 backgrounds to choose from, or a photo of your own from the camera or your photos — for each child separately, and for parents in Settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 фонов на выбор или своё фото с камеры или из галереи — для каждого ребёнка отдельно, а для родителей в настройках"
+          }
+        }
+      }
+    },
     "1️⃣  הוֹרִידוּ אֶת טוֹפִי בַּמַּכְשִׁיר שֶׁל %@ — מֵה־App Store אוֹ מִ־Google Play" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -113398,6 +113420,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Фон"
+          }
+        }
+      }
+    },
+    "רקע משלכם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خلفية خاصة بكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A background of your own"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Свой фон"
           }
         }
       }
