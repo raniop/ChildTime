@@ -52,6 +52,9 @@ data class Child(
     val gender: String?,
     val avatarPresetID: String,
     val character3DID: String?,
+    /** 🎨 The child's backdrop (BackdropTheme id, or "photo") and its freshness stamp. */
+    val backdropID: String? = null,
+    val backdropUpdatedAt: Double? = null,
     val grade: Int?,
     val photoBase64: String?,
     val dailyCapMinutes: Int?,
@@ -88,6 +91,8 @@ data class Child(
             gender = d.str("gender"),
             avatarPresetID = d.str("avatarPresetID") ?: "fox",
             character3DID = d.str("character3DID"),
+            backdropID = d.str("backdropID"),
+            backdropUpdatedAt = (d["backdropUpdatedAt"] as? Number)?.toDouble(),
             grade = d.int("grade"),
             photoBase64 = d.str("photoData"),
             dailyCapMinutes = d.int("dailyCapMinutes"),

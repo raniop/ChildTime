@@ -203,6 +203,8 @@ private sealed class KidScreen {
     data object Games : KidScreen()
     data object Wheel : KidScreen()
     data object Chest : KidScreen()
+    /** 🎨 The child's backdrop picker. */
+    data object Backdrops : KidScreen()
     /** The guard's manage screen, from the parent-gated ⚙️. */
     data object AppLock : KidScreen()
 }
@@ -428,6 +430,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
         when (s) {
             KidScreen.Shop -> ShopScreen(close)
             KidScreen.Characters -> CharacterCollectionScreen(close)
+            KidScreen.Backdrops -> com.rani.tofy.ui.common.BackdropPickerScreen(cid, child?.householdID, close)
             KidScreen.Friends -> FriendsScreen(close)
             is KidScreen.LiveQuiz -> LiveQuizScreen(s.gameID, close)
             KidScreen.Chores -> KidChoresScreen(close)
@@ -592,6 +595,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 ),
                 onShop = { screen = KidScreen.Shop },
                 onFriends = { screen = KidScreen.Friends },
+                onBackdrops = { screen = KidScreen.Backdrops },
                 onAvatar = { screen = KidScreen.Characters },
                 // Everything on the home but טופי טיים, the shop and friends is Tofy+ (requirePremium → ask a parent).
                 onChores = { if (premium) screen = KidScreen.Chores else cover = Cover.Ask(null) },

@@ -30,6 +30,7 @@ class TofyApp : Application() {
         // 🔄 "There is a newer Tofy" (config/appUpdate) — cached numbers now, the listener once signed in.
         com.rani.tofy.update.AppUpdateConfig.init(this)
         DeviceRole.init(this)
+        com.rani.tofy.ui.theme.BackdropStore.init(this)   // 🎨 the parent's backdrop + the photo copies
         createChannels()
         // Kid side: content assets/cache + the progress session (both idempotent).
         com.rani.tofy.kid.content.QuestionSource.init(this)

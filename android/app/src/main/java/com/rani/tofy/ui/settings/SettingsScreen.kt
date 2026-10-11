@@ -69,7 +69,7 @@ import com.rani.tofy.ui.theme.Ink
 import com.rani.tofy.ui.theme.Rounded
 import kotlinx.coroutines.launch
 
-private enum class SettingsSheet { LANGUAGE, ORDER, PIN, FEEDBACK, WHATS_NEW }
+private enum class SettingsSheet { LANGUAGE, ORDER, PIN, FEEDBACK, WHATS_NEW, BACKDROP }
 
 /**
  * ParentSettingsView.swift for the Android parent: what applies to a parent's
@@ -130,6 +130,15 @@ fun SettingsScreen(onBack: () -> Unit) {
                 item {
                     Section {
                         SettingsRow("🌍", tr("שפה · Language"), I18n.language.native, chevron = true) { sheet = SettingsSheet.LANGUAGE }
+                    }
+                }
+                // 🎨 The parent's own backdrop, on this phone (some don't want the colourful one).
+                item {
+                    Section {
+                        val id = com.rani.tofy.ui.theme.BackdropStore.parentID
+                        val name = if (id == com.rani.tofy.ui.theme.BackdropTheme.PHOTO) tr("התמונה שלי")
+                                   else com.rani.tofy.ui.home.stripNiqqud(com.rani.tofy.ui.theme.BackdropTheme.find(id).displayName)
+                        SettingsRow("🎨", tr("רקע"), name, chevron = true) { sheet = SettingsSheet.BACKDROP }
                     }
                 }
 
@@ -252,6 +261,12 @@ fun SettingsScreen(onBack: () -> Unit) {
         SettingsSheet.PIN -> ChangePinSheet(hh?.parentPinHash) { sheet = null }
         SettingsSheet.FEEDBACK -> FeedbackSheet { sheet = null }
         SettingsSheet.WHATS_NEW -> WhatsNewSheet { sheet = null }
+        SettingsSheet.BACKDROP -> androidx.compose.ui.window.Dialog(
+            onDismissRequest = { sheet = null },
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
+        ) {
+            com.rani.tofy.ui.common.BackdropPickerScreen(com.rani.tofy.ui.theme.BackdropStore.PARENT, null) { sheet = null }
+        }
         null -> {}
     }
 

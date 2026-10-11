@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
@@ -63,19 +65,65 @@ val Rounded = FontFamily(rubik(400), rubik(500), rubik(600), rubik(700), rubik(8
  */
 @Composable
 fun GlassBackdrop(modifier: Modifier = Modifier, maxContentWidth: Dp? = 900.dp, content: @Composable BoxScope.() -> Unit) {
+    // 🎨 The colours are no longer fixed: each child (and the parent) picks a
+    // backdrop — see Backdrop.kt. The default is the one described above.
+    val look = rememberBackdropLook(BackdropStore.ownerKey)
     Box(modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.TopCenter) {
-        Canvas(Modifier.fillMaxSize()) {
-            drawRect(Brush.linearGradient(
-                listOf(Color(0xFF7A5CFF), Color(0xFF5E60CE), Color(0xFF3E8BF0)),
-                start = Offset(size.width * 0.62f, 0f), end = Offset(size.width * 0.38f, size.height)))
-        }
-        Canvas(Modifier.fillMaxSize().blur(44.dp)) {
-            drawCircle(Color(0xFFFF7BD3).copy(alpha = 0.8f), radius = 140.dp.toPx(), center = Offset(40.dp.toPx(), 250.dp.toPx()))
-            drawCircle(Color(0xFF37E2D5).copy(alpha = 0.8f), radius = 160.dp.toPx(), center = Offset(size.width - 30.dp.toPx(), size.height - 200.dp.toPx()))
-        }
+        BackdropLayer(look)
         if (maxContentWidth == null) content()
         else Box(Modifier.widthIn(max = maxContentWidth).fillMaxSize(),
             contentAlignment = androidx.compose.ui.Alignment.TopCenter, content = content)
+    }
+}
+
+/** What to draw: a built-in theme, or a photo (under a dark veil, so white text stays readable). */
+data class BackdropLook(val theme: BackdropTheme, val photo: androidx.compose.ui.graphics.ImageBitmap? = null)
+
+/**
+ * The look for `ownerKey` — "parent", or a child id. A child's choice comes from
+ * the child doc (the kid session's, or the parent app's family list), and their
+ * photo is fetched here when another device chose a newer one.
+ */
+@Composable
+fun rememberBackdropLook(ownerKey: String): BackdropLook {
+    BackdropStore.photoRevision                     // redraw when a photo file changes
+    if (ownerKey == BackdropStore.PARENT) {
+        val id = BackdropStore.parentID
+        return if (id == BackdropTheme.PHOTO) BackdropLook(BackdropTheme.tofy, BackdropStore.photo(ownerKey)) else BackdropLook(BackdropTheme.find(id))
+    }
+    val kidDoc by com.rani.tofy.kid.core.KidSession.childDoc.collectAsState()
+    val family by com.rani.tofy.data.FamilyRepository.state.collectAsState()
+    val fromKid = kidDoc?.takeIf { (it["id"] as? String) == ownerKey }
+    val docID = (fromKid?.get("backdropID") as? String) ?: family.children.firstOrNull { it.id == ownerKey }?.backdropID
+    val docStamp = ((fromKid?.get("backdropUpdatedAt") as? Number)?.toDouble())
+        ?: family.children.firstOrNull { it.id == ownerKey }?.backdropUpdatedAt ?: 0.0
+    val pending = BackdropStore.pendingChildID?.takeIf { it.first == ownerKey }?.second
+    androidx.compose.runtime.LaunchedEffect(ownerKey, docID) { BackdropStore.childEchoed(ownerKey, docID) }
+    val id = pending ?: docID
+    if (id == BackdropTheme.PHOTO) {
+        androidx.compose.runtime.LaunchedEffect(ownerKey, docStamp) { BackdropStore.fetchPhotoIfNeeded(ownerKey, docStamp) }
+        return BackdropLook(BackdropTheme.tofy, BackdropStore.photo(ownerKey))
+    }
+    return BackdropLook(BackdropTheme.find(id))
+}
+
+/** One backdrop, drawn to fill: the gradient and its two blurred orbs (`scale` shrinks them for a preview), or the photo. */
+@Composable
+fun BackdropLayer(look: BackdropLook, modifier: Modifier = Modifier, scale: Float = 1f) {
+    val photo = look.photo
+    if (photo != null) {
+        androidx.compose.foundation.Image(photo, null, modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+        Box(modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.30f)))
+        return
+    }
+    val theme = look.theme
+    Canvas(modifier.fillMaxSize()) {
+        drawRect(Brush.linearGradient(theme.gradient,
+            start = Offset(size.width * 0.62f, 0f), end = Offset(size.width * 0.38f, size.height)))
+    }
+    Canvas(modifier.fillMaxSize().blur((44 * scale).dp)) {
+        drawCircle(Color(theme.orbTop).copy(alpha = theme.orbOpacity), radius = (140 * scale).dp.toPx(), center = Offset((40 * scale).dp.toPx(), (250 * scale).dp.toPx()))
+        drawCircle(Color(theme.orbBottom).copy(alpha = theme.orbOpacity), radius = (160 * scale).dp.toPx(), center = Offset(size.width - (30 * scale).dp.toPx(), size.height - (200 * scale).dp.toPx()))
     }
 }
 

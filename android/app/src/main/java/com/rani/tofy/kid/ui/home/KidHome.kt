@@ -153,6 +153,7 @@ internal fun KidHome(
     extras: HomeExtras = HomeExtras(),
     onShop: () -> Unit = {},
     onFriends: () -> Unit = {},
+    onBackdrops: () -> Unit = {},
     onAvatar: () -> Unit = {},
     onChores: () -> Unit = {},
     onGames: () -> Unit = {},
@@ -187,7 +188,7 @@ internal fun KidHome(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                item(span = { GridItemSpan(maxLineSpan) }) { BrandRow(premium, extras.friendsBadge, onShop, onFriends, onSettings) }
+                item(span = { GridItemSpan(maxLineSpan) }) { BrandRow(premium, extras.friendsBadge, onShop, onFriends, onBackdrops, onSettings) }
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     HeaderPane(child, snap.stars, snap.diamonds, snap.dayStreak, snap.xp, engine, cta, extras, onLevelInfo, onStatInfo, onChallenge, onAvatar, onChores)
                 }
@@ -329,7 +330,7 @@ internal fun KidHome(
 // ── brand row + header ──────────────────────────────────────────────────────
 
 @Composable
-private fun BrandRow(premium: Boolean, friendsBadge: Boolean, onShop: () -> Unit, onFriends: () -> Unit, onSettings: () -> Unit) {
+private fun BrandRow(premium: Boolean, friendsBadge: Boolean, onShop: () -> Unit, onFriends: () -> Unit, onBackdrops: () -> Unit, onSettings: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(
             if (premium) tr("טופי+") else tr("טופי"),
@@ -351,6 +352,8 @@ private fun BrandRow(premium: Boolean, friendsBadge: Boolean, onShop: () -> Unit
             NavButton("🛍️", false, Modifier.coachMark("k.shop"), onShop)
             // The parent can switch friends + leaderboards off for this child (child doc friendsEnabled).
             if (com.rani.tofy.kid.ui.social.SocialMe.friendsEnabled) NavButton("🏆", friendsBadge, Modifier.coachMark("k.friends"), onFriends)
+            // 🎨 The child's own backdrop (free — every one of them).
+            NavButton("🎨", false, onClick = onBackdrops)
             NavButton("⚙️", false, Modifier.coachMark("k.settings"), onSettings)
         }
     }

@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
         val demoGame = if (BuildConfig.DEBUG) intent?.getStringExtra("demoGame") else null
         // 🧪 `--es demoQuiz 1` opens the quiz screen on its own (the device's own child).
         val demoQuiz = BuildConfig.DEBUG && intent?.getStringExtra("demoQuiz") != null
-        // 🧪 `--es demoScreen familychoice|joinfamily` — the new-parent screens, without an account.
+        // 🧪 `--es demoScreen familychoice|joinfamily|backdrops` — screens that need no account.
         val demoScreen = if (BuildConfig.DEBUG) intent?.getStringExtra("demoScreen") else null
         if (BuildConfig.DEBUG) intent?.getStringExtra("demoGrade")?.toIntOrNull()?.let {
             com.rani.tofy.kid.ui.games.MiniGameLevel.debugGrade = it
@@ -75,6 +75,8 @@ class MainActivity : ComponentActivity() {
                     else if (demoQuiz) com.rani.tofy.kid.ui.play.QuestionRunnerScreen(com.rani.tofy.kid.content.ContentMode.SmartFeed) { finish() }
                     else if (demoScreen == "familychoice") com.rani.tofy.ui.onboarding.FamilyChoiceScreen(onJoin = {})
                     else if (demoScreen == "joinfamily") com.rani.tofy.ui.onboarding.JoinFamilyScreen(onBack = {})
+                    // 🧪 `--es demoScreen backdrops` — the parent's backdrop picker.
+                    else if (demoScreen == "backdrops") com.rani.tofy.ui.common.BackdropPickerScreen(com.rani.tofy.ui.theme.BackdropStore.PARENT, null) {}
                     else Root()
                     ForcedUpdateOverlay()
                 }
