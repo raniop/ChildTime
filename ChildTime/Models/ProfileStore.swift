@@ -286,7 +286,10 @@ final class ProfileStore: ObservableObject {
             // Auto-pick a default ONLY where no identity is at stake (parent
             // dashboard). On a CHILD device the identity is the joinedChildID
             // binding — "first in the list" once bound Yoav's iPad to a sibling.
-            if activeID == nil, ParentSettings.shared.deviceRole != .child {
+            // A device with NO role yet picks nobody either: an active profile is
+            // the evidence the lost-role self-heal turns into a child binding, and
+            // that is how the same iPad became his little brother a second time.
+            if activeID == nil, ParentSettings.shared.deviceRole == .parent {
                 activate(profiles.first?.id)
             }
         }

@@ -2152,22 +2152,32 @@ final class HouseholdManager: ObservableObject {
     /// Without this, dropping the session on reinstall only fixes THIS device:
     /// the account stays listed in the family's `parentUIDs` and its device rows
     /// linger, so the family keeps showing a member that no longer exists.
-    func leaveAllHouseholdsForThisAccount() async {
+    ///
+    /// `uid`: on a reinstall the old account is never started here (see
+    /// AuthManager.finishReinstall), so it is passed in. Its rows are found by
+    /// `ownerUID` — the reinstalled app has a NEW install id, so the old rows
+    /// can't be found by device — and deleted BEFORE leaving, while the account
+    /// is still a member and may.
+    func leaveAllHouseholdsForThisAccount(uid given: String? = nil) async {
         #if canImport(FirebaseFirestore)
-        guard let uid else { return }
+        guard let uid = given ?? self.uid else { return }
         do {
             let mine = try await db.collection("households")
                 .whereField("parentUIDs", arrayContains: uid).getDocuments()
             for doc in mine.documents {
+                if let rows = try? await db.collection("childDevices")
+                    .whereField("householdID", isEqualTo: doc.documentID).getDocuments() {
+                    for r in rows.documents
+                    where (r.data()["ownerUID"] as? String) == uid
+                        || (r.data()["deviceID"] as? String) == DeviceIdentity.installID {
+                        try? await r.reference.delete()
+                    }
+                }
                 try? await doc.reference.updateData([
                     "parentUIDs": FieldValue.arrayRemove([uid]),
                 ])
                 TofyLink("left household \(doc.documentID.prefix(8)) on reinstall")
             }
-            // …and this install's own device rows, child and parent alike.
-            let rows = try await db.collection("childDevices")
-                .whereField("deviceID", isEqualTo: DeviceIdentity.installID).getDocuments()
-            for r in rows.documents { try? await r.reference.delete() }
         } catch {
             TofyLink("leaveAllHouseholdsForThisAccount failed: \(error.localizedDescription)")
         }

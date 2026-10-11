@@ -50,56 +50,71 @@ final class AuthManager: ObservableObject {
     /// provider to be enabled in the Firebase console (Authentication → Sign-in).
     /// Marks that this INSTALL has been set up. Lives in UserDefaults, which app
     /// deletion clears — unlike the Keychain, where Firebase keeps the signed-in
-    /// user. Their difference is the whole point: see `dropSessionIfReinstalled`.
+    /// user. Their difference is the whole point: see `looksReinstalled`.
     private static let installMarkKey = "auth.installMarked"
 
     /// Deleting the app does NOT sign the device out.
     ///
     /// Firebase persists the account in the Keychain, and iOS leaves the Keychain
-    /// alone when an app is deleted — so a "fresh install" silently signs back in
-    /// as the same anonymous user and is placed in whatever family that account
-    /// belongs to. A device wiped and handed to a different child came back up
-    /// inside a DIFFERENT family, bound to a child nobody chose. Deleting the app
-    /// was, perversely, less thorough than the in-app "התנתק ומחק מהמכשיר".
+    /// alone when an app is deleted — so a "fresh install" silently comes up as
+    /// the same account, inside whatever family that account belongs to.
     ///
-    /// So: no local marker + a live session means the app was reinstalled. Drop
-    /// the session and let the device be set up from scratch, which is what
-    /// deleting an app is universally understood to mean — for a child device
-    /// AND for a parent (the parent's family stays in the cloud).
+    /// A live session beside defaults that have never seen an account means the
+    /// app was deleted and installed again: `auth.cachedUser` is written on every
+    /// launch that has a session, so every install that was ever used has it
+    /// (no migration needed), and a deleted one does not.
+    nonisolated static func looksReinstalled(liveSession: Bool, cachedUser: Bool, installMarked: Bool) -> Bool {
+        liveSession && !cachedUser && !installMarked
+    }
+
+    /// True from launch until a reinstall's old session is gone. Nothing may
+    /// sign in (or adopt the old session) while it is — see `finishReinstall`.
+    private(set) var reinstallCleanupInFlight = false
+
     /// This install is being set up on purpose (a parent device converting
-    /// itself into a child one) — not a reinstall. Without this, the first
-    /// child launch found no marker beside a live anonymous session and pulled
-    /// the freshly joined iPad straight back out of the family (seen live,
-    /// 2026-10-03).
+    /// itself into a child one) — not a reinstall.
     func markInstallSetUp() {
         UserDefaults.standard.set(true, forKey: Self.installMarkKey)
     }
 
-    func dropSessionIfReinstalled() async {
-        #if canImport(FirebaseAuth)
-        let d = UserDefaults.standard
-        guard !d.bool(forKey: Self.installMarkKey) else { return }
-        d.set(true, forKey: Self.installMarkKey)
-        guard let user = Auth.auth().currentUser else { return }
-        // A parent account (Apple / Google / email) is signed OUT too (Rani,
-        // 2026-10-08: "מוחקים ומתקינים מחדש — משתמש חדש לגמרי מ-0"). Nothing is
-        // deleted in the cloud: their family stays, and signing in again with
-        // the same account brings it back — by their choice, not by itself.
-        // The parent code is local to the Keychain, so it goes too.
-        guard user.isAnonymous else {
-            TofyLink("reinstall detected — signing the parent account out, starting fresh")
-            PINManager.shared.deletePIN()
-            signOut()
-            return
+    #if canImport(FirebaseAuth)
+    /// The app was deleted and installed again, and the Keychain handed back the
+    /// old account. It must never be used: not to load its family, not to pick
+    /// a child, not for one heartbeat (Rani, 2026-10-11 — "אחרי שמוחקים את
+    /// האפליקציה הכל מתאפס"). This runs at LAUNCH, before anything reads the
+    /// session. It used to run only on a device that was already bound to a
+    /// child — by then the old session had loaded the family, the first child
+    /// in the list had been made active, and the lost-role self-heal had bound
+    /// the iPad to him: Yoav's reinstalled iPad came up as his little brother.
+    ///
+    /// A child device (anonymous) also cleans up after itself in the cloud while
+    /// it still may — leaves its families and deletes its device rows. A parent
+    /// account is only signed out: the family stays, and signing in again brings
+    /// it back by their own choice. The parent code goes with the Keychain.
+    private func finishReinstall(_ user: User) async {
+        TofyLink("reinstall detected at launch — \(user.isAnonymous ? "leaving the old family and dropping" : "signing out") the session before anything loads")
+        PINManager.shared.deletePIN()
+        if user.isAnonymous {
+            let uid = user.uid
+            await withTaskGroup(of: Void.self) { group in
+                group.addTask { await HouseholdManager.shared.leaveAllHouseholdsForThisAccount(uid: uid) }
+                group.addTask { try? await Task.sleep(nanoseconds: 8_000_000_000) }   // offline: don't wait forever
+                await group.next()
+                group.cancelAll()
+            }
         }
-        TofyLink("reinstall detected — leaving the old family and dropping the session")
-        // Clean up in the CLOUD first, while we still have permission to: leave
-        // the household and delete this install's device rows. Otherwise the
-        // family keeps listing a member that no longer exists anywhere.
-        await HouseholdManager.shared.leaveAllHouseholdsForThisAccount()
-        signOut()
-        #endif
+        // (Only the OLD session: someone quick enough to sign in meanwhile keeps theirs.)
+        if Auth.auth().currentUser?.uid == user.uid {
+            try? Auth.auth().signOut()
+            #if canImport(GoogleSignIn)
+            GIDSignIn.sharedInstance.signOut()
+            #endif
+        }
+        reinstallCleanupInFlight = false
+        // A child device that already reached the join screen was waiting for a uid.
+        if ParentSettings.shared.deviceRole == .child { signInAnonymouslyIfNeeded() }
     }
+    #endif
 
     func signInAnonymouslyIfNeeded() {
         #if canImport(FirebaseAuth)
@@ -107,6 +122,8 @@ final class AuthManager: ObservableObject {
         // device with a cached uid but NO live session (keychain reset, device
         // restore) would otherwise skip sign-in and get permission-denied on
         // every Firestore call forever, silently killing the child's sync.
+        // A reinstall's old session is on its way out — it is not ours to adopt.
+        guard !reinstallCleanupInFlight else { return }
         guard Auth.auth().currentUser == nil else {
             if userID == nil, let u = Auth.auth().currentUser { apply(firebaseUser: u) }
             return
@@ -164,7 +181,17 @@ final class AuthManager: ObservableObject {
         // breaks the cycle (and start() also accepts an explicit uid so
         // it never needs to touch AuthManager.shared).
         #if canImport(FirebaseAuth)
-        if let user = Auth.auth().currentUser {
+        let d = UserDefaults.standard
+        if let user = Auth.auth().currentUser,
+           Self.looksReinstalled(liveSession: true, cachedUser: userID != nil,
+                                 installMarked: d.bool(forKey: Self.installMarkKey)) {
+            // 🧼 Deleted and installed again: the Keychain's old account is never
+            // applied. Deferred — the cleanup reads other singletons.
+            d.set(true, forKey: Self.installMarkKey)
+            reinstallCleanupInFlight = true
+            Task { @MainActor in await self.finishReinstall(user) }
+        } else if let user = Auth.auth().currentUser {
+            d.set(true, forKey: Self.installMarkKey)
             apply(firebaseUser: user)   // also deferred internally
         } else if let cachedUID = userID, !cachedUID.isEmpty {
             let mail = email, name = displayName
