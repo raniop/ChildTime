@@ -80,7 +80,7 @@ fun GlassBackdrop(modifier: Modifier = Modifier, maxContentWidth: Dp? = 900.dp, 
 data class BackdropLook(
     val theme: BackdropTheme,
     val photo: androidx.compose.ui.graphics.ImageBitmap? = null,
-    /** The chosen id — a theme's, a picture's ("pic-…"), or "photo". */
+    /** The chosen id — a theme's, a picture's ("pic-…"), or one of their photos' ("photo", "photo-2"…). */
     val id: String = theme.id,
 )
 
@@ -96,7 +96,7 @@ fun rememberBackdropLook(ownerKey: String): BackdropLook {
     val wide = androidx.compose.ui.platform.LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
     if (ownerKey == BackdropStore.PARENT) {
         val id = BackdropStore.parentID
-        return if (id == BackdropTheme.PHOTO) BackdropLook(BackdropTheme.tofy, BackdropStore.photo(ownerKey), BackdropTheme.PHOTO) else builtInLook(id, wide)
+        return if (id != null && BackdropTheme.isPhoto(id)) BackdropLook(BackdropTheme.tofy, BackdropStore.photo(ownerKey, id), id) else builtInLook(id, wide)
     }
     val kidDoc by com.rani.tofy.kid.core.KidSession.childDoc.collectAsState()
     val family by com.rani.tofy.data.FamilyRepository.state.collectAsState()
@@ -107,9 +107,9 @@ fun rememberBackdropLook(ownerKey: String): BackdropLook {
     val pending = BackdropStore.pendingChildID?.takeIf { it.first == ownerKey }?.second
     androidx.compose.runtime.LaunchedEffect(ownerKey, docID) { BackdropStore.childEchoed(ownerKey, docID) }
     val id = pending ?: docID
-    if (id == BackdropTheme.PHOTO) {
-        androidx.compose.runtime.LaunchedEffect(ownerKey, docStamp) { BackdropStore.fetchPhotoIfNeeded(ownerKey, docStamp) }
-        return BackdropLook(BackdropTheme.tofy, BackdropStore.photo(ownerKey), BackdropTheme.PHOTO)
+    if (id != null && BackdropTheme.isPhoto(id)) {
+        androidx.compose.runtime.LaunchedEffect(ownerKey, id, docStamp) { BackdropStore.fetchPhotoIfNeeded(ownerKey, id, docStamp) }
+        return BackdropLook(BackdropTheme.tofy, BackdropStore.photo(ownerKey, id), id)
     }
     return builtInLook(id, wide)
 }

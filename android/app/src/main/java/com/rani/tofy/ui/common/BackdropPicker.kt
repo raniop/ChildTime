@@ -38,9 +38,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,7 +82,6 @@ import com.rani.tofy.ui.theme.BackdropPicture
 import com.rani.tofy.ui.theme.BackdropStore
 import com.rani.tofy.ui.theme.BackdropTheme
 import com.rani.tofy.ui.theme.Rounded
-import com.rani.tofy.ui.theme.glassPane
 import com.rani.tofy.ui.theme.rememberBackdropLook
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -99,25 +103,43 @@ fun BackdropPickerScreen(ownerKey: String, householdID: String?, onClose: () -> 
     fun word(s: String) = if (forChild) s else stripNiqqud(s)
     val look = rememberBackdropLook(ownerKey)
     BackdropStore.photoRevision
-    val ownPhoto = BackdropStore.photo(ownerKey)
+    val ownPhotos = BackdropStore.ownPhotos(ownerKey)
+    val canAdd = BackdropStore.freePhotoID(ownerKey) != null
     val selected = look.id
     var tab by rememberSaveable { mutableStateOf(demoTab ?: 0) }
+    var addMenu by remember { mutableStateOf(false) }
+    var photoToRemove by remember { mutableStateOf<String?>(null) }
 
     fun choose(id: String) {
         if (!forChild) { BackdropStore.chooseForParent(id); return }
         BackdropStore.childPicked(ownerKey, id)      // on screen now; the child doc follows
         scope.launch { JoinRepository.childWrite(ownerKey, householdID, mapOf("backdropID" to id, "backdropUpdatedAt" to nowSecs())) }
     }
+    /** A new photo into the first free place (up to six) — and it becomes the backdrop. */
     fun usePhoto(bitmap: Bitmap?) {
         bitmap ?: return
         scope.launch {
+            val id = BackdropStore.freePhotoID(ownerKey) ?: return@launch
             val jpeg = withContext(Dispatchers.IO) { BackdropStore.compress(bitmap) } ?: return@launch
-            val stamp = BackdropStore.savePhoto(ownerKey, jpeg) ?: return@launch
-            if (!forChild) { BackdropStore.chooseForParent(BackdropTheme.PHOTO); return@launch }
-            BackdropStore.childPicked(ownerKey, BackdropTheme.PHOTO)
-            BackdropStore.upload(ownerKey, jpeg, stamp)   // the picture first, then the pointer to it
-            JoinRepository.childWrite(ownerKey, householdID, mapOf("backdropID" to BackdropTheme.PHOTO, "backdropUpdatedAt" to stamp))
+            val stamp = BackdropStore.savePhoto(ownerKey, id, jpeg) ?: return@launch
+            if (!forChild) { BackdropStore.chooseForParent(id); return@launch }
+            BackdropStore.childPicked(ownerKey, id)
+            BackdropStore.upload(ownerKey, id, jpeg, stamp)   // the picture first, then the pointer to it
+            JoinRepository.childWrite(ownerKey, householdID, mapOf("backdropID" to id, "backdropUpdatedAt" to stamp))
         }
+    }
+    /** Take one away — here and on the child's other devices. If it was the backdrop, the newest one left takes over (or the default). */
+    fun removePhoto(id: String) {
+        val wasChosen = selected == id
+        BackdropStore.forget(ownerKey, id)
+        if (wasChosen) choose(BackdropStore.ownPhotos(ownerKey).lastOrNull()?.id ?: BackdropTheme.tofy.id)
+        if (forChild) scope.launch { BackdropStore.uploadRemoval(ownerKey, id) }
+    }
+    // A child's second device: the photos added on the other one.
+    LaunchedEffect(tab) {
+        val demo = demoPhotos
+        if (demo != null) BackdropStore.seedDemoPhotos(ownerKey, demo)
+        else if (tab == 2 && forChild) BackdropStore.syncPhotoSet(ownerKey)
     }
 
     // Full-size capture into our cache through the FileProvider (as the chore photo does).
@@ -178,29 +200,62 @@ fun BackdropPickerScreen(ownerKey: String, householdID: String?, onClose: () -> 
                         BackdropLayer(BackdropLook(theme), scale = 0.3f)
                     }
                 }
-                if (tab == 2) item(span = { GridItemSpan(maxLineSpan) }) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        if (hasCamera) PhotoButton("📷", word(tr("לְצַלֵּם")), Modifier.weight(1f)) {
-                            if (ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) launchCamera()
-                            else cameraPermission.launch(Manifest.permission.CAMERA)
+                // No camera / album buttons on top (Rani, 2026-10-11): the ＋ tile is the way in.
+                if (tab == 2 && !canAdd) item(span = { GridItemSpan(maxLineSpan) }) {
+                    Text(word(tr("אֶפְשָׁר לִשְׁמוֹר עַד 6 תְּמוּנוֹת. כְּדֵי לְהוֹסִיף חֲדָשָׁה, מְסִירִים אַחַת.")), Modifier.fillMaxWidth(), color = Color.White,
+                        fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, textAlign = TextAlign.Center)
+                }
+                if (tab == 2) items(ownPhotos, key = { it.id }) { photo ->
+                    Box {
+                        Tile("", selected == photo.id, { choose(photo.id) }) {
+                            Image(photo.thumb, word(tr("הַתְּמוּנָה שֶׁלִּי")), Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                         }
-                        PhotoButton("🖼", word(tr("מֵהָאַלְבּוֹם")), Modifier.weight(1f)) {
-                            library.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        // ✕ a 44dp target around a small mark
+                        Box(Modifier.align(Alignment.TopStart).size(44.dp).clickable { photoToRemove = photo.id }, contentAlignment = Alignment.Center) {
+                            Box(Modifier.size(28.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.62f))
+                                .border(1.dp, Color.White.copy(alpha = 0.7f), CircleShape), contentAlignment = Alignment.Center) {
+                                Icon(Icons.Filled.Close, word(tr("הֲסָרָה")), tint = Color.White, modifier = Modifier.size(15.dp))
+                            }
                         }
                     }
                 }
-                if (tab == 2) item {
-                    if (ownPhoto != null) Tile(word(tr("הַתְּמוּנָה שֶׁלִּי")), selected == BackdropTheme.PHOTO, { choose(BackdropTheme.PHOTO) }) {
-                        Image(ownPhoto, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                    } else EmptyPhotoTile(word(tr("הַתְּמוּנָה שֶׁלִּי תּוֹפִיעַ כָּאן")))
+                if (tab == 2 && canAdd) item {
+                    Box {
+                        AddPhotoTile(word(tr("הוֹסָפַת תְּמוּנָה"))) {
+                            if (hasCamera) addMenu = true
+                            else library.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        }
+                        DropdownMenu(addMenu, { addMenu = false }) {
+                            DropdownMenuItem({ Text("📷 " + word(tr("לְצַלֵּם")), fontFamily = Rounded, fontWeight = FontWeight.Bold) }, {
+                                addMenu = false
+                                if (ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) launchCamera()
+                                else cameraPermission.launch(Manifest.permission.CAMERA)
+                            })
+                            DropdownMenuItem({ Text("🖼 " + word(tr("מֵהָאַלְבּוֹם")), fontFamily = Rounded, fontWeight = FontWeight.Bold) }, {
+                                addMenu = false
+                                library.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                            })
+                        }
+                    }
                 }
             }
         }
+    }
+
+    photoToRemove?.let { id ->
+        AlertDialog(
+            onDismissRequest = { photoToRemove = null },
+            title = { Text(word(tr("לְהָסִיר אֶת הַתְּמוּנָה?")), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold) },
+            confirmButton = { TextButton({ photoToRemove = null; removePhoto(id) }) { Text(word(tr("הֲסָרָה")), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, color = Color(0xFFD9364A)) } },
+            dismissButton = { TextButton({ photoToRemove = null }) { Text(if (forChild) tr("בִּטּוּל") else tr("ביטול"), fontFamily = Rounded) } },
+        )
     }
 }
 
 /** 🧪 `--es demoBackdropTab colours|mine` — screenshots. */
 var demoTab: Int? = null
+/** 🧪 `--ei demoBackdropPhotos N` — the "mine" tab with exactly N photos. */
+var demoPhotos: Int? = null
 
 /** One of the three tabs — a 16dp rounded button; the open one is white. */
 @Composable
@@ -215,26 +270,24 @@ private fun TabButton(title: String, on: Boolean, modifier: Modifier, onClick: (
     }
 }
 
-/** Where their own photo will sit, before there is one. */
+/**
+ * ＋ The empty place next to their photos IS the way to add one (Rani, 2026-10-11):
+ * tap → camera or album; once added, a new empty place opens beside it, up to six.
+ */
 @Composable
-private fun EmptyPhotoTile(text: String) {
+private fun AddPhotoTile(text: String, onClick: () -> Unit) {
     val shape = RoundedCornerShape(16.dp)
-    Box(Modifier.fillMaxWidth().aspectRatio(0.62f).clip(shape).background(Color.Black.copy(alpha = 0.24f))
+    Column(Modifier.fillMaxWidth().aspectRatio(0.62f).clip(shape).background(Color.Black.copy(alpha = 0.24f))
         .drawBehind {
             val r = 16.dp.toPx()
-            drawRoundRect(Color.White.copy(alpha = 0.8f), cornerRadius = CornerRadius(r, r),
+            drawRoundRect(Color.White.copy(alpha = 0.85f), cornerRadius = CornerRadius(r, r),
                 style = Stroke(2.dp.toPx() * 2, pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 5.dp.toPx()))))
-        }.padding(8.dp), contentAlignment = Alignment.Center) {
-        Text(text, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, textAlign = TextAlign.Center)
-    }
-}
-
-@Composable
-private fun PhotoButton(emoji: String, title: String, modifier: Modifier, onClick: () -> Unit) {
-    Row(modifier.heightIn(min = 52.dp).glassPane(16.dp, 0.20f).clickable(onClick = onClick).padding(horizontal = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) {
-        Text(emoji, fontSize = 20.sp)
-        Text(title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }.clickable(onClick = onClick).padding(6.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically), horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(Modifier.size(44.dp).clip(CircleShape).background(Color.White), contentAlignment = Alignment.Center) {
+            Text("+", color = Color(0xFF2A1E5C), fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 28.sp)
+        }
+        Text(text, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, textAlign = TextAlign.Center, maxLines = 2)
     }
 }
 
@@ -245,7 +298,8 @@ private fun Tile(name: String, selected: Boolean, onClick: () -> Unit, art: @Com
         .border(if (selected) 3.dp else 1.dp, Color.White.copy(alpha = if (selected) 1f else 0.30f), shape)
         .clickable(onClick = onClick)) {
         art()
-        Text(name, Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(Color.Black.copy(alpha = 0.28f)).padding(6.dp),
+        // A photo of their own has no caption.
+        if (name.isNotEmpty()) Text(name, Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(Color.Black.copy(alpha = 0.28f)).padding(6.dp),
             color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold,
             fontSize = if (name.length > 14) 10.sp else if (name.length > 11) 11.5.sp else 13.sp,   // a long name (ru) shrinks, as on iOS
             textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis)

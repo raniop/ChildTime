@@ -15,6 +15,9 @@ struct BackdropPickerView: View {
     @Environment(\.horizontalSizeClass) private var hsc
     @State private var libraryItem: PhotosPickerItem?
     @State private var showingCamera = false
+    @State private var showingLibrary = false
+    @State private var choosingSource = false
+    @State private var photoToRemove: String?
     @State private var tab: Tab = Tab.demo ?? .pictures
 
     private enum Tab: String, CaseIterable {
@@ -39,6 +42,7 @@ struct BackdropPickerView: View {
     private var forChild: Bool { owner != .parent }
     /// A child reads pointed Hebrew; a parent's screens carry none.
     private func word(_ s: String) -> String { forChild ? s : Question.stripNiqqud(s) }
+    private var cancelWord: String { forChild ? tr("בִּטּוּל") : tr("ביטול") }
     private var selectedID: String {
         #if DEBUG
         if let id = ProcessInfo.processInfo.environment["DEMO_BACKDROP"] { return id }
@@ -92,15 +96,20 @@ struct BackdropPickerView: View {
                                 }
                             }
                         case .mine:
-                            photoButtons
+                            // No camera / album buttons on top (Rani, 2026-10-11): the ＋ tile is the way in.
+                            let canAdd = store.canAddPhoto(for: owner)
+                            if !canAdd {
+                                Text(word(tr("אֶפְשָׁר לִשְׁמוֹר עַד 6 תְּמוּנוֹת. כְּדֵי לְהוֹסִיף חֲדָשָׁה, מְסִירִים אַחַת.")))
+                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(.white)
+                                    .multilineTextAlignment(.center)
+                                    .frame(maxWidth: .infinity)
+                            }
                             LazyVGrid(columns: columns, spacing: 12) {
-                                if let photo = store.photo(for: owner) {
-                                    tile(name: word(tr("הַתְּמוּנָה שֶׁלִּי")), selected: selectedID == BackdropTheme.photoID) {
-                                        Image(uiImage: photo).resizable().scaledToFill()
-                                    } action: { store.choosePhoto(for: owner) }
-                                } else {
-                                    emptyPhotoTile
+                                ForEach(store.photos(for: owner)) { photo in
+                                    photoTile(photo)
                                 }
+                                if canAdd { addPhotoTile }
                             }
                         }
                     }
@@ -117,18 +126,32 @@ struct BackdropPickerView: View {
             guard let item else { return }
             Task {
                 if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
-                    await MainActor.run { store.setPhoto(image, for: owner); Haptic.success() }
+                    await MainActor.run { if store.addPhoto(image, for: owner) { Haptic.success() } }
                 }
                 await MainActor.run { libraryItem = nil }
             }
         }
+        .photosPicker(isPresented: $showingLibrary, selection: $libraryItem, matching: .images)
         .fullScreenCover(isPresented: $showingCamera) {
             BackdropCamera { image in
                 showingCamera = false
-                if let image { store.setPhoto(image, for: owner); Haptic.success() }
+                if let image, store.addPhoto(image, for: owner) { Haptic.success() }
             }
             .ignoresSafeArea()
         }
+        .alert(word(tr("לְהָסִיר אֶת הַתְּמוּנָה?")), isPresented: Binding(
+            get: { photoToRemove != nil }, set: { if !$0 { photoToRemove = nil } })) {
+            Button(word(tr("הֲסָרָה")), role: .destructive) {
+                if let id = photoToRemove { withAnimation(.easeInOut(duration: 0.25)) { store.removePhoto(id, for: owner) } }
+                photoToRemove = nil
+            }
+            Button(cancelWord, role: .cancel) { photoToRemove = nil }
+        }
+        #if DEBUG
+        .onAppear { store.seedDemoPhotos(for: owner) }
+        #endif
+        // A child's second device: the photos added on the other one.
+        .task(id: tab) { if tab == .mine { await store.syncPhotoSet(for: owner) } }
     }
 
     /// 🖼 🎨 📷 The three tabs — each one a 16pt rounded button; the open one is white.
@@ -157,51 +180,70 @@ struct BackdropPickerView: View {
         }
     }
 
-    /// Where their own photo will sit, before there is one.
-    private var emptyPhotoTile: some View {
-        Text(word(tr("הַתְּמוּנָה שֶׁלִּי תּוֹפִיעַ כָּאן")))
-            .font(.system(size: 13, weight: .heavy, design: .rounded))
-            .foregroundStyle(.white)
-            .multilineTextAlignment(.center)
-            .padding(8)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .aspectRatio(0.62, contentMode: .fit)
-            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.black.opacity(0.24)))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(.white.opacity(0.8), style: StrokeStyle(lineWidth: 2, dash: [6, 5])))
-            .accessibilityHidden(true)
-    }
-
-    /// 📷 🖼 A photo of their own — the camera, or the album (the system's own
-    /// picker: no access to the library is asked for or given).
-    private var photoButtons: some View {
-        HStack(spacing: 12) {
-            if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                Button { Haptic.light(); showingCamera = true } label: {
-                    photoLabel("📷", word(tr("לְצַלֵּם")))
-                }
-                .buttonStyle(.plain)
-            }
-            PhotosPicker(selection: $libraryItem, matching: .images) {
-                photoLabel("🖼", word(tr("מֵהָאַלְבּוֹם")))
+    /// One of their photos: tap to use it, ✕ to take it away.
+    private func photoTile(_ photo: BackdropStore.OwnPhoto) -> some View {
+        tile(name: "", label: word(tr("הַתְּמוּנָה שֶׁלִּי")), selected: selectedID == photo.id) {
+            Image(uiImage: photo.thumbnail).resizable().scaledToFill()
+        } action: { store.choosePhoto(photo.id, for: owner) }
+        .overlay(alignment: .topLeading) {
+            Button {
+                Haptic.light()
+                photoToRemove = photo.id
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 12, weight: .heavy))
+                    .foregroundStyle(.white)
+                    .frame(width: 28, height: 28)
+                    .background(Circle().fill(.black.opacity(0.62)))
+                    .overlay(Circle().strokeBorder(.white.opacity(0.7), lineWidth: 1))
+                    .padding(8)                      // a 44pt target around a small mark
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(word(tr("הֲסָרָה")))
         }
     }
 
-    private func photoLabel(_ emoji: String, _ title: String) -> some View {
-        HStack(spacing: 8) {
-            Text(emoji).font(.system(size: 20))
-            Text(title)
-                .font(.system(size: 16, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .lineLimit(1).minimumScaleFactor(0.7)
+    /// ＋ The empty place next to their photos IS the way to add one (Rani,
+    /// 2026-10-11): tap → camera or album; once added, a new empty place opens
+    /// beside it, up to six.
+    private var addPhotoTile: some View {
+        Button {
+            Haptic.light()
+            if UIImagePickerController.isSourceTypeAvailable(.camera) { choosingSource = true } else { showingLibrary = true }
+        } label: {
+            Color.clear
+                .aspectRatio(0.62, contentMode: .fit)
+                .overlay {
+                    VStack(spacing: 8) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 22, weight: .heavy))
+                            .foregroundStyle(Color(hex: "2A1E5C"))
+                            .frame(width: 44, height: 44)
+                            .background(Circle().fill(.white))
+                        Text(word(tr("הוֹסָפַת תְּמוּנָה")))
+                            .font(.system(size: 13, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2).minimumScaleFactor(0.7)
+                    }
+                    .padding(6)
+                }
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.black.opacity(0.24)))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .strokeBorder(.white.opacity(0.85), style: StrokeStyle(lineWidth: 2, dash: [6, 5])))
+                .contentShape(Rectangle())
         }
-        .frame(maxWidth: .infinity, minHeight: 52)
-        .glassPane(radius: 16, strength: 0.20)
+        .buttonStyle(.plain)
+        .confirmationDialog(word(tr("הוֹסָפַת תְּמוּנָה")), isPresented: $choosingSource, titleVisibility: .hidden) {
+            Button("📷 " + word(tr("לְצַלֵּם"))) { showingCamera = true }
+            Button("🖼 " + word(tr("מֵהָאַלְבּוֹם"))) { showingLibrary = true }
+            Button(cancelWord, role: .cancel) {}
+        }
     }
 
-    private func tile<Art: View>(name: String, selected: Bool,
+    /// `name` is the caption on the tile; a photo of their own has none (`label` names it for VoiceOver).
+    private func tile<Art: View>(name: String, label: String? = nil, selected: Bool,
                                  @ViewBuilder art: () -> Art, action: @escaping () -> Void) -> some View {
         Button {
             Haptic.light()
@@ -214,6 +256,7 @@ struct BackdropPickerView: View {
                 .overlay { art() }
                 .clipped()
                 .overlay(alignment: .bottom) {
+                    if !name.isEmpty {
                     Text(name)
                         .font(.system(size: 13, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
@@ -221,6 +264,7 @@ struct BackdropPickerView: View {
                         .padding(.horizontal, 6).padding(.vertical, 6)
                         .frame(maxWidth: .infinity)
                         .background(.black.opacity(0.28))
+                    }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -235,7 +279,7 @@ struct BackdropPickerView: View {
                 }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(name)
+        .accessibilityLabel(label ?? name)
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }

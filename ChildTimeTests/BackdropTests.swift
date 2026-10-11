@@ -34,6 +34,31 @@ struct BackdropTests {
         #expect(!ids.contains(BackdropTheme.photoID))
     }
 
+    /// 📷 Six photos of their own: the first keeps the id and the file name every
+    /// build knows, and no photo id is a colour or a picture.
+    @Test func sixPhotoPlacesAndTheFirstIsTheOldOne() {
+        #expect(BackdropTheme.photoIDs == ["photo", "photo-2", "photo-3", "photo-4", "photo-5", "photo-6"])
+        #expect(BackdropTheme.isPhoto("photo") && BackdropTheme.isPhoto("photo-6"))
+        #expect(!BackdropTheme.isPhoto("photo-7") && !BackdropTheme.isPhoto("sea") && !BackdropTheme.isPhoto(nil))
+        #expect(BackdropStore.slotKey("ABC", "photo") == "ABC")
+        #expect(BackdropStore.slotKey("ABC", "photo-3") == "ABC-3")
+        #expect(Set(BackdropTheme.photoIDs).isDisjoint(with: BackdropTheme.all.map(\.id) + BackdropPicture.all.map(\.id)))
+    }
+
+    /// A child's second device: bring what is missing or older here, drop what
+    /// was removed elsewhere — and never drop a photo added here that the
+    /// cloud has not heard of yet.
+    @Test func aSecondDeviceFollowsThePhotoSet() {
+        let plan = BackdropStore.photoSetPlan(
+            cloud: ["photo": 100, "photo-2": 300, "photo-3": 50, "bogus": 9],
+            removed: ["photo-4": 200, "photo-5": 10],
+            local: ["photo": 100, "photo-2": 200, "photo-4": 150, "photo-5": 40, "photo-6": 500])
+        #expect(plan.fetch.map(\.0) == ["photo-3", "photo-2"])      // missing here, then older here; "photo" is current
+        #expect(plan.drop == ["photo-4"])                           // removed after this copy; photo-5 was added again later
+        let untouched = BackdropStore.photoSetPlan(cloud: [:], removed: [:], local: ["photo": 5])
+        #expect(untouched.fetch.isEmpty && untouched.drop.isEmpty)   // an old build's photo, no index yet
+    }
+
     /// A screen on its side gets the wide picture; a photo of their own has only one.
     @Test func aWideScreenGetsTheWidePicture() {
         let tall = UIImage(), wide = UIImage()

@@ -1,4 +1,5 @@
 import Combine
+import ImageIO
 import SwiftUI
 import UIKit
 #if canImport(FirebaseFirestore)
@@ -19,6 +20,11 @@ struct BackdropTheme: Identifiable, Equatable {
 
     /// The child's own photo (see `BackdropStore`), stored under this id.
     static let photoID = "photo"
+    /// 📷 Up to six photos of their own (Rani, 2026-10-11). The first keeps the
+    /// id every build knows; a build that does not know "photo-2" draws the
+    /// default colours for it.
+    static let photoIDs = [photoID] + (2...6).map { "\(photoID)-\($0)" }
+    static func isPhoto(_ id: String?) -> Bool { id.map(photoIDs.contains) ?? false }
 
     static let tofy = BackdropTheme(id: "tofy", colors: ["7A5CFF", "5E60CE", "3E8BF0"], orbTop: "FF7BD3", orbBottom: "37E2D5")
     static let all: [BackdropTheme] = [
@@ -153,6 +159,7 @@ final class BackdropStore: ObservableObject {
     /// Bumped when a photo file changed (picked here, or arrived from the cloud).
     @Published private(set) var photoRevision = 0
     private var photoCache: [String: UIImage] = [:]
+    private var thumbCache: [String: UIImage] = [:]
     private var fetching: Set<String> = []
 
     // MARK: who, and what
@@ -185,9 +192,9 @@ final class BackdropStore: ObservableObject {
         if let picture = BackdropPicture.find(id), let image = picture.image {
             return Look(theme: .tofy, photo: image, widePhoto: picture.wideImage)
         }
-        if id == BackdropTheme.photoID {
+        if let id, BackdropTheme.isPhoto(id) {
             // Not on this device yet (it is on its way from the cloud): the default.
-            return Look(theme: .tofy, photo: photo(for: owner))
+            return Look(theme: .tofy, photo: photo(id, for: owner))
         }
         return Look(theme: .find(id))
     }
@@ -195,6 +202,17 @@ final class BackdropStore: ObservableObject {
     var look: Look { look(for: owner) }
 
     #if DEBUG
+    /// 🧪 DEMO_BACKDROP_PHOTOS=a.jpg,b.jpg (or empty) — the picker's "mine" tab
+    /// with exactly these photos, for screenshots. Demo runs never reach the cloud.
+    func seedDemoPhotos(for owner: Owner) {
+        guard let list = ProcessInfo.processInfo.environment["DEMO_BACKDROP_PHOTOS"] else { return }
+        for id in BackdropTheme.photoIDs where hasPhoto(id, for: owner) { forget(id, ownerKey: owner.key) }
+        for (i, path) in list.split(separator: ",").prefix(BackdropTheme.photoIDs.count).enumerated() {
+            guard let image = UIImage(contentsOfFile: String(path)), let jpeg = Self.compress(image) else { continue }
+            store(jpeg, id: BackdropTheme.photoIDs[i], ownerKey: owner.key, stamp: Double(i + 1))
+        }
+    }
+
     private static let demoPhoto: UIImage? =
         ProcessInfo.processInfo.environment["DEMO_BACKDROP_PHOTO"].flatMap(UIImage.init(contentsOfFile:))
     #endif
@@ -212,23 +230,35 @@ final class BackdropStore: ObservableObject {
     }
 
     /// Back to a photo that is already on this device.
-    func choosePhoto(for owner: Owner) {
-        guard photo(for: owner) != nil else { return }
-        setBackdropID(BackdropTheme.photoID, for: owner)
+    func choosePhoto(_ id: String, for owner: Owner) {
+        guard hasPhoto(id, for: owner) else { return }
+        setBackdropID(id, for: owner)
     }
 
-    /// A new photo (camera or album): keep a copy, use it, and — for a child —
-    /// send it to their other devices.
-    func setPhoto(_ image: UIImage, for owner: Owner) {
-        guard let jpeg = Self.compress(image), let stored = UIImage(data: jpeg) else { return }
+    /// A new photo (camera or album) into the first free place: keep a copy,
+    /// use it, and — for a child — send it to their other devices. False when
+    /// all six places are taken.
+    @discardableResult
+    func addPhoto(_ image: UIImage, for owner: Owner) -> Bool {
+        guard let id = BackdropTheme.photoIDs.first(where: { !hasPhoto($0, for: owner) }),
+              let jpeg = Self.compress(image) else { return false }
         let stamp = Date()
-        try? FileManager.default.createDirectory(at: Self.folder, withIntermediateDirectories: true)
-        try? jpeg.write(to: Self.fileURL(owner.key), options: .atomic)
-        photoCache[owner.key] = stored
-        defaults.set(stamp.timeIntervalSince1970, forKey: Self.stampKey(owner.key))
-        photoRevision += 1
-        setBackdropID(BackdropTheme.photoID, for: owner, at: stamp)
-        if case .child(let id) = owner { upload(jpeg, childID: id, stamp: stamp) }
+        store(jpeg, id: id, ownerKey: owner.key, stamp: stamp.timeIntervalSince1970)
+        setBackdropID(id, for: owner, at: stamp)
+        if case .child(let childID) = owner { upload(jpeg, id: id, childID: childID, stamp: stamp) }
+        return true
+    }
+
+    /// Take one of their photos away — here, and on the child's other devices.
+    /// If it was the backdrop, the newest photo left takes over (or the default).
+    func removePhoto(_ id: String, for owner: Owner) {
+        let wasChosen = backdropID(for: owner) == id
+        forget(id, ownerKey: owner.key)
+        if wasChosen {
+            if let next = photos(for: owner).last { setBackdropID(next.id, for: owner) }
+            else { setBackdropID(BackdropTheme.tofy.id, for: owner) }
+        }
+        if case .child(let childID) = owner { uploadRemoval(id, childID: childID) }
     }
 
     private func setBackdropID(_ id: String, for owner: Owner, at stamp: Date = Date()) {
@@ -252,12 +282,78 @@ final class BackdropStore: ObservableObject {
     }
     private static func fileURL(_ key: String) -> URL { folder.appendingPathComponent("\(key).jpg") }
     private static func stampKey(_ key: String) -> String { "backdrop.photoStamp.\(key)" }
+    /// The file and stamp name of one photo: the owner's own key for the first
+    /// (where every build keeps it), "<owner>-2" … for the others.
+    static func slotKey(_ ownerKey: String, _ id: String) -> String {
+        ownerKey + id.dropFirst(BackdropTheme.photoID.count)
+    }
 
-    func photo(for owner: Owner) -> UIImage? {
-        if let cached = photoCache[owner.key] { return cached }
-        guard let image = UIImage(contentsOfFile: Self.fileURL(owner.key).path) else { return nil }
-        photoCache[owner.key] = image
+    /// One of their photos, as the picker shows it.
+    struct OwnPhoto: Identifiable {
+        let id: String
+        let thumbnail: UIImage
+        let stamp: Double
+    }
+
+    func hasPhoto(_ id: String, for owner: Owner) -> Bool {
+        FileManager.default.fileExists(atPath: Self.fileURL(Self.slotKey(owner.key, id)).path)
+    }
+
+    /// Their photos on this device, oldest first — the newest sits next to the "add" tile.
+    func photos(for owner: Owner) -> [OwnPhoto] {
+        BackdropTheme.photoIDs.compactMap { id in
+            let key = Self.slotKey(owner.key, id)
+            guard let thumb = thumbnail(key) else { return nil }
+            return OwnPhoto(id: id, thumbnail: thumb, stamp: defaults.double(forKey: Self.stampKey(key)))
+        }
+        .sorted { $0.stamp < $1.stamp }
+    }
+
+    func canAddPhoto(for owner: Owner) -> Bool {
+        BackdropTheme.photoIDs.contains { !hasPhoto($0, for: owner) }
+    }
+
+    /// The full picture — only the one on screen is kept in memory: six of
+    /// them decoded would be ~70 MB.
+    func photo(_ id: String, for owner: Owner) -> UIImage? {
+        let key = Self.slotKey(owner.key, id)
+        if let cached = photoCache[key] { return cached }
+        guard let image = UIImage(contentsOfFile: Self.fileURL(key).path) else { return nil }
+        photoCache = photoCache.filter { !$0.key.hasPrefix(owner.key) }
+        photoCache[key] = image
         return image
+    }
+
+    /// A small copy for the picker's tile, read straight from the file.
+    private func thumbnail(_ key: String) -> UIImage? {
+        if let cached = thumbCache[key] { return cached }
+        let options: [CFString: Any] = [kCGImageSourceCreateThumbnailFromImageAlways: true,
+                                        kCGImageSourceCreateThumbnailWithTransform: true,
+                                        kCGImageSourceThumbnailMaxPixelSize: 480]
+        guard let source = CGImageSourceCreateWithURL(Self.fileURL(key) as CFURL, nil),
+              let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) else { return nil }
+        let image = UIImage(cgImage: cg)
+        thumbCache[key] = image
+        return image
+    }
+
+    private func store(_ jpeg: Data, id: String, ownerKey: String, stamp: Double) {
+        let key = Self.slotKey(ownerKey, id)
+        try? FileManager.default.createDirectory(at: Self.folder, withIntermediateDirectories: true)
+        try? jpeg.write(to: Self.fileURL(key), options: .atomic)
+        photoCache[key] = nil
+        thumbCache[key] = nil
+        defaults.set(stamp, forKey: Self.stampKey(key))
+        photoRevision += 1
+    }
+
+    private func forget(_ id: String, ownerKey: String) {
+        let key = Self.slotKey(ownerKey, id)
+        try? FileManager.default.removeItem(at: Self.fileURL(key))
+        photoCache[key] = nil
+        thumbCache[key] = nil
+        defaults.removeObject(forKey: Self.stampKey(key))
+        photoRevision += 1
     }
 
     /// Small enough for one Firestore document (1 MB) and for a full-screen draw:
@@ -287,18 +383,38 @@ final class BackdropStore: ObservableObject {
     var photoSyncKey: String {
         guard case .child(let id) = owner,
               let p = ProfileStore.shared.profiles.first(where: { $0.id == id }),
-              p.backdropID == BackdropTheme.photoID else { return "" }
-        return "\(id.uuidString)-\(p.backdropUpdatedAt?.timeIntervalSince1970 ?? 0)"
+              BackdropTheme.isPhoto(p.backdropID) else { return "" }
+        return "\(id.uuidString)-\(p.backdropID ?? "")-\(p.backdropUpdatedAt?.timeIntervalSince1970 ?? 0)"
     }
 
-    private func upload(_ jpeg: Data, childID: UUID, stamp: Date) {
+    #if canImport(FirebaseFirestore)
+    /// `children/{id}/backdrop/<photo id>` holds one picture; `…/index` says
+    /// which exist (`photos`) and which were taken away (`removed`), each with
+    /// its time — so another device can show them all without downloading
+    /// them first, and drops one that was removed elsewhere.
+    private func cloud(_ childID: String) -> CollectionReference {
+        Firestore.firestore().collection("children").document(childID).collection("backdrop")
+    }
+    #endif
+
+    private func upload(_ jpeg: Data, id: String, childID: UUID, stamp: Date) {
         #if canImport(FirebaseFirestore)
         guard !HouseholdManager.skipsCloudSync, HouseholdManager.shared.household != nil else { return }
-        Firestore.firestore().collection("children").document(childID.uuidString)
-            .collection("backdrop").document("photo")
-            .setData(["data": jpeg, "updatedAt": stamp.timeIntervalSince1970]) { error in
-                if let error { TofyLink("backdrop photo upload failed: \(error.localizedDescription)") }
-            }
+        let at = stamp.timeIntervalSince1970
+        cloud(childID.uuidString).document(id).setData(["data": jpeg, "updatedAt": at]) { error in
+            if let error { TofyLink("backdrop photo upload failed: \(error.localizedDescription)") }
+        }
+        cloud(childID.uuidString).document("index")
+            .setData(["photos": [id: at], "removed": [id: FieldValue.delete()]], merge: true)
+        #endif
+    }
+
+    private func uploadRemoval(_ id: String, childID: UUID) {
+        #if canImport(FirebaseFirestore)
+        guard !HouseholdManager.skipsCloudSync, HouseholdManager.shared.household != nil else { return }
+        cloud(childID.uuidString).document(id).delete()
+        cloud(childID.uuidString).document("index")
+            .setData(["photos": [id: FieldValue.delete()], "removed": [id: Date().timeIntervalSince1970]], merge: true)
         #endif
     }
 
@@ -309,23 +425,57 @@ final class BackdropStore: ObservableObject {
         #if canImport(FirebaseFirestore)
         guard !HouseholdManager.skipsCloudSync, case .child(let id) = owner,
               let p = ProfileStore.shared.profiles.first(where: { $0.id == id }),
-              p.backdropID == BackdropTheme.photoID else { return }
-        let key = id.uuidString
-        let wanted = p.backdropUpdatedAt?.timeIntervalSince1970 ?? 0
-        let have = defaults.double(forKey: Self.stampKey(key))
-        guard photo(for: .child(id)) == nil || have + 1 < wanted, !fetching.contains(key) else { return }
-        fetching.insert(key)
-        defer { fetching.remove(key) }
-        guard let doc = try? await Firestore.firestore().collection("children").document(key)
-                .collection("backdrop").document("photo").getDocument(),
-              let data = doc.data()?["data"] as? Data, let image = UIImage(data: data) else { return }
-        let stamp = (doc.data()?["updatedAt"] as? NSNumber)?.doubleValue ?? wanted
-        guard stamp + 1 >= have else { return }       // never an older picture over a newer one
-        try? FileManager.default.createDirectory(at: Self.folder, withIntermediateDirectories: true)
-        try? data.write(to: Self.fileURL(key), options: .atomic)
-        photoCache[key] = image
-        defaults.set(stamp, forKey: Self.stampKey(key))
-        photoRevision += 1
+              let chosen = p.backdropID, BackdropTheme.isPhoto(chosen) else { return }
+        await fetch(chosen, childID: id, wanted: p.backdropUpdatedAt?.timeIntervalSince1970 ?? 0)
         #endif
     }
+
+    /// 📷 The picker's "mine" tab on a child's second device: bring the photos
+    /// added on the other one, and drop those removed there.
+    @MainActor
+    func syncPhotoSet(for owner: Owner) async {
+        #if canImport(FirebaseFirestore)
+        guard !HouseholdManager.skipsCloudSync, case .child(let id) = owner,
+              let index = try? await cloud(id.uuidString).document("index").getDocument().data() else { return }
+        let plan = Self.photoSetPlan(
+            cloud: Self.stamps(index["photos"]), removed: Self.stamps(index["removed"]),
+            local: Dictionary(uniqueKeysWithValues: BackdropTheme.photoIDs.compactMap { pid in
+                hasPhoto(pid, for: owner) ? (pid, defaults.double(forKey: Self.stampKey(Self.slotKey(id.uuidString, pid)))) : nil
+            }))
+        for pid in plan.drop { forget(pid, ownerKey: id.uuidString) }
+        for (pid, at) in plan.fetch { await fetch(pid, childID: id, wanted: at) }
+        #endif
+    }
+
+    private static func stamps(_ any: Any?) -> [String: Double] {
+        ((any as? [String: Any]) ?? [:]).compactMapValues { ($0 as? NSNumber)?.doubleValue }
+    }
+
+    /// What a device has to do to match the child's photo set: which to bring
+    /// (missing here, or older here) and which to drop (removed elsewhere after
+    /// this copy was made). A photo added here and not yet in the index stays.
+    static func photoSetPlan(cloud: [String: Double], removed: [String: Double],
+                             local: [String: Double]) -> (fetch: [(String, Double)], drop: [String]) {
+        let known = Set(BackdropTheme.photoIDs)
+        let fetch = cloud.filter { id, at in known.contains(id) && (local[id].map { have in have + 1 < at } ?? true) }
+            .sorted { $0.value < $1.value }.map { ($0.key, $0.value) }
+        let drop = local.filter { id, at in cloud[id] == nil && (removed[id].map { $0 >= at } ?? false) }.map(\.key).sorted()
+        return (fetch, drop)
+    }
+
+    #if canImport(FirebaseFirestore)
+    @MainActor
+    private func fetch(_ pid: String, childID: UUID, wanted: Double) async {
+        let key = Self.slotKey(childID.uuidString, pid)
+        let have = defaults.double(forKey: Self.stampKey(key))
+        guard !hasPhoto(pid, for: .child(childID)) || have + 1 < wanted, !fetching.contains(key) else { return }
+        fetching.insert(key)
+        defer { fetching.remove(key) }
+        guard let doc = try? await cloud(childID.uuidString).document(pid).getDocument(),
+              let data = doc.data()?["data"] as? Data, UIImage(data: data) != nil else { return }
+        let stamp = (doc.data()?["updatedAt"] as? NSNumber)?.doubleValue ?? wanted
+        guard stamp + 1 >= have else { return }       // never an older picture over a newer one
+        store(data, id: pid, ownerKey: childID.uuidString, stamp: stamp)
+    }
+    #endif
 }

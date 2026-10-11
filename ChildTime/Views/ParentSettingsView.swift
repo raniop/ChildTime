@@ -230,7 +230,7 @@ struct ParentSettingsView: View {
 
     private var backdropSummary: String {
         let id = BackdropStore.shared.parentBackdropID
-        if id == BackdropTheme.photoID { return tr("התמונה שלי") }
+        if BackdropTheme.isPhoto(id) { return tr("התמונה שלי") }
         return Question.stripNiqqud(BackdropPicture.find(id)?.displayName ?? BackdropTheme.find(id).displayName)
     }
 

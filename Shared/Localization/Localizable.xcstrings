@@ -18433,6 +18433,28 @@
         }
       }
     },
+    "אֶפְשָׁר לִשְׁמוֹר עַד 6 תְּמוּנוֹת. כְּדֵי לְהוֹסִיף חֲדָשָׁה, מְסִירִים אַחַת." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يُمْكِنُ حِفْظُ 6 صُوَرٍ عَلى الأَكْثَر. لِإِضافَةِ صُورَةٍ جَدِيدَة، أَزِيلُوا واحِدَةً أَوَّلًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can keep up to 6 photos. To add a new one, remove one first."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Можно хранить до 6 фото. Чтобы добавить новое, сначала уберите одно."
+          }
+        }
+      }
+    },
     "אֶפְשָׁר תָּמִיד לְהִצְטָרֵף לְמִשְׂחָק חָדָשׁ אַחַר כָּךְ." : {
       "localizations" : {
         "ar" : {
@@ -35567,6 +35589,28 @@
         }
       }
     },
+    "הֲסָרָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إِزالَة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Убрать"
+          }
+        }
+      }
+    },
     "הִגְדַּרְתֶּם בֶּעָבָר זְמַן מָסָךְ שֶׁל אַפֶּל בַּטֶּלֶפוֹן הַזֶּה?" : {
       "localizations" : {
         "ar" : {
@@ -47118,6 +47162,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Добавление друга"
+          }
+        }
+      }
+    },
+    "הוֹסָפַת תְּמוּנָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إِضافَةُ صُورَة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a photo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавить фото"
           }
         }
       }
@@ -74140,6 +74206,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Собрать рюкзак в сад/школу 🎒"
+          }
+        }
+      }
+    },
+    "לְהָסִיר אֶת הַתְּמוּנָה?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هَلْ نُزِيلُ هٰذِهِ الصُّورَة؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove this photo?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Убрать это фото?"
           }
         }
       }

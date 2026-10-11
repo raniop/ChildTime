@@ -12,6 +12,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import com.google.firebase.firestore.Blob
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.FirebaseFirestore
 import com.rani.tofy.DeviceRole
 import com.rani.tofy.R
@@ -47,6 +49,9 @@ data class BackdropTheme(
     companion object {
         /** The child's own photo (BackdropStore), stored under this id. */
         const val PHOTO = "photo"
+        /** 📷 Up to six photos of their own; the first keeps the id every build knows (BackdropTheme.photoIDs in Swift). */
+        val PHOTOS: List<String> = listOf(PHOTO) + (2..6).map { "$PHOTO-$it" }
+        fun isPhoto(id: String?) = id != null && id in PHOTOS
         val tofy = BackdropTheme("tofy", listOf(0xFF7A5CFF, 0xFF5E60CE, 0xFF3E8BF0), 0xFFFF7BD3, 0xFF37E2D5)
         val all = listOf(
             tofy,
@@ -143,11 +148,48 @@ object BackdropStore {
     private fun stamp(key: String) = java.lang.Double.longBitsToDouble(prefs?.getLong("stamp.$key", 0L) ?: 0L)
     private fun setStamp(key: String, v: Double) { prefs?.edit()?.putLong("stamp.$key", java.lang.Double.doubleToRawLongBits(v))?.apply() }
 
-    fun photo(key: String): ImageBitmap? {
+    /** The file and stamp name of one photo: the owner's own key for the first (where every build keeps it), "<owner>-2" … for the others. */
+    fun slotKey(ownerKey: String, id: String) = ownerKey + id.removePrefix(BackdropTheme.PHOTO)
+
+    /** One of their photos, as the picker shows it. */
+    class OwnPhoto(val id: String, val thumb: ImageBitmap, val stamp: Double)
+
+    private val thumbs = HashMap<String, ImageBitmap?>()
+
+    fun hasPhoto(ownerKey: String, id: String) = dir != null && file(slotKey(ownerKey, id)).exists()
+
+    /** Their photos on this device, oldest first — the newest sits next to the "add" tile. */
+    fun ownPhotos(ownerKey: String): List<OwnPhoto> = BackdropTheme.PHOTOS.mapNotNull { id ->
+        val key = slotKey(ownerKey, id)
+        thumb(key)?.let { OwnPhoto(id, it, stamp(key)) }
+    }.sortedBy { it.stamp }
+
+    fun freePhotoID(ownerKey: String): String? = BackdropTheme.PHOTOS.firstOrNull { !hasPhoto(ownerKey, it) }
+
+    /** The full picture — only the one on screen is kept in memory per owner. */
+    fun photo(ownerKey: String, id: String = BackdropTheme.PHOTO): ImageBitmap? {
+        val key = slotKey(ownerKey, id)
         if (photos.containsKey(key)) return photos[key]
         val f = file(key)
         val bmp = if (dir != null && f.exists()) runCatching { BitmapFactory.decodeFile(f.path)?.asImageBitmap() }.getOrNull() else null
+        photos.keys.filter { it.startsWith(ownerKey) }.forEach { photos.remove(it) }
         photos[key] = bmp
+        return bmp
+    }
+
+    /** A small copy for the picker's tile, sampled down while decoding. */
+    private fun thumb(key: String): ImageBitmap? {
+        if (thumbs.containsKey(key)) return thumbs[key]
+        val f = file(key)
+        if (dir == null || !f.exists()) return null
+        val bmp = runCatching {
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeFile(f.path, bounds)
+            var sample = 1
+            while (maxOf(bounds.outWidth, bounds.outHeight) / (sample * 2) >= 480) sample *= 2
+            BitmapFactory.decodeFile(f.path, BitmapFactory.Options().apply { inSampleSize = sample })?.asImageBitmap()
+        }.getOrNull()
+        thumbs[key] = bmp
         return bmp
     }
 
@@ -192,47 +234,96 @@ object BackdropStore {
         out
     }.getOrNull()
 
-    /** A new photo: keep a copy here; returns its stamp (epoch seconds), or null when it could not be saved. */
-    suspend fun savePhoto(key: String, jpeg: ByteArray): Double? = withContext(Dispatchers.IO) {
+    /** A new photo into place `id`: keep a copy here; returns its stamp (epoch seconds), or null when it could not be saved. */
+    suspend fun savePhoto(ownerKey: String, id: String, jpeg: ByteArray, at: Double = System.currentTimeMillis() / 1000.0): Double? = withContext(Dispatchers.IO) {
         runCatching {
+            val key = slotKey(ownerKey, id)
             dir?.mkdirs()
             file(key).writeBytes(jpeg)
-            val now = System.currentTimeMillis() / 1000.0
-            setStamp(key, now)
-            photos[key] = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.size)?.asImageBitmap()
-            now
+            setStamp(key, at)
+            photos.remove(key); thumbs.remove(key)
+            at
         }.getOrNull()
     }.also { if (it != null) photoRevision++ }
 
+    /** 🧪 `--ei demoBackdropPhotos N` — exactly N photos for `ownerKey`, taken from the built-in pictures (screenshots; nothing is uploaded). */
+    suspend fun seedDemoPhotos(ownerKey: String, count: Int) {
+        BackdropTheme.PHOTOS.filter { hasPhoto(ownerKey, it) }.forEach { forget(ownerKey, it) }
+        val r = res ?: return
+        BackdropTheme.PHOTOS.take(count).forEachIndexed { i, id ->
+            val jpeg = withContext(Dispatchers.IO) {
+                runCatching { BitmapFactory.decodeResource(r, BackdropPicture.all[(i + 2) % BackdropPicture.all.size].full) }.getOrNull()?.let(::compress)
+            } ?: return@forEachIndexed
+            savePhoto(ownerKey, id, jpeg, (i + 1).toDouble())
+        }
+    }
+
+    /** Take one of their photos off this device. */
+    fun forget(ownerKey: String, id: String) {
+        val key = slotKey(ownerKey, id)
+        runCatching { file(key).delete() }
+        photos.remove(key); thumbs.remove(key)
+        prefs?.edit()?.remove("stamp.$key")?.apply()
+        photoRevision++
+    }
+
+    // `children/{id}/backdrop/<photo id>` holds one picture; `…/index` says which exist
+    // (`photos`) and which were taken away (`removed`), each with its time — so another
+    // device can show them all, and drops one that was removed elsewhere.
+    private fun cloud(childID: String) = FirebaseFirestore.getInstance().collection("children").document(childID).collection("backdrop")
+
     /** …and send a CHILD's photo to their other devices. */
-    suspend fun upload(childID: String, jpeg: ByteArray, stamp: Double) {
+    suspend fun upload(childID: String, id: String, jpeg: ByteArray, stamp: Double) {
+        runCatching { cloud(childID).document(id).set(mapOf("data" to Blob.fromBytes(jpeg), "updatedAt" to stamp)).await() }
         runCatching {
-            FirebaseFirestore.getInstance().collection("children").document(childID)
-                .collection("backdrop").document("photo")
-                .set(mapOf("data" to Blob.fromBytes(jpeg), "updatedAt" to stamp)).await()
+            cloud(childID).document("index").set(
+                mapOf("photos" to mapOf(id to stamp), "removed" to mapOf(id to FieldValue.delete())), SetOptions.merge()).await()
+        }
+    }
+
+    suspend fun uploadRemoval(childID: String, id: String) {
+        runCatching { cloud(childID).document(id).delete().await() }
+        runCatching {
+            cloud(childID).document("index").set(
+                mapOf("photos" to mapOf(id to FieldValue.delete()), "removed" to mapOf(id to System.currentTimeMillis() / 1000.0)), SetOptions.merge()).await()
         }
     }
 
     /** The child chose a photo on ANOTHER device, newer than the copy here (or there is none) → bring it. */
-    suspend fun fetchPhotoIfNeeded(childID: String, wanted: Double) {
-        val have = stamp(childID)
-        if ((photo(childID) != null && have + 1 >= wanted) || !fetching.add(childID)) return
+    suspend fun fetchPhotoIfNeeded(childID: String, id: String, wanted: Double) {
+        val key = slotKey(childID, id)
+        val have = stamp(key)
+        if ((hasPhoto(childID, id) && have + 1 >= wanted) || !fetching.add(key)) return
         try {
-            val doc = runCatching {
-                FirebaseFirestore.getInstance().collection("children").document(childID)
-                    .collection("backdrop").document("photo").get().await()
-            }.getOrNull() ?: return
+            val doc = runCatching { cloud(childID).document(id).get().await() }.getOrNull() ?: return
             val bytes = doc.getBlob("data")?.toBytes() ?: return
             val at = (doc.get("updatedAt") as? Number)?.toDouble() ?: wanted
             if (at + 1 < have) return                      // never an older picture over a newer one
-            withContext(Dispatchers.IO) {
-                runCatching {
-                    dir?.mkdirs(); file(childID).writeBytes(bytes)
-                    photos[childID] = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.asImageBitmap()
-                    setStamp(childID, at)
-                }
-            }
-            photoRevision++
-        } finally { fetching.remove(childID) }
+            savePhoto(childID, id, bytes, at)
+        } finally { fetching.remove(key) }
+    }
+
+    /** 📷 The picker's "mine" tab on a child's second device: bring the photos added on the other one, drop those removed there. */
+    suspend fun syncPhotoSet(childID: String) {
+        val index = runCatching { cloud(childID).document("index").get().await().data }.getOrNull() ?: return
+        fun stamps(any: Any?) = (any as? Map<*, *>).orEmpty().mapNotNull { (k, v) -> (k as? String)?.let { id -> (v as? Number)?.toDouble()?.let { id to it } } }.toMap()
+        val local = BackdropTheme.PHOTOS.filter { hasPhoto(childID, it) }.associateWith { stamp(slotKey(childID, it)) }
+        val plan = photoSetPlan(stamps(index["photos"]), stamps(index["removed"]), local)
+        plan.drop.forEach { forget(childID, it) }
+        plan.fetch.forEach { (id, at) -> fetchPhotoIfNeeded(childID, id, at) }
+    }
+
+    class PhotoSetPlan(val fetch: List<Pair<String, Double>>, val drop: List<String>)
+
+    /**
+     * What a device has to do to match the child's photo set: which to bring (missing here,
+     * or older here) and which to drop (removed elsewhere after this copy was made). A photo
+     * added here and not yet in the index stays. Same as BackdropStore.photoSetPlan in Swift.
+     */
+    fun photoSetPlan(cloud: Map<String, Double>, removed: Map<String, Double>, local: Map<String, Double>): PhotoSetPlan {
+        val fetch = cloud.filter { (id, at) -> id in BackdropTheme.PHOTOS && (local[id]?.let { it + 1 < at } ?: true) }
+            .toList().sortedBy { it.second }
+        val drop = local.filter { (id, at) -> id !in cloud && (removed[id]?.let { it >= at } ?: false) }.keys.sorted()
+        return PhotoSetPlan(fetch, drop)
     }
 }

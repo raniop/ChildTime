@@ -50,6 +50,7 @@ class MainActivity : ComponentActivity() {
         val demoScreen = if (BuildConfig.DEBUG) intent?.getStringExtra("demoScreen") else null
         // 🧪 `--es demoBackdropTab colours|mine` — which tab the backdrop picker opens on.
         if (BuildConfig.DEBUG) com.rani.tofy.ui.common.demoTab = when (intent?.getStringExtra("demoBackdropTab")) { "colours" -> 1; "mine" -> 2; else -> null }
+        if (BuildConfig.DEBUG) com.rani.tofy.ui.common.demoPhotos = intent?.getIntExtra("demoBackdropPhotos", -1)?.takeIf { it >= 0 }
         if (BuildConfig.DEBUG) intent?.getStringExtra("demoGrade")?.toIntOrNull()?.let {
             com.rani.tofy.kid.ui.games.MiniGameLevel.debugGrade = it
         }
