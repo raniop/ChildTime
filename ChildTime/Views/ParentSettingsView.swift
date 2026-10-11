@@ -12,12 +12,12 @@ struct ParentSettingsView: View {
     @ObservedObject private var household = HouseholdManager.shared
     @Environment(\.dismiss) private var dismiss
 
-    /// The parent home passes this: a child's row here closes the sheet and
-    /// opens THAT child's settings (difficulty, screen time, worlds, language).
     /// A parent looking for "רמת קושי" opened this ⚙️ first and found nothing
-    /// about the children — the way in was hidden behind "פעולות" on the card
-    /// (Sasha, twice: "אני כל פעם שעה מחפשת איפה אני מגדירה את הקושי").
-    var onOpenChild: ((Profile) -> Void)? = nil
+    /// about the children (Sasha, twice) — so every child has a row here.
+    /// A child's settings page, built by the home screen (it owns the reset, the
+    /// removal and the pairing code). It slides IN, inside this window — the row
+    /// used to close the window and open another (Rani, 2026-10-11: "זה נורא").
+    var childSettings: ((Profile) -> AnyView)? = nil
 
     @State private var showAppPicker = false
     @State private var pickerSelection = SelectionStorage.empty()
@@ -78,43 +78,19 @@ struct ParentSettingsView: View {
             // form was "a pile nobody would open"). Tofy+ lives on the home.
             ScrollView {
                 VStack(spacing: 12) {
-                    // 🌍 Written in both languages, so a parent who switched by
-                    // mistake can always find the way back.
-                    if LanguageStore.shared.available.count > 1 {
-                        NavigationLink { LanguagePickerView() } label: {
-                            HStack(spacing: 12) {
-                                Text("🌍").font(.system(size: 22))
-                                    .frame(width: 44, height: 44)
-                                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.22)))
-                                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.32), lineWidth: 1))
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(tr("שפה · Language")).font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.primary)
-                                    Text(LanguageStore.shared.current.nativeName).font(.system(size: 12.5, weight: .medium, design: .rounded)).foregroundStyle(GlassInk.secondary)
-                                }
-                                Spacer(minLength: 0)
-                                Image(systemName: AppSymbol.forwardChevron).font(.system(size: 14, weight: .bold)).foregroundStyle(GlassInk.tertiary)
-                            }
-                            .padding(14)
-                            .frame(maxWidth: .infinity)
-                            .glassPane(radius: 16, strength: 0.14)
-                        }
-                        .buttonStyle(.plain)
-                    }
                     // 🧒 Whose settings? A child's first — that is what parents come
                     // here for — then everything that is about the family as a whole.
-                    if let onOpenChild, !orderedChildren.isEmpty {
+                    if let childSettings, !orderedChildren.isEmpty {
                         menuHeading(tr("הגדרות של ילד"))
                         ForEach(orderedChildren) { p in
-                            Button {
-                                Haptic.light()
-                                dismiss()
-                                onOpenChild(p)
+                            NavigationLink {
+                                childSettings(p)
                             } label: {
                                 HStack(spacing: 12) {
                                     ProfileAvatarView(profile: p, size: 44)
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(p.name).font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.primary)
-                                        Text(tr("רמת קושי, זמן מסך, עולמות ושפה")).font(.system(size: 12.5, weight: .medium, design: .rounded)).foregroundStyle(GlassInk.secondary)
+                                        Text(childRowSummary(p)).font(.system(size: 12.5, weight: .medium, design: .rounded)).foregroundStyle(GlassInk.secondary)
                                             .lineLimit(2).minimumScaleFactor(0.8)
                                     }
                                     Spacer(minLength: 0)
@@ -128,9 +104,6 @@ struct ParentSettingsView: View {
                         }
                         menuHeading(tr("הגדרות כלליות"))
                     }
-                    menuRow("🎨", tr("רקע"), backdropSummary) {
-                        BackdropPickerView(owner: .parent).navigationBarBackButtonHidden(true)
-                    }
                     menuRow("👪", tr("המשפחה"), familySummary) {
                         subScreen(tr("המשפחה")) { familySection; timeZoneSection; childOrderSection; syncSection }
                     }
@@ -143,8 +116,8 @@ struct ParentSettingsView: View {
                             ConvertToChildDeviceView { dismiss() }
                         }
                     }
-                    menuRow("🎮", tr("זמן מסך ופרסים"), rewardsSummary) {
-                        subScreen(tr("זמן מסך ופרסים")) { rewardSection; penaltySection; smartFeedSection }
+                    menuRow("🎮", tr("כללי המשחק"), rewardsSummary) {
+                        subScreen(tr("כללי המשחק")) { rewardSection; penaltySection; smartFeedSection }
                     }
                     menuRow("🔔", tr("התראות"), notificationsSummary) {
                         subScreen(tr("התראות")) { notificationsSection; insightNotificationsSection }
@@ -152,8 +125,17 @@ struct ParentSettingsView: View {
                     menuRow("🔐", tr("קוד הורה"), pinSummary) {
                         subScreen(tr("קוד הורה")) { pinSection }
                     }
-                    menuRow("📱", tr("אפליקציות ונעילה"), devicesSummary, soft: true) {
-                        subScreen(tr("אפליקציות ונעילה")) {
+                    // 🎨🌍 The backdrop and the language in one door. "Language" stays in
+                    // Latin letters in the title, so a parent who switched by mistake
+                    // can always find the way back.
+                    menuRow("🎨", multilingual ? tr("מראה ושפה") + " · Language" : tr("רקע"),
+                            multilingual ? "\(backdropSummary) · \(LanguageStore.shared.current.nativeName)" : backdropSummary) {
+                        lookAndLanguagePage
+                    }
+                    // On a PARENT's phone the page is about this phone only (a mother
+                    // looked here for her child's apps) — so it is named for what it is.
+                    menuRow("📱", settings.deviceRole == .parent ? tr("הטלפון הזה") : tr("אפליקציות ונעילה"), devicesSummary, soft: true) {
+                        subScreen(settings.deviceRole == .parent ? tr("הטלפון הזה") : tr("אפליקציות ונעילה")) {
                             if settings.deviceRole == .parent { thisDeviceOnlyNote }
                             if settings.deviceRole != .parent || shields.isAuthorized { authorizationSection }
                             appsSection; soundsSection; deviceSection
@@ -226,6 +208,9 @@ struct ParentSettingsView: View {
         // 🎚 Outside the NavigationStack, so the rail is drawn at the edge
         // of the glass and not at the edge of the content.
         .railDismiss(tr("סיום"), systemImage: "checkmark") { dismiss() }
+        // ONE window: every page pushed from here — a child's settings and the
+        // editors inside them — closes it with its own "סיום".
+        .environment(\.closeSettings, { dismiss() })
     }
 
     private var backdropSummary: String {
@@ -350,6 +335,37 @@ struct ParentSettingsView: View {
 
     // MARK: - Menu
 
+    private var multilingual: Bool { LanguageStore.shared.available.count > 1 }
+
+    /// "כיתה ו׳ · זמן מסך, למידה ומכשירים" — what waits behind a child's row.
+    private func childRowSummary(_ p: Profile) -> String {
+        guard p.grade != nil else { return tr("זמן מסך, למידה ומכשירים") }
+        return tr("\(Profile.gradeNameForParent(p.effectiveGrade)) · זמן מסך, למידה ומכשירים")
+    }
+
+    /// 🎨🌍 "מראה ושפה" — the parent's backdrop and the app's language.
+    private var lookAndLanguagePage: some View {
+        ScrollView {
+            VStack(spacing: 12) {
+                menuRow("🎨", tr("רקע"), backdropSummary) {
+                    BackdropPickerView(owner: .parent).navigationBarBackButtonHidden(true)
+                }
+                if multilingual {
+                    menuRow("🌍", tr("שפה · Language"), LanguageStore.shared.current.nativeName) {
+                        LanguagePickerView()
+                    }
+                }
+            }
+            .padding(.horizontal, AppSpacing.lg).padding(.top, AppSpacing.sm).padding(.bottom, AppSpacing.xxl)
+            .frame(maxWidth: 560).frame(maxWidth: .infinity)
+        }
+        .background(GlassBackdrop())
+        .environment(\.colorScheme, .dark)
+        .navigationTitle(multilingual ? tr("מראה ושפה") : tr("רקע"))
+        .navigationBarTitleDisplayMode(.inline)
+        .settingsDoneButton()
+    }
+
     private func menuHeading(_ title: String) -> some View {
         Text(title)
             .font(.system(size: 13.5, weight: .heavy, design: .rounded))
@@ -388,6 +404,7 @@ struct ParentSettingsView: View {
             .glassForm()
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
+            .settingsDoneButton()
     }
 
     /// Only on an iPad (the device, not the size class) that is a parent device

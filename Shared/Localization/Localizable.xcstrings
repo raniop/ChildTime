@@ -3748,6 +3748,28 @@
         }
       }
     },
+    "%@ · זמן מסך, למידה ומכשירים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · وقت الشاشة، التعلّم والأجهزة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · screen time, learning and devices"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · экранное время, обучение и устройства"
+          }
+        }
+      }
+    },
     "%@ · יִצּוּא, מְחִיקָה" : {
       "localizations" : {
         "ar" : {
@@ -3921,6 +3943,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ · с %2$@"
+          }
+        }
+      }
+    },
+    "%@ · מתאימה את עצמה לכל נושא" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · تتكيّف مع كل موضوع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · adapts itself to each subject"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · подстраивается под каждую тему"
           }
         }
       }
@@ -22993,6 +23037,138 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "С этого устройства нет активности уже %lld дн."
+          }
+        }
+      }
+    },
+    "אין תובנה להיום — %@ עוד לא ענה על שאלות היום." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا توجد ملاحظة لليوم — %@ لم يُجِب عن أسئلة اليوم بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No insight for today — %@ hasn't answered any questions today."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На сегодня наблюдений нет — %@ ещё не отвечал на вопросы сегодня."
+          }
+        }
+      }
+    },
+    "אין תובנה להיום — %@ עוד לא ענתה על שאלות היום." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا توجد ملاحظة لليوم — %@ لم تُجِب عن أسئلة اليوم بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No insight for today — %@ hasn't answered any questions today."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На сегодня наблюдений нет — %@ ещё не отвечала на вопросы сегодня."
+          }
+        }
+      }
+    },
+    "אין תובנה לחודש הזה — %@ עוד לא ענה על שאלות החודש." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا توجد ملاحظة لهذا الشهر — %@ لم يُجِب عن أسئلة هذا الشهر بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No insight for this month — %@ hasn't answered any questions this month."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В этом месяце наблюдений нет — %@ ещё не отвечал на вопросы в этом месяце."
+          }
+        }
+      }
+    },
+    "אין תובנה לחודש הזה — %@ עוד לא ענתה על שאלות החודש." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا توجد ملاحظة لهذا الشهر — %@ لم تُجِب عن أسئلة هذا الشهر بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No insight for this month — %@ hasn't answered any questions this month."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В этом месяце наблюдений нет — %@ ещё не отвечала на вопросы в этом месяце."
+          }
+        }
+      }
+    },
+    "אין תובנה לשבוע הזה — %@ עוד לא ענה על שאלות השבוע." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا توجد ملاحظة لهذا الأسبوع — %@ لم يُجِب عن أسئلة هذا الأسبوع بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No insight for this week — %@ hasn't answered any questions this week."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На этой неделе наблюдений нет — %@ ещё не отвечал на вопросы на этой неделе."
+          }
+        }
+      }
+    },
+    "אין תובנה לשבוע הזה — %@ עוד לא ענתה על שאלות השבוע." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا توجد ملاحظة لهذا الأسبوع — %@ لم تُجِب عن أسئلة هذا الأسبوع بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No insight for this week — %@ hasn't answered any questions this week."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На этой неделе наблюдений нет — %@ ещё не отвечала на вопросы на этой неделе."
           }
         }
       }
@@ -45994,6 +46170,28 @@
         }
       }
     },
+    "הבחירה היא נקודת ההתחלה. טופי מעלה ומוריד מעט בכל נושא לפי התשובות — התווית ליד שם הנושא מראה מה מוגש עכשיו." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختياركم هو نقطة البداية. توفي يرفع المستوى أو يخفضه قليلًا في كل موضوع حسب الإجابات — والعلامة بجانب اسم الموضوع تبيّن ما يُقدَّم الآن."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your choice is the starting point. Tofy moves each subject a little up or down by the answers — the label beside a subject shows what is served now."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваш выбор — отправная точка. Тофи немного повышает или понижает уровень в каждой теме по ответам — метка рядом с темой показывает, что даётся сейчас."
+          }
+        }
+      }
+    },
     "הבית" : {
       "localizations" : {
         "ar" : {
@@ -48555,6 +48753,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Этот аккаунт отключён — обратитесь в нашу поддержку"
+          }
+        }
+      }
+    },
+    "הטלפון הזה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا الهاتف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этот телефон"
           }
         }
       }
@@ -52008,6 +52228,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удалить фото"
+          }
+        }
+      }
+    },
+    "הסרה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إزالة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Убрать"
           }
         }
       }
@@ -57187,6 +57429,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "«Экранное время» Apple"
+          }
+        }
+      }
+    },
+    "זמן מסך, למידה ומכשירים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت الشاشة، التعلّم والأجهزة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screen time, learning and devices"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экранное время, обучение и устройства"
           }
         }
       }
@@ -72855,6 +73119,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Входит в Tofy+ — уже открыто для всех детей"
+          }
+        }
+      }
+    },
+    "כללי המשחק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قواعد اللعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Game rules"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Правила игры"
           }
         }
       }
@@ -89799,6 +90085,28 @@
         }
       }
     },
+    "מראה ושפה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المظهر واللغة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Look & language"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вид и язык"
+          }
+        }
+      }
+    },
     "מרחוק, בלי לגעת בטלפון שלו: מתנת דקות, נעילה ומטלות." : {
       "localizations" : {
         "ar" : {
@@ -101449,6 +101757,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ещё собираем данные…"
+          }
+        }
+      }
+    },
+    "עוד אין מספיק תשובות החודש כדי להוציא תובנה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا توجد إجابات كافية هذا الشهر لاستخلاص ملاحظة بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not enough answers this month for an insight yet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В этом месяце пока мало ответов, чтобы сделать наблюдение."
+          }
+        }
+      }
+    },
+    "עוד אין מספיק תשובות היום כדי להוציא תובנה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا توجد إجابات كافية اليوم لاستخلاص ملاحظة بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not enough answers today for an insight yet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сегодня пока мало ответов, чтобы сделать наблюдение."
+          }
+        }
+      }
+    },
+    "עוד אין מספיק תשובות השבוע כדי להוציא תובנה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا توجد إجابات كافية هذا الأسبوع لاستخلاص ملاحظة بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not enough answers this week for an insight yet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На этой неделе пока мало ответов, чтобы сделать наблюдение."
           }
         }
       }
@@ -127628,6 +128002,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "👑👑👑 Все уровни пройдены"
+          }
+        }
+      }
+    },
+    "👤 פרופיל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👤 الملف الشخصي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👤 Profile"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👤 Профиль"
           }
         }
       }

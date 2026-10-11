@@ -533,7 +533,17 @@ struct ChildTimeApp: App {
                         HouseholdManager.shared.seedDemoLiveWindow(childID: p.id)
                     }
                 }
-        case "parentsettings": ParentSettingsView(onOpenChild: { _ in })   // DEMO_SCREEN=parentsettings
+        case "parentsettings":                                             // DEMO_SCREEN=parentsettings [DEMO_DEVICE=1]
+            ParentSettingsView(childSettings: { p in
+                AnyView(ChildSettingsView(profileID: p.id, snapshot: ProgressStore.shared.captureSnapshot(), embedded: true,
+                                          onResetProgress: { _ in }, onDelete: { _ in }, onConnectDevice: {}, showsLocation: true))
+            })
+            .onAppear {
+                ParentSettings.shared.deviceRole = .parent     // the ⚙️ window is a parent's
+                if ProcessInfo.processInfo.environment["DEMO_DEVICE"] != nil, let id = ProfileStore.shared.activeID {
+                    HouseholdManager.shared.seedDemoLiveWindow(childID: id)
+                }
+            }
         // 🎨 DEMO_SCREEN=backdrops | parentbackdrops — the backdrop picker (child's / parent's)
         case "backdrops":
             if let id = ProfileStore.shared.activeID { BackdropPickerView(owner: .child(id)) }
@@ -688,8 +698,8 @@ struct ChildTimeApp: App {
         case "childsettings":
             if let id = ProfileStore.shared.activeID {
                 // DEMO_DEVICE=1 — with a connected device (the devices page).
-                ChildSettingsView(profileID: id, snapshot: .blank, onResetProgress: { _ in }, onDelete: { _ in },
-                                  onConnectDevice: {})
+                ChildSettingsView(profileID: id, snapshot: ProgressStore.shared.captureSnapshot(), onResetProgress: { _ in }, onDelete: { _ in },
+                                  onConnectDevice: {}, showsLocation: true)
                     .onAppear {
                         if ProcessInfo.processInfo.environment["DEMO_DEVICE"] != nil {
                             HouseholdManager.shared.seedDemoLiveWindow(childID: id)

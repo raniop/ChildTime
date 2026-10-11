@@ -24,8 +24,15 @@ struct ChildScreenTimeView: View {
         profiles.profiles.first(where: { $0.id == profileID })
     }
 
+    @Environment(\.closeSettings) private var closeSettings
+    /// Pushed inside the settings window (see `SettingsStack`) — no stack and
+    /// no "סיום" of its own there.
+    var embedded = false
+    /// "סיום": alone it closes this sheet; inside the settings window, the whole window.
+    private func close() { if embedded, let closeSettings { closeSettings() } else { dismiss() } }
+
     var body: some View {
-        NavigationStack {
+        SettingsStack(embedded: embedded) {
             Form {
                 Section {
                     Text(tr("בחרו כמה דקות מסך ביום עבור \(profile?.name ?? tr("הילד")). השינוי מסתנכרן אוטומטית למכשיר של הילד."))
@@ -82,7 +89,7 @@ struct ChildScreenTimeView: View {
                 // 🎚 The one way out lives in the rail on a foldable.
                 if !railHost.hasRail {
                     ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) {
-                        Button(tr("סיום")) { if save() { dismiss() } }
+                        Button(tr("סיום")) { if save() { close() } }
                     }
                 }
                 ToolbarItemGroup(placement: .keyboard) {
@@ -94,7 +101,9 @@ struct ChildScreenTimeView: View {
         // 🎚 Outside the NavigationStack and outside the readable-width cap —
         // otherwise the rail is drawn at the edge of the 600pt column instead
         // of the edge of the glass.
-        .railDismiss(tr("סיום"), systemImage: "checkmark") { if save() { dismiss() } }
+        .railDismiss(unless: embedded, tr("סיום"), systemImage: "checkmark") { if save() { close() } }
+        // The back arrow has no "סיום" to press: leaving the page saves it.
+        .onDisappear { if embedded { save() } }
         .onAppear { loadIfNeeded() }
         // Persist when the sheet closes (covers both typed and stepped values)
         // — keeps Firestore writes to one per edit session, not one per keystroke.

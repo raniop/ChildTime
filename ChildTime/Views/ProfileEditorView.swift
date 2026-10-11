@@ -116,10 +116,17 @@ struct ProfileEditorView: View {
 
                             gradeRow
 
-                            learningLevelRow
+                            // Folded, as in the sign-up form (Rani, 2026-10-11: "כל
+                            // השטויות האלה מה זה נותן?"): the starting level and the
+                            // interests only seed a NEW child's first day.
+                            moreFold
+                            if showMore {
+                                learningLevelRow
+                                interestsSection
+                            }
+                        } else {
+                            interestsSection
                         }
-
-                        interestsSection
 
                         Text(tr("טופי · \(AppInfo.versionLine)"))
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
@@ -258,22 +265,7 @@ struct ProfileEditorView: View {
 
                 capSection
 
-                Button {
-                    Haptic.light()
-                    withAnimation(.easeInOut(duration: 0.25)) { showMore.toggle() }
-                } label: {
-                    HStack {
-                        Text(tr("עוד הגדרות (לא חובה) — רמה ותחומי עניין"))
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
-                        Spacer()
-                        Image(systemName: showMore ? "chevron.up" : "chevron.down")
-                            .font(.system(size: 13, weight: .bold))
-                    }
-                    .foregroundStyle(.white.opacity(0.9))
-                    .padding(.horizontal, 14).padding(.vertical, 11)
-                    .glassPane(radius: 16, strength: 0.1, shadow: false)
-                }
-                .buttonStyle(.plain)
+                moreFold
                 if showMore {
                     learningLevelRow
                     interestsSection
@@ -290,6 +282,26 @@ struct ProfileEditorView: View {
                 .padding(.horizontal, OnboardingFooter.sidePadding)
                 .frame(maxWidth: 520)
         }
+    }
+
+    /// "עוד הגדרות (לא חובה)" — the starting level and the interests, folded.
+    private var moreFold: some View {
+        Button {
+            Haptic.light()
+            withAnimation(.easeInOut(duration: 0.25)) { showMore.toggle() }
+        } label: {
+            HStack {
+                Text(tr("עוד הגדרות (לא חובה) — רמה ותחומי עניין"))
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                Spacer()
+                Image(systemName: showMore ? "chevron.up" : "chevron.down")
+                    .font(.system(size: 13, weight: .bold))
+            }
+            .foregroundStyle(.white.opacity(0.9))
+            .padding(.horizontal, 14).padding(.vertical, 11)
+            .glassPane(radius: 16, strength: 0.1, shadow: false)
+        }
+        .buttonStyle(.plain)
     }
 
     private func compactLabel(_ text: String) -> some View {

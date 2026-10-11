@@ -60,23 +60,26 @@ struct ChildSettingsView: View {
 
     let profileID: UUID
     let snapshot: ProgressSnapshot
+    /// Pushed inside the ⚙️ window (see `SettingsStack`); alone it is its own sheet.
+    var embedded = false
     /// Owned by the dashboard: the local + cloud wipe and its refresh.
     var onResetProgress: (Profile) -> Void
-    /// Owned by the dashboard: removes the child, closes this sheet and pops the page.
+    /// Owned by the dashboard: removes the child, closes the window and pops the page.
     var onDelete: (Profile) -> Void
-    /// Owned by the dashboard: closes this sheet and opens the QR for a new device.
+    /// "Connect a device": the pairing code is made and watched by the home
+    /// screen, so the home screen supplies the sheet — and it opens OVER this
+    /// window (`pairing`), instead of closing the settings to show it.
     var onConnectDevice: (() -> Void)? = nil
-    /// Owned by the dashboard: closes this sheet and opens the child on the map.
-    var onLocation: (() -> Void)? = nil
+    var pairing: Binding<Profile?>? = nil
+    var pairingSheet: ((Profile) -> AnyView)? = nil
+    /// 📍 The map slides in here too.
+    var showsLocation = false
+    @Environment(\.closeSettings) private var closeSettings
+    /// "סיום" closes the whole settings window, from any depth.
+    private func close() { if embedded, let closeSettings { closeSettings() } else { dismiss() } }
 
     @State private var editing: Profile? = nil
-    @State private var language: Profile? = nil
-    @State private var difficulty: Profile? = nil
-    @State private var worlds: Profile? = nil
-    @State private var screenTime: Profile? = nil
     @State private var friends: Profile? = nil
-    @State private var quietEdit: QuietEdit? = nil
-    private struct QuietEdit: Identifiable { let kind: QuietKind; var id: String { kind.rawValue } }
     @State private var confirmPinReset = false
     @State private var confirmReset = false
     @State private var confirmDelete = false
@@ -89,10 +92,10 @@ struct ChildSettingsView: View {
     private var profile: Profile? { profiles.profiles.first { $0.id == profileID } }
 
     var body: some View {
-        NavigationStack {
+        SettingsStack(embedded: embedded) {
             Group {
                 if let p = profile {
-                    dialogs(sheets(form(p)), p)
+                    sheets(form(p))
                 } else {
                     Color.clear.background(GlassBackdrop())
                 }
@@ -103,12 +106,14 @@ struct ChildSettingsView: View {
                 // 🎚 The one way out lives in the rail on a foldable.
                 if !railHost.hasRail {
                     ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) {
-                        Button(tr("סיום")) { dismiss() }
+                        Button(tr("סיום")) { close() }
                     }
                 }
             }
         }
-        .railDismiss(tr("סיום"), systemImage: "checkmark") { dismiss() }
+        .railDismiss(unless: embedded, tr("סיום"), systemImage: "checkmark") { dismiss() }
+        // Every page pushed from here closes the same window with its "סיום".
+        .environment(\.closeSettings, closeSettings ?? { dismiss() })
         // 🔌 An edit refused while the family isn't loaded — outside the
         // NavigationStack, so it shows from every pushed page. (The editor
         // SHEETS below carry their own: an alert can't show under a sheet.)
@@ -119,68 +124,51 @@ struct ChildSettingsView: View {
     // MARK: - The list
 
     private func form(_ p: Profile) -> some View {
-        // Rani's approved layout (2026-10-08): time · learning · language ·
-        // device and location, and everything rare one tap further in.
+        // Four groups in the order a parent uses them (Rani, 2026-10-11: "יותר
+        // מדי דברים, יותר מדי מסובך… סדר הדברים לא טוב"): time · learning ·
+        // devices · profile. Every row slides its page IN — nothing closes this
+        // window to open another.
         Form {
             screenTimeSection(p)
             learningSection(p)
-            languageSection(p)
             deviceSection(p)
-            smartDifficultySection(p)   // read-only and long — after the settings
-            Section {
-                NavigationLink {
-                    morePage(p)
-                } label: {
-                    rowLabel("🛠️", tr("עוד הגדרות"), value: tr("קוד, חברים, איפוס והסרה"), chevron: false)
-                }
-            } header: {
-                Text(tr("מתקדם"))
-            }
-            .glassRows()
+            profileSection(p)
         }
         .readableColumn()
         .glassForm()
     }
 
-    private func languageSection(_ p: Profile) -> some View {
-        let girl = p.gender == .girl
-        let lang = p.language.flatMap(AppLanguage.init(rawValue:))
-        return Section {
-            row("🌍", girl ? tr("שפה במכשיר שלה") : tr("שפה במכשיר שלו"),
-                value: lang.map { "\($0.flag) \($0.nativeName)" }) { language = p }
-        } header: {
-            Text(tr("🌍 שפה"))
+    /// A row that slides its page in.
+    private func link<D: View>(_ emoji: String, _ title: String, value: String? = nil,
+                               valueTint: Color = GlassInk.secondary,
+                               @ViewBuilder to destination: @escaping () -> D) -> some View {
+        NavigationLink {
+            destination()
+        } label: {
+            rowLabel(emoji, title, value: value, valueTint: valueTint, chevron: false)
         }
-        .glassRows()
     }
 
-    /// 📱 The child's own device(s), the app-deletion window, and the map.
+    /// 📱 The child's own device(s) and the map.
     private func deviceSection(_ p: Profile) -> some View {
         let devices = household.devicesByChild[p.id.uuidString] ?? []
         let deviceValue = devices.isEmpty
             ? (onConnectDevice != nil ? tr("עוד לא חובר — לחצו לחיבור") : tr("עוד לא חובר"))
             : devices.map(\.name).joined(separator: ", ") + " · " + tr("מחובר")
         return Section {
-            if devices.isEmpty, let onConnectDevice {
-                row("📱", tr("המכשיר של \(p.name)"), value: deviceValue) { onConnectDevice() }
+            if devices.isEmpty, onConnectDevice != nil {
+                row("📱", tr("המכשיר של \(p.name)"), value: deviceValue) { connectDevice(p) }
             } else if devices.isEmpty {
                 rowLabel("📱", tr("המכשיר של \(p.name)"), value: deviceValue, chevron: false)
             } else {
-                // With a device connected this row was plain text — the one place a
-                // parent looks for "add another device / remove this one" led
-                // nowhere (Rani, 2026-10-11). Both live at the foot of the child's
-                // report; now here too.
-                NavigationLink {
-                    devicesPage(p)
-                } label: {
-                    rowLabel("📱", tr("המכשיר של \(p.name)"), value: deviceValue, chevron: false)
+                link("📱", tr("המכשיר של \(p.name)"), value: deviceValue) { devicesPage(p) }
+            }
+            if showsLocation, !devices.isEmpty {   // 📍 nothing to locate without a device
+                link("📍", tr("איפה \(p.name)"), value: tr("מפה, מקומות וצפצוף לטלפון")) {
+                    ParentLocationView(focusChildID: p.id.uuidString, embedded: true)
+                        .environmentObject(profiles)
+                        .environment(\.layoutDirection, .app)
                 }
-            }
-            if !devices.isEmpty {
-                row("🗑️", tr("לאפשר מחיקת אפליקציות (5 דק')"), chevron: false) { allowAppRemoval(p) }
-            }
-            if let onLocation, !devices.isEmpty {   // 📍 nothing to locate without a device
-                row("📍", tr("איפה \(p.name)"), value: tr("מפה, מקומות וצפצוף לטלפון")) { onLocation() }
             }
         } header: {
             Text(tr("📱 מכשיר ומיקום"))
@@ -188,9 +176,41 @@ struct ChildSettingsView: View {
         .glassRows()
     }
 
+    private func connectDevice(_ p: Profile) {
+        onConnectDevice?()
+        pairing?.wrappedValue = p
+    }
+
     private func learningSection(_ p: Profile) -> some View {
         let listed = ChildWorldsView.listedWorlds(for: p)
         let open = listed.filter { p.allows($0.topic) }.count
+        let girl = p.gender == .girl
+        let lang = p.language.flatMap(AppLanguage.init(rawValue:))
+        return Section {
+            // ONE place for difficulty: what the parent chose, and — inside —
+            // what the engine serves per topic. A "בינוני" row over a list of
+            // "קל" and "קשה" read as a contradiction (Rani, 2026-10-11).
+            link("🎚️", tr("רמת קושי"), value: tr("\(difficultySummary(p)) · מתאימה את עצמה לכל נושא")) {
+                ChildDifficultyView(profileID: p.id, snapshot: snapshot, embedded: true)
+                    .environmentObject(profiles)
+            }
+            link("🌐", tr("עולמות פעילים"), value: listed.isEmpty ? nil : tr("\(open) מתוך \(listed.count)")) {
+                ChildWorldsView(profileID: p.id, embedded: true)
+                    .environmentObject(profiles)
+            }
+            link("🌍", girl ? tr("שפה במכשיר שלה") : tr("שפה במכשיר שלו"),
+                 value: lang.map { "\($0.flag) \($0.nativeName)" }) {
+                ChildLanguageView(profileID: p.id, embedded: true)
+                    .environmentObject(profiles)
+            }
+        } header: {
+            Text(tr("📚 למידה"))
+        }
+        .glassRows()
+    }
+
+    /// 👤 Who the child is, and everything rare one step further in.
+    private func profileSection(_ p: Profile) -> some View {
         // 🎓 The grade drives ALL curriculum content — flagged when it is missing
         // or when the CHILD picked it on their own device.
         let flagged = p.grade == nil || p.gradeSetByChild
@@ -198,14 +218,13 @@ struct ChildSettingsView: View {
             ? tr("כיתה לא הוגדרה — הגדירו")
             : Profile.gradeNameForParent(p.effectiveGrade) + (p.gradeSetByChild ? " " + tr("· נבחרה ע\"י הילד — בדקו") : "")
         return Section {
+            // The one editor with "שמירה" / "ביטול" — a form to fill, so it stays a sheet.
             row("✏️", tr("שם, גיל וכיתה"),
                 value: "\(p.name) · \(p.age.label) · \(grade)",
                 valueTint: flagged ? AppColor.flameOrange : GlassInk.secondary) { editing = p }
-            row("🎚️", tr("רמת קושי"), value: difficultySummary(p)) { difficulty = p }
-            row("🌐", tr("עולמות פעילים"),
-                value: listed.isEmpty ? nil : tr("\(open) מתוך \(listed.count)")) { worlds = p }
+            link("🛠️", tr("עוד הגדרות"), value: tr("קוד, חברים, איפוס והסרה")) { morePage(p) }
         } header: {
-            Text(tr("📚 למידה"))
+            Text(tr("👤 פרופיל"))
         }
         .glassRows()
     }
@@ -248,60 +267,22 @@ struct ChildSettingsView: View {
         return tr("לפי נושא")
     }
 
-    /// "רמת קושי חכמה" — the adaptive engine's current level per practiced
-    /// topic and where it moved (moved here from the old child card).
-    @ViewBuilder
-    private func smartDifficultySection(_ p: Profile) -> some View {
-        let topics = AdaptiveTopicLevel.practicedTopics(profile: p, snapshot: snapshot)
-        if AdaptiveTopicLevel.hasSignal(snapshot), !topics.isEmpty {
-            Section {
-                ForEach(topics) { topic in
-                    let st = AdaptiveTopicLevel.state(for: topic, profile: p, snapshot: snapshot)
-                    HStack(spacing: 8) {
-                        Text("\(topic.emoji) \(topic.parentName)")
-                            .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            .foregroundStyle(GlassInk.primary)
-                            .lineLimit(1).minimumScaleFactor(0.8)
-                        Spacer(minLength: 4)
-                        if let dir = st.direction { directionChip(dir) }
-                        Text(st.served.parentName)
-                            .font(.system(size: 12, weight: .heavy, design: .rounded))
-                            .foregroundStyle(GlassInk.primary)
-                            .padding(.horizontal, 9).padding(.vertical, 3)
-                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
-                            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
-                    }
-                }
-            } header: {
-                Text(tr("רמת קושי חכמה"))
-            } footer: {
-                if let sentence = AdaptiveTopicLevel.sentence(for: topics, profile: p, snapshot: snapshot) {
-                    Text(sentence)
-                }
-            }
-            .glassRows()
-        }
-    }
-
-    private func directionChip(_ dir: AdaptiveTopicLevel.Direction) -> some View {
-        let raised = dir == .raised
-        return Text(raised ? "↑ " + tr("מאתגר יותר") : "↓ " + tr("בונה ביטחון"))
-            .font(.system(size: 11, weight: .heavy, design: .rounded))
-            .foregroundStyle(raised ? GlassInk.good : GlassInk.warn)
-            .lineLimit(1).minimumScaleFactor(0.8)
-    }
-
     private func screenTimeSection(_ p: Profile) -> some View {
         let cap = p.resolvedDailyCap(globalEnabled: settings.dailyCapEnabled, globalMax: settings.maxMinutesPerDay)
         return Section {
-            row("⏳", tr("זמן מסך יומי"),
-                value: cap.enabled ? tr("\(cap.minutes) דקות") : tr("ללא הגבלה")) { screenTime = p }
-            // 🏫🌙 Hours when minutes don't open (QuietHours).
-            row("🏫", tr("זמן בית ספר"), value: QuietHoursText.summary(p.quietHours, kind: .school)) {
-                quietEdit = QuietEdit(kind: .school)
+            link("⏳", tr("זמן מסך יומי"), value: cap.enabled ? tr("\(cap.minutes) דקות") : tr("ללא הגבלה")) {
+                ChildScreenTimeView(profileID: p.id, embedded: true)
+                    .environmentObject(profiles)
+                    .environmentObject(settings)
             }
-            row("🌙", tr("שעת שינה"), value: QuietHoursText.summary(p.quietHours, kind: .bedtime)) {
-                quietEdit = QuietEdit(kind: .bedtime)
+            // 🏫🌙 Hours when minutes don't open (QuietHours).
+            link("🏫", tr("זמן בית ספר"), value: QuietHoursText.summary(p.quietHours, kind: .school)) {
+                QuietHoursEditorView(profileID: profileID, kind: .school, embedded: true)
+                    .environmentObject(profiles)
+            }
+            link("🌙", tr("שעת שינה"), value: QuietHoursText.summary(p.quietHours, kind: .bedtime)) {
+                QuietHoursEditorView(profileID: profileID, kind: .bedtime, embedded: true)
+                    .environmentObject(profiles)
             }
         } header: {
             Text(tr("⏱ זמן"))
@@ -316,12 +297,34 @@ struct ChildSettingsView: View {
         return Form {
             ForEach(devices) { d in
                 Section {
-                    rowLabel(d.kind == "ipad" ? "📲" : "📱",
-                             (d.kind == "ipad" ? tr("אייפד") : tr("אייפון"))
-                                + ([tr("אייפד"), tr("אייפון"), "iPhone", "iPad", ""].contains(d.name) ? "" : " · \(d.name)"),
-                             value: Date().timeIntervalSince(d.lastSeenAt) < 120 ? tr("● מחובר") : tr("נראה \(Self.relative(d.lastSeenAt))"),
-                             valueTint: Date().timeIntervalSince(d.lastSeenAt) < 120 ? GlassInk.good : GlassInk.secondary,
-                             chevron: false)
+                    // Not a PARENT's phone in Kid Mode: that row goes away by itself
+                    // when Kid Mode ends, and removing it reset the parent's phone
+                    // (the same liveness rule as the report's device list).
+                    let removable = !household.parentDevices.contains(where: { $0.deviceID == d.deviceID && $0.lastSeenAt >= d.joinedAt })
+                    // The device and its "הסרה" are ONE row — a separate full-width
+                    // "הסר מכשיר" row under it read as a thing of its own (Rani, 2026-10-12).
+                    HStack(spacing: 8) {
+                        rowLabel(d.kind == "ipad" ? "📲" : "📱",
+                                 (d.kind == "ipad" ? tr("אייפד") : tr("אייפון"))
+                                    + ([tr("אייפד"), tr("אייפון"), "iPhone", "iPad", ""].contains(d.name) ? "" : " · \(d.name)"),
+                                 value: Date().timeIntervalSince(d.lastSeenAt) < 120 ? tr("● מחובר") : tr("נראה \(Self.relative(d.lastSeenAt))"),
+                                 valueTint: Date().timeIntervalSince(d.lastSeenAt) < 120 ? GlassInk.good : GlassInk.secondary,
+                                 chevron: false)
+                        if removable {
+                            Button {
+                                Haptic.light()
+                                deviceToRemove = d
+                            } label: {
+                                Text(tr("הסרה"))
+                                    .font(.system(size: 13.5, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(GlassInk.weak)
+                                    .padding(.horizontal, 12).frame(minHeight: 36)
+                                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.12)))
+                                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
                     if d.shieldAuthorized == false, d.role != "parent" {
                         Label(tr("אין הרשאת ״זמן מסך״ במכשיר הזה — נעילת אפליקציות לא תעבוד בו. פתחו בו את טופי ← ⚙️ ← בקש הרשאה."),
                               systemImage: "exclamationmark.shield.fill")
@@ -329,24 +332,34 @@ struct ChildSettingsView: View {
                             .foregroundStyle(AppColor.flameOrange)
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    // Not a PARENT's phone in Kid Mode: that row goes away by itself
-                    // when Kid Mode ends, and removing it reset the parent's phone
-                    // (the same liveness rule as the report's device list).
-                    if !household.parentDevices.contains(where: { $0.deviceID == d.deviceID && $0.lastSeenAt >= d.joinedAt }) {
-                        row("❌", tr("הסר מכשיר"), destructive: true, chevron: false) { deviceToRemove = d }
-                    }
                 }
                 .glassRows()
             }
-            if let onConnectDevice {
+            if onConnectDevice != nil {
                 Section {
-                    row("🔗", tr("+ חיבור מכשיר נוסף"), chevron: false) { onConnectDevice() }
+                    row("🔗", tr("+ חיבור מכשיר נוסף"), chevron: false) { connectDevice(p) }
+                }
+                .glassRows()
+            }
+            // 🗑️ An action on the device, so it sits with the devices — it was a
+            // stray row in the settings list (Rani, 2026-10-11).
+            if !devices.isEmpty {
+                Section {
+                    row("🗑️", tr("לאפשר מחיקת אפליקציות (5 דק')"), chevron: false) { allowAppRemoval(p) }
                 }
                 .glassRows()
             }
         }
         .readableColumn()
         .glassForm()
+        .settingsDoneButton()
+        .alert(tr("שליטה מרחוק"), isPresented: Binding(
+            get: { remoteNote != nil },
+            set: { if !$0 { remoteNote = nil } })) {
+            Button(tr("הבנתי"), role: .cancel) {}
+        } message: {
+            Text(remoteNote ?? "")
+        }
         // On THIS page, beside its rows (an alert on the root underneath never comes up).
         .alert(deviceToRemove.map { tr("להסיר את \"\($0.name)\"?") } ?? "",
                isPresented: Binding(get: { deviceToRemove != nil }, set: { if !$0 { deviceToRemove = nil } })) {
@@ -433,6 +446,7 @@ struct ChildSettingsView: View {
         }
         .navigationTitle(tr("עוד הגדרות"))
         .navigationBarTitleDisplayMode(.inline)
+        .settingsDoneButton()
         .environment(\.layoutDirection, .app)
     }
 
@@ -547,54 +561,14 @@ struct ChildSettingsView: View {
                 .environment(\.layoutDirection, .app)
                 .familyConnectionAlert()
             }
-            .sheet(item: $language) { p in
-                ChildLanguageView(profileID: p.id)
-                    .environmentObject(profiles)
-                    .environment(\.layoutDirection, .app)
-                .familyConnectionAlert()
-            }
-            .sheet(item: $difficulty) { p in
-                ChildDifficultyView(profileID: p.id)
-                    .environmentObject(profiles)
-                    .environment(\.layoutDirection, .app)
-                .familyConnectionAlert()
-            }
-            .sheet(item: $worlds) { p in
-                ChildWorldsView(profileID: p.id)
-                    .environmentObject(profiles)
-                    .environment(\.layoutDirection, .app)
-                .familyConnectionAlert()
-            }
-            .sheet(item: $screenTime) { p in
-                ChildScreenTimeView(profileID: p.id)
-                    .environmentObject(profiles)
-                    .environmentObject(settings)
-                    .environment(\.layoutDirection, .app)
-                .familyConnectionAlert()
-            }
-            .sheet(item: $quietEdit) { q in
-                QuietHoursEditorView(profileID: profileID, kind: q.kind)
-                    .environmentObject(profiles)
-                    .environment(\.layoutDirection, .app)
-                .familyConnectionAlert()
-            }
             .sheet(item: $friends) { p in
                 ChildFriendsView(childID: p.id.uuidString, childName: p.name)
                     .environment(\.layoutDirection, .app)
                 .familyConnectionAlert()
             }
-    }
-
-    // MARK: - Confirmations (moved here with their rows)
-
-    private func dialogs<V: View>(_ content: V, _ p: Profile) -> some View {
-        content
-            .alert(tr("שליטה מרחוק"), isPresented: Binding(
-                get: { remoteNote != nil },
-                set: { if !$0 { remoteNote = nil } })) {
-                Button(tr("הבנתי"), role: .cancel) {}
-            } message: {
-                Text(remoteNote ?? "")
+            // 🔗 The pairing code, OVER the settings window.
+            .sheet(item: pairing ?? .constant(nil)) { p in
+                if let pairingSheet { pairingSheet(p) }
             }
     }
 }

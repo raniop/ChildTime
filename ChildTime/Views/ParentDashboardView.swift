@@ -125,6 +125,8 @@ struct ParentDashboardView: View {
     /// 💬 Live support chat (the old feedback form's successor).
     @ObservedObject private var support = SupportChatStore.shared
     @State private var qrChild: Profile? = nil
+    /// The same pairing sheet, opened OVER a child's settings window.
+    @State private var qrInSettings: Profile? = nil
     @State private var qrCode: String? = nil
     /// The join code couldn't be made (no family loaded / offline) — show why and
     /// a retry, instead of a spinner that turns forever.
@@ -604,10 +606,9 @@ struct ParentDashboardView: View {
                 childDetailScreen(for: id)
             }
             .sheet(isPresented: $showingSettings) {
-                // A child's row in ⚙️ closes it and opens that child's settings —
-                // once the sheet has gone, so one sheet never opens over another on its way out.
-                ParentSettingsView(onOpenChild: { p in
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { homeSettingsChild = p }
+                // A child's row in ⚙️ slides that child's settings IN, inside the same window.
+                ParentSettingsView(childSettings: { p in
+                    AnyView(childSettingsPage(p, embedded: true, afterDelete: { showingSettings = false }))
                 })
                     .environment(\.layoutDirection, .app)
             }
@@ -772,25 +773,7 @@ struct ParentDashboardView: View {
                     .familyConnectionAlert()
             }
             .sheet(item: $homeSettingsChild) { p in
-                ChildSettingsView(profileID: p.id,
-                                  snapshot: rows.first(where: { $0.profile.id == p.id })?.snapshot ?? ProgressSnapshot(),
-                                  onResetProgress: { resetProgress(for: $0) },
-                                  onDelete: { removed in
-                                      homeSettingsChild = nil
-                                      profiles.remove(removed)
-                                  },
-                                  onConnectDevice: {
-                                      homeSettingsChild = nil
-                                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { qrCode = nil; qrChild = p }
-                                  },
-                                  onLocation: {
-                                      homeSettingsChild = nil
-                                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
-                                          locationChild = p.id.uuidString; showingLocation = true
-                                      }
-                                  })
-                    .environmentObject(profiles)
-                    .environmentObject(settings)
+                childSettingsPage(p, embedded: false, afterDelete: { homeSettingsChild = nil })
             }
             .sheet(item: $deviceQuestionChild) { p in
                 DeviceQuestionView(child: p, onOwnDevice: {
@@ -1183,6 +1166,26 @@ struct ParentDashboardView: View {
         .buttonStyle(.juicy)
         .frame(maxWidth: 460)
     }
+    /// A child's settings — one page, whether it slides in inside the ⚙️ window
+    /// or opens from the child's own screen. The map, the devices and every
+    /// editor are pushed INSIDE it; the pairing code opens over it.
+    private func childSettingsPage(_ p: Profile, embedded: Bool, afterDelete: @escaping () -> Void) -> some View {
+        ChildSettingsView(profileID: p.id,
+                          snapshot: rows.first(where: { $0.profile.id == p.id })?.snapshot ?? ProgressSnapshot(),
+                          embedded: embedded,
+                          onResetProgress: { resetProgress(for: $0) },
+                          onDelete: { removed in
+                              afterDelete()
+                              profiles.remove(removed)   // removes locally + from the cloud
+                          },
+                          onConnectDevice: { qrCode = nil; childDeviceLinked = false },
+                          pairing: $qrInSettings,
+                          pairingSheet: { AnyView(childQRSheet(for: $0)) },
+                          showsLocation: true)
+            .environmentObject(profiles)
+            .environmentObject(settings)
+    }
+
     private func childQRSheet(for child: Profile) -> some View {
         ZStack {
             GlassBackdrop()
@@ -1357,7 +1360,7 @@ struct ParentDashboardView: View {
             }
         }
         .onChangeCompat(of: household.redeemedInviteCode) { _, redeemed in
-            guard redeemed != nil, qrChild != nil, !childDeviceLinked else { return }
+            guard redeemed != nil, qrChild != nil || qrInSettings != nil, !childDeviceLinked else { return }
             Haptic.success()
             withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) { childDeviceLinked = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { closeQRSheet() }
@@ -1375,6 +1378,7 @@ struct ParentDashboardView: View {
     private func closeQRSheet() {
         HouseholdManager.shared.stopWatchingInviteRedemption()
         qrChild = nil
+        qrInSettings = nil
         qrCode = nil
         childDeviceLinked = false
     }
@@ -2591,26 +2595,10 @@ struct ParentDashboardView: View {
               }
             }
             .sheet(item: $settingsChild) { p in
-                ChildSettingsView(profileID: p.id,
-                                  snapshot: rows.first(where: { $0.profile.id == p.id })?.snapshot ?? row.snapshot,
-                                  onResetProgress: { resetProgress(for: $0) },
-                                  onDelete: { removed in
-                                      settingsChild = nil
-                                      profiles.remove(removed)   // removes locally + from the cloud
-                                      navPath.removeAll()        // pop back to the family grid
-                                  },
-                                  onConnectDevice: {
-                                      settingsChild = nil
-                                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { qrCode = nil; qrChild = p }
-                                  },
-                                  onLocation: {
-                                      settingsChild = nil
-                                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
-                                          locationChild = p.id.uuidString; showingLocation = true
-                                      }
-                                  })
-                    .environmentObject(profiles)
-                    .environmentObject(settings)
+                childSettingsPage(p, embedded: false, afterDelete: {
+                    settingsChild = nil
+                    navPath.removeAll()        // pop back to the family grid
+                })
             }
             .noHorizontalBounce()
             .environment(\.layoutDirection, .appMirrored)

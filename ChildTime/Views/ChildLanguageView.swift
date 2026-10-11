@@ -25,8 +25,15 @@ struct ChildLanguageView: View {
         profile?.language.flatMap(AppLanguage.init(rawValue:))
     }
 
+    @Environment(\.closeSettings) private var closeSettings
+    /// Pushed inside the settings window (see `SettingsStack`) — no stack and
+    /// no "סיום" of its own there.
+    var embedded = false
+    /// "סיום": alone it closes this sheet; inside the settings window, the whole window.
+    private func close() { if embedded, let closeSettings { closeSettings() } else { dismiss() } }
+
     var body: some View {
-        NavigationStack {
+        SettingsStack(embedded: embedded) {
             Form {
                 Section {
                     Text(tr("בחרו באיזו שפה טופי יופיע במכשיר של \(profile?.name ?? tr("הילד")). השינוי מגיע למכשיר בסנכרון הבא."))
@@ -69,7 +76,7 @@ struct ChildLanguageView: View {
                 // 🎚 The one way out lives in the rail on a foldable.
                 if !railHost.hasRail {
                     ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) {
-                        Button(tr("סיום")) { dismiss() }
+                        Button(tr("סיום")) { close() }
                     }
                 }
             }
@@ -77,7 +84,7 @@ struct ChildLanguageView: View {
         // 🎚 Outside the NavigationStack and outside the readable-width
         // cap — otherwise the rail is drawn at the edge of the 600pt
         // column instead of the edge of the glass.
-        .railDismiss(tr("סיום"), systemImage: "checkmark") { dismiss() }
+        .railDismiss(unless: embedded, tr("סיום"), systemImage: "checkmark") { close() }
     }
 
     private func pick(_ lang: AppLanguage) {

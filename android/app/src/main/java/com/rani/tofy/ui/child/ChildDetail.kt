@@ -188,7 +188,17 @@ private fun ChildReport(
         }
 
         // MARK: insight
-        engine.dailyInsight(child.name, girl, period, minutesToday = s.minutesEarnedToday)?.let { InsightCard(it, period) }
+        // The card is always there: with no insight it says WHY (Rani, 2026-10-11 — an empty card looked broken).
+        val noInsight = if (engine.summary(period).questions == 0) when (period) {
+            ReportPeriod.TODAY -> if (girl) tr("אין תובנה להיום — %@ עוד לא ענתה על שאלות היום.", child.name) else tr("אין תובנה להיום — %@ עוד לא ענה על שאלות היום.", child.name)
+            ReportPeriod.WEEK -> if (girl) tr("אין תובנה לשבוע הזה — %@ עוד לא ענתה על שאלות השבוע.", child.name) else tr("אין תובנה לשבוע הזה — %@ עוד לא ענה על שאלות השבוע.", child.name)
+            ReportPeriod.MONTH -> if (girl) tr("אין תובנה לחודש הזה — %@ עוד לא ענתה על שאלות החודש.", child.name) else tr("אין תובנה לחודש הזה — %@ עוד לא ענה על שאלות החודש.", child.name)
+        } else when (period) {
+            ReportPeriod.TODAY -> tr("עוד אין מספיק תשובות היום כדי להוציא תובנה.")
+            ReportPeriod.WEEK -> tr("עוד אין מספיק תשובות השבוע כדי להוציא תובנה.")
+            ReportPeriod.MONTH -> tr("עוד אין מספיק תשובות החודש כדי להוציא תובנה.")
+        }
+        InsightCard(engine.dailyInsight(child.name, girl, period, minutesToday = s.minutesEarnedToday), period, noInsight)
 
         // MARK: topics
         TopicsCard(child, s, extras, engine, period, expanded, autoCollapsed) { t, open ->
@@ -303,7 +313,7 @@ private fun Snap(modifier: Modifier, value: String, label: String) {
 
 /** The one WARM pane on the page — gold glass so it leads the eye. */
 @Composable
-private fun InsightCard(i: DailyInsight, period: ReportPeriod) {
+private fun InsightCard(i: DailyInsight?, period: ReportPeriod, emptyLine: String) {
     val shape = RoundedCornerShape(16.dp)
     Column(
         Modifier.fillMaxWidth().clip(shape)
@@ -318,6 +328,10 @@ private fun InsightCard(i: DailyInsight, period: ReportPeriod) {
         // One line by default — the recommendation is what to DO, so it leads;
         // the explanation opens on "עוד" (Rani: the page was "עמוס מדי").
         var open by remember { mutableStateOf(false) }
+        if (i == null) {
+            Text(emptyLine, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 13.5.sp)
+            return@Column
+        }
         i.recommendation?.let {
             Text(tr("מומלץ: %@", it), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.5.sp,
                 maxLines = if (open) Int.MAX_VALUE else 2)
@@ -326,7 +340,8 @@ private fun InsightCard(i: DailyInsight, period: ReportPeriod) {
             Text(i.body, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 13.5.sp,
                 maxLines = if (open) Int.MAX_VALUE else 2)
         }
-        Text(if (open) tr("פחות ▲") else tr("עוד ▼"), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp,
+        // "עוד" only when something really is folded away.
+        if (i.recommendation != null) Text(if (open) tr("פחות ▲") else tr("עוד ▼"), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp,
             modifier = Modifier.clickable { open = !open })
     }
 }

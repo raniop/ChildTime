@@ -155,14 +155,29 @@ struct ParentLocationView: View {
     private var kids: [Profile] { profiles.profiles }
     private var places: [FamilyPlace] { _ = household.household; return loc.familyPlaces }
 
+    @Environment(\.closeSettings) private var closeSettings
+    /// Pushed inside the settings window (see `SettingsStack`).
+    var embedded = false
+    private func close() { if embedded, let closeSettings { closeSettings() } else { dismiss() } }
+
     var body: some View {
-        NavigationStack {
+        SettingsStack(embedded: embedded) {
             ScrollView {
                 VStack(spacing: 14) {
                     FamilyMapView(kids: mapKids, places: places, focus: mapFocus, focusSpan: 0.012, fitAll: focusChildID == nil)
                         .frame(height: 340)
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.4), lineWidth: 1))
+                    if embedded {
+                        Button { Haptic.light(); showingPlaces = true } label: {
+                            Text(tr("📍 מקומות"))
+                                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                                .foregroundStyle(GlassInk.primary)
+                                .frame(maxWidth: .infinity, minHeight: 48)
+                                .glassPane(radius: 16, strength: 0.14)
+                        }
+                        .buttonStyle(.plain)
+                    }
                     ForEach(kids) { p in card(p) }
                 }
                 .padding(16)
@@ -172,9 +187,14 @@ struct ParentLocationView: View {
             .navigationTitle(tr("איפה הילדים"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) { Button(tr("סיום")) { dismiss() } }
+                ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) { Button(tr("סיום")) { close() } }
+                // Inside the settings window the bar already carries the back arrow
+                // and "סיום" — a third button there made a crowd (Rani, 2026-10-12);
+                // "📍 מקומות" sits under the map instead.
+                if !embedded {
                 ToolbarItem(placement: .awayFromBar(.navigationBarLeading, leading: true)) {
                     Button { showingPlaces = true } label: { Text(tr("📍 מקומות")) }
+                }
                 }
             }
         }

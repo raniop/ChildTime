@@ -19,8 +19,15 @@ struct QuietHoursEditorView: View {
     private var profile: Profile? { profiles.profiles.first { $0.id == profileID } }
     private var isSchool: Bool { kind == .school }
 
+    @Environment(\.closeSettings) private var closeSettings
+    /// Pushed inside the settings window (see `SettingsStack`) — no stack and
+    /// no "סיום" of its own there.
+    var embedded = false
+    /// "סיום": alone it closes this sheet; inside the settings window, the whole window.
+    private func close() { if embedded, let closeSettings { closeSettings() } else { dismiss() } }
+
     var body: some View {
-        NavigationStack {
+        SettingsStack(embedded: embedded) {
             Form {
                 Section {
                     Toggle(isOn: $window.enabled) {
@@ -84,12 +91,14 @@ struct QuietHoursEditorView: View {
             .toolbar {
                 if !railHost.hasRail {
                     ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) {
-                        Button(tr("סיום")) { if save() { dismiss() } }
+                        Button(tr("סיום")) { if save() { close() } }
                     }
                 }
             }
         }
-        .railDismiss(tr("סיום"), systemImage: "checkmark") { if save() { dismiss() } }
+        .railDismiss(unless: embedded, tr("סיום"), systemImage: "checkmark") { if save() { close() } }
+        // The back arrow has no "סיום" to press: leaving the page saves it.
+        .onDisappear { if embedded { save() } }
         .onAppear { load() }
         // One write per editing session, not one per wheel tick.
         .onDisappear { _ = save() }

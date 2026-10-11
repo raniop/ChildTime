@@ -11,6 +11,10 @@ struct ChildDifficultyView: View {
     @Environment(\.dismiss) private var dismiss
 
     let profileID: UUID
+    /// The child's synced progress — with it, each topic also shows what the
+    /// engine SERVES right now. The choice and its effect sit in one place
+    /// (they were two: a "רמת קושי" row and a separate "רמת קושי חכמה" list).
+    var snapshot: ProgressSnapshot? = nil
 
     /// Always read the live profile from the store so edits + cloud echoes stay
     /// reflected while the sheet is open.
@@ -18,8 +22,15 @@ struct ChildDifficultyView: View {
         profiles.profiles.first(where: { $0.id == profileID })
     }
 
+    @Environment(\.closeSettings) private var closeSettings
+    /// Pushed inside the settings window (see `SettingsStack`) — no stack and
+    /// no "סיום" of its own there.
+    var embedded = false
+    /// "סיום": alone it closes this sheet; inside the settings window, the whole window.
+    private func close() { if embedded, let closeSettings { closeSettings() } else { dismiss() } }
+
     var body: some View {
-        NavigationStack {
+        SettingsStack(embedded: embedded) {
             Form {
                 Section {
                     Text(tr("בחרו רמת קושי לכל נושא עבור \(profile?.name ?? tr("הילד")). השינוי מסתנכרן אוטומטית למכשיר של הילד."))
@@ -56,6 +67,8 @@ struct ChildDifficultyView: View {
                             HStack {
                                 Text(topic.emoji)
                                 Text(topic.parentName)
+                                Spacer(minLength: 4)
+                                servedChips(topic)
                             }
                             Picker(tr("רמת קושי"), selection: binding(for: topic)) {
                                 ForEach(Difficulty.allCases) { d in
@@ -68,6 +81,10 @@ struct ChildDifficultyView: View {
                     }
                 } header: {
                     Text(tr("לפי נושא"))
+                } footer: {
+                    if servedExplained {
+                        Text(tr("הבחירה היא נקודת ההתחלה. טופי מעלה ומוריד מעט בכל נושא לפי התשובות — התווית ליד שם הנושא מראה מה מוגש עכשיו."))
+                    }
                 }
                 .glassRows()
             }
@@ -79,7 +96,7 @@ struct ChildDifficultyView: View {
                 // 🎚 The one way out lives in the rail on a foldable.
                 if !railHost.hasRail {
                     ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) {
-                        Button(tr("סיום")) { dismiss() }
+                        Button(tr("סיום")) { close() }
                     }
                 }
             }
@@ -87,7 +104,37 @@ struct ChildDifficultyView: View {
         // 🎚 Outside the NavigationStack and outside the readable-width
         // cap — otherwise the rail is drawn at the edge of the 600pt
         // column instead of the edge of the glass.
-        .railDismiss(tr("סיום"), systemImage: "checkmark") { dismiss() }
+        .railDismiss(unless: embedded, tr("סיום"), systemImage: "checkmark") { close() }
+    }
+
+    // MARK: - What the engine serves now
+
+    /// Whether any topic has enough answers for the engine to have moved.
+    private var servedExplained: Bool {
+        guard let snapshot else { return false }
+        return AdaptiveTopicLevel.hasSignal(snapshot)
+    }
+
+    /// "↑ מאתגר יותר · קשה" beside a practiced topic whose served level moved
+    /// away from the parent's choice.
+    @ViewBuilder private func servedChips(_ topic: Topic) -> some View {
+        if let snapshot, let profile, AdaptiveTopicLevel.hasSignal(snapshot),
+           (snapshot.topicAnswered[topic.rawValue] ?? 0) >= 1 {
+            let st = AdaptiveTopicLevel.state(for: topic, profile: profile, snapshot: snapshot)
+            if let dir = st.direction {
+                let raised = dir == .raised
+                Text(raised ? "↑ " + tr("מאתגר יותר") : "↓ " + tr("בונה ביטחון"))
+                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                    .foregroundStyle(raised ? GlassInk.good : GlassInk.warn)
+                    .lineLimit(1).minimumScaleFactor(0.8)
+                Text(st.served.parentName)
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .foregroundStyle(GlassInk.primary)
+                    .padding(.horizontal, 9).padding(.vertical, 3)
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+            }
+        }
     }
 
     // MARK: - Editing

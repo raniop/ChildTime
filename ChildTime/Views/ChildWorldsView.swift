@@ -17,8 +17,15 @@ struct ChildWorldsView: View {
         profiles.profiles.first(where: { $0.id == profileID })
     }
 
+    @Environment(\.closeSettings) private var closeSettings
+    /// Pushed inside the settings window (see `SettingsStack`) — no stack and
+    /// no "סיום" of its own there.
+    var embedded = false
+    /// "סיום": alone it closes this sheet; inside the settings window, the whole window.
+    private func close() { if embedded, let closeSettings { closeSettings() } else { dismiss() } }
+
     var body: some View {
-        NavigationStack {
+        SettingsStack(embedded: embedded) {
             Form {
                 Section {
                     Text(tr("בחרו אילו עולמות פתוחים עבור \(profile?.name ?? tr("הילד")). עולם כיבוי נעלם מהמסך, והילד לא מקבל ממנו שאלות. השינוי מסתנכרן אוטומטית למכשיר של הילד."))
@@ -60,7 +67,7 @@ struct ChildWorldsView: View {
                 // 🎚 The one way out lives in the rail on a foldable.
                 if !railHost.hasRail {
                     ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) {
-                        Button(tr("סיום")) { dismiss() }
+                        Button(tr("סיום")) { close() }
                     }
                 }
             }
@@ -68,7 +75,7 @@ struct ChildWorldsView: View {
         // 🎚 Outside the NavigationStack and outside the readable-width
         // cap — otherwise the rail is drawn at the edge of the 600pt
         // column instead of the edge of the glass.
-        .railDismiss(tr("סיום"), systemImage: "checkmark") { dismiss() }
+        .railDismiss(unless: embedded, tr("סיום"), systemImage: "checkmark") { close() }
     }
 
     /// The worlds this editor lists — also counted on the child's settings

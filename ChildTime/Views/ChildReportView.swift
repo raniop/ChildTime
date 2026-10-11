@@ -54,9 +54,7 @@ struct ChildReportView: View {
             header
             let insight = engine.dailyInsight(name: profile.name, isGirl: isGirl, period: period, minutesToday: snapshot.minutesEarnedToday)
             let tip = parentTip
-            if insight != nil || tip != nil {
-                insightCard(insight, tip: tip)
-            }
+            insightCard(insight, tip: tip)
             topicsCard.id("topics")
             worldsCard.id("worlds")
             improvementCard
@@ -179,10 +177,40 @@ struct ChildReportView: View {
             .recommendedActions().first
     }
 
+    /// Why the insight card has no insight: no answers in this period at all, or
+    /// too few to say anything true.
+    private var noInsightLine: String {
+        let name = profile.name
+        if engine.summary(period).questions == 0 {
+            switch period {
+            case .today: return g(tr("אין תובנה להיום — \(name) עוד לא ענה על שאלות היום."), tr("אין תובנה להיום — \(name) עוד לא ענתה על שאלות היום."))
+            case .week:  return g(tr("אין תובנה לשבוע הזה — \(name) עוד לא ענה על שאלות השבוע."), tr("אין תובנה לשבוע הזה — \(name) עוד לא ענתה על שאלות השבוע."))
+            default:     return g(tr("אין תובנה לחודש הזה — \(name) עוד לא ענה על שאלות החודש."), tr("אין תובנה לחודש הזה — \(name) עוד לא ענתה על שאלות החודש."))
+            }
+        }
+        switch period {
+        case .today: return tr("עוד אין מספיק תשובות היום כדי להוציא תובנה.")
+        case .week:  return tr("עוד אין מספיק תשובות השבוע כדי להוציא תובנה.")
+        default:     return tr("עוד אין מספיק תשובות החודש כדי להוציא תובנה.")
+        }
+    }
+
     private func insightCard(_ i: DailyInsight?, tip: CoachingEngine.RecommendedAction?) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(period == .today ? tr("💡 תובנת היום") : period == .week ? tr("💡 תובנת השבוע") : tr("💡 תובנת החודש"))
                 .font(.system(size: 14.5, weight: .heavy, design: .rounded))
+            // Nothing to say is said out loud: a title over a lone "עוד ▼" looked
+            // broken (Rani, 2026-10-11) — the parent could not tell WHY it was empty.
+            if i == nil {
+                Text(noInsightLine)
+                    .font(.system(size: 13.5, weight: .medium, design: .rounded))
+                    .fixedSize(horizontal: false, vertical: true)
+                if let tip {
+                    Text("\(tip.emoji) \(tip.text)")
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
             if let i {
                 // One line by default — the recommendation is what to DO, so it
                 // leads; the explanation opens on "עוד".
@@ -199,12 +227,14 @@ struct ChildReportView: View {
                         .lineLimit(insightOpen ? nil : 2)
                 }
             }
-            if insightOpen, let tip, tip.text != i?.recommendation {
-                if i != nil, i?.recommendation == nil { Divider().overlay(Color.white.opacity(0.35)) }
+            if insightOpen, let i, let tip, tip.text != i.recommendation {
+                if i.recommendation == nil { Divider().overlay(Color.white.opacity(0.35)) }
                 Text("\(tip.emoji) \(tip.text)")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .fixedSize(horizontal: false, vertical: true)
             }
+            // "עוד" only when something really is folded away.
+            if let i, i.recommendation != nil || (tip != nil && tip?.text != i.recommendation) {
             Button {
                 Haptic.light()
                 withAnimation(.easeInOut(duration: 0.2)) { insightOpen.toggle() }
@@ -214,6 +244,7 @@ struct ChildReportView: View {
                     .foregroundStyle(GlassInk.primary.opacity(0.85))
             }
             .buttonStyle(.plain)
+            }
         }
         .foregroundStyle(GlassInk.primary)
         .frame(maxWidth: .infinity, alignment: .leading)
