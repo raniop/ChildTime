@@ -444,10 +444,25 @@ final class FriendsManager: ObservableObject {
                     guard let self,
                           AuthManager.shared.isSignedIn,
                           let id = ProfileStore.shared.activeID?.uuidString,
-                          Self.cardExists(id) else { return }
+                          await self.hasCard(id) else { return }
                     await self.upsertMyCard(id: id)
                 }
             }
+    }
+
+    /// The "my card exists" flag lives on the device, so a reinstalled or a
+    /// second device never had it — and the child's public card kept the score
+    /// of the device that made it: Yoav stood on friends' boards with 16,997
+    /// while he had 42,625 (2026-10-11). Without the flag, ask the cloud once.
+    private func hasCard(_ id: String) async -> Bool {
+        if Self.cardExists(id) { return true }
+        #if canImport(FirebaseFirestore)
+        guard let doc = try? await db.collection("friendCards").document(id).getDocument(), doc.exists else { return false }
+        Self.markCardExists(id)
+        return true
+        #else
+        return false
+        #endif
     }
 
     private static func cardExists(_ id: String) -> Bool {

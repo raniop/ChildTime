@@ -38,9 +38,10 @@ class PreReaderPictureQuestionTest {
             val q = PreReaderContent.pictureQuestion(pictures, Topic.SCIENCE, Random(seed))!!
             assertEquals(setOf("🧊", "🔥", "🌈", "🍃"), q.options.toSet())
             assertEquals("🧊", q.options[q.correctIndex])
-            assertTrue(q.spoken!!.startsWith("מָה נִהְיֶה"))
-            assertFalse(q.spoken!!.contains("🔬"))
-            assertEquals("🔬", q.prompt)          // the question is written once, the picture under it
+            // The answers are the pictures: the question itself is words only.
+            assertTrue(q.prompt.startsWith("מָה נִהְיֶה"))
+            assertFalse(q.prompt.contains("🔬"))
+            assertNull(q.spoken)
         }
     }
 }

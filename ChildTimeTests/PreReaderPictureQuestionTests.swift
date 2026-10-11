@@ -41,13 +41,12 @@ struct PreReaderPictureQuestionTests {
             #expect(q.correctAnswer == "🧊")
             #expect(q.readAloudText.hasPrefix("מָה נִהְיֶה"))
             #expect(!q.readAloudText.contains("🔬"))
-            // The card writes the question once and draws the picture under it.
-            #expect(q.prompt == "🔬")
+            // The answers are the pictures: the question itself is words only.
+            #expect(q.prompt.hasPrefix("מָה נִהְיֶה") && !q.prompt.contains("🔬"))
+            #expect(q.spoken == nil)
         }
-        // An item without a picture line is simply its question.
-        #expect(PreReaderContent.pictureLine(of: "מִי טוֹוֶה קוּרִים?") == nil)
-        #expect(PreReaderContent.pictureLine(of: "🕷️\nמִי טוֹוֶה קוּרִים?") == "🕷️")
-        // A picture line that carries the emoji presentation selector is still not spoken.
+        // A picture line that carries the emoji presentation selector is dropped too.
         #expect(PreReaderContent.spokenText(of: "🕷️\nמִי טוֹוֶה קוּרִים?") == "מִי טוֹוֶה קוּרִים?")
+        #expect(PreReaderContent.spokenText(of: "מִי טוֹוֶה קוּרִים?") == "מִי טוֹוֶה קוּרִים?")
     }
 }

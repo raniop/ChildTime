@@ -48,14 +48,9 @@ enum PreReaderContent {
         guard pool.count >= minPicturePool, let b = pool.randomElement() else { return nil }
         let options = ([b.correctAnswer] + b.distractors.prefix(3)).shuffled()
         guard let correct = options.firstIndex(of: b.correctAnswer) else { return nil }
-        // The card draws `spoken` as the written line and `prompt` under it, so
-        // the prompt keeps the picture alone — the whole item would show the
-        // question twice. An item with no picture line is just its question.
-        guard let picture = pictureLine(of: b.prompt) else {
-            return Question(topic: topic, prompt: b.prompt, options: options, correctIndex: correct)
-        }
-        return Question(topic: topic, prompt: picture, options: options, correctIndex: correct,
-                        spoken: spokenText(of: b.prompt))
+        // The four answers are the pictures — the question stays words only, so
+        // the item's own picture line is dropped (Rani, 2026-10-11).
+        return Question(topic: topic, prompt: spokenText(of: b.prompt), options: options, correctIndex: correct)
     }
 
     static let minPicturePool = 8
@@ -84,18 +79,11 @@ enum PreReaderContent {
         }
     }
 
-    /// What to say: the question itself, without the picture line above it.
+    /// The question itself, without the picture line the bank item carries above it.
     static func spokenText(of prompt: String) -> String {
         let lines = prompt.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }
         let spoken = lines.filter { line in line.unicodeScalars.contains(where: isLetter) }
         return spoken.isEmpty ? prompt : spoken.joined(separator: " ")
-    }
-
-    /// What to draw under the question: the lines that are pictures only.
-    static func pictureLine(of prompt: String) -> String? {
-        let lines = prompt.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }
-        let pictures = lines.filter { line in !line.isEmpty && !line.unicodeScalars.contains(where: isLetter) }
-        return pictures.isEmpty || pictures.count == lines.count ? nil : pictures.joined(separator: " ")
     }
 
     // MARK: - 🔢 Math: count, add, take away, compare, find the digit

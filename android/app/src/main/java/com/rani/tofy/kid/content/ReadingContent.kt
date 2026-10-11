@@ -114,10 +114,9 @@ object PreReaderContent {
         val b = pool[rng.nextInt(pool.size)]
         val options = (listOf(b.correctAnswer) + b.distractors.take(3)).shuffled(rng)
         val correct = options.indexOf(b.correctAnswer).takeIf { it >= 0 } ?: return null
-        // The card draws `spoken` as the written line and the prompt under it, so the
-        // prompt keeps the picture alone — the whole item would show the question twice.
-        val picture = pictureLine(b.prompt) ?: return Question(topic, b.prompt, options, correct)
-        return Question(topic, picture, options, correct, spoken = spokenText(b.prompt))
+        // The four answers are the pictures — the question stays words only, so the
+        // item's own picture line is dropped (Rani, 2026-10-11).
+        return Question(topic, spokenText(b.prompt), options, correct)
     }
 
     const val MIN_PICTURE_POOL = 8
@@ -133,17 +132,10 @@ object PreReaderContent {
         return options.size >= 4 && options.all { o -> o.isNotBlank() && o.none { it.isLetterOrDigit() } }
     }
 
-    /** What to say: the question itself, without the picture line above it. */
+    /** The question itself, without the picture line the bank item carries above it. */
     fun spokenText(prompt: String): String {
         val spoken = prompt.split("\n").map { it.trim() }.filter { line -> line.any { it.isLetter() } }
         return if (spoken.isEmpty()) prompt else spoken.joinToString(" ")
-    }
-
-    /** What to draw under the question: the lines that are pictures only. */
-    fun pictureLine(prompt: String): String? {
-        val lines = prompt.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
-        val pictures = lines.filter { line -> line.none { it.isLetter() } }
-        return if (pictures.isEmpty() || pictures.size == lines.size) null else pictures.joinToString(" ")
     }
 
     // ── 🔢 Math: count, add, take away, compare, find the digit ──

@@ -340,10 +340,23 @@ object FriendsRepository {
         scoreSync = scope.launch {
             KidSession.state.map { it?.snapshot?.stars }.distinctUntilChanged().drop(1).debounce(2500).collect {
                 val id = SocialMe.id ?: return@collect
-                if (!SocialMe.isSignedIn || !cardExists(id)) return@collect
+                if (!SocialMe.isSignedIn || !hasCard(id)) return@collect
                 upsertMyCard(id)
             }
         }
+    }
+
+    /**
+     * The "my card exists" flag lives on the device, so a reinstalled or a second
+     * device never had it — and the child's public card kept the score of the device
+     * that made it (Yoav: 16,997 on friends' boards with 42,625 stars, 2026-10-11).
+     * Without the flag, ask the cloud once.
+     */
+    private suspend fun hasCard(id: String): Boolean {
+        if (cardExists(id)) return true
+        val exists = runCatching { cards().document(id).get().await().exists() }.getOrDefault(false)
+        if (exists) markCardExists(id)
+        return exists
     }
 
     private fun cardExists(id: String) = prefs?.getBoolean("friendCard.exists.$id", false) ?: false
