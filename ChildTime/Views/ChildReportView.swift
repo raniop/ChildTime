@@ -527,9 +527,15 @@ struct ChildReportView: View {
 
     private var chartDays: Int { period == .month ? 30 : 7 }
 
+    /// The week as a calendar week (Sunday first), the month as its last 30 days.
+    private var chartPoints: [InsightsEngine.DayPoint] {
+        period == .month ? engine.dayPoints(days: 30) : engine.weekPoints()
+    }
+    private var chartCaption: String { period == .month ? tr("\(chartDays) ימים אחרונים") : tr("השבוע") }
+
     private var learningTrendCard: some View {
-        let points = engine.dayPoints(days: chartDays)
-        return card(tr("מגמת למידה"), detail: tr("\(chartDays) ימים אחרונים")) {
+        let points = chartPoints
+        return card(tr("מגמת למידה"), detail: chartCaption) {
             if points.allSatisfy({ $0.questions == 0 }) {
                 empty(tr("אין עדיין פעילות בתקופה הזו."))
             } else {
@@ -541,7 +547,7 @@ struct ChildReportView: View {
     }
 
     private var screenTimeCard: some View {
-        let points = engine.dayPoints(days: chartDays)
+        let points = chartPoints
         return card(tr("זמן מסך"), detail: tr("\(g(tr("הרוויח"), tr("הרוויחה"))) מול \(g(tr("ניצל"), tr("ניצלה")))")) {
             if points.allSatisfy({ $0.earned == 0 && $0.used == 0 }) {
                 empty(tr("עוד לא נפתח זמן מסך בתקופה הזו."))
@@ -715,10 +721,8 @@ struct LearningTrendChart: View {
                 }
                 // weekday labels (only every ~4th on a 30-day view)
                 ForEach(points.indices, id: \.self) { i in
-                    if points.count <= 7 || i % 4 == 3 || i == points.count - 1 {
-                        Text(i == points.count - 1 ? tr("היום") : points[i].weekday)
-                            .font(.system(size: 9.5, weight: i == points.count - 1 ? .heavy : .medium, design: .rounded))
-                            .foregroundStyle(i == points.count - 1 ? GlassInk.primary : GlassInk.secondary)
+                    if points.count <= 7 || i % 4 == 3 || points[i].isToday {
+                        DayLabel(text: points[i].weekday, today: points[i].isToday)
                             .position(x: xAt(i), y: h - labelH / 2)
                     }
                 }
@@ -726,6 +730,20 @@ struct LearningTrendChart: View {
         }
         .environment(\.layoutDirection, .leftToRight)
         .accessibilityLabel(tr("שאלות ואחוז הצלחה לכל יום"))
+    }
+}
+
+/// A day under a chart: its weekday letter; today's is marked.
+private struct DayLabel: View {
+    let text: String
+    let today: Bool
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: 9.5, weight: today ? .heavy : .medium, design: .rounded))
+            .foregroundStyle(today ? Color(hex: "2A1E5C") : GlassInk.secondary)
+            .padding(.horizontal, today ? 6 : 0).padding(.vertical, today ? 1.5 : 0)
+            .background(today ? RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white) : nil)
     }
 }
 
@@ -768,14 +786,12 @@ struct ScreenTimeChart: View {
                     let uh = plotH * CGFloat(p.used) / CGFloat(maxM)
                     RoundedRectangle(cornerRadius: 3, style: .continuous).fill(Color.white.opacity(0.38))
                         .frame(width: barW, height: max(eh, p.earned > 0 ? 3 : 0))
-                        .position(x: cx - barW * 0.6, y: topPad + plotH - eh / 2)
+                        .position(x: cx + (rtl ? barW * 0.6 : -barW * 0.6), y: topPad + plotH - eh / 2)   // "earned" first, in reading order — as in the legend
                     RoundedRectangle(cornerRadius: 3, style: .continuous).fill(Color(hex: "7CF3FF"))
                         .frame(width: barW, height: max(uh, p.used > 0 ? 3 : 0))
-                        .position(x: cx + barW * 0.6, y: topPad + plotH - uh / 2)
-                    if points.count <= 7 || i % 4 == 3 || i == points.count - 1 {
-                        Text(i == points.count - 1 ? tr("היום") : p.weekday)
-                            .font(.system(size: 9.5, weight: i == points.count - 1 ? .heavy : .medium, design: .rounded))
-                            .foregroundStyle(i == points.count - 1 ? GlassInk.primary : GlassInk.secondary)
+                        .position(x: cx + (rtl ? -barW * 0.6 : barW * 0.6), y: topPad + plotH - uh / 2)
+                    if points.count <= 7 || i % 4 == 3 || p.isToday {
+                        DayLabel(text: p.weekday, today: p.isToday)
                             .position(x: cx, y: h - labelH / 2)
                     }
                 }
