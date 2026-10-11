@@ -1496,7 +1496,7 @@ struct ParentDashboardView: View {
                 GeometryReader { g in
                     let t = Self.tileWidth(innerWidth: g.size.width)
                     HStack(spacing: Self.tileGap) {
-                        homePrimaryLabel(tr("מידע נוסף ←")).frame(width: t * 2 + Self.tileGap)
+                        homePrimaryLabel(tr("📊 מידע נוסף")).frame(width: t * 2 + Self.tileGap)
                         Color.clear.frame(width: t, height: 1)
                     }
                 }
@@ -1527,7 +1527,7 @@ struct ParentDashboardView: View {
                 GeometryReader { g in
                     let t = Self.tileWidth(innerWidth: g.size.width)
                     HStack(spacing: Self.tileGap) {
-                        homePrimaryLabel(tr("מידע נוסף ←")).frame(width: t)
+                        homePrimaryLabel(tr("📊 מידע נוסף")).frame(width: t)
                         Color.clear.frame(width: t, height: 1)
                         Color.clear.frame(width: t, height: 1)
                     }

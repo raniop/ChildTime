@@ -256,9 +256,9 @@ private fun ChildCard(
             val t = (maxWidth - gap * 2) / 3
             Row(horizontalArrangement = Arrangement.spacedBy(gap), verticalAlignment = Alignment.CenterVertically) {
                 if (hasDevice) {
-                    CardButton(tr("מידע נוסף ←"), white = true, Modifier.width(t * 2 + gap)) { onOpen() }
+                    CardButton(tr("📊 מידע נוסף"), white = true, Modifier.width(t * 2 + gap)) { onOpen() }
                 } else {
-                    CardButton(tr("מידע נוסף ←"), white = true, Modifier.width(t)) { onOpen() }
+                    CardButton(tr("📊 מידע נוסף"), white = true, Modifier.width(t)) { onOpen() }
                     CardButton(tr("+ חברו מכשיר"), white = false, Modifier.width(t).coachMark("p.connect", markConnect)) { onConnect() }
                 }
                 CardButton(tr("⚡ פעולות"), white = false, Modifier.width(t).coachMark("p.actions", marked)) { onActions() }
