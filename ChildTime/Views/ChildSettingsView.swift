@@ -343,9 +343,13 @@ struct ChildSettingsView: View {
             }
             // 🗑️ An action on the device, so it sits with the devices — it was a
             // stray row in the settings list (Rani, 2026-10-11).
+            // Said in full: "לאפשר מחיקת אפליקציות (5 דק')" alone told a parent
+            // nothing (Rani, 2026-10-12: "מי יבין מה זה אומר בכלל?").
             if !devices.isEmpty {
                 Section {
-                    row("🗑️", tr("לאפשר מחיקת אפליקציות (5 דק')"), chevron: false) { allowAppRemoval(p) }
+                    row("🗑️", tr("לאפשר מחיקת אפליקציות ל-5 דקות"), chevron: false) { allowAppRemoval(p) }
+                } footer: {
+                    Text(tr("במכשיר של \(p.name) אי אפשר למחוק אפליקציות — כך טופי לא נמחק ממנו, בטעות או בכוונה. רוצים למחוק שם אפליקציה? לחצו כאן, ובמשך 5 דקות אפשר יהיה למחוק במכשיר. אחר כך המחיקה ננעלת שוב לבד."))
                 }
                 .glassRows()
             }

@@ -257,7 +257,7 @@ extension InsightsEngine {
                 cal.locale = LanguageStore.shared.current.locale
                 return cal.shortWeekdaySymbols[i - 1]
             }
-            return ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "שַׁבָּת"][i - 1]
+            return ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"][i - 1]   // a parent's screen: no niqqud, and one letter like the other six
         }
     }
 

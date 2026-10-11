@@ -31370,6 +31370,28 @@
         }
       }
     },
+    "במכשיר של %@ אי אפשר למחוק אפליקציות — כך טופי לא נמחק ממנו, בטעות או בכוונה. רוצים למחוק שם אפליקציה? לחצו כאן, ובמשך 5 דקות אפשר יהיה למחוק במכשיר. אחר כך המחיקה ננעלת שוב לבד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يمكن حذف التطبيقات على جهاز %@ — حتى لا يُحذف توفي منه، بالخطأ أو عن قصد. تريدون حذف تطبيق هناك؟ اضغطوا هنا، ولمدة 5 دقائق يصبح الحذف ممكنًا على الجهاز. بعد ذلك يُقفل الحذف من جديد تلقائيًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apps can't be deleted on %@'s device — so Tofy can't be removed from it, by mistake or on purpose. Want to delete an app there? Tap here, and for 5 minutes deleting will work on the device. After that it locks again by itself."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На устройстве %@ нельзя удалять приложения — так Тофи не удалят с него ни случайно, ни нарочно. Хотите удалить там приложение? Нажмите здесь, и 5 минут удаление на устройстве будет работать. Потом оно снова заблокируется само."
+          }
+        }
+      }
+    },
     "במכשיר של ההורה שכבר רשום:" : {
       "localizations" : {
         "ar" : {
@@ -77870,6 +77892,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Разрешить удаление приложений (5 мин)"
+          }
+        }
+      }
+    },
+    "לאפשר מחיקת אפליקציות ל-5 דקות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "السماح بحذف التطبيقات لمدة 5 دقائق"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow deleting apps for 5 minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешить удаление приложений на 5 минут"
           }
         }
       }

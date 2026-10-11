@@ -2556,14 +2556,6 @@ struct ParentDashboardView: View {
                                     .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.18)))
                             }
                             .accessibilityLabel(tr("חזרה"))
-                            Button { Haptic.light(); settingsChild = row.profile } label: {
-                                Label(tr("הגדרות"), systemImage: "gearshape.fill")
-                                    .labelStyle(.titleAndIcon)
-                                    .font(.system(size: 15, weight: .heavy, design: .rounded))
-                                    .foregroundStyle(.white)
-                                    .padding(.horizontal, 14).frame(height: 44)
-                                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.18)))
-                            }
                             Spacer(minLength: 0)
                         }
                         .buttonStyle(.plain)
@@ -2576,9 +2568,7 @@ struct ParentDashboardView: View {
                         liveSecondsLeft: liveWindow(row.profile)?.secondsLeft ?? 0,
                         liveIsGift: liveWindow(row.profile)?.isManual ?? false,
                         devices: household.devicesByChild[row.profile.id.uuidString] ?? [],
-                        topActions: AnyView(detailTopActions(row.profile)),
-                        onAddDevice: { qrCode = nil; qrChild = row.profile },
-                        onRemoveDevice: { deviceToRemove = $0 }
+                        topActions: AnyView(detailTopActions(row.profile))
                     )
                 }
                 .padding(AppSpacing.lg)
@@ -2604,22 +2594,9 @@ struct ParentDashboardView: View {
             .environment(\.layoutDirection, .appMirrored)
             .background(GlassBackdrop())
             .navigationTitle("")
-            // ⚙️ Everything that is SET rather than read (name, grade,
-            // difficulty, worlds, cap, PIN, friends, reset, delete…) — in the
-            // page's header now, not a row at the very bottom of a long report.
-            .toolbar {
-                ToolbarItem(placement: .barSafeTopTrailing) {
-                    Button {
-                        Haptic.light()
-                        settingsChild = row.profile
-                    } label: {
-                        Label(tr("הגדרות"), systemImage: "gearshape.fill")
-                            .labelStyle(.titleAndIcon)
-                            .font(.system(size: 15, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                    }
-                }
-            }
+            // No ⚙️ here (Rani, 2026-10-12: "מהמסך הזה אין קשר שוב להגדרות"): this page
+            // is for READING how the child is doing. Settings open from the home
+            // screen's gear and from "פעולות" on the child's card.
             .toolbar(display.hasBarStrip ? .hidden : .visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
     }

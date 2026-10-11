@@ -14,7 +14,11 @@ struct SettingsStack<Content: View>: View {
     @ViewBuilder var content: () -> Content
 
     var body: some View {
-        if embedded { content() } else { NavigationStack { content() } }
+        // These windows are drawn for white text on the backdrop. In the phone's
+        // LIGHT mode the bar's title and "סיום" came out black over it (Rani,
+        // 2026-10-12: "הכול רשום בלבן ואז פתאום הכותרות בשחור") — the window is
+        // dark whatever the phone is set to.
+        if embedded { content() } else { NavigationStack { content() }.preferredColorScheme(.dark) }
     }
 }
 

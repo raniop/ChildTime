@@ -14,15 +14,13 @@ struct ChildReportView: View {
     /// Seconds left in an OPEN play window (0 = none) and which pocket pays for it.
     let liveSecondsLeft: Int
     let liveIsGift: Bool
+    /// Only to say WHERE the open window is ("משחקת עכשיו באייפד").
     let devices: [ChildDevice]
 
     /// The page's live banner + quick actions (gift / lock / chores), owned by
     /// the dashboard — it holds the remote commands, sheets and alerts. Shown
     /// right under the name, above the numbers.
     var topActions: AnyView? = nil
-    // Parent actions, owned by the dashboard (it holds the sheets and alerts).
-    let onAddDevice: () -> Void
-    let onRemoveDevice: (ChildDevice) -> Void
 
     @EnvironmentObject private var settings: ParentSettings
     @ObservedObject private var historyStore = LearningHistoryStore.shared
@@ -55,13 +53,16 @@ struct ChildReportView: View {
             let insight = engine.dailyInsight(name: profile.name, isGirl: isGirl, period: period, minutesToday: snapshot.minutesEarnedToday)
             let tip = parentTip
             insightCard(insight, tip: tip)
+            // Learning first, in the order a parent asks it (Rani, 2026-10-12): how
+            // is she doing · is she improving · what she masters and what to practise
+            // · the trend · screen time · the worlds. The child's DEVICES are a
+            // setting — they live in the settings, not at the foot of a report.
             topicsCard.id("topics")
-            worldsCard.id("worlds")
             improvementCard
+            masteryCards
             learningTrendCard
             screenTimeCard
-            masteryCards
-            devicesCard
+            worldsCard.id("worlds")
         }
         .environment(\.layoutDirection, .app)
         .task(id: profile.id) {
@@ -600,111 +601,6 @@ struct ChildReportView: View {
         }
     }
 
-    // MARK: - Devices
-
-    private var devicesCard: some View {
-        card(tr("המכשירים של \(profile.name)")) {
-            VStack(spacing: 0) {
-                ForEach(devices) { d in
-                    HStack {
-                        // Remove (e.g. linked to the wrong child) — the dashboard
-                        // confirms before anything happens. Not for a PARENT's
-                        // phone in Kid Mode: that row goes away by itself when Kid
-                        // Mode ends, and "removing" it reset that parent's phone.
-                        // (Same liveness rule as `childHasOwnDevice`: the parent
-                        // row must have been alive when this row appeared — a phone
-                        // that WAS a parent's and is now the child's own, or a row
-                        // an old build left behind, stays removable.)
-                        if !HouseholdManager.shared.parentDevices.contains(where: {
-                            $0.deviceID == d.deviceID && $0.lastSeenAt >= d.joinedAt
-                        }) {
-                        Menu {
-                            Button(role: .destructive) { onRemoveDevice(d) } label: {
-                                Label(tr("הסר מכשיר"), systemImage: "minus.circle")
-                            }
-                        } label: {
-                            Image(systemName: "ellipsis.circle")
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundStyle(GlassInk.secondary)
-                                .frame(width: 28, height: 28)
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        }
-                        // "אייפד של נועה" — the kind + the child (iOS names every phone
-                        // just "iPhone"); a custom device name rides along.
-                        Text(tr("\(d.kind == "ipad" ? "📲" : "📱") \(d.kind == "ipad" ? tr("אייפד") : tr("אייפון")) של \(profile.name)")
-                             + ([tr("אייפד"), tr("אייפון"), "iPhone", "iPad", ""].contains(d.name) ? "" : " · \(d.name)"))
-                            .font(.system(size: 13.5, weight: .semibold, design: .rounded))
-                        Spacer()
-                        deviceStatus(d)
-                    }
-                    .padding(.top, 8)
-                    .padding(.bottom, d.shieldAuthorized == false ? 2 : 8)
-                    // This is the device list a parent actually opens — the
-                    // dashboard row that first got the warning is not shown on
-                    // this path, so the green "● מחובר" was all they saw.
-                    if d.shieldAuthorized == false, d.role != "parent" {
-                        Label(tr("אין הרשאת ״זמן מסך״ במכשיר הזה — נעילת אפליקציות לא תעבוד בו. פתחו בו את טופי ← ⚙️ ← בקש הרשאה."),
-                              systemImage: "exclamationmark.shield.fill")
-                            .font(.system(size: 11.5, weight: .semibold, design: .rounded))
-                            .foregroundStyle(AppColor.flameOrange)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.bottom, 8)
-                    }
-                    // 🔒 The migration nudge. Screen Time is granted and apps are
-                    // locked, but the allow-list is empty, so the device is still
-                    // on the enumerated block-list and anything the child installs
-                    // stays open. Only the parent can fix it (Apple's picker needs
-                    // a human), and only on the child's device — so say exactly
-                    // where to tap. Older devices report nil: say nothing then
-                    // rather than cry wolf.
-                    if d.newAppsLocked == false, d.shieldAuthorized != false, d.role != "parent" {
-                        Label(tr("אפליקציה חדשה שהילד מתקין לא נעולה במכשיר הזה. פתחו בו את טופי ← ⚙️ ← ״לנעול גם אפליקציות חדשות״ ובחרו מה נשאר פתוח."),
-                              systemImage: "lock.open.trianglebadge.exclamationmark")
-                            .font(.system(size: 11.5, weight: .semibold, design: .rounded))
-                            .foregroundStyle(AppColor.starGold)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.bottom, 8)
-                    }
-                    if d.id != devices.last?.id { Divider().overlay(Color.white.opacity(0.16)) }
-                }
-                if devices.isEmpty {
-                    empty(tr("עוד לא חובר מכשיר."))
-                }
-                Button(action: onAddDevice) {
-                    Label(devices.isEmpty ? tr("+ חברו מכשיר") : tr("+ חיבור מכשיר נוסף"), systemImage: "qrcode")
-                        .font(.system(size: 13.5, weight: .heavy, design: .rounded))
-                        .foregroundStyle(GlassInk.primary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
-                            .foregroundStyle(Color.white.opacity(0.45)))
-                }
-                .buttonStyle(.plain)
-                .padding(.top, 8)
-            }
-        }
-    }
-
-    private func deviceStatus(_ d: ChildDevice) -> some View {
-        let live = liveSecondsLeft > 0
-        let recent = Date().timeIntervalSince(d.lastSeenAt) < 120
-        return Group {
-            if live && recent {
-                Text(tr("● \(g(tr("משחק"), tr("משחקת"))) עכשיו")).foregroundStyle(GlassInk.good)
-            } else if recent {
-                Text(tr("● מחובר")).foregroundStyle(GlassInk.good)
-            } else {
-                Text(tr("נראה \(relative(d.lastSeenAt))")).foregroundStyle(GlassInk.secondary)
-            }
-        }
-        .font(.system(size: 12, weight: .heavy, design: .rounded))
-    }
-
     // MARK: - Building blocks
 
     private func card<Content: View>(_ title: String, detail: String? = nil,
@@ -750,7 +646,13 @@ struct LearningTrendChart: View {
     let points: [InsightsEngine.DayPoint]
 
     var body: some View {
-        GeometryReader { geo in
+        // Drawn in ONE coordinate system: under a right-to-left layout `.position`
+        // is mirrored and a Path is not, so the accuracy line came out as the
+        // mirror image of its own bars (Rani, 2026-10-12: "לא מוצג תקין… בכלל לא
+        // מובן"). The chart lays itself out left-to-right and puts the days in
+        // reading order by hand: oldest at the reading start, today at the end.
+        let rtl = LanguageStore.shared.current.isRightToLeft
+        return GeometryReader { geo in
             let w = geo.size.width, h = geo.size.height
             let labelH: CGFloat = 18, topPad: CGFloat = 8, axisW: CGFloat = 36
             let plotH = h - labelH - topPad
@@ -759,7 +661,9 @@ struct LearningTrendChart: View {
             let slot = plotW / CGFloat(n)
             let barW = min(22, slot * 0.55)
             let maxQ = max(points.map(\.questions).max() ?? 1, 1)
-            let xAt: (Int) -> CGFloat = { i in plotX0 + slot * (CGFloat(i) + 0.5) }
+            let xAt: (Int) -> CGFloat = { i in plotX0 + slot * (CGFloat(rtl ? n - 1 - i : i) + 0.5) }
+            // % belongs to the line and sits at the reading END, questions at the start.
+            let pctX = rtl ? axisW / 2 : w - axisW / 2, qX = rtl ? w - axisW / 2 : axisW / 2
             ZStack(alignment: .topLeading) {
                 // grid at 50 / 75 / 100 % with the numbers on the axes (Rani:
                 // "להוסיף מספרים על הצירים") — % on one side, questions on the other.
@@ -770,16 +674,16 @@ struct LearningTrendChart: View {
                     Text("\(Int(f * 100))%")
                         .font(.system(size: 9.5, weight: .bold, design: .rounded)).monospacedDigit()
                         .foregroundStyle(GlassInk.primary)
-                        .position(x: w - axisW / 2, y: y)
+                        .position(x: pctX, y: y)
                     Text("\(Int((Double(maxQ) * f).rounded()))")
                         .font(.system(size: 9.5, weight: .bold, design: .rounded)).monospacedDigit()
                         .foregroundStyle(GlassInk.secondary)
-                        .position(x: axisW / 2, y: y)
+                        .position(x: qX, y: y)
                 }
                 Text(tr("שאלות")).font(.system(size: 8.5, weight: .semibold, design: .rounded))
-                    .foregroundStyle(GlassInk.secondary).position(x: axisW / 2, y: topPad + plotH + labelH / 2)
+                    .foregroundStyle(GlassInk.secondary).position(x: qX, y: topPad + plotH + labelH / 2)
                 Text(tr("הצלחה")).font(.system(size: 8.5, weight: .semibold, design: .rounded))
-                    .foregroundStyle(GlassInk.primary).position(x: w - axisW / 2, y: topPad + plotH + labelH / 2)
+                    .foregroundStyle(GlassInk.primary).position(x: pctX, y: topPad + plotH + labelH / 2)
                 // bars
                 ForEach(points.indices, id: \.self) { i in
                     let p = points[i]
@@ -812,7 +716,7 @@ struct LearningTrendChart: View {
                 // weekday labels (only every ~4th on a 30-day view)
                 ForEach(points.indices, id: \.self) { i in
                     if points.count <= 7 || i % 4 == 3 || i == points.count - 1 {
-                        Text(points[i].weekday)
+                        Text(i == points.count - 1 ? tr("היום") : points[i].weekday)
                             .font(.system(size: 9.5, weight: i == points.count - 1 ? .heavy : .medium, design: .rounded))
                             .foregroundStyle(i == points.count - 1 ? GlassInk.primary : GlassInk.secondary)
                             .position(x: xAt(i), y: h - labelH / 2)
@@ -820,6 +724,7 @@ struct LearningTrendChart: View {
                 }
             }
         }
+        .environment(\.layoutDirection, .leftToRight)
         .accessibilityLabel(tr("שאלות ואחוז הצלחה לכל יום"))
     }
 }
@@ -829,31 +734,33 @@ struct ScreenTimeChart: View {
     let points: [InsightsEngine.DayPoint]
 
     var body: some View {
-        GeometryReader { geo in
+        // One coordinate system, as in `LearningTrendChart`.
+        let rtl = LanguageStore.shared.current.isRightToLeft
+        return GeometryReader { geo in
             let w = geo.size.width, h = geo.size.height
             let labelH: CGFloat = 18, topPad: CGFloat = 8, axisW: CGFloat = 36
             let plotH = h - labelH - topPad
-            let plotX0 = axisW, plotW = w - axisW
+            let plotW = w - axisW, plotX0 = rtl ? 0 : axisW, axisX = rtl ? w - axisW / 2 : axisW / 2
             let n = max(points.count, 1)
             let slot = plotW / CGFloat(n)
             let barW = min(11, slot * 0.28)
             let maxM = max(points.map { max($0.earned, $0.used) }.max() ?? 1, 1)
-            let xAt: (Int) -> CGFloat = { i in plotX0 + slot * (CGFloat(i) + 0.5) }
+            let xAt: (Int) -> CGFloat = { i in plotX0 + slot * (CGFloat(rtl ? n - 1 - i : i) + 0.5) }
             ZStack(alignment: .topLeading) {
                 ForEach([0.0, 0.5, 1.0], id: \.self) { f in
                     let y = topPad + plotH * (1 - f)
                     if f > 0 {
-                        Path { p in p.move(to: CGPoint(x: plotX0, y: y)); p.addLine(to: CGPoint(x: w, y: y)) }
+                        Path { p in p.move(to: CGPoint(x: plotX0, y: y)); p.addLine(to: CGPoint(x: plotX0 + plotW, y: y)) }
                             .stroke(Color.white.opacity(0.18), lineWidth: 1)
                     }
-                    // minutes on the axis (this side is the visual LEFT under RTL)
+                    // minutes on the axis, at the reading start
                     Text("\(Int((Double(maxM) * f).rounded()))")
                         .font(.system(size: 9.5, weight: .bold, design: .rounded)).monospacedDigit()
                         .foregroundStyle(GlassInk.primary)
-                        .position(x: axisW / 2, y: y)
+                        .position(x: axisX, y: y)
                 }
                 Text(tr("דקות")).font(.system(size: 8.5, weight: .semibold, design: .rounded))
-                    .foregroundStyle(GlassInk.secondary).position(x: axisW / 2, y: h - labelH / 2)
+                    .foregroundStyle(GlassInk.secondary).position(x: axisX, y: h - labelH / 2)
                 ForEach(points.indices, id: \.self) { i in
                     let p = points[i]
                     let cx = xAt(i)
@@ -866,7 +773,7 @@ struct ScreenTimeChart: View {
                         .frame(width: barW, height: max(uh, p.used > 0 ? 3 : 0))
                         .position(x: cx + barW * 0.6, y: topPad + plotH - uh / 2)
                     if points.count <= 7 || i % 4 == 3 || i == points.count - 1 {
-                        Text(p.weekday)
+                        Text(i == points.count - 1 ? tr("היום") : p.weekday)
                             .font(.system(size: 9.5, weight: i == points.count - 1 ? .heavy : .medium, design: .rounded))
                             .foregroundStyle(i == points.count - 1 ? GlassInk.primary : GlassInk.secondary)
                             .position(x: cx, y: h - labelH / 2)
@@ -874,6 +781,7 @@ struct ScreenTimeChart: View {
                 }
             }
         }
+        .environment(\.layoutDirection, .leftToRight)
         .accessibilityLabel(tr("דקות שהורווחו ודקות שנוצלו לכל יום"))
     }
 }

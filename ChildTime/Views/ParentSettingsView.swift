@@ -211,6 +211,7 @@ struct ParentSettingsView: View {
         // ONE window: every page pushed from here — a child's settings and the
         // editors inside them — closes it with its own "סיום".
         .environment(\.closeSettings, { dismiss() })
+        .preferredColorScheme(.dark)     // white titles in the bar, like everything under it
     }
 
     private var backdropSummary: String {

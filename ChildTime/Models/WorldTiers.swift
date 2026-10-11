@@ -38,12 +38,14 @@ enum WorldTiers {
 
     /// The parent's line for a world: tier, then room or "boss waiting".
     static func parentLabel(tier: Int, room: Int) -> String {
-        let where_ = room >= 9 ? tr("הַבּוֹס מְחַכֶּה") : tr("חֶדֶר \(room + 1)/10")
+        // A PARENT's screen carries no niqqud (the child's own labels keep theirs).
+        let plain = Question.stripNiqqud
+        let where_ = room >= 9 ? plain(tr("הַבּוֹס מְחַכֶּה")) : plain(tr("חֶדֶר \(room + 1)/10"))
         switch tier {
-        case 0:  return tr("⭐ אָרָד") + " · " + where_
-        case 1:  return tr("⭐⭐ כֶּסֶף") + " · " + where_
-        case 2:  return tr("⭐⭐⭐ זָהָב") + " · " + where_
-        default: return tr("👑 הֻשְׁלַם")
+        case 0:  return plain(tr("⭐ אָרָד")) + " · " + where_
+        case 1:  return plain(tr("⭐⭐ כֶּסֶף")) + " · " + where_
+        case 2:  return plain(tr("⭐⭐⭐ זָהָב")) + " · " + where_
+        default: return plain(tr("👑 הֻשְׁלַם"))
         }
     }
 
