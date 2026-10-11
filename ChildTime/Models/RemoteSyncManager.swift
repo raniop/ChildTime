@@ -35,7 +35,11 @@ enum SyncLog {
 /// Box for the cloud generation an upload transaction lands on, so the
 /// completion (main thread) can adopt what the transaction body (Firestore's
 /// queue) computed. A class, not a var: the closure captures it by reference.
-private final class SyncGeneration: @unchecked Sendable { var revision: Int? }
+private final class SyncGeneration: @unchecked Sendable {
+    var revision: Int?
+    /// Set when the upload was refused (see ProgressSnapshot.uploadMayMerge): the cloud's own state.
+    var refusedCloud: ProgressSnapshot?
+}
 
 @MainActor
 final class RemoteSyncManager: ObservableObject {
@@ -816,6 +820,10 @@ final class RemoteSyncManager: ObservableObject {
                 if let data = Self.encode(local) { txn.setData(data, forDocument: ref, merge: true) }
                 return nil
             }
+            guard ProgressSnapshot.uploadMayMerge(local: local, remote: cloud) else {
+                SyncLog.error("upload REFUSED for \(pid.uuidString.prefix(8)): local reset epoch \(local.resetEpoch) is above the cloud's \(cloud.resetEpoch) — not this child's data")
+                return nil
+            }
             var merged = ProgressSnapshot.ratchetMerged(local: local, remote: cloud)
             if ProgressSnapshot.sameProgressData(merged, cloud) { return nil }
             merged.revision = max(local.revision, cloud.revision) + 1
@@ -861,6 +869,10 @@ final class RemoteSyncManager: ObservableObject {
                 landed.revision = local.revision
                 return nil
             }
+            guard ProgressSnapshot.uploadMayMerge(local: local, remote: cloud) else {
+                landed.refusedCloud = cloud
+                return nil
+            }
             var merged = ProgressSnapshot.ratchetMerged(local: local, remote: cloud)
             // Cloud already holds everything we have → don't write (no churn, and
             // never lowers the cloud with a stale push).
@@ -878,6 +890,22 @@ final class RemoteSyncManager: ObservableObject {
             } else {
                 self?.lastUploadAt = .now
                 self?.lastError = nil
+                // 🛡 Refused: this store claims a newer reset than the cloud ever
+                // had for this child — it is holding someone else's numbers. Drop
+                // them and take the child's own state from the cloud, whole.
+                if let cloud = landed.refusedCloud {
+                    SyncLog.error("upload REFUSED for \(pid.uuidString.prefix(8)): local reset epoch \(local.resetEpoch) is above the cloud's \(cloud.resetEpoch) — taking the cloud's state instead")
+                    if ProgressStore.shared.holdsData(for: pid) {
+                        ProgressStore.shared.bind(to: nil)
+                        ProgressStore.shared.resetWallets()
+                        ProgressStore.shared.clearInFlightRefund()
+                        ProgressStore.shared.clearSecondsCarry()
+                        ProgressStore.shared.apply(cloud, owner: pid)
+                        ProgressStore.shared.bind(to: pid)
+                        ProgressVault.shared.write(ProgressStore.shared.captureSnapshot(), for: pid)
+                    }
+                    return
+                }
                 // Only while the store still holds THIS child — a profile switch
                 // in the meantime must not stamp a sibling with our generation.
                 if let r = landed.revision, ProgressStore.shared.holdsData(for: pid) {

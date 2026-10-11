@@ -61,6 +61,9 @@ final class ProgressStore: ObservableObject {
         static let dailyEarnedDate = "dailyEarnedDate"
         static let carryOverMinutes = "carryOverMinutes"
         static let resetEpoch = "resetEpoch"
+        /// Whose data this store holds (see `belongsTo`), and that it is being tracked.
+        static let owner = "progress.ownerID"
+        static let ownerTracked = "progress.ownerTracked"
         static let answeredToday = "answeredToday"
         static let correctToday = "correctToday"
         static let bestStreak = "bestStreak"
@@ -2002,16 +2005,43 @@ final class ProgressStore: ObservableObject {
     ///
     /// So the data carries its owner. Every path that writes this store OUT must
     /// check `belongsTo` first and refuse when it does not match.
-    private(set) var belongsTo: UUID? = {
-        // On launch the live store holds whatever was persisted for the profile
-        // that was active when the app last ran — `profiles.activeID` records
-        // exactly who that was. Binding to it here matters: `ProfileStore` only
-        // calls `switchTo` on the NEXT main-loop turn, and until then an unbound
-        // store would refuse every upload and sync would silently die.
-        UserDefaults.standard.string(forKey: "profiles.activeID").flatMap(UUID.init(uuidString:))
-    }()
+    ///
+    /// The owner is STORED with the data — in the same defaults, through the same
+    /// write-behind queue — and read back at launch. It used to be inferred at
+    /// launch from `profiles.activeID`, which lives in another defaults domain
+    /// and is written at once, while this store's fields trickle out behind it:
+    /// an app killed in between (an update is enough) came back with one child's
+    /// numbers tagged as their sibling's, and every guard below said "yes".
+    /// That is how Yahli's whole progress replaced Yoav's (2026-10-10).
+    private(set) var belongsTo: UUID? = ProgressStore.launchOwner(
+        stored: AppGroup.defaults.string(forKey: Key.owner),
+        tracked: AppGroup.defaults.bool(forKey: Key.ownerTracked),
+        activeID: UserDefaults.standard.string(forKey: "profiles.activeID"),
+        boundChildID: AppGroup.defaults.string(forKey: "deviceRole") == "child"
+            ? AppGroup.defaults.string(forKey: "joinedChildID") : nil)
 
-    func bind(to profileID: UUID?) { belongsTo = profileID }
+    /// Whose data the store holds as the app starts.
+    /// - The stored owner, when there is one.
+    /// - Nobody, once owners are tracked and none is stored: the last switch never
+    ///   finished. `ProfileStore` loads the active child from the vault on the
+    ///   next main-loop turn, and until then nothing may be written out.
+    /// - An install from before owners were stored: only a device BOUND to one
+    ///   child can be trusted to hold that child — every other device holds a
+    ///   cache of several children and starts unbound.
+    nonisolated static func launchOwner(stored: String?, tracked: Bool, activeID: String?, boundChildID: String?) -> UUID? {
+        if let stored, let id = UUID(uuidString: stored) { return id }
+        if tracked { return nil }
+        guard let boundChildID, boundChildID == activeID else { return nil }
+        return UUID(uuidString: boundChildID)
+    }
+
+    /// Say whose data the store holds — or `nil` BEFORE loading another child's,
+    /// so a switch cut short leaves "nobody's" behind rather than the wrong name.
+    func bind(to profileID: UUID?) {
+        belongsTo = profileID
+        defaults.set(true, forKey: Key.ownerTracked)
+        defaults.set(profileID?.uuidString, forKey: Key.owner)
+    }
 
     /// True when this store's live data really is `id`'s, and may be written to
     /// `id`'s document. Refuses when nothing is bound — a store that has never

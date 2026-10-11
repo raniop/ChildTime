@@ -351,6 +351,7 @@ struct ChildJoinView: View {
             // cloud revision, so this never pushes a blank over the cloud.
             if let cloud = await RemoteSyncManager.shared.fetchSnapshot(for: cid) {
                 TofyLink("JOIN: applying cloud snapshot stars=\(cloud.stars) diamonds=\(cloud.diamonds) min=\(cloud.pendingMinutes)")
+                if !ProgressStore.shared.holdsData(for: cid) { ProgressStore.shared.bind(to: nil) }   // nobody's while it loads
                 ProgressStore.shared.apply(cloud)
                 // This device is now BEING this child — say so, or the ownership
                 // guard refuses every upload for them.

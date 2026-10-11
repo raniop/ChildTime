@@ -40,6 +40,7 @@ final class ProfileStore: ObservableObject {
     /// duplicate-children / cross-family-leak incidents.
     func wipeAllInMemory() {
         defaults.removeObject(forKey: Key.createdHere)
+        ProgressStore.shared.bind(to: nil)      // the live numbers are nobody's now
         activeID = nil
         profiles = []
     }

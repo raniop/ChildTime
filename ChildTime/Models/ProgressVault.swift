@@ -141,6 +141,8 @@ final class ProgressVault {
         // new child's (Eli, 9.10: a brand-new אורית with 18 min + a 60-min gift).
         // The outgoing child was saved above; start the incoming one from her own.
         if !ProgressStore.shared.holdsData(for: profileID) {
+            // Nobody's, until the incoming child is fully loaded (see ProgressStore.bind).
+            ProgressStore.shared.bind(to: nil)
             ProgressStore.shared.resetWallets()
             ProgressStore.shared.clearInFlightRefund()   // the outgoing child's pending refund isn't theirs
             ProgressStore.shared.clearSecondsCarry()     // …nor their sub-minute leftover

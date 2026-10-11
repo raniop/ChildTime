@@ -310,6 +310,19 @@ extension ProgressSnapshot {
         return max(a, b)
     }
 
+    /// May `local` be merged into the cloud's `remote` by an ordinary upload?
+    ///
+    /// A higher reset epoch wins WHOLE (below) — the right rule for a reset, and
+    /// the reason one wrong upload could replace a child outright: Yahli's
+    /// numbers, at her epoch 2, written into Yoav's document at epoch 1, erased
+    /// him on every device (2026-10-10). But only a reset ever raises an epoch,
+    /// and a reset writes the cloud FIRST, in its own transaction, and only then
+    /// touches the device. So a device holding a HIGHER epoch than the cloud is
+    /// not ahead of it — it is holding something that is not this child's.
+    static func uploadMayMerge(local: ProgressSnapshot, remote: ProgressSnapshot) -> Bool {
+        local.resetEpoch <= remote.resetEpoch
+    }
+
     static func ratchetMerged(local: ProgressSnapshot, remote: ProgressSnapshot) -> ProgressSnapshot {
         // 🧹 A reset (higher resetEpoch) wins WHOLESALE — never max-merge across
         // a wipe, or a stale device would resurrect the old progress.
