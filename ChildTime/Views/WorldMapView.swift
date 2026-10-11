@@ -1071,8 +1071,6 @@ struct WorldMapView: View {
             if let active = profiles.active {
                 ProfileEditorView(mode: .edit(active)) { updated in
                     profiles.update(updated)
-                } onDelete: { profile in
-                    profiles.remove(profile)
                 }
                 .environmentObject(profiles)
                 .environment(\.layoutDirection, .app)

@@ -11,7 +11,6 @@ struct ProfileEditorView: View {
 
     let mode: Mode
     var onSave: (Profile) -> Void
-    var onDelete: ((Profile) -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var profiles: ProfileStore
@@ -30,7 +29,6 @@ struct ProfileEditorView: View {
     @State private var pickerItem: PhotosPickerItem? = nil
     @State private var showPicker = false
     @State private var pendingCrop: PendingCrop? = nil
-    @State private var showDeleteConfirm = false
     /// A kid-side save with no internet — a gentle "later", never a failure.
     @State private var needsInternet = false
     /// ⏱ The create flow's last step (parent only): the daily screen-time ceiling.
@@ -122,36 +120,6 @@ struct ProfileEditorView: View {
                         }
 
                         interestsSection
-
-                        // Delete is PARENT-ONLY (canEditLearning) — a kid tapping
-                        // their own avatar must never be able to wipe the account,
-                        // incl. real-money diamonds and purchased characters.
-                        if isEdit, canEditLearning, let id = existingID {
-                            Button(role: .destructive) {
-                                showDeleteConfirm = true
-                            } label: {
-                                Label(tr("מחק פרופיל"), systemImage: "trash")
-                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
-                                    .background(Color.red.opacity(0.25), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                                    .foregroundStyle(.white)
-                            }
-                            .padding(.top, AppSpacing.md)
-                            .confirmationDialog(
-                                tr("למחוק את הפרופיל של \(name)?"),
-                                isPresented: $showDeleteConfirm,
-                                titleVisibility: .visible
-                            ) {
-                                Button(tr("מחק"), role: .destructive) {
-                                    if case .edit(let p) = mode {
-                                        onDelete?(p)
-                                    }
-                                    _ = id  // silence unused
-                                }
-                                Button(tr("בטל"), role: .cancel) {}
-                            }
-                        }
 
                         Text(tr("טופי · \(AppInfo.versionLine)"))
                             .font(.system(size: 12, weight: .semibold, design: .rounded))

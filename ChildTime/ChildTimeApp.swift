@@ -536,7 +536,7 @@ struct ChildTimeApp: App {
             ChildDeviceControlsView()
                 .onAppear { ParentSettings.shared.deviceRole = .child }
         case "createchild":                             // DEMO_SCREEN=createchild — as the PARENT sees it
-            ProfileEditorView(mode: .create) { _ in } onDelete: { _ in }
+            ProfileEditorView(mode: .create) { _ in }
                 .onAppear { ParentSettings.shared.deviceRole = .parent }   // demo: age / grade rows are parent-only
         case "dailycapstep":                            // DEMO_SCREEN=dailycapstep — create child: ⏱ the last step
             DailyCapStepDemo(profile: ProfileStore.shared.active

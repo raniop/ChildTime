@@ -50,7 +50,6 @@ struct ParentDashboardView: View {
     /// Did the parent actually pick that child, or did the split just have to
     /// show someone? Only a real choice is pushed when the device folds back.
     @State private var chosenExplicitly = false
-    @State private var gridDeleteProfile: Profile? = nil   // long-press delete from the grid
     /// ⚙️ The child's settings list (page 2), opened from the bottom of their page.
     @State private var settingsChild: Profile? = nil
     /// ✏️ The same child settings, opened straight from the HOME (the card's
@@ -296,7 +295,7 @@ struct ParentDashboardView: View {
                 if !WhatsNewStories.parentStoryForThisVersion.isEmpty {
                     storyRing.frame(width: 46, height: 46)
                 }
-                SideRailButton(systemImage: "person.badge.plus", label: tr("＋ צרו ילד/ה")) { if !household.refuseIfDisconnected() { showingCreateChild = true } }
+                SideRailButton(systemImage: "person.badge.plus", label: tr("＋ הוספת ילד/ה")) { if !household.refuseIfDisconnected() { showingCreateChild = true } }
                 SideRailButton(emoji: "🧹", label: tr("🧹 מטלות")) { openChores() }
                 if familyHasChildDevice {
                     SideRailButton(emoji: "📍", label: tr("📍 מיקום")) { showingLocation = true }
@@ -604,24 +603,6 @@ struct ParentDashboardView: View {
             .navigationDestination(for: UUID.self) { id in
                 childDetailScreen(for: id)
             }
-            // Long-press → delete straight from the grid (its own state so it can't
-            // clash with the detail page's delete dialog). An `alert` (not a
-            // `confirmationDialog`) — the latter is a popover on iPad that, when
-            // fired from a context menu, often has no anchor and never appears.
-            .alert(
-                gridDeleteProfile.map { tr("למחוק את \($0.name)?") } ?? "",
-                isPresented: Binding(get: { gridDeleteProfile != nil },
-                                     set: { if !$0 { gridDeleteProfile = nil } }),
-                presenting: gridDeleteProfile
-            ) { p in
-                Button(tr("מחיקת ילד/ה"), role: .destructive) {
-                    profiles.remove(p)
-                    gridDeleteProfile = nil
-                }
-                Button(tr("בטל"), role: .cancel) { gridDeleteProfile = nil }
-            } message: { _ in
-                Text(tr("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק."))
-            }
             .sheet(isPresented: $showingSettings) {
                 ParentSettingsView()
                     .environment(\.layoutDirection, .app)
@@ -763,7 +744,7 @@ struct ParentDashboardView: View {
                     profiles.add(newProfile)
                     HouseholdManager.shared.upsertChild(newProfile)
                     pendingQRChild = newProfile
-                } onDelete: { _ in }
+                }
                 .environmentObject(profiles)
                 .environment(\.layoutDirection, .app)
             }
@@ -774,9 +755,6 @@ struct ParentDashboardView: View {
             .sheet(item: $editChild) { p in
                 ProfileEditorView(mode: .edit(p)) { updated in
                     profiles.parentEdit(updated)
-                } onDelete: { removed in
-                    editChild = nil
-                    profiles.remove(removed)
                 }
                 .environmentObject(profiles)
                 .environment(\.layoutDirection, .app)
@@ -1186,7 +1164,7 @@ struct ParentDashboardView: View {
         } label: {
             HStack(spacing: 10) {
                 Image(systemName: "person.crop.circle.badge.plus")
-                Text(tr("צרו ילד/ה"))
+                Text(tr("הוספת ילד/ה"))
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
@@ -1655,7 +1633,7 @@ struct ParentDashboardView: View {
 
     private var homeActionsRow: some View {
         HStack(spacing: 8) {
-            Button { Haptic.light(); if !household.refuseIfDisconnected() { showingCreateChild = true } } label: { homeGhostLabel(tr("＋ צרו ילד/ה")).frame(maxWidth: .infinity) }
+            Button { Haptic.light(); if !household.refuseIfDisconnected() { showingCreateChild = true } } label: { homeGhostLabel(tr("＋ הוספת ילד/ה")).frame(maxWidth: .infinity) }
                 .buttonStyle(.plain)
                 .coachMark("p.newChild")
             // "תנו לילד לשחק" moved into each child's ⚡ menu (Rani, 2026-09-07):
@@ -2492,9 +2470,6 @@ struct ParentDashboardView: View {
                                 showingReorder = true
                             } label: { Label(tr("סדר את הילדים"), systemImage: "arrow.up.arrow.down") }
                         }
-                        Button(role: .destructive) {
-                            gridDeleteProfile = row.profile
-                        } label: { Label(tr("מחיקת ילד/ה"), systemImage: "trash") }
                     }
                 }
             }

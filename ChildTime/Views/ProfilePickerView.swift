@@ -75,9 +75,6 @@ struct ProfilePickerView: View {
             ProfileEditorView(mode: .edit(p)) { updated in
                 profiles.update(updated)
                 editingProfile = nil
-            } onDelete: { toDelete in
-                profiles.remove(toDelete)
-                editingProfile = nil
             }
             .environmentObject(profiles)
             .environment(\.layoutDirection, .app)

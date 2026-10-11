@@ -109,7 +109,7 @@ fun HomeScreen(
                 item { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { banners() } }
                 item {
                     RowSpaced {
-                        GlassButton(tr("＋ צרו ילד/ה"), Modifier.weight(1f).coachMark("p.newChild")) { onAddChild() }
+                        GlassButton(tr("＋ הוספת ילד/ה"), Modifier.weight(1f).coachMark("p.newChild")) { onAddChild() }
                         GlassButton(tr("🧹 מטלות"), Modifier.weight(1f).coachMark("p.chores")) { onChores() }
                         // 📍 Only once a child has a device of their own (Rani, 9.10).
                         if (state.orderedChildren.any { state.devicesOf(it.id).isNotEmpty() }) {
@@ -134,7 +134,7 @@ fun HomeScreen(
                 if (!state.loading && state.children.isEmpty()) item {
                     Column(Modifier.fillMaxWidth().glassPane().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         H(tr("עוד אין ילדים במשפחה"), 19, align = TextAlign.Center)
-                        GoldButton(tr("＋ צרו ילד/ה")) { onAddChild() }
+                        GoldButton(tr("＋ הוספת ילד/ה")) { onAddChild() }
                     }
                 }
             }

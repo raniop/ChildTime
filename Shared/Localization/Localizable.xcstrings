@@ -47743,6 +47743,28 @@
         }
       }
     },
+    "הוספת ילד/ה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إضافة طفل/ة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a child"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавить ребёнка"
+          }
+        }
+      }
+    },
     "הוספתם %lld דקות משחק" : {
       "localizations" : {
         "ar" : {
@@ -49089,28 +49111,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Мой ребёнок"
-          }
-        }
-      }
-    },
-    "הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "سيُحذف الطفل وبياناته من العائلة نهائيًا. يمكنكم إنشاؤه من جديد في أي وقت. وسيُفصل أي جهاز مرتبط بهذا الطفل."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This child and their data will be permanently deleted from the family. You can create them again anytime. Any device linked to this child will be disconnected."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ребёнок и его данные будут навсегда удалены из семьи. Вы сможете создать его заново в любой момент. Устройство, привязанное к этому ребёнку, отключится."
           }
         }
       }
@@ -51722,6 +51722,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удалить фото"
+          }
+        }
+      }
+    },
+    "הסרה מהמשפחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إزالة من العائلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from the family"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Убрать из семьи"
+          }
+        }
+      }
+    },
+    "הסרת הילד מהמשפחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إزالة الطفل من العائلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove child from the family"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Убрать ребёнка из семьи"
+          }
+        }
+      }
+    },
+    "הסרת הילדה מהמשפחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إزالة الطفلة من العائلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove child from the family"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Убрать ребёнка из семьи"
           }
         }
       }
@@ -71533,6 +71599,28 @@
         }
       }
     },
+    "כל הנתונים של %@ יימחקו לצמיתות, ואי אפשר לשחזר אותם. מכשיר שמחובר לפרופיל הזה יתנתק." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ستُحذف كل بيانات %@ نهائيًا ولا يمكن استرجاعها. وسيُفصل أي جهاز مرتبط بهذا الملف."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All of %@'s data will be permanently deleted and can't be restored. A device linked to this profile will be disconnected."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все данные %@ будут удалены навсегда, восстановить их нельзя. Устройство, привязанное к этому профилю, отключится."
+          }
+        }
+      }
+    },
     "כל העדכונים" : {
       "localizations" : {
         "ar" : {
@@ -77612,6 +77700,28 @@
         }
       }
     },
+    "להסיר את %@ מהמשפחה?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إزالة %@ من العائلة؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove %@ from the family?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Убрать %@ из семьи?"
+          }
+        }
+      }
+    },
     "להעביר את המשפחה לאזור הזמן של הטלפון הזה" : {
       "localizations" : {
         "ar" : {
@@ -78776,50 +78886,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "занималась"
-          }
-        }
-      }
-    },
-    "למחוק את %@?" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "حذف %@؟"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete %@?"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Удалить %@?"
-          }
-        }
-      }
-    },
-    "למחוק את הפרופיל של %@?" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "حذف ملف %@ الشخصي؟"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete %@'s profile?"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Удалить профиль %@?"
           }
         }
       }
@@ -87282,50 +87348,6 @@
         }
       }
     },
-    "מחיקת הילד" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "حذف الطفل"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete child"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Удалить ребёнка"
-          }
-        }
-      }
-    },
-    "מחיקת הילדה" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "حذف الطفلة"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete child"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Удалить ребёнка"
-          }
-        }
-      }
-    },
     "מחיקת המקום" : {
       "localizations" : {
         "ar" : {
@@ -87344,28 +87366,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удалить место"
-          }
-        }
-      }
-    },
-    "מחיקת ילד/ה" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "حذف طفل/ة"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete child"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Удалить ребёнка"
           }
         }
       }
@@ -87608,28 +87608,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удалить всё"
-          }
-        }
-      }
-    },
-    "מחק פרופיל" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "احذف الملفّ الشخصي"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete profile"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Удалить профиль"
           }
         }
       }
@@ -108015,28 +107993,6 @@
         }
       }
     },
-    "צרו ילד/ה" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "أنشئوا طفلًا/طفلة"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Create a child"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Создайте ребёнка"
-          }
-        }
-      }
-    },
     "צרו פרופיל לכל ילד/ה כאן. אחר כך כל ילד יקבל קוד QR — סורקים אותו במכשיר של הילד, והוא נכנס ישירות לשחק." : {
       "localizations" : {
         "ar" : {
@@ -110466,24 +110422,24 @@
         }
       }
     },
-    "קוד, חברים, איפוס ומחיקה" : {
+    "קוד, חברים, איפוס והסרה" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الرمز والأصدقاء وإعادة الضبط والحذف"
+            "value" : "الرمز والأصدقاء وإعادة الضبط والإزالة"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Code, friends, reset and delete"
+            "value" : "Code, friends, reset and removal"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Код, друзья, сброс и удаление"
+            "value" : "Код, друзья, сброс и удаление из семьи"
           }
         }
       }
@@ -124429,6 +124385,28 @@
         }
       }
     },
+    "＋ הוספת ילד/ה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "＋ إضافة طفل/ة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "＋ Add a child"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "＋ Добавить ребёнка"
+          }
+        }
+      }
+    },
     "＋ הוספת מקום" : {
       "localizations" : {
         "ar" : {
@@ -124452,28 +124430,6 @@
       }
     },
     "＋ צְרוּ יֶלֶד/ה" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "＋ أنشئوا طفلًا/طفلة"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "＋ Create a child"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "＋ Добавить ребёнка"
-          }
-        }
-      }
-    },
-    "＋ צרו ילד/ה" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {

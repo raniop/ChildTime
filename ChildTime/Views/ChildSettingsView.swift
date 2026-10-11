@@ -130,7 +130,7 @@ struct ChildSettingsView: View {
                 NavigationLink {
                     morePage(p)
                 } label: {
-                    rowLabel("🛠️", tr("עוד הגדרות"), value: tr("קוד, חברים, איפוס ומחיקה"), chevron: false)
+                    rowLabel("🛠️", tr("עוד הגדרות"), value: tr("קוד, חברים, איפוס והסרה"), chevron: false)
                 }
             } header: {
                 Text(tr("מתקדם"))
@@ -317,7 +317,9 @@ struct ChildSettingsView: View {
                     moreNote = tr("נשלחה בקשת רענון לכל המכשירים של \(p.name). זה קורה בפתיחה הבאה של טופי בכל מכשיר.")
                 }
                 row("↩️", tr("איפוס התקדמות"), destructive: true, chevron: false) { confirmReset = true }
-                row("🚮", p.gender == .girl ? tr("מחיקת הילדה") : tr("מחיקת הילד"),
+                // The ONE place a child is removed (David, 11.10: "כמה מקומות שמהם אפשר
+                // למחוק ילד" — and "מחיקת הילדה" beside 🚮 read badly).
+                row("❌", p.gender == .girl ? tr("הסרת הילדה מהמשפחה") : tr("הסרת הילד מהמשפחה"),
                     destructive: true, chevron: false) { confirmDelete = true }
             }
             .glassRows()
@@ -349,11 +351,11 @@ struct ChildSettingsView: View {
             } message: {
                 Text(tr("הקוד שהילד הגדיר לפתיחת זמן משחק יימחק. הילד יוכל להגדיר קוד חדש מהמכשיר שלו. שימושי כשהקוד נשכח."))
             }
-        .alert(tr("למחוק את \(p.name)?"), isPresented: $confirmDelete) {
-                Button(tr("מחיקת ילד/ה"), role: .destructive) { onDelete(p) }
+        .alert(tr("להסיר את \(p.name) מהמשפחה?"), isPresented: $confirmDelete) {
+                Button(tr("הסרה מהמשפחה"), role: .destructive) { onDelete(p) }
                 Button(tr("בטל"), role: .cancel) {}
             } message: {
-                Text(tr("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק."))
+                Text(tr("כל הנתונים של \(p.name) יימחקו לצמיתות, ואי אפשר לשחזר אותם. מכשיר שמחובר לפרופיל הזה יתנתק."))
             }
         .alert(moreNote ?? "", isPresented: Binding(get: { moreNote != nil },
                                                     set: { if !$0 { moreNote = nil } })) {
@@ -470,9 +472,6 @@ struct ChildSettingsView: View {
             .sheet(item: $editing) { p in
                 ProfileEditorView(mode: .edit(p)) { updated in
                     profiles.parentEdit(updated)
-                } onDelete: { removed in
-                    editing = nil
-                    onDelete(removed)
                 }
                 .environmentObject(profiles)
                 .environment(\.layoutDirection, .app)

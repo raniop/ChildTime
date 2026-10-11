@@ -81,7 +81,7 @@ internal fun ChildSettingsContent(childID: String, onBack: () -> Unit, onDeleted
             when (page) {
                 Page.MAIN -> MainList(child, progress, extras, state.devicesOf(childID).isNotEmpty(), note, ::back, onOpen = { page = it }, write = ::write, onDeleted = onDeleted,
                     onConnect = onConnect, onLocation = onLocation)
-                Page.PROFILE -> ProfileEditor(child, ::back, onSave = { f -> if (f.isNotEmpty()) write(f); if (direct) onBack() else page = Page.MAIN }, onDeleted = onDeleted, note = note)
+                Page.PROFILE -> ProfileEditor(child, ::back, onSave = { f -> if (f.isNotEmpty()) write(f); if (direct) onBack() else page = Page.MAIN })
                 Page.LANGUAGE -> LanguageEditor(child, ::back, ::write)
                 Page.DIFFICULTY -> DifficultyEditor(child, ::back, ::write)
                 Page.WORLDS -> WorldsEditor(child, ::back, ::write)
@@ -172,7 +172,7 @@ private fun MainList(
             RowDivider()
             SettingsRow("↩️", tr("איפוס התקדמות"), destructive = true, chevron = false) { confirmReset = true }
             RowDivider()
-            SettingsRow("🚮", if (girl) tr("מחיקת הילדה") else tr("מחיקת הילד"), destructive = true, chevron = false) { confirmDelete = true }
+            SettingsRow("❌", if (girl) tr("הסרת הילדה מהמשפחה") else tr("הסרת הילד מהמשפחה"), destructive = true, chevron = false) { confirmDelete = true }
         }
         } else {
         // הַיֶּלֶד / הַיַּלְדָּה — the grade drives ALL curriculum content: flag it when missing or child-picked.
@@ -251,7 +251,7 @@ private fun MainList(
         }
 
         SettingsSection(tr("מתקדם")) {
-            SettingsRow("🛠️", tr("עוד הגדרות"), tr("קוד, חברים, איפוס ומחיקה")) { more = true }
+            SettingsRow("🛠️", tr("עוד הגדרות"), tr("קוד, חברים, איפוס והסרה")) { more = true }
         }
         }
     }
@@ -264,9 +264,9 @@ private fun MainList(
     if (confirmPin) Confirm(tr("לאפס את קוד הגנת הזמן של %@?", child.name),
         tr("הקוד שהילד הגדיר לפתיחת זמן משחק יימחק. הילד יוכל להגדיר קוד חדש מהמכשיר שלו. שימושי כשהקוד נשכח."),
         tr("אפס קוד"), cancel = tr("בטל"), onConfirm = { write(mapOf("playPIN" to "")) }, onDismiss = { confirmPin = false })
-    if (confirmDelete) Confirm(tr("למחוק את %@?", child.name),
-        tr("הילד/ה והנתונים שלו יימחקו מהמשפחה לצמיתות. תוכלו ליצור אותו מחדש בכל עת. מכשיר שמחובר לילד הזה יתנתק."),
-        tr("מחיקת ילד/ה"), cancel = tr("בטל"),
+    if (confirmDelete) Confirm(tr("להסיר את %@ מהמשפחה?", child.name),
+        tr("כל הנתונים של %@ יימחקו לצמיתות, ואי אפשר לשחזר אותם. מכשיר שמחובר לפרופיל הזה יתנתק.", child.name),
+        tr("הסרה מהמשפחה"), cancel = tr("בטל"),
         onConfirm = { scope.launch { if (deleteChild(child.id, note)) onDeleted() } }, onDismiss = { confirmDelete = false })
     remoteNote?.let { Notice(tr("שליטה מרחוק"), it) { remoteNote = null } }
 }
@@ -306,8 +306,7 @@ private fun ToggleRow(emoji: String, title: String, subtitle: String?, on: Boole
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String, Any?>) -> Unit, onDeleted: () -> Unit, note: WriteNote) {
-    val scope = rememberCoroutineScope()
+private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String, Any?>) -> Unit) {
     var name by remember { mutableStateOf(child.name) }
     var gender by remember { mutableStateOf(child.gender) }
     var age by remember { mutableStateOf(AgeBracket.of(child.age)) }
@@ -316,7 +315,6 @@ private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String,
     var grade by remember { mutableStateOf(shownGrade) }
     var level by remember { mutableStateOf(child.learningLevel) }
     var interests by remember { mutableStateOf(child.interests.toSet()) }
-    var confirmDelete by remember { mutableStateOf(false) }
     // A grade choice is REQUIRED from the parent: it drives curriculum + the September promotion.
     val canSave = name.isNotBlank() && grade != null
 
@@ -431,14 +429,7 @@ private fun ProfileEditor(child: Child, onBack: () -> Unit, onSave: (Map<String,
                 }
             }
         }
-
-        Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.Red.copy(alpha = 0.25f)).clickable { confirmDelete = true }.padding(vertical = 12.dp),
-            contentAlignment = Alignment.Center) {
-            Text("🗑 " + tr("מחק פרופיל"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-        }
     }
-    if (confirmDelete) Confirm(tr("למחוק את הפרופיל של %@?", child.name), null, tr("מחק"),
-        onConfirm = { scope.launch { if (deleteChild(child.id, note)) onDeleted() } }, onDismiss = { confirmDelete = false })
 }
 
 @Composable
