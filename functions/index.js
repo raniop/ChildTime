@@ -1272,6 +1272,48 @@ async function wakeChildDevices(householdID, reason) {
   } catch (e) { console.error("[wake] failed", e && e.message); }
 }
 
+// 🔓 Check-in. A child device reports whether Tofy's lock still has its
+// permission (`shieldAuthorized`) only from Tofy itself — and a child whose apps
+// are all open has no reason to open Tofy. Yoav's iPad sat unlocked for 28 hours
+// before the parents' "הנעילה כובתה" push could go out (2026-10-11). So: every
+// 3 hours, a SILENT wake to each child device that has not been heard from for
+// 2 hours; the app answers with a heartbeat (build 232+; older builds just
+// drain their listeners), and wakeOnDeviceCommand does the rest.
+// Honest limits: iOS throttles silent pushes and never wakes a force-quit app.
+function checkInTokens(rows, nowSeconds) {
+  const out = new Set();
+  for (const d of rows) {
+    if (!d || d.role === "parent" || d.removed === true || !d.fcmToken) continue;
+    const quiet = nowSeconds - (Number(d.lastSeenAt) || 0);
+    if (quiet < 2 * 3600) continue;          // it told us a moment ago
+    if (quiet > 14 * 86400) continue;        // long gone — not worth a ping every 3 hours
+    out.add(d.fcmToken);
+  }
+  return [...out];
+}
+exports.checkInTokens = checkInTokens;   // for the unit test
+
+exports.checkInChildDevices = onSchedule(
+  { schedule: "every 3 hours", timeZone: "Asia/Jerusalem", timeoutSeconds: 300 },
+  async () => {
+    const snap = await db.collection("childDevices").get();
+    const tokens = checkInTokens(snap.docs.map((d) => d.data()), Date.now() / 1000);
+    let sent = 0;
+    for (let i = 0; i < tokens.length; i += 500) {
+      try {
+        const res = await admin.messaging().sendEachForMulticast({
+          tokens: tokens.slice(i, i + 500),
+          data: { type: "wake", reason: "checkin" },
+          apns: { headers: { "apns-priority": "5", "apns-push-type": "background" },
+                  payload: { aps: { "content-available": 1 } } },
+        });
+        sent += res.successCount;
+      } catch (e) { console.error("[checkin] failed", e && e.message); }
+    }
+    console.log("[checkin] woke", sent, "/", tokens.length, "quiet child devices");
+  }
+);
+
 // One-shot claim: create() fails if the doc exists, so exactly ONE function
 // invocation wins per key. Vital because a command is written onto EVERY device
 // row of the child — N rows → N invocations → N duplicate pushes without this
