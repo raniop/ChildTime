@@ -15809,6 +15809,28 @@
         }
       }
     },
+    "9 תמונות מצוירות, 15 צבעים, או עד 6 תמונות משלכם מהמצלמה או מהאלבום — לכל ילד בנפרד, וגם להורים בהגדרות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "9 صور مرسومة، 15 لونًا، أو حتى 6 صور خاصة بكم من الكاميرا أو الألبوم — لكل طفل على حدة، وللوالدين في الإعدادات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "9 illustrated pictures, 15 colors, or up to 6 photos of your own from the camera or your photos — for each child separately, and for parents in Settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "9 рисованных картинок, 15 цветов или до 6 своих фото с камеры или из галереи — для каждого ребёнка отдельно, а для родителей в настройках"
+          }
+        }
+      }
+    },
     "9 תמונות מצוירות, 15 צבעים, או תמונה משלכם מהמצלמה או מהאלבום — לכל ילד בנפרד, וגם להורים בהגדרות" : {
       "localizations" : {
         "ar" : {
@@ -29187,6 +29209,28 @@
         }
       }
     },
+    "בהגדרות של הילד רואים את המכשירים המחוברים, ואפשר להסיר מכשיר או לחבר מכשיר נוסף" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في إعدادات الطفل تظهر الأجهزة المتصلة، ويمكن إزالة جهاز أو ربط جهاز آخر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In the child's settings you can see the connected devices, remove one, or connect another"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В настройках ребёнка видны подключённые устройства: можно убрать устройство или подключить ещё одно"
+          }
+        }
+      }
+    },
     "בהגדרות של כל ילד בוחרים ימים ושעות שבהם אי אפשר לפתוח דקות משחק. משחק פתוח נעצר, והדקות שנשארו חוזרות לארנק" : {
       "localizations" : {
         "ar" : {
@@ -31106,6 +31150,28 @@
         }
       }
     },
+    "במדע ובגאוגרפיה: השאלה מוקראת בקול והתשובות הן תמונות — למשל, מה יקרה לקרח בשמש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في العلوم والجغرافيا: يُقرأ السؤال بصوت عالٍ والإجابات صور — مثلًا: ماذا يحدث للثلج في الشمس"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Science and Geography: the question is read aloud and the answers are pictures — for example, what happens to ice in the sun"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В «Науке» и «Географии»: вопрос читается вслух, а ответы — картинки. Например: что будет со льдом на солнце"
+          }
+        }
+      }
+    },
     "במכשיר" : {
       "localizations" : {
         "ar" : {
@@ -32940,6 +33006,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Появился интерес к новой теме"
+          }
+        }
+      }
+    },
+    "גלגל השיניים במסך הבית מציג שורה לכל ילד — רמת קושי, זמן מסך, עולמות ושפה — מעל ההגדרות הכלליות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رمز الترس في الشاشة الرئيسية يعرض الآن سطرًا لكل طفل — مستوى الصعوبة، وقت الشاشة، العوالم واللغة — فوق الإعدادات العامة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The gear on the home screen now shows a row for each child — difficulty, screen time, worlds and language — above the general settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Шестерёнка на главном экране теперь показывает строку для каждого ребёнка — сложность, экранное время, миры и язык — над общими настройками"
           }
         }
       }
@@ -46237,6 +46325,28 @@
         }
       }
     },
+    "הגדרות של כל ילד במקום אחד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إعدادات كل طفل في مكان واحد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each child's settings in one place"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройки каждого ребёнка в одном месте"
+          }
+        }
+      }
+    },
     "הגדרתם בטעות את האייפד של הילד כמכשיר הורה? בהגדרות יש עכשיו \"להפוך את האייפד הזה למכשיר של ילד\" — בלחיצה אחת, בלי למחוק כלום. והתקנה חדשה באייפד ממליצה מראש על מכשיר ילד" : {
       "localizations" : {
         "ar" : {
@@ -50343,6 +50453,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Устройства %@"
+          }
+        }
+      }
+    },
+    "המכשירים של כל ילד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أجهزة كل طفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each child's devices"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Устройства каждого ребёнка"
           }
         }
       }
@@ -117751,6 +117883,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вопросы и процент успеха по дням"
+          }
+        }
+      }
+    },
+    "שאלות חשיבה לילדי הגן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أسئلة تفكير لأطفال الروضة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thinking questions for kindergarten"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вопросы на размышление для детсадовцев"
           }
         }
       }
