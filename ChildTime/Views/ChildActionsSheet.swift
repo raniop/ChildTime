@@ -32,7 +32,7 @@ struct ChildActionsSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var expanded: Tile? = nil
 
-    private enum Tile { case gift, lock }
+    private enum Tile { case lock }
 
     private var name: String { Question.stripNiqqud(profile.name) }
     private var girl: Bool { profile.gender == .girl }
@@ -91,7 +91,7 @@ struct ChildActionsSheet: View {
 
     private var tiles: some View {
         HStack(spacing: 10) {
-            tile("💝", tr("מתנת דקות"), on: expanded == .gift) { toggle(.gift) }
+            // 💝 The gift left for the home screen — its own button on the child's card.
             tile("🔒", tr("נעילה"), on: expanded == .lock) { toggle(.lock) }
             tile("📍", tr("איפה \(name)"), on: false) { run(.location) }
         }
@@ -105,15 +105,6 @@ struct ChildActionsSheet: View {
 
     @ViewBuilder private func choices(_ t: Tile) -> some View {
         switch t {
-        case .gift:
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
-                chip(tr("רבע שעה")) { run(.gift(minutes: 15)) }
-                chip(tr("חצי שעה")) { run(.gift(minutes: 30)) }
-                chip(tr("שעה")) { run(.gift(minutes: 60)) }
-                chip(tr("שעתיים")) { run(.gift(minutes: 120)) }
-                chip(tr("4 שעות")) { run(.gift(minutes: 240)) }
-            }
-            .transition(.opacity.combined(with: .move(edge: .top)))
         case .lock:
             VStack(spacing: 8) {
                 chip(tr("נעל עכשיו")) { run(.lock) }

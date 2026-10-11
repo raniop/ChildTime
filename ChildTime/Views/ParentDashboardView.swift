@@ -125,6 +125,8 @@ struct ParentDashboardView: View {
     /// 💬 Live support chat (the old feedback form's successor).
     @ObservedObject private var support = SupportChatStore.shared
     @State private var qrChild: Profile? = nil
+    /// 💝 The gift window, opened from a child's card.
+    @State private var giftChild: Profile? = nil
     /// The same pairing sheet, opened OVER a child's settings window.
     @State private var qrInSettings: Profile? = nil
     @State private var qrCode: String? = nil
@@ -757,6 +759,7 @@ struct ParentDashboardView: View {
                 childQRSheet(for: child)
             }
             .sheet(item: $actionsChild) { p in actionsSheet(p) }
+            .sheet(item: $giftChild) { p in giftSheet(p) }
             .sheet(item: $editChild) { p in
                 ProfileEditorView(mode: .edit(p)) { updated in
                     profiles.parentEdit(updated)
@@ -1489,14 +1492,14 @@ struct ParentDashboardView: View {
                 .fixedSize(horizontal: false, vertical: true)   // all three tiles as tall as the one with the bar (Rani)
             }
             if hasDevice {
-                // The buttons sit on the tiles' grid (Rani): "מידע נוסף" spans
-                // the first two tiles and the gap between them, ⚡ (overlaid
-                // by the grid — a Menu inside a link would swallow the tap) is
-                // exactly the third tile.
+                // The buttons sit on the tiles' grid (Rani): 📊 מידע נוסף · ⚡ פעולות ·
+                // 💝 מתנת דקות, a tile each. ⚡ and 💝 are overlaid by the grid — a
+                // Button inside the link would swallow the tap.
                 GeometryReader { g in
                     let t = Self.tileWidth(innerWidth: g.size.width)
                     HStack(spacing: Self.tileGap) {
-                        homePrimaryLabel(tr("📊 מידע נוסף")).frame(width: t * 2 + Self.tileGap)
+                        homePrimaryLabel(tr("📊 מידע נוסף")).frame(width: t)
+                        Color.clear.frame(width: t, height: 1)
                         Color.clear.frame(width: t, height: 1)
                     }
                 }
@@ -1857,6 +1860,36 @@ struct ParentDashboardView: View {
             .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.30), lineWidth: 1))
         }
         .buttonStyle(.plain)
+    }
+
+    /// 💝 on a card: the gift window, straight from the home screen.
+    private func gridCardGift(_ profile: Profile, width: CGFloat) -> some View {
+        Button {
+            Haptic.light()
+            giftChild = profile
+        } label: {
+            Text("💝 " + tr("מתנת דקות"))
+                .font(.system(size: 13.5, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .lineLimit(1).minimumScaleFactor(0.6)
+                .padding(.horizontal, 4)
+                .frame(width: width, height: Self.homeControlHeight)
+                .background(LinearGradient(colors: [Color(hex: "FF8FC0"), Color(hex: "FF5F9A")], startPoint: .top, endPoint: .bottom),
+                            in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.45), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func giftSheet(_ p: Profile) -> some View {
+        let snapshot = rows.first(where: { $0.profile.id == p.id })?.snapshot
+        let today = DayGate.usedToday(snapshot?.giftGivenDate) ? (snapshot?.giftGivenToday ?? 0) : 0
+        return GiftMinutesSheet(profile: p,
+                                givenToday: today,
+                                waiting: snapshot?.giftMinutesShown ?? 0,
+                                capLeft: ProgressStore.minutesUntilMidnight()) { minutes in
+            sendGift(p, minutes)
+        }
     }
 
     private func actionsSheet(_ p: Profile) -> some View {
@@ -2416,11 +2449,22 @@ struct ParentDashboardView: View {
                     // The grid is RTL, so `.bottomTrailing` is the bottom-LEFT.
                     .overlay {
                         GeometryReader { g in
-                            gridCardMenu(row.profile, width: Self.tileWidth(cardWidth: g.size.width))
+                            let t = Self.tileWidth(cardWidth: g.size.width)
+                            // With a device: 📊 · ⚡ · 💝 — ⚡ sits in the middle slot and the
+                            // gift takes the last one. Without: 📊 · חברו מכשיר · ⚡.
+                            let hasDevice = childHasDevice(row.profile)
+                            gridCardMenu(row.profile, width: t)
                                 .coachMark("p.actions", if: row.profile.id == rows.first?.profile.id)
                                 .padding(Self.cardPadding)
                                 .padding(.bottom, Self.homeControlHeight + Self.homeRowGap)
+                                .padding(.trailing, hasDevice ? t + Self.tileGap : 0)
                                 .frame(width: g.size.width, height: g.size.height, alignment: .bottomTrailing)
+                            if hasDevice {
+                                gridCardGift(row.profile, width: t)
+                                    .padding(Self.cardPadding)
+                                    .padding(.bottom, Self.homeControlHeight + Self.homeRowGap)
+                                    .frame(width: g.size.width, height: g.size.height, alignment: .bottomTrailing)
+                            }
                         }
                     }
                     // 🧒 One tap hands THIS device to THIS child. Parents wrote in
@@ -2744,12 +2788,20 @@ struct ParentDashboardView: View {
     /// until midnight (a 20:00 gift tops out at 240 min total for today).
     /// Unused gift carries over — the cap is on GIVING, not on holding.
     private func remoteOpen(_ profile: Profile, _ minutes: Int) {
+        if let status = sendGift(profile, minutes) { commandStatus = status }
+    }
+
+    /// Sends the gift and returns its live status (nil when nothing could be
+    /// given). The 💝 window shows that status INSIDE itself; the other callers
+    /// present it as a sheet.
+    @discardableResult
+    private func sendGift(_ profile: Profile, _ minutes: Int) -> RemoteCommandStatusRequest? {
         let (allowed, capLeft) = giftAllowance(for: profile, wanting: minutes)
         guard allowed > 0 else {
             // Only reachable in the last minute before midnight (capLeft == 0).
             Haptic.warning()
             remoteGrantMsg = tr("עוד רגע חצות — אין מה לתת להיום. מיד אחרי חצות אפשר לתת שוב.")
-            return
+            return nil
         }
         Haptic.success()
         remote.giftChildMinutes(childID: profile.id, minutes: allowed)
@@ -2760,8 +2812,8 @@ struct ParentDashboardView: View {
         let note = allowed < minutes
             ? tr("ביקשתם \(minutes) — זה המקסימום שנשאר להיום, עד חצות.")
             : nil
-        commandStatus = RemoteCommandStatusRequest(profile: profile,
-                                                   kind: .gift(minutes: allowed, note: note))
+        _ = capLeft
+        return RemoteCommandStatusRequest(profile: profile, kind: .gift(minutes: allowed, note: note))
     }
 
     /// How much of `wanting` may be given RIGHT NOW: each single give is capped

@@ -30996,6 +30996,28 @@
         }
       }
     },
+    "בכפתור ״פעולות״ של כל ילד: נעילה ואיפה הילד בלחיצה אחת, ומשם זמן מסך, מטלות וכל ההגדרות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في زر «إجراءات» لكل طفل: القفل ومعرفة مكان الطفل بلمسة واحدة، ومن هناك وقت الشاشة والمهام وكل الإعدادات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In each child's \"Actions\" button: lock and where your child is in one tap, and from there screen time, chores and all the settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В кнопке «Действия» каждого ребёнка: блокировка и «где ребёнок» в одно касание, а оттуда — экранное время, дела по дому и все настройки"
+          }
+        }
+      }
+    },
     "בכרטיס של כל ילד במסך ההורים אפשר לבחור באיזו שפה האפליקציה תופיע אצלו — והמכשיר שלו מתחלף מיד, בלי לגעת בו" : {
       "localizations" : {
         "ar" : {
@@ -33230,6 +33252,28 @@
         }
       }
     },
+    "גלגל השיניים מציג שורה לכל ילד, והכול נפתח באותו חלון עם חץ חזרה: זמן מסך, רמת קושי, עולמות, שפה ומכשירים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رمز الترس يعرض سطرًا لكل طفل، وكل شيء يُفتح في النافذة نفسها مع سهم للرجوع: وقت الشاشة، الصعوبة، العوالم، اللغة والأجهزة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The gear shows a row for each child, and everything opens in the same window with a back arrow: screen time, difficulty, worlds, language and devices"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Шестерёнка показывает строку для каждого ребёнка, и всё открывается в том же окне со стрелкой «назад»: экранное время, сложность, миры, язык и устройства"
+          }
+        }
+      }
+    },
     "גלגל מזל כל %lld שאלות" : {
       "localizations" : {
         "ar" : {
@@ -35322,6 +35366,28 @@
         }
       }
     },
+    "דקות מתנה שלא נוצלו היום נשמרות למחר." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دقائق الهدية التي لم تُستخدم اليوم تبقى للغد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gift minutes that aren't used today are kept for tomorrow."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подаренные минуты, не использованные сегодня, сохраняются на завтра."
+          }
+        }
+      }
+    },
     "דקות שאתם נתתם במתנה ועוד לא נפתחו — נשמרות בנפרד לגמרי מהדקות שהילד/ה הרוויח/ה, אותו מספר בכל מכשיר. הילד/ה פותח/ת אותן מתי שרוצה, וכשהמתנה פתוחה — הספירה לאחור מופיעה כאן (ולא ב-🎮). בכל נתינה אפשר לתת עד מה שנשאר עד חצות; מה שלא נוצל נשאר למחר." : {
       "localizations" : {
         "ar" : {
@@ -35494,6 +35560,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Накоплено минут"
+          }
+        }
+      }
+    },
+    "דק׳" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "د"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "min"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "мин"
           }
         }
       }
@@ -57433,6 +57521,50 @@
         }
       }
     },
+    "זמן מסך שאתם נותנים מהלב — בלי שאלות. %@ פותח אותו מתי שהוא רוצה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت شاشة تمنحونه من القلب — بلا أسئلة. %@ يفتحه متى شاء."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screen time you give from the heart — no questions asked. %@ opens it whenever he likes."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экранное время, которое вы дарите от души — без вопросов. %@ открывает его, когда захочет."
+          }
+        }
+      }
+    },
+    "זמן מסך שאתם נותנים מהלב — בלי שאלות. %@ פותחת אותו מתי שהיא רוצה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت شاشة تمنحونه من القلب — بلا أسئلة. %@ تفتحه متى شاءت."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screen time you give from the heart — no questions asked. %@ opens it whenever she likes."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экранное время, которое вы дарите от души — без вопросов. %@ открывает его, когда захочет."
+          }
+        }
+      }
+    },
     "זמן מסך של אפל" : {
       "localizations" : {
         "ar" : {
@@ -73829,6 +73961,28 @@
         }
       }
     },
+    "כפתור 💝 בכרטיס של כל ילד: מסובבים טבעת לבחירת הדקות, רואים כמה כבר נתתם היום, ושולחים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "زر 💝 في بطاقة كل طفل: أديروا الحلقة لاختيار الدقائق، شاهدوا كم منحتم اليوم، وأرسلوا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A 💝 button on each child's card: turn a ring to choose the minutes, see how much you've given today, and send"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кнопка 💝 на карточке каждого ребёнка: поверните кольцо, чтобы выбрать минуты, посмотрите, сколько уже подарили сегодня, и отправьте"
+          }
+        }
+      }
+    },
     "כפתורים מיושרים" : {
       "localizations" : {
         "ar" : {
@@ -89266,6 +89420,28 @@
         }
       }
     },
+    "מסובבים באצבע" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أديروا بالإصبع"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn with a finger"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вращайте пальцем"
+          }
+        }
+      }
+    },
     "מסך בית רגוע יותר לילד" : {
       "localizations" : {
         "ar" : {
@@ -89306,6 +89482,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Новый родительский экран — всё за пару секунд"
+          }
+        }
+      }
+    },
+    "מסך הילד מסודר מחדש" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شاشة الطفل بترتيب جديد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The child's screen, rearranged"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экран ребёнка в новом порядке"
           }
         }
       }
@@ -90966,6 +91164,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Подарить минуты"
+          }
+        }
+      }
+    },
+    "מתנת דקות ישר ממסך הבית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دقائق هدية مباشرة من الشاشة الرئيسية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gift minutes straight from the home screen"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подарок минут прямо с главного экрана"
           }
         }
       }
@@ -95332,6 +95552,28 @@
         }
       }
     },
+    "נשלחו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أُرسلت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sent"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отправлено"
+          }
+        }
+      }
+    },
     "נשמח לשמוע מה דעתכם — מה לשפר, מה חסר, או כל רעיון שיש לכם. כל מילה עוזרת לנו לשפר את טופי לילדים." : {
       "localizations" : {
         "ar" : {
@@ -95438,6 +95680,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Увидимся внутри 👋"
+          }
+        }
+      }
+    },
+    "נתתם היום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مُنح اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Given today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подарено сегодня"
           }
         }
       }
@@ -102198,6 +102462,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ещё не подключено — нажмите, чтобы подключить"
+          }
+        }
+      }
+    },
+    "עוד לא נוצלו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم تُستخدم بعد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not used yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё не использованы"
           }
         }
       }
@@ -111214,6 +111500,28 @@
         }
       }
     },
+    "קודם הביצועים והשיפור, אחר כך מה כדאי לתרגל, וגרף שבועי ברור מיום א׳ עד שבת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أولًا الأداء والتحسّن، ثم ما يستحق التدريب، ورسم أسبوعي واضح من الأحد إلى السبت"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First how they're doing and whether they're improving, then what to practise, and a clear weekly chart from Sunday to Saturday"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сначала результаты и прогресс, затем что стоит потренировать, и понятный недельный график с воскресенья по субботу"
+          }
+        }
+      }
+    },
     "קודם המסך הזה הראה את כל מה שנוסף אי פעם, בכל פעם מחדש. עכשיו הוא מראה רק את מה שהגיע מאז העדכון האחרון שראיתם" : {
       "localizations" : {
         "ar" : {
@@ -119604,6 +119912,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вы отправили %lld мин. в подарок"
+          }
+        }
+      }
+    },
+    "שליחת %lld דקות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إرسال %lld دقيقة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send %lld minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отправить %lld мин."
           }
         }
       }
