@@ -63,21 +63,61 @@ struct ChildReportTests {
         #expect(e.skillReports(.math, .today).isEmpty)
     }
 
+    /// "Now" for the week tests: a Wednesday, so that "yesterday" is this week and
+    /// "9 days ago" is the week before — whatever day the tests really run on.
+    private func onAWednesday<T>(_ body: () -> T) -> T {
+        var cal = Calendar.current
+        cal.firstWeekday = 1
+        let today = cal.startOfDay(for: Date())
+        let shift = (4 - cal.component(.weekday, from: today) + 7) % 7      // 4 = Wednesday
+        let wednesday = cal.date(byAdding: .day, value: shift, to: today)!
+        InsightsEngine.clock = { wednesday }
+        defer { InsightsEngine.clock = { Date() } }
+        return body()
+    }
+    /// A day key counted back from that Wednesday.
+    private func weekKey(daysBeforeWednesday n: Int) -> String {
+        LearningHistoryStore.dayKey(Calendar.current.date(byAdding: .day, value: -n, to: InsightsEngine.clock())!)
+    }
+    private func weekDay(_ n: Int, _ topic: Topic, _ answered: Int, _ correct: Int) -> DailyStat {
+        var d = DailyStat(date: weekKey(daysBeforeWednesday: n))
+        d.perTopic[topic.rawValue] = DailyStat.TopicDay(answered: answered, correct: correct, responseMsTotal: 0)
+        d.questionsAnswered = answered; d.correct = correct; d.wrong = answered - correct
+        return d
+    }
+
+    @Test("\"השבוע\" is the calendar week: it starts on its first day, not seven days back")
+    func theWeekIsACalendarWeek() {
+        onAWednesday {
+            // Wednesday: Sun, Mon, Tue, Wed are this week; last Saturday (4 days ago) is not.
+            let e = engine([weekDay(0, .math, 10, 9), weekDay(3, .math, 10, 7), weekDay(4, .math, 50, 50)])
+            #expect(e.summary(.week).questions == 20)
+            #expect(e.topicReports(.week).first?.answered == 20)
+            // …and the chart shows the same seven days, the ones still ahead empty.
+            let points = e.weekPoints()
+            #expect(points.count == 7)
+            #expect(points.map(\.questions) == [10, 0, 0, 10, 0, 0, 0])
+            #expect(points[3].isToday && points.filter(\.isToday).count == 1)
+        }
+    }
+
     @Test("a trend needs enough answers in BOTH periods")
     func deltasIgnoreNoise() {
+      onAWednesday {
         // This week: strong. Last week: only 3 answers → no delta may be claimed.
-        let e = engine([day(1, [(.geography, 20, 18, [:])]),
-                        day(9, [(.geography, 3, 1, [:])])])
+        let e = engine([weekDay(1, .geography, 20, 18),
+                        weekDay(9, .geography, 3, 1)])
         #expect(e.topicDeltas(.week).isEmpty)
         #expect(e.overallDelta(.week) == nil)
 
         // With a real prior sample the improvement shows, in percentage points.
-        let e2 = engine([day(1, [(.geography, 20, 18, [:])]),
-                         day(9, [(.geography, 20, 12, [:])])])
+        let e2 = engine([weekDay(1, .geography, 20, 18),
+                         weekDay(9, .geography, 20, 12)])
         let d = e2.topicDeltas(.week).first
         #expect(d?.topic == .geography)
         #expect(abs((d?.deltaPoints ?? 0) - 30) < 0.01)
         #expect(e2.dailyInsight(name: "נועה", isGirl: true, period: .week)?.emoji == "🌟")
+      }
     }
 
     @Test("mastered and to-practise name skills when they exist, topics otherwise")

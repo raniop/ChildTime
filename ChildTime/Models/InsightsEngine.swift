@@ -44,6 +44,40 @@ struct InsightsEngine {
     /// Last 7 calendar days (including today).
     var thisWeek: PeriodSummary { summarize(daysInLast(7)) }
 
+    // MARK: 📅 The calendar week (what the parent's report calls "השבוע")
+
+    /// "Now", replaceable in tests — a calendar week depends on which weekday it is.
+    static var clock: () -> Date = { Date() }
+
+    /// The first day of the week `date` is in: Sunday in Hebrew, the phone's own
+    /// first weekday in the other languages.
+    static func weekStart(of date: Date = clock()) -> Date {
+        var cal = Calendar.current
+        if LanguageStore.shared.current == .he { cal.firstWeekday = 1 }
+        let day = cal.startOfDay(for: date)
+        let back = (cal.component(.weekday, from: day) - cal.firstWeekday + 7) % 7
+        return cal.date(byAdding: .day, value: -back, to: day) ?? day
+    }
+
+    /// The days of a calendar week: `weeksBack` 0 is this week up to today, 1 is
+    /// the whole week before it.
+    func daysInCalendarWeek(weeksBack: Int = 0) -> [DailyStat] {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Self.clock())
+        guard let start = cal.date(byAdding: .day, value: -7 * weeksBack, to: Self.weekStart()) else { return [] }
+        let keys = Set((0..<7).compactMap { i -> String? in
+            guard let d = cal.date(byAdding: .day, value: i, to: start), d <= today else { return nil }
+            return LearningHistoryStore.dayKey(d)
+        })
+        return history.filter { keys.contains($0.date) }
+    }
+
+    /// This week as a weekly calendar counts it: from its first day up to today.
+    /// The report's "השבוע" used to mean "the last 7 days" while its chart showed
+    /// the calendar week — on a Monday the numbers included last week and the
+    /// chart did not (Rani approved the change, 2026-10-12).
+    var calendarWeek: PeriodSummary { summarize(daysInCalendarWeek()) }
+
     /// Last 30 calendar days.
     var thisMonth: PeriodSummary { summarize(daysInLast(30)) }
 

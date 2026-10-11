@@ -115,6 +115,8 @@ extension InsightsEngine {
     // MARK: - Windows
 
     private func stats(period: ReportPeriod, offsetPeriods: Int = 0) -> [DailyStat] {
+        // 📅 "השבוע" is the calendar week; its "before" is the whole week before it.
+        if period == .week { return daysInCalendarWeek(weeksBack: offsetPeriods) }
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         let end = cal.date(byAdding: .day, value: -(period.days * offsetPeriods), to: today)!
@@ -128,7 +130,7 @@ extension InsightsEngine {
     func summary(_ period: ReportPeriod) -> PeriodSummary {
         switch period {
         case .today: return today
-        case .week: return thisWeek
+        case .week: return calendarWeek
         case .month: return thisMonth
         }
     }
@@ -247,7 +249,7 @@ extension InsightsEngine {
         let earned: Int
         let used: Int
         var id: String { date }
-        var isToday: Bool { date == LearningHistoryStore.dayKey(Date()) }
+        var isToday: Bool { date == LearningHistoryStore.dayKey(InsightsEngine.clock()) }
         /// Short Hebrew weekday, Saturday spelt out as the app does elsewhere.
         var weekday: String {
             guard let d = LearningHistoryStore.date(fromKey: date) else { return "" }
@@ -269,17 +271,15 @@ extension InsightsEngine {
     /// chose this over a rolling "last 7 days", which starts on a different
     /// weekday every day ("היום הראשון הוא א׳… בכלל לא מובן", 2026-10-12).
     func weekPoints() -> [DayPoint] {
-        var cal = Calendar.current
-        if LanguageStore.shared.current == .he { cal.firstWeekday = 1 }
-        let today = cal.startOfDay(for: Date())
-        let back = (cal.component(.weekday, from: today) - cal.firstWeekday + 7) % 7
-        let start = cal.date(byAdding: .day, value: -back, to: today)!
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Self.clock())
+        let start = Self.weekStart()
         let byKey = Dictionary(uniqueKeysWithValues: history.map { ($0.date, $0) })
         return (0..<7).map { i in
-            let key = LearningHistoryStore.dayKey(cal.date(byAdding: .day, value: i, to: start)!)
-            let d = i <= back ? byKey[key] : nil
+            let date = cal.date(byAdding: .day, value: i, to: start)!
+            let d = date <= today ? byKey[LearningHistoryStore.dayKey(date)] : nil
             let q = d?.questionsAnswered ?? 0
-            return DayPoint(date: key, questions: q,
+            return DayPoint(date: LearningHistoryStore.dayKey(date), questions: q,
                             accuracy: q > 0 ? Double(d!.correct) / Double(q) : 0,
                             earned: d?.minutesEarned ?? 0, used: d?.minutesUsed ?? 0)
         }
