@@ -94,7 +94,7 @@ fun AppNav() {
             com.rani.tofy.ui.location.ParentLocationScreen(e.arguments?.getString("child")) { nav.popBackStack() }
         }
         composable("activity") { ActivityScreen(onBack = { nav.popBackStack() }) }
-        composable("settings") { SettingsScreen(onBack = { nav.popBackStack() }) }
+        composable("settings") { SettingsScreen(onBack = { nav.popBackStack() }, onOpenChild = { nav.navigate("childSettings/$it") }) }
         composable("paywall") { com.rani.tofy.billing.GatedPaywall("request") { nav.popBackStack() } }
         composable("pack/{pack}/{cid}") { e ->
             com.rani.tofy.billing.PackPurchaseScreen(e.arguments?.getString("pack") ?: "", e.arguments?.getString("cid")) { nav.popBackStack() }

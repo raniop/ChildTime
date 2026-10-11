@@ -604,7 +604,11 @@ struct ParentDashboardView: View {
                 childDetailScreen(for: id)
             }
             .sheet(isPresented: $showingSettings) {
-                ParentSettingsView()
+                // A child's row in ⚙️ closes it and opens that child's settings —
+                // once the sheet has gone, so one sheet never opens over another on its way out.
+                ParentSettingsView(onOpenChild: { p in
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { homeSettingsChild = p }
+                })
                     .environment(\.layoutDirection, .app)
             }
             // 🔔 The activity centre. The sheet closes itself first and hands the

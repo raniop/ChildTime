@@ -28,6 +28,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -79,7 +80,7 @@ private enum class SettingsSheet { LANGUAGE, ORDER, PIN, FEEDBACK, WHATS_NEW, BA
  * (ParentSettings.swift keeps those device-local), plus StoreKit / data export.
  */
 @Composable
-fun SettingsScreen(onBack: () -> Unit) {
+fun SettingsScreen(onBack: () -> Unit, onOpenChild: (String) -> Unit = {}) {
     var addingParent by remember { mutableStateOf(false) }
     if (addingParent) { AddParentScreen(onClose = { addingParent = false }); return }
 
@@ -132,9 +133,29 @@ fun SettingsScreen(onBack: () -> Unit) {
                         SettingsRow("🌍", tr("שפה · Language"), I18n.language.native, chevron = true) { sheet = SettingsSheet.LANGUAGE }
                     }
                 }
+                // 🧒 Whose settings? A child's first — that is what parents come here for
+                // (Sasha, twice: "אני כל פעם שעה מחפשת איפה אני מגדירה את הקושי") — then
+                // everything that is about the family as a whole.
+                val kids = state.orderedChildren
+                if (kids.isNotEmpty()) item {
+                    Section(tr("הגדרות של ילד")) {
+                        kids.forEachIndexed { i, c ->
+                            if (i > 0) RowDivider()
+                            Row(Modifier.fillMaxWidth().clickable { onOpenChild(c.id) }.padding(horizontal = 14.dp, vertical = 10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                                com.rani.tofy.ui.common.ChildAvatar(c, 44.dp)
+                                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    Text(c.name, color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                                    P(tr("רמת קושי, זמן מסך, עולמות ושפה"), 12.5f, color = Ink.secondary)
+                                }
+                                androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = Ink.tertiary)
+                            }
+                        }
+                    }
+                }
                 // 🎨 The parent's own backdrop, on this phone (some don't want the colourful one).
                 item {
-                    Section {
+                    Section(if (kids.isNotEmpty()) tr("הגדרות כלליות") else null) {
                         val id = com.rani.tofy.ui.theme.BackdropStore.parentID
                         val name = if (id == com.rani.tofy.ui.theme.BackdropTheme.PHOTO) tr("התמונה שלי")
                                    else com.rani.tofy.ui.home.stripNiqqud(com.rani.tofy.ui.theme.BackdropPicture.find(id)?.displayName ?: com.rani.tofy.ui.theme.BackdropTheme.find(id).displayName)

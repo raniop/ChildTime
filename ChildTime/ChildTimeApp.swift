@@ -522,7 +522,7 @@ struct ChildTimeApp: App {
                         HouseholdManager.shared.seedDemoLiveWindow(childID: p.id)
                     }
                 }
-        case "parentsettings": ParentSettingsView()   // DEMO_SCREEN=parentsettings
+        case "parentsettings": ParentSettingsView(onOpenChild: { _ in })   // DEMO_SCREEN=parentsettings
         // 🎨 DEMO_SCREEN=backdrops | parentbackdrops — the backdrop picker (child's / parent's)
         case "backdrops":
             if let id = ProfileStore.shared.activeID { BackdropPickerView(owner: .child(id)) }

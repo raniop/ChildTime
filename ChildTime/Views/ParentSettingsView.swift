@@ -12,6 +12,13 @@ struct ParentSettingsView: View {
     @ObservedObject private var household = HouseholdManager.shared
     @Environment(\.dismiss) private var dismiss
 
+    /// The parent home passes this: a child's row here closes the sheet and
+    /// opens THAT child's settings (difficulty, screen time, worlds, language).
+    /// A parent looking for "רמת קושי" opened this ⚙️ first and found nothing
+    /// about the children — the way in was hidden behind "פעולות" on the card
+    /// (Sasha, twice: "אני כל פעם שעה מחפשת איפה אני מגדירה את הקושי").
+    var onOpenChild: ((Profile) -> Void)? = nil
+
     @State private var showAppPicker = false
     @State private var pickerSelection = SelectionStorage.empty()
     @State private var showAllowedPicker = false
@@ -92,6 +99,34 @@ struct ParentSettingsView: View {
                             .glassPane(radius: 16, strength: 0.14)
                         }
                         .buttonStyle(.plain)
+                    }
+                    // 🧒 Whose settings? A child's first — that is what parents come
+                    // here for — then everything that is about the family as a whole.
+                    if let onOpenChild, !orderedChildren.isEmpty {
+                        menuHeading(tr("הגדרות של ילד"))
+                        ForEach(orderedChildren) { p in
+                            Button {
+                                Haptic.light()
+                                dismiss()
+                                onOpenChild(p)
+                            } label: {
+                                HStack(spacing: 12) {
+                                    ProfileAvatarView(profile: p, size: 44)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(p.name).font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.primary)
+                                        Text(tr("רמת קושי, זמן מסך, עולמות ושפה")).font(.system(size: 12.5, weight: .medium, design: .rounded)).foregroundStyle(GlassInk.secondary)
+                                            .lineLimit(2).minimumScaleFactor(0.8)
+                                    }
+                                    Spacer(minLength: 0)
+                                    Image(systemName: AppSymbol.forwardChevron).font(.system(size: 14, weight: .bold)).foregroundStyle(GlassInk.tertiary)
+                                }
+                                .padding(14)
+                                .frame(maxWidth: .infinity)
+                                .glassPane(radius: 16, strength: 0.14)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        menuHeading(tr("הגדרות כלליות"))
                     }
                     menuRow("🎨", tr("רקע"), backdropSummary) {
                         BackdropPickerView(owner: .parent).navigationBarBackButtonHidden(true)
@@ -314,6 +349,15 @@ struct ParentSettingsView: View {
     }
 
     // MARK: - Menu
+
+    private func menuHeading(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 13.5, weight: .heavy, design: .rounded))
+            .foregroundStyle(GlassInk.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 6)
+            .padding(.top, 8)
+    }
 
     private func menuRow<D: View>(_ emoji: String, _ title: String, _ summary: String, soft: Bool = false,
                                   @ViewBuilder destination: @escaping () -> D) -> some View {

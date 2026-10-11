@@ -46127,6 +46127,28 @@
         }
       }
     },
+    "הגדרות כלליות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإعدادات العامة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "General settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Общие настройки"
+          }
+        }
+      }
+    },
     "הגדרות של %@" : {
       "localizations" : {
         "ar" : {
@@ -46145,6 +46167,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Настройки: %@"
+          }
+        }
+      }
+    },
+    "הגדרות של ילד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إعدادات الطفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A child's settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройки ребёнка"
           }
         }
       }
@@ -113182,6 +113226,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Умная сложность"
+          }
+        }
+      }
+    },
+    "רמת קושי, זמן מסך, עולמות ושפה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مستوى الصعوبة ووقت الشاشة والعوالم واللغة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Difficulty, screen time, worlds and language"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сложность, экранное время, миры и язык"
           }
         }
       }
