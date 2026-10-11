@@ -119,8 +119,8 @@ struct GlassBackdrop: View {
         let look = store.look
         GeometryReader { g in
             ZStack {
-                if let photo = look.photo {
-                    // A photo of their own: filled edge to edge, under a dark veil so
+                if let photo = look.photo(for: g.size) {
+                    // A picture (a built-in one, or their own): filled edge to edge, under a dark veil so
                     // the white text and the glass panes stay readable on any picture.
                     Image(uiImage: photo).resizable().scaledToFill()
                         .frame(width: g.size.width, height: g.size.height).clipped()

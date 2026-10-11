@@ -14903,28 +14903,6 @@
         }
       }
     },
-    "15 רקעים לבחירה, או תמונה משלכם מהמצלמה או מהאלבום — לכל ילד בנפרד, וגם להורים בהגדרות" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "15 خلفية للاختيار، أو صورة خاصة بكم من الكاميرا أو الألبوم — لكل طفل على حدة، وللوالدين في الإعدادات"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "15 backgrounds to choose from, or a photo of your own from the camera or your photos — for each child separately, and for parents in Settings"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "15 фонов на выбор или своё фото с камеры или из галереи — для каждого ребёнка отдельно, а для родителей в настройках"
-          }
-        }
-      }
-    },
     "1️⃣  הוֹרִידוּ אֶת טוֹפִי בַּמַּכְשִׁיר שֶׁל %@ — מֵה־App Store אוֹ מִ־Google Play" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -15827,6 +15805,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "72 вопроса о Рамадане, Ид аль-Фитр, Ид аль-Адха, Рождестве и Пасхе. Мир существовал, но попасть в него было нельзя — теперь он на главном экране каждого ребёнка, у которого приложение на арабском"
+          }
+        }
+      }
+    },
+    "9 תמונות מצוירות, 15 צבעים, או תמונה משלכם מהמצלמה או מהאלבום — לכל ילד בנפרד, וגם להורים בהגדרות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "9 صور مرسومة، 15 لونًا، أو صورة خاصة بكم من الكاميرا أو الألبوم — لكل طفل على حدة، وللوالدين في الإعدادات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "9 illustrated pictures, 15 colors, or a photo of your own from the camera or your photos — for each child separately, and for parents in Settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "9 рисованных картинок, 15 цветов или своё фото с камеры или из галереи — для каждого ребёнка отдельно, а для родителей в настройках"
           }
         }
       }
@@ -17142,6 +17142,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сброс кода защиты времени"
+          }
+        }
+      }
+    },
+    "אִצְטַדְיוֹן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ملعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stadium"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стадион"
           }
         }
       }
@@ -43209,6 +43231,28 @@
         }
       }
     },
+    "הַקֹּטֶב" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "القطب الشمالي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Arctic"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Арктика"
+          }
+        }
+      }
+    },
     "הַקּוֹד אֻפַּס! אֶפְשָׁר לִבְחוֹר חָדָשׁ 🔓" : {
       "localizations" : {
         "ar" : {
@@ -43914,6 +43958,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Моё фото"
+          }
+        }
+      }
+    },
+    "הַתְּמוּנָה שֶׁלִּי תּוֹפִיעַ כָּאן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "صورتي ستظهر هنا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My photo will show up here"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Здесь появится моё фото"
           }
         }
       }
@@ -61224,6 +61290,28 @@
         }
       }
     },
+    "טִירָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قلعة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Castle"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Замок"
+          }
+        }
+      }
+    },
     "טִירָנוֹזָאוּרוּס" : {
       "localizations" : {
         "ar" : {
@@ -64050,6 +64138,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Лес историй"
+          }
+        }
+      }
+    },
+    "יַעַר קָסוּם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "غابة مسحورة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Magic forest"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Волшебный лес"
           }
         }
       }
@@ -67673,6 +67783,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "мячи"
+          }
+        }
+      }
+    },
+    "כַּדּוּרִים פּוֹרְחִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مناطيد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Balloons"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Воздушные шары"
           }
         }
       }
@@ -82570,6 +82702,28 @@
         }
       }
     },
+    "מִתַּחַת לַמַּיִם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تحت الماء"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Underwater"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Под водой"
+          }
+        }
+      }
+    },
     "מֵאֲחוֹרֵי קוֹד הוֹרֶה · Apple ID · הַשְּׁאֵלוֹן נִכְנָס לַיֶּלֶד מִיָּד" : {
       "localizations" : {
         "ar" : {
@@ -83648,6 +83802,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ждём, пока родитель присоединится…"
+          }
+        }
+      }
+    },
+    "מַמְתַּקִּים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أرض الحلوى"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Candy land"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Страна сладостей"
           }
         }
       }
@@ -125390,6 +125566,28 @@
         }
       }
     },
+    "🎨 צְבָעִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎨 ألوان"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎨 Colors"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎨 Цвета"
+          }
+        }
+      }
+    },
     "🎮" : {
 
     },
@@ -128775,6 +128973,28 @@
         }
       }
     },
+    "📷 מִשֶּׁלִּי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📷 صورتي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📷 Mine"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📷 Моё"
+          }
+        }
+      }
+    },
     "📸 לְצַלֵּם עַכְשָׁו" : {
       "localizations" : {
         "ar" : {
@@ -129963,6 +130183,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🖼 Выбрать фото"
+          }
+        }
+      }
+    },
+    "🖼 תְּמוּנוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🖼 صور"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🖼 Pictures"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🖼 Картинки"
           }
         }
       }

@@ -137,7 +137,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                     Section {
                         val id = com.rani.tofy.ui.theme.BackdropStore.parentID
                         val name = if (id == com.rani.tofy.ui.theme.BackdropTheme.PHOTO) tr("התמונה שלי")
-                                   else com.rani.tofy.ui.home.stripNiqqud(com.rani.tofy.ui.theme.BackdropTheme.find(id).displayName)
+                                   else com.rani.tofy.ui.home.stripNiqqud(com.rani.tofy.ui.theme.BackdropPicture.find(id)?.displayName ?: com.rani.tofy.ui.theme.BackdropTheme.find(id).displayName)
                         SettingsRow("🎨", tr("רקע"), name, chevron = true) { sheet = SettingsSheet.BACKDROP }
                     }
                 }

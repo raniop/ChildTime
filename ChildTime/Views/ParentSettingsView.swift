@@ -190,7 +190,8 @@ struct ParentSettingsView: View {
 
     private var backdropSummary: String {
         let id = BackdropStore.shared.parentBackdropID
-        return id == BackdropTheme.photoID ? tr("התמונה שלי") : Question.stripNiqqud(BackdropTheme.find(id).displayName)
+        if id == BackdropTheme.photoID { return tr("התמונה שלי") }
+        return Question.stripNiqqud(BackdropPicture.find(id)?.displayName ?? BackdropTheme.find(id).displayName)
     }
 
     /// "משפחת גולן" — one name for the whole household (Rani: the dashboard

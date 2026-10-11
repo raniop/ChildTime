@@ -1,0 +1,5 @@
+A polar night scene: deep blue snowy hills, rounded icebergs, a glowing green-and-violet aurora across the sky, a cozy igloo with a warm light, friendly penguins and a small polar bear, stars and gently falling snow.
+
+Style: soft 3D animated-film / toy diorama render, chunky rounded shapes, smooth matte materials, gentle glowing light. Wide landscape orientation (3:2), the scene fills the whole frame edge to edge.
+
+This is a BACKGROUND for an app screen with white text and translucent cards on top of it, so: rich saturated colors but overall fairly dark and calm, low contrast, no bright white or very light areas, no single huge object in the middle, details spread softly over the frame. No text, no letters, no numbers, no people.

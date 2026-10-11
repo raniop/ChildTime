@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import com.google.firebase.firestore.Blob
 import com.google.firebase.firestore.FirebaseFirestore
 import com.rani.tofy.DeviceRole
+import com.rani.tofy.R
 import com.rani.tofy.i18n.tr
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
@@ -71,6 +72,38 @@ data class BackdropTheme(
 }
 
 /**
+ * 🖼 A built-in PICTURE backdrop — BackdropPicture in Backdrop.swift (same ids).
+ * An illustrated scene bundled with the app, free; chosen and stored like a
+ * colour backdrop, by its id ("pic-…": a build that does not know it falls
+ * back to the default colours), and drawn like a photo of their own.
+ */
+data class BackdropPicture(val id: String, val full: Int, val wide: Int, val thumb: Int) {
+    // `wide`: the same scene drawn wide, for a screen on its side — the tall one would show only its middle band there.
+    /** Pointed, as a child reads it; a parent's screen strips the points. Capitalised: it is a NAME. */
+    val displayName: String
+        get() = when (id) {
+            "pic-ocean" -> tr("מִתַּחַת לַמַּיִם"); "pic-forest" -> tr("יַעַר קָסוּם"); "pic-balloons" -> tr("כַּדּוּרִים פּוֹרְחִים")
+            "pic-dino" -> tr("דִּינוֹזָאוּרִים"); "pic-candy" -> tr("מַמְתַּקִּים"); "pic-castle" -> tr("טִירָה")
+            "pic-stadium" -> tr("אִצְטַדְיוֹן"); "pic-space" -> tr("חָלָל"); else -> tr("הַקֹּטֶב")
+        }.replaceFirstChar { it.uppercase() }
+
+    companion object {
+        val all = listOf(
+            BackdropPicture("pic-ocean", R.drawable.backdrop_pic_ocean, R.drawable.backdrop_pic_ocean_wide, R.drawable.backdrop_pic_ocean_thumb),
+            BackdropPicture("pic-forest", R.drawable.backdrop_pic_forest, R.drawable.backdrop_pic_forest_wide, R.drawable.backdrop_pic_forest_thumb),
+            BackdropPicture("pic-balloons", R.drawable.backdrop_pic_balloons, R.drawable.backdrop_pic_balloons_wide, R.drawable.backdrop_pic_balloons_thumb),
+            BackdropPicture("pic-dino", R.drawable.backdrop_pic_dino, R.drawable.backdrop_pic_dino_wide, R.drawable.backdrop_pic_dino_thumb),
+            BackdropPicture("pic-candy", R.drawable.backdrop_pic_candy, R.drawable.backdrop_pic_candy_wide, R.drawable.backdrop_pic_candy_thumb),
+            BackdropPicture("pic-castle", R.drawable.backdrop_pic_castle, R.drawable.backdrop_pic_castle_wide, R.drawable.backdrop_pic_castle_thumb),
+            BackdropPicture("pic-stadium", R.drawable.backdrop_pic_stadium, R.drawable.backdrop_pic_stadium_wide, R.drawable.backdrop_pic_stadium_thumb),
+            BackdropPicture("pic-space", R.drawable.backdrop_pic_space, R.drawable.backdrop_pic_space_wide, R.drawable.backdrop_pic_space_thumb),
+            BackdropPicture("pic-arctic", R.drawable.backdrop_pic_arctic, R.drawable.backdrop_pic_arctic_wide, R.drawable.backdrop_pic_arctic_thumb),
+        )
+        fun find(id: String?) = all.firstOrNull { it.id == id }
+    }
+}
+
+/**
  * 🎨 Which backdrop this phone draws right now, and the photos behind it
  * (BackdropStore in Backdrop.swift).
  *
@@ -96,6 +129,7 @@ object BackdropStore {
     fun init(ctx: Context) {
         prefs = ctx.applicationContext.getSharedPreferences("tofy.backdrop", Context.MODE_PRIVATE)
         dir = File(ctx.applicationContext.filesDir, "backdrops")
+        res = ctx.applicationContext.resources
         parentID = prefs?.getString(PARENT, null)
     }
 
@@ -114,6 +148,25 @@ object BackdropStore {
         val f = file(key)
         val bmp = if (dir != null && f.exists()) runCatching { BitmapFactory.decodeFile(f.path)?.asImageBitmap() }.getOrNull() else null
         photos[key] = bmp
+        return bmp
+    }
+
+    private var res: android.content.res.Resources? = null
+    private val pictures = object : LinkedHashMap<String, ImageBitmap>(4, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, ImageBitmap>?) = size > 2
+    }
+
+    /**
+     * A built-in picture, full size. Only the last two are kept (the screen's
+     * own, and a child's while a parent picks for them) — nine of them decoded
+     * would not fit in memory.
+     */
+    fun picture(p: BackdropPicture, wide: Boolean): ImageBitmap? {
+        val key = if (wide) p.id + "/wide" else p.id
+        pictures[key]?.let { return it }
+        val r = res ?: return null
+        val bmp = runCatching { BitmapFactory.decodeResource(r, if (wide) p.wide else p.full)?.asImageBitmap() }.getOrNull() ?: return null
+        pictures[key] = bmp
         return bmp
     }
 

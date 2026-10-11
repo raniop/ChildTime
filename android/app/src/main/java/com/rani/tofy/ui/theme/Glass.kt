@@ -77,7 +77,12 @@ fun GlassBackdrop(modifier: Modifier = Modifier, maxContentWidth: Dp? = 900.dp, 
 }
 
 /** What to draw: a built-in theme, or a photo (under a dark veil, so white text stays readable). */
-data class BackdropLook(val theme: BackdropTheme, val photo: androidx.compose.ui.graphics.ImageBitmap? = null)
+data class BackdropLook(
+    val theme: BackdropTheme,
+    val photo: androidx.compose.ui.graphics.ImageBitmap? = null,
+    /** The chosen id — a theme's, a picture's ("pic-…"), or "photo". */
+    val id: String = theme.id,
+)
 
 /**
  * The look for `ownerKey` — "parent", or a child id. A child's choice comes from
@@ -87,9 +92,11 @@ data class BackdropLook(val theme: BackdropTheme, val photo: androidx.compose.ui
 @Composable
 fun rememberBackdropLook(ownerKey: String): BackdropLook {
     BackdropStore.photoRevision                     // redraw when a photo file changes
+    // A screen on its side gets a built-in picture's wide version.
+    val wide = androidx.compose.ui.platform.LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
     if (ownerKey == BackdropStore.PARENT) {
         val id = BackdropStore.parentID
-        return if (id == BackdropTheme.PHOTO) BackdropLook(BackdropTheme.tofy, BackdropStore.photo(ownerKey)) else BackdropLook(BackdropTheme.find(id))
+        return if (id == BackdropTheme.PHOTO) BackdropLook(BackdropTheme.tofy, BackdropStore.photo(ownerKey), BackdropTheme.PHOTO) else builtInLook(id, wide)
     }
     val kidDoc by com.rani.tofy.kid.core.KidSession.childDoc.collectAsState()
     val family by com.rani.tofy.data.FamilyRepository.state.collectAsState()
@@ -102,18 +109,25 @@ fun rememberBackdropLook(ownerKey: String): BackdropLook {
     val id = pending ?: docID
     if (id == BackdropTheme.PHOTO) {
         androidx.compose.runtime.LaunchedEffect(ownerKey, docStamp) { BackdropStore.fetchPhotoIfNeeded(ownerKey, docStamp) }
-        return BackdropLook(BackdropTheme.tofy, BackdropStore.photo(ownerKey))
+        return BackdropLook(BackdropTheme.tofy, BackdropStore.photo(ownerKey), BackdropTheme.PHOTO)
     }
-    return BackdropLook(BackdropTheme.find(id))
+    return builtInLook(id, wide)
+}
+
+/** A built-in backdrop by its id: a picture (drawn like a photo), or a colour theme. */
+private fun builtInLook(id: String?, wide: Boolean): BackdropLook {
+    val found = BackdropPicture.find(id)
+    val picture = found?.let { BackdropStore.picture(it, wide) }
+    return if (found != null && picture != null) BackdropLook(BackdropTheme.tofy, picture, found.id) else BackdropLook(BackdropTheme.find(id))
 }
 
 /** One backdrop, drawn to fill: the gradient and its two blurred orbs (`scale` shrinks them for a preview), or the photo. */
 @Composable
-fun BackdropLayer(look: BackdropLook, modifier: Modifier = Modifier, scale: Float = 1f) {
+fun BackdropLayer(look: BackdropLook, modifier: Modifier = Modifier, scale: Float = 1f, veil: Float = 0.30f) {
     val photo = look.photo
     if (photo != null) {
         androidx.compose.foundation.Image(photo, null, modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
-        Box(modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.30f)))
+        Box(modifier.fillMaxSize().background(Color.Black.copy(alpha = veil)))
         return
     }
     val theme = look.theme

@@ -34,6 +34,40 @@ struct BackdropTests {
         #expect(!ids.contains(BackdropTheme.photoID))
     }
 
+    /// A screen on its side gets the wide picture; a photo of their own has only one.
+    @Test func aWideScreenGetsTheWidePicture() {
+        let tall = UIImage(), wide = UIImage()
+        let look = BackdropStore.Look(theme: .tofy, photo: tall, widePhoto: wide)
+        #expect(look.photo(for: CGSize(width: 800, height: 1200)) === tall)
+        #expect(look.photo(for: CGSize(width: 1200, height: 800)) === wide)
+        let own = BackdropStore.Look(theme: .tofy, photo: tall)
+        #expect(own.photo(for: CGSize(width: 1200, height: 800)) === tall)
+        #expect(BackdropStore.Look(theme: .tofy).photo(for: CGSize(width: 1200, height: 800)) == nil)
+    }
+
+    /// 🖼 The pictures: ids of their own (a build that does not know one falls
+    /// back to the default colours), and every one really is in the bundle —
+    /// full size and thumbnail.
+    @Test func everyPictureHasItsOwnIdAndBothImages() {
+        let ids = BackdropPicture.all.map(\.id)
+        #expect(ids.count == 9)
+        #expect(Set(ids).count == ids.count)
+        #expect(ids.allSatisfy { $0.hasPrefix("pic-") })
+        #expect(Set(ids).isDisjoint(with: BackdropTheme.all.map(\.id) + [BackdropTheme.photoID]))
+        for picture in BackdropPicture.all {
+            #expect(picture.image != nil, "\(picture.id) — no picture in the bundle")
+            #expect(picture.thumbnail != nil, "\(picture.id) — no thumbnail in the bundle")
+            let wide = picture.wideImage
+            #expect(wide != nil, "\(picture.id) — no wide picture in the bundle")
+            #expect((wide?.size.width ?? 0) > (wide?.size.height ?? 0), "\(picture.id) — the wide picture is not wide")
+            #expect((picture.image?.size.height ?? 0) > (picture.image?.size.width ?? 0), "\(picture.id) — the tall picture is not tall")
+            #expect(!picture.displayName.isEmpty)
+            #expect(BackdropTheme.find(picture.id) == .tofy)
+        }
+        #expect(BackdropPicture.find("sea") == nil)
+        #expect(BackdropPicture.find(nil) == nil)
+    }
+
     /// The one rule of the catalog: dark enough for white text. Each stop of the
     /// gradient must keep a 3:1 contrast with white (the large-text threshold).
     @Test func everyBackdropIsDarkEnoughForWhiteText() {

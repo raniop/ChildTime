@@ -41,11 +41,20 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -64,6 +73,7 @@ import com.rani.tofy.kid.ui.JoinRepository
 import com.rani.tofy.ui.home.stripNiqqud
 import com.rani.tofy.ui.theme.BackdropLayer
 import com.rani.tofy.ui.theme.BackdropLook
+import com.rani.tofy.ui.theme.BackdropPicture
 import com.rani.tofy.ui.theme.BackdropStore
 import com.rani.tofy.ui.theme.BackdropTheme
 import com.rani.tofy.ui.theme.Rounded
@@ -75,10 +85,11 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
- * 🎨 BackdropPickerView.swift: every built-in backdrop, or a photo of your own
- * (camera or album) — for a child (`ownerKey` = their id, pointed Hebrew) and
- * for the parent (`ownerKey` = "parent"). Tapping one applies it at once: this
- * screen sits on the backdrop itself.
+ * 🎨 BackdropPickerView.swift, in its three tabs: 🖼 the built-in pictures,
+ * 🎨 the built-in colours, 📷 a photo of your own (camera or album) — for a
+ * child (`ownerKey` = their id, pointed Hebrew) and for the parent (`ownerKey`
+ * = "parent"). Tapping one applies it at once: this screen sits on the
+ * backdrop itself.
  */
 @Composable
 fun BackdropPickerScreen(ownerKey: String, householdID: String?, onClose: () -> Unit) {
@@ -89,10 +100,8 @@ fun BackdropPickerScreen(ownerKey: String, householdID: String?, onClose: () -> 
     val look = rememberBackdropLook(ownerKey)
     BackdropStore.photoRevision
     val ownPhoto = BackdropStore.photo(ownerKey)
-    val selected = when {
-        look.photo != null -> BackdropTheme.PHOTO
-        else -> look.theme.id
-    }
+    val selected = look.id
+    var tab by rememberSaveable { mutableStateOf(demoTab ?: 0) }
 
     fun choose(id: String) {
         if (!forChild) { BackdropStore.chooseForParent(id); return }
@@ -132,11 +141,13 @@ fun BackdropPickerScreen(ownerKey: String, householdID: String?, onClose: () -> 
         if (uri != null) scope.launch { usePhoto(withContext(Dispatchers.IO) { decode(ctx, uri) }) }
     }
     val hasCamera = remember { ctx.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY) }
-    val columns = if (LocalConfiguration.current.smallestScreenWidthDp >= 600) 5 else 3
+    // A phone on its side: more, smaller tiles — three across would each be taller than the screen.
+    val columns = LocalConfiguration.current.let { if (it.smallestScreenWidthDp >= 600) 5 else if (it.screenWidthDp > it.screenHeightDp) 6 else 3 }
 
     BackHandler(onBack = onClose)
     Box(Modifier.fillMaxSize()) {
-        BackdropLayer(look)
+        // Deeper than on the other screens: the title and the tabs sit straight on the picture here.
+        BackdropLayer(look, veil = 0.50f)
         Column(Modifier.fillMaxSize().systemBarsPadding()) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(44.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.18f))
@@ -147,12 +158,27 @@ fun BackdropPickerScreen(ownerKey: String, householdID: String?, onClose: () -> 
                     fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, textAlign = TextAlign.Center)
                 Spacer(Modifier.width(44.dp))
             }
+            Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(tr("🖼 תְּמוּנוֹת"), tr("🎨 צְבָעִים"), tr("📷 מִשֶּׁלִּי")).forEachIndexed { i, title ->
+                    TabButton(word(title), tab == i, Modifier.weight(1f)) { tab = i }
+                }
+            }
             LazyVerticalGrid(
                 GridCells.Fixed(columns), Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 14.dp, bottom = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                item(span = { GridItemSpan(maxLineSpan) }) {
+                if (tab == 0) items(BackdropPicture.all, key = { it.id }) { picture ->
+                    Tile(word(picture.displayName), selected == picture.id, { choose(picture.id) }) {
+                        Image(painterResource(picture.thumb), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                    }
+                }
+                if (tab == 1) items(BackdropTheme.all, key = { it.id }) { theme ->
+                    Tile(word(theme.displayName), selected == theme.id, { choose(theme.id) }) {
+                        BackdropLayer(BackdropLook(theme), scale = 0.3f)
+                    }
+                }
+                if (tab == 2) item(span = { GridItemSpan(maxLineSpan) }) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         if (hasCamera) PhotoButton("📷", word(tr("לְצַלֵּם")), Modifier.weight(1f)) {
                             if (ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) launchCamera()
@@ -163,18 +189,43 @@ fun BackdropPickerScreen(ownerKey: String, householdID: String?, onClose: () -> 
                         }
                     }
                 }
-                if (ownPhoto != null) item {
-                    Tile(word(tr("הַתְּמוּנָה שֶׁלִּי")), selected == BackdropTheme.PHOTO, { choose(BackdropTheme.PHOTO) }) {
+                if (tab == 2) item {
+                    if (ownPhoto != null) Tile(word(tr("הַתְּמוּנָה שֶׁלִּי")), selected == BackdropTheme.PHOTO, { choose(BackdropTheme.PHOTO) }) {
                         Image(ownPhoto, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                    }
-                }
-                items(BackdropTheme.all, key = { it.id }) { theme ->
-                    Tile(word(theme.displayName), selected == theme.id, { choose(theme.id) }) {
-                        BackdropLayer(BackdropLook(theme), scale = 0.3f)
-                    }
+                    } else EmptyPhotoTile(word(tr("הַתְּמוּנָה שֶׁלִּי תּוֹפִיעַ כָּאן")))
                 }
             }
         }
+    }
+}
+
+/** 🧪 `--es demoBackdropTab colours|mine` — screenshots. */
+var demoTab: Int? = null
+
+/** One of the three tabs — a 16dp rounded button; the open one is white. */
+@Composable
+private fun TabButton(title: String, on: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(16.dp)
+    Box(modifier.heightIn(min = 46.dp).clip(shape)
+        .background(if (on) Color.White else Color.Black.copy(alpha = 0.28f))
+        .border(1.dp, Color.White.copy(alpha = if (on) 0f else 0.30f), shape)
+        .clickable(onClick = onClick).padding(horizontal = 6.dp), contentAlignment = Alignment.Center) {
+        Text(title, color = if (on) Color(0xFF2A1E5C) else Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold,
+            fontSize = 15.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+/** Where their own photo will sit, before there is one. */
+@Composable
+private fun EmptyPhotoTile(text: String) {
+    val shape = RoundedCornerShape(16.dp)
+    Box(Modifier.fillMaxWidth().aspectRatio(0.62f).clip(shape).background(Color.Black.copy(alpha = 0.24f))
+        .drawBehind {
+            val r = 16.dp.toPx()
+            drawRoundRect(Color.White.copy(alpha = 0.8f), cornerRadius = CornerRadius(r, r),
+                style = Stroke(2.dp.toPx() * 2, pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 5.dp.toPx()))))
+        }.padding(8.dp), contentAlignment = Alignment.Center) {
+        Text(text, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, textAlign = TextAlign.Center)
     }
 }
 
@@ -195,7 +246,8 @@ private fun Tile(name: String, selected: Boolean, onClick: () -> Unit, art: @Com
         .clickable(onClick = onClick)) {
         art()
         Text(name, Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(Color.Black.copy(alpha = 0.28f)).padding(6.dp),
-            color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp,
+            color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold,
+            fontSize = if (name.length > 14) 10.sp else if (name.length > 11) 11.5.sp else 13.sp,   // a long name (ru) shrinks, as on iOS
             textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis)
         if (selected) Box(Modifier.align(Alignment.TopEnd).padding(6.dp).size(22.dp).clip(CircleShape).background(Color(0xFF2FD67B)),
             contentAlignment = Alignment.Center) {

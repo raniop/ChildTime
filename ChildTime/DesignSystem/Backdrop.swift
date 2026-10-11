@@ -70,6 +70,49 @@ struct BackdropTheme: Identifiable, Equatable {
     }
 }
 
+/// 🖼 A built-in PICTURE backdrop — an illustrated scene, bundled with the app
+/// (Rani, 2026-10-11). Free, every one of them. Chosen and stored exactly like
+/// a colour backdrop, by its id ("pic-…": a build that does not know it yet
+/// falls back to the default colours), and drawn like a photo of their own —
+/// edge to edge, under the same veil.
+struct BackdropPicture: Identifiable, Equatable {
+    let id: String
+
+    static let all: [BackdropPicture] = ["ocean", "forest", "balloons", "dino", "candy", "castle", "stadium", "space", "arctic"]
+        .map { BackdropPicture(id: "pic-" + $0) }
+
+    static func find(_ id: String?) -> BackdropPicture? { all.first { $0.id == id } }
+
+    private var assetName: String { "BackdropPic" + id.dropFirst(4).capitalized }
+    /// The full picture (the system keeps it cached while it is on screen).
+    var image: UIImage? { UIImage(named: assetName) }
+    /// The same scene drawn wide, for a screen on its side (an iPad): the tall
+    /// picture would show only its middle band there, blown up.
+    var wideImage: UIImage? { UIImage(named: assetName + "Wide") }
+    /// A small copy for the picker's grid — nine full pictures would not fit in memory.
+    var thumbnail: UIImage? { UIImage(named: assetName + "Thumb") }
+
+    /// Pointed, as a child reads it; a parent's screen strips the points.
+    var displayName: String {
+        let name = rawName
+        return name.prefix(1).uppercased() + name.dropFirst()
+    }
+
+    private var rawName: String {
+        switch id {
+        case "pic-ocean":    return tr("מִתַּחַת לַמַּיִם")
+        case "pic-forest":   return tr("יַעַר קָסוּם")
+        case "pic-balloons": return tr("כַּדּוּרִים פּוֹרְחִים")
+        case "pic-dino":     return tr("דִּינוֹזָאוּרִים")
+        case "pic-candy":    return tr("מַמְתַּקִּים")
+        case "pic-castle":   return tr("טִירָה")
+        case "pic-stadium":  return tr("אִצְטַדְיוֹן")
+        case "pic-space":    return tr("חָלָל")
+        default:             return tr("הַקֹּטֶב")
+        }
+    }
+}
+
 /// 🎨 Which backdrop this device draws right now, and the photos behind it.
 ///
 /// A CHILD's choice lives on their profile (`backdropID` + `backdropUpdatedAt`,
@@ -95,6 +138,13 @@ final class BackdropStore: ObservableObject {
     struct Look {
         var theme: BackdropTheme
         var photo: UIImage?
+        /// A built-in picture's wide version — nil for a photo of their own.
+        var widePhoto: UIImage?
+
+        /// The picture for a screen of this size: the wide one when it lies on its side.
+        func photo(for size: CGSize) -> UIImage? {
+            size.width > size.height ? (widePhoto ?? photo) : photo
+        }
     }
 
     private let defaults = UserDefaults.standard
@@ -127,9 +177,14 @@ final class BackdropStore: ObservableObject {
         #if DEBUG
         // 🧪 DEMO_BACKDROP=<id> / DEMO_BACKDROP_PHOTO=<path> — screenshots.
         if let photo = Self.demoPhoto { return Look(theme: .tofy, photo: photo) }
-        if let id = ProcessInfo.processInfo.environment["DEMO_BACKDROP"] { return Look(theme: .find(id)) }
+        let demoID = ProcessInfo.processInfo.environment["DEMO_BACKDROP"]
+        #else
+        let demoID: String? = nil
         #endif
-        let id = backdropID(for: owner)
+        let id = demoID ?? backdropID(for: owner)
+        if let picture = BackdropPicture.find(id), let image = picture.image {
+            return Look(theme: .tofy, photo: image, widePhoto: picture.wideImage)
+        }
         if id == BackdropTheme.photoID {
             // Not on this device yet (it is on its way from the cloud): the default.
             return Look(theme: .tofy, photo: photo(for: owner))
@@ -149,6 +204,11 @@ final class BackdropStore: ObservableObject {
     /// Pick a built-in backdrop.
     func choose(_ theme: BackdropTheme, for owner: Owner) {
         setBackdropID(theme.id, for: owner)
+    }
+
+    /// Pick a built-in picture.
+    func choose(_ picture: BackdropPicture, for owner: Owner) {
+        setBackdropID(picture.id, for: owner)
     }
 
     /// Back to a photo that is already on this device.

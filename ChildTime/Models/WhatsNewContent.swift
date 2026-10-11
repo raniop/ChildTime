@@ -56,11 +56,11 @@ enum WhatsNewContent {
     static let releases: [Release] = [
 
         // 2026.10.8 in one list, the most important first (Rani approved the
-        // order; 211, 212 and 220–228 were builds of the same version — 229
-        // carries them all, so everything rides on 229).
-        Release(build: 229, version: "2026.10.8", headline: tr("פעולות פשוטות יותר, וזמן מסך מדויק"), items: [
+        // order; 211, 212 and 220–229 were builds of the same version — 230
+        // carries them all, so everything rides on 230).
+        Release(build: 230, version: "2026.10.8", headline: tr("פעולות פשוטות יותר, וזמן מסך מדויק"), items: [
             Item(emoji: "🎨", title: tr("רקע משלכם"),
-                 line: tr("15 רקעים לבחירה, או תמונה משלכם מהמצלמה או מהאלבום — לכל ילד בנפרד, וגם להורים בהגדרות")),
+                 line: tr("9 תמונות מצוירות, 15 צבעים, או תמונה משלכם מהמצלמה או מהאלבום — לכל ילד בנפרד, וגם להורים בהגדרות")),
             Item(emoji: "🧊", title: tr("שאלון מסודר מחדש"),
                  line: tr("יותר מקום לשאלה ולתשובות, הזמן לשחק מחכה במדף למטה, והדמות עומדת ליד הרצף ומדברת בבועה משלה")),
             Item(emoji: "🔌", title: tr("חיבור יציב למשפחה"),
