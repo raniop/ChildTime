@@ -217,6 +217,12 @@ final class WatchBridge: NSObject, WCSessionDelegate {
         }
         lastActionStatus = status
         if lastPayload != nil { lastPayload?["actionStatus"] = status; flush() }
+        // Woken in the background by the watch, before any family snapshot was
+        // built: the status still has to travel — on its own (the watch keeps the
+        // children it already shows when a context carries none).
+        else if session.activationState == .activated, session.isPaired, session.isWatchAppInstalled {
+            try? session.updateApplicationContext(["actionStatus": status])
+        }
         if state == "confirmed" || state == "failed" { releaseAnswerWait() }
     }
 

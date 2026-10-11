@@ -65314,28 +65314,6 @@
         }
       }
     },
-    "יישלח כשהאייפון יתחבר" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "سيُرسل عند اتصال الآيفون"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Will send when the iPhone connects"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Отправится, когда iPhone подключится"
-          }
-        }
-      }
-    },
     "ילד" : {
       "localizations" : {
         "ar" : {
@@ -87432,6 +87410,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ждёт вашего одобрения 🕐"
+          }
+        }
+      }
+    },
+    "מחכה לטלפון שלך" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بانتظار هاتفكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for your phone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ждём ваш телефон"
           }
         }
       }

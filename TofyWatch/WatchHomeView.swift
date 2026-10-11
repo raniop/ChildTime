@@ -116,7 +116,7 @@ final class WatchFamilyModel: NSObject, ObservableObject, WCSessionDelegate {
         func queued() {
             session.transferUserInfo(msg)
             if tracked { advance(startedAt: started) { $0.state = .queued } }
-            else { show(tr("יישלח כשהאייפון יתחבר")) }
+            else { show(tr("מחכה לטלפון שלך")) }
         }
         guard session.isReachable else { queued(); return }
         session.sendMessage(msg, replyHandler: { r in
@@ -126,6 +126,10 @@ final class WatchFamilyModel: NSObject, ObservableObject, WCSessionDelegate {
                 guard ok else { $0.state = .failed; return }
                 $0.id = r["actionID"] as? String
                 if let m = r["minutes"] as? Int, m > 0 { $0.minutes = m }   // capped at midnight
+                // The phone HAS it. Without this the row sat on "שולח…", and after
+                // 20 seconds claimed it was still waiting for the phone — about a
+                // gift the child had already received (Rani, 2026-10-11).
+                if $0.state.rank < WatchActionStatus.State.sent.rank { $0.state = .sent }
             }
         }, errorHandler: { _ in queued() })
     }
@@ -448,7 +452,8 @@ struct WatchHomeView: View {
         let line: String, icon: String, fill: Color
         switch a.state {
         case .sending:     line = tr("שולח…"); icon = ""; fill = .white.opacity(0.18)
-        case .queued:      line = tr("יישלח כשהאייפון יתחבר"); icon = "⏳"; fill = .white.opacity(0.18)
+        // "הטלפון שלך": "האייפון" read as the CHILD's iPhone (Rani — the child has an iPad too).
+        case .queued:      line = tr("מחכה לטלפון שלך"); icon = "⏳"; fill = .white.opacity(0.18)
         case .sent:        line = tr("נשלח, מחכה למכשיר"); icon = "☁️"; fill = .white.opacity(0.18)
         case .confirmed:   line = tr("המכשיר של \(c.name) אישר"); icon = "✅"; fill = Color(tofyHex: "48C774").opacity(0.55)
         case .willNotify:  line = tr("נשלח, נודיע כשיתקבל"); icon = "🔔"; fill = .white.opacity(0.18)
