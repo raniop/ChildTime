@@ -57,6 +57,10 @@ struct BackdropPickerView: View {
         ZStack {
             GlassBackdropPreview(owner: owner)
             VStack(spacing: 0) {
+                // The title row AND the tabs stop short of the foldable's clock, and
+                // the pictures start below it: the tabs ran under the clock — "תמונות"
+                // was half covered and a tap on it never arrived (measured 2026-10-12).
+                VStack(spacing: 0) {
                 HStack {
                     CornerDismissButton(label: word(Gendered.g(tr("סְגֹר"), tr("סִגְרִי")))) { dismiss() }
                     Spacer()
@@ -72,9 +76,12 @@ struct BackdropPickerView: View {
                 .padding(.top, 8)
 
                 tabBar
+                    .clearOfBar()
                     .padding(.horizontal, 12)
                     .padding(.top, 10)
                     .frame(maxWidth: 720)
+                }
+                .fillsTopBand(alignment: .top)
 
                 ScrollView {
                     VStack(spacing: 14) {

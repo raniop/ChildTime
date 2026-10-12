@@ -14,10 +14,15 @@ struct LanguagePickerView: View {
     /// centred on the glass — the navigation bar's sat off to the side of the
     /// foldable's clock (Rani: "הכותרת תמרכז").
     var ownHeader = false
+    /// Pushed inside the parent's settings window: a parent's page — no niqqud —
+    /// with the window's own top row on the foldable (`SettingsBandRow`).
+    var inSettings = false
 
     var body: some View {
         ScrollView {
             VStack(spacing: 10) {
+                SettingsBandRow(title: tr("שפה · Language"), active: inSettings,
+                                above: DisplayProbeView.minimumTopMargin + AppSpacing.lg)
                 if ownHeader {
                     Text(tr("שָׁפָה · Language"))
                         .font(.system(size: 20, weight: .heavy, design: .rounded))
@@ -31,7 +36,9 @@ struct LanguagePickerView: View {
                 ForEach(language.available) { lang in
                     row(lang)
                 }
-                Text(tr("הַשָּׂפָה מִשְׁתַּנָּה מִיָּד בְּכָל הָאַפְּלִיקַצְיָה: טֶקְסְטִים, כִּוּוּן, הַקְרָאָה וּשְׁאֵלוֹת."))
+                Text(inSettings
+                     ? tr("השפה משתנה מיד בכל האפליקציה: טקסטים, כיוון, הקראה ושאלות.")
+                     : tr("הַשָּׂפָה מִשְׁתַּנָּה מִיָּד בְּכָל הָאַפְּלִיקַצְיָה: טֶקְסְטִים, כִּוּוּן, הַקְרָאָה וּשְׁאֵלוֹת."))
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .multilineTextAlignment(.center)
@@ -42,8 +49,9 @@ struct LanguagePickerView: View {
         }
         .background(GlassBackdrop())
         .environment(\.colorScheme, .dark)
-        .navigationTitle(ownHeader ? "" : tr("שָׁפָה · Language"))
+        .navigationTitle(ownHeader ? "" : inSettings ? tr("שפה · Language") : tr("שָׁפָה · Language"))
         .navigationBarTitleDisplayMode(.inline)
+        .settingsBand(active: inSettings)
     }
 
     private func row(_ lang: AppLanguage) -> some View {

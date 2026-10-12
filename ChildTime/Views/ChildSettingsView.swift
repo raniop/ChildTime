@@ -95,7 +95,11 @@ struct ChildSettingsView: View {
         SettingsStack(embedded: embedded) {
             Group {
                 if let p = profile {
+                    #if DEBUG
+                    if let page = demoPage(p) { sheets(page) } else { sheets(form(p)) }
+                    #else
                     sheets(form(p))
+                    #endif
                 } else {
                     Color.clear.background(GlassBackdrop())
                 }
@@ -123,6 +127,23 @@ struct ChildSettingsView: View {
         .familyConnectionAlert()
         .environment(\.layoutDirection, .app)
     }
+
+    #if DEBUG
+    /// 🧪 DEMO_CHILD_PAGE — one of this window's inner pages, shown directly (foldable checks).
+    private func demoPage(_ p: Profile) -> AnyView? {
+        switch ProcessInfo.processInfo.environment["DEMO_CHILD_PAGE"] {
+        case "devices":    return AnyView(devicesPage(p))
+        case "more":       return AnyView(morePage(p))
+        case "difficulty": return AnyView(ChildDifficultyView(profileID: p.id, snapshot: snapshot, embedded: true).environmentObject(profiles))
+        case "worlds":     return AnyView(ChildWorldsView(profileID: p.id, embedded: true).environmentObject(profiles))
+        case "language":   return AnyView(ChildLanguageView(profileID: p.id, embedded: true).environmentObject(profiles))
+        case "screentime": return AnyView(ChildScreenTimeView(profileID: p.id, embedded: true).environmentObject(profiles).environmentObject(settings))
+        case "school":     return AnyView(QuietHoursEditorView(profileID: profileID, kind: .school, embedded: true).environmentObject(profiles))
+        case "map":        return AnyView(ParentLocationView(focusChildID: p.id.uuidString, embedded: true).environmentObject(profiles))
+        default:           return nil
+        }
+    }
+    #endif
 
     // MARK: - The list
 

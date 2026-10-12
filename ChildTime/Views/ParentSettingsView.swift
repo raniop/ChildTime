@@ -66,6 +66,15 @@ struct ParentSettingsView: View {
         } else if ProcessInfo.processInfo.environment["DEMO_SETTINGS_PAGE"] == "apps" {
             // 🧪 DEMO_SETTINGS_PAGE=apps — "אפליקציות ונעילה" as a PARENT's phone shows it.
             NavigationStack { subScreen(tr("אפליקציות ונעילה")) { thisDeviceOnlyNote; appsSection; soundsSection; deviceSection } }
+        } else if ProcessInfo.processInfo.environment["DEMO_SETTINGS_PAGE"] == "look" {
+            // 🧪 DEMO_SETTINGS_PAGE=look | language — pages two doors in (foldable checks).
+            NavigationStack { lookAndLanguagePage }.preferredColorScheme(.dark)
+        } else if ProcessInfo.processInfo.environment["DEMO_SETTINGS_PAGE"] == "child", let childSettings, let first = orderedChildren.first {
+            // 🧪 DEMO_SETTINGS_PAGE=child [DEMO_CHILD_PAGE=devices|more|worlds|language|screentime|school|map|difficulty]
+            // — a child's settings as they are INSIDE this window (embedded), one page of them.
+            NavigationStack { childSettings(first) }.preferredColorScheme(.dark)
+        } else if ProcessInfo.processInfo.environment["DEMO_SETTINGS_PAGE"] == "language" {
+            NavigationStack { LanguagePickerView(inSettings: true) }.preferredColorScheme(.dark)
         } else { settingsMenu }
         #else
         settingsMenu
@@ -358,7 +367,7 @@ struct ParentSettingsView: View {
                 }
                 if multilingual {
                     menuRow("🌍", tr("שפה · Language"), LanguageStore.shared.current.nativeName) {
-                        LanguagePickerView()
+                        LanguagePickerView(inSettings: true)
                     }
                 }
             }

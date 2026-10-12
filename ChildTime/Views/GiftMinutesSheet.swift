@@ -52,7 +52,7 @@ struct GiftMinutesSheet: View {
         ScrollView {
             VStack(spacing: 14) {
                 Text(verbatim: "💝")
-                    .font(.system(size: 54))
+                    .font(.system(size: display.isShort ? 44 : 54))
                     .shadow(color: Color(hex: "FF5F9A").opacity(0.55), radius: 14, y: 8)
                     .padding(.top, 6)
                 Text(tr("מתנת דקות ל\(name)"))
@@ -71,8 +71,10 @@ struct GiftMinutesSheet: View {
                     stat(waiting, tr("עוד לא נוצלו"))   // "מחכות לנוני" was not clear (Rani)
                 }
 
+                // A short screen (the closed foldable, an iPhone SE): a smaller ring, so
+                // the status line and "סיום" that follow a send fit without scrolling.
                 GiftRing(minutes: $minutes, ceiling: ceiling, locked: sentMinutes != nil)
-                    .frame(width: 250, height: 250)
+                    .frame(width: display.isShort ? 196 : 250, height: display.isShort ? 196 : 250)
                     .padding(.vertical, 4)
 
                 if sentMinutes != nil {
@@ -258,15 +260,17 @@ struct GiftRing: View {
                     .shadow(color: .black.opacity(0.3), radius: 5, y: 3)
                     .position(x: centre.x + radius * CGFloat(cos(angle.radians)),
                               y: centre.y + radius * CGFloat(sin(angle.radians)))
+                // The smaller ring of a short screen takes smaller words, or they touch the arc.
+                let compact = side < 220
                 VStack(spacing: 0) {
                     Text(locked ? tr("נשלחו") : tr("מסובבים באצבע"))
-                        .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+                        .font(.system(size: compact ? 11 : 12.5, weight: .semibold, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                     Text("\(minutes)")
-                        .font(.system(size: 68, weight: .heavy, design: .rounded)).monospacedDigit()
+                        .font(.system(size: compact ? 50 : 68, weight: .heavy, design: .rounded)).monospacedDigit()
                         .contentTransition(.numericText())
                     Text(tr("דקות"))
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .font(.system(size: compact ? 13.5 : 16, weight: .bold, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                 }
                 .foregroundStyle(GlassInk.primary)

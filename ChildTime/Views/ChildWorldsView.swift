@@ -45,7 +45,7 @@ struct ChildWorldsView: View {
                             HStack(spacing: 10) {
                                 Text(world.emoji).font(.title3)
                                 VStack(alignment: .leading, spacing: 1) {
-                                    Text(world.name)
+                                    Text(world.parentName)   // a parent's page: no niqqud
                                     Text(world.topic.parentName)
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
