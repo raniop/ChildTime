@@ -1363,6 +1363,8 @@ struct QuestionRunnerView: View {
                 companion.wow(Gendered.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת"), tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת"))); return
             case "hint":
                 companion.cheer(HintContent.explain(.english)); return
+            case "firstrun":   // 🎬 the first-run opening line, for approval
+                companion.cheer(tr("ככה הילדים משחקים בטופי. נסו לענות! 👋")); return
             default: break
             }
             #endif

@@ -232,7 +232,7 @@ struct DemoTourRoot: View {
 // PREVIEW ONLY: these are the screens for approval. Nothing shows them yet.
 
 struct FirstRunCoach: View {
-    /// 0 = the hint before the first answer · 1…4 = after each answer · 5 = the finish.
+    /// 0 = the opening card, over the first question · 1…4 = after each answer · 5 = the finish.
     let step: Int
     /// What the first answer just paid — said in the first card.
     var earnedSeconds: Int = 24
@@ -249,6 +249,9 @@ struct FirstRunCoach: View {
 
     private var card: Card? {
         switch step {
+        case 0: return Card(emoji: "👋",
+                            title: tr("ככה הילדים משחקים בטופי"),
+                            line: tr("עונים על שאלות ומרוויחים זמן מסך. נסו בעצמכם: חמש שאלות, בערך דקה."))
         case 1: return Card(emoji: "⏱",
                             title: tr("הרווחתם \(earnedSeconds) שניות של זמן מסך"),
                             line: tr("כל תשובה נכונה מוסיפה זמן. הילדים לומדים כדי לשחק, בלי ויכוחים על עוד חמש דקות."))
@@ -267,7 +270,7 @@ struct FirstRunCoach: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            if step >= 1 {
+            if step >= 0 {
                 VStack(spacing: 0) {
                     Color.black.opacity(0.55)
                     if step == 1 { Color.clear.frame(height: Self.shelf) }
@@ -275,33 +278,28 @@ struct FirstRunCoach: View {
                 .ignoresSafeArea()
             }
             switch step {
-            case 0: hint.padding(.bottom, Self.shelf + 96)
-            case 1...4: if let card { coach(card).padding(.bottom, step == 1 ? Self.shelf - 22 : 28) }
+            case 0...4: if let card { coach(card).padding(.bottom, step == 1 ? Self.shelf - 22 : 28) }
             default: finish.padding(.bottom, 12)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
     }
 
-    // Before the first answer: one line, and the way out for a family that already exists.
-    private var hint: some View {
-        VStack(spacing: 8) {
-            Text(tr("👋 ככה הילדים משחקים בטופי. נסו לענות"))
-                .font(.system(size: 15, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 14).padding(.vertical, 10)
-                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "2A1E5C").opacity(0.88)))
-            Button(action: onHaveFamily) {
-                Text(tr("יש לנו כבר משפחה"))
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.9))
+    // The opening card also holds the quiet way out for a family that already exists.
+    private var haveFamilyLink: some View {
+        Button(action: onHaveFamily) {
+            HStack(spacing: 5) {
+                Text(tr("כבר יש לכם משפחה בטופי?"))
+                    .foregroundStyle(.white.opacity(0.8))
+                Text(tr("כניסה"))
+                    .foregroundStyle(.white)
                     .underline()
-                    .padding(.vertical, 4)
             }
-            .buttonStyle(.plain)
+            .font(.system(size: 14, weight: .bold, design: .rounded))
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
         }
-        .padding(.horizontal, 20)
+        .buttonStyle(.plain)
     }
 
     private func coach(_ c: Card) -> some View {
@@ -315,7 +313,7 @@ struct FirstRunCoach: View {
                         .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
                     Spacer()
                     HStack(spacing: 5) {
-                        ForEach(1...4, id: \.self) { i in
+                        ForEach(0...4, id: \.self) { i in
                             Circle().fill(.white.opacity(i <= step ? 0.95 : 0.3)).frame(width: 7, height: 7)
                         }
                     }
@@ -332,7 +330,7 @@ struct FirstRunCoach: View {
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                 Button(action: onNext) {
-                    Text(step == 4 ? tr("עוד שאלה אחת") : tr("לשאלה הבאה"))
+                    Text(step == 0 ? tr("לשאלה הראשונה") : (step == 4 ? tr("עוד שאלה אחת") : tr("לשאלה הבאה")))
                         .font(.system(size: 17, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "2A1E5C"))
                         .frame(maxWidth: .infinity)
@@ -341,6 +339,7 @@ struct FirstRunCoach: View {
                 }
                 .buttonStyle(.juicy)
                 .padding(.top, 4)
+                if step == 0 { haveFamilyLink }
             }
             .padding(16)
             .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "4A3AB0").opacity(0.98)))
