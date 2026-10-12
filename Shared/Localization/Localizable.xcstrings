@@ -43668,6 +43668,28 @@
         }
       }
     },
+    "הַפְתָּעָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مفاجأة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surprise"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сюрприз"
+          }
+        }
+      }
+    },
     "הַפִּיל" : {
       "localizations" : {
         "ar" : {
@@ -59542,6 +59564,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сложение, вычитание, умножение, деление и текстовые задачи"
+          }
+        }
+      }
+    },
+    "חִידוֹן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مسابقة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quiz"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Викторина"
           }
         }
       }
@@ -103687,6 +103731,28 @@
         }
       }
     },
+    "עוֹנִים עַל שְׁאֵלוֹת וּמַרְוִיחִים דַּקּוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نجيب عن الأسئلة ونكسب دقائق"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Answer questions and earn minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отвечаем на вопросы и зарабатываем минуты"
+          }
+        }
+      }
+    },
     "עוֹנֶה" : {
       "localizations" : {
         "ar" : {
@@ -117519,6 +117585,28 @@
         }
       }
     },
+    "שְׁאֵלוֹת עֲנָק, וְדַקּוֹת כְּפוּלוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أسئلة عملاقة ودقائق مضاعفة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giant questions, double minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Гигантские вопросы и двойные минуты"
+          }
+        }
+      }
+    },
     "שְׁאֵלוֹת קָשׁוֹת יוֹתֵר, פְּרָסִים גְּדוֹלִים יוֹתֵר" : {
       "localizations" : {
         "ar" : {
@@ -120331,6 +120419,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "освоила"
+          }
+        }
+      }
+    },
+    "שׁוֹמְעִים שְׁאֵלָה וּבוֹחֲרִים תְּמוּנָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نسمع سؤالًا ونختار صورة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hear a question and pick a picture"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Слушаем вопрос и выбираем картинку"
           }
         }
       }
@@ -126015,6 +126125,28 @@
         }
       }
     },
+    "▶ לְשַׂחֵק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "▶ العب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "▶ Play"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "▶ Играть"
+          }
+        }
+      }
+    },
     "●" : {
 
     },
@@ -129912,6 +130044,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🎲 В мешочке %@ и %@. Вытягиваем один шар не глядя. Какова вероятность, что он красный?"
+          }
+        }
+      }
+    },
+    "🎲 הַפְתָּעָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎲 مفاجأة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎲 Surprise"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎲 Сюрприз"
           }
         }
       }
@@ -134337,6 +134491,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "🧠 חִידוֹן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧠 مسابقة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧠 Quiz"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🧠 Викторина"
           }
         }
       }
