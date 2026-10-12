@@ -14565,6 +14565,28 @@
         }
       }
     },
+    "+%lld שניות של זמן מסך" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld ثانية من وقت الشاشة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld seconds of screen time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld сек. экранного времени"
+          }
+        }
+      }
+    },
     "+%lld 💎 בּוֹנוּס לַחֲנוּת!" : {
       "localizations" : {
         "ar" : {
@@ -53465,6 +53487,50 @@
         }
       }
     },
+    "הפעם בלי שניות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذه المرة بلا ثوانٍ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No seconds this time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В этот раз без секунд"
+          }
+        }
+      }
+    },
+    "הפעם בלי שניות נוספות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذه المرة بلا ثوانٍ إضافية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No extra seconds this time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В этот раз без дополнительных секунд"
+          }
+        }
+      }
+    },
     "הפקודה נשלחה" : {
       "localizations" : {
         "ar" : {
@@ -55758,6 +55824,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Системное уведомление"
+          }
+        }
+      }
+    },
+    "התשובה הנכונה הבאה תיתן %lld שניות פחות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإجابة الصحيحة التالية ستمنح %lld ثانية أقل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The next right answer will give %lld seconds less"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Следующий верный ответ даст на %lld сек. меньше"
           }
         }
       }
@@ -64596,6 +64684,28 @@
         }
       }
     },
+    "טעית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خطأ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not quite"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ошибка"
+          }
+        }
+      }
+    },
     "טרום" : {
       "localizations" : {
         "ar" : {
@@ -73064,6 +73174,28 @@
         }
       }
     },
+    "ככה הילדים מרוויחים זמן מסך בטופי: עונים על שאלות, והשניות נצברות. ההרשמה לוקחת כדקה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هكذا يكسب الأطفال وقت الشاشة في Tofy: يجيبون عن الأسئلة فتتراكم الثواني. التسجيل يستغرق نحو دقيقة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is how kids earn screen time in Tofy: they answer questions and the seconds add up. Signing up takes about a minute."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Так дети зарабатывают экранное время в Tofy: отвечают на вопросы, и секунды накапливаются. Регистрация занимает около минуты."
+          }
+        }
+      }
+    },
     "כל %lld העולמות, משחקים, זירה ומטלות · לכל הילדים" : {
       "localizations" : {
         "ar" : {
@@ -80887,6 +81019,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Для детсадовцев: каждый мир — свой"
+          }
+        }
+      }
+    },
+    "ליצור ילד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إنشاء طفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create a child"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создать ребёнка"
           }
         }
       }
@@ -110435,6 +110589,28 @@
         }
       }
     },
+    "צדקת!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "صحيح!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correct!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Верно!"
+          }
+        }
+      }
+    },
     "צוֹבֵר עִנְיָן" : {
       "localizations" : {
         "ar" : {
@@ -115515,6 +115691,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Хочешь узнать о футболе?"
+          }
+        }
+      }
+    },
+    "רוצים ליצור פרופיל לילד שלכם?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هل تريدون إنشاء ملف لطفلكم؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Want to create a profile for your child?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создать профиль для вашего ребёнка?"
           }
         }
       }
