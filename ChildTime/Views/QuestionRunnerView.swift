@@ -424,33 +424,36 @@ struct QuestionRunnerView: View {
                 dismiss()
             }
         }
-        // 🎬 First run: the first right answer and the first wrong one each get
-        // one tip, pointing at the time on the shelf (see `DemoTour.Tip`).
-        .coachTour(firstRunTip, forKid: false, isActive: $firstRunTipOn) {
-            DemoTour.shared.mark(firstRunTipKind)
+        // 🎬 First run (see `DemoTour`): every answer says what it was, and
+        // what it did to the seconds — in plain words, for the parent.
+        .overlay(alignment: .bottom) {
+            if let note = firstRunNote {
+                FirstRunAnswerNote(correct: note.correct, seconds: note.seconds)
+                    .padding(.bottom, 232)
+                    .transition(.scale(scale: 0.85).combined(with: .opacity))
+                    .allowsHitTesting(false)
+            }
         }
     }
 
-    @State private var firstRunTip: [CoachStep] = []
-    @State private var firstRunTipKind: DemoTour.Tip = .firstRight
-    @State private var firstRunTipOn = false
+    private struct FirstRunNote: Equatable { let correct: Bool, seconds: Int, id: Int }
+    @State private var firstRunNote: FirstRunNote?
+    @State private var firstRunNoteID = 0
 
-    /// Shown a beat after the answer, so the "+seconds" has already flown to the shelf.
-    private func firstRunTipIfNeeded(correct: Bool) {
+    /// `seconds`: what a right answer really paid, or what a wrong one took off
+    /// the next right answer (the clock itself never goes down).
+    private func firstRunFeedback(correct: Bool, seconds: Int) {
         let tour = DemoTour.shared
-        guard tour.active else { return }
-        tour.noteAnswer()
-        let kind: DemoTour.Tip = correct ? .firstRight : .firstWrong
-        guard tour.needs(kind), !firstRunTipOn else { return }
-        firstRunTipKind = kind
-        firstRunTip = [correct
-            ? CoachStep(id: "q.time", title: tr("הנה הזמן שהילד הרוויח"),
-                        text: tr("כל תשובה נכונה מוסיפה לכאן זמן מסך. ככה הילדים לומדים כדי לשחק."))
-            : CoachStep(id: "q.time", title: tr("טעות? הזמן לא יורד"),
-                        text: tr("הדקות שהילד הרוויח נשארות שלו. השאלה תחזור אליו בהמשך, כדי שילמד אותה."))]
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            withAnimation(.easeOut(duration: 0.2)) { firstRunTipOn = true }
+        guard tour.active, tour.firstRunQuiz else { return }
+        firstRunNoteID += 1
+        let id = firstRunNoteID
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+            firstRunNote = FirstRunNote(correct: correct, seconds: seconds, id: id)
         }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.7) {
+            if firstRunNote?.id == id { withAnimation(.easeOut(duration: 0.3)) { firstRunNote = nil } }
+        }
+        tour.noteAnswer()
     }
 
     // MARK: - Background
@@ -1037,7 +1040,7 @@ struct QuestionRunnerView: View {
                         }
                         .frame(height: 12)
                         if earnsTime, timeOnShelf {
-                            shelfTimeChip.coachMark("q.time")   // 🎬 the first-run tip points here
+                            shelfTimeChip
                                 .animation(.spring(response: 0.35, dampingFraction: 0.7), value: secondsFlashText)
                         } else if earnsTime {
                             Text(tr("+\(progress.secondsPerCorrect) שְׁנִיּוֹת"))
@@ -1832,7 +1835,6 @@ struct QuestionRunnerView: View {
 
     /// (The sound, haptic and sparkle already played in `pickOption`.)
     private func handleCorrect(q: Question, answeredAt: Date = Date()) {
-        firstRunTipIfNeeded(correct: true)
         correctInSession += 1
         consecutiveWrong = 0
 
@@ -1905,6 +1907,7 @@ struct QuestionRunnerView: View {
         if earnsTime, !cappedBefore, progress.lastPaidSeconds > 0 {
             flashSeconds(tr("+\(progress.lastPaidSeconds) שְׁנִיּוֹת"), positive: true)
         }
+        firstRunFeedback(correct: true, seconds: earnsTime && !cappedBefore ? progress.lastPaidSeconds : 0)
         // "+X דקות" popup — only for a real bonus (💫 question, 🌈 variety).
         if bonusPopupMinutes > 0 {
             showEarnedMinutesPopup(minutes: bonusPopupMinutes)
@@ -2004,7 +2007,6 @@ struct QuestionRunnerView: View {
 
     /// (The sound and haptic already played in `pickOption`.)
     private func handleWrong(q: Question) {
-        firstRunTipIfNeeded(correct: false)
         consecutiveWrong += 1
         hadMistakeThisQuestion = true
         // No automatic help sheet any more: a wrong answer moves on after a
@@ -2027,7 +2029,9 @@ struct QuestionRunnerView: View {
         // No "−12 שניות" (Rani, 2026-10-06): the balance never drops on a miss —
         // the next right answer just pays a little less — so only the
         // encouraging line. Safe negative experience: never accusatory.
-        _ = lostSeconds
+        // 🎬 …except in the first run, where a PARENT is the one answering and
+        // is told in words what a miss costs (the clock still never drops).
+        firstRunFeedback(correct: false, seconds: lostSeconds)
         companion.console([
             tr("כִּמְעַט!"),
             tr("מַמָּשׁ קָרוֹב"),

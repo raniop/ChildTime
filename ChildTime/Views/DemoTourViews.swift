@@ -189,6 +189,16 @@ struct DemoTourRoot: View {
     private var kid: Profile? { tour.kidID.flatMap { id in profiles.profiles.first { $0.id == id } } }
 
     var body: some View {
+        if tour.firstRunQuiz {
+            FirstRunQuiz()
+        } else {
+            family
+        }
+    }
+
+    /// The demo family's own screens (phase A): the band, and under it the
+    /// parent's home or one child's screen.
+    private var family: some View {
         VStack(spacing: 0) {
             DemoTourBand(onKidScreen: kid != nil,
                          onSignUp: { Haptic.light(); tour.invite = .band },
@@ -205,16 +215,6 @@ struct DemoTourRoot: View {
         }
         .background(GlassBackdrop())
         .overlay {
-            if let card = tour.card {
-                FirstRunCard(kind: card,
-                             onDone: { closeCard(card) },
-                             onCreateFamily: { Haptic.medium(); tour.end(signUp: true) },
-                             onParentView: { Haptic.light(); tour.mark(.closing); tour.card = nil; tour.backToParent() },
-                             onHaveFamily: { Haptic.light(); tour.end(signUp: false) })
-                    .transition(.opacity)
-            }
-        }
-        .overlay {
             if let reason = tour.invite {
                 DemoTourInviteSheet(reason: reason,
                                     onSignUp: { Haptic.medium(); tour.end(signUp: true) },
@@ -224,246 +224,137 @@ struct DemoTourRoot: View {
             }
         }
         .animation(.easeOut(duration: 0.2), value: tour.invite)
-        .animation(.easeOut(duration: 0.25), value: tour.card)
         .animation(.easeOut(duration: 0.2), value: tour.kidID)
         .onReceive(ProgressStore.shared.objectWillChange.receive(on: DispatchQueue.main)) { _ in
             let open = ProgressStore.shared.isUnlocked || ProgressStore.shared.isOpeningWindow
-            guard open != windowShowing else { return }
-            windowShowing = open
-            // 🎬 The minutes were opened for the first time: what that means
-            // on the child's real phone — and what happens when they run out.
-            if open, tour.needs(.window), tour.card == nil {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                    if tour.needs(.window), tour.card == nil, tour.invite == nil { tour.card = .window }
-                }
-            }
+            if open != windowShowing { windowShowing = open }
         }
-    }
-
-    private func closeCard(_ card: DemoTour.Tip) {
-        Haptic.light()
-        tour.mark(card)
-        // The lock is the last piece of the idea — the closing card follows it.
-        tour.card = (card == .window && tour.closingIsDue) ? .closing : nil
     }
 }
 
-// MARK: - 🎬 First run: the two tips that are a picture
+// MARK: - 🎬 First run: straight into the questions
 //
-// Most first-run tips point at the thing itself (the spotlight of
-// `CoachMarks`, driven from `DemoTour.Tip`). Two are about something that is
-// NOT on this screen — the child's other apps locking, and the parent's own
-// phone — so each gets a picture of its subject in the top half, and the
-// words under it. They speak to the parent: no niqqud.
+// Rani's final shape (2026-10-12): a parent who has just installed Tofy lands
+// on Tofy Time's questions. Each answer is named — "צדקת" / "טעית" — with what
+// it did to the seconds; after four answers (then every five) one question:
+// "ליצור ילד" or "להמשיך לשחק". These speak to the parent: no niqqud.
 
-struct FirstRunCard: View {
-    /// `.window` (the minutes were opened) or `.closing` (create a family).
-    let kind: DemoTour.Tip
-    var onDone: () -> Void = {}
-    var onCreateFamily: () -> Void = {}
-    var onParentView: () -> Void = {}
-    var onHaveFamily: () -> Void = {}
+/// The whole first run: the quiz, and the question over it.
+struct FirstRunQuiz: View {
+    @ObservedObject private var tour = DemoTour.shared
+    @State private var quizOn = false
+    /// How the quiz was left: "ליצור ילד" goes on to sign-up; ✕ (or the end of
+    /// the round) just to "who uses this device".
+    @State private var createChild = false
 
     var body: some View {
-        ZStack {
-            GlassBackdrop().ignoresSafeArea()
-            VStack(spacing: 0) {
-                Group { if kind == .window { lockPicture } else { parentPicture } }
-                    .frame(maxWidth: 360)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding(.horizontal, 22)
-                    .padding(.top, 8)
-                if kind == .window { windowCard } else { closingCard }
-            }
-            .padding(.bottom, 14)
-        }
-    }
-
-    // MARK: The pictures
-
-    /// 🔒 The child's own screen once the minutes are gone: everything locked but Tofy.
-    private var lockPicture: some View {
-        let apps: [(String, String)] = [("▶️", "E5484D"), ("🎮", "7C5CFF"), ("📺", "2D9CDB"),
-                                        ("🎵", "F2994A"), ("🦁", ""), ("💬", "27AE60"),
-                                        ("🛒", "EB5757"), ("📷", "9B51E0"), ("🌐", "56CCF2")]
-        return VStack(spacing: 14) {
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 16), count: 3), spacing: 16) {
-                ForEach(Array(apps.enumerated()), id: \.offset) { _, app in
-                    let tofy = app.1.isEmpty
-                    ZStack(alignment: .bottomTrailing) {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(tofy ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(Color(hex: app.1)))
-                            .aspectRatio(1, contentMode: .fit)
-                            .opacity(tofy ? 1 : 0.55)
-                            .overlay(Text(app.0).font(.system(size: 36)).opacity(tofy ? 1 : 0.7))
-                        if !tofy {
-                            Image(systemName: "lock.fill")
-                                .font(.system(size: 13, weight: .heavy))
-                                .foregroundStyle(.white)
-                                .frame(width: 26, height: 26)
-                                .background(Circle().fill(Color(hex: "2A1E5C")))
-                                .offset(x: 5, y: 5)
+        GlassBackdrop().ignoresSafeArea()
+            .onAppear { quizOn = true }
+            .fullScreenCover(isPresented: $quizOn, onDismiss: { tour.end(signUp: createChild) }) {
+                QuestionRunnerView(mode: .smartFeed, purpose: .earnTime)
+                    .environment(\.layoutDirection, .app)   // a cover can arrive left-to-right
+                    .overlay {
+                        if tour.askToCreate {
+                            FirstRunAsk(answered: tour.answered,
+                                        onCreate: { Haptic.medium(); createChild = true; tour.askToCreate = false; quizOn = false },
+                                        onPlay: { Haptic.light(); tour.askToCreate = false })
+                                .transition(.opacity)
                         }
                     }
-                }
+                    .animation(.easeOut(duration: 0.22), value: tour.askToCreate)
             }
-            .padding(.horizontal, 26)
-            Text(tr("טופי נשאר פתוח — עונים, ומרוויחים זמן"))
-                .font(.system(size: 14, weight: .heavy, design: .rounded))
+    }
+}
+
+/// "צדקת! +24 שניות" / "טעית" — over the quiz for a moment, after every answer.
+struct FirstRunAnswerNote: View {
+    let correct: Bool
+    /// What a right answer paid — or what a wrong one took off the next right
+    /// answer (the clock itself never goes down). 0 = nothing either way.
+    let seconds: Int
+
+    private var detail: String {
+        if correct {
+            return seconds > 0 ? tr("+\(seconds) שניות של זמן מסך") : tr("הפעם בלי שניות נוספות")
+        }
+        return seconds > 0 ? tr("התשובה הנכונה הבאה תיתן \(seconds) שניות פחות") : tr("הפעם בלי שניות")
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: correct ? "checkmark.circle.fill" : "xmark.circle.fill")
+                .font(.system(size: 34, weight: .bold))
                 .foregroundStyle(.white)
-                .padding(.horizontal, 14).padding(.vertical, 8)
-                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
-        }
-    }
-
-    /// 📱 What the parent's own phone shows about one child.
-    private var parentPicture: some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 12) {
-                Text("👧").font(.system(size: 30))
-                    .frame(width: 52, height: 52)
-                    .background(Circle().fill(.white.opacity(0.2)))
-                    .overlay(Circle().stroke(AppColor.starGold, lineWidth: 2))
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(tr("דנה · כיתה ו׳"))
-                        .font(.system(size: 17, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                    HStack(spacing: 6) {
-                        Circle().fill(Color(hex: "5CFF9D")).frame(width: 8, height: 8)
-                        Text(tr("משחקת עכשיו · נשארו 23:38"))
-                            .font(.system(size: 12.5, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.8))
-                    }
-                }
-                Spacer(minLength: 4)
-                Text(verbatim: "91%")
-                    .font(.system(size: 20, weight: .heavy, design: .rounded))
-                    .foregroundStyle(Color(hex: "5CFF9D"))
+            VStack(alignment: .leading, spacing: 1) {
+                Text(correct ? tr("צדקת!") : tr("טעית"))
+                    .font(.system(size: 22, weight: .heavy, design: .rounded))
+                Text(detail)
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .opacity(0.95)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            HStack(spacing: 8) {
-                stat("24", tr("דקות היום"))
-                stat("22", tr("שאלות"))
-                stat("20", tr("נכונות"))
-            }
-            HStack(spacing: 8) {
-                chip(tr("📊 הדוח"))
-                chip(tr("💝 מתנת דקות"))
-                chip(tr("🔒 נעילה"))
-            }
-        }
-        .padding(16)
-        .glassPane(radius: 16)
-    }
-
-    private func stat(_ value: String, _ label: String) -> some View {
-        VStack(spacing: 2) {
-            Text(verbatim: value).font(.system(size: 22, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-            Text(label).font(.system(size: 11.5, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.75))
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 10)
-        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.12)))
-    }
-
-    private func chip(_ text: String) -> some View {
-        Text(text)
-            .font(.system(size: 12.5, weight: .heavy, design: .rounded))
             .foregroundStyle(.white)
-            .lineLimit(1).minimumScaleFactor(0.8)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
-            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.2)))
-    }
-
-    // MARK: The words
-
-    private var tag: some View {
-        HStack {
-            Text(tr("הסבר קצר להורים"))
-                .font(.system(size: 12, weight: .heavy, design: .rounded))
-                .foregroundStyle(Color(hex: "2B1C04"))
-                .padding(.horizontal, 10).padding(.vertical, 3)
-                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
-            Spacer()
         }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 12)
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
+            .fill(correct ? Color(hex: "1B8A5A") : Color(hex: "C2410C")))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.35), lineWidth: 1))
+        .shadow(color: .black.opacity(0.35), radius: 14, y: 6)
+        .padding(.horizontal, 20)
     }
+}
 
-    private func words(_ title: String, _ line: String) -> some View {
-        VStack(spacing: 9) {
-            Text(title)
-                .font(.system(size: 22, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 6)
-            Text(line)
-                .font(.system(size: 15.5, weight: .medium, design: .rounded))
-                .foregroundStyle(.white.opacity(0.9))
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
+/// The one question of the first run: create a child's profile, or play on.
+struct FirstRunAsk: View {
+    let answered: Int
+    var onCreate: () -> Void = {}
+    var onPlay: () -> Void = {}
 
-    private func gold(_ text: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(text)
-                .font(.system(size: 17.5, weight: .heavy, design: .rounded))
-                .foregroundStyle(Color(hex: "2A1E5C"))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .glassFill(AppGradient.gold, radius: 16)
-        }
-        .buttonStyle(.juicy)
-        .padding(.top, 4)
-    }
-
-    private func plate<V: View>(@ViewBuilder _ content: () -> V) -> some View {
-        VStack(spacing: 9) { content() }
-            .padding(16)
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            Color.black.opacity(0.55).ignoresSafeArea()
+            VStack(spacing: 10) {
+                Text("🧒").font(.system(size: 46))
+                Text(tr("רוצים ליצור פרופיל לילד שלכם?"))
+                    .font(.system(size: 23, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(tr("ככה הילדים מרוויחים זמן מסך בטופי: עונים על שאלות, והשניות נצברות. ההרשמה לוקחת כדקה."))
+                    .font(.system(size: 15.5, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button(action: onCreate) {
+                    Text(tr("ליצור ילד"))
+                        .font(.system(size: 18, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "2A1E5C"))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 15)
+                        .glassFill(AppGradient.gold, radius: 16)
+                }
+                .buttonStyle(.juicy)
+                .padding(.top, 4)
+                Button(action: onPlay) {
+                    Text(tr("להמשיך לשחק"))
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                }
+                .buttonStyle(.juicy)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 18)
             .frame(maxWidth: 440)
             .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "4A3AB0").opacity(0.98)))
             .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
-            .shadow(color: .black.opacity(0.45), radius: 18, y: 6)
-            .padding(.horizontal, 14)
-    }
-
-    private var windowCard: some View {
-        plate {
-            tag
-            words(tr("כשהזמן נגמר, האפליקציות ננעלות"),
-                  tr("עכשיו הן פתוחות לילד, והשעון רץ. כשהוא מגיע לאפס הן ננעלות לבד, וכדי לפתוח שוב עונים על עוד שאלות."))
-            gold(tr("הבנתי"), action: onDone)
-        }
-    }
-
-    private var closingCard: some View {
-        plate {
-            tag
-            words(tr("ואתם רואים הכול מהטלפון שלכם"),
-                  tr("מה הילדים למדו, כמה שיחקו ואיפה הם צריכים עזרה. ההרשמה לוקחת כדקה, ו־30 הימים הראשונים של טופי+ במתנה."))
-            gold(tr("ליצור משפחה"), action: onCreateFamily)
-            Button(action: onParentView) {
-                Text(tr("לראות את המסך של ההורה"))
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
-                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
-            }
-            .buttonStyle(.juicy)
-            HStack(spacing: 18) {
-                Button(action: onDone) {
-                    Text(tr("להמשיך לשחק")).underline()
-                }
-                Button(action: onHaveFamily) {
-                    Text(tr("כבר יש לכם משפחה?")).underline()
-                }
-            }
-            .buttonStyle(.plain)
-            .font(.system(size: 14, weight: .bold, design: .rounded))
-            .foregroundStyle(.white.opacity(0.88))
-            .padding(.top, 2)
+            .shadow(color: .black.opacity(0.45), radius: 20, y: -10)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
         }
     }
 }

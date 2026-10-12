@@ -689,19 +689,8 @@ struct WorldMapView: View {
             }
         }
         // 🧭 Once per child: one point per thing on this screen.
-        .coachTour(firstRunSteps ?? kidTourSteps, forKid: firstRunSteps == nil, isActive: $kidTourActive) {
-            if firstRunSteps != nil {
-                // 🎬 A first-run tip, not the child's own tour (that one is theirs to see).
-                DemoTour.shared.mark(firstRunTipKind)
-                firstRunSteps = nil
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { maybeStartFirstRunTip() }
-            } else if let id = profiles.activeID {
-                CoachTours.markDone(Self.kidTourKey(id))
-            }
-        }
-        // 🎬 Back from a world: the next first-run tip, if one is due.
-        .onChangeCompat(of: selectedWorld == nil && !showingSmartFeed) { _, home in
-            if home, DemoTour.isOn { DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { maybeStartFirstRunTip() } }
+        .coachTour(kidTourSteps, forKid: true, isActive: $kidTourActive) {
+            if let id = profiles.activeID { CoachTours.markDone(Self.kidTourKey(id)) }
         }
         // 💬 What the rail's buddy says — over the bottom scrim, where it can
         // cover nothing that matters, instead of over a world card.
@@ -1739,7 +1728,6 @@ struct WorldMapView: View {
         if useSidebar {
             return AnyView(VStack(spacing: 0) {
                 statRow(value: minutes, suffix: minutesMax, label: Gendered.g(tr("⏱ הִרְוַחְתָּ הַיּוֹם"), tr("⏱ הִרְוַחַתְּ הַיּוֹם"))) { infoStat = .today }
-                    .coachMark("k.today")
                 Divider().overlay(Color.white.opacity(0.16))
                 statRow(value: "\(progress.correctToday)", suffix: progress.answeredToday > 0 ? "/\(progress.answeredToday)" : nil,
                         label: tr("✅ נְכוֹנוֹת הַיּוֹם")) { infoStat = .correct }
@@ -1760,7 +1748,6 @@ struct WorldMapView: View {
         }
         return AnyView(HStack(spacing: 0) {
             statColumn(value: minutes, suffix: minutesMax, label: Gendered.g(tr("⏱ הִרְוַחְתָּ הַיּוֹם"), tr("⏱ הִרְוַחַתְּ הַיּוֹם"))) { infoStat = .today }
-                .coachMark("k.today")
             statDivider
             // Out of how many, so all three read the same way (Rani).
             statColumn(value: "\(progress.correctToday)",
@@ -2769,7 +2756,6 @@ struct WorldMapView: View {
     /// After the story and every pop-up that waited for it — never on top of
     /// anything. Once per child (two siblings on one iPad each get theirs).
     private func maybeStartKidTour() {
-        if DemoTour.isOn { maybeStartFirstRunTip(); return }
         guard let id = profiles.activeID, !kidTourActive,
               !CoachTours.isDone(Self.kidTourKey(id)) || CoachTours.forcedInDemo,
               !AppInfo.isDemoRun || CoachTours.forcedInDemo,
@@ -2781,71 +2767,6 @@ struct WorldMapView: View {
               !ChildLockSetup.isPending || AppInfo.isDemoRun
         else { return }
         kidTourActive = true
-    }
-
-    /// 🎬 First run (Rani, 2026-10-12): a parent who opens Tofy for the first
-    /// time lands here and plays; the first time something they TAPPED leads
-    /// to a moment worth explaining, one tip points at the thing itself. These speak to the
-    /// parent — no niqqud. Set by `maybeStartFirstRunTip`, cleared when read.
-    @State private var firstRunSteps: [CoachStep]? = nil
-    @State private var firstRunTipKind: DemoTour.Tip = .minutes
-
-    /// Same rule as the child's own tour: never on top of anything.
-    private func maybeStartFirstRunTip() {
-        let tour = DemoTour.shared
-        guard tour.active, tour.kidID != nil, !kidTourActive, tour.card == nil, tour.invite == nil,
-              selectedWorld == nil, !showingSmartFeed, packReveal == nil, packOffer == nil,
-              !showingWheel, !showDailyChest, !showEventSplash else { return }
-        if tour.needs(.home) {
-            // The one that comes by itself, once, on the first arrival: the
-            // full tour of this screen, a spotlight on every button (Rani) —
-            // then they play. Every later tip follows something the parent DID.
-            firstRunTipKind = .home
-            firstRunSteps = parentTourSteps
-        } else if tour.answered > 0, tour.needs(.minutes) {
-            // Follows leaving a world after answering in it.
-            firstRunTipKind = .minutes
-            firstRunSteps = [CoachStep(id: "k.minutes", title: tr("הנה הדקות שהילד הרוויח עכשיו"),
-                                       text: tr("מכאן הוא פותח אותן, והאפליקציות שלו נפתחות לזמן הזה. כשהזמן נגמר, הן ננעלות שוב."))]
-        } else if tour.closingIsDue {
-            tour.card = .closing
-            return
-        } else {
-            return
-        }
-        kidTourActive = true
-    }
-
-    /// 🎬 The first run's tour of this screen: the same stops as the child's
-    /// own tour below, said to the PARENT (no niqqud) — what each button is
-    /// for, and what it means for them. It ends by handing the screen over.
-    private var parentTourSteps: [CoachStep] {
-        [
-            CoachStep(id: "k.world", title: tr("זה המסך של הילד"),
-                      text: tr("כל עולם הוא נושא: חשבון, עברית, אנגלית ועוד. הילד בוחר עולם, עונה על שאלות ומרוויח זמן מסך.")),
-            CoachStep(id: "k.tofyTime", title: tr("טופי טיים"),
-                      text: tr("שאלות שטופי בוחר לילד מכל העולמות, לפי הרמה שלו.")),
-            CoachStep(id: "k.games", title: tr("משחקים"),
-                      text: tr("משחקים קצרים, שנפתחים אחרי כמה תשובות נכונות ביום.")),
-            CoachStep(id: "k.minutes", title: tr("הדקות"),
-                      text: tr("כאן הילד פותח את הדקות שהרוויח, והאפליקציות שלו נפתחות לזמן הזה.")),
-            CoachStep(id: "k.today", title: tr("המקסימום היומי"),
-                      text: tr("כמה הרוויח היום, מתוך המקסימום ליום. את המקסימום אתם קובעים לכל ילד.")),
-            CoachStep(id: "k.wallet", title: tr("כוכבים ויהלומים"),
-                      text: tr("כוכבים על כל הצלחה, ויהלומים לקניות בחנות הדמויות.")),
-            CoachStep(id: "k.challenge", title: tr("אתגר יומי"),
-                      text: tr("משימה קטנה בכל יום, ופרס כשמסיימים.")),
-            CoachStep(id: "k.chores", title: tr("מטלות"),
-                      text: tr("הילד עוזר בבית ומרוויח, ואתם מאשרים מהטלפון שלכם.")),
-            CoachStep(id: "k.shop", title: tr("חנות"),
-                      text: tr("דמויות ובגדים, שקונים ביהלומים שהילד צבר.")),
-            CoachStep(id: "k.friends", title: tr("חברים"),
-                      text: tr("טבלת חברים, ומשחק חי ביחד.")),
-            CoachStep(id: "k.settings", title: tr("להורים"),
-                      text: tr("ההגדרות שלכם. הן נפתחות רק עם קוד הורה.")),
-            CoachStep(id: "k.world", title: tr("עכשיו תורכם"),
-                      text: tr("לחצו על עולם ונסו לענות על כמה שאלות, בדיוק כמו הילדים.")),
-        ]
     }
 
     /// The child's side — niqqud, and the right form for a boy or a girl.

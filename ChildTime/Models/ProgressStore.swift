@@ -1355,6 +1355,7 @@ final class ProgressStore: ObservableObject {
     /// child, so three cards don't show three identical rows of numbers.
     func seedForDemoTour(answered: Int, correct: Int, minutes: Int) {
         seedForDemo()
+        cycleSeconds = 0     // nothing left over to be paid out with the first answer
         answeredToday = answered
         correctToday = correct
         minutesEarnedToday = minutes

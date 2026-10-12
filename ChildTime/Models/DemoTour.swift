@@ -60,50 +60,39 @@ final class DemoTour: ObservableObject {
         var id: String { rawValue }
     }
 
-    // MARK: - First run: play first, explain as it happens
+    // MARK: - First run: straight into the questions
 
-    /// Rani, 2026-10-12: a first launch lands on the child's own home and the
-    /// parent simply plays. One tip greets the very first arrival ("this is
-    /// the child's screen — tap a world"); after that nothing pops up by
-    /// itself: only when something they TAPPED leads to a moment worth
-    /// stopping at, one tip explains it — pointing at the thing itself.
-    /// Never a tour to sit through first.
-    enum Tip: String, CaseIterable {
-        /// The first arrival on the child's home (Rani: "רק בפעם הראשונה שנכנסים").
-        case home
-        /// The first right answer: the time that just grew.
-        case firstRight
-        /// The first wrong answer: the time did not go down.
-        case firstWrong
-        /// Back on the home after playing: the minutes, and the daily maximum.
-        case minutes
-        /// The minutes opened: what happens when they run out.
-        case window
-        /// "ואתם רואים הכול מהטלפון שלכם" → create a family.
-        case closing
-    }
-
-    private static let tipsKey = "demoTour.tips"
-    private var seenTips: Set<String> = Set(UserDefaults.standard.stringArray(forKey: DemoTour.tipsKey) ?? [])
-
-    /// A full-screen card of the first run (the two tips that are a picture
-    /// rather than a pointer).
-    @Published var card: Tip?
-    /// Answers given in this tour — the closing card waits for a few.
+    /// Rani's final shape (2026-10-12, after four others): a parent who has
+    /// just installed Tofy lands straight on Tofy Time's questions. Every
+    /// answer says "צדקת" or "טעית" and what it did to the seconds; after four
+    /// answers they are asked whether to create a child's profile — "ליצור
+    /// ילד" or "להמשיך לשחק" — and, if they play on, again every five.
+    @Published private(set) var firstRunQuiz = UserDefaults.standard.bool(forKey: DemoTour.quizKey)
+    /// The question itself, over the quiz.
+    @Published var askToCreate = false
+    /// Answers given in this first run.
     @Published private(set) var answered = 0
 
-    func needs(_ tip: Tip) -> Bool { active && !seenTips.contains(tip.rawValue) }
+    private static let quizKey = "demoTour.firstRunQuiz"
+    static let firstAskAfter = 4
+    static let askAgainEvery = 5
 
-    func mark(_ tip: Tip) {
-        guard seenTips.insert(tip.rawValue).inserted else { return }
-        UserDefaults.standard.set(Array(seenTips), forKey: Self.tipsKey)
+    /// After the 4th answer, then the 9th, the 14th…
+    static func asks(afterAnswer n: Int) -> Bool {
+        n == firstAskAfter || (n > firstAskAfter && (n - firstAskAfter) % askAgainEvery == 0)
     }
 
-    func noteAnswer() { if active { answered += 1 } }
-
-    /// The closing card is due once the idea has been seen in action: the
-    /// minutes were opened, or a handful of questions answered.
-    var closingIsDue: Bool { needs(.closing) && (answered >= 5 || !needs(.window)) }
+    /// Called by the quiz for every answer, right or wrong.
+    func noteAnswer() {
+        guard active, firstRunQuiz else { return }
+        answered += 1
+        guard Self.asks(afterAnswer: answered) else { return }
+        // A beat later: the answer's own "צדקת / טעית" is read first.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) { [weak self] in
+            guard let self, self.active, self.firstRunQuiz else { return }
+            self.askToCreate = true
+        }
+    }
 
     /// Whether a first launch should open the first run by itself. Never in a
     /// test run: the test host IS a first launch on a blank device, and a tour
@@ -114,19 +103,24 @@ final class DemoTour: ObservableObject {
     }
 
     /// A first launch on a device with no family at all: straight into the
-    /// child's home, with no welcome pages and no questions asked. Returns
-    /// false (and does nothing) anywhere else.
+    /// questions, with no welcome pages and nothing asked first. Returns false
+    /// (and does nothing) anywhere else.
     @discardableResult
     func startFirstRun() -> Bool {
         guard Self.canStart else { return false }
         start()
         guard active else { return false }
-        // The welcome pages are what this replaces; the way to a real family
-        // (the band, the closing card) goes straight to "who uses this device".
+        // The welcome pages are what this replaces; leaving the quiz (✕, or
+        // "ליצור ילד") goes straight to "who uses this device".
         ParentSettings.shared.hasSeenWelcome = true
         if let kid = ProfileStore.shared.profiles.first(where: { $0.grade == Self.firstRunGrade }) ?? ProfileStore.shared.profiles.first {
-            showKid(kid.id)
+            ProfileStore.shared.setActive(kid)
+            // A clean slate for the one who plays: the clock starts at 0:00,
+            // so the first right answer visibly puts the first seconds on it.
+            ProgressStore.shared.resetAll()
         }
+        UserDefaults.standard.set(true, forKey: Self.quizKey)
+        firstRunQuiz = true
         return true
     }
     /// The child a first run plays as: כיתה א׳ — quick questions anyone answers.
@@ -157,10 +151,8 @@ final class DemoTour: ObservableObject {
         seedFamily()
         kidID = nil
         invite = nil
-        card = nil
+        askToCreate = false
         answered = 0
-        seenTips = []
-        UserDefaults.standard.removeObject(forKey: Self.tipsKey)
         active = true
     }
 
@@ -244,11 +236,11 @@ final class DemoTour: ObservableObject {
     func end(signUp: Bool) {
         guard Self.isOn else { return }
         invite = nil
-        card = nil
+        askToCreate = false
         kidID = nil
         answered = 0
-        seenTips = []
-        UserDefaults.standard.removeObject(forKey: Self.tipsKey)
+        firstRunQuiz = false
+        UserDefaults.standard.removeObject(forKey: Self.quizKey)
         let ids = Set(ProfileStore.shared.profiles.map(\.id)).union(childIDs)
         HouseholdManager.shared.clearDemoDevices()
         RemoteSyncManager.shared.clearDemoGifts()
