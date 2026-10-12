@@ -688,7 +688,7 @@ struct WorldMapView: View {
             }
         }
         // 🧭 Once per child: one point per thing on this screen.
-        .coachTour(kidTourSteps, forKid: true, isActive: $kidTourActive) {
+        .coachTour(firstRunTip ?? kidTourSteps, forKid: firstRunTip == nil, isActive: $kidTourActive) {
             if let id = profiles.activeID { CoachTours.markDone(Self.kidTourKey(id)) }
         }
         // 💬 What the rail's buddy says — over the bottom scrim, where it can
@@ -2766,6 +2766,26 @@ struct WorldMapView: View {
               !ChildLockSetup.isPending || AppInfo.isDemoRun
         else { return }
         kidTourActive = true
+    }
+
+    /// 🎬 First run (Rani, 2026-10-12 — preview): a parent who opens Tofy for
+    /// the first time lands here and plays; the FIRST time they do something,
+    /// one tip points at the thing itself. These speak to the parent — no niqqud.
+    /// DEMO_FIRSTRUN_TIP=world|minutes (with DEMO_COACH=1) shows one for approval.
+    private var firstRunTip: [CoachStep]? {
+        #if DEBUG
+        switch ProcessInfo.processInfo.environment["DEMO_FIRSTRUN_TIP"] {
+        case "world":
+            return [CoachStep(id: "k.tofyTime", title: tr("זה המסך של הילד"),
+                              text: tr("לחצו על עולם ונסו לענות על כמה שאלות, בדיוק כמו הילדים."))]
+        case "minutes":
+            return [CoachStep(id: "k.minutes", title: tr("כאן הדקות שהילד הרוויח"),
+                              text: tr("מכאן הוא פותח אותן, והאפליקציות שלו נפתחות לזמן הזה. כשהזמן נגמר, הן ננעלות שוב."))]
+        default: return nil
+        }
+        #else
+        return nil
+        #endif
     }
 
     /// The child's side — niqqud, and the right form for a boy or a girl.

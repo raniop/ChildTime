@@ -1010,7 +1010,7 @@ struct QuestionRunnerView: View {
                         }
                         .frame(height: 12)
                         if earnsTime, timeOnShelf {
-                            shelfTimeChip
+                            shelfTimeChip.coachMark("q.time")   // 🎬 the first-run tip points here
                                 .animation(.spring(response: 0.35, dampingFraction: 0.7), value: secondsFlashText)
                         } else if earnsTime {
                             Text(tr("+\(progress.secondsPerCorrect) שְׁנִיּוֹת"))
