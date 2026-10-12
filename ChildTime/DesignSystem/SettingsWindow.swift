@@ -73,6 +73,9 @@ struct SettingsBandRow: View {
     @ObservedObject private var display = DisplayGeometry.shared
     @Environment(\.dismiss) private var dismiss
 
+    /// Closed, the page is as wide as the glass and its top runs beside the clock.
+    private var besideClock: Bool { display.safeSize.width <= DisplayGeometry.readableWidth }
+
     var body: some View {
         if active && display.hasBarStrip {
             let farIsLeft = !display.barOnLeft
@@ -90,10 +93,13 @@ struct SettingsBandRow: View {
                 if titleBesideControl { Spacer(minLength: 8) }
             }
             // Laid out so the control lands on the PHYSICAL far side; trailing is the clock's.
-            .padding(.trailing, max(0, display.barInset - sideInset) + 6)
+            // Unfolded, the page is one readable column in the middle of the glass,
+            // nowhere near the clock: the row runs the column's whole width and the
+            // content follows it directly, with no band to clear.
+            .padding(.trailing, besideClock ? max(0, display.barInset - sideInset) + 6 : 0)
             .environment(\.layoutDirection, farIsLeft ? .leftToRight : .rightToLeft)
             .frame(maxWidth: .infinity)
-            .frame(minHeight: max(44, display.barStripTop - above), alignment: .top)
+            .frame(minHeight: besideClock ? max(44, display.barStripTop - above) : 44, alignment: .top)
         }
     }
 
