@@ -773,8 +773,17 @@ struct ChildTimeApp: App {
         // 🎬 DEMO_SCREEN=firstrun DEMO_COACH=0…5 — the first-run question with
         // the parent's card for that step over it (screens for approval).
         case "firstrun":
-            QuestionRunnerView(mode: .world(Worlds.all.first { $0.topic.rawValue == (ProcessInfo.processInfo.environment["DEMO_WORLD"] ?? "logic") } ?? Worlds.all[0]), purpose: .earnTime)
-                .overlay { FirstRunCoach(step: Int(ProcessInfo.processInfo.environment["DEMO_COACH"] ?? "") ?? 0) }
+            let coach = Int(ProcessInfo.processInfo.environment["DEMO_COACH"] ?? "") ?? 0
+            Group {
+                if coach == 0 {
+                    WorldMapView()
+                } else if coach == 1 {
+                    QuestionRunnerView(mode: .world(Worlds.all.first { $0.topic.rawValue == (ProcessInfo.processInfo.environment["DEMO_WORLD"] ?? "logic") } ?? Worlds.all[0]), purpose: .earnTime)
+                } else {
+                    Color.clear
+                }
+            }
+            .overlay { FirstRunCoach(step: coach) }
         #endif
         case "parenthome": ParentDashboardView(isRoot: true)   // DEMO_SCREEN=parenthome — the redesigned overview
             .onAppear {
