@@ -149,18 +149,29 @@ object KidSession : LeaseHost {
     val boundChildID: String? get() = childID
 
     // ── binding ─────────────────────────────────────────────────────────────
-    fun bind(childID: String, kidMode: Boolean = false) {
+    /** 🎬 A first-run session (see `FirstRun`): a made-up child that exists only on
+     *  this phone — no listeners, no uploads, no device row, no lease. */
+    var localOnly: Boolean = false
+        private set
+
+    /** Drop whatever is saved under this child id (the first run's clean slate). */
+    fun forget(childID: String) { prefs?.edit()?.remove(childID)?.apply() }
+
+    fun bind(childID: String, kidMode: Boolean = false, local: Boolean = false) {
         check(initialized) { "KidSession.init(context) first" }
-        if (this.childID == childID && this.kidMode == kidMode) return
+        if (this.childID == childID && this.kidMode == kidMode && localOnly == local) return
         unbind()
         this.childID = childID
         this.kidMode = kidMode
+        localOnly = local
         lastReportedPlayed = -1
         val saved = prefs?.getString(childID, null)?.let { KidPersistence.decode(it) }
         engine = ProgressEngine(baseSettings, AndroidKidClock, KidIdentity.installID, saved?.first, saved?.second)
         publish()
-        leases.startIfNeeded(childID)
-        sync.start(childID)
+        if (!local) {
+            leases.startIfNeeded(childID)
+            sync.start(childID)
+        }
         ticker = scope.launch { while (true) { delay(1000); tick() } }
         onForeground()
     }
@@ -180,6 +191,12 @@ object KidSession : LeaseHost {
         lastChildDoc = null
         _state.value = null
         _opening.value = null
+        if (localOnly) {
+            prefs?.edit()?.remove(cid)?.apply()   // 🎬 the first run leaves nothing behind
+            localOnly = false
+            kidMode = false
+            return
+        }
         if (kidMode) {
             prefs?.edit()?.remove(cid)?.apply()   // Kid Mode leaves nothing kid-specific behind
             // …nor a device row: the parent's phone published itself as this child's
@@ -198,6 +215,7 @@ object KidSession : LeaseHost {
         if (!kidMode) com.rani.tofy.kid.location.KidLocation.appBecameActive()
         edit { it.applyDailyRolloverIfNeeded() }
         tick()
+        if (localOnly) return                 // 🎬 nothing to reconcile with, nobody to tell
         leases.reconcileOfflineWindowIfNeeded(cid)
         sync.startHeartbeat()
         scope.launch { sync.consumePendingCommandsNow() }
@@ -238,6 +256,7 @@ object KidSession : LeaseHost {
         }
         for (ev in e.drainEvents()) {
             _events.tryEmit(KidEvent.Progress(ev))
+            if (localOnly) continue           // 🎬 the first run reports nothing
             when (ev) {
                 is ProgressEvent.LevelUp -> sync.reportEvent("levelUp", value = ev.level.toString())
                 is ProgressEvent.PersonalBest -> sync.reportEvent("personalBest", value = ev.streak.toString())
@@ -246,6 +265,7 @@ object KidSession : LeaseHost {
                 is ProgressEvent.WorldUnlocked -> Unit   // the UI reports it with the world's NAME
             }
         }
+        if (localOnly) return
         if (e.localEditSeq != seqBefore) sync.uploadSoon()
         if (windowKey(e) != windowBefore) sync.reportTimeState()
     }

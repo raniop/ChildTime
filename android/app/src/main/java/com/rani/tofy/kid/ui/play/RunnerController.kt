@@ -326,7 +326,8 @@ class RunnerController(
             feedback[idx] = OptionFeedback.WRONG
             handleWrong(q)
             if (reAskQueue.none { it.first.prompt == q.prompt }) reAskQueue += q to (questionIndex + reAskSpacing)
-            companion.cheer(tr("נַחְזֹר לָזוֹ עוֹד מְעַט 💪"))
+            // 🎬 …unless Tofy has just explained the first miss of a first run.
+            if (!firstRunSpoke) companion.cheer(tr("נַחְזֹר לָזוֹ עוֹד מְעַט 💪"))
             showFeedback = true
             advance(1000, onlyIfSerial = serial)
         }
@@ -381,6 +382,7 @@ class RunnerController(
             roundSeconds += paid
             flashSeconds(tr("+%lld שְׁנִיּוֹת", paid), positive = true)
         }
+        firstRunFeedback(correct = true, seconds = if (cappedBefore) 0 else paid)   // 🎬 before the branches below that leave early
         if (bonusPopupMinutes > 0) { lastEarnedMinutes = bonusPopupMinutes; earnedPopupTrigger++ }
 
         val atCapNow = KidSession.edit { it.atDailyCap() } ?: false
@@ -431,13 +433,39 @@ class RunnerController(
         }
     }
 
+    /** 🎬 First run (see `FirstRun`): the FIRST right answer and the FIRST wrong
+     *  one are explained by Tofy himself, in his own bubble, in place of "יֵשׁ!" /
+     *  "כִּמְעַט!" — to the parent, so without niqqud. After that he talks as in
+     *  the real game. `seconds`: what the right answer paid, or what the wrong one
+     *  takes off the next right answer (the clock itself never goes down). */
+    private var firstRunSpoke = false
+    private fun firstRunFeedback(correct: Boolean, seconds: Int) {
+        firstRunSpoke = false
+        if (!com.rani.tofy.kid.core.FirstRun.isOn) return
+        val first = com.rani.tofy.kid.core.FirstRun.noteAnswer(correct)
+        if (com.rani.tofy.kid.core.FirstRun.asks(com.rani.tofy.kid.core.FirstRun.answered)) {
+            // A beat later: this answer is read first.
+            scope.launch { delay(1800); if (com.rani.tofy.kid.core.FirstRun.isOn) com.rani.tofy.kid.core.FirstRun.asking = true }
+        }
+        if (!first) return
+        firstRunSpoke = true
+        // A right answer's own line is chosen further down the handler (some of
+        // its branches leave early) — this one comes a beat later, and stays.
+        if (correct) scope.launch {
+            delay(80)
+            companion.cheer(if (seconds > 0) tr("צדקתם! כל תשובה נכונה מוסיפה %lld שניות של זמן מסך", seconds) else tr("צדקתם!"))
+        }
+        else companion.console(if (seconds > 0) tr("טעיתם, לא נורא. הזמן לא יורד, אבל התשובה הנכונה הבאה תיתן %lld שניות פחות.", seconds)
+                               else tr("טעיתם, לא נורא. הזמן שנצבר לא יורד."))
+    }
+
     private fun handleWrong(q: Question) {
         KidSounds.play(AppSound.WRONG_SOFT)
         haptics()?.warning()
         consecutiveWrong++
         hadMistakeThisQuestion = true
         // Neither the arena nor a 💫 bonus question (hard by design) may lower the adaptive level.
-        KidSession.answerWrong(q.topic.raw, usedHintThisQuestion, grantsScreenTime = true,
+        val owed = KidSession.answerWrong(q.topic.raw, usedHintThisQuestion, grantsScreenTime = true,
             affectsAdaptive = !isArena && !isBonusQuestion)
         refreshProfile()
         KidSession.boundChildID?.let { LearningHistoryRecorder.recordAnswer(it, q.topic.raw, false, 0.0, 0, 0, skill = q.skill) }
@@ -446,6 +474,7 @@ class RunnerController(
         // …and no "−12 שניות" either (Rani, 2026-10-06): the balance never drops, so only the encouraging line.
         companion.console(listOf(tr("כִּמְעַט!"), tr("מַמָּשׁ קָרוֹב"), g(tr("בּוֹא נְנַסֶּה שׁוּב"), tr("בּוֹאִי נְנַסֶּה שׁוּב")), tr("נְנַסֶּה אֶת הַבָּאָה"),
             tr("⭐ עוֹד תְּשׁוּבָה נְכוֹנָה וְחוֹזְרִים לְהִתְקַדֵּם")).random())
+        firstRunFeedback(correct = false, seconds = maxOf(0, owed))
     }
 
     private fun flashSeconds(text: String, positive: Boolean) {
@@ -492,7 +521,7 @@ class RunnerController(
     fun reportCurrent() {
         val q = current ?: return
         val name = child?.name
-        scope.launch { QuestionReporter.report(q, name) }
+        if (!KidSession.localOnly) scope.launch { QuestionReporter.report(q, name) }
         haptics()?.success()
         createQuestion(false)   // replace with a fresh question
     }

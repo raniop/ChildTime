@@ -147,6 +147,7 @@ class KidSync internal constructor(
 
     // ── lifecycle ───────────────────────────────────────────────────────────
     fun start(cid: String) {
+        if (KidSession.localOnly) return   // 🎬 first run: nothing leaves the phone
         stop()
         childID = cid
         syncActive = true
@@ -169,6 +170,7 @@ class KidSync internal constructor(
 
     fun pauseHeartbeat() { heartbeatJob?.cancel(); heartbeatJob = null }
     fun startHeartbeat() {
+        if (KidSession.localOnly) return   // 🎬 first run: nothing leaves the phone
         if (heartbeatJob?.isActive == true) return
         heartbeatJob = scope.launch {
             while (isActive) {
@@ -180,6 +182,7 @@ class KidSync internal constructor(
 
     /** Re-attach every listener now (after a join, when earlier ones were refused). */
     fun resubscribe() {
+        if (KidSession.localOnly) return   // 🎬 first run: nothing leaves the phone
         val cid = childID ?: return
         regs.forEach { it.remove() }; regs.clear()
         retries = 0
@@ -222,6 +225,7 @@ class KidSync internal constructor(
     // ── state/current: upload + merge ───────────────────────────────────────
     /** Debounced upload — coalesced, never restarted, so fast answering can't starve it. */
     fun uploadSoon() {
+        if (KidSession.localOnly) return   // 🎬 first run: nothing leaves the phone
         if (uploadJob?.isActive == true) return
         uploadJob = scope.launch {
             delay(3000)
@@ -232,6 +236,7 @@ class KidSync internal constructor(
 
     /** Ratchet-merge upload transaction — an upload can only raise the cloud, never lower it. */
     suspend fun upload() {
+        if (KidSession.localOnly) return   // 🎬 first run: nothing leaves the phone
         val cid = childID ?: return
         val e = session.engineFor(cid) ?: return   // the store must hold THIS child's data
         val local = e.capture()
@@ -293,6 +298,7 @@ class KidSync internal constructor(
 
     /** Kid Mode entry / foreground: catch up on commands issued before we were listening. */
     suspend fun consumePendingCommandsNow() {
+        if (KidSession.localOnly) return   // 🎬 first run: nothing leaves the phone
         val cid = childID ?: return
         val d = runCatching { childRef(cid).get().await().data }.getOrNull() ?: return
         consumeCommands(cid, d)
@@ -416,6 +422,7 @@ class KidSync internal constructor(
     // ── childDevices row ────────────────────────────────────────────────────
     /** Register / refresh THIS device under the child — idempotent, keyed by install ID. */
     suspend fun registerDevice() {
+        if (KidSession.localOnly) return   // 🎬 first run: nothing leaves the phone
         val cid = childID ?: return
         val hid = householdID ?: return
         val u = uid ?: return
@@ -458,6 +465,7 @@ class KidSync internal constructor(
      * a missing row never creates an unreadable doc. Confirmed + self-healing.
      */
     fun reportTimeState() {
+        if (KidSession.localOnly) return   // 🎬 first run: nothing leaves the phone
         val cid = childID ?: return
         val hid = householdID ?: return
         val e = session.engineFor(cid) ?: return
@@ -480,6 +488,7 @@ class KidSync internal constructor(
 
     /** Doorbell for a transfer: stamp remoteLockAt on the OTHER device's row. */
     fun lockOtherDeviceWindow(deviceRowID: String) {
+        if (KidSession.localOnly) return   // 🎬 first run: nothing leaves the phone
         val ref = db.collection("childDevices").document(deviceRowID)
         scope.launch { confirmedWithHeal(ref, mapOf("remoteLockAt" to AppleTime.nowUnix())) }
     }
@@ -492,6 +501,7 @@ class KidSync internal constructor(
 
     /** Re-add our uid to the household (the rules let anyone add ONLY themselves). */
     suspend fun reassertMembership() {
+        if (KidSession.localOnly) return   // 🎬 first run: nothing leaves the phone
         val u = uid ?: return; val hid = householdID ?: return
         runCatching { db.collection("households").document(hid).update("parentUIDs", FieldValue.arrayUnion(u)).await() }
     }
@@ -562,12 +572,14 @@ class KidSync internal constructor(
 
     /** This device was removed: delete our tombstoned row (local wipe is KidSession's). */
     fun deleteOwnRow(cid: String) {
+        if (KidSession.localOnly) return   // 🎬 first run: nothing leaves the phone
         runCatching { deviceRef(cid).delete() }
     }
 
     // ── LiveEventReporter ───────────────────────────────────────────────────
     /** One row in children/{id}/events — the parent's activity feed + push. */
     fun reportEvent(type: String, value: String? = null, topicName: String? = null, extra: Map<String, Any?> = emptyMap()) {
+        if (KidSession.localOnly) return   // 🎬 first run: nothing leaves the phone
         val cid = childID ?: return
         val u = uid ?: return
         val doc = _childDoc.value

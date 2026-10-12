@@ -70,6 +70,7 @@ object LearningHistoryRecorder {
             ?: mutableMapOf()
 
     private fun mutateToday(childID: String, transform: (DailyStat) -> Unit) {
+        if (com.rani.tofy.kid.core.KidSession.localOnly) return   // 🎬 first run: no history of a made-up child
         val days = load(childID)
         val k = dayKey()
         val stat = days[k] ?: DailyStat(k)

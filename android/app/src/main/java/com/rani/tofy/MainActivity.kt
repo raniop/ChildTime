@@ -145,7 +145,17 @@ private fun Root() {
         com.rani.tofy.kid.ui.KidRoot(cid, kidMode = true, onExitKidMode = { DeviceRole.endKidMode() }); return
     }
     when (DeviceRole.role) {
-        null -> { com.rani.tofy.kid.ui.RolePickerScreen(onParent = { DeviceRole.choose(DeviceRole.Role.PARENT) }, onChild = { DeviceRole.choose(DeviceRole.Role.CHILD) }); return }
+        null -> {
+            // 🎬 A first launch on a phone with no family at all: straight into Tofy
+            // Time's questions (see `FirstRun`), before "who uses this device".
+            val ctx = androidx.compose.ui.platform.LocalContext.current
+            androidx.compose.runtime.remember { com.rani.tofy.kid.ui.KidBinding.init(ctx) }
+            if (com.rani.tofy.kid.core.FirstRun.isOn) { com.rani.tofy.kid.ui.FirstRunQuiz(); return }
+            if (com.rani.tofy.kid.core.FirstRun.shouldOpen(ctx)) {
+                androidx.compose.runtime.LaunchedEffect(Unit) { com.rani.tofy.kid.core.FirstRun.start(ctx) }
+                return
+            }
+            com.rani.tofy.kid.ui.RolePickerScreen(onParent = { DeviceRole.choose(DeviceRole.Role.PARENT) }, onChild = { DeviceRole.choose(DeviceRole.Role.CHILD) }); return }
         DeviceRole.Role.CHILD -> {
             val cid = DeviceRole.joinedChildID
             if (cid == null) com.rani.tofy.kid.ui.ChildJoinScreen(onJoined = { DeviceRole.join(it) }, onBack = { DeviceRole.choose(null) })

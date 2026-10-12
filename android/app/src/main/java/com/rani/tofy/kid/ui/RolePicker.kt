@@ -106,6 +106,11 @@ private fun RolePicker(onParent: () -> Unit, onChild: () -> Unit) {
             }
         }
     }
+    // 🎬 "ליצור ילד" in the first run leads straight on to the parent's way in —
+    // through the age check, like every other.
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        if (com.rani.tofy.kid.core.FirstRun.consumeSignUpNext(ctx)) requestParent()
+    }
     when (ageStep) {
         "year" -> {
             AgeGateYear(onAnswer = { v ->
