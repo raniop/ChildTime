@@ -401,7 +401,7 @@ struct ParentSettingsView: View {
 
     private func subScreen<C: View>(_ title: String, @ViewBuilder _ content: () -> C) -> some View {
         Form { content() }
-            .readableColumn()
+            .readableColumn(form: true)
             .glassForm()
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
@@ -1194,7 +1194,7 @@ struct ChangePINView: View {
                 .glassRows()
             }
             .interactiveDismissDisabled(saving)
-            .readableColumn()
+            .readableColumn(form: true)
             .glassForm()
             .navigationTitle(tr("שינוי קוד הורה"))
             .navigationBarTitleDisplayMode(.inline)

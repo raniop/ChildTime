@@ -22,6 +22,7 @@ struct GiftMinutesSheet: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var remote = RemoteSyncManager.shared
     @ObservedObject private var household = HouseholdManager.shared
+    @ObservedObject private var display = DisplayGeometry.shared
     @State private var minutes = 30
     /// The minutes that were sent — nil until "שליחה" is pressed.
     @State private var sentMinutes: Int?
@@ -112,7 +113,11 @@ struct GiftMinutesSheet: View {
             .foregroundStyle(GlassInk.primary)
         }
         .background(GlassBackdrop().ignoresSafeArea())
-        .overlay(alignment: .topLeading) {
+        // ✕ where it was approved — the reading-leading corner — except on the
+        // foldable, where that corner can be the clock's: a tap there never
+        // arrives (measured 2026-10-12: in Hebrew the ✕ sat under the clock).
+        // Laid out left-to-right so the corner is the PHYSICAL one.
+        .overlay {
             Button { dismiss() } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 15, weight: .bold))
@@ -124,9 +129,16 @@ struct GiftMinutesSheet: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(tr("סגירה"))
-            .padding(.leading, 14).padding(.top, 14)
-            .environment(\.layoutDirection, .leftToRight)   // the corner, not the reading side
+            .padding(.horizontal, 14).padding(.top, 14)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: closeOnLeft ? .topLeading : .topTrailing)
+            .environment(\.layoutDirection, .leftToRight)
         }
+    }
+
+    /// Which physical corner holds the ✕.
+    private var closeOnLeft: Bool {
+        if display.hasBarStrip { return !display.barOnLeft }
+        return !LanguageStore.shared.current.isRightToLeft
     }
 
     // MARK: - After sending

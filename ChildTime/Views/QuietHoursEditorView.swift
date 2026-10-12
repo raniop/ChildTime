@@ -84,7 +84,7 @@ struct QuietHoursEditorView: View {
                     }
                 }
             }
-            .readableColumn()
+            .readableColumn(form: true)
             .glassForm()
             .navigationTitle(isSchool ? tr("🏫 זמן בית ספר") : tr("🌙 שעת שינה"))
             .navigationBarTitleDisplayMode(.inline)

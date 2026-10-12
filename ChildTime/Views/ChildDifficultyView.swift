@@ -88,7 +88,7 @@ struct ChildDifficultyView: View {
                 }
                 .glassRows()
             }
-            .readableColumn()
+            .readableColumn(form: true)
             .glassForm()
             .navigationTitle(tr("רמת קושי"))
             .navigationBarTitleDisplayMode(.inline)

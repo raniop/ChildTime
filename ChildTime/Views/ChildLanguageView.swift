@@ -68,7 +68,7 @@ struct ChildLanguageView: View {
                 }
                 .glassRows()
             }
-            .readableColumn()
+            .readableColumn(form: true)
             .glassForm()
             .navigationTitle(tr("שפה"))
             .navigationBarTitleDisplayMode(.inline)

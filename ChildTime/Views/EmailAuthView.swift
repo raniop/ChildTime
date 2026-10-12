@@ -101,7 +101,7 @@ struct EmailAuthView: View {
                 }
                 .glassRows()
             }
-            .readableColumn()
+            .readableColumn(form: true)
             .glassForm()
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle(tr("חשבון הורה"))

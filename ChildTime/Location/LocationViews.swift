@@ -609,7 +609,7 @@ struct PlacesListView: View {
                 } header: { Text(tr("שיתוף מיקום")) }
                 .glassRows()
             }
-            .readableColumn()
+            .readableColumn(form: true)
             .glassForm()
             .navigationTitle(tr("📍 מקומות"))
             .navigationBarTitleDisplayMode(.inline)

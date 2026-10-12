@@ -304,6 +304,21 @@ final class DisplayProbeView: UIView {
             touched = true
         }
         if touched { window.layoutIfNeeded() }
+        #if DEBUG
+        // 🧪 DEMO_INSETS=<file> — what every controller ended up with (measuring, not guessing).
+        if let path = ProcessInfo.processInfo.environment["DEMO_INSETS"] {
+            var out = "window \(window.bounds.size) safe \(window.safeAreaInsets) stripTop \(stripTop)\n"
+            forEachViewController(from: window.rootViewController) { vc in
+                guard vc.isViewLoaded else { return }
+                let f = vc.view.convert(vc.view.bounds, to: window)
+                out += "\(type(of: vc)) frame \(f) safe \(vc.view.safeAreaInsets) add \(vc.additionalSafeAreaInsets) margins \(vc.view.layoutMargins)\n"
+                if let cv = vc.view.subviews.compactMap({ $0 as? UIScrollView }).first ?? vc.view.subviews.first?.subviews.compactMap({ $0 as? UIScrollView }).first {
+                    out += "   scroll \(type(of: cv)) frame \(cv.convert(cv.bounds, to: window)) safe \(cv.safeAreaInsets) adj \(cv.adjustedContentInset) margins \(cv.layoutMargins)\n"
+                }
+            }
+            try? out.write(toFile: path, atomically: true, encoding: .utf8)
+        }
+        #endif
 
         if active, sweepTimer == nil {
             sweepTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
@@ -417,6 +432,18 @@ final class DisplayProbeView: UIView {
 struct ReadableWidthColumn: ViewModifier {
     @ObservedObject private var display = DisplayGeometry.shared
 
+    /// ↔️ On the foldable a Form keeps its LEADING margin and loses the TRAILING
+    /// one: the system counts the bar as sitting on the trailing edge (in Hebrew
+    /// too — `verticalBarEdge` says `.trailing` in every language) and lets the
+    /// bar's inset stand in for that margin. The app cancels the inset to give
+    /// pages the whole glass, so the rows ran flush into the edge on one side
+    /// and kept 20pt on the other — every settings page looked cut off
+    /// (measured 2026-10-12, Hebrew and English: rows 0…445 of 466pt; setting
+    /// UIKit's layout margins changed nothing). The margin is given back here.
+    /// Only a Form / List has the problem — a ScrollView lays out its own margins.
+    var form = false
+    private var missingTrailingMargin: CGFloat { form && display.hasBarStrip ? 20 : 0 }
+
     func body(content: Content) -> some View {
         if display.safeSize.width > DisplayGeometry.readableWidth {
             // A capped, centred frame — NOT `contentMargins(for: .scrollContent)`,
@@ -425,15 +452,17 @@ struct ReadableWidthColumn: ViewModifier {
             // at the other. This is also what iOS itself does with a Form on a
             // wide screen: one readable column in the middle.
             content
+                .padding(.trailing, missingTrailingMargin)
                 .frame(maxWidth: DisplayGeometry.readableWidth)
                 .frame(maxWidth: .infinity)
         } else {
             content
+                .padding(.trailing, missingTrailingMargin)
         }
     }
 }
 
 extension View {
-    /// See `ReadableWidthColumn`.
-    func readableColumn() -> some View { modifier(ReadableWidthColumn()) }
+    /// See `ReadableWidthColumn`. `form: true` for a Form or a List.
+    func readableColumn(form: Bool = false) -> some View { modifier(ReadableWidthColumn(form: form)) }
 }

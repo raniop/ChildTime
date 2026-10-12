@@ -134,7 +134,7 @@ struct ChildSettingsView: View {
             deviceSection(p)
             profileSection(p)
         }
-        .readableColumn()
+        .readableColumn(form: true)
         .glassForm()
     }
 
@@ -354,7 +354,7 @@ struct ChildSettingsView: View {
                 .glassRows()
             }
         }
-        .readableColumn()
+        .readableColumn(form: true)
         .glassForm()
         .settingsDoneButton()
         .alert(tr("שליטה מרחוק"), isPresented: Binding(
@@ -411,7 +411,7 @@ struct ChildSettingsView: View {
             }
             .glassRows()
         }
-        .readableColumn()
+        .readableColumn(form: true)
         .glassForm()
         // ⚠️ The confirmations live on THIS page, beside their rows. Attached to
         // the settings root underneath, the alert never came up from here —

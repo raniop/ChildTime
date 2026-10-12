@@ -81,7 +81,7 @@ struct ChildScreenTimeView: View {
                 }
                 .glassRows()
             }
-            .readableColumn()
+            .readableColumn(form: true)
             .glassForm()
             .navigationTitle(tr("זמן מסך יומי"))
             .navigationBarTitleDisplayMode(.inline)
