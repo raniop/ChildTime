@@ -110677,6 +110677,28 @@
         }
       }
     },
+    "צדקתם! כל תשובה נכונה מוסיפה %lld שניות של זמן מסך" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "صحيح! كل إجابة صحيحة تضيف %lld ثانية من وقت الشاشة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correct! Every right answer adds %lld seconds of screen time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Верно! Каждый правильный ответ добавляет %lld сек. экранного времени"
+          }
+        }
+      }
+    },
     "צדקתם! כל תשובה נכונה מוסיפה %lld שניות של זמן מסך ⏱" : {
       "localizations" : {
         "ar" : {
