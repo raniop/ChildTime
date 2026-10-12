@@ -31810,6 +31810,28 @@
         }
       }
     },
+    "במסך ״איך בא לך לשחק?״ השאלות הן עכשיו משחק כמו כל השאר: ״חידון״, ראשון ברשת ועם ציור. גם ״הפתעה״ נראה כמו משחק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في شاشة «كيف تريد أن تلعب؟» أصبحت الأسئلة لعبة مثل البقية: «مسابقة»، الأولى في الشبكة ومع صورة. و«مفاجأة» تبدو لعبة أيضًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On the \"How do you want to play?\" screen the questions are now a game like all the others: \"Quiz\", first in the grid, with a picture. \"Surprise\" looks like a game too"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На экране «Как хочешь играть?» вопросы теперь выглядят как игра: «Викторина», первая в списке и с картинкой. «Сюрприз» тоже выглядит как игра"
+          }
+        }
+      }
+    },
     "במסכים של ילדה, טופי פונה אליה בלשון נקבה — בפרסים, ברמזים ובמשחקים" : {
       "localizations" : {
         "ar" : {
@@ -125395,6 +125417,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "«Доступ к истории использования» помогает Tofy блокировать сразу, даже после перезагрузки устройства. Tofy не сохраняет и не отправляет эти данные."
+          }
+        }
+      }
+    },
+    "״חידון״ במקום ״שאלות רגילות״" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«مسابقة» بدل «أسئلة عادية»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\"Quiz\" instead of \"Regular questions\""
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Викторина» вместо «Обычных вопросов»"
           }
         }
       }

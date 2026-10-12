@@ -57,7 +57,9 @@ enum WhatsNewContent {
 
         // 2026.10.9 — after Apple approved 2026.10.8 (build 235) on 2026-10-12:
         // the fixes that waited in main for that approval.
-        Release(build: 236, version: "2026.10.9", headline: tr("הגדרות פשוטות יותר, ומותאם ל־iPhone Duo"), items: [
+        Release(build: 237, version: "2026.10.9", headline: tr("הגדרות פשוטות יותר, ומותאם ל־iPhone Duo"), items: [
+            Item(emoji: "🧠", title: tr("״חידון״ במקום ״שאלות רגילות״"),
+                 line: tr("במסך ״איך בא לך לשחק?״ השאלות הן עכשיו משחק כמו כל השאר: ״חידון״, ראשון ברשת ועם ציור. גם ״הפתעה״ נראה כמו משחק")),
             Item(emoji: "⚙️", title: tr("חץ חזרה אחד בהגדרות"),
                  line: tr("בעמודים הפנימיים של ההגדרות יש עכשיו רק חץ חזרה. ״סיום״ נשאר בעמוד הראשון, והחלון נסגר גם במשיכה למטה")),
             Item(emoji: "📱", title: tr("מותאם ל־iPhone Duo"),
