@@ -67,6 +67,9 @@ final class ShieldManager: ObservableObject {
     /// `automaticRequestExhausted`. The default is the SAFE one: a new caller that
     /// forgets the argument cannot put Apple's sheet in front of a child again.
     func requestAuthorizationIfNeeded(userInitiated: Bool = false) async {
+        // 🎬 The demo tour asks the system for nothing — locking real apps
+        // belongs to a real family (see `DemoTour`).
+        guard !DemoTour.isOn else { return }
         refreshStatus()
         print("[ShieldManager] Status before request: \(authStatusText)")
         guard authCenter.authorizationStatus != .approved else {
