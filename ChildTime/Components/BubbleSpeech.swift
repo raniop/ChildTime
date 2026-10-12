@@ -20,6 +20,9 @@ struct BubbleSpeech: View {
     /// Take exactly the words' own width (one line) instead of stretching to
     /// what is offered — for a bubble that must touch the one who speaks.
     var hugs: Bool = false
+    /// The widest the bubble wraps at. 260 everywhere; the quiz's buddy asks
+    /// for more when a long line has the room beside him.
+    var maxWidth: CGFloat = 260
 
     @State private var shownWords: Int = 0
     @Environment(\.layoutDirection) private var layoutDirection
@@ -62,7 +65,7 @@ struct BubbleSpeech: View {
                 // deterministic (RTL would mirror it to the wrong side).
                 .environment(\.layoutDirection, .leftToRight)
         }
-        .frame(maxWidth: hugs ? nil : 260)
+        .frame(maxWidth: hugs ? nil : maxWidth)
         .fixedSize(horizontal: hugs, vertical: false)
         .onAppear { startTyping() }
         .onChangeCompat(of: text) { _, _ in startTyping() }

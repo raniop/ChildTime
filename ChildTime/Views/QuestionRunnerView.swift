@@ -439,7 +439,7 @@ struct QuestionRunnerView: View {
         guard tour.firstTime(correct ? .right : .wrong) else { return }
         let line: String
         if correct {
-            line = seconds > 0 ? tr("צדקתם! כל תשובה נכונה מוסיפה \(seconds) שניות של זמן מסך ⏱") : tr("צדקתם!")
+            line = seconds > 0 ? tr("צדקתם! כל תשובה נכונה מוסיפה \(seconds) שניות של זמן מסך") : tr("צדקתם!")
         } else {
             line = seconds > 0 ? tr("טעיתם, לא נורא. הזמן לא יורד, אבל התשובה הנכונה הבאה תיתן \(seconds) שניות פחות.")
                                : tr("טעיתם, לא נורא. הזמן שנצבר לא יורד.")
@@ -2072,13 +2072,19 @@ private struct ShelfBuddy: View {
                 // Hugs its words: a short "כן!" used to sit centred in a 230pt box,
                 // far from the buddy (Rani, 2026-10-10). One line when it fits,
                 // wrapped at 230 when it doesn't. And no typewriter here.
+                // A LONG line (Tofy explaining an answer in the first run, the
+                // daily-maximum message, a hint) takes all the room there is
+                // beside him, so it reads in fewer lines (Rani, 2026-10-12).
+                let wrap: CGFloat = text.count > 36
+                    ? min(320, max(230, DisplayGeometry.shared.safeSize.width - size - 28))
+                    : 230
                 ViewThatFits(in: .horizontal) {
                     BubbleSpeech(text: text, pointDirection: rtl ? .trailing : .leading, animated: false, hugs: true)
-                    BubbleSpeech(text: text, pointDirection: rtl ? .trailing : .leading, animated: false)
-                        .frame(width: 230)
+                    BubbleSpeech(text: text, pointDirection: rtl ? .trailing : .leading, animated: false, maxWidth: wrap)
+                        .frame(width: wrap)
                 }
                     .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: 230, alignment: .leading)
+                    .frame(maxWidth: wrap, alignment: .leading)
                     .id(text)
                     .transition(.scale(scale: 0.85, anchor: .leading).combined(with: .opacity))
                     // A short line sits at the buddy's middle. A long one (the
