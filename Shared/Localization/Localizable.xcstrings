@@ -31920,6 +31920,28 @@
         }
       }
     },
+    "בעמודים הפנימיים של ההגדרות יש עכשיו רק חץ חזרה. ״סיום״ נשאר בעמוד הראשון, והחלון נסגר גם במשיכה למטה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الصفحات الداخلية في الإعدادات تعرض الآن سهم الرجوع فقط. يبقى «تم» في الصفحة الأولى، ويمكن إغلاق النافذة أيضًا بسحبها إلى الأسفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inner Settings pages now show only a back arrow. \"Done\" stays on the first page, and you can also close the window by pulling it down"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На внутренних страницах настроек теперь только стрелка «Назад». «Готово» осталось на первой странице, а окно можно закрыть и потянув его вниз"
+          }
+        }
+      }
+    },
     "בפעם הראשונה, נקודה על כל כפתור במסך הבית — אצלכם ואצל הילד. אפשר להציג שוב מההגדרות" : {
       "localizations" : {
         "ar" : {
@@ -46809,6 +46831,28 @@
         }
       }
     },
+    "הגדרות פשוטות יותר, ומותאם לאייפון המתקפל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إعدادات أبسط، وملاءمة أفضل للآيفون القابل للطي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simpler settings, and a better fit for the foldable iPhone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройки проще и лучше подходят для складного iPhone"
+          }
+        }
+      }
+    },
     "הגדרות של %@" : {
       "localizations" : {
         "ar" : {
@@ -47206,6 +47250,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Эти настройки действуют только на этом устройстве"
+          }
+        }
+      }
+    },
+    "ההגדרות, מתנת הדקות ובחירת הרקע מסודרים נכון במסך הסגור ובמסך הפתוח, והמעבר ביניהם חלק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإعدادات ودقائق الهدية واختيار الخلفية مرتبة بشكل صحيح في الشاشة المغلقة والمفتوحة، والانتقال بينهما سلس"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings, gift minutes and the background picker are laid out properly on the closed and the open screen, and switching between them is smooth"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройки, подарочные минуты и выбор фона правильно расположены на закрытом и открытом экране, а переход между ними плавный"
           }
         }
       }
@@ -62164,6 +62230,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "חץ חזרה אחד בהגדרות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سهم رجوع واحد في الإعدادات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One back arrow in Settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Одна стрелка «Назад» в настройках"
           }
         }
       }
@@ -88337,6 +88425,28 @@
         }
       }
     },
+    "מותאם לאייפון המתקפל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ملائم للآيفون القابل للطي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fits the foldable iPhone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подходит для складного iPhone"
+          }
+        }
+      }
+    },
     "מותאם לגיל" : {
       "localizations" : {
         "ar" : {
@@ -91608,6 +91718,28 @@
         }
       }
     },
+    "מתנת דקות מדויקת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دقائق هدية دقيقة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accurate gift minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Точные подарочные минуты"
+          }
+        }
+      }
+    },
     "מתקדם" : {
       "localizations" : {
         "ar" : {
@@ -94535,6 +94667,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Управление Экранным временем"
+          }
+        }
+      }
+    },
+    "ניסוחים מתוקנים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تصحيحات في الصياغة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wording fixes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Исправления формулировок"
           }
         }
       }
@@ -122806,6 +122960,28 @@
         }
       }
     },
+    "תיקוני כתיב וניסוח במסכי ההורים: הדוח, עולמות פעילים ובחירת השפה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تصحيحات في الإملاء والصياغة في شاشات الأهل: التقرير، العوالم النشطة واختيار اللغة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spelling and wording fixes on the parent screens: the report, active worlds and the language picker"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Исправления орфографии и формулировок на экранах родителей: отчёт, активные миры и выбор языка"
+          }
+        }
+      }
+    },
     "תיקנו תקלה נדירה שבה במכשיר משותף ההתקדמות של ילד אחד יכלה להיכתב אצל אח או אחות. עכשיו זה פשוט לא אפשרי" : {
       "localizations" : {
         "ar" : {
@@ -123415,6 +123591,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Более точное «с»"
+          }
+        }
+      }
+    },
+    "״נתתם היום״ מציג את הסכום הנכון גם כשהחלון נשאר פתוח, והחלון כולו נכנס גם במסך קטן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«أعطيتم اليوم» يعرض المجموع الصحيح حتى عندما تبقى النافذة مفتوحة، والنافذة كلها تظهر حتى على شاشة صغيرة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\"Given today\" shows the right total even when the window stays open, and the whole window fits on a small screen too"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Подарено сегодня» показывает верную сумму, даже если окно остаётся открытым, и всё окно помещается и на маленьком экране"
           }
         }
       }

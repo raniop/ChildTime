@@ -55,6 +55,19 @@ enum WhatsNewContent {
     /// notes were dated — the first release, as one entry.
     static let releases: [Release] = [
 
+        // 2026.10.9 — after Apple approved 2026.10.8 (build 235) on 2026-10-12:
+        // the fixes that waited in main for that approval.
+        Release(build: 236, version: "2026.10.9", headline: tr("הגדרות פשוטות יותר, ומותאם לאייפון המתקפל"), items: [
+            Item(emoji: "⚙️", title: tr("חץ חזרה אחד בהגדרות"),
+                 line: tr("בעמודים הפנימיים של ההגדרות יש עכשיו רק חץ חזרה. ״סיום״ נשאר בעמוד הראשון, והחלון נסגר גם במשיכה למטה")),
+            Item(emoji: "📱", title: tr("מותאם לאייפון המתקפל"),
+                 line: tr("ההגדרות, מתנת הדקות ובחירת הרקע מסודרים נכון במסך הסגור ובמסך הפתוח, והמעבר ביניהם חלק")),
+            Item(emoji: "💝", title: tr("מתנת דקות מדויקת"),
+                 line: tr("״נתתם היום״ מציג את הסכום הנכון גם כשהחלון נשאר פתוח, והחלון כולו נכנס גם במסך קטן")),
+            Item(emoji: "✏️", title: tr("ניסוחים מתוקנים"),
+                 line: tr("תיקוני כתיב וניסוח במסכי ההורים: הדוח, עולמות פעילים ובחירת השפה")),
+        ]),
+
         // 2026.10.8 in one list, the most important first (Rani approved the
         // order; 211, 212 and 220–234 were builds of the same version — 235
         // carries them all, so everything rides on 235).
