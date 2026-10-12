@@ -164,6 +164,7 @@ struct ParentLocationView: View {
         SettingsStack(embedded: embedded) {
             ScrollView {
                 VStack(spacing: 14) {
+                    SettingsBandRow(title: tr("איפה הילדים"), active: embedded, above: DisplayProbeView.minimumTopMargin + 16)
                     FamilyMapView(kids: mapKids, places: places, focus: mapFocus, focusSpan: 0.012, fitAll: focusChildID == nil)
                         .frame(height: 340)
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -186,6 +187,7 @@ struct ParentLocationView: View {
             .background(GlassBackdrop())
             .navigationTitle(tr("איפה הילדים"))
             .navigationBarTitleDisplayMode(.inline)
+            .settingsBand(active: embedded)
             .toolbar {
                 if !embedded {
                     ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) { Button(tr("סיום")) { close() } }

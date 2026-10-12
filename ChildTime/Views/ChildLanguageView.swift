@@ -35,6 +35,7 @@ struct ChildLanguageView: View {
     var body: some View {
         SettingsStack(embedded: embedded) {
             Form {
+                SettingsBandHeader(title: tr("שפה"), active: embedded)
                 Section {
                     Text(tr("בחרו באיזו שפה טופי יופיע במכשיר של \(profile?.name ?? tr("הילד")). השינוי מגיע למכשיר בסנכרון הבא."))
                         .font(.footnote)
@@ -72,6 +73,7 @@ struct ChildLanguageView: View {
             .glassForm()
             .navigationTitle(tr("שפה"))
             .navigationBarTitleDisplayMode(.inline)
+            .settingsBand(active: embedded)
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
                 // Pushed inside the settings window the page has ONE button, the back

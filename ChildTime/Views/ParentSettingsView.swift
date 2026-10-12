@@ -78,6 +78,8 @@ struct ParentSettingsView: View {
             // form was "a pile nobody would open"). Tofy+ lives on the home.
             ScrollView {
                 VStack(spacing: 12) {
+                    SettingsBandRow(title: tr("הגדרות"), done: { dismiss() },
+                                    above: DisplayProbeView.minimumTopMargin + AppSpacing.sm)
                     // 🧒 Whose settings? A child's first — that is what parents come
                     // here for — then everything that is about the family as a whole.
                     if let childSettings, !orderedChildren.isEmpty {
@@ -164,6 +166,7 @@ struct ParentSettingsView: View {
             .environment(\.colorScheme, .dark)
             .navigationTitle(tr("הגדרות"))
             .navigationBarTitleDisplayMode(.inline)
+            .settingsBand()
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
                 if !railHost.hasRail {
@@ -348,6 +351,8 @@ struct ParentSettingsView: View {
     private var lookAndLanguagePage: some View {
         ScrollView {
             VStack(spacing: 12) {
+                SettingsBandRow(title: multilingual ? tr("מראה ושפה") : tr("רקע"),
+                                above: DisplayProbeView.minimumTopMargin + AppSpacing.sm)
                 menuRow("🎨", tr("רקע"), backdropSummary) {
                     BackdropPickerView(owner: .parent).navigationBarBackButtonHidden(true)
                 }
@@ -364,6 +369,7 @@ struct ParentSettingsView: View {
         .environment(\.colorScheme, .dark)
         .navigationTitle(multilingual ? tr("מראה ושפה") : tr("רקע"))
         .navigationBarTitleDisplayMode(.inline)
+        .settingsBand()
     }
 
     private func menuHeading(_ title: String) -> some View {
@@ -399,11 +405,12 @@ struct ParentSettingsView: View {
     }
 
     private func subScreen<C: View>(_ title: String, @ViewBuilder _ content: () -> C) -> some View {
-        Form { content() }
+        Form { SettingsBandHeader(title: title); content() }
             .readableColumn(form: true)
             .glassForm()
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
+            .settingsBand()
     }
 
     /// Only on an iPad (the device, not the size class) that is a parent device

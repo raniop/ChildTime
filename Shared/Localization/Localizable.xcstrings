@@ -30229,28 +30229,6 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "اختاروا العوالم المفتوحة لـ%@. العالم المُطفأ يختفي من الشاشة ولا يحصل الطفل على أسئلة منه. يُزامَن التغيير تلقائيًا مع جهاز الطفل."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose which worlds are open for %@. A world that is off disappears from the screen, and the child gets no questions from it. The change syncs to the child's device automatically."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выберите, какие миры открыты для %@. Выключенный мир исчезает с экрана, и ребёнок не получает из него вопросов. Изменение автоматически синхронизируется с устройством ребёнка."
-          }
-        }
-      }
-    },
-    "בחרו אילו עולמות פתוחים עבור %@. עולם כיבוי נעלם מהמסך, והילד לא מקבל ממנו שאלות. השינוי מסתנכרן אוטומטית למכשיר של הילד." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
             "value" : "اختاروا العوالم المفتوحة أمام %@. العالم المغلق يختفي من الشاشة، ولا يتلقّى الطفل منه أسئلة. يُزامَن التغيير تلقائيًا إلى جهاز الطفل."
           }
         },

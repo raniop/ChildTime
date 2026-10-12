@@ -27,8 +27,9 @@ struct ChildWorldsView: View {
     var body: some View {
         SettingsStack(embedded: embedded) {
             Form {
+                SettingsBandHeader(title: tr("עולמות פעילים"), active: embedded)
                 Section {
-                    Text(tr("בחרו אילו עולמות פתוחים עבור \(profile?.name ?? tr("הילד")). עולם כיבוי נעלם מהמסך, והילד לא מקבל ממנו שאלות. השינוי מסתנכרן אוטומטית למכשיר של הילד."))
+                    Text(tr("בחרו אילו עולמות פתוחים עבור \(profile?.name ?? tr("הילד")). עולם כבוי נעלם מהמסך, והילד לא מקבל ממנו שאלות. השינוי מסתנכרן אוטומטית למכשיר של הילד."))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -63,6 +64,7 @@ struct ChildWorldsView: View {
             .glassForm()
             .navigationTitle(tr("עולמות פעילים"))
             .navigationBarTitleDisplayMode(.inline)
+            .settingsBand(active: embedded)
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
                 // Pushed inside the settings window the page has ONE button, the back

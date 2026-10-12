@@ -29,6 +29,7 @@ struct QuietHoursEditorView: View {
     var body: some View {
         SettingsStack(embedded: embedded) {
             Form {
+                SettingsBandHeader(title: isSchool ? tr("🏫 זמן בית ספר") : tr("🌙 שעת שינה"), active: embedded)
                 Section {
                     Toggle(isOn: $window.enabled) {
                         Text(isSchool ? tr("זמן בית ספר פעיל") : tr("שעת שינה פעילה"))
@@ -88,6 +89,7 @@ struct QuietHoursEditorView: View {
             .glassForm()
             .navigationTitle(isSchool ? tr("🏫 זמן בית ספר") : tr("🌙 שעת שינה"))
             .navigationBarTitleDisplayMode(.inline)
+            .settingsBand(active: embedded)
             .toolbar {
                 // Pushed inside the settings window the page has ONE button, the back
                 // arrow — "סיום" beside it read as a second way out (Rani, 2026-10-12).

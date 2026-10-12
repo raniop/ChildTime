@@ -34,6 +34,7 @@ struct ChildScreenTimeView: View {
     var body: some View {
         SettingsStack(embedded: embedded) {
             Form {
+                SettingsBandHeader(title: tr("זמן מסך יומי"), active: embedded)
                 Section {
                     Text(tr("בחרו כמה דקות מסך ביום עבור \(profile?.name ?? tr("הילד")). השינוי מסתנכרן אוטומטית למכשיר של הילד."))
                         .font(.footnote)
@@ -85,6 +86,7 @@ struct ChildScreenTimeView: View {
             .glassForm()
             .navigationTitle(tr("זמן מסך יומי"))
             .navigationBarTitleDisplayMode(.inline)
+            .settingsBand(active: embedded)
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
                 // Pushed inside the settings window the page has ONE button, the back

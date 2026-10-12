@@ -102,6 +102,7 @@ struct ChildSettingsView: View {
             }
             .navigationTitle(profile.map { tr("הגדרות של \($0.name)") } ?? "")
             .navigationBarTitleDisplayMode(.inline)
+            .settingsBand(active: embedded)
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
                 // Pushed inside the settings window the page has ONE button, the back
@@ -131,6 +132,7 @@ struct ChildSettingsView: View {
         // devices · profile. Every row slides its page IN — nothing closes this
         // window to open another.
         Form {
+            SettingsBandHeader(title: tr("הגדרות של \(p.name)"), active: embedded)
             screenTimeSection(p)
             learningSection(p)
             deviceSection(p)
@@ -297,6 +299,7 @@ struct ChildSettingsView: View {
     private func devicesPage(_ p: Profile) -> some View {
         let devices = household.devicesByChild[p.id.uuidString] ?? []
         return Form {
+            SettingsBandHeader(title: tr("המכשירים של \(p.name)"))
             ForEach(devices) { d in
                 Section {
                     // Not a PARENT's phone in Kid Mode: that row goes away by itself
@@ -377,6 +380,7 @@ struct ChildSettingsView: View {
             Text(tr("המכשיר יתנתק אוטומטית מהילד ויחזור למצב התחלתי (כאילו הותקן מחדש). ההתקדמות בענן נשמרת — כדי לחבר אותו שוב (או לילד אחר), סרקו בו מחדש את ה-QR של הילד הנכון."))
         }
         .navigationTitle(tr("המכשירים של \(p.name)"))
+        .settingsBand()
     }
 
     private static func relative(_ d: Date) -> String {
@@ -390,6 +394,7 @@ struct ChildSettingsView: View {
     /// friends, questions-only, a data refresh, reset and deletion.
     private func morePage(_ p: Profile) -> some View {
         Form {
+            SettingsBandHeader(title: tr("עוד הגדרות"))
             Section {
                 pinRow(p)
                 row("👫", tr("חברים")) { friends = p }
@@ -451,6 +456,7 @@ struct ChildSettingsView: View {
         }
         .navigationTitle(tr("עוד הגדרות"))
         .navigationBarTitleDisplayMode(.inline)
+        .settingsBand()
         .environment(\.layoutDirection, .app)
     }
 

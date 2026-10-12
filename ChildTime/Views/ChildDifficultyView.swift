@@ -32,6 +32,7 @@ struct ChildDifficultyView: View {
     var body: some View {
         SettingsStack(embedded: embedded) {
             Form {
+                SettingsBandHeader(title: tr("רמת קושי"), active: embedded)
                 Section {
                     Text(tr("בחרו רמת קושי לכל נושא עבור \(profile?.name ?? tr("הילד")). השינוי מסתנכרן אוטומטית למכשיר של הילד."))
                         .font(.footnote)
@@ -92,6 +93,7 @@ struct ChildDifficultyView: View {
             .glassForm()
             .navigationTitle(tr("רמת קושי"))
             .navigationBarTitleDisplayMode(.inline)
+            .settingsBand(active: embedded)
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
                 // Pushed inside the settings window the page has ONE button, the back
