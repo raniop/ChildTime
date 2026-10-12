@@ -15498,6 +15498,28 @@
         }
       }
     },
+    "30 יום של טופי+ במתנה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 يومًا من Tofy+ مجانًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 days of Tofy+ free"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 дней Tofy+ в подарок"
+          }
+        }
+      }
+    },
     "30 כּוֹכָבִים" : {
       "localizations" : {
         "ar" : {
@@ -29645,6 +29667,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "В настройках каждого ребёнка выберите дни и часы, когда игровые минуты нельзя открыть. Начатая игра останавливается, а оставшиеся минуты возвращаются в кошелёк"
+          }
+        }
+      }
+    },
+    "בהדגמה אפשר להסתכל, לתת מתנת דקות ולשחק כמו הילד. את השאר עושים במשפחה שלכם, וההרשמה לוקחת כדקה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في العرض التجريبي يمكنكم التجوّل، وإهداء دقائق، واللعب كما يلعب الطفل. أمّا الباقي فيتمّ في عائلتكم، والتسجيل يستغرق نحو دقيقة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In the demo you can look around, give gift minutes and play as the child. Everything else happens in your own family, and signing up takes about a minute."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В демо можно осмотреться, подарить минуты и поиграть как ребёнок. Всё остальное — уже в вашей семье, а регистрация занимает около минуты."
           }
         }
       }
@@ -47276,6 +47320,28 @@
         }
       }
     },
+    "ההדגמה נמחקת מהמכשיר, ומתחילים נקי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يُحذف العرض التجريبي من الجهاز، وتبدأون من جديد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The demo is erased from this device, and you start fresh"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Демо удаляется с устройства, и вы начинаете с чистого листа"
+          }
+        }
+      }
+    },
     "ההדרכה תוצג שוב במסך הבית ✓" : {
       "localizations" : {
         "ar" : {
@@ -57298,6 +57364,28 @@
         }
       }
     },
+    "זה נפתח אחרי ההרשמה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يُفتح هذا بعد التسجيل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This opens after you sign up"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это откроется после регистрации"
+          }
+        }
+      }
+    },
     "זה קוד של הורה" : {
       "localizations" : {
         "ar" : {
@@ -61688,6 +61776,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Назад"
+          }
+        }
+      }
+    },
+    "חזרה להורים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "العودة إلى الأهل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back to parents"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Назад к родителям"
           }
         }
       }
@@ -66943,6 +67053,28 @@
         }
       }
     },
+    "יציאה מההדגמה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخروج من العرض التجريبي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leave the demo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выйти из демо"
+          }
+        }
+      }
+    },
     "יציאה ממצב ילד" : {
       "localizations" : {
         "ar" : {
@@ -67823,6 +67955,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "почки"
+          }
+        }
+      }
+    },
+    "כְּנִיסָה לְהַדְגָּמָה · בְּלִי הַרְשָׁמָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دخول إلى العرض التجريبي · بدون تسجيل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open the demo · no sign-up"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть демо · без регистрации"
           }
         }
       }
@@ -78865,6 +79019,28 @@
         }
       }
     },
+    "להירשם ולהתחיל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سجّلوا وابدأوا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign up and start"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зарегистрироваться и начать"
+          }
+        }
+      }
+    },
     "להכין את התיק לבית הספר" : {
       "localizations" : {
         "ar" : {
@@ -78928,6 +79104,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "продолжить"
+          }
+        }
+      }
+    },
+    "להמשיך בהדגמה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "متابعة العرض التجريبي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep exploring the demo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продолжить демо"
           }
         }
       }
@@ -79214,6 +79412,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Полить цветы"
+          }
+        }
+      }
+    },
+    "להתחיל עם הילדים שלכם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ابدأوا مع أطفالكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start with your own kids"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начать со своими детьми"
           }
         }
       }
@@ -87785,6 +88005,28 @@
         }
       }
     },
+    "מה שראיתם הוא משפחה לדוגמה. ההרשמה לוקחת כדקה, ואחריה מוסיפים את הילדים ומתחילים." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما رأيتموه هو عائلة نموذجية. التسجيل يستغرق نحو دقيقة، وبعده تضيفون أطفالكم وتبدأون."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you saw is a sample family. Signing up takes about a minute, then you add your kids and start."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "То, что вы видели, — семья-пример. Регистрация занимает около минуты, после неё вы добавляете детей и начинаете."
+          }
+        }
+      }
+    },
     "מהרגע שמאשרים זמן מסך בטלפון של הילד, הכל נעול חוץ מטופי עד שמרוויחים זמן — גם אפליקציה שיתקין מחר. בלי לבחור או לסמן כלום" : {
       "localizations" : {
         "ar" : {
@@ -89392,6 +89634,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Справа налево, как на иврите"
+          }
+        }
+      }
+    },
+    "מיקה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ميكا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mika"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мика"
           }
         }
       }
@@ -91316,6 +91580,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Семья Голан"
+          }
+        }
+      }
+    },
+    "משפחת טופי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عائلة Tofy"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Tofy family"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Семья Tofy"
           }
         }
       }
@@ -103811,6 +104097,28 @@
         }
       }
     },
+    "עכשיו עם הילדים שלכם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "والآن مع أطفالكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Now with your own kids"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Теперь — со своими детьми"
+          }
+        }
+      }
+    },
     "עלייה לרמה %lld" : {
       "localizations" : {
         "ar" : {
@@ -114061,6 +114369,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Хочешь добавить фото того, что сделал? 📸"
+          }
+        }
+      }
+    },
+    "רוֹצִים רַק לִרְאוֹת אֵיךְ זֶה עוֹבֵד?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تريدون فقط أن تروا كيف يعمل؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Just want to see how it works?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хотите просто посмотреть, как это работает?"
           }
         }
       }
@@ -127410,6 +127740,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🎨 Цвета"
+          }
+        }
+      }
+    },
+    "🎬 זו הדגמה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎬 هذا عرض تجريبي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎬 This is a demo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎬 Это демо"
           }
         }
       }
