@@ -113,6 +113,14 @@ struct DemoTourTests {
         // The mark a later sign-in would upload a "created here" child by.
         #expect(ids.allSatisfy { !ProfileStore.shared.wasCreatedHere($0) })
         #expect(leftoverKeys(for: ids).isEmpty)             // …and now are not
+        // Found by listing a device after leaving: the settings' copy of the
+        // active child — which the old one-child migration would turn back
+        // into a child at the next launch — and the widgets' copy of the family.
+        #expect(ParentSettings.shared.childName.isEmpty)
+        #expect(ParentSettings.shared.childGender == nil)
+        #expect(UserDefaults.standard.bool(forKey: "profiles.didMigrateLegacyKid"))
+        #expect(AppGroup.defaults.object(forKey: "widget.family.v1") == nil)
+        #expect(AppGroup.defaults.object(forKey: "widget.kid.v1") == nil)
         #expect(ProgressStore.shared.stars == 0)
         #expect(ProgressStore.shared.answeredToday == 0)
         #expect(ids.allSatisfy { HouseholdManager.shared.devicesByChild[$0.uuidString] == nil })

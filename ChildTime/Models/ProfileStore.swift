@@ -349,6 +349,9 @@ final class ProfileStore: ObservableObject {
         // updates is not allowed" warning. The equality guards also skip
         // needless publishes when nothing actually changed.
         DispatchQueue.main.async {
+            // Still the active child by the time this runs? A child removed in
+            // the same breath (a demo tour that ended) must not be copied in.
+            guard self.activeID == p.id else { return }
             let s = ParentSettings.shared
             if s.childName != p.name { s.childName = p.name }
             if s.childGender != p.gender { s.childGender = p.gender }

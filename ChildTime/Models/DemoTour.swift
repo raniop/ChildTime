@@ -1,6 +1,9 @@
 import Foundation
 import Combine
 import UserNotifications
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 #if canImport(FirebaseAuth)
 import FirebaseAuth
 #endif
@@ -33,6 +36,10 @@ final class DemoTour: ObservableObject {
     private static let activeKey = "demoTour.active"
     private static let childIDsKey = "demoTour.childIDs"
     private static let signUpKey = "demoTour.signUpNext"
+    /// The children of a tour that has ended — swept for once more at the
+    /// next launch (a store that saves a beat late can write one of their
+    /// keys back after the sweep on the way out).
+    private static let sweepKey = "demoTour.sweepIDs"
 
     /// Read from every thread and from other singletons' `init` (through
     /// `AppInfo.isDemoRun` and `HouseholdManager.skipsCloudSync`), so it is a
@@ -172,7 +179,16 @@ final class DemoTour: ObservableObject {
         DataExporter.wipeLocalData()
         ProgressStore.shared.resetAll()
         Self.removeLeftoverKeys(for: ids)
+        Self.forgetMirroredChild()
         UserDefaults.standard.removeObject(forKey: Self.childIDsKey)
+        UserDefaults.standard.set(ids.map(\.uuidString), forKey: Self.sweepKey)
+        // Measured on a device after leaving: a store that saves a beat late
+        // wrote one child's (blank) slot back. Sweep once more when it has.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            guard !Self.isOn else { return }
+            Self.removeLeftoverKeys(for: ids)
+            if ProfileStore.shared.profiles.isEmpty { Self.forgetMirroredChild() }
+        }
         // Nothing the tour's screens may have scheduled about its children
         // fires later. (Off the main thread: this call waits on the system.)
         DispatchQueue.global(qos: .utility).async {
@@ -192,6 +208,26 @@ final class DemoTour: ObservableObject {
                 store.removeObject(forKey: key)
             }
         }
+    }
+
+    /// What the tour left OUTSIDE its children's own keys (found by listing a
+    /// device's storage after leaving it):
+    ///  • the settings' copy of "the active child" (name, gender, photo) — the
+    ///    old one-child migration reads it at the next launch and would bring
+    ///    a child called דנה back, for the first sign-in to upload;
+    ///  • the home-screen widgets' copy of the family.
+    /// Only ever called while this device holds no child at all.
+    private static func forgetMirroredChild() {
+        let s = ParentSettings.shared
+        if !s.childName.isEmpty { s.childName = "" }
+        if s.childGender != nil { s.childGender = nil }
+        if s.childPhotoData != nil { s.childPhotoData = nil }
+        // …and that migration has nothing left to do here in any case.
+        UserDefaults.standard.set(true, forKey: "profiles.didMigrateLegacyKid")
+        for key in ["widget.kid.v1", "widget.family.v1"] { AppGroup.defaults.removeObject(forKey: key) }
+        #if canImport(WidgetKit)
+        WidgetCenter.shared.reloadAllTimelines()
+        #endif
     }
 
     /// True once, right after "להירשם ולהתחיל" — the first screen then goes
@@ -217,11 +253,18 @@ final class DemoTour: ObservableObject {
             }
             return
         }
+        // The late sweep for a tour that ended properly (only keys that carry
+        // one of ITS children's ids — a real family's are never touched).
+        if let swept = UserDefaults.standard.stringArray(forKey: sweepKey) {
+            removeLeftoverKeys(for: Set(swept.compactMap(UUID.init(uuidString:))))
+            UserDefaults.standard.removeObject(forKey: sweepKey)
+        }
         guard let raw = UserDefaults.standard.stringArray(forKey: childIDsKey), !raw.isEmpty else { return }
         let ids = Set(raw.compactMap(UUID.init(uuidString:)))
         ids.forEach { ProfileStore.shared.purgeDemoProfile($0) }
         ProgressStore.shared.resetAll()
         removeLeftoverKeys(for: ids)
+        if ProfileStore.shared.profiles.isEmpty { forgetMirroredChild() }
         UserDefaults.standard.removeObject(forKey: childIDsKey)
     }
 }
