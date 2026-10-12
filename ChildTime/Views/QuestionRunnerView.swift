@@ -438,7 +438,12 @@ struct QuestionRunnerView: View {
         tour.noteAnswer()
         guard tour.firstTime(correct ? .right : .wrong) else { return }
         let line: String
-        if correct {
+        if display.isShort {
+            // A short screen (the closed foldable): the full sentence grew up
+            // over the lower answers, so he says the short of it.
+            line = correct ? (seconds > 0 ? tr("צדקתם! +\(seconds) שניות של זמן מסך") : tr("צדקתם!"))
+                           : tr("טעיתם, לא נורא. הזמן לא יורד.")
+        } else if correct {
             line = seconds > 0 ? tr("צדקתם! כל תשובה נכונה מוסיפה \(seconds) שניות של זמן מסך") : tr("צדקתם!")
         } else {
             line = seconds > 0 ? tr("טעיתם, לא נורא. הזמן לא יורד, אבל התשובה הנכונה הבאה תיתן \(seconds) שניות פחות.")
