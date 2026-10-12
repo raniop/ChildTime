@@ -57341,6 +57341,28 @@
         }
       }
     },
+    "זה המסך של הילד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذه شاشة الطفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is your child's screen"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это экран ребёнка"
+          }
+        }
+      }
+    },
     "זה לוקח יותר מהרגיל. בדקו שיש חיבור לאינטרנט — אנחנו ממשיכים לנסות לבד." : {
       "localizations" : {
         "ar" : {
@@ -80403,6 +80425,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Нажмите на обновление, чтобы увидеть, что в нём изменилось"
+          }
+        }
+      }
+    },
+    "לחצו על עולם ונסו לענות על כמה שאלות, בדיוק כמו הילדים." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اضغطوا على عالم وجرّبوا الإجابة عن بضعة أسئلة، تمامًا مثل الأطفال."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap a world and try answering a few questions, just like the kids."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите на мир и попробуйте ответить на несколько вопросов — как дети."
           }
         }
       }
