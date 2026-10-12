@@ -27,6 +27,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -38,6 +39,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -207,41 +210,68 @@ internal fun WorldGameChooserScreen(world: PlayWorld, onPlayQuestions: () -> Uni
                     if (preReader) PreReaderSpeakButton(q, if (m.compact) 44.dp else 54.dp)
                 }
             }
-            // ── 📝 Regular questions ──
-            val settings = KidSession.engine()?.settings
-            val lines = if (world.isBonus) listOf(
-                "💪 " + tr("רַק שְׁאֵלוֹת עֲנָק — קָשׁוֹת בִּמְיוּחָד, מִכָּל הַנּוֹשְׂאִים!"),
-                "🎮 " + tr("דַּקּוֹת כְּפוּלוֹת: כָּל %lld נְכוֹנוֹת = %lld דַּקּוֹת מִשְׂחָק", maxOf(1, (settings?.batchAnswers ?: 10) / 2), settings?.batchMinutes ?: 4),
-            ) else listOf(
-                "🎁 " + tr("%lld שְׁאֵלוֹת → קוּפְסַת הַפְתָּעָה", settings?.questionsPerSession ?: 15),
-                "🎮 " + tr("כָּל %lld נְכוֹנוֹת = %lld דַּקּוֹת מִשְׂחָק", settings?.batchAnswers ?: 10, settings?.batchMinutes ?: 4),
-            )
-            ChooserCard(inner, KidColor.starGold, lastPick == "questions", girl) {
-                Row(Modifier.juicyClick { pick("questions") }.padding(if (m.compact) 14.dp else 20.dp),
-                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(if (m.compact) 12.dp else 20.dp)) {
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        FitText(tr("📝 שְׁאֵלוֹת רְגִילוֹת"), (if (m.compact) 21 else 27).sp, weight = FontWeight.ExtraBold, maxLines = 1, minScale = 0.7f, align = TextAlign.Start)
-                        lines.forEach { Text(it, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = (if (m.compact) 13 else 16).sp) }
-                    }
-                    QuestionsPreview(Modifier.width(if (m.compact) 120.dp else 190.dp).height(if (m.compact) 84.dp else 120.dp))
-                }
+            // ── 🧠 The questions are a TILE like every game — first in the grid —
+            // and "surprise me" the last one (Rani, 2026-10-12; same as iOS). They
+            // used to be a wide strip of text above the picture tiles and read as
+            // the screen's heading: a tester and her daughter never found out it
+            // could be tapped, and played only the games under it.
+            val quizBlurb = when {
+                world.isBonus -> tr("שְׁאֵלוֹת עֲנָק, וְדַקּוֹת כְּפוּלוֹת")
+                preReader -> tr("שׁוֹמְעִים שְׁאֵלָה וּבוֹחֲרִים תְּמוּנָה")
+                else -> tr("עוֹנִים עַל שְׁאֵלוֹת וּמַרְוִיחִים דַּקּוֹת")
             }
-            // ── The games ──
-            if (list.isNotEmpty()) {
+            if (list.isEmpty()) {
+                // Nothing to sit beside (a world with only its boss): the whole row,
+                // with the picture and a button that says what to do.
+                ChooserCard(inner, KidColor.starGold, lastPick == "questions", girl) {
+                    Row(Modifier.juicyClick { pick("questions") }.padding(if (m.compact) 14.dp else 20.dp),
+                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(if (m.compact) 12.dp else 20.dp)) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FitText(tr("🧠 חִידוֹן"), (if (m.compact) 21 else 27).sp, weight = FontWeight.ExtraBold, maxLines = 1, minScale = 0.7f, align = TextAlign.Start)
+                            Text(quizBlurb, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = (if (m.compact) 13 else 16).sp)
+                            Text(tr("▶ לְשַׂחֵק"), color = Color(0xFF2A1E5C), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = (if (m.compact) 17 else 21).sp,
+                                modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(KidColor.starGold)
+                                    .padding(horizontal = if (m.compact) 22.dp else 30.dp, vertical = if (m.compact) 9.dp else 12.dp))
+                        }
+                        QuizTilePreview(preReader, Modifier.width(if (m.compact) 130.dp else 230.dp).height(if (m.compact) 92.dp else 132.dp))
+                    }
+                }
+            } else {
                 val cols = if (m.compact) 2 else 4
+                val tiles = listOf("questions") + list.map { it.raw } + "surprise"
                 Column(inner, verticalArrangement = Arrangement.spacedBy(if (m.compact) 12.dp else 16.dp)) {
-                    list.chunked(cols).forEachIndexed { row, chunk ->
+                    tiles.chunked(cols).forEachIndexed { row, chunk ->
                         Row(horizontalArrangement = Arrangement.spacedBy(if (m.compact) 12.dp else 16.dp)) {
-                            chunk.forEachIndexed { k, kind ->
+                            chunk.forEachIndexed { k, id ->
                                 val i = row * cols + k
+                                val kind = list.firstOrNull { it.raw == id }
                                 val rise by animateFloatAsState(if (appeared) 0f else 14f, tween(400, delayMillis = 30 * i), label = "rise")
+                                val tint = when (id) { "questions" -> KidColor.starGold; "surprise" -> hexColor("9B5DE5"); else -> TileTints[i % 4] }
                                 Box(Modifier.weight(1f).graphicsLayer { translationY = rise * density; alpha = 1f - rise / 14f }) {
-                                    ChooserCard(Modifier.fillMaxWidth(), TileTints[i % 4], lastPick == kind.raw, girl) {
-                                        Column(Modifier.juicyClick { pick(kind.raw) }.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                            MiniGamePreview(kind, Modifier.fillMaxWidth().height(if (m.compact) 92.dp else 124.dp))
-                                            FitText(kind.emoji + " " + kind.shortName, (if (m.compact) 16 else 20).sp, weight = FontWeight.ExtraBold, maxLines = 1, minScale = 0.6f)
-                                            Text(kind.blurb, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = (if (m.compact) 12 else 14).sp,
+                                    ChooserCard(Modifier.fillMaxWidth(), tint, lastPick == id && id != "surprise", girl) {
+                                        Column(Modifier.juicyClick {
+                                            if (id == "surprise") {
+                                                val pool = list.toMutableList()
+                                                if (pool.size > 1) pool.removeAll { it.raw == lastPick }
+                                                pool.randomOrNull()?.let { pick(it.raw) }
+                                            } else pick(id)
+                                        }.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            val art = Modifier.fillMaxWidth().height(if (m.compact) 92.dp else 124.dp)
+                                            when {
+                                                kind != null -> MiniGamePreview(kind, art)
+                                                id == "questions" -> QuizTilePreview(preReader, art)
+                                                else -> Box(art.glassInset(16.dp), contentAlignment = Alignment.Center) { Text("🎲", fontSize = (if (m.compact) 56 else 78).sp) }
+                                            }
+                                            FitText(when {
+                                                kind != null -> kind.emoji + " " + kind.shortName
+                                                id == "questions" -> tr("🧠 חִידוֹן")
+                                                else -> tr("🎲 הַפְתָּעָה")
+                                            }, (if (m.compact) 16 else 20).sp, weight = FontWeight.ExtraBold, maxLines = 1, minScale = 0.6f)
+                                            Text(when {
+                                                kind != null -> kind.blurb
+                                                id == "questions" -> quizBlurb
+                                                else -> tr("מִשְׂחָק אַקְרָאִי מֵהָעוֹלָם הַזֶּה")
+                                            }, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = (if (m.compact) 12 else 14).sp,
                                                 textAlign = TextAlign.Center, maxLines = 2, modifier = Modifier.heightIn(min = if (m.compact) 30.dp else 36.dp))
                                         }
                                     }
@@ -255,13 +285,6 @@ internal fun WorldGameChooserScreen(world: PlayWorld, onPlayQuestions: () -> Uni
             // ── 🐉 the boss (once its last room is reached) ──
             if (bossUnlocked(world)) WideCard(inner, "🐉", tr("קְרַב בּוֹס"), tr("הָאֶתְגָּר הַגָּדוֹל שֶׁל הָעוֹלָם הַזֶּה"), hexColor("EF476F"),
                 lastPick == "boss", girl) { pick("boss") }
-            // ── 🎲 one of this world's games, picked for the child ──
-            if (list.isNotEmpty()) WideCard(inner, "🎲", tr("תַּפְתִּיעוּ אוֹתִי!"), tr("מִשְׂחָק אַקְרָאִי מֵהָעוֹלָם הַזֶּה"), hexColor("9B5DE5"),
-                lastPick == "surprise", girl) {
-                val pool = list.toMutableList()
-                if (pool.size > 1) pool.removeAll { it.raw == lastPick }
-                pool.randomOrNull()?.let { pick(it.raw) }
-            }
         }
     }
 }
@@ -298,14 +321,29 @@ private fun WideCard(modifier: Modifier, emoji: String, title: String, subtitle:
     }
 }
 
-/** A still miniature of a question card (QuestionsPreview, simplified). */
+/** The questions' tile art: a question as the child meets it — pictures to
+ *  choose from for a pre-reader, a sum with number answers for a reader. */
 @Composable
-private fun QuestionsPreview(modifier: Modifier) {
-    Column(modifier.glassInset(16.dp).padding(8.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-        Box(Modifier.fillMaxWidth().height(14.dp).clip(RoundedCornerShape(6.dp)).background(Color.White.copy(alpha = 0.35f)))
-        repeat(2) { r ->
-            Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                repeat(2) { c -> Box(Modifier.weight(1f).fillMaxSize().miniGameTile(TileState.NORMAL, TileTints[(r * 2 + c) % 4], 8.dp)) }
+private fun QuizTilePreview(pictures: Boolean, modifier: Modifier) {
+    val answers = if (pictures) listOf("🦴", "🚗", "🍎", "⚽") else listOf("10", "12", "13", "11")
+    val right = if (pictures) 0 else 1
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Column(modifier.glassInset(16.dp).padding(horizontal = 14.dp, vertical = 5.dp), horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)) {
+            Text(if (pictures) "🔊 🐶 ❓" else "7 + 5 = ?", color = Color(0xFF2A1E5C), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp,
+                modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.92f)).padding(horizontal = 10.dp, vertical = 1.dp))
+            repeat(2) { r ->
+                Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    repeat(2) { c ->
+                        val i = r * 2 + c
+                        Box(Modifier.width(46.dp).height(21.dp).clip(RoundedCornerShape(8.dp))
+                            .background(if (i == right) Color(0xFF2ECC71) else TileTints[i % 4].copy(alpha = 0.85f))
+                            .border(if (i == right) 2.dp else 1.dp, Color.White.copy(alpha = if (i == right) 0.9f else 0.35f), RoundedCornerShape(8.dp)),
+                            contentAlignment = Alignment.Center) {
+                            Text(answers[i], color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = if (pictures) 15.sp else 13.sp)
+                        }
+                    }
+                }
             }
         }
     }

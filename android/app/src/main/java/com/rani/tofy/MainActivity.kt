@@ -84,14 +84,17 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val demo = demoGame?.let { g -> com.rani.tofy.kid.ui.games.MiniGameKind.entries.firstOrNull { it.name.equals(g, true) } }
                     // Be the device's own child, so the ⭐/💎 chips show the real wallet.
-                    if (demo != null || demoQuiz) androidx.compose.runtime.LaunchedEffect(Unit) {
+                    if (demo != null || demoQuiz || demoScreen == "chooser") androidx.compose.runtime.LaunchedEffect(Unit) {
                         // (The quiz demo falls back to a made-up child — nothing of it can be
                         // written: the rules know no such child or family.)
-                        (com.rani.tofy.DeviceRole.joinedChildID ?: if (demoQuiz) "DEMO-QUIZ-CHILD" else null)
+                        (com.rani.tofy.DeviceRole.joinedChildID ?: if (demoQuiz || demoScreen == "chooser") "DEMO-QUIZ-CHILD" else null)
                             ?.let { com.rani.tofy.kid.core.KidSession.bind(it, false) }
                     }
                     if (demo != null) com.rani.tofy.kid.ui.games.MiniGameScreen(demo, null) { finish() }
                     else if (demoQuiz) com.rani.tofy.kid.ui.play.QuestionRunnerScreen(com.rani.tofy.kid.content.ContentMode.SmartFeed) { finish() }
+                    // 🧪 `--es demoScreen chooser [--es demoGrade 0]` — a world's "how do you want to play?".
+                    else if (demoScreen == "chooser") com.rani.tofy.kid.ui.games.WorldGameChooserScreen(
+                        com.rani.tofy.kid.ui.play.PlayWorlds.all.first(), onPlayQuestions = {}, onExit = { finish() })
                     else if (demoParent != null) com.rani.tofy.ui.DemoParentScreens(demoParent, demoPage)
                     else if (demoScreen == "familychoice") com.rani.tofy.ui.onboarding.FamilyChoiceScreen(onJoin = {})
                     else if (demoScreen == "joinfamily") com.rani.tofy.ui.onboarding.JoinFamilyScreen(onBack = {})
