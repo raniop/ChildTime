@@ -1388,6 +1388,10 @@ struct QuestionRunnerView: View {
                 companion.wow(Gendered.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת"), tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת"))); return
             case "hint":
                 companion.cheer(HintContent.explain(.english)); return
+            case "firstright":   // 🎬 Tofy's two first-run explanations, to see them in every language
+                companion.cheer(tr("צדקתם! כל תשובה נכונה מוסיפה \(24) שניות של זמן מסך")); return
+            case "firstwrong":
+                companion.console(tr("טעיתם, לא נורא. הזמן לא יורד, אבל התשובה הנכונה הבאה תיתן \(12) שניות פחות.")); return
             default: break
             }
             #endif
@@ -2052,6 +2056,9 @@ struct QuestionRunnerView: View {
 /// until the next tap, and a message with no other change never showed at all.
 private struct ShelfBuddy: View {
     @ObservedObject var controller: CompanionController
+    /// Observed, not just read: a bubble drawn before the screen's size was
+    /// known stayed at the narrow width (seen in a Russian run).
+    @ObservedObject private var display = DisplayGeometry.shared
     var profile: Profile?
     let size: CGFloat
     /// The row's real direction — not the app language: a cover can arrive
@@ -2076,7 +2083,7 @@ private struct ShelfBuddy: View {
                 // daily-maximum message, a hint) takes all the room there is
                 // beside him, so it reads in fewer lines (Rani, 2026-10-12).
                 let wrap: CGFloat = text.count > 36
-                    ? min(320, max(230, DisplayGeometry.shared.safeSize.width - size - 28))
+                    ? min(330, max(230, display.safeSize.width - size - 20))
                     : 230
                 ViewThatFits(in: .horizontal) {
                     BubbleSpeech(text: text, pointDirection: rtl ? .trailing : .leading, animated: false, hugs: true)
