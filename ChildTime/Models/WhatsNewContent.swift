@@ -57,10 +57,10 @@ enum WhatsNewContent {
 
         // 2026.10.9 — after Apple approved 2026.10.8 (build 235) on 2026-10-12:
         // the fixes that waited in main for that approval.
-        Release(build: 236, version: "2026.10.9", headline: tr("הגדרות פשוטות יותר, ומותאם לאייפון המתקפל"), items: [
+        Release(build: 236, version: "2026.10.9", headline: tr("הגדרות פשוטות יותר, ומותאם ל־iPhone Duo"), items: [
             Item(emoji: "⚙️", title: tr("חץ חזרה אחד בהגדרות"),
                  line: tr("בעמודים הפנימיים של ההגדרות יש עכשיו רק חץ חזרה. ״סיום״ נשאר בעמוד הראשון, והחלון נסגר גם במשיכה למטה")),
-            Item(emoji: "📱", title: tr("מותאם לאייפון המתקפל"),
+            Item(emoji: "📱", title: tr("מותאם ל־iPhone Duo"),
                  line: tr("ההגדרות, מתנת הדקות ובחירת הרקע מסודרים נכון במסך הסגור ובמסך הפתוח, והמעבר ביניהם חלק")),
             Item(emoji: "💝", title: tr("מתנת דקות מדויקת"),
                  line: tr("״נתתם היום״ מציג את הסכום הנכון גם כשהחלון נשאר פתוח, והחלון כולו נכנס גם במסך קטן")),

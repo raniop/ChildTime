@@ -46985,6 +46985,28 @@
         }
       }
     },
+    "הגדרות פשוטות יותר, ומותאם ל־iPhone Duo" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إعدادات أبسط، وملاءمة أفضل لـ iPhone Duo"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simpler settings, and a better fit for iPhone Duo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройки проще и лучше подходят для iPhone Duo"
+          }
+        }
+      }
+    },
     "הגדרות פשוטות יותר, ומותאם לאייפון המתקפל" : {
       "localizations" : {
         "ar" : {
@@ -89691,6 +89713,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Made for iPhone Duo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Адаптировано для iPhone Duo"
+          }
+        }
+      }
+    },
+    "מותאם ל־iPhone Duo" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ملائم لـ iPhone Duo"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fits iPhone Duo"
           }
         },
         "ru" : {
