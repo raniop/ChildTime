@@ -143,6 +143,9 @@ object FamilyRepository {
 
     val householdID: String? get() = _state.value.household?.id
 
+    /** 🧪 Debug screenshots: a made-up family put straight into the state — no listeners, no network (ui/DemoFamily.kt). */
+    internal fun demoSeed(s: FamilyState) { if (com.rani.tofy.BuildConfig.DEBUG) _state.value = s }
+
     /** This account's family is loaded and its listeners are up. */
     fun isRunningFor(uid: String): Boolean = this.uid == uid && _state.value.household != null
 

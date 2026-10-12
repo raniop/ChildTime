@@ -50,6 +50,22 @@ class MainActivity : ComponentActivity() {
         val demoScreen = if (BuildConfig.DEBUG) intent?.getStringExtra("demoScreen") else null
         // 🧪 `--es demoBackdropTab colours|mine` — which tab the backdrop picker opens on.
         if (BuildConfig.DEBUG) com.rani.tofy.ui.common.demoTab = when (intent?.getStringExtra("demoBackdropTab")) { "colours" -> 1; "mine" -> 2; else -> null }
+        // 🧪 `--es demoScreen parenthome|childreport|childsettings|gift|settings` — the parent's screens
+        // over a made-up family (ui/DemoFamily.kt); `--es demoPage devices|difficulty|profile|more`
+        // opens a page of the child's settings, `--ei demoGiftSent 30` the gift window after sending.
+        val demoParent = demoScreen?.takeIf { it in setOf("parenthome", "childreport", "childsettings", "gift", "settings") }
+        if (demoParent != null) {
+            // `--es demoLang he|en|ru|ar` — the language for this run only (nothing is saved).
+            com.rani.tofy.i18n.AppLanguage.of(intent?.getStringExtra("demoLang"))?.let { com.rani.tofy.i18n.I18n.set(it, persist = false) }
+            com.rani.tofy.ui.DemoFamily.seed(this)
+            // `--es demoBackdrop tofy` — the parent's backdrop on this emulator.
+            intent?.getStringExtra("demoBackdrop")?.let { com.rani.tofy.ui.theme.BackdropStore.chooseForParent(it) }
+            intent?.getIntExtra("demoGiftSent", -1)?.takeIf { it > 0 }?.let {
+                com.rani.tofy.ui.home.demoGiftSent = it
+                com.rani.tofy.data.Commands.demoGiftSaved(com.rani.tofy.ui.DemoFamily.NONI, it)
+            }
+        }
+        val demoPage = if (BuildConfig.DEBUG) intent?.getStringExtra("demoPage") else null
         if (BuildConfig.DEBUG) com.rani.tofy.ui.common.demoPhotos = intent?.getIntExtra("demoBackdropPhotos", -1)?.takeIf { it >= 0 }
         if (BuildConfig.DEBUG) intent?.getStringExtra("demoGrade")?.toIntOrNull()?.let {
             com.rani.tofy.kid.ui.games.MiniGameLevel.debugGrade = it
@@ -76,6 +92,7 @@ class MainActivity : ComponentActivity() {
                     }
                     if (demo != null) com.rani.tofy.kid.ui.games.MiniGameScreen(demo, null) { finish() }
                     else if (demoQuiz) com.rani.tofy.kid.ui.play.QuestionRunnerScreen(com.rani.tofy.kid.content.ContentMode.SmartFeed) { finish() }
+                    else if (demoParent != null) com.rani.tofy.ui.DemoParentScreens(demoParent, demoPage)
                     else if (demoScreen == "familychoice") com.rani.tofy.ui.onboarding.FamilyChoiceScreen(onJoin = {})
                     else if (demoScreen == "joinfamily") com.rani.tofy.ui.onboarding.JoinFamilyScreen(onBack = {})
                     // 🧪 `--es demoScreen backdrops` — the parent's backdrop picker.

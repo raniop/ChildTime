@@ -6013,6 +6013,28 @@
         }
       }
     },
+    "%@ משחק עכשיו 🎮" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ يلعب الآن 🎮"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is playing now 🎮"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ сейчас играет 🎮"
+          }
+        }
+      }
+    },
     "%@ משחקת עכשיו" : {
       "localizations" : {
         "ar" : {
@@ -6031,6 +6053,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ сейчас играет"
+          }
+        }
+      }
+    },
+    "%@ משחקת עכשיו 🎮" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ تلعب الآن 🎮"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is playing now 🎮"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ сейчас играет 🎮"
           }
         }
       }
@@ -30004,6 +30048,28 @@
         }
       }
     },
+    "בחרו אילו עולמות פתוחים עבור %@. עולם כבוי נעלם מהמסך, והילד לא מקבל ממנו שאלות. השינוי מסתנכרן אוטומטית למכשיר של הילד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختاروا العوالم المفتوحة لـ%@. العالم المُطفأ يختفي من الشاشة ولا يحصل الطفل على أسئلة منه. يُزامَن التغيير تلقائيًا مع جهاز الطفل."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose which worlds are open for %@. A world that is off disappears from the screen, and the child gets no questions from it. The change syncs to the child's device automatically."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите, какие миры открыты для %@. Выключенный мир исчезает с экрана, и ребёнок не получает из него вопросов. Изменение автоматически синхронизируется с устройством ребёнка."
+          }
+        }
+      }
+    },
     "בחרו אילו עולמות פתוחים עבור %@. עולם כיבוי נעלם מהמסך, והילד לא מקבל ממנו שאלות. השינוי מסתנכרן אוטומטית למכשיר של הילד." : {
       "localizations" : {
         "ar" : {
@@ -48646,6 +48712,28 @@
         }
       }
     },
+    "החברים של %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أصدقاء %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s friends"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Друзья: %@"
+          }
+        }
+      }
+    },
     "החדש" : {
       "localizations" : {
         "ar" : {
@@ -50145,6 +50233,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Множество тихих улучшений, которые берегут прогресс, приватность и призы детей на всех устройствах"
+          }
+        }
+      }
+    },
+    "המחיקה לא הצליחה. בדקו את חיבור האינטרנט ונסו שוב." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم تنجح عملية الحذف. تحقّقوا من اتصال الإنترنت وحاولوا مرة أخرى."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The removal didn't go through. Check your internet connection and try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить не получилось. Проверьте подключение к интернету и попробуйте ещё раз."
           }
         }
       }
@@ -53603,7 +53713,7 @@
         }
       }
     },
-    "הרציפות שוה יותר מהכמות — גם 10 דקות ביום שומרות עליה." : {
+    "הרציפות שווה יותר מהכמות — גם 10 דקות ביום שומרות עליה." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -54591,6 +54701,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выйти и войти снова"
+          }
+        }
+      }
+    },
+    "התנתקות, מחיקה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تسجيل الخروج، الحذف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign out, delete"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выход, удаление"
           }
         }
       }
@@ -99576,6 +99708,28 @@
         }
       }
     },
+    "עדיין אין חברים." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد أصدقاء بعد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No friends yet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Друзей пока нет."
+          }
+        }
+      }
+    },
     "עדיין לא בחרת אפליקציות לחסום. בלי בחירה - לא יקרה כלום כשהילד פותח את ה-iPad." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -102065,6 +102219,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ещё собираем данные…"
+          }
+        }
+      }
+    },
+    "עוד אין ילדים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد أطفال بعد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No children yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Детей пока нет"
+          }
+        }
+      }
+    },
+    "עוד אין ילדים במשפחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد أطفال في العائلة بعد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No children in the family yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В семье пока нет детей"
           }
         }
       }
@@ -118790,7 +118988,7 @@
         }
       }
     },
-    "שוה לצין את זה בקול — ילדים ממשיכים להשתפר במה שמשבחים אותם עליו." : {
+    "שווה לציין את זה בקול — ילדים ממשיכים להשתפר במה שמשבחים אותם עליו." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {

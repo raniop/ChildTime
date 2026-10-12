@@ -71,18 +71,19 @@ internal data class SnapshotExtras(
  * The per-child page: ParentDashboardView.childDetailPage + ChildReportView.swift.
  * "Is my kid using it, actually learning, strong where / struggling where" — the
  * report is derived on this device from the child's own dailyStats.
+ *
+ * A page for READING how the child is doing: no ⚙️ and no device list here
+ * (Rani, 2026-10-12: "מהמסך הזה אין קשר שוב להגדרות", "למה צריך פה שוב המכשירים?").
+ * Settings open from the home's gear and from "פעולות" on the child's card.
  */
 @Composable
-internal fun ChildDetailContent(childID: String, onBack: () -> Unit, onSettings: () -> Unit, onActions: () -> Unit, onConnectDevice: () -> Unit) {
+internal fun ChildDetailContent(childID: String, onBack: () -> Unit) {
     val state by FamilyRepository.state.collectAsState()
     val child = state.children.firstOrNull { it.id == childID }
     val histories by ChildReportRepository.history.collectAsState()
     val stateDoc by remember(childID) { ChildReportRepository.stateDoc(childID) }.collectAsState(initial = emptyMap())
     var refreshing by remember { mutableStateOf(false) }
     var tick by remember { mutableIntStateOf(0) }
-    val scope = rememberCoroutineScope()
-    val note = remember { WriteNote() }
-    var removing by remember { mutableStateOf<ChildDevice?>(null) }
 
     LaunchedEffect(Unit) { while (true) { delay(1000); tick++ } }
     // The parent's phone never recorded this child's play — pull the history down.
@@ -100,36 +101,16 @@ internal fun ChildDetailContent(childID: String, onBack: () -> Unit, onSettings:
         val live = tick.let { state.liveWindow(child) }  // re-read on the 1 s tick
 
         LazyColumn(Modifier.contentColumn().fillMaxSize().systemBarsPadding(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            item {
-                PageBar("", onBack) {
-                    Row(Modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = onSettings).padding(horizontal = 10.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text("⚙️", fontSize = 16.sp)
-                        Text(tr("הגדרות"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
-                    }
-                }
-            }
-            item { ChildReport(child, progress, extras, engine, live, devices, refreshing, onSettings, onActions, onConnectDevice, onRemoveDevice = { removing = it }, onLock = { Commands.lock(childID) }) }
+            item { PageBar("", onBack) }
+            item { ChildReport(child, progress, extras, engine, live, devices, refreshing, onLock = { Commands.lock(childID) }) }
         }
-        note.Host(Modifier.align(Alignment.BottomCenter).navigationBarsPadding())
-    }
-
-    removing?.let { d ->
-        Confirm(
-            title = tr("להסיר את \"%@\"?", d.name),
-            message = tr("המכשיר יתנתק אוטומטית מהילד ויחזור למצב התחלתי (כאילו הותקן מחדש). ההתקדמות בענן נשמרת — כדי לחבר אותו שוב (או לילד אחר), סרקו בו מחדש את ה-QR של הילד הנכון."),
-            confirm = tr("הסר מכשיר"), cancel = tr("ביטול"),
-            onConfirm = { scope.launch { note.report(ChildReportRepository.withRetry { Commands.removeDevice(d.id) }) } },
-            onDismiss = { removing = null },
-        )
     }
 }
 
 @Composable
 private fun ChildReport(
     child: Child, s: Progress, extras: SnapshotExtras, engine: ReportEngine, live: LiveWindow?, devices: List<ChildDevice>,
-    refreshing: Boolean, onSettings: () -> Unit, onActions: () -> Unit, onConnectDevice: () -> Unit,
-    onRemoveDevice: (ChildDevice) -> Unit, onLock: () -> Unit,
+    refreshing: Boolean, onLock: () -> Unit,
 ) {
     val girl = child.isGirl
     fun g(m: String, f: String) = if (girl) f else m
@@ -138,8 +119,8 @@ private fun ChildReport(
     var autoCollapsed by remember { mutableStateOf(false) }
 
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        // MARK: header — avatar + name (tap → settings), grade · playing now
-        Row(Modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = onSettings), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        // MARK: header — avatar + name, grade · playing now
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             ChildAvatar(child, 56.dp)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(child.name, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
@@ -158,9 +139,9 @@ private fun ChildReport(
             if (refreshing) CircularProgressIndicator(Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
         }
 
-        // MARK: top actions — the live banner (lock one tap away) + the actions sheet
+        // MARK: live — an open play window right now, with the lock one tap away.
+        // (Everything else a parent DOES lives in "⚡ פעולות" and 💝 on the home card, as on iOS.)
         live?.let { LiveBanner(child, it, onLock) }
-        GlassButton(tr("⚡ פעולות"), Modifier.fillMaxWidth()) { onActions() }
 
         // MARK: the four numbers
         val sum = engine.summary(period)
@@ -200,13 +181,13 @@ private fun ChildReport(
         }
         InsightCard(engine.dailyInsight(child.name, girl, period, minutesToday = s.minutesEarnedToday), period, noInsight)
 
+        // Learning first, in the order a parent asks it (Rani, 2026-10-12): how is
+        // she doing · is she improving · what she masters and what to practise ·
+        // the trend · screen time · the worlds.
         // MARK: topics
         TopicsCard(child, s, extras, engine, period, expanded, autoCollapsed) { t, open ->
             if (open) { expanded = null; autoCollapsed = true } else expanded = t
         }
-
-        // MARK: 🏆 worlds (tiers)
-        WorldsCard(child, extras)
 
         // MARK: improvement (week / month only)
         val deltas = engine.topicDeltas(period)
@@ -221,28 +202,9 @@ private fun ChildReport(
                         color = if (up) Ink.good else Ink.weak, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    deltas.firstOrNull()?.takeIf { it.deltaPoints > 0 }?.let { TrendChip(tr("השיפור הגדול"), it.topic.displayName, it.deltaPoints) }
-                    deltas.lastOrNull()?.takeIf { it.deltaPoints < 0 }?.let { TrendChip(tr("דורש חיזוק"), it.topic.displayName, it.deltaPoints) }
+                    deltas.firstOrNull()?.takeIf { it.deltaPoints > 0 }?.let { TrendChip(tr("השיפור הגדול"), it.topic.parentName, it.deltaPoints) }
+                    deltas.lastOrNull()?.takeIf { it.deltaPoints < 0 }?.let { TrendChip(tr("דורש חיזוק"), it.topic.parentName, it.deltaPoints) }
                 }
-            }
-        }
-
-        // MARK: charts
-        val days = if (period == ReportPeriod.MONTH) 30 else 7
-        val points = engine.dayPoints(days)
-        ReportCard(tr("מגמת למידה"), detail = tr("%lld ימים אחרונים", days)) {
-            if (points.all { it.questions == 0 }) EmptyLine(tr("אין עדיין פעילות בתקופה הזו."))
-            else {
-                LearningTrendChart(points, Modifier.fillMaxWidth().height(130.dp))
-                Legend(listOf(tr("שאלות") to Color.White.copy(alpha = 0.4f), tr("אחוז הצלחה") to Color.White))
-            }
-        }
-        val earnedW = g(tr("הרוויח"), tr("הרוויחה")); val usedW = g(tr("ניצל"), tr("ניצלה"))
-        ReportCard(tr("זמן מסך"), detail = tr("%@ מול %@", earnedW, usedW)) {
-            if (points.all { it.earned == 0 && it.used == 0 }) EmptyLine(tr("עוד לא נפתח זמן מסך בתקופה הזו."))
-            else {
-                ScreenTimeChart(points, Modifier.fillMaxWidth().height(120.dp))
-                Legend(listOf(earnedW to Color.White.copy(alpha = 0.4f), usedW to Color(0xFF7CF3FF)))
             }
         }
 
@@ -259,9 +221,28 @@ private fun ChildReport(
             }
         }
 
-        // MARK: devices
-        DevicesCard(child, devices, live != null, onConnectDevice, onRemoveDevice)
-        // (iOS's "תְּנוּ לְX לְשַׂחֵק כָּאן 🧒" kid-mode entry is left out — no kid mode on Android yet.)
+        // MARK: charts
+        // The week as a calendar week (Sunday first), the month as its last 30 days.
+        val points = if (period == ReportPeriod.MONTH) engine.dayPoints(30) else engine.weekPoints()
+        ReportCard(tr("מגמת למידה"), detail = if (period == ReportPeriod.MONTH) tr("%lld ימים אחרונים", 30) else tr("השבוע")) {
+            if (points.all { it.questions == 0 }) EmptyLine(tr("אין עדיין פעילות בתקופה הזו."))
+            else {
+                LearningTrendChart(points, Modifier.fillMaxWidth().height(130.dp))
+                Legend(listOf(tr("שאלות") to Color.White.copy(alpha = 0.4f), tr("אחוז הצלחה") to Color.White))
+            }
+        }
+        val earnedW = g(tr("הרוויח"), tr("הרוויחה")); val usedW = g(tr("ניצל"), tr("ניצלה"))
+        ReportCard(tr("זמן מסך"), detail = tr("%@ מול %@", earnedW, usedW)) {
+            if (points.all { it.earned == 0 && it.used == 0 }) EmptyLine(tr("עוד לא נפתח זמן מסך בתקופה הזו."))
+            else {
+                ScreenTimeChart(points, Modifier.fillMaxWidth().height(120.dp))
+                Legend(listOf(earnedW to Color.White.copy(alpha = 0.4f), usedW to Color(0xFF7CF3FF)))
+            }
+        }
+
+        // MARK: 🏆 worlds (tiers)
+        WorldsCard(child, extras)
+        // (iOS's "תְּנוּ לְX לְשַׂחֵק כָּאן 🧒" kid-mode entry lives on the home card.)
     }
 }
 
@@ -417,7 +398,7 @@ private fun WorldsCard(child: Child, extras: SnapshotExtras) {
 private fun WorldRow(w: World, label: String, tint: Color?) {
     Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(w.emoji, fontSize = 20.sp)
-        Text(w.name, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.5.sp, maxLines = 2, lineHeight = 18.sp)
+        Text(w.parentName, Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 14.5.sp, maxLines = 2, lineHeight = 18.sp)
         Text(label, Modifier.clip(RoundedCornerShape(16.dp)).background(tint ?: Color.White.copy(alpha = 0.18f)).padding(horizontal = 9.dp, vertical = 4.dp),
             color = if (tint == null) Ink.secondary else Color(0xFF2A1D00), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, maxLines = 1)
     }
@@ -447,7 +428,7 @@ private fun ChipLine(label: String, topics: List<Topic>) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(label, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp, modifier = Modifier.align(Alignment.CenterVertically))
         topics.forEach { t ->
-            Text("${t.emoji} ${t.displayName}", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.sp,
+            Text("${t.emoji} ${t.parentName}", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.sp,
                 modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
                     .border(1.dp, Color.White.copy(alpha = 0.24f), RoundedCornerShape(16.dp)).padding(horizontal = 8.dp, vertical = 3.dp))
         }
@@ -460,12 +441,12 @@ private fun TopicRow(child: Child, s: Progress, extras: SnapshotExtras, t: Topic
         Text(t.topic.emoji, fontSize = 22.sp, modifier = Modifier.width(34.dp))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(t.topic.displayName, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, maxLines = 1)
+                Text(t.topic.parentName, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, maxLines = 1)
                 // The level the adaptive engine serves now, and where it moved from the parent's base.
                 if (hasAdaptiveSignal(s)) {
                     val st = adaptiveState(t.topic, child, extras.adaptive)
                     val hint = st.direction?.let { if (it == Direction.EASED) "↓ " + tr("בונה ביטחון") else "↑ " + tr("מאתגר יותר") }
-                    Text(st.served.displayName + (hint?.let { " · $it" } ?: ""), maxLines = 1,
+                    Text(st.served.parentName + (hint?.let { " · $it" } ?: ""), maxLines = 1,
                         color = when (st.direction) { Direction.EASED -> Ink.warn; Direction.RAISED -> Ink.good; null -> Ink.secondary },
                         fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 10.5.sp,
                         modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.10f)).padding(horizontal = 7.dp, vertical = 2.dp))
@@ -522,65 +503,6 @@ private fun NamedList(items: List<Named>) {
     }
 }
 
-// MARK: - Devices
-
-@Composable
-private fun DevicesCard(child: Child, devices: List<ChildDevice>, live: Boolean, onAdd: () -> Unit, onRemove: (ChildDevice) -> Unit) {
-    val girl = child.isGirl
-    ReportCard(tr("המכשירים של %@", child.name)) {
-        devices.forEachIndexed { idx, d ->
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Remove (e.g. linked to the wrong child) — confirmed before anything happens.
-                var menu by remember { mutableStateOf(false) }
-                Box {
-                    Box(Modifier.size(28.dp).clip(CircleShape).clickable { menu = true }, contentAlignment = Alignment.Center) {
-                        Text("⋯", color = Ink.secondary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    }
-                    DropdownMenu(menu, { menu = false }, containerColor = Ink.sheet) {
-                        DropdownMenuItem(text = { Text("➖ " + tr("הסר מכשיר"), color = Ink.weak, fontFamily = Rounded, fontWeight = FontWeight.Bold) },
-                            onClick = { menu = false; onRemove(d) })
-                    }
-                }
-                // "אייפד של נועה" — the kind + the child; a custom device name rides along.
-                val ipad = d.kind == "ipad"
-                val generic = listOf(tr("אייפד"), tr("אייפון"), "iPhone", "iPad", "").contains(d.name)
-                Text(tr("%@ %@ של %@", if (ipad) "📲" else "📱", if (ipad) tr("אייפד") else tr("אייפון"), child.name) + (if (generic) "" else " · ${d.name}"),
-                    Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.5.sp)
-                val recent = nowSecs() - d.lastSeenAt < 120
-                val (txt, col) = when {
-                    live && recent -> tr("● %@ עכשיו", if (girl) tr("משחקת") else tr("משחק")) to Ink.good
-                    recent -> tr("● מחובר") to Ink.good
-                    else -> tr("נראה %@", relative(d.lastSeenAt)) to Ink.secondary
-                }
-                Text(txt, color = col, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp)
-            }
-            if (d.shieldAuthorized == false && d.role != "parent") {
-                Text("🛡️ " + tr("אין הרשאת ״זמן מסך״ במכשיר הזה — נעילת אפליקציות לא תעבוד בו. פתחו בו את טופי ← ⚙️ ← בקש הרשאה."),
-                    color = Color(0xFFFF8A3D), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 11.5.sp)
-            }
-            // The allow-list migration nudge (nil on older devices → say nothing).
-            if (d.raw.bool("newAppsLocked") == false && d.shieldAuthorized != false && d.role != "parent") {
-                Text("🔓 " + tr("אפליקציה חדשה שהילד מתקין לא נעולה במכשיר הזה. פתחו בו את טופי ← ⚙️ ← ״לנעול גם אפליקציות חדשות״ ובחרו מה נשאר פתוח."),
-                    color = Ink.gold2, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 11.5.sp)
-            }
-            if (idx != devices.lastIndex) RowDivider()
-        }
-        if (devices.isEmpty()) EmptyLine(tr("עוד לא חובר מכשיר."))
-        Box(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).clickable(onClick = onAdd).dashedBorder().padding(vertical = 10.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text("▦ " + if (devices.isEmpty()) tr("+ חברו מכשיר") else tr("+ חיבור מכשיר נוסף"),
-                color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.5.sp)
-        }
-    }
-}
-
-private fun Modifier.dashedBorder() = this.drawBehind {
-    drawRoundRect(Color.White.copy(alpha = 0.45f), cornerRadius = CornerRadius(12.dp.toPx()),
-        style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx()))))
-}
-
 internal fun relative(t: Double): String {
     val m = ((nowSecs() - t) / 60).toInt()
     if (m < 60) return tr("לפני %lld דק׳", maxOf(1, m))
@@ -595,12 +517,26 @@ private fun DrawScope.label(tm: TextMeasurer, text: String, x: Float, y: Float, 
     drawText(layout, topLeft = Offset(x - layout.size.width / 2f, y - layout.size.height / 2f))
 }
 
-/** Bars = questions per day; line = accuracy. Bars to the busiest day, the line to 0…100 %. */
+/** A day under a chart: its weekday letter; today's sits on a white tile. */
+private fun DrawScope.dayLabel(tm: TextMeasurer, text: String, x: Float, y: Float, today: Boolean) {
+    if (!today) { label(tm, text, x, y, Ink.secondary, 9.5f, false); return }
+    val layout = tm.measure(text, TextStyle(color = Ink.deep, fontSize = 9.5.sp, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold))
+    val w = layout.size.width + 12.dp.toPx(); val h = layout.size.height + 3.dp.toPx()
+    drawRoundRect(Color.White, Offset(x - w / 2, y - h / 2), Size(w, h), CornerRadius(h / 2))
+    drawText(layout, topLeft = Offset(x - layout.size.width / 2f, y - layout.size.height / 2f))
+}
+
+/**
+ * Bars = questions per day; line = accuracy. Bars to the busiest day, the line to 0…100 %.
+ * A Canvas is not mirrored under a right-to-left layout, so the days are put in
+ * reading order by hand: the first day at the reading start (the right, in Hebrew).
+ */
 @Composable
 private fun LearningTrendChart(points: List<DayPoint>, modifier: Modifier) {
     val tm = rememberTextMeasurer()
     val qLabel = tr("שאלות"); val okLabel = tr("הצלחה")
     val weekdays = points.map { it.weekday }
+    val rtl = androidx.compose.ui.platform.LocalLayoutDirection.current == androidx.compose.ui.unit.LayoutDirection.Rtl
     Canvas(modifier) {
         val w = size.width; val h = size.height
         val labelH = 18.dp.toPx(); val topPad = 8.dp.toPx(); val axisW = 36.dp.toPx()
@@ -608,15 +544,17 @@ private fun LearningTrendChart(points: List<DayPoint>, modifier: Modifier) {
         val n = maxOf(points.size, 1); val slot = plotW / n
         val barW = minOf(22.dp.toPx(), slot * 0.55f)
         val maxQ = maxOf(points.maxOfOrNull { it.questions } ?: 1, 1)
-        fun xAt(i: Int) = plotX0 + slot * (i + 0.5f)
+        fun xAt(i: Int) = plotX0 + slot * ((if (rtl) n - 1 - i else i) + 0.5f)
+        // % belongs to the line and sits at the reading END, questions at the start.
+        val pctX = if (rtl) axisW / 2 else w - axisW / 2; val qX = if (rtl) w - axisW / 2 else axisW / 2
         for (f in listOf(0.5f, 0.75f, 1f)) {
             val y = topPad + plotH * (1 - f)
             drawLine(Color.White.copy(alpha = 0.18f), Offset(plotX0, y), Offset(plotX0 + plotW, y), 1.dp.toPx())
-            label(tm, "${(f * 100).toInt()}%", w - axisW / 2, y, Color.White, 9.5f)
-            label(tm, "${Math.round(maxQ * f)}", axisW / 2, y, Ink.secondary, 9.5f)
+            label(tm, "${(f * 100).toInt()}%", pctX, y, Color.White, 9.5f)
+            label(tm, "${Math.round(maxQ * f)}", qX, y, Ink.secondary, 9.5f)
         }
-        label(tm, qLabel, axisW / 2, topPad + plotH + labelH / 2, Ink.secondary, 8.5f, false)
-        label(tm, okLabel, w - axisW / 2, topPad + plotH + labelH / 2, Color.White, 8.5f, false)
+        label(tm, qLabel, qX, topPad + plotH + labelH / 2, Ink.secondary, 8.5f, false)
+        label(tm, okLabel, pctX, topPad + plotH + labelH / 2, Color.White, 8.5f, false)
         points.forEachIndexed { i, p ->
             val bh = plotH * p.questions / maxQ
             val hh = maxOf(bh, if (p.questions > 0) 3.dp.toPx() else 0f)
@@ -634,41 +572,43 @@ private fun LearningTrendChart(points: List<DayPoint>, modifier: Modifier) {
             drawCircle(Color.White, 4.dp.toPx(), o)
             label(tm, "${Math.round(points[last].accuracy * 100)}%", o.x, maxOf(8.dp.toPx(), o.y - 14.dp.toPx()), Color.White, 10f)
         }
+        // weekday labels (only every ~4th on a 30-day view)
         points.indices.forEach { i ->
-            if (points.size <= 7 || i % 4 == 3 || i == points.size - 1)
-                label(tm, weekdays[i], xAt(i), h - labelH / 2, if (i == points.size - 1) Color.White else Ink.secondary, 9.5f, i == points.size - 1)
+            if (points.size <= 7 || i % 4 == 3 || points[i].isToday) dayLabel(tm, weekdays[i], xAt(i), h - labelH / 2, points[i].isToday)
         }
     }
 }
 
-/** Paired bars per day: minutes earned vs minutes actually used, one scale. */
+/** Paired bars per day: minutes earned vs minutes actually used, one scale — in reading order, like the trend chart. */
 @Composable
 private fun ScreenTimeChart(points: List<DayPoint>, modifier: Modifier) {
     val tm = rememberTextMeasurer()
     val mLabel = tr("דקות")
     val weekdays = points.map { it.weekday }
+    val rtl = androidx.compose.ui.platform.LocalLayoutDirection.current == androidx.compose.ui.unit.LayoutDirection.Rtl
     Canvas(modifier) {
         val w = size.width; val h = size.height
         val labelH = 18.dp.toPx(); val topPad = 8.dp.toPx(); val axisW = 36.dp.toPx()
-        val plotH = h - labelH - topPad; val plotX0 = axisW; val plotW = w - axisW
+        val plotH = h - labelH - topPad; val plotW = w - axisW
+        val plotX0 = if (rtl) 0f else axisW; val axisX = if (rtl) w - axisW / 2 else axisW / 2
         val n = maxOf(points.size, 1); val slot = plotW / n
         val barW = minOf(11.dp.toPx(), slot * 0.28f)
         val maxM = maxOf(points.maxOfOrNull { maxOf(it.earned, it.used) } ?: 1, 1)
-        fun xAt(i: Int) = plotX0 + slot * (i + 0.5f)
+        fun xAt(i: Int) = plotX0 + slot * ((if (rtl) n - 1 - i else i) + 0.5f)
         for (f in listOf(0f, 0.5f, 1f)) {
             val y = topPad + plotH * (1 - f)
-            if (f > 0) drawLine(Color.White.copy(alpha = 0.18f), Offset(plotX0, y), Offset(w, y), 1.dp.toPx())
-            label(tm, "${Math.round(maxM * f)}", axisW / 2, y, Color.White, 9.5f)
+            if (f > 0) drawLine(Color.White.copy(alpha = 0.18f), Offset(plotX0, y), Offset(plotX0 + plotW, y), 1.dp.toPx())
+            label(tm, "${Math.round(maxM * f)}", axisX, y, Color.White, 9.5f)   // minutes, at the reading start
         }
-        label(tm, mLabel, axisW / 2, h - labelH / 2, Ink.secondary, 8.5f, false)
+        label(tm, mLabel, axisX, h - labelH / 2, Ink.secondary, 8.5f, false)
+        val side = if (rtl) 1f else -1f   // "earned" first in reading order — as in the legend
         points.forEachIndexed { i, p ->
             val cx = xAt(i)
             val eh = maxOf(plotH * p.earned / maxM, if (p.earned > 0) 3.dp.toPx() else 0f)
             val uh = maxOf(plotH * p.used / maxM, if (p.used > 0) 3.dp.toPx() else 0f)
-            if (eh > 0) drawRoundRect(Color.White.copy(alpha = 0.38f), Offset(cx - barW * 0.6f - barW / 2, topPad + plotH - eh), Size(barW, eh), CornerRadius(3.dp.toPx()))
-            if (uh > 0) drawRoundRect(Color(0xFF7CF3FF), Offset(cx + barW * 0.6f - barW / 2, topPad + plotH - uh), Size(barW, uh), CornerRadius(3.dp.toPx()))
-            if (points.size <= 7 || i % 4 == 3 || i == points.size - 1)
-                label(tm, weekdays[i], cx, h - labelH / 2, if (i == points.size - 1) Color.White else Ink.secondary, 9.5f, i == points.size - 1)
+            if (eh > 0) drawRoundRect(Color.White.copy(alpha = 0.38f), Offset(cx + side * barW * 0.6f - barW / 2, topPad + plotH - eh), Size(barW, eh), CornerRadius(3.dp.toPx()))
+            if (uh > 0) drawRoundRect(Color(0xFF7CF3FF), Offset(cx - side * barW * 0.6f - barW / 2, topPad + plotH - uh), Size(barW, uh), CornerRadius(3.dp.toPx()))
+            if (points.size <= 7 || i % 4 == 3 || p.isToday) dayLabel(tm, weekdays[i], cx, h - labelH / 2, p.isToday)
         }
     }
 }

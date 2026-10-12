@@ -47,6 +47,7 @@ fun AppNav() {
     val nav = rememberNavController()
     var actionsFor by remember { mutableStateOf<Child?>(null) }
     var connectFor by remember { mutableStateOf<String?>(null) }
+    var giftFor by remember { mutableStateOf<String?>(null) }
     val status by Commands.status.collectAsState()
 
     NavHost(nav, startDestination = "home") {
@@ -57,6 +58,7 @@ fun AppNav() {
                 // ✏️ The pencil by the name edits the child (name, photo, grade).
                 onChildSettings = { nav.navigate("childEdit/${it.id}") },
                 onActions = { actionsFor = it },
+                onGift = { giftFor = it.id },
                 onAddChild = { nav.navigate("addChild") },
                 onChores = { nav.navigate("chores") },
                 onSettings = { nav.navigate("settings") },
@@ -64,15 +66,14 @@ fun AppNav() {
                 onConnectDevice = { connectFor = it.id },
                 onLocation = { c -> nav.navigate(if (c == null) "location" else "location?child=${c.id}") },
                 bellBadge = unreadActivityCount(),
-                sheetOpen = actionsFor != null || connectFor != null || status != null,
+                sheetOpen = actionsFor != null || connectFor != null || giftFor != null || status != null,
                 banners = { HomeBanners(state, onChores = { nav.navigate("chores") },
                     onPaywall = { nav.navigate("paywall") }, onPack = { pack, cid -> nav.navigate("pack/$pack/$cid") }) },
             )
         }
         composable("child/{id}") { e ->
             val id = e.arguments?.getString("id") ?: return@composable
-            ChildDetailScreen(id, onBack = { nav.popBackStack() }, onSettings = { nav.navigate("childSettings/$id") },
-                onActions = { state.children.firstOrNull { it.id == id }?.let { actionsFor = it } }, onConnectDevice = { connectFor = id })
+            ChildDetailScreen(id, onBack = { nav.popBackStack() })
         }
         composable("childSettings/{id}") { e ->
             val id = e.arguments?.getString("id") ?: return@composable
@@ -110,6 +111,11 @@ fun AppNav() {
             onLocation = { actionsFor = null; nav.navigate("location?child=${c.id}") })
     }
     connectFor?.let { ConnectDeviceSheet(it, onDismiss = { connectFor = null }) }
+    // 💝 The gift window (the live child, so "reached the device" shows as it happens).
+    giftFor?.let { id ->
+        val c = state.children.firstOrNull { it.id == id }
+        if (c == null) giftFor = null else com.rani.tofy.ui.home.GiftMinutesWindow(c, state) { giftFor = null }
+    }
     // 📍 Follow the children's fixes for the cards (no push to their phones), and
     // open the map on a child when an arrival push was tapped.
     LaunchedEffect(state.children.map { it.id }) { com.rani.tofy.ui.location.LocationRepository.follow(state.children.map { it.id }) }

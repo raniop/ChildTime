@@ -26,6 +26,21 @@ private val skillKeys = mapOf(
 
 fun skillName(key: String): String = skillKeys[key]?.let { tr(it) } ?: key
 
+/** The same skills as a PARENT reads them — full spelling, no niqqud (SkillCatalog.names on iOS). */
+private val parentSkillKeys = mapOf(
+    "addSub" to "חיבור וחיסור", "completeTen" to "השלמה לעשר", "compare" to "השוואת מספרים",
+    "evenOdd" to "זוגי ואי־זוגי", "mul" to "כפל", "div" to "חילוק", "mixedOps" to "פעולות משולבות",
+    "wordProblem" to "בעיות מילוליות", "fractions" to "שברים פשוטים", "divRemainder" to "חילוק עם שארית",
+    "geometry" to "היקף ושטח", "decimals" to "מספרים עשרוניים", "average" to "ממוצע", "percent" to "אחוזים",
+    "negatives" to "מספרים מכוונים", "expressions" to "ביטויים אלגבריים", "equations" to "משוואות",
+    "powers" to "חזקות", "roots" to "שורשים", "angles" to "זוויות", "proportion" to "יחס ופרופורציה",
+    "pythagoras" to "משפט פיתגורס", "linearFunction" to "פונקציה קווית", "volume" to "נפח",
+    "probability" to "הסתברות", "circle" to "מעגל",
+    "letters" to "אותיות",
+)
+
+fun parentSkillName(key: String): String = parentSkillKeys[key]?.let { tr(it) } ?: com.rani.tofy.ui.home.stripNiqqud(skillName(key))
+
 enum class ReportPeriod(val days: Int) {
     TODAY(1), WEEK(7), MONTH(30);
     val title: String get() = when (this) { TODAY -> tr("היום"); WEEK -> tr("השבוע"); MONTH -> tr("החודש") }
@@ -45,7 +60,8 @@ data class TopicReport(val topic: Topic, val answered: Int, val correct: Int) {
 }
 
 data class SkillReport(val key: String, val answered: Int, val correct: Int) {
-    val name get() = skillName(key)
+    /** For the parent's report — full spelling, no niqqud. */
+    val name get() = parentSkillName(key)
     val accuracy get() = if (answered > 0) correct.toDouble() / answered else 0.0
 }
 
@@ -62,18 +78,29 @@ data class PeriodSummary(
 }
 
 data class DayPoint(val date: String, val questions: Int, val accuracy: Double, val earned: Int, val used: Int) {
-    /** Short weekday; Hebrew spells Saturday out, other languages take the calendar's own. */
+    val isToday: Boolean get() = date == dayKey(startOfToday())
+    /** Short weekday: one Hebrew letter (a parent's screen — no niqqud); other languages take the calendar's own. */
     val weekday: String get() {
         val d = parseKey(date) ?: return ""
         val i = Calendar.getInstance().apply { time = d }.get(Calendar.DAY_OF_WEEK)  // 1 = Sunday
         if (I18n.language != AppLanguage.HE) return DateFormatSymbols(Locale(I18n.language.code)).shortWeekdays[i]
-        return listOf("א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "שַׁבָּת")[i - 1]
+        return listOf("א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳")[i - 1]
     }
 }
 
 fun dayKey(c: Calendar): String = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(c.time)
 private fun parseKey(k: String) = runCatching { SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(k) }.getOrNull()
-private fun startOfToday() = Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }
+/** "Now", replaceable in tests — a calendar week depends on which weekday it is (InsightsEngine.clock). */
+internal var reportClock: () -> Calendar = { Calendar.getInstance() }
+private fun startOfToday() = (reportClock().clone() as Calendar).apply { set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }
+
+/** The first day of the week today is in: Sunday in Hebrew, the phone's own first weekday in the other languages. */
+internal fun weekStart(): Calendar {
+    val day = startOfToday()
+    val first = if (I18n.language == AppLanguage.HE) Calendar.SUNDAY else day.firstDayOfWeek
+    val back = (day.get(Calendar.DAY_OF_WEEK) - first + 7) % 7
+    return day.apply { add(Calendar.DAY_OF_YEAR, -back) }
+}
 fun pct(x: Double) = "${(x * 100).roundToInt()}%"
 
 /**
@@ -97,13 +124,30 @@ class ReportEngine(history: List<DailyStat>) {
         return history.filter { s -> parseKey(s.date)?.let { it >= lower && it.time < upper } == true }
     }
 
+    /**
+     * The days of a calendar week: `weeksBack` 0 is this week up to today, 1 is
+     * the whole week before it. "השבוע" used to mean "the last 7 days" while a
+     * weekly chart shows the calendar week — on a Monday the numbers included
+     * last week and the chart did not (Rani approved the change, 2026-10-12).
+     */
+    private fun daysInCalendarWeek(weeksBack: Int = 0): List<DailyStat> {
+        val today = startOfToday().timeInMillis
+        val start = weekStart().apply { add(Calendar.DAY_OF_YEAR, -7 * weeksBack) }
+        val keys = (0 until 7).mapNotNull { i ->
+            (start.clone() as Calendar).apply { add(Calendar.DAY_OF_YEAR, i) }.takeIf { it.timeInMillis <= today }?.let { dayKey(it) }
+        }.toSet()
+        return history.filter { it.date in keys }
+    }
+
     fun summary(p: ReportPeriod): PeriodSummary = when (p) {
         ReportPeriod.TODAY -> summarize(history.filter { it.date == dayKey(startOfToday()) })
-        ReportPeriod.WEEK -> summarize(daysInRange(7, 0))
+        ReportPeriod.WEEK -> summarize(daysInCalendarWeek())
         ReportPeriod.MONTH -> summarize(daysInRange(30, 0))
     }
 
     private fun stats(p: ReportPeriod, offset: Int = 0): List<DailyStat> {
+        // 📅 "השבוע" is the calendar week; its "before" is the whole week before it.
+        if (p == ReportPeriod.WEEK) return daysInCalendarWeek(offset)
         val end = startOfToday().apply { add(Calendar.DAY_OF_YEAR, -(p.days * offset)) }
         val keys = (0 until p.days).map { i -> dayKey((end.clone() as Calendar).apply { add(Calendar.DAY_OF_YEAR, -(p.days - 1) + i) }) }.toSet()
         return history.filter { it.date in keys }
@@ -149,7 +193,7 @@ class ReportEngine(history: List<DailyStat>) {
         for (t in topicReports(p).filter { it.answered >= 8 }) {
             val skills = skillReports(t.topic, p)
             for (s in skills) if (s.answered >= 5 && s.accuracy >= 0.85) out += Named(s.name, pct(s.accuracy)) to s.accuracy
-            if (skills.isEmpty() && t.accuracy >= 0.85) out += Named(t.topic.displayName, tr("%@ · %lld שאלות", pct(t.accuracy), t.answered)) to t.accuracy
+            if (skills.isEmpty() && t.accuracy >= 0.85) out += Named(t.topic.parentName, tr("%@ · %lld שאלות", pct(t.accuracy), t.answered)) to t.accuracy
         }
         return out.sortedByDescending { it.second }.take(4).map { it.first }
     }
@@ -158,10 +202,27 @@ class ReportEngine(history: List<DailyStat>) {
         val out = mutableListOf<Pair<Named, Double>>()
         for (t in topicReports(p).filter { it.answered >= 6 }) {
             val skills = skillReports(t.topic, p)
-            for (s in skills.take(3)) if (s.answered >= 4 && s.accuracy < 0.7) out += Named(s.name, tr("%@ ב%@", pct(s.accuracy), t.topic.displayName)) to s.accuracy
-            if (skills.isEmpty() && t.accuracy < 0.7) out += Named(t.topic.displayName, tr("%@ · %lld טעויות", pct(t.accuracy), t.wrong)) to t.accuracy
+            for (s in skills.take(3)) if (s.answered >= 4 && s.accuracy < 0.7) out += Named(s.name, tr("%@ ב%@", pct(s.accuracy), t.topic.parentName)) to s.accuracy
+            if (skills.isEmpty() && t.accuracy < 0.7) out += Named(t.topic.parentName, tr("%@ · %lld טעויות", pct(t.accuracy), t.wrong)) to t.accuracy
         }
         return out.sortedBy { it.second }.take(4).map { it.first }
+    }
+
+    /**
+     * This week as a weekly calendar shows it — its first day to its last, the
+     * days still ahead as zeros. A rolling "last 7 days" starts on a different
+     * weekday every day (Rani, 2026-10-12: "היום הראשון הוא א׳… בכלל לא מובן").
+     */
+    fun weekPoints(): List<DayPoint> {
+        val today = startOfToday().timeInMillis
+        val byKey = history.associateBy { it.date }
+        return (0 until 7).map { i ->
+            val day = weekStart().apply { add(Calendar.DAY_OF_YEAR, i) }
+            val key = dayKey(day)
+            val d = if (day.timeInMillis <= today) byKey[key] else null
+            val q = d?.questionsAnswered ?: 0
+            DayPoint(key, q, if (q > 0) d!!.correct.toDouble() / q else 0.0, d?.minutesEarned ?: 0, d?.minutesUsed ?: 0)
+        }
     }
 
     /** One point per calendar day, oldest first, empty days as zeros. */
@@ -186,19 +247,19 @@ class ReportEngine(history: List<DailyStat>) {
             val focus = weakSkill?.let { tr(" הפער נפתח בעיקר ב%@.", it.name) } ?: ""
             return DailyInsight("💡", tr("פער גדול בין נושאים"),
                 tr("%@ %@ על %@ ב-%@ לעומת %@ ב%@ — הפער הגדול ביותר בין הנושאים %@.%@",
-                    name, g(tr("עונה"), tr("עונה")), worst.topic.displayName, pct(worst.accuracy), pct(best.accuracy),
-                    best.topic.displayName, g(tr("שלו"), tr("שלה")), focus),
+                    name, g(tr("עונה"), tr("עונה")), worst.topic.parentName, pct(worst.accuracy), pct(best.accuracy),
+                    best.topic.parentName, g(tr("שלו"), tr("שלה")), focus),
                 tr("10 דקות של %@ ביחד, פעם־פעמיים בשבוע. %@ כבר %@ ב%@ — יש על מה לבנות.",
-                    weakSkill?.name ?: worst.topic.displayName, g(tr("הוא"), tr("היא")), g(tr("חזק"), tr("חזקה")), best.topic.displayName))
+                    weakSkill?.name ?: worst.topic.parentName, g(tr("הוא"), tr("היא")), g(tr("חזק"), tr("חזקה")), best.topic.parentName))
         }
         deltas.firstOrNull()?.takeIf { it.deltaPoints >= 10 }?.let { up ->
-            return DailyInsight("🌟", tr("%@ הופכת לחוזקה", up.topic.displayName),
-                tr("%@ %@ ב%@ ב-%lld נקודות לעומת התקופה הקודמת.", name, g(tr("השתפר"), tr("השתפרה")), up.topic.displayName, up.deltaPoints.roundToInt()),
+            return DailyInsight("🌟", tr("%@ הופכת לחוזקה", up.topic.parentName),
+                tr("%@ %@ ב%@ ב-%lld נקודות לעומת התקופה הקודמת.", name, g(tr("השתפר"), tr("השתפרה")), up.topic.parentName, up.deltaPoints.roundToInt()),
                 tr("שווה לציין את זה בקול — ילדים ממשיכים להשתפר במה שמשבחים אותם עליו."))
         }
         deltas.lastOrNull()?.takeIf { it.deltaPoints <= -8 }?.let { down ->
-            return DailyInsight("🔎", tr("ירידה קלה ב%@", down.topic.displayName),
-                tr("הדיוק של %@ ב%@ ירד ב-%lld נקודות לעומת התקופה הקודמת. לפעמים זה פשוט חומר חדש שנכנס.", name, down.topic.displayName, abs(down.deltaPoints).roundToInt()),
+            return DailyInsight("🔎", tr("ירידה קלה ב%@", down.topic.parentName),
+                tr("הדיוק של %@ ב%@ ירד ב-%lld נקודות לעומת התקופה הקודמת. לפעמים זה פשוט חומר חדש שנכנס.", name, down.topic.parentName, abs(down.deltaPoints).roundToInt()),
                 tr("%@ מה היה קשה השבוע — לרוב זו שאלה אחת שפותחת הכול.", g(tr("שאלו אותו"), tr("שאלו אותה"))))
         }
         val s = summary(p)

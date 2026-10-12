@@ -327,7 +327,7 @@ extension InsightsEngine {
                 emoji: "🌟",
                 title: tr("\(up.topic.parentName) הופכת לחוזקה"),
                 body: tr("\(name) \(g(tr("השתפר"), tr("השתפרה"))) ב\(up.topic.parentName) ב-\(Int(up.deltaPoints.rounded())) נקודות לעומת התקופה הקודמת."),
-                recommendation: tr("שוה לצין את זה בקול — ילדים ממשיכים להשתפר במה שמשבחים אותם עליו."))
+                recommendation: tr("שווה לציין את זה בקול — ילדים ממשיכים להשתפר במה שמשבחים אותם עליו."))
         }
         // 3. A subject that slipped.
         if let down = deltas.last, down.deltaPoints <= -8 {
@@ -344,7 +344,7 @@ extension InsightsEngine {
                 emoji: "🔥",
                 title: tr("\(s.activeDays) ימים של למידה"),
                 body: tr("\(name) \(g(tr("למד"), tr("למדה"))) ב-\(s.activeDays) ימים \(period == .week ? tr("השבוע") : tr("החודש")), \(s.questions) שאלות בסך הכול ב-\(pct(s.accuracy)) הצלחה."),
-                recommendation: tr("הרציפות שוה יותר מהכמות — גם 10 דקות ביום שומרות עליה."))
+                recommendation: tr("הרציפות שווה יותר מהכמות — גם 10 דקות ביום שומרות עליה."))
         }
         // 5. Learning for its own sake.
         if s.voluntaryLearningRate >= 0.3, s.questions >= 20 {

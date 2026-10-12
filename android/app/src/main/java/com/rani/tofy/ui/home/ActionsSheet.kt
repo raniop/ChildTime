@@ -25,17 +25,17 @@ import com.rani.tofy.ui.theme.*
 
 /**
  * "⚡ פעולות" — what a parent does for ONE child, in one short window (Rani
- * approved the mockup 2026-10-08; iOS ChildActionsSheet). The two remote
- * controls and "where" up top as tiles, then the three places a parent goes
- * next. Editing is the ✏️ by the name, the device is on the card, deletion is
- * in the child's settings.
+ * approved the mockup 2026-10-08; iOS ChildActionsSheet). The lock and
+ * "where" up top as tiles, then the three places a parent goes next. 💝 The
+ * gift has its own button on the child's card; editing is the ✏️ by the name,
+ * the device is on the card, deletion is in the child's settings.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActionsSheet(child: Child, state: FamilyState, onDismiss: () -> Unit, onChores: () -> Unit, onConnect: () -> Unit, onSettings: () -> Unit,
     onScreenTime: () -> Unit = {},
                  onLocation: () -> Unit = {}) {
-    var expanded by remember { mutableStateOf<String?>(null) }   // "gift" | "lock"
+    var expanded by remember { mutableStateOf<String?>(null) }   // "lock"
     var confirmRevoke by remember { mutableStateOf(false) }
     val hasDevice = state.hasDevice(child)
     val name = stripNiqqud(child.name)
@@ -59,27 +59,10 @@ fun ActionsSheet(child: Child, state: FamilyState, onDismiss: () -> Unit, onChor
             }
             if (hasDevice) {
                 Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Tile("💝", tr("מתנת דקות"), expanded == "gift", Modifier.weight(1f)) { expanded = if (expanded == "gift") null else "gift" }
                     Tile("🔒", tr("נעילה"), expanded == "lock", Modifier.weight(1f)) { expanded = if (expanded == "lock") null else "lock" }
                     Tile("📍", tr("איפה %@", name), false, Modifier.weight(1f), onClick = onLocation)
                 }
                 when (expanded) {
-                    "gift" -> {
-                        val options = listOf(15 to tr("רבע שעה"), 30 to tr("חצי שעה"), 60 to tr("שעה"), 120 to tr("שעתיים"), 240 to tr("4 שעות"))
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            options.chunked(3).forEach { row ->
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    row.forEach { (m, label) ->
-                                        Chip(label, Modifier.weight(1f)) {
-                                            Commands.gift(child.id, m) { wanted -> tr("ביקשתם %lld — זה המקסימום שנשאר להיום, עד חצות.", wanted) }
-                                            onDismiss()
-                                        }
-                                    }
-                                    repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
-                                }
-                            }
-                        }
-                    }
                     "lock" -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Chip(tr("נעל עכשיו"), Modifier.fillMaxWidth()) { Commands.lock(child.id); onDismiss() }
                         Chip(tr("נעל ואפס דקות מתנה"), Modifier.fillMaxWidth(), destructive = true) { confirmRevoke = true }

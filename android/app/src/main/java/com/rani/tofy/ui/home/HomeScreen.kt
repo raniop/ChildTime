@@ -41,6 +41,8 @@ fun HomeScreen(
     state: FamilyState,
     onOpenChild: (Child) -> Unit,
     onActions: (Child) -> Unit,
+    /** 💝 The gift window, straight from the child's card. */
+    onGift: (Child) -> Unit = {},
     /** ✏️ Avatar + name → this child's settings, in one tap (iOS homeSettingsChild). */
     onChildSettings: (Child) -> Unit,
     onAddChild: () -> Unit,
@@ -126,7 +128,7 @@ fun HomeScreen(
                         // the connect button of the first child without a device.
                         marked = child.id == firstChild?.id, markConnect = child.id == connectFirst?.id,
                         tick = tick,
-                        onOpen = { onOpenChild(child) }, onActions = { onActions(child) }, onConnect = { onConnectDevice(child) },
+                        onOpen = { onOpenChild(child) }, onActions = { onActions(child) }, onGift = { onGift(child) }, onConnect = { onConnectDevice(child) },
                         onSettings = { onChildSettings(child) }, onLocation = { onLocation(child) })
                 }
                 // 📍 Once, for families from before location — BELOW the children.
@@ -185,7 +187,7 @@ private fun ChildCard(
     state: FamilyState, child: Child, s: Progress,
     marked: Boolean, markConnect: Boolean,
     @Suppress("UNUSED_PARAMETER") tick: Int,   // recomposes the live countdown each second
-    onOpen: () -> Unit, onActions: () -> Unit, onConnect: () -> Unit,
+    onOpen: () -> Unit, onActions: () -> Unit, onGift: () -> Unit, onConnect: () -> Unit,
     onSettings: () -> Unit,
     onLocation: () -> Unit = {},
 ) {
@@ -248,24 +250,40 @@ private fun ChildCard(
         } else {
             P(tr("%@ · אין עדיין מכשיר מחובר.", gradeName(child.effectiveGrade)), 13f)
         }
-        // The buttons sit on the tiles' grid (Rani): with a device, "מידע נוסף"
-        // spans two tiles and the gap between them and ⚡ is exactly the third;
-        // without one, three equal columns — ⚡ in the same place on every card.
+        // The buttons sit on the tiles' grid, three equal columns (Rani). With a
+        // device: 📊 · ⚡ · 💝 — the gift is one tap from the home, not inside
+        // "פעולות" (Rani, 2026-10-12). Without one: 📊 · חברו מכשיר · ⚡.
         androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
             val gap = 8.dp
             val t = (maxWidth - gap * 2) / 3
             Row(horizontalArrangement = Arrangement.spacedBy(gap), verticalAlignment = Alignment.CenterVertically) {
+                CardButton(tr("📊 מידע נוסף"), white = true, Modifier.width(t)) { onOpen() }
                 if (hasDevice) {
-                    CardButton(tr("📊 מידע נוסף"), white = true, Modifier.width(t * 2 + gap)) { onOpen() }
+                    CardButton(tr("⚡ פעולות"), white = false, Modifier.width(t).coachMark("p.actions", marked)) { onActions() }
+                    GiftButton(Modifier.width(t)) { onGift() }
                 } else {
-                    CardButton(tr("📊 מידע נוסף"), white = true, Modifier.width(t)) { onOpen() }
                     CardButton(tr("+ חברו מכשיר"), white = false, Modifier.width(t).coachMark("p.connect", markConnect)) { onConnect() }
+                    CardButton(tr("⚡ פעולות"), white = false, Modifier.width(t).coachMark("p.actions", marked)) { onActions() }
                 }
-                CardButton(tr("⚡ פעולות"), white = false, Modifier.width(t).coachMark("p.actions", marked)) { onActions() }
             }
         }
         // 🧒 Kid Mode: this phone becomes the child's for a while (screen-pinned).
         WhiteButton(tr("תנו ל%@ לשחק כאן 🧒", child.name), Modifier.fillMaxWidth().coachMark("p.playHere", marked)) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
+    }
+}
+
+/** 💝 The gift button: the one warm tile on the card (iOS gridCardGift). */
+@Composable
+private fun GiftButton(modifier: Modifier, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(16.dp)
+    Box(
+        modifier.height(46.dp).clip(shape)
+            .background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color(0xFFFF8FC0), Color(0xFFFF5F9A))))
+            .border(1.dp, Color.White.copy(alpha = 0.45f), shape)
+            .clickable(onClick = onClick).padding(horizontal = 4.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        com.rani.tofy.kid.ui.play.FitText("💝 " + tr("מתנת דקות"), 13.5.sp, color = Color.White, weight = FontWeight.ExtraBold, maxLines = 1, minScale = 0.6f)
     }
 }
 

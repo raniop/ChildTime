@@ -175,3 +175,12 @@ enum Worlds {
         all.first { $0.id == id }
     }
 }
+
+extension World {
+    /// The world's name on a PARENT's screen: no niqqud — and the one name that
+    /// needs a letter added back once the niqqud is gone ("הספורים" → "הסיפורים").
+    var parentName: String {
+        let plain = Question.stripNiqqud(name)
+        return plain == "יער הספורים" ? "יער הסיפורים" : plain
+    }
+}

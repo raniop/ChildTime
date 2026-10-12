@@ -11,6 +11,7 @@ import com.rani.tofy.data.strList
 import com.rani.tofy.i18n.AppLanguage
 import com.rani.tofy.i18n.I18n
 import com.rani.tofy.i18n.tr
+import com.rani.tofy.ui.home.stripNiqqud
 
 /** Topic.swift — raw values are the Firestore keys (difficultyByTopic, enabledTopics, perTopic…). */
 enum class Topic(val raw: String, private val nameKey: String, private val emojiRaw: String, val isPack: Boolean = false) {
@@ -118,6 +119,23 @@ fun Topic.hasContent(lang: AppLanguage = I18n.language): Boolean = when {
     lang == AppLanguage.HE -> true
     this == Topic.HEBREW -> lang == AppLanguage.RU || lang == AppLanguage.AR
     else -> true
+}
+
+// MARK: - A PARENT's screen carries no niqqud (the child's own labels keep theirs) — iOS `parentName`.
+// Dropping the niqqud leaves the short spelling, so the few words that need a
+// letter added back are spelt in full here ("חנוך" → "חינוך").
+
+val Topic.parentName: String get() = when (val plain = stripNiqqud(displayName)) {
+    "חנוך פיננסי" -> "חינוך פיננסי"
+    "מטבח ומדע של אכל" -> "מטבח ומדע של אוכל"
+    else -> plain
+}
+val Difficulty.parentName: String get() = when (this) { Difficulty.EASY -> tr("קל"); Difficulty.MEDIUM -> tr("בינוני"); Difficulty.HARD -> tr("קשה") }
+val LearningLevel.parentName: String get() = stripNiqqud(displayName)
+val Interest.parentLabel: String get() = stripNiqqud(label)
+val World.parentName: String get() = if (topic.isPack) topic.parentName else when (val plain = stripNiqqud(name)) {
+    "יער הספורים" -> "יער הסיפורים"
+    else -> plain
 }
 
 // MARK: - Child helpers (Profile.swift semantics on the raw ChildRecord)

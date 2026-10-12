@@ -74,6 +74,15 @@ object Commands {
     val status: StateFlow<CommandStatus?> = _status
     fun clearStatus() { _status.value = null }
 
+    /** 💝 A gift sent from the gift window: the window shows its progress itself, so no status sheet opens. */
+    private val _giftStatus = MutableStateFlow<CommandStatus?>(null)
+    val giftStatus: StateFlow<CommandStatus?> = _giftStatus
+    fun clearGiftStatus() { _giftStatus.value = null }
+    /** 🧪 Debug screenshots: a gift that already reached the cloud (ui/DemoFamily.kt) — nothing is written. */
+    internal fun demoGiftSaved(childID: String, minutes: Int) {
+        if (com.rani.tofy.BuildConfig.DEBUG) _giftStatus.value = CommandStatus(childID, CommandStatus.Kind.GIFT, nowSecs(), minutes, reachedCloud = true)
+    }
+
     private suspend fun childCommand(childID: String, fields: Map<String, Any?>): WriteOutcome {
         val ref = db.collection("children").document(childID)
         var out = confirmedMerge(ref, fields)
@@ -90,11 +99,13 @@ object Commands {
     }
 
     /** 💝 Into the child's GIFT pocket; the child opens it when they choose. */
-    fun gift(childID: String, wanted: Int, capNote: (Int) -> String?) {
+    /** Returns the minutes actually sent (capped at what is left until midnight), 0 when nothing was. */
+    fun gift(childID: String, wanted: Int, inline: Boolean = false, capNote: (Int) -> String?): Int {
         val allowed = minOf(wanted, minutesUntilMidnight())
-        if (allowed <= 0) return
+        if (allowed <= 0) return 0
         val stamp = nowSecs()
-        _status.value = CommandStatus(childID, CommandStatus.Kind.GIFT, stamp, allowed, if (allowed < wanted) capNote(wanted) else null)
+        val status = CommandStatus(childID, CommandStatus.Kind.GIFT, stamp, allowed, if (allowed < wanted) capNote(wanted) else null)
+        if (inline) _giftStatus.value = status else _status.value = status
         val fields = mutableMapOf<String, Any?>("pendingGiftAdjustment" to FieldValue.increment(allowed.toLong()), "giftSentAt" to stamp)
         uid?.let { fields["giftCommandBy"] = it }
         scope.launch {
@@ -102,6 +113,7 @@ object Commands {
             mark(stamp, out)
             ActivityStore.record(ActivityStore.Kind.GIFT, childID, allowed, stamp, out)
         }
+        return allowed
     }
 
     /** 🔒 Re-lock now: a stamp on every device row, then settle the lease if the device never answers. */
@@ -215,12 +227,15 @@ object Commands {
         return best
     }
 
-    private fun mark(stamp: Double, out: WriteOutcome) = _status.update {
-        if (it?.stamp != stamp) it else when (out) {
-            WriteOutcome.OK -> it.copy(reachedCloud = true)
-            WriteOutcome.QUEUED -> it.copy(queued = true)
-            else -> it.copy(failed = true)
+    private fun mark(stamp: Double, out: WriteOutcome) {
+        val step = { it: CommandStatus? ->
+            if (it?.stamp != stamp) it else when (out) {
+                WriteOutcome.OK -> it.copy(reachedCloud = true)
+                WriteOutcome.QUEUED -> it.copy(queued = true)
+                else -> it.copy(failed = true)
+            }
         }
+        _status.update(step); _giftStatus.update(step)
     }
 
     /**

@@ -297,7 +297,7 @@ struct ChildReportView: View {
     private func worldRow(_ w: World, label: String, tint: Color?) -> some View {
         HStack(spacing: 10) {
             Text(w.emoji).font(.system(size: 20))
-            Text(Question.stripNiqqud(w.name))
+            Text(w.parentName)
                 .font(.system(size: 14.5, weight: .semibold, design: .rounded))
                 .lineLimit(2).minimumScaleFactor(0.85)
             Spacer(minLength: 6)

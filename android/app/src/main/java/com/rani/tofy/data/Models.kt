@@ -125,6 +125,9 @@ data class Progress(
     val topicAccuracy: Map<String, Double>,
     val topicAnswered: Map<String, Int>,
     val lastModifiedAt: Double?,
+    /** 💝 Minutes the parents gave TODAY (0 when the stamp is another day's) and gift minutes still unopened. */
+    val giftGivenToday: Int = 0,
+    val giftMinutes: Int = 0,
 ) {
     companion object {
         val EMPTY = Progress(0, 0, 0, null, 0, 0, 0, 0, 0, 0, 0, emptyMap(), emptyMap(), null)
@@ -150,6 +153,10 @@ data class Progress(
                 topicAccuracy = d.map("topicAccuracy")?.mapNotNull { (k, v) -> (v as? Number)?.let { k to it.toDouble() } }?.toMap() ?: emptyMap(),
                 topicAnswered = d.map("topicAnswered")?.mapNotNull { (k, v) -> (v as? Number)?.let { k to it.toInt() } }?.toMap() ?: emptyMap(),
                 lastModifiedAt = d.appleSecs("lastModifiedAt"),
+                giftGivenToday = d.appleSecs("giftGivenDate")?.takeIf { isToday(it) }?.let { d.int("giftGivenToday") } ?: 0,
+                // ProgressSnapshot.giftMinutesShown: the counters, and the minute mirror only for a snapshot from before them.
+                giftMinutes = if (d["giftSecondsIn"] == null && d["giftSecondsOut"] == null) d.int("parentGiftMinutes") ?: 0
+                    else maxOf(0, (d.int("giftSecondsIn") ?: 0) - (d.int("giftSecondsOut") ?: 0)) / 60,
             )
         }
     }

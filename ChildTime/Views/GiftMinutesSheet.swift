@@ -25,6 +25,10 @@ struct GiftMinutesSheet: View {
     @State private var minutes = 30
     /// The minutes that were sent — nil until "שליחה" is pressed.
     @State private var sentMinutes: Int?
+    /// What was given BEFORE this window opened. `givenToday` is live: once the
+    /// child's device takes the gift it grows by itself, and adding what was
+    /// just sent on top of that would count the same minutes twice.
+    @State private var givenAtOpen: Int?
 
     private var name: String { Question.stripNiqqud(profile.name) }
     private var girl: Bool { profile.gender == .girl }
@@ -37,7 +41,10 @@ struct GiftMinutesSheet: View {
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
             .environment(\.layoutDirection, .app)
-            .onAppear { minutes = min(minutes, ceiling) }
+            .onAppear {
+                minutes = min(minutes, ceiling)
+                if givenAtOpen == nil { givenAtOpen = givenToday }
+            }
     }
 
     private var chooser: some View {
@@ -59,7 +66,7 @@ struct GiftMinutesSheet: View {
                     .fixedSize(horizontal: false, vertical: true)
 
                 HStack(spacing: 10) {
-                    stat(givenToday + (sentMinutes ?? 0), tr("נתתם היום"))
+                    stat((givenAtOpen ?? givenToday) + (sentMinutes ?? 0), tr("נתתם היום"))
                     stat(waiting, tr("עוד לא נוצלו"))   // "מחכות לנוני" was not clear (Rani)
                 }
 

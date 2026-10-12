@@ -70,8 +70,16 @@ object ChildReportRepository {
     private val _history = MutableStateFlow<Map<String, List<DailyStat>>>(emptyMap())
     val history: StateFlow<Map<String, List<DailyStat>>> = _history
 
+    /** 🧪 Debug screenshots: a made-up child's history and snapshot doc (ui/DemoFamily.kt). */
+    private var demoDocs: Map<String, Doc> = emptyMap()
+    internal fun demoSeed(histories: Map<String, List<DailyStat>>, docs: Map<String, Doc>) {
+        if (!com.rani.tofy.BuildConfig.DEBUG) return
+        _history.value = histories; demoDocs = docs
+    }
+
     /** Pull every dailyStats doc. Returns false on a read error (the cached copy stays). */
     suspend fun refreshHistory(childID: String): Boolean = runCatching {
+        if (demoDocs.containsKey(childID)) return@runCatching true
         val docs = db.collection("children").document(childID).collection("dailyStats").get().await().documents
         val stats = docs.mapNotNull { d -> d.data?.let { DailyStat.from(d.id, it) } }.sortedBy { it.date }
         _history.update { it + (childID to stats) }
@@ -79,7 +87,7 @@ object ChildReportRepository {
     }.getOrDefault(false)
 
     /** Live raw state/current — the snapshot maps Progress doesn't model. */
-    fun stateDoc(childID: String): Flow<Doc> = callbackFlow {
+    fun stateDoc(childID: String): Flow<Doc> = demoDocs[childID]?.let { kotlinx.coroutines.flow.flowOf(it) } ?: callbackFlow {
         val reg = db.collection("children").document(childID).collection("state").document("current")
             .addSnapshotListener { s, _ -> trySend(s?.data ?: emptyMap()) }
         awaitClose { reg.remove() }

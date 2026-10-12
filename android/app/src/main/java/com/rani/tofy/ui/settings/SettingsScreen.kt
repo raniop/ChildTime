@@ -68,9 +68,11 @@ import com.rani.tofy.ui.common.P
 import com.rani.tofy.ui.theme.GlassBackdrop
 import com.rani.tofy.ui.theme.Ink
 import com.rani.tofy.ui.theme.Rounded
+import com.rani.tofy.ui.theme.glassPane
 import kotlinx.coroutines.launch
 
 private enum class SettingsSheet { LANGUAGE, ORDER, PIN, FEEDBACK, WHATS_NEW, BACKDROP }
+private enum class SettingsPage { MENU, FAMILY, NOTIFICATIONS, LOOK, ABOUT }
 
 /**
  * ParentSettingsView.swift for the Android parent: what applies to a parent's
@@ -84,7 +86,11 @@ fun SettingsScreen(onBack: () -> Unit, onOpenChild: (String) -> Unit = {}) {
     var addingParent by remember { mutableStateOf(false) }
     if (addingParent) { AddParentScreen(onClose = { addingParent = false }); return }
 
-    BackHandler(onBack = onBack)
+    // One screen, pages inside it: a door slides its page in and "back" goes one step
+    // (never a screen closing to open another — Rani, 2026-10-11).
+    var page by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(SettingsPage.MENU) }
+    fun back() { if (page == SettingsPage.MENU) onBack() else page = SettingsPage.MENU }
+    BackHandler { back() }
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     val state by FamilyRepository.state.collectAsState()
@@ -118,92 +124,113 @@ fun SettingsScreen(onBack: () -> Unit, onOpenChild: (String) -> Unit = {}) {
         if (Build.VERSION.SDK_INT >= 33) askPermission.launch(Manifest.permission.POST_NOTIFICATIONS) else openNotificationSettings()
     }
 
+    val kids = state.orderedChildren
+    val backdropName = com.rani.tofy.ui.theme.BackdropStore.parentID.let { id ->
+        if (com.rani.tofy.ui.theme.BackdropTheme.isPhoto(id)) tr("התמונה שלי")
+        else com.rani.tofy.ui.home.stripNiqqud(com.rani.tofy.ui.theme.BackdropPicture.find(id)?.displayName ?: com.rani.tofy.ui.theme.BackdropTheme.find(id).displayName)
+    }
+    val lookTitle = tr("מראה ושפה") + " · Language"
+    val title = when (page) {
+        SettingsPage.MENU -> tr("הגדרות"); SettingsPage.FAMILY -> tr("המשפחה"); SettingsPage.NOTIFICATIONS -> tr("התראות")
+        SettingsPage.LOOK -> lookTitle; SettingsPage.ABOUT -> tr("אודות ופרטיות")
+    }
+
     GlassBackdrop {
         Column(Modifier.contentColumn().fillMaxSize().systemBarsPadding().imePadding()) {
-            SettingsTopBar(tr("הגדרות"), onBack)
+            SettingsTopBar(title, ::back)
             LazyColumn(
                 Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 40.dp),
-                verticalArrangement = Arrangement.spacedBy(18.dp),
+                verticalArrangement = Arrangement.spacedBy(if (page == SettingsPage.MENU || page == SettingsPage.LOOK) 12.dp else 18.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                // 🌍 Written in both languages, so a parent who switched by mistake finds the way back.
-                item {
-                    Section {
-                        SettingsRow("🌍", tr("שפה · Language"), I18n.language.native, chevron = true) { sheet = SettingsSheet.LANGUAGE }
-                    }
-                }
-                // 🧒 Whose settings? A child's first — that is what parents come here for
-                // (Sasha, twice: "אני כל פעם שעה מחפשת איפה אני מגדירה את הקושי") — then
-                // everything that is about the family as a whole.
-                val kids = state.orderedChildren
-                if (kids.isNotEmpty()) item {
-                    Section(tr("הגדרות של ילד")) {
-                        kids.forEachIndexed { i, c ->
-                            if (i > 0) RowDivider()
-                            Row(Modifier.fillMaxWidth().clickable { onOpenChild(c.id) }.padding(horizontal = 14.dp, vertical = 10.dp),
+                when (page) {
+                // The doors, each with a one-line summary (ParentSettingsView.settingsMenu):
+                // 🧒 a child's settings first — that is what parents come here for (Sasha,
+                // twice: "אני כל פעם שעה מחפשת איפה אני מגדירה את הקושי") — then what is
+                // about the family as a whole. The language is NOT on top (Rani, 2026-10-12).
+                SettingsPage.MENU -> {
+                    if (kids.isNotEmpty()) {
+                        item { MenuHeading(tr("הגדרות של ילד")) }
+                        items(kids.size) { i ->
+                            val c = kids[i]
+                            Row(Modifier.widthIn(max = 560.dp).fillMaxWidth().glassPane(16.dp).clickable { onOpenChild(c.id) }.padding(14.dp),
                                 horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                                 com.rani.tofy.ui.common.ChildAvatar(c, 44.dp)
                                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                     Text(c.name, color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
-                                    P(tr("רמת קושי, זמן מסך, עולמות ושפה"), 12.5f, color = Ink.secondary)
+                                    // "כיתה ו׳ · זמן מסך, למידה ומכשירים" — what waits behind the row.
+                                    P(if (c.grade == null) tr("זמן מסך, למידה ומכשירים")
+                                      else tr("%@ · זמן מסך, למידה ומכשירים", com.rani.tofy.ui.home.gradeNameForParent(c.effectiveGrade)), 12.5f, color = Ink.secondary)
                                 }
                                 androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = Ink.tertiary)
                             }
                         }
+                        item { MenuHeading(tr("הגדרות כלליות")) }
                     }
-                }
-                // 🎨 The parent's own backdrop, on this phone (some don't want the colourful one).
-                item {
-                    Section(if (kids.isNotEmpty()) tr("הגדרות כלליות") else null) {
-                        val id = com.rani.tofy.ui.theme.BackdropStore.parentID
-                        val name = if (com.rani.tofy.ui.theme.BackdropTheme.isPhoto(id)) tr("התמונה שלי")
-                                   else com.rani.tofy.ui.home.stripNiqqud(com.rani.tofy.ui.theme.BackdropPicture.find(id)?.displayName ?: com.rani.tofy.ui.theme.BackdropTheme.find(id).displayName)
-                        SettingsRow("🎨", tr("רקע"), name, chevron = true) { sheet = SettingsSheet.BACKDROP }
+                    item {
+                        val parents = (listOfNotNull(user?.displayName?.takeIf { it.isNotBlank() }) + linkedParentNames(hh?.parentNames ?: emptyMap()))
+                            .distinct().joinToString(", ").ifEmpty { tr("הורה") }
+                        val count = if (state.children.size == 1) tr("ילד אחד") else tr("%lld ילדים", state.children.size)
+                        Door("👪", tr("המשפחה"), "$parents · $count") { page = SettingsPage.FAMILY }
                     }
+                    item { Door("🔔", tr("התראות"), if (pushOn) tr("פועלות") else tr("כבויות")) { page = SettingsPage.NOTIFICATIONS } }
+                    item { Door("🔐", tr("קוד הורה"), tr("שנה קוד הורה")) { sheet = SettingsSheet.PIN } }
+                    // 🎨🌍 The backdrop and the language in one door. "Language" stays in Latin
+                    // letters, so a parent who switched by mistake always finds the way back.
+                    item { Door("🎨", lookTitle, "$backdropName · ${I18n.language.native}") { page = SettingsPage.LOOK } }
+                    // 📱 Nothing to set here on a parent's phone — so it says where it IS set.
+                    item {
+                        Door("📱", tr("אפליקציות ונעילה"),
+                            tr("נעילת האפליקציות, הצלילים והתגמול על תשובות נכונות מוגדרים במכשיר של כל ילד: פותחים שם את טופי ונכנסים להגדרות עם קוד ההורה."),
+                            soft = true, onClick = null)
+                    }
+                    item { Door("ℹ️", tr("אודות ופרטיות"), SettingsRepository.versionLine + " · " + tr("התנתקות, מחיקה"), soft = true) { page = SettingsPage.ABOUT } }
                 }
 
                 // 👪 The family: its name, the parents in it, the order of the kids.
-                item {
-                    Section(tr("שם המשפחה"), tr("מופיע במסך ההורים ובהודעות — לכל ההורים במשפחה.")) {
-                        FamilyNameRow(hh?.familyName)
-                    }
-                }
-                // 🌍 Only when this phone's clock differs from the family's (ParentSettingsView.timeZoneSection).
-                hh?.timeZone?.let { stored ->
-                    val family = java.util.TimeZone.getTimeZone(stored)
-                    val phone = java.util.TimeZone.getDefault()
-                    val now = System.currentTimeMillis()
-                    if (family.getOffset(now) != phone.getOffset(now)) item {
-                        Section(tr("אזור הזמן של המשפחה"), tr("לפיו נקבעות השעות והתאריכים בהתראות — לכל ההורים במשפחה.")) {
-                            FamilyTimeZoneRow(stored, phone.id)
+                SettingsPage.FAMILY -> {
+                    item {
+                        Section(tr("שם המשפחה"), tr("מופיע במסך ההורים ובהודעות — לכל ההורים במשפחה.")) {
+                            FamilyNameRow(hh?.familyName)
                         }
                     }
-                }
-                item {
-                    Section(tr("סנכרון בין מכשירים")) {
-                        val name = user?.displayName?.takeIf { it.isNotBlank() }
-                        val sub = buildList {
-                            user?.email?.takeIf { it != name }?.let { add(it) }
-                            if ("google.com" in providers) add(tr("דרך Google")) else if ("apple.com" in providers) add(tr("דרך Apple"))
-                        }.joinToString(" · ").ifEmpty { null }
-                        SettingsRow("✅", name ?: user?.email ?: tr("מחובר"), sub)
-                        linkedParentNames(hh?.parentNames ?: emptyMap()).forEach { p ->
+                    // 🌍 Only when this phone's clock differs from the family's (ParentSettingsView.timeZoneSection).
+                    hh?.timeZone?.let { stored ->
+                        val family = java.util.TimeZone.getTimeZone(stored)
+                        val phone = java.util.TimeZone.getDefault()
+                        val now = System.currentTimeMillis()
+                        if (family.getOffset(now) != phone.getOffset(now)) item {
+                            Section(tr("אזור הזמן של המשפחה"), tr("לפיו נקבעות השעות והתאריכים בהתראות — לכל ההורים במשפחה.")) {
+                                FamilyTimeZoneRow(stored, phone.id)
+                            }
+                        }
+                    }
+                    if (state.children.size >= 2) item {
+                        Section(null, tr("הסדר של הכרטיסים במסך הבית")) {
+                            SettingsRow("↕️", tr("סדר את הילדים"), chevron = true) { sheet = SettingsSheet.ORDER }
+                        }
+                    }
+                    item {
+                        Section(tr("סנכרון בין מכשירים")) {
+                            val name = user?.displayName?.takeIf { it.isNotBlank() }
+                            val sub = buildList {
+                                user?.email?.takeIf { it != name }?.let { add(it) }
+                                if ("google.com" in providers) add(tr("דרך Google")) else if ("apple.com" in providers) add(tr("דרך Apple"))
+                            }.joinToString(" · ").ifEmpty { null }
+                            SettingsRow("✅", name ?: user?.email ?: tr("מחובר"), sub)
+                            linkedParentNames(hh?.parentNames ?: emptyMap()).forEach { p ->
+                                RowDivider()
+                                SettingsRow("👥", p, tr("הורה במשפחה"))
+                            }
                             RowDivider()
-                            SettingsRow("👥", p, tr("הורה במשפחה"))
+                            SettingsRow("➕", tr("הוסיפו הורה למשפחה"), titleColor = Ink.gold2, chevron = true) { addingParent = true }
                         }
-                        RowDivider()
-                        SettingsRow("➕", tr("הוסיפו הורה למשפחה"), titleColor = Ink.gold2, chevron = true) { addingParent = true }
-                    }
-                }
-                if (state.children.size >= 2) item {
-                    Section(tr("סדר הילדים")) {
-                        SettingsRow("↕️", tr("סדר את הילדים"), chevron = true) { sheet = SettingsSheet.ORDER }
                     }
                 }
 
                 // 🔔 Notifications to this phone.
-                item {
+                SettingsPage.NOTIFICATIONS -> item {
                     Section(tr("התראות להורה"), tr("קבלו עדכון כשהילד מתחיל ומסיים לשחק, פותח רצף, זוכה בגלגל מזל או מגלה תחום חדש — וגם דוח שבועי. ההתראות נשלחות בין המכשירים בבית. \"שלח התראת בדיקה\" שולח התראה אליכם עכשיו כדי לוודא שהכול עובד.")) {
                         if (pushOn) SettingsRow("🔔", tr("התראות פעילות"), titleColor = Ink.good)
                         else SettingsRow("🔕", tr("הפעל התראות חיות"), titleColor = Ink.gold2, chevron = true) { enablePush() }
@@ -218,59 +245,52 @@ fun SettingsScreen(onBack: () -> Unit, onOpenChild: (String) -> Unit = {}) {
                     }
                 }
 
-                // 🔐 The family parent code.
-                item {
-                    Section(tr("קוד הורה")) {
-                        SettingsRow("🔑", tr("שנה קוד הורה"), chevron = true) { sheet = SettingsSheet.PIN }
-                    }
+                // 🎨🌍 "מראה ושפה" — the parent's backdrop (on this phone) and the app's language.
+                SettingsPage.LOOK -> {
+                    item { Door("🎨", tr("רקע"), backdropName) { sheet = SettingsSheet.BACKDROP } }
+                    item { Door("🌍", tr("שפה · Language"), I18n.language.native) { sheet = SettingsSheet.LANGUAGE } }
                 }
 
-                // 📱 iOS's Screen Time rows are per-device — say where they live instead.
-                item {
-                    Section(tr("אפליקציות ונעילה"), tr("נעילת האפליקציות, הצלילים והתגמול על תשובות נכונות מוגדרים במכשיר של כל ילד: פותחים שם את טופי ונכנסים להגדרות עם קוד ההורה.")) {
-                        SettingsRow("📱", tr("מוגדר במכשיר של כל ילד"))
-                    }
-                }
-
-                // ℹ️ About, support and the legal pages.
-                item {
-                    Section(tr("אודות ופרטיות")) {
-                        SettingsRow("✨", tr("מה חדש בטופי ✨"), chevron = true) { sheet = SettingsSheet.WHATS_NEW }
-                        RowDivider()
-                        // Every tour on this device (the parent's home, and a child's
-                        // home on a shared phone) runs again the next time its screen opens.
-                        SettingsRow(
-                            "👆",
-                            if (tourResetDone) tr("ההדרכה תוצג שוב במסך הבית ✓") else tr("הצגת ההדרכה שוב"),
-                            titleColor = if (tourResetDone) Ink.good else Ink.primary,
-                        ) { if (!tourResetDone) { CoachTours.reset(); tourResetDone = true } }
-                        RowDivider()
-                        SettingsRow("💬", tr("פידבק והצעות"), chevron = true) { sheet = SettingsSheet.FEEDBACK }
-                        RowDivider()
-                        SettingsRow("🛟", tr("עזרה ותמיכה"), chevron = true) {
-                            openUrl(ctx, if (I18n.language.code == "he") "https://tofyapp.com/support" else "https://tofyapp.com/en/support")
+                // ℹ️ About, support, the legal pages — and the account.
+                SettingsPage.ABOUT -> {
+                    item {
+                        Section(tr("אודות ופרטיות")) {
+                            SettingsRow("✨", tr("מה חדש בטופי ✨"), chevron = true) { sheet = SettingsSheet.WHATS_NEW }
+                            RowDivider()
+                            // Every tour on this device (the parent's home, and a child's
+                            // home on a shared phone) runs again the next time its screen opens.
+                            SettingsRow(
+                                "👆",
+                                if (tourResetDone) tr("ההדרכה תוצג שוב במסך הבית ✓") else tr("הצגת ההדרכה שוב"),
+                                titleColor = if (tourResetDone) Ink.good else Ink.primary,
+                            ) { if (!tourResetDone) { CoachTours.reset(); tourResetDone = true } }
+                            RowDivider()
+                            SettingsRow("💬", tr("פידבק והצעות"), chevron = true) { sheet = SettingsSheet.FEEDBACK }
+                            RowDivider()
+                            SettingsRow("🛟", tr("עזרה ותמיכה"), chevron = true) {
+                                openUrl(ctx, if (I18n.language.code == "he") "https://tofyapp.com/support" else "https://tofyapp.com/en/support")
+                            }
+                            RowDivider()
+                            SettingsRow("🔒", tr("מדיניות פרטיות"), chevron = true) { openUrl(ctx, "https://tofyapp.com/privacy") }
+                            RowDivider()
+                            SettingsRow("📄", tr("תנאי שימוש"), chevron = true) { openUrl(ctx, "https://tofyapp.com/terms") }
                         }
-                        RowDivider()
-                        SettingsRow("🔒", tr("מדיניות פרטיות"), chevron = true) { openUrl(ctx, "https://tofyapp.com/privacy") }
-                        RowDivider()
-                        SettingsRow("📄", tr("תנאי שימוש"), chevron = true) { openUrl(ctx, "https://tofyapp.com/terms") }
+                    }
+                    // 🚪 The account.
+                    item {
+                        Section(tr("פרטיות ונתונים")) {
+                            SettingsRow("🚪", tr("התנתקות")) { confirmSignOut = true }
+                            RowDivider()
+                            SettingsRow("🗑️", tr("מחק את כל הנתונים שלי"), titleColor = Ink.weak) { deleting = true }
+                        }
+                    }
+                    item {
+                        Column(Modifier.fillMaxWidth().padding(top = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(tr("טופי"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
+                            P(SettingsRepository.versionLine, 13f, color = Ink.tertiary, align = TextAlign.Center)
+                        }
                     }
                 }
-
-                // 🚪 The account.
-                item {
-                    Section(tr("פרטיות ונתונים")) {
-                        SettingsRow("🚪", tr("התנתקות")) { confirmSignOut = true }
-                        RowDivider()
-                        SettingsRow("🗑️", tr("מחק את כל הנתונים שלי"), titleColor = Ink.weak) { deleting = true }
-                    }
-                }
-
-                item {
-                    Column(Modifier.fillMaxWidth().padding(top = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(tr("טופי"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
-                        P(SettingsRepository.versionLine, 13f, color = Ink.tertiary, align = TextAlign.Center)
-                    }
                 }
             }
         }
@@ -314,7 +334,29 @@ private fun Section(header: String? = null, footer: String? = null, content: @Co
     Box(Modifier.widthIn(max = 560.dp).fillMaxWidth()) { SettingsSection(header, footer, content) }
 }
 
-/** "משפחת גולן" — one name for the whole household; "שִׁמְרוּ" appears once it was edited. */
+@Composable
+private fun MenuHeading(text: String) =
+    Box(Modifier.widthIn(max = 560.dp).fillMaxWidth().padding(horizontal = 6.dp).padding(top = 8.dp)) {
+        P(text, 13.5f, color = Ink.secondary, weight = FontWeight.ExtraBold)
+    }
+
+/** A door in the settings menu (ParentSettingsView.menuRow): emoji tile, title, one-line summary. */
+@Composable
+private fun Door(emoji: String, title: String, summary: String?, soft: Boolean = false, onClick: (() -> Unit)?) {
+    Row(
+        Modifier.widthIn(max = 560.dp).fillMaxWidth().glassPane(16.dp, if (soft) 0.09f else 0.14f)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier).padding(14.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically,
+    ) {
+        EmojiTile(emoji, 44.dp)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(title, color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+            summary?.let { P(it, 12.5f, color = Ink.secondary) }
+        }
+        if (onClick != null) androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = Ink.tertiary)
+    }
+}
+
 /** "שעון ישראל" / "Eastern Time" — in the app's language. */
 private fun zoneName(id: String): String =
     runCatching {
