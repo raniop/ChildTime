@@ -24895,6 +24895,28 @@
         }
       }
     },
+    "אתגר יומי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تحدٍّ يومي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily challenge"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ежедневное задание"
+          }
+        }
+      }
+    },
     "אתם קובעים כמה" : {
       "localizations" : {
         "ar" : {
@@ -35346,6 +35368,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Пропустить"
+          }
+        }
+      }
+    },
+    "דמויות ובגדים, שקונים ביהלומים שהילד צבר." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شخصيات وملابس تُشترى بالألماس الذي جمعه الطفل."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Characters and outfits, bought with the diamonds your child collected."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Персонажи и одежда — за алмазы, которые накопил ребёнок."
           }
         }
       }
@@ -47276,6 +47320,28 @@
         }
       }
     },
+    "הדקות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدقائق"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Минуты"
+          }
+        }
+      }
+    },
     "הדקות שהילד הרוויח נשארות שלו. השאלה תחזור אליו בהמשך, כדי שילמד אותה." : {
       "localizations" : {
         "ar" : {
@@ -47338,6 +47404,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Эти настройки действуют только на этом устройстве"
+          }
+        }
+      }
+    },
+    "ההגדרות שלכם. הן נפתחות רק עם קוד הורה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إعداداتكم. تُفتح فقط برمز الأهل."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your settings. They open only with the parent code."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваши настройки. Открываются только по родительскому коду."
           }
         }
       }
@@ -50082,6 +50170,28 @@
         }
       }
     },
+    "הילד עוזר בבית ומרוויח, ואתם מאשרים מהטלפון שלכם." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يساعد الطفل في البيت ويكسب، وأنتم توافقون من هاتفكم."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your child helps at home and earns, and you approve from your own phone."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ребёнок помогает по дому и зарабатывает, а вы подтверждаете со своего телефона."
+          }
+        }
+      }
+    },
     "הילד רואה חברים שהוסיף בקוד, ובטבלה הכללית מופיעים שחקנים אחרים רק באות ראשונה" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -51381,6 +51491,28 @@
         }
       }
     },
+    "המקסימום היומי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الحدّ الأقصى اليومي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The daily maximum"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дневной максимум"
+          }
+        }
+      }
+    },
     "המקסימום היומי בידיים שלכם" : {
       "localizations" : {
         "ar" : {
@@ -52374,6 +52506,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Они определяют, что заблокировано, когда ребёнок играет здесь в детском режиме. Приложения на устройстве ребёнка выбираются на самом устройстве: откройте там Tofy → ⚙️ → «Выберите, что остаётся открытым»."
+          }
+        }
+      }
+    },
+    "הנה הדקות שהילד הרוויח עכשיו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذه هي الدقائق التي كسبها الطفل الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Here are the minutes your child just earned"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вот минуты, которые ребёнок только что заработал"
           }
         }
       }
@@ -62242,6 +62396,28 @@
         }
       }
     },
+    "חנות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "متجر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shop"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Магазин"
+          }
+        }
+      }
+    },
     "חסוך %lld%%" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -63006,6 +63182,28 @@
         }
       }
     },
+    "טבלת חברים, ומשחק חי ביחד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لوحة الأصدقاء، ولعبة مباشرة معًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A friends leaderboard, and a live game together."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Таблица друзей и живая игра вместе."
+          }
+        }
+      }
+    },
     "טוֹב!" : {
       "localizations" : {
         "ar" : {
@@ -63620,6 +63818,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Тофи сама вернёт вас сюда"
+          }
+        }
+      }
+    },
+    "טופי טיים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy Time"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy Time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy Time"
           }
         }
       }
@@ -71826,6 +72046,28 @@
         }
       }
     },
+    "כאן הילד פותח את הדקות שהרוויח, והאפליקציות שלו נפתחות לזמן הזה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هنا يفتح الطفل الدقائق التي كسبها، فتُفتح تطبيقاته لهذه المدة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is where your child opens the minutes they earned, and their apps unlock for that long."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Здесь ребёнок открывает заработанные минуты, и его приложения открываются на это время."
+          }
+        }
+      }
+    },
     "כאן יופיע כל מה שקורה אצל הילדים: כל התראה ששלחנו לכם, סבב שהסתיים ודקות שהורווחו, מטלה שמחכה לאישור שלכם, דקות מתנה ונעילה מרחוק, הישגים כמו רצף ועליית רמה, מכשיר שהצטרף למשפחה, ותשובה מצוות טופי." : {
       "localizations" : {
         "ar" : {
@@ -72421,6 +72663,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Звёзды = рейтинг. Они только растут и никогда не заканчиваются — именно они определяют уровень ребёнка и место в списке друзей. Потратить их нельзя."
+          }
+        }
+      }
+    },
+    "כוכבים ויהלומים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نجوم وألماس"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stars and diamonds"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Звёзды и алмазы"
+          }
+        }
+      }
+    },
+    "כוכבים על כל הצלחה, ויהלומים לקניות בחנות הדמויות." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نجوم على كل نجاح، وألماس للشراء من متجر الشخصيات."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stars for every success, and diamonds to spend in the character shop."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Звёзды за каждый успех и алмазы для покупок в магазине персонажей."
           }
         }
       }
@@ -73815,6 +74101,28 @@
         }
       }
     },
+    "כל עולם הוא נושא: חשבון, עברית, אנגלית ועוד. הילד בוחר עולם, עונה על שאלות ומרוויח זמן מסך." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل عالم هو موضوع: حساب، عبرية، إنجليزية وغيرها. يختار الطفل عالمًا، يجيب عن الأسئلة ويكسب وقت شاشة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each world is a subject: math, Hebrew, English and more. Your child picks a world, answers questions and earns screen time."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждый мир — это предмет: математика, иврит, английский и другие. Ребёнок выбирает мир, отвечает на вопросы и зарабатывает экранное время."
+          }
+        }
+      }
+    },
     "כל עולם נפתח שוב בשלוש דרגות — ארד, כסף וזהב — וכל דרגה מאתגרת קצת יותר. מי שמסיים את שלושתן מקבל כתר של אלוף או אלופה 👑" : {
       "localizations" : {
         "ar" : {
@@ -74285,6 +74593,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сколько минут экранного времени ребёнок заработал сегодня из дневного лимита, который вы задали (число после дроби). Каждые несколько правильных ответов дают минуты экрана (соотношение задаётся в настройках). Когда лимит исчерпан (например, 240/240), ребёнок продолжает учиться, но новые минуты сохраняются на завтра (🎁), а 🎮 покажет «—», если кошелёк уже израсходован. Подарочные минуты 💝 лимиту не подчиняются."
+          }
+        }
+      }
+    },
+    "כמה הרוויח היום, מתוך המקסימום ליום. את המקסימום אתם קובעים לכל ילד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كم كسب اليوم من الحدّ الأقصى اليومي. الحدّ الأقصى تحدّدونه أنتم لكل طفل."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How much they earned today, out of the daily maximum. You set the maximum for each child."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сколько заработано сегодня из дневного максимума. Максимум для каждого ребёнка задаёте вы."
           }
         }
       }
@@ -79278,6 +79608,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вынести мусор"
+          }
+        }
+      }
+    },
+    "להורים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "للأهل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For parents"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для родителей"
           }
         }
       }
@@ -91759,6 +92111,50 @@
         }
       }
     },
+    "משחקים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ألعاب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Games"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Игры"
+          }
+        }
+      }
+    },
+    "משחקים קצרים, שנפתחים אחרי כמה תשובות נכונות ביום." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ألعاب قصيرة تُفتح بعد بضع إجابات صحيحة في اليوم."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Short games that unlock after a few right answers each day."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Короткие игры, которые открываются после нескольких верных ответов за день."
+          }
+        }
+      }
+    },
     "משחקת" : {
       "localizations" : {
         "ar" : {
@@ -91821,6 +92217,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Играет сейчас · осталось 23:38"
+          }
+        }
+      }
+    },
+    "משימה קטנה בכל יום, ופרס כשמסיימים." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مهمة صغيرة كل يوم، وجائزة عند إتمامها."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A small task every day, and a prize for finishing it."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Небольшое задание каждый день и приз за выполнение."
           }
         }
       }
@@ -104599,6 +105017,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Теперь — со своими детьми"
+          }
+        }
+      }
+    },
+    "עכשיו תורכם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الآن دوركم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Now it's your turn"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Теперь ваша очередь"
           }
         }
       }
@@ -120105,6 +120545,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Повторяющиеся вопросы — убраны"
+          }
+        }
+      }
+    },
+    "שאלות שטופי בוחר לילד מכל העולמות, לפי הרמה שלו." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أسئلة يختارها Tofy للطفل من كل العوالم، بحسب مستواه."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questions Tofy picks for your child from all the worlds, at their level."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вопросы, которые Tofy подбирает ребёнку из всех миров, по его уровню."
           }
         }
       }
