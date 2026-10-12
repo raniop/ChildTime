@@ -46,8 +46,6 @@ struct WorldGameChooserView: View {
     @State private var appeared = false
     /// 💎 paid for the first visit to this world (shown once, then gone).
     @State private var firstVisitPaid = 0
-    /// 🧪 Option 3 of the mock-ups: the one-time pointer at the questions.
-    @State private var mockSpotlight = false
 
     private var isCompact: Bool { hsc == .compact }
     /// 👶 A גן child can't read this screen on their own, so the question at
@@ -83,31 +81,24 @@ struct WorldGameChooserView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: isCompact ? AppSpacing.md : AppSpacing.lg) {
                     header
-                    // 🧪 Mock-ups for Rani (2026-10-12, after Sasha: her גן
-                    // daughter never understood that "שאלות רגילות" is a game —
-                    // a wide strip of text above five picture tiles). Nothing
-                    // changes for users until one is approved.
-                    if mockup == "tile" {
+                    // The questions are a TILE like every game, first in the
+                    // grid, and "surprise me" the last one (Rani, 2026-10-12).
+                    // They used to be a wide strip of text above the picture
+                    // tiles, and read as the screen's heading: a tester and her
+                    // daughter never found out it could be tapped, and played
+                    // only the games under it.
+                    if games.isEmpty {
+                        quizCard            // nothing to sit beside: the whole row
+                    } else {
                         LazyVGrid(columns: gridColumns, spacing: isCompact ? 12 : 16) {
                             quizTile
                             ForEach(Array(games.enumerated()), id: \.element) { i, kind in
                                 gameCard(kind, index: i + 1)
                             }
-                            if !games.isEmpty { surpriseTile }
+                            surpriseTile
                         }
-                        if bossUnlocked { bossCard }
-                    } else {
-                        if mockup == "button" { questionsCardWithButton } else { questionsCard }
-                        if !games.isEmpty {
-                            LazyVGrid(columns: gridColumns, spacing: isCompact ? 12 : 16) {
-                                ForEach(Array(games.enumerated()), id: \.element) { i, kind in
-                                    gameCard(kind, index: i)
-                                }
-                            }
-                        }
-                        if bossUnlocked { bossCard }
-                        if !games.isEmpty { surpriseCard }
                     }
+                    if bossUnlocked { bossCard }
                 }
                 .frame(maxWidth: isCompact ? .infinity : 1000)
                 .padding(.horizontal, isCompact ? AppSpacing.md : AppSpacing.xl)
@@ -117,15 +108,7 @@ struct WorldGameChooserView: View {
             }
             .opacity(leftForPlay && !inertPreview ? 0 : 1)
         }
-        .coachTour([CoachStep(id: "c.quiz", title: tr("גַּם זֶה מִשְׂחָק!"),
-                              text: tr("כָּאן עוֹנִים עַל שְׁאֵלוֹת — וּמַרְוִיחִים דַּקּוֹת לְשַׂחֵק."))],
-                   forKid: true, isActive: $mockSpotlight) {}
         .onAppear {
-            #if DEBUG
-            if ProcessInfo.processInfo.environment["DEMO_CHOOSER_TIP"] != nil {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { mockSpotlight = true }
-            }
-            #endif
             games = WorldGameFit.games(for: world, grade: profiles.active?.effectiveGrade ?? 1)
             lastPick = UserDefaults.standard.string(forKey: lastKey)
             // 👶 A גן child can't read "אֵיךְ בָּא לְךָ לְשַׂחֵק?", so they hear it.
@@ -311,50 +294,16 @@ struct WorldGameChooserView: View {
             .allowsHitTesting(false)
     }
 
-    /// 📝 Regular questions — the runner, as "בואו נתחיל" always started it.
-    private var questionsCard: some View {
-        Button { pick(.questions) } label: {
-            HStack(spacing: isCompact ? 12 : 20) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(tr("📝 שְׁאֵלוֹת רְגִילוֹת"))
-                        .font(.system(size: isCompact ? 21 : 27, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .lineLimit(1).minimumScaleFactor(0.7)
-                    ForEach(missionLines, id: \.self) { line in
-                        Text(line)
-                            .font(.system(size: isCompact ? 13 : 16, weight: .semibold, design: .rounded))
-                            .foregroundStyle(GlassInk.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                QuestionsPreview()
-                    .frame(width: isCompact ? 120 : 190, height: isCompact ? 84 : 120)
-                    .padding(8)
-                    .glassInset(radius: 16)
-            }
-            .padding(isCompact ? 14 : 20)
-            .frame(maxWidth: .infinity)
-            .miniGameTile(.normal, tint: AppColor.starGold, radius: 24)
-            .overlay(outline("questions"))
-        }
-        .buttonStyle(.juicy)
-        .multilineTextAlignment(.leading)
+    // MARK: - The questions, and "surprise me"
+
+    /// What the questions' tile says under its name.
+    private var quizBlurb: String {
+        if world.isBonusWorld { return tr("שְׁאֵלוֹת עֲנָק, וְדַקּוֹת כְּפוּלוֹת") }
+        return preReader ? tr("שׁוֹמְעִים שְׁאֵלָה וּבוֹחֲרִים תְּמוּנָה") : tr("עוֹנִים עַל שְׁאֵלוֹת וּמַרְוִיחִים דַּקּוֹת")
     }
 
-    // MARK: - 🧪 Mock-ups (see `body`)
-
-    /// DEMO_CHOOSER=tile | button — which mock-up to draw (DEBUG only).
-    private var mockup: String? {
-        #if DEBUG
-        return ProcessInfo.processInfo.environment["DEMO_CHOOSER"]
-        #else
-        return nil
-        #endif
-    }
-
-    /// Option 1: the questions are a TILE like every game — first in the grid,
-    /// with a picture of what happens in it, and a name that sounds like play.
+    /// 🧠 The questions — a tile like every game: a picture of what happens in
+    /// it, and a name that sounds like play ("חידון", not "שאלות רגילות").
     private var quizTile: some View {
         Button { pick(.questions) } label: {
             VStack(spacing: 8) {
@@ -367,7 +316,7 @@ struct WorldGameChooserView: View {
                     .font(.system(size: isCompact ? 16 : 20, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .lineLimit(1).minimumScaleFactor(0.6)
-                Text(preReader ? tr("שׁוֹמְעִים שְׁאֵלָה וּבוֹחֲרִים תְּמוּנָה") : tr("עוֹנִים עַל שְׁאֵלוֹת וּמַרְוִיחִים דַּקּוֹת"))
+                Text(quizBlurb)
                     .font(.system(size: isCompact ? 12 : 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(GlassInk.secondary)
                     .multilineTextAlignment(.center)
@@ -378,12 +327,15 @@ struct WorldGameChooserView: View {
             .frame(maxWidth: .infinity)
             .miniGameTile(.normal, tint: AppColor.starGold, radius: 24)
             .overlay(outline("questions"))
-            .coachMark("c.quiz")
+            .offset(y: appeared ? 0 : 14)
+            .opacity(appeared ? 1 : 0)
+            .animation(.spring(response: 0.5, dampingFraction: 0.75), value: appeared)
         }
         .buttonStyle(.juicy)
+        .accessibilityLabel(tr("חִידוֹן"))
     }
 
-    /// Option 1, the last tile: "surprise me" as a tile too.
+    /// 🎲 One of this world's games, picked for the child — the last tile.
     private var surpriseTile: some View {
         Button {
             var pool = games
@@ -410,13 +362,17 @@ struct WorldGameChooserView: View {
             .padding(10)
             .frame(maxWidth: .infinity)
             .miniGameTile(.normal, tint: Color(hex: "9B5DE5"), radius: 24)
+            .offset(y: appeared ? 0 : 14)
+            .opacity(appeared ? 1 : 0)
+            .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.03 * Double(games.count + 1)), value: appeared)
         }
         .buttonStyle(.juicy)
+        .accessibilityLabel(tr("הַפְתָּעָה"))
     }
 
-    /// Option 2: the wide card stays, with a picture of a real question and a
-    /// button that says what to do.
-    private var questionsCardWithButton: some View {
+    /// The same questions as a whole row — for a world that has no games to
+    /// put beside them (only its boss): a picture, and a button that says what to do.
+    private var quizCard: some View {
         Button { pick(.questions) } label: {
             HStack(spacing: isCompact ? 12 : 20) {
                 VStack(alignment: .leading, spacing: 8) {
@@ -424,7 +380,7 @@ struct WorldGameChooserView: View {
                         .font(.system(size: isCompact ? 21 : 27, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .lineLimit(1).minimumScaleFactor(0.7)
-                    Text(preReader ? tr("שׁוֹמְעִים שְׁאֵלָה וּבוֹחֲרִים תְּמוּנָה") : tr("עוֹנִים עַל שְׁאֵלוֹת וּמַרְוִיחִים דַּקּוֹת"))
+                    Text(quizBlurb)
                         .font(.system(size: isCompact ? 13 : 16, weight: .semibold, design: .rounded))
                         .foregroundStyle(GlassInk.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -433,7 +389,6 @@ struct WorldGameChooserView: View {
                         .foregroundStyle(Color(hex: "2A1E5C"))
                         .padding(.horizontal, isCompact ? 22 : 30).padding(.vertical, isCompact ? 9 : 12)
                         .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
-                        .coachMark("c.quiz")
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 QuizTilePreview(pictures: preReader)
@@ -448,16 +403,6 @@ struct WorldGameChooserView: View {
         }
         .buttonStyle(.juicy)
         .multilineTextAlignment(.leading)
-    }
-
-    /// What WorldDetailView's mission card said, in two short lines.
-    private var missionLines: [String] {
-        if world.isBonusWorld {
-            return ["💪 " + tr("רַק שְׁאֵלוֹת עֲנָק — קָשׁוֹת בִּמְיוּחָד, מִכָּל הַנּוֹשְׂאִים!"),
-                    "🎮 " + tr("דַּקּוֹת כְּפוּלוֹת: כָּל \(max(1, settings.batchAnswers / 2)) נְכוֹנוֹת = \(settings.batchMinutes) דַּקּוֹת מִשְׂחָק")]
-        }
-        return ["🎁 " + tr("\(settings.questionsPerSession) שְׁאֵלוֹת → קוּפְסַת הַפְתָּעָה"),
-                "🎮 " + tr("כָּל \(settings.batchAnswers) נְכוֹנוֹת = \(settings.batchMinutes) דַּקּוֹת מִשְׂחָק")]
     }
 
     private func gameCard(_ kind: MiniGameKind, index i: Int) -> some View {
@@ -522,16 +467,6 @@ struct WorldGameChooserView: View {
     private var bossCard: some View {
         wideCard(emoji: "🐉", title: tr("קְרַב בּוֹס"), subtitle: tr("הָאֶתְגָּר הַגָּדוֹל שֶׁל הָעוֹלָם הַזֶּה"),
                  tint: Color(hex: "EF476F"), pickID: "boss") { pick(.boss) }
-    }
-
-    /// 🎲 One of this world's games, picked for the child.
-    private var surpriseCard: some View {
-        wideCard(emoji: "🎲", title: tr("תַּפְתִּיעוּ אוֹתִי!"), subtitle: tr("מִשְׂחָק אַקְרָאִי מֵהָעוֹלָם הַזֶּה"),
-                 tint: Color(hex: "9B5DE5"), pickID: "surprise") {
-            var pool = games
-            if pool.count > 1, let last = lastPick { pool.removeAll { $0.rawValue == last } }
-            if let kind = pool.randomElement() { pick(.game(kind), viaSurprise: true) }
-        }
     }
 
     // MARK: - Launch
@@ -631,7 +566,7 @@ struct WorldGameChooserDemo: View {
 }
 
 
-/// 🧪 Mock-up art: a question as the child meets it — pictures to choose from
+/// The questions' tile art: a question as the child meets it — pictures to choose from
 /// for a pre-reader, a sum with number answers for a reader.
 struct QuizTilePreview: View {
     var pictures: Bool

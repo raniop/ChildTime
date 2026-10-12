@@ -509,31 +509,3 @@ struct MiniGamePreview: View {
         }
     }
 }
-
-/// The regular questions' card miniature: a question line and four answers.
-struct QuestionsPreview: View {
-    var body: some View {
-        GeometryReader { geo in
-            let s = min(geo.size.width, geo.size.height * 1.5)
-            VStack(spacing: s * 0.05) {
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(.white.opacity(0.85))
-                    .frame(width: s * 0.6, height: s * 0.06)
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(.white.opacity(0.5))
-                    .frame(width: s * 0.4, height: s * 0.05)
-                LazyVGrid(columns: [GridItem(.fixed(s * 0.4), spacing: s * 0.04), GridItem(.fixed(s * 0.4))], spacing: s * 0.04) {
-                    ForEach(0..<4, id: \.self) { i in
-                        Capsule()
-                            .fill(.clear)
-                            .frame(height: s * 0.13)
-                            .miniGameTile(i == 2 ? .correct : .normal, tint: OptionCard.tints[i], radius: s * 0.065)
-                    }
-                }
-            }
-            .frame(width: geo.size.width, height: geo.size.height)
-        }
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
-    }
-}
