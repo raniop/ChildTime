@@ -63,10 +63,14 @@ final class DemoTour: ObservableObject {
     // MARK: - First run: play first, explain as it happens
 
     /// Rani, 2026-10-12: a first launch lands on the child's own home and the
-    /// parent simply plays. Nothing pops up by itself: only when something
-    /// they TAPPED leads to a moment worth stopping at, one tip explains it —
-    /// pointing at the thing itself. Never a tour to sit through first.
+    /// parent simply plays. One tip greets the very first arrival ("this is
+    /// the child's screen — tap a world"); after that nothing pops up by
+    /// itself: only when something they TAPPED leads to a moment worth
+    /// stopping at, one tip explains it — pointing at the thing itself.
+    /// Never a tour to sit through first.
     enum Tip: String, CaseIterable {
+        /// The first arrival on the child's home (Rani: "רק בפעם הראשונה שנכנסים").
+        case home
         /// The first right answer: the time that just grew.
         case firstRight
         /// The first wrong answer: the time did not go down.

@@ -2796,15 +2796,17 @@ struct WorldMapView: View {
         guard tour.active, tour.kidID != nil, !kidTourActive, tour.card == nil, tour.invite == nil,
               selectedWorld == nil, !showingSmartFeed, packReveal == nil, packOffer == nil,
               !showingWheel, !showDailyChest, !showEventSplash else { return }
-        // Nothing on arrival: a tip only ever follows something the parent DID
-        // (Rani: "אני לא רוצה להקפיץ לו את זה בלי שהוא לחץ"). This one follows
-        // leaving a world after answering in it.
-        if tour.answered > 0, tour.needs(.minutes) {
+        if tour.needs(.home) {
+            // The one that comes by itself, once, on the first arrival: the
+            // full tour of this screen, a spotlight on every button (Rani) —
+            // then they play. Every later tip follows something the parent DID.
+            firstRunTipKind = .home
+            firstRunSteps = parentTourSteps
+        } else if tour.answered > 0, tour.needs(.minutes) {
+            // Follows leaving a world after answering in it.
             firstRunTipKind = .minutes
-            firstRunSteps = [CoachStep(id: "k.minutes", title: tr("כאן הדקות שהילד הרוויח"),
-                                       text: tr("מכאן הוא פותח אותן, והאפליקציות שלו נפתחות לזמן הזה. כשהזמן נגמר, הן ננעלות שוב.")),
-                             CoachStep(id: "k.today", title: tr("המקסימום היומי בידיים שלכם"),
-                                       text: tr("המספר השני הוא המקסימום ליום. אתם קובעים אותו לכל ילד."))]
+            firstRunSteps = [CoachStep(id: "k.minutes", title: tr("הנה הדקות שהילד הרוויח עכשיו"),
+                                       text: tr("מכאן הוא פותח אותן, והאפליקציות שלו נפתחות לזמן הזה. כשהזמן נגמר, הן ננעלות שוב."))]
         } else if tour.closingIsDue {
             tour.card = .closing
             return
@@ -2812,6 +2814,38 @@ struct WorldMapView: View {
             return
         }
         kidTourActive = true
+    }
+
+    /// 🎬 The first run's tour of this screen: the same stops as the child's
+    /// own tour below, said to the PARENT (no niqqud) — what each button is
+    /// for, and what it means for them. It ends by handing the screen over.
+    private var parentTourSteps: [CoachStep] {
+        [
+            CoachStep(id: "k.world", title: tr("זה המסך של הילד"),
+                      text: tr("כל עולם הוא נושא: חשבון, עברית, אנגלית ועוד. הילד בוחר עולם, עונה על שאלות ומרוויח זמן מסך.")),
+            CoachStep(id: "k.tofyTime", title: tr("טופי טיים"),
+                      text: tr("שאלות שטופי בוחר לילד מכל העולמות, לפי הרמה שלו.")),
+            CoachStep(id: "k.games", title: tr("משחקים"),
+                      text: tr("משחקים קצרים, שנפתחים אחרי כמה תשובות נכונות ביום.")),
+            CoachStep(id: "k.minutes", title: tr("הדקות"),
+                      text: tr("כאן הילד פותח את הדקות שהרוויח, והאפליקציות שלו נפתחות לזמן הזה.")),
+            CoachStep(id: "k.today", title: tr("המקסימום היומי"),
+                      text: tr("כמה הרוויח היום, מתוך המקסימום ליום. את המקסימום אתם קובעים לכל ילד.")),
+            CoachStep(id: "k.wallet", title: tr("כוכבים ויהלומים"),
+                      text: tr("כוכבים על כל הצלחה, ויהלומים לקניות בחנות הדמויות.")),
+            CoachStep(id: "k.challenge", title: tr("אתגר יומי"),
+                      text: tr("משימה קטנה בכל יום, ופרס כשמסיימים.")),
+            CoachStep(id: "k.chores", title: tr("מטלות"),
+                      text: tr("הילד עוזר בבית ומרוויח, ואתם מאשרים מהטלפון שלכם.")),
+            CoachStep(id: "k.shop", title: tr("חנות"),
+                      text: tr("דמויות ובגדים, שקונים ביהלומים שהילד צבר.")),
+            CoachStep(id: "k.friends", title: tr("חברים"),
+                      text: tr("טבלת חברים, ומשחק חי ביחד.")),
+            CoachStep(id: "k.settings", title: tr("להורים"),
+                      text: tr("ההגדרות שלכם. הן נפתחות רק עם קוד הורה.")),
+            CoachStep(id: "k.world", title: tr("עכשיו תורכם"),
+                      text: tr("לחצו על עולם ונסו לענות על כמה שאלות, בדיוק כמו הילדים.")),
+        ]
     }
 
     /// The child's side — niqqud, and the right form for a boy or a girl.

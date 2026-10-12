@@ -196,7 +196,8 @@ struct DemoTourTests {
         tour.start()
         defer { tour.end(signUp: false) }
         #expect(DemoTour.Tip.allCases.allSatisfy { tour.needs($0) })
-        // Rani: nothing pops up by itself — arriving is not a reason to explain.
+        // Arriving brings one pointer at a world, and never a full-screen card.
+        #expect(tour.needs(.home))
         #expect(tour.card == nil)
         #expect(tour.answered == 0)
         #expect(tour.closingIsDue == false)
