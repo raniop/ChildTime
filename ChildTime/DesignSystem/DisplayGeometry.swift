@@ -246,6 +246,20 @@ final class DisplayProbeView: UIView {
     /// measured, never assumed — `additionalSafeAreaInsets` is set to exactly
     /// minus what the system put on the far side, so a screen that never had a
     /// mirror is left alone and the correction cannot compound.
+    #if DEBUG
+    /// 🧪 DEMO_FOLD_LOG=<file> — every sweep and every correction, time-stamped
+    /// (what happens to the insets across a fold: measured, not guessed).
+    private var lastFoldLine = ""
+    private func foldLog(_ line: String) {
+        guard let path = ProcessInfo.processInfo.environment["DEMO_FOLD_LOG"] else { return }
+        if line.hasPrefix("sweep"), line == lastFoldLine { return }      // only changes
+        if line.hasPrefix("sweep") { lastFoldLine = line }
+        let stamped = String(format: "%.3f %@\n", CACurrentMediaTime(), line)
+        if let h = FileHandle(forWritingAtPath: path) { h.seekToEndOfFile(); h.write(Data(stamped.utf8)); try? h.close() }
+        else { try? stamped.write(toFile: path, atomically: true, encoding: .utf8) }
+    }
+    #endif
+
     private func unmirrorVerticalBar() {
         guard let window else { return }
         let l = window.safeAreaInsets.left, r = window.safeAreaInsets.right
@@ -254,6 +268,25 @@ final class DisplayProbeView: UIView {
         let barOnLeft = l > r
         // How far down the strip the clock and its items reach.
         let stripTop = DisplayGeometry.shared.barStripTop
+        #if DEBUG
+        foldLog("sweep window=\(Int(window.bounds.width))×\(Int(window.bounds.height)) l=\(Int(l)) r=\(Int(r)) active=\(active) published=\(Int(DisplayGeometry.shared.barInset))")
+        #endif
+
+        // 🎞 In the middle of a fold or an unfold the window reports NO bar for a
+        // moment. Taking that at its word reset every controller's correction —
+        // and when the bar came back a frame later, so did the system's mirrored
+        // inset, uncorrected: the home column was drawn 84pt narrower for a frame
+        // or two (its text re-wrapping) and then jumped out to its width (recorded
+        // 2026-10-12; Rani: "יש קפיצות מוזרות"). `DisplayGeometry` already waits
+        // 0.45s before believing the bar is gone — the corrections wait with it.
+        if !active, DisplayGeometry.shared.barInset >= 40 {
+            if sweepTimer == nil {
+                sweepTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
+                    MainActor.assumeIsolated { self?.unmirrorVerticalBar() }
+                }
+            }
+            return
+        }
 
         var touched = false
         forEachViewController(from: window.rootViewController) { vc in
@@ -300,6 +333,9 @@ final class DisplayProbeView: UIView {
                     || abs(add.top - wantTop) > 0.5 else { return }
             if barOnLeft { add.right = want; add.left = wantNear } else { add.left = want; add.right = wantNear }
             add.top = wantTop
+            #if DEBUG
+            foldLog("  fix \(String(describing: type(of: vc)).prefix(40)) system l=\(Int(insets.left - vc.additionalSafeAreaInsets.left)) r=\(Int(insets.right - vc.additionalSafeAreaInsets.right)) add \(Int(vc.additionalSafeAreaInsets.left)),\(Int(vc.additionalSafeAreaInsets.right)) → \(Int(add.left)),\(Int(add.right))")
+            #endif
             vc.additionalSafeAreaInsets = add
             touched = true
         }
