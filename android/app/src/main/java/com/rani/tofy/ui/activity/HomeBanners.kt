@@ -34,6 +34,9 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import com.google.firebase.firestore.FieldValue
 import com.rani.tofy.data.*
 import com.rani.tofy.i18n.tr
+import com.rani.tofy.ui.child.BaseWorlds
+import com.rani.tofy.ui.child.Topic
+import com.rani.tofy.ui.child.parentName
 import com.rani.tofy.ui.common.*
 import com.rani.tofy.ui.theme.*
 import kotlinx.coroutines.delay
@@ -182,31 +185,10 @@ private fun ChoreBanner(kid: Child, c: Chore, approving: Boolean, onOpen: () -> 
 // MARK: 👑 / ⚽ requests from a child's device
 
 /** A pack or world pass by id (QuestionPacks.find) — the name + emoji the parent sees. */
-internal fun packLabel(id: String): Pair<String, String>? = when (id) {
-    "soccer" -> "⚽" to tr("עולם הכדורגל")
-    "dinosaurs" -> "🦖" to tr("דינוזאורים")
-    "space" -> "🚀" to tr("חלל וכוכבים")
-    "animals" -> "🐾" to tr("עולם החיות")
-    "sea" -> "🌊" to tr("מעמקי הים")
-    "gifted" -> "🧠" to tr("הכנה למחוננים")
-    "food" -> "🍳" to tr("מטבח ומדע של אוכל")
-    "israel" -> "🏛️" to tr("ישראל שלי")
-    "tishrei" -> "🍎" to tr("חגי תשרי")
-    "music" -> "🎵" to tr("מוזיקה")
-    "body" -> "🧍" to tr("גוף האדם")
-    "vehicles" -> "🚗" to tr("כלי רכב ותחבורה")
-    "flags" -> "🌍" to tr("דגלים ומדינות")
-    "math" -> "🧮" to tr("ממלכת המתמטיקה")
-    "english" -> "🔤" to tr("ארץ אנגלית")
-    "hebrew" -> "✍️" to tr("ארץ העברית")
-    "logic" -> "🧩" to tr("חידות הלוגיקה")
-    "science" -> "🔬" to tr("מעבדת המדעים")
-    "history" -> "🏛️" to tr("מוזיאון ההיסטוריה")
-    "geography" -> "🌍" to tr("מסע סביב העולם")
-    "money" -> "💰" to tr("שוק הכסף")
-    "reading" -> "📖" to tr("יער הסיפורים")
-    "holidays" -> "🎊" to tr("החגים")
-    else -> null
+internal fun packLabel(id: String): Pair<String, String>? {
+    val topic = Topic.of(id) ?: return null
+    if (topic.isPack) return topic.emoji to topic.parentName
+    return BaseWorlds.firstOrNull { it.topic == topic }?.let { it.emoji to it.parentName }
 }
 
 /** Children who tapped "ask a parent" for Tofy+ (premiumRequestedAt), unless the family is premium. */

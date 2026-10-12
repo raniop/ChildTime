@@ -2,6 +2,7 @@ package com.rani.tofy.ui.child
 
 import androidx.compose.ui.graphics.Color
 import com.rani.tofy.i18n.tr
+import com.rani.tofy.ui.home.stripNiqqud
 
 /**
  * 🏆 WorldTiers.swift — how a world tier READS, shared by the kid's home tiles,
@@ -35,12 +36,14 @@ object WorldTiers {
 
     /** The parent's line for a world: tier, then room or "boss waiting". */
     fun parentLabel(tier: Int, room: Int): String {
-        val where = if (room >= 9) tr("הבוס מחכה") else tr("חדר %lld/10", room + 1)
+        // A PARENT's screen carries no niqqud (the child's own labels keep theirs).
+        val where = stripNiqqud(if (room >= 9) tr("הַבּוֹס מְחַכֶּה") else tr("חֶדֶר %lld/10", room + 1))
         return when (tier) {
-            0 -> tr("⭐ ארד") + " · " + where
-            1 -> tr("⭐⭐ כסף") + " · " + where
-            2 -> tr("⭐⭐⭐ זהב") + " · " + where
-            else -> tr("👑 הושלם")
+            0 -> stripNiqqud(tr("⭐ אָרָד")) + " · " + where
+            1 -> stripNiqqud(tr("⭐⭐ כֶּסֶף")) + " · " + where
+            2 -> stripNiqqud(tr("⭐⭐⭐ זָהָב")) + " · " + where
+            // Dropping the niqqud leaves the short spelling — the full one is spelt here.
+            else -> when (val plain = stripNiqqud(tr("👑 הֻשְׁלַם"))) { "👑 השלם" -> "👑 הושלם"; else -> plain }
         }
     }
 }

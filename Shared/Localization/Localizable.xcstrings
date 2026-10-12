@@ -3947,6 +3947,28 @@
         }
       }
     },
+    "%@ · מחכה לאישור" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · بانتظار الموافقة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · waiting for approval"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · ждёт подтверждения"
+          }
+        }
+      }
+    },
     "%@ · מתאימה את עצמה לכל נושא" : {
       "localizations" : {
         "ar" : {
@@ -6121,6 +6143,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ выполнил задание"
+          }
+        }
+      }
+    },
+    "%@ סיים מטלה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ أنهى مهمة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ finished a chore"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ выполнил задание"
+          }
+        }
+      }
+    },
+    "%@ סיימה מטלה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ أنهت مهمة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ finished a chore"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ выполнила задание"
           }
         }
       }
@@ -15036,6 +15102,28 @@
         }
       }
     },
+    "1️⃣  הורידו את טופי במכשיר של %@ — מה־App Store או מ־Google Play" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1️⃣  حمّلوا Tofy على جهاز %@ — من App Store أو Google Play"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1️⃣  Download Tofy on %@'s device — from the App Store or Google Play"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1️⃣  Скачайте Tofy на устройство %@ — из App Store или Google Play"
+          }
+        }
+      }
+    },
     "1️⃣  הורידו את טופי מהApp Store במכשיר של %@ (אייפד או אייפון)" : {
       "localizations" : {
         "ar" : {
@@ -22755,6 +22843,72 @@
         }
       }
     },
+    "אין כרגע חיבור, אז לא הצלחנו ליצור את המשפחה. בדקו את האינטרנט ונסו שוב." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد اتصال حاليًا، لذا تعذّر إنشاء العائلة. تحقّقوا من الإنترنت وحاولوا مرة أخرى."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There's no connection right now, so we couldn't create the family. Check your internet and try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас нет подключения, поэтому не удалось создать семью. Проверьте интернет и попробуйте снова."
+          }
+        }
+      }
+    },
+    "אין כרגע חיבור. בדקו את האינטרנט ונסו שוב — אותו קוד יעבוד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد اتصال حاليًا. تحقّقوا من الإنترنت وحاولوا مرة أخرى — الرمز نفسه سيعمل."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There's no connection right now. Check your internet and try again — the same code will work."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас нет подключения. Проверьте интернет и попробуйте снова — тот же код подойдёт."
+          }
+        }
+      }
+    },
+    "אין כרגע חיבור. בדקו את האינטרנט ונסו שוב." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد اتصال حاليًا. تحقّقوا من الإنترنت وحاولوا مرة أخرى."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There's no connection right now. Check your internet and try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас нет подключения. Проверьте интернет и попробуйте снова."
+          }
+        }
+      }
+    },
     "אין כרגע מכשיר מחבר ל%@ — החלון יפתח ברגע שהמכשיר יתחבר." : {
       "localizations" : {
         "ar" : {
@@ -24693,6 +24847,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Подтвердить Family Controls"
+          }
+        }
+      }
+    },
+    "אשרו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وافِقوا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Approve"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подтвердить"
           }
         }
       }
@@ -47166,6 +47342,28 @@
         }
       }
     },
+    "ההורים במשפחה רואים איפה הטלפון. רק הם." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأهل في العائلة يرون مكان هذا الهاتف. هم فقط."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The parents in your family can see where this phone is. Only them."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Родители в семье видят, где этот телефон. Только они."
+          }
+        }
+      }
+    },
     "ההזמנה למשפחה מומשה" : {
       "localizations" : {
         "ar" : {
@@ -50475,6 +50673,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Это устройство станет игровым устройством ребёнка и подключится к семье. Это всегда можно изменить в настройках."
+          }
+        }
+      }
+    },
+    "המכשיר הזה מחובר ל%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا الجهاز متصل بـ%@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This device is connected to %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это устройство подключено к профилю %@"
           }
         }
       }
@@ -53956,6 +54176,50 @@
         }
       }
     },
+    "השינוי לא נשמר — אין כרגע הרשאה למשפחה הזו. נסו שוב בעוד רגע." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يُحفَظ التغيير — لا توجد صلاحية لهذه العائلة حاليًا. حاولوا مرّة أخرى بعد لحظة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The change wasn't saved — there's no permission for this family right now. Try again in a moment."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменение не сохранилось — сейчас нет доступа к этой семье. Попробуйте ещё раз через минуту."
+          }
+        }
+      }
+    },
+    "השינוי לא נשמר. בדקו את חיבור האינטרנט ונסו שוב." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يُحفَظ التغيير. تحقّقوا من اتّصال الإنترنت وحاولوا مرّة أخرى."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The change wasn't saved. Check your internet connection and try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменение не сохранилось. Проверьте интернет-соединение и попробуйте снова."
+          }
+        }
+      }
+    },
     "השיפור הגדול" : {
       "localizations" : {
         "ar" : {
@@ -54062,6 +54326,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Язык меняет и вопросы, а не только тексты. Если поменять его на самом устройстве ребёнка, действует последний выбор."
+          }
+        }
+      }
+    },
+    "השפה משתנה מיד בכל האפליקציה: טקסטים, כיוון, הקראה ושאלות." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تتغيّر اللغة فورًا في التطبيق كلّه: النصوص والاتّجاه والقراءة الصوتية والأسئلة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The language changes right away across the whole app: text, layout, read-aloud, and questions."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Язык меняется сразу во всём приложении: тексты, направление, чтение вслух и вопросы."
           }
         }
       }
@@ -129764,6 +130050,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "📍 Включить геолокацию для %@"
+          }
+        }
+      }
+    },
+    "📍 טופי משתף את המיקום עם ההורים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Tofy يشارك الموقع مع الأهل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Tofy is sharing location with your parents"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📍 Tofy передаёт геолокацию родителям"
           }
         }
       }

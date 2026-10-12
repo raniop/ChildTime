@@ -26,6 +26,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rani.tofy.i18n.tr
+import com.rani.tofy.ui.child.Interests
+import com.rani.tofy.ui.child.LearningLevel
+import com.rani.tofy.ui.child.parentLabel
+import com.rani.tofy.ui.child.parentName
 import com.rani.tofy.ui.common.H
 import com.rani.tofy.ui.common.P
 import com.rani.tofy.ui.home.stripNiqqud
@@ -200,10 +204,7 @@ private fun StepButton(sign: String, onClick: () -> Unit) {
 /** LearningLevel.allCases — raw values are what ChildRecord stores. */
 @Composable
 private fun LevelRow(level: String, onPick: (String) -> Unit) {
-    val levels = listOf(
-        Triple("beginner", "🌱", tr("מתחיל")), Triple("developing", "🌿", tr("מתפתח")),
-        Triple("proficient", "🌳", tr("שולט")), Triple("advanced", "🚀", tr("מתקדם")),
-    )
+    val levels = LearningLevel.entries.map { Triple(it.raw, it.emoji, it.parentName) }
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Label(tr("רמת למידה התחלתית"))
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -221,12 +222,7 @@ private fun LevelRow(level: String, onPick: (String) -> Unit) {
 /** InterestCatalog.all (ChildRecord.swift) — ids are what ChildRecord stores. */
 @Composable
 private fun InterestsGrid(selected: Set<String>, onToggle: (String) -> Unit) {
-    val all = listOf(
-        Triple("sports", "⚽️", tr("ספורט")), Triple("space", "🚀", tr("חלל")), Triple("animals", "🦁", tr("בעלי חיים")),
-        Triple("flags", "🚩", tr("דגלים")), Triple("music", "🎵", tr("מוזיקה")), Triple("art", "🎨", tr("אמנות")),
-        Triple("history", "🏛️", tr("היסטוריה")), Triple("science", "🔬", tr("מדע")), Triple("english", "🔤", tr("אנגלית")),
-        Triple("numbers", "🔢", tr("מספרים")), Triple("puzzles", "🧩", tr("חידות")), Triple("geography", "🌍", tr("מדינות")),
-    )
+    val all = Interests.map { Triple(it.id, it.emoji, it.parentLabel) }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Label(tr("תחומי עניין — מהם נבנות השאלות המותאמות"))
         all.chunked(3).forEach { row ->
