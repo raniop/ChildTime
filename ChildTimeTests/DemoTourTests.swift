@@ -168,6 +168,70 @@ struct DemoTourTests {
         #expect(ProgressStore.shared.captureSnapshot().giftMinutesShown == before + 30)
     }
 
+    // MARK: - First run: play first, explain as it happens
+
+    @Test func aFirstLaunchLandsOnAChildsOwnScreen() throws {
+        try #require(hostIsBlank && !DemoTour.isOn, "needs a simulator with no family on it and no tour in progress — reinstall the app first")
+        let sawWelcome = ParentSettings.shared.hasSeenWelcome
+        defer { DemoTour.shared.end(signUp: false); ParentSettings.shared.hasSeenWelcome = sawWelcome }
+
+        #expect(DemoTour.shared.startFirstRun())
+        #expect(DemoTour.shared.active)
+        // Straight to a child — כיתה א׳ — as the active one, with no welcome pages left to show.
+        let kid = try #require(ProfileStore.shared.profiles.first { $0.id == DemoTour.shared.kidID })
+        #expect(kid.grade == DemoTour.firstRunGrade)
+        #expect(ProfileStore.shared.activeID == kid.id)
+        #expect(ParentSettings.shared.hasSeenWelcome)
+        // Never a second time, and never over a tour that is already on.
+        #expect(DemoTour.shared.startFirstRun() == false)
+    }
+
+    @Test func eachExplanationIsShownOnceAndOnlyAfterSomethingWasDone() throws {
+        try #require(hostIsBlank && !DemoTour.isOn, "needs a simulator with no family on it and no tour in progress — reinstall the app first")
+        let tour = DemoTour.shared
+        // Outside a tour nothing is ever due.
+        #expect(DemoTour.Tip.allCases.allSatisfy { !tour.needs($0) })
+        #expect(tour.closingIsDue == false)
+
+        tour.start()
+        defer { tour.end(signUp: false) }
+        #expect(DemoTour.Tip.allCases.allSatisfy { tour.needs($0) })
+        // Rani: nothing pops up by itself — arriving is not a reason to explain.
+        #expect(tour.card == nil)
+        #expect(tour.answered == 0)
+        #expect(tour.closingIsDue == false)
+
+        tour.mark(.firstRight)
+        #expect(tour.needs(.firstRight) == false)
+        #expect(tour.needs(.firstWrong))
+
+        // The closing card waits until the idea was seen in action: five
+        // answers, or the minutes opened.
+        (0..<4).forEach { _ in tour.noteAnswer() }
+        #expect(tour.closingIsDue == false)
+        tour.noteAnswer()
+        #expect(tour.closingIsDue)
+        tour.mark(.closing)
+        #expect(tour.closingIsDue == false)
+    }
+
+    @Test func openingTheMinutesBringsTheClosingCard() throws {
+        try #require(hostIsBlank && !DemoTour.isOn, "needs a simulator with no family on it and no tour in progress — reinstall the app first")
+        let tour = DemoTour.shared
+        tour.start()
+        tour.noteAnswer()
+        #expect(tour.closingIsDue == false)
+        tour.mark(.window)
+        #expect(tour.closingIsDue)
+        // …and a tour that ended remembers none of it: the next one explains again.
+        tour.end(signUp: false)
+        #expect(UserDefaults.standard.stringArray(forKey: "demoTour.tips") == nil)
+        tour.start()
+        defer { tour.end(signUp: false) }
+        #expect(DemoTour.Tip.allCases.allSatisfy { tour.needs($0) })
+        #expect(tour.answered == 0)
+    }
+
     @Test func aCrashHalfWayOutIsFinishedAtTheNextLaunch() throws {
         try #require(hostIsBlank && !DemoTour.isOn, "needs a simulator with no family on it and no tour in progress — reinstall the app first")
         // The state such a crash leaves: the flag already off, the children

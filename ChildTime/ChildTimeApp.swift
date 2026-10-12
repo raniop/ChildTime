@@ -769,28 +769,6 @@ struct ChildTimeApp: App {
             ForcedUpdateView()
                 .onAppear { AppUpdateConfig.shared.setForTesting(latest: 9999, min: 9999) }
         #endif
-        #if DEBUG
-        // 🎬 DEMO_SCREEN=firstrun DEMO_COACH=0…5 — the first-run question with
-        // the parent's card for that step over it (screens for approval).
-        case "firstrun":
-            let coach = Int(ProcessInfo.processInfo.environment["DEMO_COACH"] ?? "") ?? 0
-            Group {
-                if coach == 0 {
-                    WorldMapView()
-                } else if ProcessInfo.processInfo.environment["DEMO_FIRSTRUN_TIP"] == "time" {
-                    // The tip after the first right answer: the time on the shelf.
-                    QuestionRunnerView(mode: .world(Worlds.all.first { $0.topic.rawValue == "logic" } ?? Worlds.all[0]), purpose: .earnTime)
-                        .coachTour([CoachStep(id: "q.time", title: tr("הנה הזמן שהילד הרוויח"),
-                                              text: tr("כל תשובה נכונה מוסיפה לכאן זמן מסך. ככה הילדים לומדים כדי לשחק."))],
-                                   forKid: false, isActive: .constant(true)) {}
-                } else if coach == 1 {
-                    QuestionRunnerView(mode: .world(Worlds.all.first { $0.topic.rawValue == (ProcessInfo.processInfo.environment["DEMO_WORLD"] ?? "logic") } ?? Worlds.all[0]), purpose: .earnTime)
-                } else {
-                    Color.clear
-                }
-            }
-            .overlay { if ProcessInfo.processInfo.environment["DEMO_FIRSTRUN_TIP"] == nil { FirstRunCoach(step: coach) } }
-        #endif
         case "parenthome": ParentDashboardView(isRoot: true)   // DEMO_SCREEN=parenthome — the redesigned overview
             .onAppear {
                 // 📍 DEMO_LOCATION=1: the cards' location line.

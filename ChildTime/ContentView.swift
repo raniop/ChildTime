@@ -36,9 +36,14 @@ struct ContentView: View {
             } else if kidMode.active {
                 // Parent's phone temporarily acting as the kid's device.
                 kidModeRoot
+            } else if !settings.hasSeenWelcome, DemoTour.opensOnFirstLaunch {
+                // 🎬 Very first launch on a device with no family at all (Rani,
+                // 2026-10-12): straight into the child's home, playing — the
+                // explanations come as things happen (`DemoTour.startFirstRun`).
+                Color.clear.onAppear { DemoTour.shared.startFirstRun() }
             } else if !settings.hasSeenWelcome {
-                // Very first launch — explain what the app is + the Screen Time
-                // notice, before anything else.
+                // First launch where there IS something here already — explain
+                // what the app is + the Screen Time notice, before anything else.
                 WelcomeIntroView()
             } else if settings.deviceRole == .unset {
                 // Choose the device's role FIRST: a child's play device (joins by

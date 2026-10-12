@@ -375,6 +375,7 @@ struct WorldMapView: View {
     /// 🎁 The first open after a parent bought a pack: one reveal, on the
     /// child's own device, before anything else pops (wheel, chest, events).
     private func maybeRevealPack() {
+        guard !DemoTour.isOn else { return }   // 🎬 nothing pops over the first run
         guard packReveal == nil, selectedWorld == nil, !showingSmartFeed, !storyPending,
               let p = profiles.active, let pack = PackKidState.pendingReveal(for: p) else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
@@ -688,8 +689,19 @@ struct WorldMapView: View {
             }
         }
         // 🧭 Once per child: one point per thing on this screen.
-        .coachTour(firstRunTip ?? kidTourSteps, forKid: firstRunTip == nil, isActive: $kidTourActive) {
-            if let id = profiles.activeID { CoachTours.markDone(Self.kidTourKey(id)) }
+        .coachTour(firstRunSteps ?? kidTourSteps, forKid: firstRunSteps == nil, isActive: $kidTourActive) {
+            if firstRunSteps != nil {
+                // 🎬 A first-run tip, not the child's own tour (that one is theirs to see).
+                DemoTour.shared.mark(firstRunTipKind)
+                firstRunSteps = nil
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { maybeStartFirstRunTip() }
+            } else if let id = profiles.activeID {
+                CoachTours.markDone(Self.kidTourKey(id))
+            }
+        }
+        // 🎬 Back from a world: the next first-run tip, if one is due.
+        .onChangeCompat(of: selectedWorld == nil && !showingSmartFeed) { _, home in
+            if home, DemoTour.isOn { DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { maybeStartFirstRunTip() } }
         }
         // 💬 What the rail's buddy says — over the bottom scrim, where it can
         // cover nothing that matters, instead of over a world card.
@@ -1727,6 +1739,7 @@ struct WorldMapView: View {
         if useSidebar {
             return AnyView(VStack(spacing: 0) {
                 statRow(value: minutes, suffix: minutesMax, label: Gendered.g(tr("⏱ הִרְוַחְתָּ הַיּוֹם"), tr("⏱ הִרְוַחַתְּ הַיּוֹם"))) { infoStat = .today }
+                    .coachMark("k.today")
                 Divider().overlay(Color.white.opacity(0.16))
                 statRow(value: "\(progress.correctToday)", suffix: progress.answeredToday > 0 ? "/\(progress.answeredToday)" : nil,
                         label: tr("✅ נְכוֹנוֹת הַיּוֹם")) { infoStat = .correct }
@@ -1747,6 +1760,7 @@ struct WorldMapView: View {
         }
         return AnyView(HStack(spacing: 0) {
             statColumn(value: minutes, suffix: minutesMax, label: Gendered.g(tr("⏱ הִרְוַחְתָּ הַיּוֹם"), tr("⏱ הִרְוַחַתְּ הַיּוֹם"))) { infoStat = .today }
+                .coachMark("k.today")
             statDivider
             // Out of how many, so all three read the same way (Rani).
             statColumn(value: "\(progress.correctToday)",
@@ -2755,6 +2769,7 @@ struct WorldMapView: View {
     /// After the story and every pop-up that waited for it — never on top of
     /// anything. Once per child (two siblings on one iPad each get theirs).
     private func maybeStartKidTour() {
+        if DemoTour.isOn { maybeStartFirstRunTip(); return }
         guard let id = profiles.activeID, !kidTourActive,
               !CoachTours.isDone(Self.kidTourKey(id)) || CoachTours.forcedInDemo,
               !AppInfo.isDemoRun || CoachTours.forcedInDemo,
@@ -2768,24 +2783,35 @@ struct WorldMapView: View {
         kidTourActive = true
     }
 
-    /// 🎬 First run (Rani, 2026-10-12 — preview): a parent who opens Tofy for
-    /// the first time lands here and plays; the FIRST time they do something,
-    /// one tip points at the thing itself. These speak to the parent — no niqqud.
-    /// DEMO_FIRSTRUN_TIP=world|minutes (with DEMO_COACH=1) shows one for approval.
-    private var firstRunTip: [CoachStep]? {
-        #if DEBUG
-        switch ProcessInfo.processInfo.environment["DEMO_FIRSTRUN_TIP"] {
-        case "world":
-            return [CoachStep(id: "k.tofyTime", title: tr("זה המסך של הילד"),
-                              text: tr("לחצו על עולם ונסו לענות על כמה שאלות, בדיוק כמו הילדים."))]
-        case "minutes":
-            return [CoachStep(id: "k.minutes", title: tr("כאן הדקות שהילד הרוויח"),
-                              text: tr("מכאן הוא פותח אותן, והאפליקציות שלו נפתחות לזמן הזה. כשהזמן נגמר, הן ננעלות שוב."))]
-        default: return nil
+    /// 🎬 First run (Rani, 2026-10-12): a parent who opens Tofy for the first
+    /// time lands here and plays; the first time something they TAPPED leads
+    /// to a moment worth explaining, one tip points at the thing itself. These speak to the
+    /// parent — no niqqud. Set by `maybeStartFirstRunTip`, cleared when read.
+    @State private var firstRunSteps: [CoachStep]? = nil
+    @State private var firstRunTipKind: DemoTour.Tip = .minutes
+
+    /// Same rule as the child's own tour: never on top of anything.
+    private func maybeStartFirstRunTip() {
+        let tour = DemoTour.shared
+        guard tour.active, tour.kidID != nil, !kidTourActive, tour.card == nil, tour.invite == nil,
+              selectedWorld == nil, !showingSmartFeed, packReveal == nil, packOffer == nil,
+              !showingWheel, !showDailyChest, !showEventSplash else { return }
+        // Nothing on arrival: a tip only ever follows something the parent DID
+        // (Rani: "אני לא רוצה להקפיץ לו את זה בלי שהוא לחץ"). This one follows
+        // leaving a world after answering in it.
+        if tour.answered > 0, tour.needs(.minutes) {
+            firstRunTipKind = .minutes
+            firstRunSteps = [CoachStep(id: "k.minutes", title: tr("כאן הדקות שהילד הרוויח"),
+                                       text: tr("מכאן הוא פותח אותן, והאפליקציות שלו נפתחות לזמן הזה. כשהזמן נגמר, הן ננעלות שוב.")),
+                             CoachStep(id: "k.today", title: tr("המקסימום היומי בידיים שלכם"),
+                                       text: tr("המספר השני הוא המקסימום ליום. אתם קובעים אותו לכל ילד."))]
+        } else if tour.closingIsDue {
+            tour.card = .closing
+            return
+        } else {
+            return
         }
-        #else
-        return nil
-        #endif
+        kidTourActive = true
     }
 
     /// The child's side — niqqud, and the right form for a boy or a girl.

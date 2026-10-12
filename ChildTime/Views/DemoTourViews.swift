@@ -44,24 +44,25 @@ struct DemoTourEntryRow: View {
 /// says this is a demo, and is the one standing way to sign up. On a child's
 /// screen it is also the way back to the parent's.
 struct DemoTourBand: View {
-    /// The child whose screen is showing; nil on the parent's home.
-    var kidName: String? = nil
+    /// A child's own screen is showing (the first run starts there).
+    var onKidScreen = false
     var onSignUp: () -> Void = {}
-    var onBack: () -> Void = {}
+    /// "כבר יש לכם משפחה?" — out of the tour, to "who uses this device".
+    var onHaveFamily: () -> Void = {}
 
     var body: some View {
         HStack(spacing: AppSpacing.sm) {
-            if kidName != nil {
-                Button(action: onBack) {
-                    HStack(spacing: 5) {
-                        Image(systemName: "chevron.backward").font(.system(size: 13, weight: .heavy))
-                        Text(tr("חזרה להורים"))
-                            .font(.system(size: 14, weight: .heavy, design: .rounded))
-                            .lineLimit(1)
-                    }
-                    .foregroundStyle(.white)
-                    .padding(.vertical, 7)
-                    .contentShape(Rectangle())
+            if onKidScreen {
+                // The two ways to a real family are always on screen: a parent
+                // or a child who already has one must never be stuck in a demo.
+                Button(action: onHaveFamily) {
+                    Text(tr("כבר יש לכם משפחה?"))
+                        .font(.system(size: 13.5, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .underline()
+                        .lineLimit(1).minimumScaleFactor(0.8)
+                        .padding(.vertical, 7)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             } else {
@@ -72,7 +73,7 @@ struct DemoTourBand: View {
             }
             Spacer(minLength: AppSpacing.sm)
             Button(action: onSignUp) {
-                Text(tr("להתחיל עם הילדים שלכם"))
+                Text(onKidScreen ? tr("ליצור משפחה") : tr("להתחיל עם הילדים שלכם"))
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color(hex: "2A1E5C"))
                     .lineLimit(1)
@@ -189,9 +190,9 @@ struct DemoTourRoot: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            DemoTourBand(kidName: kid?.name,
+            DemoTourBand(onKidScreen: kid != nil,
                          onSignUp: { Haptic.light(); tour.invite = .band },
-                         onBack: { Haptic.light(); tour.backToParent() })
+                         onHaveFamily: { Haptic.light(); tour.end(signUp: false) })
             if kid != nil {
                 Group {
                     if windowShowing { UnlockedView() } else { WorldMapView() }
@@ -204,6 +205,16 @@ struct DemoTourRoot: View {
         }
         .background(GlassBackdrop())
         .overlay {
+            if let card = tour.card {
+                FirstRunCard(kind: card,
+                             onDone: { closeCard(card) },
+                             onCreateFamily: { Haptic.medium(); tour.end(signUp: true) },
+                             onParentView: { Haptic.light(); tour.mark(.closing); tour.card = nil; tour.backToParent() },
+                             onHaveFamily: { Haptic.light(); tour.end(signUp: false) })
+                    .transition(.opacity)
+            }
+        }
+        .overlay {
             if let reason = tour.invite {
                 DemoTourInviteSheet(reason: reason,
                                     onSignUp: { Haptic.medium(); tour.end(signUp: true) },
@@ -213,135 +224,62 @@ struct DemoTourRoot: View {
             }
         }
         .animation(.easeOut(duration: 0.2), value: tour.invite)
+        .animation(.easeOut(duration: 0.25), value: tour.card)
         .animation(.easeOut(duration: 0.2), value: tour.kidID)
         .onReceive(ProgressStore.shared.objectWillChange.receive(on: DispatchQueue.main)) { _ in
             let open = ProgressStore.shared.isUnlocked || ProgressStore.shared.isOpeningWindow
-            if open != windowShowing { windowShowing = open }
+            guard open != windowShowing else { return }
+            windowShowing = open
+            // 🎬 The minutes were opened for the first time: what that means
+            // on the child's real phone — and what happens when they run out.
+            if open, tour.needs(.window), tour.card == nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    if tour.needs(.window), tour.card == nil, tour.invite == nil { tour.card = .window }
+                }
+            }
         }
+    }
+
+    private func closeCard(_ card: DemoTour.Tip) {
+        Haptic.light()
+        tour.mark(card)
+        // The lock is the last piece of the idea — the closing card follows it.
+        tour.card = (card == .window && tour.closingIsDue) ? .closing : nil
     }
 }
 
-// MARK: - 🎬 First run: straight into a question (Rani, 2026-10-12 — preview)
+// MARK: - 🎬 First run: the two tips that are a picture
 //
-// The direction after phase A: a first launch opens a short guided tour for
-// the PARENT — the child's home, then a question, then what stands behind
-// them (every grade, the lock, the parent's own phone) — and ends with "בואו
-// תנסו בעצמכם": from there they play freely, as the child would. The cards
-// speak to the parent, so they carry no niqqud; the screens under the first
-// two stay exactly the child's.
-//
-// PREVIEW ONLY: these are the screens for approval. Nothing shows them yet.
+// Most first-run tips point at the thing itself (the spotlight of
+// `CoachMarks`, driven from `DemoTour.Tip`). Two are about something that is
+// NOT on this screen — the child's other apps locking, and the parent's own
+// phone — so each gets a picture of its subject in the top half, and the
+// words under it. They speak to the parent: no niqqud.
 
-struct FirstRunCoach: View {
-    /// 0 = over the child's home · 1 = over a question · 2…4 = a picture of the
-    /// subject on a screen of its own · 5 = "try it yourselves".
-    let step: Int
-    var onNext: () -> Void = {}
+struct FirstRunCard: View {
+    /// `.window` (the minutes were opened) or `.closing` (create a family).
+    let kind: DemoTour.Tip
+    var onDone: () -> Void = {}
     var onCreateFamily: () -> Void = {}
+    var onParentView: () -> Void = {}
     var onHaveFamily: () -> Void = {}
-    @StateObject private var companion = CompanionController()
-
-    private struct Card { let title: String, line: String }
-
-    private var card: Card? {
-        switch step {
-        case 0: return Card(title: tr("זה המסך של הילד"),
-                            line: tr("כאן בוחרים עולם — חשבון, עברית, אנגלית ועוד — ויוצאים להרפתקה של שאלות."))
-        case 1: return Card(title: tr("עונים על שאלות ומרוויחים זמן מסך"),
-                            line: tr("כל תשובה נכונה מוסיפה זמן. הילדים לומדים כדי לשחק, בלי ויכוחים על עוד חמש דקות."))
-        case 2: return Card(title: tr("שאלות לפי הכיתה של הילד"),
-                            line: tr("מגן חובה ועד כיתה ח׳, בכל המקצועות. הרמה מתאימה את עצמה לכל ילד."))
-        case 3: return Card(title: tr("נגמרו הדקות? האפליקציות ננעלות"),
-                            line: tr("יוטיוב, משחקים וכל מה שתבחרו ננעלים לבד. כדי לפתוח שוב, עונים על עוד שאלות."))
-        case 4: return Card(title: tr("ואתם רואים הכול מהטלפון שלכם"),
-                            line: tr("מה הילדים למדו, כמה שיחקו ואיפה הם צריכים עזרה, בלי לקחת להם את המכשיר."))
-        default: return nil
-        }
-    }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            if step <= 1 {
-                // The child's own screens ARE the picture — lit on top, the
-                // card over the lower half.
-                LinearGradient(stops: [.init(color: .black.opacity(0), location: 0),
-                                       .init(color: .black.opacity(0.1), location: 0.38),
-                                       .init(color: .black.opacity(0.82), location: 0.56),
-                                       .init(color: .black.opacity(0.88), location: 1)],
-                               startPoint: .top, endPoint: .bottom)
-                    .ignoresSafeArea()
-                if let card { coach(card).padding(.bottom, 20) }
-            } else {
-                // Every later card has a picture of ITS subject in the top half,
-                // on a screen of its own — never the same dimmed question again.
-                GlassBackdrop().ignoresSafeArea()
-                VStack(spacing: 0) {
-                    picture
-                        .frame(maxWidth: 360)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .padding(.horizontal, 22)
-                        .padding(.top, 8)
-                    if let card { coach(card) } else { finish }
-                }
-                .padding(.bottom, 14)
+        ZStack {
+            GlassBackdrop().ignoresSafeArea()
+            VStack(spacing: 0) {
+                Group { if kind == .window { lockPicture } else { parentPicture } }
+                    .frame(maxWidth: 360)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(.horizontal, 22)
+                    .padding(.top, 8)
+                if kind == .window { windowCard } else { closingCard }
             }
+            .padding(.bottom, 14)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
     }
 
     // MARK: The pictures
-
-    @ViewBuilder private var picture: some View {
-        switch step {
-        case 2: gradesPicture
-        case 3: lockPicture
-        case 4: parentPicture
-        default: tryPicture
-        }
-    }
-
-    /// 🦁 Their turn.
-    private var tryPicture: some View {
-        VStack(spacing: 6) {
-            CompanionView(controller: companion, size: 190)
-            Text(tr("עכשיו תורכם"))
-                .font(.system(size: 30, weight: .heavy, design: .rounded))
-                .foregroundStyle(AppGradient.gold)
-        }
-    }
-
-    /// 🎯 Every grade, every subject.
-    private var gradesPicture: some View {
-        let grades = [tr("גן"), "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳"]
-        let topics: [(String, String)] = [("🔢", tr("חשבון")), ("✍️", tr("עברית")), ("🔤", tr("אנגלית")),
-                                          ("🔬", tr("מדעים")), ("🌍", tr("גאוגרפיה")), ("🧩", tr("חשיבה"))]
-        return VStack(spacing: 14) {
-            HStack(spacing: 5) {
-                ForEach(Array(grades.enumerated()), id: \.offset) { i, g in
-                    Text(g)
-                        .font(.system(size: 14, weight: .heavy, design: .rounded))
-                        .foregroundStyle(i == 3 ? Color(hex: "2A1E5C") : .white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 9)
-                        .background(RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(i == 3 ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(.white.opacity(0.14))))
-                }
-            }
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 10) {
-                ForEach(topics, id: \.1) { emoji, name in
-                    VStack(spacing: 6) {
-                        Text(emoji).font(.system(size: 34))
-                        Text(name)
-                            .font(.system(size: 14, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .glassPane(radius: 16, shadow: false)
-                }
-            }
-        }
-    }
 
     /// 🔒 The child's own screen once the minutes are gone: everything locked but Tofy.
     private var lockPicture: some View {
@@ -437,109 +375,95 @@ struct FirstRunCoach: View {
             .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.2)))
     }
 
-    // MARK: The cards
+    // MARK: The words
 
-    // The opening card also holds the quiet way out for a family that already exists.
-    private var haveFamilyLink: some View {
-        Button(action: onHaveFamily) {
-            HStack(spacing: 5) {
-                Text(tr("כבר יש לכם משפחה בטופי?"))
-                    .foregroundStyle(.white.opacity(0.8))
-                Text(tr("כניסה"))
-                    .foregroundStyle(.white)
-                    .underline()
-            }
-            .font(.system(size: 14, weight: .bold, design: .rounded))
-            .padding(.vertical, 4)
-            .contentShape(Rectangle())
+    private var tag: some View {
+        HStack {
+            Text(tr("הסבר קצר להורים"))
+                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                .foregroundStyle(Color(hex: "2B1C04"))
+                .padding(.horizontal, 10).padding(.vertical, 3)
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
+            Spacer()
         }
-        .buttonStyle(.plain)
     }
 
-    private func coach(_ c: Card) -> some View {
+    private func words(_ title: String, _ line: String) -> some View {
         VStack(spacing: 9) {
-            HStack {
-                Text(tr("הסבר קצר להורים"))
-                    .font(.system(size: 12, weight: .heavy, design: .rounded))
-                    .foregroundStyle(Color(hex: "2B1C04"))
-                    .padding(.horizontal, 10).padding(.vertical, 3)
-                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
-                Spacer()
-                HStack(spacing: 5) {
-                    ForEach(0...5, id: \.self) { i in
-                        Circle().fill(.white.opacity(i <= step ? 0.95 : 0.3)).frame(width: 7, height: 7)
-                    }
-                }
-            }
-            Text(c.title)
+            Text(title)
                 .font(.system(size: 22, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 6)
-            Text(c.line)
+            Text(line)
                 .font(.system(size: 15.5, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.9))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
-            Button(action: onNext) {
-                Text(tr("הבא"))
-                    .font(.system(size: 17, weight: .heavy, design: .rounded))
-                    .foregroundStyle(Color(hex: "2A1E5C"))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 13)
-                    .glassFill(AppGradient.gold, radius: 16)
-            }
-            .buttonStyle(.juicy)
-            .padding(.top, 4)
         }
-        .padding(16)
-        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "4A3AB0").opacity(0.98)))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
-        .shadow(color: .black.opacity(0.45), radius: 18, y: 6)
-        .frame(maxWidth: 440)
-        .padding(.horizontal, 14)
     }
 
-    private var finish: some View {
-        VStack(spacing: 10) {
-            Text(tr("בואו תנסו בעצמכם"))
-                .font(.system(size: 24, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-            Text(tr("שחקו כמה שאלות, בדיוק כמו הילדים. כשתרצו, יוצרים משפחה ומוסיפים אותם — ההרשמה לוקחת כדקה."))
-                .font(.system(size: 15.5, weight: .medium, design: .rounded))
-                .foregroundStyle(.white.opacity(0.9))
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-            Button(action: onNext) {
-                Text(tr("יאללה, לשחק"))
-                    .font(.system(size: 18, weight: .heavy, design: .rounded))
-                    .foregroundStyle(Color(hex: "2A1E5C"))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 15)
-                    .glassFill(AppGradient.gold, radius: 16)
-            }
-            .buttonStyle(.juicy)
-            .padding(.top, 4)
-            Button(action: onCreateFamily) {
-                Text(tr("ליצור משפחה עכשיו"))
+    private func gold(_ text: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(text)
+                .font(.system(size: 17.5, weight: .heavy, design: .rounded))
+                .foregroundStyle(Color(hex: "2A1E5C"))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .glassFill(AppGradient.gold, radius: 16)
+        }
+        .buttonStyle(.juicy)
+        .padding(.top, 4)
+    }
+
+    private func plate<V: View>(@ViewBuilder _ content: () -> V) -> some View {
+        VStack(spacing: 9) { content() }
+            .padding(16)
+            .frame(maxWidth: 440)
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "4A3AB0").opacity(0.98)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+            .shadow(color: .black.opacity(0.45), radius: 18, y: 6)
+            .padding(.horizontal, 14)
+    }
+
+    private var windowCard: some View {
+        plate {
+            tag
+            words(tr("כשהזמן נגמר, האפליקציות ננעלות"),
+                  tr("עכשיו הן פתוחות לילד, והשעון רץ. כשהוא מגיע לאפס הן ננעלות לבד, וכדי לפתוח שוב עונים על עוד שאלות."))
+            gold(tr("הבנתי"), action: onDone)
+        }
+    }
+
+    private var closingCard: some View {
+        plate {
+            tag
+            words(tr("ואתם רואים הכול מהטלפון שלכם"),
+                  tr("מה הילדים למדו, כמה שיחקו ואיפה הם צריכים עזרה. ההרשמה לוקחת כדקה, ו־30 הימים הראשונים של טופי+ במתנה."))
+            gold(tr("ליצור משפחה"), action: onCreateFamily)
+            Button(action: onParentView) {
+                Text(tr("לראות את המסך של ההורה"))
                     .font(.system(size: 15, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 13)
+                    .padding(.vertical, 12)
                     .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
                     .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
             }
             .buttonStyle(.juicy)
-            haveFamilyLink
+            HStack(spacing: 18) {
+                Button(action: onDone) {
+                    Text(tr("להמשיך לשחק")).underline()
+                }
+                Button(action: onHaveFamily) {
+                    Text(tr("כבר יש לכם משפחה?")).underline()
+                }
+            }
+            .buttonStyle(.plain)
+            .font(.system(size: 14, weight: .bold, design: .rounded))
+            .foregroundStyle(.white.opacity(0.88))
+            .padding(.top, 2)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 18)
-        .frame(maxWidth: 440)
-        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "4A3AB0").opacity(0.98)))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
-        .shadow(color: .black.opacity(0.45), radius: 20, y: -10)
-        .padding(.horizontal, 12)
     }
 }

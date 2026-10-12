@@ -424,6 +424,33 @@ struct QuestionRunnerView: View {
                 dismiss()
             }
         }
+        // 🎬 First run: the first right answer and the first wrong one each get
+        // one tip, pointing at the time on the shelf (see `DemoTour.Tip`).
+        .coachTour(firstRunTip, forKid: false, isActive: $firstRunTipOn) {
+            DemoTour.shared.mark(firstRunTipKind)
+        }
+    }
+
+    @State private var firstRunTip: [CoachStep] = []
+    @State private var firstRunTipKind: DemoTour.Tip = .firstRight
+    @State private var firstRunTipOn = false
+
+    /// Shown a beat after the answer, so the "+seconds" has already flown to the shelf.
+    private func firstRunTipIfNeeded(correct: Bool) {
+        let tour = DemoTour.shared
+        guard tour.active else { return }
+        tour.noteAnswer()
+        let kind: DemoTour.Tip = correct ? .firstRight : .firstWrong
+        guard tour.needs(kind), !firstRunTipOn else { return }
+        firstRunTipKind = kind
+        firstRunTip = [correct
+            ? CoachStep(id: "q.time", title: tr("הנה הזמן שהילד הרוויח"),
+                        text: tr("כל תשובה נכונה מוסיפה לכאן זמן מסך. ככה הילדים לומדים כדי לשחק."))
+            : CoachStep(id: "q.time", title: tr("טעות? הזמן לא יורד"),
+                        text: tr("הדקות שהילד הרוויח נשארות שלו. השאלה תחזור אליו בהמשך, כדי שילמד אותה."))]
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            withAnimation(.easeOut(duration: 0.2)) { firstRunTipOn = true }
+        }
     }
 
     // MARK: - Background
@@ -1363,8 +1390,6 @@ struct QuestionRunnerView: View {
                 companion.wow(Gendered.g(tr("הִגַּעְתָּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת"), tr("הִגַּעַתְּ לַמַּקְסִימוּם הַיּוֹמִי! 🎉 מִכָּאן מַמְשִׁיכִים לִלְמוֹד בְּלִי דַּקּוֹת נוֹסָפוֹת"))); return
             case "hint":
                 companion.cheer(HintContent.explain(.english)); return
-            case "firstrun":   // 🎬 the first-run opening line, for approval
-                companion.cheer(tr("ככה הילדים משחקים בטופי. נסו לענות! 👋")); return
             default: break
             }
             #endif
@@ -1807,6 +1832,7 @@ struct QuestionRunnerView: View {
 
     /// (The sound, haptic and sparkle already played in `pickOption`.)
     private func handleCorrect(q: Question, answeredAt: Date = Date()) {
+        firstRunTipIfNeeded(correct: true)
         correctInSession += 1
         consecutiveWrong = 0
 
@@ -1978,6 +2004,7 @@ struct QuestionRunnerView: View {
 
     /// (The sound and haptic already played in `pickOption`.)
     private func handleWrong(q: Question) {
+        firstRunTipIfNeeded(correct: false)
         consecutiveWrong += 1
         hadMistakeThisQuestion = true
         // No automatic help sheet any more: a wrong answer moves on after a

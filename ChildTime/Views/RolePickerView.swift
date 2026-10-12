@@ -66,20 +66,6 @@ struct RolePickerView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        // 🎬 The demo tour's way in — pinned to the bottom of the screen (Rani),
-        // apart from the two cards that set the device up. Only where there is
-        // nothing to mix with: no account, no family, no child (`DemoTour.canStart`).
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            if DemoTour.canStart {
-                DemoTourEntryRow {
-                    Haptic.medium()
-                    DemoTour.shared.start()
-                }
-                .frame(maxWidth: 460)
-                .padding(.horizontal, AppSpacing.lg)
-                .padding(.bottom, AppSpacing.sm)
-            }
-        }
         .overlay {
             if confirmParentOnPad { padParentConfirm }
             if childNeedsCode { childCodeSheet }

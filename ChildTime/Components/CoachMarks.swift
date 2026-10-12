@@ -91,7 +91,15 @@ private struct CoachTourModifier: ViewModifier {
                         return (step, r)
                     }
                     if live.isEmpty {
-                        Color.clear.onAppear { finish() }
+                        // Nothing to point at — but give the screen a moment
+                        // first: a tip that starts while its screen is still
+                        // sliding into place found its target "off screen" and
+                        // ended before it was ever seen. (Leaving this branch
+                        // cancels the wait.)
+                        Color.clear.task {
+                            try? await Task.sleep(nanoseconds: 900_000_000)
+                            if !Task.isCancelled { finish() }
+                        }
                     } else {
                         let i = min(index, live.count - 1)
                         CoachSpotlight(step: live[i].0, target: live[i].1, size: geo.size, forKid: forKid,
@@ -185,6 +193,8 @@ private struct CoachSpotlight: View {
             HStack(spacing: 10) {
                 Button(action: onNext) {
                     Text(number < total ? (forKid ? tr("הַבָּא") : tr("הבא"))
+                                        // A single tip is not a tour: "got it", and no "1 of 1".
+                                        : total == 1 ? (forKid ? tr("הֵבַנְתִּי") : tr("הבנתי"))
                                         : (forKid ? tr("סִיַּמְנוּ") : tr("סיימנו")))
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
@@ -196,6 +206,7 @@ private struct CoachSpotlight: View {
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundStyle(Color(hex: "2A1E5C").opacity(0.55))
                     .monospacedDigit()
+                    .opacity(total > 1 ? 1 : 0)
                 Spacer(minLength: 0)
                 if number < total {
                     Button(action: onSkip) {
