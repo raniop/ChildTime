@@ -424,36 +424,31 @@ struct QuestionRunnerView: View {
                 dismiss()
             }
         }
-        // 🎬 First run (see `DemoTour`): every answer says what it was, and
-        // what it did to the seconds — in plain words, for the parent.
-        .overlay(alignment: .bottom) {
-            if let note = firstRunNote {
-                FirstRunAnswerNote(correct: note.correct, seconds: note.seconds)
-                    .padding(.bottom, 232)
-                    .transition(.scale(scale: 0.85).combined(with: .opacity))
-                    .allowsHitTesting(false)
-            }
-        }
     }
 
-    private struct FirstRunNote: Equatable { let correct: Bool, seconds: Int, id: Int }
-    @State private var firstRunNote: FirstRunNote?
-    @State private var firstRunNoteID = 0
-
-    /// `seconds`: what a right answer really paid, or what a wrong one took off
-    /// the next right answer (the clock itself never goes down).
+    /// 🎬 First run (see `DemoTour`): the FIRST right answer and the FIRST
+    /// wrong one are explained by Tofy himself, in his own speech bubble, in
+    /// place of "יֵשׁ!" / "כִּמְעַט!" — to the parent, so without niqqud. After
+    /// that he talks exactly as he does in the real game (Rani).
+    /// `seconds`: what the right answer really paid, or what the wrong one
+    /// takes off the next right answer (the clock itself never goes down).
     private func firstRunFeedback(correct: Bool, seconds: Int) {
         let tour = DemoTour.shared
         guard tour.active, tour.firstRunQuiz else { return }
-        firstRunNoteID += 1
-        let id = firstRunNoteID
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
-            firstRunNote = FirstRunNote(correct: correct, seconds: seconds, id: id)
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.7) {
-            if firstRunNote?.id == id { withAnimation(.easeOut(duration: 0.3)) { firstRunNote = nil } }
-        }
         tour.noteAnswer()
+        guard tour.firstTime(correct ? .right : .wrong) else { return }
+        let line: String
+        if correct {
+            line = seconds > 0 ? tr("צדקתם! כל תשובה נכונה מוסיפה \(seconds) שניות של זמן מסך ⏱") : tr("צדקתם!")
+        } else {
+            line = seconds > 0 ? tr("טעיתם, לא נורא. הזמן לא יורד, אבל התשובה הנכונה הבאה תיתן \(seconds) שניות פחות.")
+                               : tr("טעיתם, לא נורא. הזמן שנצבר לא יורד.")
+        }
+        // A beat later: this answer's ordinary line is set further down the
+        // same function, and this one is the one to stay.
+        DispatchQueue.main.async {
+            if correct { companion.cheer(line) } else { companion.console(line) }
+        }
     }
 
     // MARK: - Background

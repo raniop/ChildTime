@@ -235,9 +235,10 @@ struct DemoTourRoot: View {
 // MARK: - 🎬 First run: straight into the questions
 //
 // Rani's final shape (2026-10-12): a parent who has just installed Tofy lands
-// on Tofy Time's questions. Each answer is named — "צדקת" / "טעית" — with what
-// it did to the seconds; after four answers (then every five) one question:
-// "ליצור ילד" or "להמשיך לשחק". These speak to the parent: no niqqud.
+// on Tofy Time's questions. The first right answer and the first wrong one
+// are explained by Tofy himself, in his speech bubble (see the quiz); after
+// four answers (then every five) one question: "ליצור ילד" or "להמשיך לשחק".
+// These speak to the parent: no niqqud.
 
 /// The whole first run: the quiz, and the question over it.
 struct FirstRunQuiz: View {
@@ -263,45 +264,6 @@ struct FirstRunQuiz: View {
                     }
                     .animation(.easeOut(duration: 0.22), value: tour.askToCreate)
             }
-    }
-}
-
-/// "צדקת! +24 שניות" / "טעית" — over the quiz for a moment, after every answer.
-struct FirstRunAnswerNote: View {
-    let correct: Bool
-    /// What a right answer paid — or what a wrong one took off the next right
-    /// answer (the clock itself never goes down). 0 = nothing either way.
-    let seconds: Int
-
-    private var detail: String {
-        if correct {
-            return seconds > 0 ? tr("+\(seconds) שניות של זמן מסך") : tr("הפעם בלי שניות נוספות")
-        }
-        return seconds > 0 ? tr("התשובה הנכונה הבאה תיתן \(seconds) שניות פחות") : tr("הפעם בלי שניות")
-    }
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: correct ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .font(.system(size: 34, weight: .bold))
-                .foregroundStyle(.white)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(correct ? tr("צדקת!") : tr("טעית"))
-                    .font(.system(size: 22, weight: .heavy, design: .rounded))
-                Text(detail)
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .opacity(0.95)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .foregroundStyle(.white)
-        }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 12)
-        .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
-            .fill(correct ? Color(hex: "1B8A5A") : Color(hex: "C2410C")))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.35), lineWidth: 1))
-        .shadow(color: .black.opacity(0.35), radius: 14, y: 6)
-        .padding(.horizontal, 20)
     }
 }
 

@@ -213,6 +213,19 @@ struct DemoTourTests {
         #expect(tour.askToCreate == false)
     }
 
+    @Test func tofyExplainsTheFirstRightAndTheFirstWrongAnswerOnly() throws {
+        try #require(hostIsBlank && !DemoTour.isOn, "needs a simulator with no family on it and no tour in progress — reinstall the app first")
+        let tour = DemoTour.shared
+        #expect(tour.firstTime(.right) == false)              // outside a first run: he talks as always
+        let sawWelcome = ParentSettings.shared.hasSeenWelcome
+        tour.startFirstRun()
+        defer { tour.end(signUp: false); ParentSettings.shared.hasSeenWelcome = sawWelcome }
+        #expect(tour.firstTime(.right))
+        #expect(tour.firstTime(.right) == false)              // …and from then on, "יֵשׁ!" as in the real game
+        #expect(tour.firstTime(.wrong))
+        #expect(tour.firstTime(.wrong) == false)
+    }
+
     @Test func aCrashHalfWayOutIsFinishedAtTheNextLaunch() throws {
         try #require(hostIsBlank && !DemoTour.isOn, "needs a simulator with no family on it and no tour in progress — reinstall the app first")
         // The state such a crash leaves: the flag already off, the children

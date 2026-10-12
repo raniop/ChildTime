@@ -63,10 +63,11 @@ final class DemoTour: ObservableObject {
     // MARK: - First run: straight into the questions
 
     /// Rani's final shape (2026-10-12, after four others): a parent who has
-    /// just installed Tofy lands straight on Tofy Time's questions. Every
-    /// answer says "צדקת" or "טעית" and what it did to the seconds; after four
-    /// answers they are asked whether to create a child's profile — "ליצור
-    /// ילד" or "להמשיך לשחק" — and, if they play on, again every five.
+    /// just installed Tofy lands straight on Tofy Time's questions. The first
+    /// time they are right, and the first time they are wrong, Tofy himself
+    /// explains what that did to the seconds; after four answers they are
+    /// asked whether to create a child's profile — "ליצור ילד" or "להמשיך
+    /// לשחק" — and, if they play on, again every five.
     @Published private(set) var firstRunQuiz = UserDefaults.standard.bool(forKey: DemoTour.quizKey)
     /// The question itself, over the quiz.
     @Published var askToCreate = false
@@ -76,6 +77,16 @@ final class DemoTour: ObservableObject {
     private static let quizKey = "demoTour.firstRunQuiz"
     static let firstAskAfter = 4
     static let askAgainEvery = 5
+
+    /// The two moments Tofy explains — each once per first run.
+    enum Explained { case right, wrong }
+    private var explained: Set<Explained> = []
+
+    /// True the first time only: Tofy explains it now, and never again.
+    func firstTime(_ what: Explained) -> Bool {
+        guard active, firstRunQuiz else { return false }
+        return explained.insert(what).inserted
+    }
 
     /// After the 4th answer, then the 9th, the 14th…
     static func asks(afterAnswer n: Int) -> Bool {
@@ -153,6 +164,7 @@ final class DemoTour: ObservableObject {
         invite = nil
         askToCreate = false
         answered = 0
+        explained = []
         active = true
     }
 
@@ -239,6 +251,7 @@ final class DemoTour: ObservableObject {
         askToCreate = false
         kidID = nil
         answered = 0
+        explained = []
         firstRunQuiz = false
         UserDefaults.standard.removeObject(forKey: Self.quizKey)
         let ids = Set(ProfileStore.shared.profiles.map(\.id)).union(childIDs)
