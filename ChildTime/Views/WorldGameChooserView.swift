@@ -46,6 +46,8 @@ struct WorldGameChooserView: View {
     @State private var appeared = false
     /// 💎 paid for the first visit to this world (shown once, then gone).
     @State private var firstVisitPaid = 0
+    /// 🧪 Option 3 of the mock-ups: the one-time pointer at the questions.
+    @State private var mockSpotlight = false
 
     private var isCompact: Bool { hsc == .compact }
     /// 👶 A גן child can't read this screen on their own, so the question at
@@ -81,16 +83,31 @@ struct WorldGameChooserView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: isCompact ? AppSpacing.md : AppSpacing.lg) {
                     header
-                    questionsCard
-                    if !games.isEmpty {
+                    // 🧪 Mock-ups for Rani (2026-10-12, after Sasha: her גן
+                    // daughter never understood that "שאלות רגילות" is a game —
+                    // a wide strip of text above five picture tiles). Nothing
+                    // changes for users until one is approved.
+                    if mockup == "tile" {
                         LazyVGrid(columns: gridColumns, spacing: isCompact ? 12 : 16) {
+                            quizTile
                             ForEach(Array(games.enumerated()), id: \.element) { i, kind in
-                                gameCard(kind, index: i)
+                                gameCard(kind, index: i + 1)
+                            }
+                            if !games.isEmpty { surpriseTile }
+                        }
+                        if bossUnlocked { bossCard }
+                    } else {
+                        if mockup == "button" { questionsCardWithButton } else { questionsCard }
+                        if !games.isEmpty {
+                            LazyVGrid(columns: gridColumns, spacing: isCompact ? 12 : 16) {
+                                ForEach(Array(games.enumerated()), id: \.element) { i, kind in
+                                    gameCard(kind, index: i)
+                                }
                             }
                         }
+                        if bossUnlocked { bossCard }
+                        if !games.isEmpty { surpriseCard }
                     }
-                    if bossUnlocked { bossCard }
-                    if !games.isEmpty { surpriseCard }
                 }
                 .frame(maxWidth: isCompact ? .infinity : 1000)
                 .padding(.horizontal, isCompact ? AppSpacing.md : AppSpacing.xl)
@@ -100,7 +117,15 @@ struct WorldGameChooserView: View {
             }
             .opacity(leftForPlay && !inertPreview ? 0 : 1)
         }
+        .coachTour([CoachStep(id: "c.quiz", title: tr("גַּם זֶה מִשְׂחָק!"),
+                              text: tr("כָּאן עוֹנִים עַל שְׁאֵלוֹת — וּמַרְוִיחִים דַּקּוֹת לְשַׂחֵק."))],
+                   forKid: true, isActive: $mockSpotlight) {}
         .onAppear {
+            #if DEBUG
+            if ProcessInfo.processInfo.environment["DEMO_CHOOSER_TIP"] != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { mockSpotlight = true }
+            }
+            #endif
             games = WorldGameFit.games(for: world, grade: profiles.active?.effectiveGrade ?? 1)
             lastPick = UserDefaults.standard.string(forKey: lastKey)
             // 👶 A גן child can't read "אֵיךְ בָּא לְךָ לְשַׂחֵק?", so they hear it.
@@ -317,6 +342,114 @@ struct WorldGameChooserView: View {
         .multilineTextAlignment(.leading)
     }
 
+    // MARK: - 🧪 Mock-ups (see `body`)
+
+    /// DEMO_CHOOSER=tile | button — which mock-up to draw (DEBUG only).
+    private var mockup: String? {
+        #if DEBUG
+        return ProcessInfo.processInfo.environment["DEMO_CHOOSER"]
+        #else
+        return nil
+        #endif
+    }
+
+    /// Option 1: the questions are a TILE like every game — first in the grid,
+    /// with a picture of what happens in it, and a name that sounds like play.
+    private var quizTile: some View {
+        Button { pick(.questions) } label: {
+            VStack(spacing: 8) {
+                QuizTilePreview(pictures: preReader)
+                    .frame(height: isCompact ? 92 : 124)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .glassInset(radius: 16)
+                Text(tr("🧠 חִידוֹן"))
+                    .font(.system(size: isCompact ? 16 : 20, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                Text(preReader ? tr("שׁוֹמְעִים שְׁאֵלָה וּבוֹחֲרִים תְּמוּנָה") : tr("עוֹנִים עַל שְׁאֵלוֹת וּמַרְוִיחִים דַּקּוֹת"))
+                    .font(.system(size: isCompact ? 12 : 14, weight: .semibold, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2).minimumScaleFactor(0.8)
+                    .frame(minHeight: isCompact ? 30 : 36, alignment: .top)
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity)
+            .miniGameTile(.normal, tint: AppColor.starGold, radius: 24)
+            .overlay(outline("questions"))
+            .coachMark("c.quiz")
+        }
+        .buttonStyle(.juicy)
+    }
+
+    /// Option 1, the last tile: "surprise me" as a tile too.
+    private var surpriseTile: some View {
+        Button {
+            var pool = games
+            if pool.count > 1, let last = lastPick { pool.removeAll { $0.rawValue == last } }
+            if let kind = pool.randomElement() { pick(.game(kind), viaSurprise: true) }
+        } label: {
+            VStack(spacing: 8) {
+                Text("🎲").font(.system(size: isCompact ? 56 : 78))
+                    .frame(height: isCompact ? 92 : 124)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .glassInset(radius: 16)
+                Text(tr("🎲 הַפְתָּעָה"))
+                    .font(.system(size: isCompact ? 16 : 20, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                Text(tr("מִשְׂחָק אַקְרָאִי מֵהָעוֹלָם הַזֶּה"))
+                    .font(.system(size: isCompact ? 12 : 14, weight: .semibold, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2).minimumScaleFactor(0.8)
+                    .frame(minHeight: isCompact ? 30 : 36, alignment: .top)
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity)
+            .miniGameTile(.normal, tint: Color(hex: "9B5DE5"), radius: 24)
+        }
+        .buttonStyle(.juicy)
+    }
+
+    /// Option 2: the wide card stays, with a picture of a real question and a
+    /// button that says what to do.
+    private var questionsCardWithButton: some View {
+        Button { pick(.questions) } label: {
+            HStack(spacing: isCompact ? 12 : 20) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(tr("🧠 חִידוֹן"))
+                        .font(.system(size: isCompact ? 21 : 27, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                    Text(preReader ? tr("שׁוֹמְעִים שְׁאֵלָה וּבוֹחֲרִים תְּמוּנָה") : tr("עוֹנִים עַל שְׁאֵלוֹת וּמַרְוִיחִים דַּקּוֹת"))
+                        .font(.system(size: isCompact ? 13 : 16, weight: .semibold, design: .rounded))
+                        .foregroundStyle(GlassInk.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(tr("▶ לְשַׂחֵק"))
+                        .font(.system(size: isCompact ? 17 : 21, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "2A1E5C"))
+                        .padding(.horizontal, isCompact ? 22 : 30).padding(.vertical, isCompact ? 9 : 12)
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
+                        .coachMark("c.quiz")
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                QuizTilePreview(pictures: preReader)
+                    .frame(width: isCompact ? 130 : 230, height: isCompact ? 92 : 132)
+                    .padding(8)
+                    .glassInset(radius: 16)
+            }
+            .padding(isCompact ? 14 : 20)
+            .frame(maxWidth: .infinity)
+            .miniGameTile(.normal, tint: AppColor.starGold, radius: 24)
+            .overlay(outline("questions"))
+        }
+        .buttonStyle(.juicy)
+        .multilineTextAlignment(.leading)
+    }
+
     /// What WorldDetailView's mission card said, in two short lines.
     private var missionLines: [String] {
         if world.isBonusWorld {
@@ -495,4 +628,49 @@ struct WorldGameChooserDemo: View {
         .environmentObject(ParentSettings.shared)
         .environmentObject(ProgressStore.shared)
         .environmentObject(ProfileStore.shared)
+}
+
+
+/// 🧪 Mock-up art: a question as the child meets it — pictures to choose from
+/// for a pre-reader, a sum with number answers for a reader.
+struct QuizTilePreview: View {
+    var pictures: Bool
+
+    var body: some View {
+        GeometryReader { geo in
+            let s = min(geo.size.width, geo.size.height * 1.22)
+            let chip = s * 0.26
+            VStack(spacing: s * 0.05) {
+                HStack(spacing: s * 0.03) {
+                    if pictures { Text("🔊").font(.system(size: s * 0.13)) }
+                    Text(pictures ? "🐶 ❓" : "7 + 5 = ?")
+                        .font(.system(size: s * 0.15, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "2A1E5C"))
+                }
+                .padding(.horizontal, s * 0.07).padding(.vertical, s * 0.025)
+                .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(.white.opacity(0.92)))
+                let answers = pictures ? ["🦴", "🚗", "🍎", "⚽"] : ["10", "12", "13", "11"]
+                VStack(spacing: s * 0.035) {
+                    ForEach(0..<2, id: \.self) { row in
+                        HStack(spacing: s * 0.035) {
+                            ForEach(0..<2, id: \.self) { col in
+                                let i = row * 2 + col
+                                let right = pictures ? i == 0 : i == 1
+                                Text(answers[i])
+                                    .font(.system(size: pictures ? s * 0.15 : s * 0.12, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(.white)
+                                    .frame(width: chip * 1.5, height: chip * 0.78)
+                                    .background(RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                        .fill(right ? Color(hex: "2ECC71") : OptionCard.tints[i % OptionCard.tints.count].opacity(0.85)))
+                                    .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                        .strokeBorder(.white.opacity(right ? 0.9 : 0.35), lineWidth: right ? 2 : 1))
+                            }
+                        }
+                    }
+                }
+            }
+            .frame(width: geo.size.width, height: geo.size.height)
+        }
+        .environment(\.layoutDirection, .leftToRight)
+    }
 }
