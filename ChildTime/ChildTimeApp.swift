@@ -214,6 +214,29 @@ struct ChildTimeApp: App {
     private static let demoSeededIDsKey = "demo.seededProfileIDs"
 
     private static func seedDemo() {
+        #if DEBUG && targetEnvironment(simulator)
+        // 🎬 DEMO_TOUR=1 — the demo tour's family (Rani): גן חובה, כיתה א׳, כיתה ו׳.
+        // Whatever the simulator held is replaced (a fresh install already has
+        // one legacy child by the time this runs), so it is simulator-only.
+        if ProcessInfo.processInfo.environment["DEMO_TOUR"] != nil,
+           ProfileStore.shared.profiles.map(\.grade) != [0, 1, 6] {
+            ProfileStore.shared.profiles.map(\.id).forEach { ProfileStore.shared.purgeDemoProfile($0) }
+            let kids = [Profile(name: tr("מיקה"), gender: .girl, age: .preK, character3DID: "panda", grade: 0),
+                        Profile(name: tr("יואב"), gender: .boy, age: .grade1, character3DID: "lion", grade: 1),
+                        Profile(name: tr("דנה"), gender: .girl, age: .older, character3DID: "unicorn", grade: 6)]
+            let days = [(answered: 9, correct: 8, minutes: 11), (answered: 14, correct: 11, minutes: 15),
+                        (answered: 22, correct: 20, minutes: 24)]
+            kids.forEach { ProfileStore.shared.add($0) }
+            // Each child's day is written while that child is the active one;
+            // switching away saves it to that child's own slot.
+            for (kid, day) in zip(kids, days) {
+                ProfileStore.shared.setActive(kid)
+                ProgressStore.shared.seedForDemoTour(answered: day.answered, correct: day.correct, minutes: day.minutes)
+            }
+            UserDefaults.standard.set(kids.map { $0.id.uuidString }, forKey: demoSeededIDsKey)
+            return
+        }
+        #endif
         if ProfileStore.shared.profiles.isEmpty {
             // Grades set, so the kid-facing grade picker never covers a demo screen.
             let dana = Profile(name: tr("דנה"), gender: .girl, age: .grade1, grade: 3)
@@ -765,6 +788,19 @@ struct ChildTimeApp: App {
         case "updateforced":                        // DEMO_SCREEN=updateforced — below minBuild, blocking
             ForcedUpdateView()
                 .onAppear { AppUpdateConfig.shared.setForTesting(latest: 9999, min: 9999) }
+        #endif
+        #if DEBUG
+        // 🎬 DEMO_SCREEN=demotour | demoinvite DEMO_TOUR=1 — the demo family's
+        // parent home under its band, and the invitation to sign up over it.
+        case "demotour", "demoinvite":
+            DemoTourPreview(invite: Self.demoScreen == "demoinvite")
+                .onAppear {
+                    HouseholdManager.shared.seedDemoJourney(familyName: tr("משפחת טופי"))
+                    for p in ProfileStore.shared.profiles {
+                        HouseholdManager.shared.seedDemoLiveWindow(childID: p.id)
+                        LearningHistoryStore.shared.seedDemo(childID: p.id)
+                    }
+                }
         #endif
         case "parenthome": ParentDashboardView(isRoot: true)   // DEMO_SCREEN=parenthome — the redesigned overview
             .onAppear {

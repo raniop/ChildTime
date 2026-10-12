@@ -66,6 +66,19 @@ struct RolePickerView: View {
                 .frame(maxWidth: .infinity)
             }
         }
+        #if DEBUG
+        // 🎬 DEMO_TOUR=1 — the demo's entry row, for approval (not wired yet).
+        // Pinned to the bottom of the screen (Rani), apart from the two cards
+        // that set the device up.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if ProcessInfo.processInfo.environment["DEMO_TOUR"] != nil {
+                DemoTourEntryRow()
+                    .frame(maxWidth: 460)
+                    .padding(.horizontal, AppSpacing.lg)
+                    .padding(.bottom, AppSpacing.sm)
+            }
+        }
+        #endif
         .overlay {
             if confirmParentOnPad { padParentConfirm }
             if childNeedsCode { childCodeSheet }

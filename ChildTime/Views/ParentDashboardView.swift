@@ -301,7 +301,7 @@ struct ParentDashboardView: View {
                 }
                 SideRailButton(systemImage: "person.badge.plus", label: tr("＋ הוספת ילד/ה")) { if !household.refuseIfDisconnected() { showingCreateChild = true } }
                 SideRailButton(emoji: "🧹", label: tr("🧹 מטלות")) { openChores() }
-                if familyHasChildDevice {
+                if familyHasChildDevice, !DemoTour.isOn {
                     SideRailButton(emoji: "📍", label: tr("📍 מיקום")) { showingLocation = true }
                 }
                 if !rows.isEmpty {
@@ -1602,7 +1602,7 @@ struct ParentDashboardView: View {
     }
 
     private var showsLocationIntro: Bool {
-        !locationIntroDismissed && rows.contains { childHasDevice($0.profile) }
+        !DemoTour.isOn && !locationIntroDismissed && rows.contains { childHasDevice($0.profile) }
             && !rows.contains { location.sharing[$0.profile.id.uuidString] == true }
     }
 
@@ -1662,7 +1662,8 @@ struct ParentDashboardView: View {
             // 📍 Where the children are — map, places, beep. Only once a child
             // has a phone of their own: with none, there is nothing to locate
             // (Rani, 9.10 — Eli's daughter plays on his phone).
-            if familyHasChildDevice {
+            // (Not in the demo tour — Rani: location is not what it is there to show.)
+            if familyHasChildDevice, !DemoTour.isOn {
                 Button { Haptic.light(); showingLocation = true } label: { homeGhostLabel(tr("📍 מיקום")).frame(maxWidth: .infinity) }
                     .buttonStyle(.plain)
             }

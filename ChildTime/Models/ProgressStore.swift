@@ -1351,6 +1351,17 @@ final class ProgressStore: ObservableObject {
         }
     }
 
+    #if DEBUG
+    /// 🎬 The demo tour's family: the same seed, with a different day for each
+    /// child, so three cards don't show three identical rows of numbers.
+    func seedForDemoTour(answered: Int, correct: Int, minutes: Int) {
+        seedForDemo()
+        answeredToday = answered
+        correctToday = correct
+        minutesEarnedToday = minutes
+    }
+    #endif
+
     /// Reset the per-session score — call at the start of QuestionRunner.
     func resetSessionScore() {
         sessionScore = 0
