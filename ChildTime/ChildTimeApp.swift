@@ -221,9 +221,9 @@ struct ChildTimeApp: App {
         if ProcessInfo.processInfo.environment["DEMO_TOUR"] != nil,
            ProfileStore.shared.profiles.map(\.grade) != [0, 1, 6] {
             ProfileStore.shared.profiles.map(\.id).forEach { ProfileStore.shared.purgeDemoProfile($0) }
-            let kids = [Profile(name: tr("מיקה"), gender: .girl, age: .preK, character3DID: "panda", grade: 0),
+            let kids = [Profile(name: tr("מיקה"), gender: .girl, age: .preK, character3DID: "bunny", grade: 0),
                         Profile(name: tr("יואב"), gender: .boy, age: .grade1, character3DID: "lion", grade: 1),
-                        Profile(name: tr("דנה"), gender: .girl, age: .older, character3DID: "unicorn", grade: 6)]
+                        Profile(name: tr("דנה"), gender: .girl, age: .older, character3DID: "owl", grade: 6)]
             let days = [(answered: 9, correct: 8, minutes: 11), (answered: 14, correct: 11, minutes: 15),
                         (answered: 22, correct: 20, minutes: 24)]
             kids.forEach { ProfileStore.shared.add($0) }
