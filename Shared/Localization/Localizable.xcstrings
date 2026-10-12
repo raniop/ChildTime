@@ -64706,6 +64706,50 @@
         }
       }
     },
+    "טעיתם, לא נורא. הזמן לא יורד, אבל התשובה הנכונה הבאה תיתן %lld שניות פחות." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ليست صحيحة، لا بأس. الوقت لا ينقص، لكن الإجابة الصحيحة التالية ستمنح %lld ثانية أقل."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not quite — no worries. The time doesn't go down, but the next right answer will give %lld seconds less."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не совсем — ничего страшного. Время не уменьшается, но следующий верный ответ даст на %lld сек. меньше."
+          }
+        }
+      }
+    },
+    "טעיתם, לא נורא. הזמן שנצבר לא יורד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ليست صحيحة، لا بأس. الوقت المكتسب لا ينقص."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not quite — no worries. The time you earned doesn't go down."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не совсем — ничего страшного. Заработанное время не уменьшается."
+          }
+        }
+      }
+    },
     "טרום" : {
       "localizations" : {
         "ar" : {
@@ -110607,6 +110651,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Верно!"
+          }
+        }
+      }
+    },
+    "צדקתם!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "صحيح!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correct!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Верно!"
+          }
+        }
+      }
+    },
+    "צדקתם! כל תשובה נכונה מוסיפה %lld שניות של זמן מסך ⏱" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "صحيح! كل إجابة صحيحة تضيف %lld ثانية من وقت الشاشة ⏱"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correct! Every right answer adds %lld seconds of screen time ⏱"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Верно! Каждый правильный ответ добавляет %lld сек. экранного времени ⏱"
           }
         }
       }
