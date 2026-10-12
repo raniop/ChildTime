@@ -31744,6 +31744,28 @@
         }
       }
     },
+    "במסך הבית של ההורה, ליד השם של כל ילד מופיעה עכשיו הכיתה שלו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الشاشة الرئيسية للأهل يظهر الآن صف كل طفل بجانب اسمه"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On the parent's home screen, each child's grade now appears next to their name"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На главном экране родителя рядом с именем каждого ребёнка теперь указан его класс"
+          }
+        }
+      }
+    },
     "במסך ההורים יש עכשיו מדף \"שאלונים חדשים\": עולם שלם של שאלות בנושא שהילד אוהב. למנויי טופי+ הוא נפתח אוטומטית לכל הילדים; בלי מנוי בוחרים לאיזה ילד לשלוח, וברגע הבא הוא מקבל מתנה במסך הבית שלו. ילד שרוצה שאלון לוחץ \"בקש מאבא או אמא\" — בלי מחירים במכשיר של הילד" : {
       "localizations" : {
         "ar" : {
@@ -50475,6 +50497,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Накройте вместе праздничный стол и дайте %@ объяснить, что символизирует каждое блюдо."
+          }
+        }
+      }
+    },
+    "הכיתה ליד שם הילד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الصف بجانب اسم الطفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The grade next to your child's name"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Класс рядом с именем ребёнка"
           }
         }
       }
