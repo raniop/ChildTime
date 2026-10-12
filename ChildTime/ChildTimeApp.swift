@@ -769,6 +769,13 @@ struct ChildTimeApp: App {
             ForcedUpdateView()
                 .onAppear { AppUpdateConfig.shared.setForTesting(latest: 9999, min: 9999) }
         #endif
+        #if DEBUG
+        // 🎬 DEMO_SCREEN=firstrun DEMO_COACH=0…5 — the first-run question with
+        // the parent's card for that step over it (screens for approval).
+        case "firstrun":
+            QuestionRunnerView(mode: .world(Worlds.all.first { $0.topic.rawValue == (ProcessInfo.processInfo.environment["DEMO_WORLD"] ?? "logic") } ?? Worlds.all[0]), purpose: .earnTime)
+                .overlay { FirstRunCoach(step: Int(ProcessInfo.processInfo.environment["DEMO_COACH"] ?? "") ?? 0) }
+        #endif
         case "parenthome": ParentDashboardView(isRoot: true)   // DEMO_SCREEN=parenthome — the redesigned overview
             .onAppear {
                 // 📍 DEMO_LOCATION=1: the cards' location line.

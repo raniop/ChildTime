@@ -220,3 +220,213 @@ struct DemoTourRoot: View {
         }
     }
 }
+
+// MARK: - 🎬 First run: straight into a question (Rani, 2026-10-12 — preview)
+//
+// The direction after phase A: a first launch lands on a QUESTION, as the
+// child would see it, and after each of the first answers a short card tells
+// the parent what just happened — the minutes, the grade, the lock, their own
+// phone — until the fifth answer brings "ליצור משפחה". The cards speak to the
+// parent, so they carry no niqqud; the question under them stays the child's.
+//
+// PREVIEW ONLY: these are the screens for approval. Nothing shows them yet.
+
+struct FirstRunCoach: View {
+    /// 0 = the hint before the first answer · 1…4 = after each answer · 5 = the finish.
+    let step: Int
+    /// What the first answer just paid — said in the first card.
+    var earnedSeconds: Int = 24
+    var onNext: () -> Void = {}
+    var onCreateFamily: () -> Void = {}
+    var onParentView: () -> Void = {}
+    var onHaveFamily: () -> Void = {}
+
+    /// The quiz shelf (streak, time, hint) — the first card points at it, so
+    /// it is the one part of the screen left bright.
+    private static let shelf: CGFloat = 158
+
+    private struct Card { let emoji: String, title: String, line: String }
+
+    private var card: Card? {
+        switch step {
+        case 1: return Card(emoji: "⏱",
+                            title: tr("הרווחתם \(earnedSeconds) שניות של זמן מסך"),
+                            line: tr("כל תשובה נכונה מוסיפה זמן. הילדים לומדים כדי לשחק, בלי ויכוחים על עוד חמש דקות."))
+        case 2: return Card(emoji: "🎯",
+                            title: tr("שאלות לפי הכיתה של הילד"),
+                            line: tr("מגן חובה ועד כיתה ח׳: חשבון, עברית, אנגלית, מדעים ועוד. הרמה מתאימה את עצמה לכל ילד."))
+        case 3: return Card(emoji: "🔒",
+                            title: tr("נגמרו הדקות? האפליקציות ננעלות"),
+                            line: tr("יוטיוב, משחקים וכל מה שתבחרו ננעלים לבד. כדי לפתוח שוב, עונים על עוד שאלות."))
+        case 4: return Card(emoji: "📱",
+                            title: tr("ואתם רואים הכול מהטלפון שלכם"),
+                            line: tr("מה הילדים למדו, כמה שיחקו ואיפה הם צריכים עזרה. אפשר גם לתת מתנת דקות או לנעול מרחוק."))
+        default: return nil
+        }
+    }
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            if step >= 1 {
+                VStack(spacing: 0) {
+                    Color.black.opacity(0.55)
+                    if step == 1 { Color.clear.frame(height: Self.shelf) }
+                }
+                .ignoresSafeArea()
+            }
+            switch step {
+            case 0: hint.padding(.bottom, Self.shelf + 96)
+            case 1...4: if let card { coach(card).padding(.bottom, step == 1 ? Self.shelf - 22 : 28) }
+            default: finish.padding(.bottom, 12)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+    }
+
+    // Before the first answer: one line, and the way out for a family that already exists.
+    private var hint: some View {
+        VStack(spacing: 8) {
+            Text(tr("👋 ככה הילדים משחקים בטופי. נסו לענות"))
+                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 14).padding(.vertical, 10)
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "2A1E5C").opacity(0.88)))
+            Button(action: onHaveFamily) {
+                Text(tr("יש לנו כבר משפחה"))
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .underline()
+                    .padding(.vertical, 4)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 20)
+    }
+
+    private func coach(_ c: Card) -> some View {
+        VStack(spacing: 0) {
+            VStack(spacing: 9) {
+                HStack {
+                    Text(tr("הסבר קצר להורים"))
+                        .font(.system(size: 12, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "2B1C04"))
+                        .padding(.horizontal, 10).padding(.vertical, 3)
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
+                    Spacer()
+                    HStack(spacing: 5) {
+                        ForEach(1...4, id: \.self) { i in
+                            Circle().fill(.white.opacity(i <= step ? 0.95 : 0.3)).frame(width: 7, height: 7)
+                        }
+                    }
+                }
+                Text(c.emoji).font(.system(size: 44))
+                Text(c.title)
+                    .font(.system(size: 22, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(c.line)
+                    .font(.system(size: 15.5, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button(action: onNext) {
+                    Text(step == 4 ? tr("עוד שאלה אחת") : tr("לשאלה הבאה"))
+                        .font(.system(size: 17, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "2A1E5C"))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                        .glassFill(AppGradient.gold, radius: 16)
+                }
+                .buttonStyle(.juicy)
+                .padding(.top, 4)
+            }
+            .padding(16)
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "4A3AB0").opacity(0.98)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+            .shadow(color: .black.opacity(0.45), radius: 18, y: 6)
+            // The first card points down at the time that just grew on the shelf.
+            if step == 1 {
+                HStack {
+                    Image(systemName: "arrowtriangle.down.fill")
+                        .font(.system(size: 22))
+                        .foregroundStyle(Color(hex: "4A3AB0"))
+                        .padding(.leading, 34)
+                        .offset(y: -4)
+                    Spacer()
+                }
+                .environment(\.layoutDirection, .leftToRight)
+            }
+        }
+        .frame(maxWidth: 440)
+        .padding(.horizontal, 14)
+    }
+
+    private var finish: some View {
+        VStack(spacing: 10) {
+            Text("🎉").font(.system(size: 46))
+            Text(tr("5 שאלות, 2 דקות של זמן מסך"))
+                .font(.system(size: 24, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+            Text(tr("עכשיו תורם של הילדים. יוצרים משפחה, מוסיפים את הילדים, והם מתחילים להרוויח."))
+                .font(.system(size: 15.5, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.9))
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 8) {
+                point("🎁", tr("30 יום של טופי+ במתנה"))
+                point("⏳", tr("ההרשמה לוקחת כדקה"))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(12)
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.1)))
+            Button(action: onCreateFamily) {
+                Text(tr("ליצור משפחה"))
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+                    .foregroundStyle(Color(hex: "2A1E5C"))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 15)
+                    .glassFill(AppGradient.gold, radius: 16)
+            }
+            .buttonStyle(.juicy)
+            .padding(.top, 4)
+            Button(action: onParentView) {
+                Text(tr("לראות מה ההורה רואה"))
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 13)
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+            }
+            .buttonStyle(.juicy)
+            Button(action: onNext) {
+                Text(tr("עוד כמה שאלות"))
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .underline()
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 2)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 18)
+        .frame(maxWidth: 440)
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "4A3AB0").opacity(0.98)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+        .shadow(color: .black.opacity(0.45), radius: 20, y: -10)
+        .padding(.horizontal, 12)
+    }
+
+    private func point(_ emoji: String, _ text: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(emoji).font(.system(size: 16))
+            Text(text)
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
