@@ -3,8 +3,11 @@ import SwiftUI
 /// ⚙️ ONE settings window (Rani, 2026-10-11: "אני לוחץ הגדרות של נוני, זה סוגר
 /// את המסך ואז פותח מסך הגדרות חדש — זה נורא"). The gear opens one sheet with
 /// one navigation stack; a child's settings, an editor, the map and the pairing
-/// code all slide IN, the back arrow goes one step back, and "סיום" closes the
-/// whole window from any depth. Nothing closes and reopens.
+/// code all slide IN and the back arrow goes one step back. Nothing closes and
+/// reopens. "סיום" is on the window's FIRST page only: a pushed page has one
+/// button, its back arrow — the two side by side read as two ways out (Rani,
+/// 2026-10-12: "למה יש גם סיום וגם X?"). The window still closes from any depth
+/// by pulling it down.
 ///
 /// A page that can also stand alone in a sheet of its own (the editors do, from
 /// the child's card) takes `embedded`: alone it brings its own stack and its
@@ -43,25 +46,4 @@ extension View {
                      action: @escaping () -> Void) -> some View {
         if embedded { self } else { railDismiss(label, systemImage: systemImage, action: action) }
     }
-}
-
-/// "סיום" on a page that lives only inside the settings window (a child's
-/// devices, "עוד הגדרות"): it closes the whole window, like every other page's.
-private struct SettingsDoneButton: ViewModifier {
-    @Environment(\.closeSettings) private var closeSettings
-    @ObservedObject private var railHost = DisplayGeometry.shared
-
-    func body(content: Content) -> some View {
-        content.toolbar {
-            if !railHost.hasRail, let closeSettings {
-                ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) {
-                    Button(tr("סיום")) { closeSettings() }
-                }
-            }
-        }
-    }
-}
-
-extension View {
-    func settingsDoneButton() -> some View { modifier(SettingsDoneButton()) }
 }

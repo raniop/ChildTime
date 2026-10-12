@@ -187,10 +187,11 @@ struct ParentLocationView: View {
             .navigationTitle(tr("איפה הילדים"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) { Button(tr("סיום")) { close() } }
-                // Inside the settings window the bar already carries the back arrow
-                // and "סיום" — a third button there made a crowd (Rani, 2026-10-12);
-                // "📍 מקומות" sits under the map instead.
+                if !embedded {
+                    ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) { Button(tr("סיום")) { close() } }
+                }
+                // Inside the settings window the bar carries the back arrow alone
+                // (Rani, 2026-10-12); "📍 מקומות" sits under the map instead.
                 if !embedded {
                 ToolbarItem(placement: .awayFromBar(.navigationBarLeading, leading: true)) {
                     Button { showingPlaces = true } label: { Text(tr("📍 מקומות")) }

@@ -364,7 +364,6 @@ struct ParentSettingsView: View {
         .environment(\.colorScheme, .dark)
         .navigationTitle(multilingual ? tr("מראה ושפה") : tr("רקע"))
         .navigationBarTitleDisplayMode(.inline)
-        .settingsDoneButton()
     }
 
     private func menuHeading(_ title: String) -> some View {
@@ -405,7 +404,6 @@ struct ParentSettingsView: View {
             .glassForm()
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
-            .settingsDoneButton()
     }
 
     /// Only on an iPad (the device, not the size class) that is a parent device

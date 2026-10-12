@@ -65,7 +65,9 @@ struct ChildWorldsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
-                if !railHost.hasRail {
+                // Pushed inside the settings window the page has ONE button, the back
+                // arrow — "סיום" beside it read as a second way out (Rani, 2026-10-12).
+                if !railHost.hasRail, !embedded {
                     ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) {
                         Button(tr("סיום")) { close() }
                     }

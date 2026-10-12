@@ -104,7 +104,9 @@ struct ChildSettingsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.
-                if !railHost.hasRail {
+                // Pushed inside the settings window the page has ONE button, the back
+                // arrow — "סיום" beside it read as a second way out (Rani, 2026-10-12).
+                if !railHost.hasRail, !embedded {
                     ToolbarItem(placement: .awayFromBar(.confirmationAction, leading: false)) {
                         Button(tr("סיום")) { close() }
                     }
@@ -356,7 +358,6 @@ struct ChildSettingsView: View {
         }
         .readableColumn(form: true)
         .glassForm()
-        .settingsDoneButton()
         .alert(tr("שליטה מרחוק"), isPresented: Binding(
             get: { remoteNote != nil },
             set: { if !$0 { remoteNote = nil } })) {
@@ -450,7 +451,6 @@ struct ChildSettingsView: View {
         }
         .navigationTitle(tr("עוד הגדרות"))
         .navigationBarTitleDisplayMode(.inline)
-        .settingsDoneButton()
         .environment(\.layoutDirection, .app)
     }
 
