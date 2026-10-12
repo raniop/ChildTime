@@ -717,8 +717,8 @@ struct WorldMapView: View {
         // not chrome.
         .sideRail {
             SideRailButton(emoji: "🛍️", label: tr("חֲנוּת")) { showingShop = true }
-            SideRailButton(emoji: "🏆", label: tr("חֲבֵרִים")) { showingLeaderboard = true }
-            SideRailButton(emoji: "⚙️", label: tr("הגדרות")) { showingParentGate = true }
+            SideRailButton(emoji: "🏆", label: tr("חֲבֵרִים")) { if !DemoTour.refuse() { showingLeaderboard = true } }
+            SideRailButton(emoji: "⚙️", label: tr("הגדרות")) { if !DemoTour.refuse() { showingParentGate = true } }
             SideRailDivider()
             // 🎁 The daily chest rides beside the buddy, exactly as it rides on
             // its head everywhere else.
@@ -1671,7 +1671,7 @@ struct WorldMapView: View {
             }
             .coachMark("k.shop")
             navButton("🏆", badge: !liveGame.invites.isEmpty, size: size) {
-                Haptic.light(); showingLeaderboard = true
+                Haptic.light(); if !DemoTour.refuse() { showingLeaderboard = true }
             }
             .coachMark("k.friends")
             // 🎨 The child's own backdrop (free — every one of them).
@@ -1679,7 +1679,7 @@ struct WorldMapView: View {
                 Haptic.light(); showingBackdrops = true
             }
             navButton("⚙️", badge: false, size: size, longPress: { showingDemo = true }) {
-                showingParentGate = true
+                if !DemoTour.refuse() { showingParentGate = true }
             }
             .coachMark("k.settings")
         }
@@ -1733,7 +1733,7 @@ struct WorldMapView: View {
                 Divider().overlay(Color.white.opacity(0.16))
                 let all = profiles.activeID.map { choreStore.chores(forChild: $0) } ?? []
                 statRow(value: "\(all.filter { $0.approvedToday }.count)", suffix: all.isEmpty ? nil : "/\(all.count)",
-                        label: tr("🧹 מְטָלוֹת הַיּוֹם")) { requirePremium { showingChores = true } }
+                        label: tr("🧹 מְטָלוֹת הַיּוֹם")) { if !DemoTour.refuse() { requirePremium { showingChores = true } } }
             }
             .environment(\.layoutDirection, .app)
             .padding(.horizontal, 14).padding(.vertical, 4)
@@ -1777,7 +1777,7 @@ struct WorldMapView: View {
         let all = profiles.activeID.map { choreStore.chores(forChild: $0) } ?? []
         let done = all.filter { $0.approvedToday }.count
         return statColumn(value: "\(done)", suffix: all.isEmpty ? nil : "/\(all.count)", label: tr("🧹 מְטָלוֹת הַיּוֹם")) {
-            requirePremium { showingChores = true }
+            if !DemoTour.refuse() { requirePremium { showingChores = true } }
         }
         .overlay(alignment: .topTrailing) {
             if all.contains(where: { $0.isPendingApproval }) {
@@ -1907,7 +1907,7 @@ struct WorldMapView: View {
                             colors: [Color(hex: "10B981"), Color(hex: "0E9E72")],
                             startPoint: .leading, endPoint: .trailing)),
                         glow: Color(hex: "10B981")) {
-                    showingLeaderboard = true
+                    if !DemoTour.refuse() { showingLeaderboard = true }
                 }
             }
         }
@@ -2694,7 +2694,7 @@ struct WorldMapView: View {
             .foregroundStyle(.white.opacity(0.88)).lineLimit(1).minimumScaleFactor(0.6)
         return Button {
             Haptic.light()
-            requirePremium { showingChores = true }
+            if !DemoTour.refuse() { requirePremium { showingChores = true } }
         } label: {
             twinCard(ring: ring, title: tr("מַטְלוֹת הַבַּיִת"), status: status, frac: frac)
         }

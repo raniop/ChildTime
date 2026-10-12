@@ -1,29 +1,13 @@
 import SwiftUI
+import Combine
 
-// 🎬 סיור הדגמה — a family to look around in before signing up (Rani,
-// 2026-10-12: parents say "show us an example" and won't install → sign up →
-// create children just to see one).
-//
-// PREVIEW ONLY for now: the three pieces Rani approves from real screenshots
-// before anything is wired — the entry row, the band that stays on top, and
-// the invitation to sign up. The demo itself (its own storage, no account,
-// the cloud layer off) is not built yet.
-enum DemoTour {
-    /// True while the demo family is on screen. For now only a DEBUG launch
-    /// with DEMO_TOUR=1 turns it on; the real switch comes with the demo.
-    static var isOn: Bool {
-        #if DEBUG
-        return ProcessInfo.processInfo.environment["DEMO_TOUR"] != nil
-        #else
-        return false
-        #endif
-    }
-}
+// 🎬 סיור הדגמה — the screens of the demo tour (see `DemoTour` for what it is
+// and why nothing of it leaves the device). Three pieces, approved by Rani from
+// real screenshots (2026-10-12): the entry row on the first screen, the band
+// that stays on top, and the invitation to sign up.
 
-#if DEBUG
-
-/// The third row on the first screen, under the two role cards. Quieter than
-/// them on purpose: it is a look around, not a way to set the device up.
+/// The row pinned to the bottom of the first screen, apart from the two role
+/// cards: it is a look around, not a way to set the device up.
 struct DemoTourEntryRow: View {
     var action: () -> Void = {}
 
@@ -56,18 +40,38 @@ struct DemoTourEntryRow: View {
     }
 }
 
-/// The strip that stays above every screen of the demo, the parent's and the
-/// child's: says this is a demo, and is the one standing way to sign up.
+/// The strip above every screen of the tour, the parent's and the child's:
+/// says this is a demo, and is the one standing way to sign up. On a child's
+/// screen it is also the way back to the parent's.
 struct DemoTourBand: View {
-    var action: () -> Void = {}
+    /// The child whose screen is showing; nil on the parent's home.
+    var kidName: String? = nil
+    var onSignUp: () -> Void = {}
+    var onBack: () -> Void = {}
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: AppSpacing.sm) {
+        HStack(spacing: AppSpacing.sm) {
+            if kidName != nil {
+                Button(action: onBack) {
+                    HStack(spacing: 5) {
+                        Image(systemName: "chevron.backward").font(.system(size: 13, weight: .heavy))
+                        Text(tr("חזרה להורים"))
+                            .font(.system(size: 14, weight: .heavy, design: .rounded))
+                            .lineLimit(1)
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.vertical, 7)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            } else {
                 Text(tr("🎬 זו הדגמה"))
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Spacer(minLength: AppSpacing.sm)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: AppSpacing.sm)
+            Button(action: onSignUp) {
                 Text(tr("להתחיל עם הילדים שלכם"))
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color(hex: "2A1E5C"))
@@ -77,19 +81,21 @@ struct DemoTourBand: View {
                     .padding(.vertical, 7)
                     .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
             }
-            .padding(.leading, AppSpacing.lg)
-            .padding(.trailing, AppSpacing.sm)
-            .padding(.vertical, 6)
-            .clearOfBar()
-            .background(Color(hex: "2A1E5C").opacity(0.92).ignoresSafeArea(edges: .top))
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
+        .padding(.leading, AppSpacing.lg)
+        .padding(.trailing, AppSpacing.sm)
+        .padding(.vertical, 6)
+        .clearOfBar()
+        .background(Color(hex: "2A1E5C").opacity(0.92).ignoresSafeArea(edges: .top))
     }
 }
 
-/// "בואו נירשם" — what the band opens, and what a closed feature shows instead
-/// of an error. Leaving it is always one tap: back to the demo, or out of it.
+/// "בואו נירשם" — what the band opens, and what something closed in the tour
+/// shows instead of an error. Leaving it is always one tap: back to the demo,
+/// or out of it.
 struct DemoTourInviteSheet: View {
+    var reason: DemoTour.Invite = .band
     var onSignUp: () -> Void = {}
     var onStay: () -> Void = {}
     var onLeave: () -> Void = {}
@@ -100,12 +106,14 @@ struct DemoTourInviteSheet: View {
                 .ignoresSafeArea()
                 .onTapGesture { onStay() }
             VStack(spacing: 10) {
-                Text("🎉").font(.system(size: 44))
-                Text(tr("עכשיו עם הילדים שלכם"))
+                Text(reason == .closed ? "🔑" : "🎉").font(.system(size: 44))
+                Text(reason == .closed ? tr("זה נפתח אחרי ההרשמה") : tr("עכשיו עם הילדים שלכם"))
                     .font(.system(size: 24, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
-                Text(tr("מה שראיתם הוא משפחה לדוגמה. ההרשמה לוקחת כדקה, ואחריה מוסיפים את הילדים ומתחילים."))
+                Text(reason == .closed
+                     ? tr("בהדגמה אפשר להסתכל, לתת מתנת דקות ולשחק כמו הילד. את השאר עושים במשפחה שלכם, וההרשמה לוקחת כדקה.")
+                     : tr("מה שראיתם הוא משפחה לדוגמה. ההרשמה לוקחת כדקה, ואחריה מוסיפים את הילדים ומתחילים."))
                     .font(.system(size: 15, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.88))
                     .multilineTextAlignment(.center)
@@ -168,18 +176,47 @@ struct DemoTourInviteSheet: View {
     }
 }
 
-/// DEMO_SCREEN=demotour | demoinvite — the parent home as the demo shows it.
-struct DemoTourPreview: View {
-    var invite = false
+/// The whole app while the tour is on: the band, and under it the parent's
+/// home of the demo family or one of its children's own screens.
+struct DemoTourRoot: View {
+    @ObservedObject private var tour = DemoTour.shared
+    @EnvironmentObject var profiles: ProfileStore
+    /// Mirrors the play window, like the app's own root does: the store
+    /// publishes BEFORE it changes, so the value is read a beat later.
+    @State private var windowShowing = false
+
+    private var kid: Profile? { tour.kidID.flatMap { id in profiles.profiles.first { $0.id == id } } }
 
     var body: some View {
         VStack(spacing: 0) {
-            DemoTourBand()
-            ParentDashboardView(isRoot: true)
+            DemoTourBand(kidName: kid?.name,
+                         onSignUp: { Haptic.light(); tour.invite = .band },
+                         onBack: { Haptic.light(); tour.backToParent() })
+            if kid != nil {
+                Group {
+                    if windowShowing { UnlockedView() } else { WorldMapView() }
+                }
+                .transition(.opacity)
+            } else {
+                ParentDashboardView(isRoot: true)
+                    .transition(.opacity)
+            }
         }
         .background(GlassBackdrop())
-        .overlay { if invite { DemoTourInviteSheet() } }
+        .overlay {
+            if let reason = tour.invite {
+                DemoTourInviteSheet(reason: reason,
+                                    onSignUp: { Haptic.medium(); tour.end(signUp: true) },
+                                    onStay: { tour.invite = nil },
+                                    onLeave: { Haptic.light(); tour.end(signUp: false) })
+                    .transition(.opacity)
+            }
+        }
+        .animation(.easeOut(duration: 0.2), value: tour.invite)
+        .animation(.easeOut(duration: 0.2), value: tour.kidID)
+        .onReceive(ProgressStore.shared.objectWillChange.receive(on: DispatchQueue.main)) { _ in
+            let open = ProgressStore.shared.isUnlocked || ProgressStore.shared.isOpeningWindow
+            if open != windowShowing { windowShowing = open }
+        }
     }
 }
-
-#endif

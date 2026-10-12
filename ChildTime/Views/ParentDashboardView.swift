@@ -292,9 +292,9 @@ struct ParentDashboardView: View {
     @ViewBuilder private var parentRail: some View {
         if useRail {
             SideRailContainer {
-                SideRailButton(systemImage: "gearshape.fill", label: tr("הגדרות")) { showingSettings = true }
+                SideRailButton(systemImage: "gearshape.fill", label: tr("הגדרות")) { if !DemoTour.refuse() { showingSettings = true } }
                 SideRailButton(systemImage: activity.unread > 0 ? "bell.badge.fill" : "bell.fill",
-                               label: tr("עדכונים")) { showingActivity = true }
+                               label: tr("עדכונים")) { if !DemoTour.refuse() { showingActivity = true } }
                 // ✨ This version's story — the same ring as on the phone's header.
                 if !WhatsNewStories.parentStoryForThisVersion.isEmpty {
                     storyRing.frame(width: 46, height: 46)
@@ -352,6 +352,7 @@ struct ParentDashboardView: View {
 
     /// The chores sheet, opened from the rail as well as the actions row.
     private func openChores() {
+        guard !DemoTour.refuse() else { return }
         let items = choreStore.pendingApproval
         let target = items.first.flatMap { first in
             profiles.profiles.first(where: { $0.id.uuidString == first.childID })
@@ -483,7 +484,7 @@ struct ParentDashboardView: View {
                             // Feedback to the team — a plain button BELOW everything
                             // (replaces the floating bubble that overlapped a child
                             // card on smaller screens).
-                            if isRoot {
+                            if isRoot, !DemoTour.isOn {
                                 // Now opens the live chat (Rani); the old email
                                 // form (ParentFeedbackView) stays in the code.
                                 Button { openSupportChat() } label: {
@@ -592,7 +593,7 @@ struct ParentDashboardView: View {
             .toolbar {
                 ToolbarItem(placement: .barSafeTopTrailing) {
                     if isRoot {
-                        Button { showingSettings = true } label: {
+                        Button { if !DemoTour.refuse() { showingSettings = true } } label: {
                             Image(systemName: "gearshape.fill")
                                 .foregroundStyle(.white)
                         }
@@ -948,6 +949,9 @@ struct ParentDashboardView: View {
 
     // MARK: - Sub-views
     private func rescheduleInsights() {
+        // 🎬 No reminders about the demo tour's made-up children — they would
+        // fire days later, on a phone that by then belongs to a real family.
+        guard !DemoTour.isOn else { return }
         InsightNotificationScheduler.reschedule(
             rows: rows,
             enabledTopics: settings.enabledTopics,
@@ -1420,6 +1424,12 @@ struct ParentDashboardView: View {
                         Text(profile.name)
                             .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .lineLimit(1).minimumScaleFactor(0.7)
+                        // "דנה · כיתה ו׳" (Rani, 2026-10-12): with a few children
+                        // on the home, the grade says at a glance who is who.
+                        Text(verbatim: "· \(Profile.gradeNameForParent(profile.effectiveGrade))")
+                            .font(.system(size: 13.5, weight: .semibold, design: .rounded))
+                            .foregroundStyle(GlassInk.secondary)
+                            .lineLimit(1).fixedSize()
                         // ✏️ The name and avatar open this child's settings —
                         // the same pencil the family name already wears.
                         if isRoot { Text("✏️").font(.system(size: 13)).opacity(0.75) }
@@ -1651,6 +1661,7 @@ struct ParentDashboardView: View {
             // it opens Kid Mode for THAT child, no picker.
             Button {
                 Haptic.light()
+                guard !DemoTour.refuse() else { return }
                 let items = choreStore.pendingApproval
                 let target = items.first.flatMap { first in
                     profiles.profiles.first(where: { $0.id.uuidString == first.childID })
@@ -1714,7 +1725,7 @@ struct ParentDashboardView: View {
             // ⚙️ on the far left (the container is LTR), a glass circle like the
             // kid's nav buttons. On the Duo it lives in the rail instead.
             if !useRail {
-                Button { Haptic.light(); showingSettings = true } label: {
+                Button { Haptic.light(); if !DemoTour.refuse() { showingSettings = true } } label: {
                     Image(systemName: "gearshape.fill")
                         .font(.system(size: 17, weight: .bold))
                         .foregroundStyle(.white)
@@ -1725,7 +1736,7 @@ struct ParentDashboardView: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel(tr("הגדרות"))
                 .coachMark("p.gear")
-                ActivityBellButton(unread: activity.unread) { showingActivity = true }
+                ActivityBellButton(unread: DemoTour.isOn ? 0 : activity.unread) { if !DemoTour.refuse() { showingActivity = true } }
                     .coachMark("p.bell")
                 if !WhatsNewStories.parentStoryForThisVersion.isEmpty {
                     storyRing
@@ -1735,6 +1746,7 @@ struct ParentDashboardView: View {
                 // The family's name IS the title (Rani); tap to name / rename.
                 Button {
                     Haptic.light()
+                    guard !DemoTour.refuse() else { return }
                     familyNameDraft = household.familyNameShown ?? ""
                     showFamilyNameEditor = true
                 } label: {
@@ -1843,6 +1855,7 @@ struct ParentDashboardView: View {
     private func gridCardMenu(_ profile: Profile, width: CGFloat) -> some View {
         Button {
             Haptic.light()
+            guard !DemoTour.refuse() else { return }
             actionsChild = profile
         } label: {
             // ⚡ as a symbol, not the emoji: the emoji's empty side bearing
@@ -2429,6 +2442,7 @@ struct ParentDashboardView: View {
                             if isRoot {
                                 Button {
                                     Haptic.light()
+                                    guard !DemoTour.refuse() else { return }
                                     editChild = row.profile
                                 } label: {
                                     Color.clear
@@ -2478,6 +2492,9 @@ struct ParentDashboardView: View {
                         if isRoot {
                             Button {
                                 Haptic.light()
+                                // 🎬 The demo tour: that child's own screen, with
+                                // no parent code and no Screen Time to approve.
+                                if DemoTour.isOn { DemoTour.shared.showKid(row.profile.id); return }
                                 kidModeStart = row.profile
                             } label: {
                                 homePrimaryLabel(tr("תנו ל\(row.profile.name) לשחק כאן 🧒"))
@@ -2516,10 +2533,12 @@ struct ParentDashboardView: View {
                             navPath.append(row.profile.id)
                         } label: { Label(tr("פתחו כרטיס"), systemImage: "rectangle.portrait.and.arrow.right") }
                         Button {
+                            guard !DemoTour.refuse() else { return }
                             choresProfile = row.profile
                         } label: { Label(tr("מטלות הבית 🧹"), systemImage: "checklist") }
                         if rows.count >= 2 {
                             Button {
+                                guard !DemoTour.refuse() else { return }
                                 showingReorder = true
                             } label: { Label(tr("סדר את הילדים"), systemImage: "arrow.up.arrow.down") }
                         }
@@ -2828,6 +2847,7 @@ struct ParentDashboardView: View {
     }
 
     private func remoteLock(_ profile: Profile) {
+        guard !DemoTour.refuse() else { return }
         Haptic.warning()
         household.lockRemoteScreenTime(toChildID: profile.id)
         // Live status sheet instead of an optimistic alert: shows the real
@@ -2845,6 +2865,7 @@ struct ParentDashboardView: View {
     }
 
     private func lockAndRevokeGift(_ profile: Profile) {
+        guard !DemoTour.refuse() else { return }
         Haptic.warning()
         remote.revokeChildGift(childID: profile.id)
         household.lockRemoteScreenTime(toChildID: profile.id)

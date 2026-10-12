@@ -192,6 +192,7 @@ final class RemoteSyncManager: ObservableObject {
     /// the parent taps reset, so the kid's other device sees it fast).
     func pushNow() {
         #if canImport(FirebaseFirestore)
+        guard !DemoTour.isOn else { return }
         uploadActiveProfile()
         #endif
     }
@@ -245,6 +246,8 @@ final class RemoteSyncManager: ObservableObject {
     /// final outcome so the caller can honestly reconcile optimistic UI. Only
     /// `.denied` is retried; `.queued` (offline) is a genuine success (durable).
     private func sendChildCommandConfirmed(_ childID: UUID, _ fields: [String: Any]) async -> ConfirmedWriteOutcome {
+        // 🎬 The demo tour never reaches for the server (see `DemoTour`).
+        if DemoTour.isOn { return .error }
         let ref = db.collection("children").document(childID.uuidString)
         var outcome = await confirmedMerge(ref, fields)
         if outcome == .denied {
@@ -302,6 +305,7 @@ final class RemoteSyncManager: ObservableObject {
     func giftChildMinutes(childID: UUID, minutes: Int, fromWatch: Bool = false) {
         #if canImport(FirebaseFirestore)
         guard minutes != 0 else { return }
+        if DemoTour.isOn { deliverDemoGift(childID: childID, minutes: minutes); return }
         pendingGifts[childID, default: 0] += minutes
         let stamp = Date().timeIntervalSince1970
         giftSendTracker[childID] = GiftRevokeTracker(stamp: stamp, sentAt: Date(),
@@ -340,6 +344,29 @@ final class RemoteSyncManager: ObservableObject {
         }
         #endif
     }
+
+    /// 🎬 The demo tour: parent and child are the same device and there is no
+    /// cloud between them, so the gift walks the same three steps the parent
+    /// sees in a real family — sending, saved, arrived — and lands straight in
+    /// that child's 💝 pocket.
+    private func deliverDemoGift(childID: UUID, minutes: Int) {
+        let stamp = Date().timeIntervalSince1970
+        giftSendTracker[childID] = GiftRevokeTracker(stamp: stamp, sentAt: Date(),
+                                                     reachedCloud: false, appliedAt: nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { [weak self] in
+            guard DemoTour.isOn, self?.giftSendTracker[childID]?.stamp == stamp else { return }
+            self?.giftSendTracker[childID]?.reachedCloud = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) { [weak self] in
+            guard DemoTour.isOn, self?.giftSendTracker[childID]?.stamp == stamp,
+                  ProfileStore.shared.profiles.contains(where: { $0.id == childID }) else { return }
+            if ProfileStore.shared.activeID != childID { ProfileStore.shared.setActiveID(childID) }
+            ProgressStore.shared.addParentGiftMinutes(minutes)
+            self?.giftSendTracker[childID]?.appliedAt = Date().timeIntervalSince1970
+        }
+    }
+    /// 🎬 The demo tour is over: no gift of it is still "on its way".
+    func clearDemoGifts() { giftSendTracker = [:] }
 
     /// CHILD device: consume a parent's gift command exactly once (read + zero
     /// in a transaction), then add it to the GIFT pocket.
@@ -408,6 +435,7 @@ final class RemoteSyncManager: ObservableObject {
     /// own device consumes concurrently.
     func consumePendingCommandsNow(for childID: UUID) async {
         #if canImport(FirebaseFirestore)
+        guard !DemoTour.isOn else { return }
         let s = ParentSettings.shared
         let isBoundChildDevice = s.deviceRole == .child && s.joinedChildID == childID.uuidString
         let isKidModeForThis = KidModeManager.shared.active && KidModeManager.shared.childID == childID
@@ -747,6 +775,8 @@ final class RemoteSyncManager: ObservableObject {
     /// attached, in case they were dropped.
     func refreshNow() {
         #if canImport(FirebaseFirestore)
+        // 🎬 The demo tour never reaches for the server (see `DemoTour`).
+        guard !DemoTour.isOn else { return }
         refreshProfileSubscriptions()
         for profile in ProfileStore.shared.profiles {
             let id = profile.id.uuidString
@@ -813,6 +843,7 @@ final class RemoteSyncManager: ObservableObject {
     /// progress the parent-cache/vault held for a NON-active profile). Same
     /// merge-transaction contract as uploadActiveProfile — never lowers cloud.
     private func uploadSnapshot(_ local: ProgressSnapshot, for pid: UUID) {
+        guard !DemoTour.isOn else { return }
         let ref = db.collection("children").document(pid.uuidString)
             .collection("state").document("current")
         db.runTransaction({ txn, _ -> Any? in
@@ -835,6 +866,8 @@ final class RemoteSyncManager: ObservableObject {
     }
 
     private func uploadActiveProfile() {
+        // 🎬 The demo tour never reaches for the server (see `DemoTour`).
+        guard !DemoTour.isOn else { return }
         guard let pid = ProfileStore.shared.activeID else { return }
         // THE path comes from ProfileStore and THE payload from ProgressStore —
         // two separate globals, read at two different moments, with a 3-second
@@ -969,6 +1002,8 @@ final class RemoteSyncManager: ObservableObject {
     }
 
     private func refreshProfileSubscriptions() {
+        // 🎬 The demo tour never reaches for the server (see `DemoTour`).
+        guard !DemoTour.isOn else { return }
         // Drop listeners for children we no longer have locally.
         let localIDs = Set(ProfileStore.shared.profiles.map { $0.id.uuidString })
         for (id, listener) in listeners where !localIDs.contains(id) {

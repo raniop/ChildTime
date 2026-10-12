@@ -16,7 +16,10 @@ enum AppInfo {
     }
     /// A DEMO_SCREEN run (screenshots, design review): no once-a-day pop-ups,
     /// no system permission prompts — the screen being reviewed must be visible.
-    static let isDemoRun = ProcessInfo.processInfo.environment["DEMO_SCREEN"] != nil
+    /// 🎬 …and the demo tour a parent opens from the first screen: the same
+    /// quiet (nothing pops over it, nothing is asked of the system).
+    static var isDemoRun: Bool { isDemoScreenRun || DemoTour.isOn }
+    private static let isDemoScreenRun = ProcessInfo.processInfo.environment["DEMO_SCREEN"] != nil
 
     static var build: String {
         Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"

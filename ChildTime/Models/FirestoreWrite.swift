@@ -24,7 +24,9 @@ enum ConfirmedWriteOutcome { case ok, queued, denied, error }
 func confirmedMerge(_ ref: DocumentReference,
                     _ fields: [String: Any],
                     timeout: TimeInterval = 3.0) async -> ConfirmedWriteOutcome {
-    await withCheckedContinuation { (cont: CheckedContinuation<ConfirmedWriteOutcome, Never>) in
+    // 🎬 The demo tour never writes to the server (see `DemoTour`).
+    if DemoTour.isOn { return .error }
+    return await withCheckedContinuation { (cont: CheckedContinuation<ConfirmedWriteOutcome, Never>) in
         let latch = WriteLatch()
         let assumeQueued = DispatchWorkItem {
             if latch.fire() { cont.resume(returning: .queued) }

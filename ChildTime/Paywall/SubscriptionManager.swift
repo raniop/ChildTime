@@ -47,6 +47,8 @@ final class SubscriptionManager: ObservableObject {
 
     /// True if the user has ANY form of premium access (trial, paid, or lifetime).
     var isPremium: Bool {
+        // 🎬 The demo tour shows the whole of Tofy; nothing is sold inside it.
+        if DemoTour.isOn { return true }
         #if DEBUG
         // Screenshots / demo checks only — never in a release build.
         if ProcessInfo.processInfo.environment["DEMO_PREMIUM"] != nil { return true }

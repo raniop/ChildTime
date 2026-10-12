@@ -17,6 +17,7 @@ struct ContentView: View {
     @StateObject private var liveGame = LiveGameManager.shared
     @QuietAppStorage(ChildLockSetup.pendingKey) private var lockSetupPending = false
     @ObservedObject private var location = LocationSharing.shared
+    @ObservedObject private var demoTour = DemoTour.shared
     /// 📍 The child's explanation shows at most once per launch and 3 times in
     /// all — iOS asks for "always" only once, so a kid who declined is not nagged.
     @State private var locationPromptShown = false
@@ -28,7 +29,11 @@ struct ContentView: View {
     var body: some View {
         let _ = BodyLog.hit("ContentView")
         Group {
-            if kidMode.active {
+            if demoTour.active {
+                // 🎬 The demo tour: a made-up family, no account, nothing leaves
+                // this device (see `DemoTour`).
+                DemoTourRoot()
+            } else if kidMode.active {
                 // Parent's phone temporarily acting as the kid's device.
                 kidModeRoot
             } else if !settings.hasSeenWelcome {

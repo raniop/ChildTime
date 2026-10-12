@@ -66,19 +66,20 @@ struct RolePickerView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        #if DEBUG
-        // 🎬 DEMO_TOUR=1 — the demo's entry row, for approval (not wired yet).
-        // Pinned to the bottom of the screen (Rani), apart from the two cards
-        // that set the device up.
+        // 🎬 The demo tour's way in — pinned to the bottom of the screen (Rani),
+        // apart from the two cards that set the device up. Only where there is
+        // nothing to mix with: no account, no family, no child (`DemoTour.canStart`).
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if ProcessInfo.processInfo.environment["DEMO_TOUR"] != nil {
-                DemoTourEntryRow()
-                    .frame(maxWidth: 460)
-                    .padding(.horizontal, AppSpacing.lg)
-                    .padding(.bottom, AppSpacing.sm)
+            if DemoTour.canStart {
+                DemoTourEntryRow {
+                    Haptic.medium()
+                    DemoTour.shared.start()
+                }
+                .frame(maxWidth: 460)
+                .padding(.horizontal, AppSpacing.lg)
+                .padding(.bottom, AppSpacing.sm)
             }
         }
-        #endif
         .overlay {
             if confirmParentOnPad { padParentConfirm }
             if childNeedsCode { childCodeSheet }
@@ -98,6 +99,9 @@ struct RolePickerView: View {
         .opacity(appeared ? 1 : 0)
         .onAppear {
             withAnimation(.easeOut(duration: 0.4)) { appeared = true }
+            // 🎬 "להירשם ולהתחיל" in the demo tour leads straight on to the
+            // parent's way in — through the age check, like every other.
+            if DemoTour.consumeSignUpNext() { requestParent() }
         }
     }
 

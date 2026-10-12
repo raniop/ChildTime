@@ -124,6 +124,8 @@ final class AuthManager: ObservableObject {
         // every Firestore call forever, silently killing the child's sync.
         // A reinstall's old session is on its way out — it is not ours to adopt.
         guard !reinstallCleanupInFlight else { return }
+        // 🎬 The demo tour has NO account — that is its first line of defence.
+        guard !DemoTour.isOn else { return }
         guard Auth.auth().currentUser == nil else {
             if userID == nil, let u = Auth.auth().currentUser { apply(firebaseUser: u) }
             return

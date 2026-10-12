@@ -202,6 +202,73 @@ final class LearningHistoryStore: ObservableObject {
         objectWillChange.send()
     }
 
+    /// 🎬 The demo tour's month for one child: the topics a child of that grade
+    /// meets, and a today that adds up to exactly what the parent's card says.
+    func seedDemoTour(childID: UUID, grade: Int, today: (answered: Int, correct: Int, minutes: Int)) {
+        // topic → (questions on a full day, accuracy now, accuracy a month ago)
+        let plan: [(Topic, Int, Double, Double)]
+        var mathSkills: [(String, Int, Double)] = []
+        switch grade {
+        case ..<1:
+            plan = [(.math, 5, 0.90, 0.78), (.logic, 4, 0.86, 0.70)]
+        case 1...2:
+            plan = [(.math, 6, 0.82, 0.70), (.hebrew, 5, 0.74, 0.60), (.logic, 4, 0.85, 0.75), (.science, 3, 0.80, 0.72)]
+            mathSkills = [("addSub", 6, 0.82)]
+        default:
+            plan = [(.math, 7, 0.62, 0.55), (.reading, 4, 0.89, 0.80), (.hebrew, 5, 0.86, 0.78),
+                    (.geography, 4, 0.85, 0.75), (.logic, 4, 0.78, 0.60), (.english, 4, 0.70, 0.60)]
+            mathSkills = [("fractions", 3, 0.40), ("mul", 2, 0.75), ("addSub", 2, 0.90)]
+        }
+        let full = plan.reduce(0) { $0 + $1.1 }
+        let skillTotal = max(1, mathSkills.reduce(0) { $0 + $1.1 })
+        var out: [String: DailyStat] = [:]
+        let cal = Calendar.current
+        for back in 0..<30 {
+            guard let day = cal.date(byAdding: .day, value: -back, to: Date()) else { continue }
+            if back % 6 == 4 { continue }                       // a quiet day now and then
+            var stat = DailyStat(date: Self.dayKey(day))
+            let t = 1 - Double(back) / 30                        // 0 = a month ago, 1 = today
+            let load = 0.6 + 0.8 * Double((back * 7) % 10) / 10
+            // Today is handed out so the whole day sums to the card's numbers.
+            var leftN = today.answered, leftC = today.correct
+            for (i, (topic, perDay, now, then)) in plan.enumerated() {
+                let last = i == plan.count - 1
+                let n: Int, c: Int
+                if back == 0 {
+                    n = last ? leftN : min(leftN, Int((Double(today.answered) * Double(perDay) / Double(full)).rounded()))
+                    c = last ? min(n, leftC) : min(n, leftC, Int((Double(n) * Double(today.correct) / Double(max(1, today.answered))).rounded()))
+                    leftN -= n; leftC -= c
+                } else {
+                    n = max(1, Int((Double(perDay) * load).rounded()))
+                    c = Int((Double(n) * (then + (now - then) * t)).rounded())
+                }
+                guard n > 0 else { continue }
+                var td = DailyStat.TopicDay(answered: n, correct: c, responseMsTotal: Double(n) * 6200)
+                if topic == .math, !mathSkills.isEmpty {
+                    var map: [String: DailyStat.SkillDay] = [:]
+                    var left = n
+                    for (j, (skill, share, sacc)) in mathSkills.enumerated() {
+                        let sn = j == mathSkills.count - 1 ? left : min(left, max(1, Int((Double(n) * Double(share) / Double(skillTotal)).rounded())))
+                        left -= sn
+                        if sn > 0 { map[skill] = .init(answered: sn, correct: Int((Double(sn) * sacc).rounded())) }
+                    }
+                    td.perSkill = map
+                }
+                stat.perTopic[topic.rawValue] = td
+                stat.questionsAnswered += n; stat.correct += c; stat.wrong += n - c
+                stat.learningSeconds += n * 6
+            }
+            stat.sessions = 2; stat.earnSessions = 1; stat.freeSessions = 1
+            stat.minutesEarned = back == 0 ? today.minutes : min(60, stat.correct)
+            stat.minutesUsed = back == 0 ? max(0, today.minutes - 6) : max(0, stat.minutesEarned - 4 - (back % 3) * 3)
+            stat.longestStreak = 4 + back % 4
+            out[stat.date] = stat
+        }
+        if let data = try? JSONEncoder().encode(out) { defaults.set(data, forKey: storageKey(childID)) }
+        if childID == boundChildID { days = out }
+        objectWillChange.send()
+    }
+
     // MARK: - Persistence
 
     private func storageKey(_ childID: UUID) -> String {

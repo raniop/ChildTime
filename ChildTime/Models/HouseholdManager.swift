@@ -101,15 +101,21 @@ final class HouseholdManager: ObservableObject {
 
     /// DEMO_SCREEN=dashboard only: fake a live iPad play window for the active
     /// child so the "playing now" banner can be seen in screenshots.
-    func seedDemoLiveWindow(childID: UUID) {
+    func seedDemoLiveWindow(childID: UUID, playing: Bool = true) {
         let now = Date()
         let dev = ChildDevice(id: "\(childID.uuidString)_demo", childID: childID.uuidString,
                               householdID: "demo", deviceID: "demo", name: "iPad", kind: "ipad",
-                              systemVersion: "18", joinedAt: now, lastSeenAt: now, removed: nil,
+                              systemVersion: "18", joinedAt: now,
+                              // Seen a while ago unless playing — or the card says "בטופי עכשיו".
+                              lastSeenAt: playing ? now : now.addingTimeInterval(-2 * 3600), removed: nil,
                               remoteUnlockMinutes: nil, remoteUnlockAt: nil,
-                              windowEndsAt: now.timeIntervalSince1970 + 23 * 60 + 40,
+                              windowEndsAt: playing ? now.timeIntervalSince1970 + 23 * 60 + 40 : nil,
                               frozenSeconds: nil, windowIsManual: false)
         devicesByChild[childID.uuidString] = [dev]
+    }
+    /// 🎬 The demo tour is over: its children's made-up devices go with them.
+    func clearDemoDevices() {
+        devicesByChild = devicesByChild.filter { !$0.value.contains { $0.householdID == "demo" } }
     }
     /// Demo harness: put the family at a point of the gift journey so the
     /// parent home / paywall render that state for screenshots and review.
@@ -188,6 +194,9 @@ final class HouseholdManager: ObservableObject {
     /// says so, tries again, and returns true (= don't proceed).
     @discardableResult
     func refuseIfDisconnected() -> Bool {
+        // 🎬 In the demo tour nothing writes a family: the invitation to sign
+        // up opens instead.
+        if DemoTour.refuse() { return true }
         guard familyLinkBroken || familyNotLoaded else { return false }
         // Still true from a notice that never got to show (a sheet was closing)?
         // Re-raise it, or every later refusal would publish nothing at all.
@@ -340,7 +349,11 @@ final class HouseholdManager: ObservableObject {
     ///    once synced stale local profiles straight into the real production
     ///    household (that's how junk יוֹאָב/שיפי dupes leaked in).
     /// In these modes every HouseholdManager cloud write is a no-op (local only).
+    ///  • 🎬 the demo tour (`DemoTour`) — a made-up family a parent looks around
+    ///    in before signing up. It has no account at all; this is its second
+    ///    line of defence.
     static var skipsCloudSync: Bool {
+        if DemoTour.isOn { return true }
         if ProcessInfo.processInfo.environment["DEMO_SCREEN"] != nil { return true }
         if NSClassFromString("XCTestCase") != nil { return true }   // running under tests
         return false
@@ -1543,7 +1556,7 @@ final class HouseholdManager: ObservableObject {
     /// The family name as shown: the cloud value, else what this device last
     /// set (so the title updates before the household round-trips — and on a
     /// device whose household hasn't streamed down yet).
-    var familyNameShown: String? { household?.familyName ?? localFamilyName }
+    var familyNameShown: String? { DemoTour.isOn ? DemoTour.familyName : (household?.familyName ?? localFamilyName) }
     @Published private(set) var localFamilyName: String? = UserDefaults.standard.string(forKey: "family.name")
 
     /// A ready-made suggestion for the family name, from the signed-in parent's
