@@ -123348,6 +123348,28 @@
         }
       }
     },
+    "שם, תמונה ודקות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اسم وصورة ودقائق"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name, picture and minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Название, картинка и минуты"
+          }
+        }
+      }
+    },
     "שמור" : {
       "localizations" : {
         "ar" : {
