@@ -81380,19 +81380,19 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "إنشاء طفل"
+            "value" : "إنشاء ملف"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Create a child"
+            "value" : "Create a profile"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Создать ребёнка"
+            "value" : "Создать профиль"
           }
         }
       }
