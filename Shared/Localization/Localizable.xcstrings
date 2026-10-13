@@ -23636,6 +23636,28 @@
         }
       }
     },
+    "איפוס דקות מתנה, מחלון המתנה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تصفير دقائق الهدية من نافذة الهدية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset gift minutes from the gift window"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сброс подаренных минут из окна подарка"
+          }
+        }
+      }
+    },
     "איפוס ההתקדמות מאפס גם את הדקות והמתנות, גם לילד שמשחק רק במצב ילד בטלפון של ההורה" : {
       "localizations" : {
         "ar" : {
@@ -29998,6 +30020,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Один раз выберите, что остаётся открытым, а всё остальное блокируется, пока не заработано время, — даже приложение, которое ребёнок установит завтра"
+          }
+        }
+      }
+    },
+    "בוחרים ציור למטלה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختاروا صورة للمهمة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick a picture for a chore"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите картинку для задания"
           }
         }
       }
@@ -75985,6 +76029,28 @@
         }
       }
     },
+    "כשהילד קונה דמות או פריט בחנות הדמויות, אתם מקבלים התראה, והקנייה מופיעה במרכז העדכונים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عندما يشتري الطفل شخصية أو غرضًا من متجر الشخصيات يصلكم إشعار، ويظهر الشراء في مركز التحديثات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When your child buys a character or an item in the character shop, you get a notification, and the purchase appears in the updates centre"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Когда ребёнок покупает персонажа или предмет в магазине персонажей, вы получаете уведомление, а покупка появляется в центре обновлений"
+          }
+        }
+      }
+    },
     "כשחוזרים לאפליקציה ומסך קוד ההורה פתוח, זיהוי הפנים עולה לבד" : {
       "localizations" : {
         "ar" : {
@@ -76025,6 +76091,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Когда выходит новая версия Tofy, появляется короткое сообщение о том, что нового, и кнопка, которая ведёт прямо к обновлению"
+          }
+        }
+      }
+    },
+    "כשמוסיפים מטלה בוחרים אחד מ־49 ציורים, או כל אימוג׳י שרוצים. מסך המטלות שלכם מסודר עכשיו בשורות, כמו אצל הילד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عند إضافة مهمة تختارون واحدة من 49 صورة، أو أي إيموجي تريدونه. شاشة المهام لديكم مرتّبة الآن في صفوف، كما عند الطفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When you add a chore you pick one of 49 pictures, or any emoji you like. Your chores screen is now laid out in rows, like the child's"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавляя задание, вы выбираете одну из 49 картинок или любой эмодзи. Ваш экран заданий теперь выстроен строками, как у ребёнка"
           }
         }
       }
@@ -81463,6 +81551,28 @@
         }
       }
     },
+    "לילד שעוד לא קורא יש כפתור 🔊 ליד כל מטלה, והמטלות המובנות מופיעות בשפה של המכשיר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "للطفل الذي لا يقرأ بعد زر 🔊 بجانب كل مهمة، والمهام الجاهزة تظهر بلغة الجهاز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A child who does not read yet has a 🔊 button next to every chore, and the built-in chores appear in the device's language"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У ребёнка, который ещё не читает, рядом с каждым заданием есть кнопка 🔊, а встроенные задания показываются на языке устройства"
+          }
+        }
+      }
+    },
     "לילדי גן — זוגות של תמונות זהות, בלי מילים באנגלית" : {
       "localizations" : {
         "ar" : {
@@ -81657,6 +81767,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "У каждого ребёнка простая карточка: минуты за сегодня из максимума, вопросы, правильные ответы и процент успеха. Нажатие открывает полный отчёт — в чём ребёнок силён, что стоит потренировать, улучшается ли он, и ежедневная подсказка с рекомендацией. Без звёзд и алмазов — они у детей"
+          }
+        }
+      }
+    },
+    "לכל מטלה יש עכשיו ציור. אצל הילד: רשימה עם ריבוע אחד לסימון, והדמות שלו מראה כמה דקות עוד אפשר להרוויח היום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لكل مهمة الآن صورة. عند الطفل: قائمة بمربع واحد للتأشير، وشخصيته تُظهر كم دقيقة ما زال يمكن كسبها اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every chore now has a picture. On the child's side: a list with one box to tick, and their character shows how many minutes can still be earned today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У каждого дела теперь есть картинка. У ребёнка: список с одной клеткой для отметки, а его персонаж показывает, сколько минут ещё можно заработать сегодня"
           }
         }
       }
@@ -90824,6 +90956,28 @@
         }
       }
     },
+    "מטלה שאפשר לשמוע" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مهمة يمكن سماعها"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A chore you can hear"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Задание, которое можно услышать"
+          }
+        }
+      }
+    },
     "מטלה שילד באמת מכיר בשם הזה" : {
       "localizations" : {
         "ar" : {
@@ -90908,6 +91062,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Домашние дела · %@"
+          }
+        }
+      }
+    },
+    "מטלות הבית בציורים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مهام البيت بالصور"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chores in pictures"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Домашние дела в картинках"
+          }
+        }
+      }
+    },
+    "מטלות הבית בציורים, והגדרות פשוטות יותר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مهام البيت بالصور، وإعدادات أبسط"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chores in pictures, and simpler settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Домашние дела в картинках и более простые настройки"
           }
         }
       }
@@ -114602,6 +114800,28 @@
         }
       }
     },
+    "קנייה בחנות מגיעה אליכם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مشتريات المتجر تصلكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shop purchases reach you"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Покупки в магазине приходят к вам"
+          }
+        }
+      }
+    },
     "קנייה בחנות: %@" : {
       "localizations" : {
         "ar" : {
@@ -126187,6 +126407,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Более точное «с»"
+          }
+        }
+      }
+    },
+    "״נעל ואפס דקות מתנה״ נמצא עכשיו גם בחלון המתנה עצמו, מתחת ל״עוד לא נוצלו״" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«اقفل وصفّر دقائق الهدية» موجود الآن أيضًا في نافذة الهدية نفسها، تحت «لم تُستخدم بعد»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“Lock and reset gift minutes” is now in the gift window itself too, under “Not used yet”"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Заблокировать и сбросить подаренные минуты» теперь есть и в самом окне подарка, под «Ещё не использовано»"
           }
         }
       }
