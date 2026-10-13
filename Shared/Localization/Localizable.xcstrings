@@ -35724,6 +35724,28 @@
         }
       }
     },
+    "דקות לשחק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دقائق اللعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Минуты на игру"
+          }
+        }
+      }
+    },
     "דקות משחק לתגמול: %lld" : {
       "localizations" : {
         "ar" : {
@@ -35828,6 +35850,28 @@
         }
       }
     },
+    "דקות מתנה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دقائق هدية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gift minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Минуты в подарок"
+          }
+        }
+      }
+    },
     "דקות מתנה שלא נוצלו היום נשמרות למחר." : {
       "localizations" : {
         "ar" : {
@@ -35846,6 +35890,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Подаренные минуты, не использованные сегодня, сохраняются на завтра."
+          }
+        }
+      }
+    },
+    "דקות שאתם נותנים לילד מהטלפון שלכם, בלי קשר לשאלות: על עזרה בבית, או סתם כי בא לכם. ה־30 שכאן הן לדוגמה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دقائق تمنحونها للطفل من هاتفكم، بلا علاقة بالأسئلة: مقابل المساعدة في البيت، أو لأنكم أردتم ذلك فقط. الـ30 هنا مثال."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minutes you give your child from your own phone, regardless of the questions: for helping at home, or just because. The 30 here are an example."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Минуты, которые вы дарите ребёнку со своего телефона, независимо от вопросов: за помощь по дому или просто так. 30 минут здесь — для примера."
           }
         }
       }
@@ -49324,6 +49390,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Пригласить"
+          }
+        }
+      }
+    },
+    "הזמן שהילד הרוויח בתשובות נכונות — כאן זה מה שאתם צברתם עכשיו. כשנצברות מספיק דקות, הילד לוחץ, והאפליקציות והמשחקים שלו נפתחים עד שהזמן נגמר." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوقت الذي كسبه الطفل بالإجابات الصحيحة — وهنا هو ما جمعتموه أنتم الآن. عندما تتجمع دقائق كافية يضغط الطفل، فتُفتح تطبيقاته وألعابه إلى أن ينتهي الوقت."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The time your child earned with right answers — here it is what you have just earned. Once enough minutes add up, your child taps it, and their apps and games open until the time runs out."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Время, которое ребёнок заработал правильными ответами, — здесь это то, что сейчас заработали вы. Когда минут накопится достаточно, ребёнок нажимает, и его приложения и игры открываются, пока время не закончится."
+          }
+        }
+      }
+    },
+    "הזמן שהילד הרוויח בתשובות נכונות. כשנצברות מספיק דקות, הילד לוחץ, והאפליקציות והמשחקים שלו נפתחים עד שהזמן נגמר." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوقت الذي كسبه الطفل بالإجابات الصحيحة. عندما تتجمع دقائق كافية يضغط الطفل، فتُفتح تطبيقاته وألعابه إلى أن ينتهي الوقت."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The time your child earned with right answers. Once enough minutes add up, your child taps it, and their apps and games open until the time runs out."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Время, которое ребёнок заработал правильными ответами. Когда минут накопится достаточно, ребёнок нажимает, и его приложения и игры открываются, пока время не закончится."
           }
         }
       }
@@ -103121,6 +103231,28 @@
         }
       }
     },
+    "עוֹד אֶפְשָׁר לְהַרְוִיחַ הַיּוֹם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما زال يمكن كسبه اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Still up for grabs today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сегодня ещё можно заработать"
+          }
+        }
+      }
+    },
     "עוֹד כַּסֶּפֶת 🔁" : {
       "localizations" : {
         "ar" : {
@@ -114162,6 +114294,50 @@
         }
       }
     },
+    "קוד סודי" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرمز السري"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secret code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Секретный код"
+          }
+        }
+      }
+    },
+    "קוד שהילד בוחר לעצמו, כדי שרק הוא יוכל לפתוח את הדקות שלו — ולא אח או אחות." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رمز يختاره الطفل لنفسه، حتى يكون هو وحده من يفتح دقائقه — لا أخوه ولا أخته."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A code your child picks, so that only they can open their minutes — not a brother or a sister."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код, который ребёнок выбирает сам, чтобы только он мог открыть свои минуты — а не брат или сестра."
+          }
+        }
+      }
+    },
     "קוד שרק אתם יודעים — כך הילדים לא ישנו הגדרות ולא יפתחו לעצמם זמן מסך. תצטרכו אותו גם בטלפון של הילד." : {
       "localizations" : {
         "ar" : {
@@ -122640,6 +122816,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Трое детей"
+          }
+        }
+      }
+    },
+    "שלושת הכפתורים שלמטה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأزرار الثلاثة في الأسفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The three buttons at the bottom"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Три кнопки внизу"
           }
         }
       }
