@@ -167,6 +167,27 @@ final class DemoTour: ObservableObject {
         return true
     }
 
+    // MARK: - The three keys under the child's home
+
+    /// Rani, 2026-10-13: in the tour the bar under the child's home shows what
+    /// the parent has really earned, a made-up gift of 30 minutes beside it,
+    /// and the child's code — and a tap on any of them opens nothing: it
+    /// explains what each of the three is.
+    enum Key: String, Identifiable {
+        case minutes, gift, code
+        var id: String { rawValue }
+    }
+    @Published var explaining: Key?
+    /// "תרשום שם סתם 30 דקות" — shown, never credited to anyone.
+    static let giftMinutesShown = 30
+    /// True in the tour (and the explanation opens): the caller stops there.
+    @discardableResult
+    static func explain(_ key: Key) -> Bool {
+        guard isOn else { return false }
+        shared.explaining = key
+        return true
+    }
+
     private var languageWatch: AnyCancellable?
     /// Heard here and not by a view: the views are the very thing a language
     /// change tears down.
@@ -324,6 +345,7 @@ final class DemoTour: ObservableObject {
         invite = nil
         askToCreate = false
         showLanguages = false
+        explaining = nil
         kidID = nil
         answered = 0
         explained = []

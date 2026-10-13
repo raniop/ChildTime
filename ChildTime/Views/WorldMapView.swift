@@ -2244,12 +2244,14 @@ struct WorldMapView: View {
     /// today, nothing yet.
     private var kidToolbar: some View {
         HStack(spacing: 8) {
-            if (giftOpenableSeconds > 0 || progress.hasPausedManualTime) && !progress.isUnlocked {
+            // 🎬 In the tour all three keys are always there, and a tap on
+            // any of them only explains what the three are (Rani, 2026-10-13).
+            if DemoTour.isOn || ((giftOpenableSeconds > 0 || progress.hasPausedManualTime) && !progress.isUnlocked) {
                 giftKey
             }
-            minutesKey
+            if DemoTour.isOn { demoTourMinutesKey } else { minutesKey }
             if let p = profiles.active,
-               p.hasPlayPIN || progress.pendingMinutes > 0 || progress.hasPausedManualTime {
+               DemoTour.isOn || p.hasPlayPIN || progress.pendingMinutes > 0 || progress.hasPausedManualTime {
                 codeKey(p)
             }
         }
@@ -2272,8 +2274,11 @@ struct WorldMapView: View {
     /// 💝 "10 דק׳ · מתנה · פתחו!" — opens the parents' gift (and any frozen leftover).
     private var giftKey: some View {
         let frozen = progress.pausedManualMinutes
-        let title = giftOpenableSeconds > 0 ? tr("\(Self.timeLabel(giftOpenableSeconds)) דַּקּ׳") : "❄️ \(frozen)"
+        // 🎬 The tour's gift is a made-up 30 minutes: shown, never credited.
+        let title = DemoTour.isOn ? tr("\(Self.timeLabel(DemoTour.giftMinutesShown * 60)) דַּקּ׳")
+            : giftOpenableSeconds > 0 ? tr("\(Self.timeLabel(giftOpenableSeconds)) דַּקּ׳") : "❄️ \(frozen)"
         return Button {
+            if DemoTour.explain(.gift) { Haptic.light(); return }
             requestUnlock { redeemGift() }
         } label: {
             VStack(spacing: 3) {
@@ -2299,6 +2304,32 @@ struct WorldMapView: View {
         .disabled(isOpening)
         .frame(maxWidth: .infinity)   // the same width as the minutes beside it (Rani)
         .accessibilityLabel(giftButtonTitle)
+    }
+
+    /// 🎬 The tour's minutes key: what the parent has really earned so far, to
+    /// the second, in the shape of minutes that are ready to open — and a tap
+    /// explains instead of opening.
+    private var demoTourMinutesKey: some View {
+        Button {
+            Haptic.light()
+            DemoTour.explain(.minutes)
+        } label: {
+            keyBox {
+                VStack(spacing: 3) {
+                    HStack(spacing: 5) {
+                        Image(systemName: "gamecontroller.fill").font(.system(size: 15, weight: .bold)).foregroundStyle(Color(hex: "8CFFC4"))
+                        Text(tr("\(Self.timeLabel(progress.openableSeconds(gift: false))) דַּקּ׳"))
+                            .font(.system(size: 16, weight: .black, design: .rounded))
+                            .lineLimit(1).minimumScaleFactor(0.7)
+                    }
+                    Text(tr("לְשַׂחֵק · פִּתְחוּ!")).font(.system(size: 11, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "8CFFC4"))
+                }
+            }
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color(hex: "8CFFC4"), lineWidth: 1.5))
+        }
+        .buttonStyle(.juicy)
+        .frame(minWidth: isCompact || display.hasBarStrip ? 0 : 150)
     }
 
     /// 🎮 The play minutes — the middle key, widest. Tappable only when they open.
@@ -2385,6 +2416,7 @@ struct WorldMapView: View {
     private func codeKey(_ p: Profile) -> some View {
         Button {
             Haptic.light()
+            if DemoTour.explain(.code) { return }
             playPINSheet = p.hasPlayPIN ? .manage : .setNew
         } label: {
             keyBox {

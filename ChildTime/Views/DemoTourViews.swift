@@ -223,7 +223,17 @@ struct DemoTourRoot: View {
                     .transition(.opacity)
             }
         }
+        .overlay {
+            if let key = tour.explaining {
+                DemoTourKeysSheet(tapped: key,
+                                  earnedSeconds: ProgressStore.shared.openableSeconds(gift: false),
+                                  onSignUp: { Haptic.medium(); tour.end(signUp: true) },
+                                  onClose: { tour.explaining = nil })
+                    .transition(.opacity)
+            }
+        }
         .animation(.easeOut(duration: 0.2), value: tour.invite)
+        .animation(.easeOut(duration: 0.2), value: tour.explaining)
         .animation(.easeOut(duration: 0.2), value: tour.kidID)
         .onAppear { tour.restoreKidHomeIfNeeded(); tour.watchLanguage() }
         // ⚙️ on the child's home opens this, for now (see `openLanguages`).
@@ -237,6 +247,87 @@ struct DemoTourRoot: View {
             let open = ProgressStore.shared.isUnlocked || ProgressStore.shared.isOpeningWindow
             if open != windowShowing { windowShowing = open }
         }
+    }
+}
+
+/// What the three keys under the child's home are (Rani, 2026-10-13): in the
+/// tour a tap on any of them opens nothing — it explains all three, the tapped
+/// one marked. To the parent: no niqqud.
+struct DemoTourKeysSheet: View {
+    var tapped: DemoTour.Key = .minutes
+    /// What the parent has really earned so far, to the second.
+    var earnedSeconds = 0
+    var onSignUp: () -> Void = {}
+    var onClose: () -> Void = {}
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            Color.black.opacity(0.5)
+                .ignoresSafeArea()
+                .onTapGesture { onClose() }
+            VStack(spacing: 10) {
+                Text(tr("שלושת הכפתורים שלמטה"))
+                    .font(.system(size: 22, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                row(.minutes, "🎮", tr("דקות לשחק"),
+                    earnedSeconds > 0
+                    ? tr("הזמן שהילד הרוויח בתשובות נכונות — כאן זה מה שאתם צברתם עכשיו. כשנצברות מספיק דקות, הילד לוחץ, והאפליקציות והמשחקים שלו נפתחים עד שהזמן נגמר.")
+                    : tr("הזמן שהילד הרוויח בתשובות נכונות. כשנצברות מספיק דקות, הילד לוחץ, והאפליקציות והמשחקים שלו נפתחים עד שהזמן נגמר."))
+                row(.gift, "💝", tr("דקות מתנה"),
+                    tr("דקות שאתם נותנים לילד מהטלפון שלכם, בלי קשר לשאלות: על עזרה בבית, או סתם כי בא לכם. ה־30 שכאן הן לדוגמה."))
+                row(.code, "🔒", tr("קוד סודי"),
+                    tr("קוד שהילד בוחר לעצמו, כדי שרק הוא יוכל לפתוח את הדקות שלו — ולא אח או אחות."))
+                Button(action: onSignUp) {
+                    Text(tr("ליצור משפחה"))
+                        .font(.system(size: 18, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "2A1E5C"))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 15)
+                        .glassFill(AppGradient.gold, radius: 16)
+                }
+                .buttonStyle(.juicy)
+                .padding(.top, 4)
+                Button(action: onClose) {
+                    Text(tr("הבנתי"))
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                }
+                .buttonStyle(.juicy)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 18)
+            .frame(maxWidth: 440)
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "4A3AB0").opacity(0.98)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+            .shadow(color: .black.opacity(0.45), radius: 20, y: -10)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
+        }
+    }
+
+    private func row(_ key: DemoTour.Key, _ emoji: String, _ title: String, _ text: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Text(emoji).font(.system(size: 24))
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Text(text)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(11)
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(key == tapped ? 0.18 : 0.08)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
+            .strokeBorder(key == tapped ? Color(hex: "FFD23F") : .white.opacity(0.18), lineWidth: key == tapped ? 1.5 : 1))
     }
 }
 
@@ -264,7 +355,6 @@ struct FirstRunQuiz: View {
                 else if !tour.isRebuildingForLanguage { tour.leaveQuizToKidHome() }
             }) {
                 QuestionRunnerView(mode: .smartFeed, purpose: .earnTime)
-                    .environment(\.layoutDirection, .app)   // a cover can arrive left-to-right
                     .overlay {
                         if tour.askToCreate {
                             FirstRunAsk(answered: tour.answered,
@@ -275,6 +365,9 @@ struct FirstRunQuiz: View {
                         }
                     }
                     .animation(.easeOut(duration: 0.22), value: tour.askToCreate)
+                    // A cover can arrive left-to-right — and the question over
+                    // the quiz with it (its three points sat on the left: Rani).
+                    .environment(\.layoutDirection, .app)
             }
     }
 }
