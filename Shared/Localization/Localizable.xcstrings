@@ -116443,6 +116443,28 @@
         }
       }
     },
+    "רוצים ליצור משפחה בטופי?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هل تريدون إنشاء عائلتكم في Tofy؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Want to create your family in Tofy?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создать вашу семью в Tofy?"
+          }
+        }
+      }
+    },
     "רוצים ליצור פרופיל לילד שלכם?" : {
       "localizations" : {
         "ar" : {
