@@ -2,27 +2,20 @@ import SwiftUI
 import PhotosUI
 
 /// 🧹 The kid's chores screen: the parent defined the chores, the kid does one
-/// and taps "עשיתי!". The reward is always 🎮 play minutes (money was removed —
+/// and ticks its box. The reward is always 🎮 play minutes (money was removed —
 /// Rani), landing only after the parent approves. No failure language anywhere:
 /// a returned chore just shows up as available again.
+///
+/// The look (Rani, 2026-10-13, chosen from nine directions — "ח"): a checklist
+/// in pictures. The child's own buddy stands on top holding the day's prize,
+/// every chore is one coloured row with a drawing of it (`ChoreArt`) and one
+/// big box to tick, and a tick that reaches the parent is a small party.
 struct ChoresKidView: View {
     @EnvironmentObject var profiles: ProfileStore
     @EnvironmentObject var progress: ProgressStore
     @Environment(\.horizontalSizeClass) private var hSize
     @StateObject private var choreStore = ChoreStore.shared
     let onClose: () -> Void
-
-    /// 👦👧 Gendered accent: the action button + the "done" trophy card take the
-    /// child's own colours — blue-teal for a boy, pink-purple for a girl (Rani).
-    private var accentColors: [Color] {
-        switch profiles.active?.gender {
-        case .girl: return [Color(hex: "FF5FA2"), Color(hex: "B15EFF")]
-        case .boy:  return [Color(hex: "3A86FF"), Color(hex: "00C2CB")]
-        default:    return [Color(hex: "06D6A0"), Color(hex: "48BFE3")]
-        }
-    }
-    /// Single accent (for tints) — the first stop of the gendered pair.
-    private var accentColor: Color { accentColors.first ?? Color(hex: "06D6A0") }
 
     /// Reward picked → offering an optional 📸 proof photo before sending.
     @State private var pendingSend: (chore: Chore, reward: String)?
@@ -36,6 +29,11 @@ struct ChoresKidView: View {
     /// Set when a send couldn't reach the parent — a gentle "let's try again"
     /// (never failure language for a kid). The chore stays available.
     @State private var retryChoreID: String?
+    /// 🎉 A chore has just reached the parent: confetti, the prize pops out of
+    /// its row, and the buddy cheers — for a moment.
+    @State private var justCelebrated: String?
+    @State private var confetti = 0
+    @ObservedObject private var display = DisplayGeometry.shared
 
     private var myChores: [Chore] {
         guard let id = profiles.activeID else { return [] }
@@ -48,14 +46,25 @@ struct ChoresKidView: View {
         sending.contains(c.id) || justSent.contains(c.id)
             || c.isPendingApproval || (c.isDaily && c.approvedToday)
     }
-    /// The main grid: only chores the kid can DO right now (clean action button).
-    private var todoChores: [Chore] { myChores.filter { !isHandled($0) } }
-    /// The "בוצעו היום" bucket: sent / waiting-for-approval / approved-today.
-    private var doneChores: [Chore] { myChores.filter { isHandled($0) } }
+    /// One list (Rani chose the checklist, 2026-10-13): what can be done now
+    /// on top, what was handled today under it — a row slides down when its
+    /// box is ticked.
+    private var orderedChores: [Chore] { myChores.filter { !isHandled($0) } + myChores.filter(isHandled) }
 
-    private var gridColumns: [GridItem] {
-        Array(repeating: GridItem(.flexible(), spacing: AppSpacing.md),
-              count: hSize == .regular ? 3 : 2)
+    /// How many times a day this chore can be done (a one-off: once).
+    private func turns(_ c: Chore) -> Int { c.isDaily ? max(1, c.timesPerDay) : 1 }
+    /// Turns already done today — approved ones, plus the one on its way to a parent.
+    private func turnsDone(_ c: Chore) -> Int {
+        let onItsWay = (c.isPendingApproval || sending.contains(c.id) || justSent.contains(c.id)) ? 1 : 0
+        return min(turns(c), (c.isDaily ? c.doneToday : 0) + onItsWay)
+    }
+    /// The play minutes still waiting today.
+    private var minutesLeft: Int {
+        myChores.reduce(0) { $0 + max($1.rewardMinutes, 0) * (turns($1) - turnsDone($1)) }
+    }
+
+    private var columns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: AppSpacing.md), count: hSize == .regular ? 2 : 1)
     }
 
     var body: some View {
@@ -66,32 +75,25 @@ struct ChoresKidView: View {
             VStack(spacing: 0) {
                 header
                 ScrollView {
-                    VStack(spacing: AppSpacing.md) {
-                        totalsCard
+                    VStack(spacing: 10) {
                         if myChores.isEmpty {
+                            totalsCard
                             emptyState
                         } else {
-                            // Only actionable chores in the main grid — a clean
-                            // "עשיתי!" call to action, never mixed with "done"
-                            // badges (Rani: the mix was confusing).
-                            if !todoChores.isEmpty {
-                                LazyVGrid(columns: gridColumns, spacing: AppSpacing.md) {
-                                    ForEach(todoChores) { chore in activeCard(chore) }
-                                }
-                            } else {
-                                allDoneBanner
+                            buddyHero
+                            LazyVGrid(columns: columns, spacing: 10) {
+                                ForEach(orderedChores) { chore in choreRow(chore) }
                             }
-                            // Everything finished today drops into its own
-                            // friendly "בוצעו היום" section below.
-                            if !doneChores.isEmpty { doneSection }
+                            .animation(.spring(response: 0.5, dampingFraction: 0.75), value: orderedChores.map(\.id))
                         }
                     }
-                    .padding(.horizontal, AppSpacing.lg)
-                    .padding(.vertical, AppSpacing.lg)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, AppSpacing.md)
                     .frame(maxWidth: hSize == .regular ? 860 : 560)
                     .frame(maxWidth: .infinity)
                 }
             }
+            FancyConfetti(trigger: confetti).allowsHitTesting(false)
         }
         .onAppear { choreStore.startIfNeeded() }
         // 📸 Optional proof photo — a picture beats a debate about whether the
@@ -144,20 +146,15 @@ struct ChoresKidView: View {
                     .font(.system(size: 17, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: 40, height: 40)
-                    .background(.white.opacity(0.22), in: Circle())
-                    .overlay(Circle().stroke(.white.opacity(0.32), lineWidth: 1))
+                    .background(.white.opacity(0.22), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.32), lineWidth: 1))
             }
             .accessibilityLabel(tr("חזרה"))
             Spacer()
-            VStack(spacing: 2) {
-                Text(tr("מַטְלוֹת הַבַּיִת 🧹"))
-                    .font(.system(size: 24, weight: .black, design: .rounded))
-                    .foregroundStyle(GlassInk.primary)
-                    .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
-                Text(tr("עוֹזְרִים בַּבַּיִת — וּבוֹחֲרִים פְּרָס!"))
-                    .font(.system(size: 13.5, weight: .semibold, design: .rounded))
-                    .foregroundStyle(GlassInk.secondary)
-            }
+            Text(tr("מַטְלוֹת הַבַּיִת 🧹"))
+                .font(.system(size: 24, weight: .black, design: .rounded))
+                .foregroundStyle(GlassInk.primary)
+                .shadow(color: .black.opacity(0.18), radius: 7, y: 2)
             Spacer()
             Color.clear.frame(width: 40, height: 40)
         }
@@ -170,14 +167,93 @@ struct ChoresKidView: View {
         .padding(.bottom, AppSpacing.sm)
     }
 
-    /// 🏆 Lifetime earnings from chores — "how much have I made, ever".
+    // MARK: - The buddy on top, holding the day's prize
+
+    /// The child's own character says how many play minutes are still waiting
+    /// today; a segment per turn fills under it; and when a chore reaches the
+    /// parent, the buddy is the one who cheers.
+    private var buddyHero: some View {
+        let total = myChores.reduce(0) { $0 + turns($1) }
+        let done = myChores.reduce(0) { $0 + turnsDone($1) }
+        let left = minutesLeft
+        let cheering = justCelebrated != nil
+        let totals = profiles.activeID.map { choreStore.totals(forChild: $0) } ?? (minutes: 0, coins: 0, paid: 0)
+        let buddyWidth: CGFloat = display.isShort ? 64 : 92
+        return VStack(spacing: 10) {
+            HStack(alignment: .bottom, spacing: 6) {
+                ChoreBuddy(profile: profiles.active, width: buddyWidth)
+                    .scaleEffect(cheering ? 1.12 : 1, anchor: .bottom)
+                    .rotationEffect(.degrees(cheering ? -6 : 0), anchor: .bottom)
+                VStack(alignment: .leading, spacing: 2) {
+                    if cheering {
+                        bubbleSmall(Gendered.g(tr("כָּל הַכָּבוֹד, אַלּוּף! 🎉"), tr("כָּל הַכָּבוֹד, אַלּוּפָה! 🎉")))
+                    } else if left > 0 {
+                        bubbleSmall(tr("עוֹד אֶפְשָׁר לְהַרְוִיחַ הַיּוֹם"))
+                    }
+                    if left > 0 {
+                        Text(tr("🎮 \(left) דַּקּוֹת מִשְׂחָק"))
+                            .font(.system(size: 23, weight: .black, design: .rounded))
+                            .foregroundStyle(Color(hex: "2A1E5C"))
+                            .lineLimit(1).minimumScaleFactor(0.7)
+                            .contentTransition(.numericText())
+                    } else {
+                        Text(Gendered.g(tr("כָּל הַכָּבוֹד! סִיַּמְתָּ הַכֹּל לְהַיּוֹם"), tr("כָּל הַכָּבוֹד! סִיַּמְתְּ הַכֹּל לְהַיּוֹם")))
+                            .font(.system(size: 18, weight: .heavy, design: .rounded))
+                            .foregroundStyle(Color(hex: "2A1E5C"))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .padding(.horizontal, 14).padding(.vertical, 11)
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white))
+                .padding(.bottom, buddyWidth * 0.28)
+                Spacer(minLength: 0)
+            }
+            // One segment per turn; a long list gets one plain bar.
+            if total <= 12 {
+                HStack(spacing: 5) {
+                    ForEach(0..<max(total, 1), id: \.self) { i in
+                        RoundedRectangle(cornerRadius: 5, style: .continuous)
+                            .fill(i < done ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(.white.opacity(0.25)))
+                            .frame(height: 11)
+                    }
+                }
+            } else {
+                ProgressView(value: Double(done), total: Double(max(total, 1)))
+                    .tint(Color(hex: "FFD23F"))
+            }
+            if totals.minutes > 0 {
+                HStack(spacing: 6) {
+                    Text("🏆").font(.system(size: 13))
+                    Text(Gendered.g(tr("סַךְ הַכֹּל הִרְוַחְתָּ מֵהַמַּטְלוֹת:"), tr("סַךְ הַכֹּל הִרְוַחַתְּ מֵהַמַּטְלוֹת:")))
+                        .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.88))
+                    Text(tr("🎮 \(totals.minutes) דַּקּוֹת מִשְׂחָק"))
+                        .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                    Spacer(minLength: 0)
+                }
+                .lineLimit(1).minimumScaleFactor(0.7)
+            }
+        }
+        .animation(.spring(response: 0.45, dampingFraction: 0.6), value: justCelebrated)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func bubbleSmall(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 14, weight: .bold, design: .rounded))
+            .foregroundStyle(Color(hex: "2A1E5C").opacity(0.8))
+            .lineLimit(1).minimumScaleFactor(0.7)
+    }
+
+    /// 🏆 Lifetime earnings from chores — shown alone only while there are no chores.
     @ViewBuilder
     private var totalsCard: some View {
         let totals = profiles.activeID.map { choreStore.totals(forChild: $0) } ?? (minutes: 0, coins: 0, paid: 0)
         if totals.minutes > 0 {
             HStack(spacing: AppSpacing.md) {
                 Text("🏆").font(.system(size: 30))
-                VStack(alignment: .trailing, spacing: 2) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(Gendered.g(tr("סַךְ הַכֹּל הִרְוַחְתָּ מֵהַמַּטְלוֹת:"), tr("סַךְ הַכֹּל הִרְוַחַתְּ מֵהַמַּטְלוֹת:")))
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white.opacity(0.85))
@@ -206,134 +282,112 @@ struct ChoresKidView: View {
         .padding(.top, 60)
     }
 
-    /// A chore the kid can DO now — emoji, name, reward, and the one clear
-    /// action button. No status badges here (those live in the done section).
-    @ViewBuilder
-    private func activeCard(_ chore: Chore) -> some View {
-        VStack(spacing: 8) {
-            Text(chore.emoji).font(.system(size: 38))
-                .frame(maxWidth: .infinity)
+    // MARK: - One chore, one row
+
+    /// The picture of the chore, its name, the prize in gold (or where it
+    /// stands, once ticked), and ONE big box to tick. No failure language: a
+    /// chore a parent sent back is simply an empty box again.
+    private func choreRow(_ chore: Chore) -> some View {
+        let handled = isHandled(chore)
+        let isSending = sending.contains(chore.id)
+        let approved = chore.isDaily && chore.approvedToday
+        let tint = ChoreArt.tint(for: chore)
+        let celebrating = justCelebrated == chore.id
+        return HStack(spacing: 12) {
+            ChorePicture(chore: chore, side: 92)
+                .scaleEffect(1.1)
                 // 🔊 A child who does not read yet hears what the chore is
                 // (Sasha, 12.10: her גן daughter could not tell them apart).
-                .overlay(alignment: .topTrailing) {
+                .overlay(alignment: .bottomLeading) {
                     if PreReaderGames.activeChildIsPreReader || (profiles.active?.effectiveGrade ?? 1) <= 1 {
-                        PreReaderSpeakButton(spoken: chore.title, side: 34)
+                        PreReaderSpeakButton(spoken: chore.title, side: 32)
+                            .background(Circle().fill(Color(hex: "2A1E5C").opacity(0.55)))
+                            .offset(x: -6, y: 6)
                     }
                 }
-            Text(chore.title)
-                .font(.system(size: 15, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .minimumScaleFactor(0.75)
-                .frame(minHeight: 38)
-            // ONE reward line — three separate chips + "אוֹ" overflowed the
-            // 2-up grid card and truncated into "…5" (Rani caught it live).
-            Text(rewardLine(chore))
-                .font(.system(size: 12, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
-                .lineLimit(1).minimumScaleFactor(0.55)
-                .padding(.horizontal, 9).padding(.vertical, 4)
-                .background(.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
-            // Same-day repeat counter — reserved even when absent so every
-            // card in a grid row keeps the same height.
-            Text(chore.timesPerDay > 1 ? tr("הַיּוֹם: \(chore.doneToday)/\(chore.timesPerDay) ✔️") : " ")
-                .font(.system(size: 10.5, weight: .bold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.8))
-                .lineLimit(1)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(minHeight: 16)   // niqqud needs the room; a fixed 13 let it run into "עשיתי!"
-
+            VStack(alignment: .leading, spacing: 7) {
+                Text(chore.title)
+                    .font(.system(size: 19, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(2).minimumScaleFactor(0.75)
+                if handled {
+                    Text(isSending ? tr("שׁוֹלְחִים… 📨")
+                         : approved ? Gendered.g(tr("כָּל הַכָּבוֹד, אַלּוּף! 🎉"), tr("כָּל הַכָּבוֹד, אַלּוּפָה! 🎉"))
+                         : tr("מְחַכִּים לְאִשּׁוּר 🕐"))
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.92))
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                } else {
+                    HStack(spacing: 8) {
+                        // The prize, in gold — the one thing on the row that shines.
+                        Text(rewardLine(chore))
+                            .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                            .foregroundStyle(Color(hex: "2A1E5C"))
+                            .lineLimit(1).minimumScaleFactor(0.6)
+                            .padding(.horizontal, 10).padding(.vertical, 5)
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
+                        // A dot per turn today, for a chore done more than once a day.
+                        if turns(chore) > 1 {
+                            HStack(spacing: 5) {
+                                ForEach(0..<turns(chore), id: \.self) { i in
+                                    Circle()
+                                        .fill(i < turnsDone(chore) ? Color(hex: "FFD23F") : .white.opacity(0.4))
+                                        .frame(width: 9, height: 9)
+                                }
+                            }
+                            .accessibilityLabel(tr("הַיּוֹם: \(chore.doneToday)/\(chore.timesPerDay) ✔️"))
+                        }
+                    }
+                }
+            }
+            Spacer(minLength: 2)
             Button {
                 Haptic.success()
                 tapDone(chore)
             } label: {
-                Text(tr("עָשִׂיתִי! ✅"))
-                    .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    .foregroundStyle(Color(hex: "4B3FBF"))
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(handled && !isSending ? AnyShapeStyle(AppGradient.gold) : AnyShapeStyle(.white.opacity(0.18)))
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .strokeBorder(.white, lineWidth: handled && !isSending ? 0 : 3)
+                    if isSending {
+                        ProgressView().tint(.white)
+                    } else if handled {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 25, weight: .black))
+                            .foregroundStyle(Color(hex: "2A1E5C"))
+                            .transition(.scale(scale: 0.2).combined(with: .opacity))
+                    }
+                }
+                .frame(width: 60, height: 60)
+                .scaleEffect(celebrating ? 1.18 : 1)
+            }
+            .buttonStyle(.plain)
+            .allowsHitTesting(!handled)   // not `.disabled`: that greys the gold ✓ out
+            .accessibilityLabel(handled ? chore.title : tr("עָשִׂיתִי! ✅"))
+        }
+        .padding(.horizontal, 12).padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
+            .fill(LinearGradient(colors: [tint.opacity(handled ? 0.3 : 0.72), tint.opacity(handled ? 0.14 : 0.36)],
+                                 startPoint: .leading, endPoint: .trailing)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.4), lineWidth: 1))
+        // The prize pops out of the row as it goes to the parent.
+        .overlay(alignment: .top) {
+            if celebrating {
+                Text(rewardLine(chore))
+                    .font(.system(size: 15, weight: .black, design: .rounded))
+                    .foregroundStyle(Color(hex: "2A1E5C"))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.92)))
+                    .padding(.horizontal, 14).padding(.vertical, 7)
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
+                    .shadow(color: .black.opacity(0.3), radius: 6, y: 3)
+                    .offset(y: -20)
+                    .transition(.move(edge: .bottom).combined(with: .opacity).combined(with: .scale(scale: 0.5)))
             }
         }
-        .padding(AppSpacing.sm)
-        .frame(maxWidth: .infinity)
-        .glassPane(radius: 16, tint: Color(hex: "48BFE3"))
-    }
-
-    /// 🎉 "בוצעו היום" card. APPROVED chores become a gendered "champion" card —
-    /// the child's own colour, a 👑, and a personal cheer ("אלוף!" / "אלופה!").
-    /// Still-in-flight ones (sent / waiting for a parent) keep a plain status so
-    /// the crown means "really done", not "maybe".
-    @ViewBuilder
-    private func doneCard(_ chore: Chore) -> some View {
-        let approved = chore.isDaily && chore.approvedToday
-        let waiting = !approved && !sending.contains(chore.id)
-        VStack(spacing: 6) {
-            Text(approved ? "👑" : chore.emoji).font(.system(size: 30))
-            Text(chore.title)
-                .font(.system(size: 13, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-                .lineLimit(1).minimumScaleFactor(0.7)
-            if sending.contains(chore.id) {
-                statusCapsule(tr("שׁוֹלְחִים… 📨"), background: .white.opacity(0.18))
-            } else if waiting {
-                statusCapsule(tr("מְחַכִּים לְאִשּׁוּר 🕐"), background: Color(hex: "FFD98A").opacity(0.35))
-            } else {
-                Text(Gendered.g(tr("כָּל הַכָּבוֹד, אַלּוּף! 🎉"), tr("כָּל הַכָּבוֹד, אַלּוּפָה! 🎉")))
-                    .font(.system(size: 11.5, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                    .lineLimit(1).minimumScaleFactor(0.6)
-            }
-        }
-        .padding(AppSpacing.sm)
-        .frame(maxWidth: .infinity)
-        // Approved → the child's gendered colour fills the card; otherwise the
-        // neutral translucent look.
-        .glassPane(radius: 16, strength: approved ? 0.14 : 0.09, tint: approved ? accentColor : nil)
-    }
-
-    /// The "בוצעו היום 🎉" section under the to-do grid.
-    private var doneSection: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-            Text(tr("בּוֹצְעוּ הַיּוֹם 🎉"))
-                .font(.system(size: 17, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white.opacity(0.9))
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, AppSpacing.sm)
-            LazyVGrid(columns: gridColumns, spacing: AppSpacing.md) {
-                ForEach(doneChores) { chore in doneCard(chore) }
-            }
-        }
-    }
-
-    /// Shown when there's nothing left to do but chores WERE done today.
-    private var allDoneBanner: some View {
-        VStack(spacing: 8) {
-            Text("🎉").font(.system(size: 46))
-            Text(Gendered.g(tr("כָּל הַכָּבוֹד! סִיַּמְתָּ הַכֹּל לְהַיּוֹם"), tr("כָּל הַכָּבוֹד! סִיַּמְתְּ הַכֹּל לְהַיּוֹם")))
-                .font(.system(size: 18, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-        }
-        .padding(AppSpacing.lg)
-        .frame(maxWidth: .infinity)
-        .glassPane(radius: 16, tint: Color(hex: "8CFFC4"))
-    }
-
-    private func statusCapsule(_ text: String, background: some ShapeStyle) -> some View {
-        Text(text)
-            .font(.system(size: 13, weight: .bold, design: .rounded))
-            .foregroundStyle(.white)
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
-            .background(background, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .zIndex(celebrating ? 2 : 0)
+        .animation(.spring(response: 0.5, dampingFraction: 0.62), value: justCelebrated)
     }
 
     private func rewardLine(_ c: Chore) -> String {
@@ -376,7 +430,19 @@ struct ChoresKidView: View {
         // drifted membership and retries, so this is honest, not slow-by-default.
         sending.insert(chore.id)
         Task {
-            let result = await choreStore.markDone(chore, reward: reward, photo: photo)
+            let result: ChoreStore.SendResult
+            #if DEBUG
+            // DEMO_SCREEN=choreskid has no family to send to: play the answer of one.
+            if ProcessInfo.processInfo.environment["DEMO_SCREEN"] == "choreskid" {
+                try? await Task.sleep(nanoseconds: 700_000_000)
+                choreStore.markDemoPending(chore)
+                result = .sent
+            } else {
+                result = await choreStore.markDone(chore, reward: reward, photo: photo)
+            }
+            #else
+            result = await choreStore.markDone(chore, reward: reward, photo: photo)
+            #endif
             sending.remove(chore.id)
             switch result {
             case .sent, .queued:
@@ -387,6 +453,12 @@ struct ChoresKidView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 4) { justSent.remove(chore.id) }
                 Haptic.success()
                 SoundPlayer.shared.play(.portalAppear)
+                // 🎉 Only now — the chore really reached the parent.
+                justCelebrated = chore.id
+                confetti += 1
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+                    if justCelebrated == chore.id { justCelebrated = nil }
+                }
             case .failed, .notReady:
                 // Never failure language for a kid (safe-negative-experience) —
                 // a gentle "let's try again" and the chore stays available.
@@ -416,5 +488,26 @@ private struct CameraPicker: UIViewControllerRepresentable {
             onImage(info[.originalImage] as? UIImage)
         }
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) { onImage(nil) }
+    }
+}
+
+/// The child's own character, standing still (the screen's buddy is not the
+/// roaming companion: it only holds the prize and cheers).
+private struct ChoreBuddy: View {
+    var profile: Profile?
+    var width: CGFloat = 92
+
+    var body: some View {
+        Group {
+            if let profile,
+               let img = profile.character.uiImage
+                ?? CharacterSnapshot.image(modelName: profile.character.scn, pixelSize: width * 2) {
+                Image(uiImage: img).resizable().scaledToFit()
+            } else {
+                Text("🧹").font(.system(size: width * 0.7))
+            }
+        }
+        .frame(width: width, height: width * 1.22)
+        .accessibilityHidden(true)
     }
 }

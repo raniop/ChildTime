@@ -124,9 +124,21 @@ final class ChoreStore: ObservableObject {
                           emoji: "🧹", rewardMinutes: 20, rewardCoins: 0, isDaily: true, timesPerDay: 1,
                           createdAt: 2, markedDoneAt: now, chosenReward: "minutes", lastApprovedAt: nil,
                           photoData: nil, approvedTodayCount: 0, approvedTodayAt: nil, archived: false))
+        // …and one a parent wrote, with an emoji that has no drawing.
+        docs.append(Chore(id: "demo-own_\(cid)", childID: cid, title: "לצחצח שיניים בערב",
+                          emoji: "🦷", rewardMinutes: 5, rewardCoins: 0, isDaily: true, timesPerDay: 1,
+                          createdAt: 3, markedDoneAt: nil, chosenReward: nil, lastApprovedAt: nil,
+                          photoData: nil, approvedTodayCount: 0, approvedTodayAt: nil, archived: false))
         self.chores = docs
         self.stats = [cid: (minutes: 45, coins: 0, paid: 0)]
     }
+    #if DEBUG
+    /// The demo screen's "sent to a parent" — local only.
+    func markDemoPending(_ chore: Chore) {
+        guard let i = chores.firstIndex(where: { $0.id == chore.id }) else { return }
+        chores[i].markedDoneAt = Date().timeIntervalSince1970
+    }
+    #endif
 
     /// Idempotent — (re)attach the listener to the current household. Views call
     /// this on appear; it re-binds automatically if the family changed.
