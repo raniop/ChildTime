@@ -24983,6 +24983,28 @@
         }
       }
     },
+    "אתם רואים מהטלפון שלכם מה הילד למד וכמה שיחק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ترون من هاتفكم ماذا تعلّم الطفل وكم لعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You see on your own phone what your child learned and how long they played"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На своём телефоне вы видите, что ребёнок выучил и сколько играл"
+          }
+        }
+      }
+    },
     "אתמול" : {
       "localizations" : {
         "ar" : {
@@ -46742,6 +46764,28 @@
         }
       }
     },
+    "האפליקציות והמשחקים נעולים, ונפתחים בזמן שהילד הרוויח" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التطبيقات والألعاب مقفلة، وتُفتح في الوقت الذي كسبه الطفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apps and games stay locked, and open for the time your child earned"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложения и игры заблокированы и открываются на время, которое ребёнок заработал"
+          }
+        }
+      }
+    },
     "הבא" : {
       "localizations" : {
         "ar" : {
@@ -47932,6 +47976,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Озвучка сначала называет число"
+          }
+        }
+      }
+    },
+    "ההרשמה לוקחת כדקה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التسجيل يستغرق نحو دقيقة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signing up takes about a minute"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Регистрация занимает около минуты"
           }
         }
       }
@@ -105743,6 +105809,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Новый уровень"
+          }
+        }
+      }
+    },
+    "עניתם על %lld שאלות וצברתם %lld שניות של זמן מסך. ככה הילדים מרוויחים אותו בטופי." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أجبتم عن %1$lld من الأسئلة وجمعتم %2$lld ثانية من وقت الشاشة. هكذا يكسبه الأطفال في Tofy."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You answered %1$lld questions and earned %2$lld seconds of screen time. That is how kids earn it in Tofy."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваших ответов: %1$lld. Заработано секунд экранного времени: %2$lld. Так дети зарабатывают его в Tofy."
           }
         }
       }
