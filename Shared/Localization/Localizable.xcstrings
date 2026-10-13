@@ -114030,6 +114030,72 @@
         }
       }
     },
+    "קנייה בחנות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شراء من المتجر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bought in the shop"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Покупка в магазине"
+          }
+        }
+      }
+    },
+    "קנייה בחנות: %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شراء من المتجر: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bought in the shop: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Покупка в магазине: %@"
+          }
+        }
+      }
+    },
+    "קנייה בחנות: %@ · %lld 💎" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شراء من المتجر: %@ · %lld 💎"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bought in the shop: %@ · %lld 💎"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Покупка в магазине: %@ · %lld 💎"
+          }
+        }
+      }
+    },
     "קראו את מדיניות הפרטיות המלאה" : {
       "localizations" : {
         "ar" : {
