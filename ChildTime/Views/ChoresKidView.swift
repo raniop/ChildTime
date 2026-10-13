@@ -212,6 +212,14 @@ struct ChoresKidView: View {
     private func activeCard(_ chore: Chore) -> some View {
         VStack(spacing: 8) {
             Text(chore.emoji).font(.system(size: 38))
+                .frame(maxWidth: .infinity)
+                // 🔊 A child who does not read yet hears what the chore is
+                // (Sasha, 12.10: her גן daughter could not tell them apart).
+                .overlay(alignment: .topTrailing) {
+                    if PreReaderGames.activeChildIsPreReader || (profiles.active?.effectiveGrade ?? 1) <= 1 {
+                        PreReaderSpeakButton(spoken: chore.title, side: 34)
+                    }
+                }
             Text(chore.title)
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)

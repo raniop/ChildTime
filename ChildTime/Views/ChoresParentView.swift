@@ -41,94 +41,124 @@ struct ChoresParentView: View {
     private var rest: [Chore] { myChores.filter { !$0.isPendingApproval } }
     private var hidden: [Chore] { choreStore.hiddenPresets(forChild: profile.id) }
 
+    // The screen (Rani, 2026-10-13: "מסך מטלות לא יפה" — it was a settings-style
+    // list). The same data and the same actions, drawn as the app's own tiles:
+    // who it is about, what waits for the parent, today at a glance, and every
+    // chore as a card that says what it pays and what happened with it today.
     var body: some View {
-        if Self.newLook { newScreen } else { classic }
-    }
-
-    // MARK: - 🧪 A new look, for approval (Rani, 2026-10-13: "מסך מטלות לא יפה")
-    //
-    // DEMO_CHORES=new. The same data and the same actions as the list below,
-    // drawn as the app's own tiles: who it is about, what waits for the parent,
-    // today at a glance, and every chore as a card that says what it pays.
-
-    private static var newLook: Bool {
-        #if DEBUG
-        return ProcessInfo.processInfo.environment["DEMO_CHORES"] == "new"
-        #else
-        return false
-        #endif
-    }
-
-    private var newScreen: some View {
-        ZStack {
-            GlassBackdrop().ignoresSafeArea()
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 14) {
-                    HStack {
-                        Text(tr("מטלות הבית"))
-                            .font(.system(size: 26, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                        Spacer()
-                        Text(tr("סגור"))
-                            .font(.system(size: 15, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 16).padding(.vertical, 9)
-                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
-                    }
-                    // Who it is about — a face, not a segmented control.
-                    if profilesStore.profiles.count > 1 {
+        NavigationStack {
+            ZStack {
+                GlassBackdrop().ignoresSafeArea()
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 14) {
+                        if profilesStore.profiles.count > 1 { childChips }
+                        // What waits for the parent comes first, and looks like it.
+                        ForEach(pending) { chore in pendingCard(chore) }
                         HStack(spacing: 10) {
-                            ForEach(profilesStore.profiles) { p in
-                                let on = p.id == profile.id
-                                let waiting = choreStore.chores(forChild: p.id).contains { $0.isPendingApproval }
-                                Button { selectedID = p.id } label: {
-                                    HStack(spacing: 8) {
-                                        ProfileAvatarView(profile: p, size: 34)
-                                        Text(p.name)
-                                            .font(.system(size: 16, weight: .heavy, design: .rounded))
-                                            .foregroundStyle(.white)
-                                        if waiting { Text("🕐").font(.system(size: 14)) }
-                                    }
-                                    .padding(.horizontal, 12).padding(.vertical, 8)
-                                    .frame(maxWidth: .infinity)
-                                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(on ? 0.22 : 0.08)))
-                                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                        .strokeBorder(on ? AppColor.starGold : .white.opacity(0.2), lineWidth: on ? 2 : 1))
+                            stat("\(myChores.filter { $0.doneToday > 0 }.count)", tr("בוצעו היום"))
+                            stat("\(pending.count)", tr("מחכות לאישור"))
+                            stat("\(choreStore.totals(forChild: profile.id).minutes)", tr("דק׳ מהמטלות"))
+                        }
+                        Text(tr("המטלות של \(profile.name)"))
+                            .font(.system(size: 18, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.top, 4)
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: hsc == .compact ? 2 : 4), spacing: 12) {
+                            addTile
+                            ForEach(rest) { chore in choreTile(chore) }
+                        }
+                        Text(tr("כל המטלות זמינות לילד אוטומטית, ופרס דקות המשחק מוצע לפי גודל המטלה. לחיצה על מטלה פותחת את העריכה שלה."))
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.7))
+                            .fixedSize(horizontal: false, vertical: true)
+                        if !hidden.isEmpty { hiddenCard }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: 900)
+                    .frame(maxWidth: .infinity)
+                }
+            }
+            .sheet(isPresented: $showEditor, onDismiss: { clearForm() }) {
+                NavigationStack {
+                    Form {
+                        Section {
+                            if let e = editing { Text("\(e.emoji) \(Question.stripNiqqud(e.title))").font(.headline) }
+                            formFields
+                        }
+                        .glassRows()
+                        // Removing a chore lives inside the chore itself (never a
+                        // swipe on a list): a built-in one is hidden and can come
+                        // back, a family's own one is deleted.
+                        if let e = editing {
+                            Section {
+                                Button(role: .destructive) {
+                                    if ChoreStore.isPreset(e) { choreStore.hideChore(e) } else { choreStore.deleteChore(e) }
+                                    showEditor = false
+                                } label: {
+                                    HStack { Spacer(); Text(ChoreStore.isPreset(e) ? tr("הסתרת המטלה") : tr("מחיקת המטלה")); Spacer() }
                                 }
-                                .buttonStyle(.plain)
+                            } footer: {
+                                if ChoreStore.isPreset(e) { Text(tr("מטלה מוסתרת לא מופיעה אצל הילד. אפשר להחזיר אותה מתחתית המסך.")) }
                             }
+                            .glassRows()
                         }
                     }
-                    // What waits for the parent comes first, and looks like it.
-                    ForEach(pending) { chore in newPendingCard(chore) }
-                    // Today at a glance.
-                    HStack(spacing: 10) {
-                        newStat("\(myChores.filter { $0.doneToday > 0 }.count)", tr("בוצעו היום"))
-                        newStat("\(pending.count)", tr("מחכות לאישור"))
-                        newStat("\(choreStore.totals(forChild: profile.id).minutes)", tr("דק׳ מהמטלות"))
-                    }
-                    Text(tr("המטלות של \(profile.name)"))
-                        .font(.system(size: 18, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                        .padding(.top, 4)
-                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-                        newAddTile
-                        ForEach(rest) { chore in newChoreTile(chore) }
-                    }
+                    .readableColumn(form: true)
+                    .glassForm()
+                    .navigationTitle(editing == nil ? tr("מטלה חדשה") : tr("עריכת מטלה"))
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbarColorScheme(.dark, for: .navigationBar)
+                    .toolbar { ToolbarItem(placement: .awayFromBar(.cancellationAction, leading: true)) { Button(tr("ביטול")) { showEditor = false } } }
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .environment(\.layoutDirection, .app)
+                .presentationDetents([.medium, .large])
             }
-        }
-        .sheet(isPresented: $showEditor, onDismiss: { clearForm() }) {
-            NavigationStack {
-                Form { if let e = editing { Section { Text("\(e.emoji) \(e.title)").font(.headline); formFields }.glassRows() } }
-                    .readableColumn(form: true).glassForm()
+            .navigationTitle(tr("מטלות הבית"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)   // white title on the glass
+            .toolbar {
+                ToolbarItem(placement: .awayFromBar(.topBarLeading, leading: true)) { Button(tr("סגור")) { dismiss() } }
+            }
+            .onAppear { choreStore.startIfNeeded() }
+            .onChangeCompat(of: selectedID) { _, _ in clearForm() }
+            .alert(tr("האישור לא נשלח"), isPresented: $choreStore.lastActionFailed) {
+                Button(tr("הבנתי"), role: .cancel) { }
+            } message: {
+                Text(tr("לא הצלחנו לאשר את המטלה כרגע. בדקו את החיבור לאינטרנט ונסו שוב."))
             }
         }
     }
 
-    private func newStat(_ value: String, _ label: String) -> some View {
+    @Environment(\.horizontalSizeClass) private var hsc
+
+    /// Who it is about — a face, not a segmented control. 🕐 = a chore of theirs waits.
+    private var childChips: some View {
+        HStack(spacing: 10) {
+            ForEach(profilesStore.profiles) { p in
+                let on = p.id == profile.id
+                let waiting = choreStore.chores(forChild: p.id).contains { $0.isPendingApproval }
+                Button { Haptic.light(); selectedID = p.id } label: {
+                    HStack(spacing: 8) {
+                        ProfileAvatarView(profile: p, size: 34)
+                        Text(p.name)
+                            .font(.system(size: 16, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .lineLimit(1).minimumScaleFactor(0.7)
+                        if waiting { Text("🕐").font(.system(size: 14)) }
+                    }
+                    .padding(.horizontal, 12).padding(.vertical, 8)
+                    .frame(maxWidth: .infinity)
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(on ? 0.22 : 0.08)))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .strokeBorder(on ? AppColor.starGold : .white.opacity(0.2), lineWidth: on ? 2 : 1))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func stat(_ value: String, _ label: String) -> some View {
         VStack(spacing: 2) {
             Text(verbatim: value)
                 .font(.system(size: 24, weight: .heavy, design: .rounded)).foregroundStyle(.white)
@@ -141,8 +171,10 @@ struct ChoresParentView: View {
         .glassPane(radius: 16, shadow: false)
     }
 
-    private func newPendingCard(_ chore: Chore) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+    /// A chore the child marked as done: its photo if there is one, and the two answers.
+    private func pendingCard(_ chore: Chore) -> some View {
+        let approving = choreStore.approvingIDs.contains(chore.id)
+        return VStack(alignment: .leading, spacing: 12) {
             Text(tr("מחכה לאישור שלכם"))
                 .font(.system(size: 12, weight: .heavy, design: .rounded))
                 .foregroundStyle(Color(hex: "2B1C04"))
@@ -155,20 +187,47 @@ struct ChoresParentView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(Question.stripNiqqud(chore.title))
                         .font(.system(size: 19, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                        .fixedSize(horizontal: false, vertical: true)
                     Text(tr("🎮 \(chore.rewardMinutes) דק׳ משחק"))
                         .font(.system(size: 14, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.85))
                 }
                 Spacer(minLength: 0)
             }
+            if let data = chore.photoData, let img = UIImage(data: data) {
+                Image(uiImage: img)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 160)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
             HStack(spacing: 10) {
-                Text(tr("בוצע — אשרו ✅"))
-                    .font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                Button {
+                    Haptic.success()
+                    choreStore.approve(chore)
+                } label: {
+                    HStack(spacing: 6) {
+                        if approving { ProgressView().controlSize(.small).tint(.white) }
+                        Text(approving ? tr("מאשר…") : tr("בוצע — אשרו ✅"))
+                            .font(.system(size: 16, weight: .heavy, design: .rounded))
+                    }
+                    .foregroundStyle(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 12)
                     .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "1FA35C")))
-                Text(tr("עוד לא הושלמה"))
-                    .font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(.white)
-                    .frame(maxWidth: .infinity).padding(.vertical, 12)
-                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                }
+                .buttonStyle(.plain)
+                .disabled(approving)
+                Button {
+                    choreStore.returnChore(chore)
+                    Haptic.light()
+                } label: {
+                    Text(tr("עוד לא הושלמה"))
+                        .font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(.white)
+                        .frame(maxWidth: .infinity).padding(.vertical, 12)
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                }
+                .buttonStyle(.plain)
+                .disabled(approving)
             }
         }
         .padding(14)
@@ -176,22 +235,31 @@ struct ChoresParentView: View {
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(AppColor.starGold, lineWidth: 2))
     }
 
-    private var newAddTile: some View {
-        VStack(spacing: 8) {
-            Text("＋").font(.system(size: 44, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                .frame(height: 64)
-            Text(tr("מטלה חדשה"))
-                .font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-            Text(tr("שם, אימוג׳י ודקות"))
-                .font(.system(size: 12.5, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.75))
+    /// "＋ מטלה חדשה" — the first tile, so it is found without scrolling past twenty chores.
+    private var addTile: some View {
+        Button {
+            Haptic.light()
+            clearForm()
+            showEditor = true
+        } label: {
+            VStack(spacing: 8) {
+                Text("＋").font(.system(size: 44, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    .frame(height: 64)
+                Text(tr("מטלה חדשה"))
+                    .font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                Text(tr("שם, אימוג׳י ודקות"))
+                    .font(.system(size: 12.5, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.75))
+            }
+            .frame(maxWidth: .infinity, minHeight: 168)
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.07)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(.white.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [6, 5])))
+            .contentShape(Rectangle())
         }
-        .frame(maxWidth: .infinity, minHeight: 168)
-        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.07)))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
-            .strokeBorder(.white.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [6, 5])))
+        .buttonStyle(.plain)
     }
 
-    private func newChoreTile(_ chore: Chore) -> some View {
+    private func choreTile(_ chore: Chore) -> some View {
         let done = chore.approvedToday
         return Button { startEditing(chore) } label: {
             VStack(spacing: 8) {
@@ -226,109 +294,29 @@ struct ChoresParentView: View {
         .buttonStyle(.plain)
     }
 
-    private var classic: some View {
-        NavigationStack {
-            Form {
-                if profilesStore.profiles.count > 1 {
-                    Section {
-                        Picker(tr("ילד/ה"), selection: $selectedID) {
-                            ForEach(profilesStore.profiles) { p in
-                                // 🕐 marks a kid with a chore waiting for approval.
-                                Text(choreStore.chores(forChild: p.id).contains(where: { $0.isPendingApproval })
-                                     ? "\(p.name) 🕐" : p.name)
-                                    .tag(p.id)
-                            }
-                        }
-                        .pickerStyle(.segmented)
+    /// Built-in chores the parent hid — each can come back.
+    private var hiddenCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(tr("מטלות שהוסתרו"))
+                .font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+            ForEach(hidden) { chore in
+                HStack {
+                    Text("\(chore.emoji) \(Question.stripNiqqud(chore.title))")
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.8))
+                    Spacer()
+                    Button { choreStore.restoreChore(chore) } label: {
+                        Text(tr("החזירו"))
+                            .font(.system(size: 14, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                            .padding(.horizontal, 12).padding(.vertical, 6)
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
                     }
-                    .glassRows()
+                    .buttonStyle(.plain)
                 }
-
-                if !pending.isEmpty {
-                    Section(pending.count == 1 ? tr("מחכה לאישור שלכם 🕐") : tr("מחכות לאישור שלכם 🕐")) {
-                        ForEach(pending) { chore in pendingRow(chore) }
-                    }
-                    .glassRows()
-                }
-
-                if choreStore.totals(forChild: profile.id).minutes > 0 {
-                    Section {
-                        Text(tr("סה\"כ הרוויח\(profile.gender == .girl ? tr("ה") : "") מהמטלות: 🎮 \(choreStore.totals(forChild: profile.id).minutes) דקות משחק"))
-                            .font(.caption).foregroundStyle(.secondary)
-                    }
-                    .glassRows()
-                }
-
-                Section {
-                    ForEach(rest) { chore in choreRow(chore) }
-                        .onDelete { idx in
-                            for chore in idx.map({ rest[$0] }) {
-                                if ChoreStore.isPreset(chore) { choreStore.hideChore(chore) }
-                                else { choreStore.deleteChore(chore) }
-                            }
-                        }
-                } header: {
-                    Text(tr("המטלות של \(profile.name)"))
-                } footer: {
-                    Text(tr("כל המטלות זמינות אוטומטית, ופרס דקות המשחק מוצע לפי גודל המטלה. לחיצה על מטלה — עריכת הפרס; החלקה — הסתרה."))
-                }
-                .glassRows()
-
-                if !hidden.isEmpty {
-                    Section(tr("מטלות שהוסתרו 🙈")) {
-                        ForEach(hidden) { chore in
-                            HStack {
-                                Text("\(chore.emoji) \(chore.title)")
-                                    .foregroundStyle(.secondary)
-                                Spacer()
-                                Button(tr("החזירו")) { choreStore.restoreChore(chore) }
-                                    .buttonStyle(.borderless)
-                            }
-                        }
-                    }
-                    .glassRows()
-                }
-
-                Section(tr("מטלה חדשה ➕")) {
-                    formFields
-                }
-                .glassRows()
-            }
-            .readableColumn(form: true)
-            .glassForm()
-            .sheet(isPresented: $showEditor, onDismiss: { clearForm() }) {
-                NavigationStack {
-                    Form {
-                        if let e = editing {
-                            Section {
-                                Text("\(e.emoji) \(e.title)").font(.headline)
-                                formFields
-                            }
-                            .glassRows()
-                        }
-                    }
-                    .readableColumn(form: true)
-                    .glassForm()
-                    .navigationTitle(tr("עריכת מטלה"))
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar { ToolbarItem(placement: .awayFromBar(.cancellationAction, leading: true)) { Button(tr("ביטול")) { showEditor = false } } }
-                }
-                .environment(\.layoutDirection, .app)
-                .presentationDetents([.medium, .large])
-            }
-            .navigationTitle(tr("מטלות הבית · \(profile.name)"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .awayFromBar(.topBarLeading, leading: true)) { Button(tr("סגור")) { dismiss() } }
-            }
-            .onAppear { choreStore.startIfNeeded() }
-            .onChangeCompat(of: selectedID) { _, _ in clearForm() }
-            .alert(tr("האישור לא נשלח"), isPresented: $choreStore.lastActionFailed) {
-                Button(tr("הבנתי"), role: .cancel) { }
-            } message: {
-                Text(tr("לא הצלחנו לאשר את המטלה כרגע. בדקו את החיבור לאינטרנט ונסו שוב."))
             }
         }
+        .padding(14)
+        .glassPane(radius: 16, shadow: false)
     }
 
     /// The shared fields: name + emoji for a custom chore, then the reward knobs
@@ -340,6 +328,13 @@ struct ChoresParentView: View {
                             .frame(height: 24)
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 8) {
+                                // Any emoji at all (Sasha, 12.10: "לצחצח שיניים" had no
+                                // toothbrush among the twelve): this box opens the
+                                // phone's own emoji keyboard.
+                                EmojiPickField(emoji: $formEmoji, isCustom: !Self.emojiOptions.contains(formEmoji))
+                                    .frame(width: 40, height: 40)
+                                    .background(!Self.emojiOptions.contains(formEmoji) ? Color.accentColor.opacity(0.25) : Color.primary.opacity(0.08),
+                                                in: RoundedRectangle(cornerRadius: 16))
                                 ForEach(Self.emojiOptions, id: \.self) { e in
                                     Button {
                                         formEmoji = e
@@ -364,78 +359,6 @@ struct ChoresParentView: View {
                     }
                     .disabled((editing == nil && formTitle.trimmingCharacters(in: .whitespaces).isEmpty)
                               || formMinutes == 0)
-    }
-
-    @ViewBuilder
-    private func pendingRow(_ chore: Chore) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("\(chore.emoji) \(chore.title)").bold()
-                Spacer()
-                Text(tr("🎮 \(chore.rewardMinutes) דק׳ משחק"))
-                    .font(.caption).foregroundStyle(.secondary)
-            }
-            if let data = chore.photoData, let img = UIImage(data: data) {
-                Image(uiImage: img)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 160)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            }
-            let approving = choreStore.approvingIDs.contains(chore.id)
-            HStack(spacing: 10) {
-                Button {
-                    Haptic.success()
-                    choreStore.approve(chore)
-                } label: {
-                    HStack(spacing: 6) {
-                        if approving { ProgressView().controlSize(.small).tint(.white) }
-                        Text(approving ? tr("מאשר…") : tr("בוצע — אשרו ✅")).bold()
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.green)
-                .disabled(approving)
-                Button {
-                    choreStore.returnChore(chore)
-                    Haptic.light()
-                } label: {
-                    Text(tr("עוד לא הושלמה"))
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-                .disabled(approving)
-            }
-        }
-        .padding(.vertical, 2)
-    }
-
-    @ViewBuilder
-    private func choreRow(_ chore: Chore) -> some View {
-        Button {
-            startEditing(chore)
-        } label: {
-            HStack {
-                Text(chore.emoji)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(chore.title).foregroundStyle(.primary)
-                    HStack(spacing: 6) {
-                        Text(tr("🎮 \(chore.rewardMinutes) דק׳"))
-                        if chore.timesPerDay > 1 { Text(tr("🔁 עד \(chore.timesPerDay) ביום")) }
-                    if chore.isDaily && chore.doneToday > 0 {
-                        Text(chore.approvedToday ? tr("✅ הושלמה להיום") : tr("✅ \(chore.doneToday)/\(chore.timesPerDay) היום"))
-                    }
-                    }
-                    .font(.caption).foregroundStyle(.secondary)
-                }
-                Spacer()
-                Image(systemName: "pencil.circle")
-                    .foregroundStyle(.tertiary)
-            }
-        }
-        .buttonStyle(.plain)
     }
 
     private func startEditing(_ chore: Chore) {
@@ -477,5 +400,58 @@ struct ChoresParentView: View {
         showEditor = false
         clearForm()
         Haptic.success()
+    }
+}
+
+
+/// A one-emoji field that opens the phone's EMOJI keyboard: shows "＋" until a
+/// custom emoji is chosen, then that emoji.
+struct EmojiPickField: UIViewRepresentable {
+    @Binding var emoji: String
+    var isCustom: Bool
+
+    final class Field: UITextField {
+        override var textInputContextIdentifier: String? { "" }
+        override var textInputMode: UITextInputMode? {
+            UITextInputMode.activeInputModes.first { $0.primaryLanguage == "emoji" } ?? super.textInputMode
+        }
+        override func caretRect(for position: UITextPosition) -> CGRect { .zero }
+    }
+
+    func makeUIView(context: Context) -> Field {
+        let f = Field()
+        f.delegate = context.coordinator
+        f.textAlignment = .center
+        f.font = .systemFont(ofSize: 24)
+        f.tintColor = .clear
+        f.addTarget(context.coordinator, action: #selector(Coordinator.changed(_:)), for: .editingChanged)
+        return f
+    }
+
+    func updateUIView(_ f: Field, context: Context) {
+        context.coordinator.parent = self
+        let shown = isCustom ? emoji : "＋"
+        if f.text != shown, !f.isFirstResponder || isCustom { f.text = shown }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    final class Coordinator: NSObject, UITextFieldDelegate {
+        var parent: EmojiPickField
+        init(_ parent: EmojiPickField) { self.parent = parent }
+
+        func textFieldDidBeginEditing(_ textField: UITextField) { textField.text = "" }
+
+        @objc func changed(_ f: UITextField) {
+            // Keep the last thing typed, and only if it really is an emoji.
+            guard let last = f.text?.last, last.unicodeScalars.contains(where: { $0.properties.isEmojiPresentation || $0.properties.isEmoji && $0.value > 0x238C }) else {
+                f.text = ""; return
+            }
+            parent.emoji = String(last)
+            f.text = String(last)
+            f.resignFirstResponder()
+        }
+
+        func textFieldShouldReturn(_ textField: UITextField) -> Bool { textField.resignFirstResponder(); return true }
     }
 }
