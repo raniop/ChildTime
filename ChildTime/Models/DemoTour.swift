@@ -75,6 +75,8 @@ final class DemoTour: ObservableObject {
     @Published private(set) var answered = 0
 
     private static let quizKey = "demoTour.firstRunQuiz"
+    /// The first run's quiz was left for the child's home (✕, or the round ended).
+    private static let kidHomeKey = "demoTour.kidHome"
     static let firstAskAfter = 4
     static let askAgainEvery = 5
 
@@ -105,6 +107,78 @@ final class DemoTour: ObservableObject {
         }
     }
 
+    /// ✕ on the first run's quiz (or the end of its round) — Rani, 2026-10-13:
+    /// not out of the tour, but on to the child's own home, so the parent can
+    /// look around the whole child's side. The band above it keeps the two
+    /// ways to a real family on screen.
+    func leaveQuizToKidHome() {
+        guard active, firstRunQuiz else { return }
+        askToCreate = false
+        firstRunQuiz = false
+        UserDefaults.standard.removeObject(forKey: Self.quizKey)
+        UserDefaults.standard.set(true, forKey: Self.kidHomeKey)
+        if let id = ProfileStore.shared.activeID { showKid(id) }
+    }
+
+    /// The app was closed on the child's home: it opens there again (which
+    /// child's screen is showing lives in memory only).
+    func restoreKidHomeIfNeeded() {
+        guard active, !firstRunQuiz, kidID == nil,
+              UserDefaults.standard.bool(forKey: Self.kidHomeKey),
+              let id = ProfileStore.shared.activeID else { return }
+        showKid(id)
+    }
+
+    /// The language was changed from the first run's quiz: the whole screen is
+    /// rebuilt in it, so the quiz starts over and Tofy explains again, this
+    /// time in words the parent reads.
+    func languageChanged() {
+        guard active else { return }
+        if firstRunQuiz {
+            languageChangedAt = Date()
+            askToCreate = false
+            answered = 0
+            explained = []
+        }
+        // The made-up children are called by the new language's names too
+        // (a beat later: this is heard just BEFORE the language switches).
+        DispatchQueue.main.async { [weak self] in self?.renameFamilyForLanguage() }
+    }
+    private func renameFamilyForLanguage() {
+        guard active else { return }
+        for (id, kid) in zip(childIDs, Self.kids) {
+            guard var profile = ProfileStore.shared.profiles.first(where: { $0.id == id }),
+                  profile.name != kid.name else { continue }
+            profile.name = kid.name
+            ProfileStore.shared.update(profile)
+        }
+    }
+    private var languageChangedAt = Date.distantPast
+    /// ⚙️ on the child's home (Rani, 2026-10-13): in the tour there are no
+    /// settings to open — a parent's code, a family — so for now the gear
+    /// opens the one setting that matters before signing up: the language.
+    @Published var showLanguages = false
+    /// True in the tour (and the language list opens): the caller stops there.
+    @discardableResult
+    static func openLanguages() -> Bool {
+        guard isOn else { return false }
+        shared.watchLanguage()
+        shared.showLanguages = true
+        return true
+    }
+
+    private var languageWatch: AnyCancellable?
+    /// Heard here and not by a view: the views are the very thing a language
+    /// change tears down.
+    func watchLanguage() {
+        guard languageWatch == nil else { return }
+        languageWatch = LanguageStore.shared.$current.dropFirst()
+            .sink { [weak self] _ in self?.languageChanged() }
+    }
+    /// The quiz closing because the screen is being rebuilt in a new language
+    /// is not the parent leaving it.
+    var isRebuildingForLanguage: Bool { Date().timeIntervalSince(languageChangedAt) < 2 }
+
     /// Whether a first launch should open the first run by itself. Never in a
     /// test run: the test host IS a first launch on a blank device, and a tour
     /// puts the whole process in demo mode (every other suite then sees "no
@@ -121,8 +195,8 @@ final class DemoTour: ObservableObject {
         guard Self.canStart else { return false }
         start()
         guard active else { return false }
-        // The welcome pages are what this replaces; leaving the quiz (✕, or
-        // "ליצור ילד") goes straight to "who uses this device".
+        // The welcome pages are what this replaces: "ליצור ילד" goes straight
+        // to "who uses this device", ✕ to the child's home (still in the tour).
         ParentSettings.shared.hasSeenWelcome = true
         if let kid = ProfileStore.shared.profiles.first(where: { $0.grade == Self.firstRunGrade }) ?? ProfileStore.shared.profiles.first {
             ProfileStore.shared.setActive(kid)
@@ -249,11 +323,13 @@ final class DemoTour: ObservableObject {
         guard Self.isOn else { return }
         invite = nil
         askToCreate = false
+        showLanguages = false
         kidID = nil
         answered = 0
         explained = []
         firstRunQuiz = false
         UserDefaults.standard.removeObject(forKey: Self.quizKey)
+        UserDefaults.standard.removeObject(forKey: Self.kidHomeKey)
         let ids = Set(ProfileStore.shared.profiles.map(\.id)).union(childIDs)
         HouseholdManager.shared.clearDemoDevices()
         RemoteSyncManager.shared.clearDemoGifts()

@@ -226,6 +226,56 @@ struct DemoTourTests {
         #expect(tour.firstTime(.wrong) == false)
     }
 
+    /// Rani, 2026-10-13: ✕ on the first quiz is not the way out of the tour —
+    /// it is the way to the child's own home, still local, still a demo.
+    @Test func closingTheFirstQuizShowsTheChildsHome() throws {
+        try #require(hostIsBlank && !DemoTour.isOn, "needs a simulator with no family on it and no tour in progress — reinstall the app first")
+        let tour = DemoTour.shared
+        tour.leaveQuizToKidHome()
+        #expect(tour.kidID == nil)                            // outside a first run: nothing
+        let sawWelcome = ParentSettings.shared.hasSeenWelcome
+        tour.startFirstRun()
+        defer { tour.end(signUp: false); ParentSettings.shared.hasSeenWelcome = sawWelcome }
+        let player = try #require(ProfileStore.shared.activeID)
+
+        tour.leaveQuizToKidHome()
+        #expect(tour.active && DemoTour.isOn)                 // still the tour: nothing may sync
+        #expect(HouseholdManager.skipsCloudSync)
+        #expect(tour.firstRunQuiz == false)
+        #expect(tour.kidID == player)                         // the home of the one who played
+        // From here Tofy talks as in the real game, and nothing more is asked.
+        #expect(tour.firstTime(.right) == false)
+        tour.noteAnswer()
+        #expect(tour.answered == 0)
+        // A relaunch opens on the same home (which screen shows lives in memory).
+        tour.backToParent()
+        tour.restoreKidHomeIfNeeded()
+        #expect(tour.kidID == player)
+
+        tour.end(signUp: false)
+        #expect(UserDefaults.standard.object(forKey: "demoTour.kidHome") == nil)
+        #expect(ProfileStore.shared.profiles.isEmpty)
+    }
+
+    /// A new language rebuilds the whole screen: the quiz starts over, Tofy
+    /// explains again, and the quiz closing for that is not "the parent left".
+    @Test func aNewLanguageStartsTheFirstQuizOver() throws {
+        try #require(hostIsBlank && !DemoTour.isOn, "needs a simulator with no family on it and no tour in progress — reinstall the app first")
+        let tour = DemoTour.shared
+        let sawWelcome = ParentSettings.shared.hasSeenWelcome
+        tour.startFirstRun()
+        defer { tour.end(signUp: false); ParentSettings.shared.hasSeenWelcome = sawWelcome }
+        #expect(tour.isRebuildingForLanguage == false)
+        (0..<3).forEach { _ in tour.noteAnswer() }
+        #expect(tour.firstTime(.right))
+
+        tour.languageChanged()
+        #expect(tour.isRebuildingForLanguage)
+        #expect(tour.answered == 0)
+        #expect(tour.firstTime(.right))                       // explained again, in the new language
+        #expect(tour.firstRunQuiz)                            // still the first run's quiz
+    }
+
     @Test func aCrashHalfWayOutIsFinishedAtTheNextLaunch() throws {
         try #require(hostIsBlank && !DemoTour.isOn, "needs a simulator with no family on it and no tour in progress — reinstall the app first")
         // The state such a crash leaves: the flag already off, the children

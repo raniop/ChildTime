@@ -437,6 +437,8 @@ struct QuestionRunnerView: View {
         guard tour.active, tour.firstRunQuiz else { return }
         tour.noteAnswer()
         guard tour.firstTime(correct ? .right : .wrong) else { return }
+        // The very first right answer is a moment: confetti (Rani, 2026-10-13).
+        if correct { confettiTrigger += 1 }
         let line: String
         if display.isShort {
             // A short screen (the closed foldable): the full sentence grew up
@@ -565,6 +567,8 @@ struct QuestionRunnerView: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel(Gendered.g(tr("סְגֹר"), tr("סִגְרִי")))
             }
+            // 🎬 First run only: the language, beside ✕.
+            if DemoTour.shared.active, DemoTour.shared.firstRunQuiz { FirstRunLanguageChip() }
             // iPad has the room: the world's name beside ✕ (Rani, 2026-10-10).
             if !isCompact, let topic = current?.topic {
                 // The world's icon before its name (on its right in Hebrew),

@@ -225,6 +225,14 @@ struct DemoTourRoot: View {
         }
         .animation(.easeOut(duration: 0.2), value: tour.invite)
         .animation(.easeOut(duration: 0.2), value: tour.kidID)
+        .onAppear { tour.restoreKidHomeIfNeeded(); tour.watchLanguage() }
+        // ⚙️ on the child's home opens this, for now (see `openLanguages`).
+        .sheet(isPresented: $tour.showLanguages) {
+            LanguagePickerView(ownHeader: true)
+                .environment(\.layoutDirection, .app)
+                .environment(\.colorScheme, .dark)
+                .presentationDetents(DisplayGeometry.shared.isShort ? [.large] : [.medium, .large])
+        }
         .onReceive(ProgressStore.shared.objectWillChange.receive(on: DispatchQueue.main)) { _ in
             let open = ProgressStore.shared.isUnlocked || ProgressStore.shared.isOpeningWindow
             if open != windowShowing { windowShowing = open }
@@ -245,18 +253,22 @@ struct FirstRunQuiz: View {
     @ObservedObject private var tour = DemoTour.shared
     @State private var quizOn = false
     /// How the quiz was left: "ליצור ילד" goes on to sign-up; ✕ (or the end of
-    /// the round) just to "who uses this device".
+    /// the round) to the child's home, still inside the tour.
     @State private var createChild = false
 
     var body: some View {
         GlassBackdrop().ignoresSafeArea()
             .onAppear { quizOn = true }
-            .fullScreenCover(isPresented: $quizOn, onDismiss: { tour.end(signUp: createChild) }) {
+            .fullScreenCover(isPresented: $quizOn, onDismiss: {
+                if createChild { tour.end(signUp: true) }
+                else if !tour.isRebuildingForLanguage { tour.leaveQuizToKidHome() }
+            }) {
                 QuestionRunnerView(mode: .smartFeed, purpose: .earnTime)
                     .environment(\.layoutDirection, .app)   // a cover can arrive left-to-right
                     .overlay {
                         if tour.askToCreate {
                             FirstRunAsk(answered: tour.answered,
+                                        seconds: ProgressStore.shared.openableSeconds(gift: false),
                                         onCreate: { Haptic.medium(); createChild = true; tour.askToCreate = false; quizOn = false },
                                         onPlay: { Haptic.light(); tour.askToCreate = false })
                                 .transition(.opacity)
@@ -268,28 +280,48 @@ struct FirstRunQuiz: View {
 }
 
 /// The one question of the first run: create a child's profile, or play on.
+/// It is also the pitch (Rani, 2026-10-13: "חייבים שזה יגרום להורה לפתוח
+/// משפחה"): what the parent has just earned, in their own numbers, and what a
+/// real family adds to it.
 struct FirstRunAsk: View {
     let answered: Int
+    /// The screen time those answers put on the clock.
+    var seconds = 0
     var onCreate: () -> Void = {}
     var onPlay: () -> Void = {}
+    @ObservedObject private var display = DisplayGeometry.shared
 
     var body: some View {
         ZStack(alignment: .bottom) {
             Color.black.opacity(0.55).ignoresSafeArea()
             VStack(spacing: 10) {
-                Text("🧒").font(.system(size: 46))
-                Text(tr("רוצים ליצור פרופיל לילד שלכם?"))
+                if !display.isShort { Text("👨‍👩‍👧‍👦").font(.system(size: 46)) }
+                Text(tr("רוצים ליצור משפחה בטופי?"))
                     .font(.system(size: 23, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(tr("ככה הילדים מרוויחים זמן מסך בטופי: עונים על שאלות, והשניות נצברות. ההרשמה לוקחת כדקה."))
+                Text(seconds > 0
+                     ? tr("עניתם על \(answered) שאלות וצברתם \(seconds) שניות של זמן מסך. ככה הילדים מרוויחים אותו בטופי.")
+                     : tr("ככה הילדים מרוויחים זמן מסך בטופי: עונים על שאלות, והשניות נצברות. ההרשמה לוקחת כדקה."))
                     .font(.system(size: 15.5, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.9))
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
+                if !display.isShort {
+                    VStack(alignment: .leading, spacing: 8) {
+                        point("🔒", tr("האפליקציות והמשחקים נעולים, ונפתחים בזמן שהילד הרוויח"))
+                        point("📱", tr("אתם רואים מהטלפון שלכם מה הילד למד וכמה שיחק"))
+                        point("🎁", tr("30 יום של טופי+ במתנה"))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.1)))
+                }
                 Button(action: onCreate) {
-                    Text(tr("ליצור ילד"))
+                    // One name for it everywhere — the band above the child's
+                    // home says the same (Rani: "צריך להחליט אם רושמים זה או זה").
+                    Text(tr("ליצור משפחה"))
                         .font(.system(size: 18, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color(hex: "2A1E5C"))
                         .frame(maxWidth: .infinity)
@@ -308,6 +340,11 @@ struct FirstRunAsk: View {
                         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
                 }
                 .buttonStyle(.juicy)
+                if seconds > 0 {
+                    Text(tr("ההרשמה לוקחת כדקה"))
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.75))
+                }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 18)
@@ -318,5 +355,49 @@ struct FirstRunAsk: View {
             .padding(.horizontal, 12)
             .padding(.bottom, 12)
         }
+    }
+
+    private func point(_ emoji: String, _ text: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(emoji).font(.system(size: 16))
+            Text(text)
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
+/// 🌐 The language, on the first run's quiz (Rani, 2026-10-13): a parent who
+/// landed on questions in a language they don't read changes it right there.
+/// The flag and a globe, beside ✕ — never in the corner under the foldable's
+/// clock.
+struct FirstRunLanguageChip: View {
+    @ObservedObject private var language = LanguageStore.shared
+    @State private var showLanguages = false
+
+    var body: some View {
+        Button {
+            Haptic.light()
+            showLanguages = true
+        } label: {
+            HStack(spacing: 4) {
+                Text(language.current.flag).font(.system(size: 15))
+                Image(systemName: "globe").font(.system(size: 12, weight: .heavy))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 9).frame(height: 32)
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
+            .padding(.vertical, 6).contentShape(Rectangle()).padding(.vertical, -6)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Language · שפה")
+        .sheet(isPresented: $showLanguages) {
+            LanguagePickerView(ownHeader: true)
+                .environment(\.layoutDirection, .app)
+                .environment(\.colorScheme, .dark)
+                .presentationDetents(DisplayGeometry.shared.isShort ? [.large] : [.medium, .large])
+        }
+        .onAppear { DemoTour.shared.watchLanguage() }
     }
 }

@@ -719,7 +719,7 @@ struct WorldMapView: View {
         .sideRail {
             SideRailButton(emoji: "🛍️", label: tr("חֲנוּת")) { showingShop = true }
             SideRailButton(emoji: "🏆", label: tr("חֲבֵרִים")) { if !DemoTour.refuse() { showingLeaderboard = true } }
-            SideRailButton(emoji: "⚙️", label: tr("הגדרות")) { if !DemoTour.refuse() { showingParentGate = true } }
+            SideRailButton(emoji: "⚙️", label: tr("הגדרות")) { if !DemoTour.openLanguages() { showingParentGate = true } }
             SideRailDivider()
             // 🎁 The daily chest rides beside the buddy, exactly as it rides on
             // its head everywhere else.
@@ -1680,7 +1680,7 @@ struct WorldMapView: View {
                 Haptic.light(); showingBackdrops = true
             }
             navButton("⚙️", badge: false, size: size, longPress: { showingDemo = true }) {
-                if !DemoTour.refuse() { showingParentGate = true }
+                if !DemoTour.openLanguages() { showingParentGate = true }   // 🎬 in the tour: the language
             }
             .coachMark("k.settings")
         }
