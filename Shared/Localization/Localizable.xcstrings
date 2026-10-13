@@ -30047,6 +30047,28 @@
         }
       }
     },
+    "בוצעו היום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أُنجزت اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сделано сегодня"
+          }
+        }
+      }
+    },
     "בורר השפה — עם דגל לכל שפה" : {
       "localizations" : {
         "ar" : {
@@ -36022,6 +36044,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Мин. учёбы"
+          }
+        }
+      }
+    },
+    "דק׳ מהמטלות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دقائق من المهام"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Min from chores"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мин. за дела"
           }
         }
       }
@@ -53416,6 +53460,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Скрыть"
+          }
+        }
+      }
+    },
+    "הסתרת המטלה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إخفاء المهمة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide this chore"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скрыть дело"
           }
         }
       }
@@ -73755,6 +73821,28 @@
         }
       }
     },
+    "כל המטלות זמינות לילד אוטומטית, ופרס דקות המשחק מוצע לפי גודל המטלה. לחיצה על מטלה פותחת את העריכה שלה." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل المهام متاحة للطفل تلقائيًا، ومكافأة دقائق اللعب مقترحة بحسب حجم المهمة. اضغطوا على مهمة لتعديلها."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All chores are available to your child automatically, and the play-minute reward is suggested by the size of the chore. Tap a chore to edit it."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все дела доступны ребёнку автоматически, а награда в минутах предлагается по размеру дела. Нажмите на дело, чтобы изменить его."
+          }
+        }
+      }
+    },
     "כל המסכים של ההורה כתובים עכשיו בלי ניקוד. אצל הילדים הניקוד נשאר" : {
       "localizations" : {
         "ar" : {
@@ -90032,6 +90120,28 @@
         }
       }
     },
+    "מחיקת המטלה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حذف المهمة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this chore"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить дело"
+          }
+        }
+      }
+    },
     "מחיקת המקום" : {
       "localizations" : {
         "ar" : {
@@ -90098,6 +90208,28 @@
         }
       }
     },
+    "מחכה לאישור שלכם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بانتظار موافقتكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for your approval"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ждёт вашего подтверждения"
+          }
+        }
+      }
+    },
     "מחכה לאישור שלכם 🕐" : {
       "localizations" : {
         "ar" : {
@@ -90138,6 +90270,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ждём ваш телефон"
+          }
+        }
+      }
+    },
+    "מחכות לאישור" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بانتظار الموافقة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for approval"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ждут подтверждения"
           }
         }
       }
@@ -90340,6 +90494,28 @@
         }
       }
     },
+    "מטלה חדשה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مهمة جديدة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New chore"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новое дело"
+          }
+        }
+      }
+    },
     "מטלה חדשה ➕" : {
       "localizations" : {
         "ar" : {
@@ -90358,6 +90534,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Новое дело ➕"
+          }
+        }
+      }
+    },
+    "מטלה מוסתרת לא מופיעה אצל הילד. אפשר להחזיר אותה מתחתית המסך." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المهمة المخفية لا تظهر لدى الطفل. يمكن إعادتها من أسفل هذه الشاشة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A hidden chore doesn't appear on your child's screen. You can bring it back from the bottom of this screen."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скрытое дело не показывается ребёнку. Его можно вернуть внизу этого экрана."
           }
         }
       }
@@ -90535,6 +90733,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Домашние дела 🧹"
+          }
+        }
+      }
+    },
+    "מטלות שהוסתרו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مهام مخفية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hidden chores"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скрытые дела"
           }
         }
       }
@@ -101622,6 +101842,28 @@
         }
       }
     },
+    "עד %lld ביום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حتى %lld في اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to %lld a day"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "До %lld в день"
+          }
+        }
+      }
+    },
     "עד %lld דקות ביום" : {
       "localizations" : {
         "ar" : {
@@ -104552,6 +104794,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ещё не выполнено"
+          }
+        }
+      }
+    },
+    "עוד לא היום" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ليس بعد اليوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not yet today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сегодня ещё нет"
           }
         }
       }
@@ -122684,6 +122948,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Название семьи и Tofy+ на главном экране"
+          }
+        }
+      }
+    },
+    "שם, אימוג׳י ודקות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الاسم، الإيموجي والدقائق"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name, emoji and minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Название, эмодзи и минуты"
           }
         }
       }
