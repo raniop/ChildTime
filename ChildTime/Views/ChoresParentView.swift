@@ -62,7 +62,10 @@ struct ChoresParentView: View {
                             .font(.system(size: 18, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.top, 4)
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: hsc == .compact ? 2 : 4), spacing: 12) {
+                        // Rows, like the child's own screen (Rani, 2026-10-13: "בשורות
+                        // זה יותר טוב") — the same picture and the same colour for the
+                        // same chore on both sides.
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: hsc == .compact ? 1 : 2), spacing: 10) {
                             addTile
                             ForEach(rest) { chore in choreTile(chore) }
                         }
@@ -234,22 +237,26 @@ struct ChoresParentView: View {
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(AppColor.starGold, lineWidth: 2))
     }
 
-    /// "＋ מטלה חדשה" — the first tile, so it is found without scrolling past twenty chores.
+    /// "＋ מטלה חדשה" — the first row, so it is found without scrolling past twenty chores.
     private var addTile: some View {
         Button {
             Haptic.light()
             clearForm()
             showEditor = true
         } label: {
-            VStack(spacing: 8) {
-                Text("＋").font(.system(size: 44, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                    .frame(height: 64)
-                Text(tr("מטלה חדשה"))
-                    .font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                Text(tr("שם, תמונה ודקות"))
-                    .font(.system(size: 12.5, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.75))
+            HStack(spacing: 12) {
+                Text("＋").font(.system(size: 38, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    .frame(width: 70, height: 70)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(tr("מטלה חדשה"))
+                        .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    Text(tr("שם, תמונה ודקות"))
+                        .font(.system(size: 13, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.75))
+                }
+                Spacer(minLength: 0)
             }
-            .frame(maxWidth: .infinity, minHeight: 168)
+            .padding(.horizontal, 12).padding(.vertical, 6)
+            .frame(maxWidth: .infinity, minHeight: 86)
             .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.07)))
             .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .strokeBorder(.white.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [6, 5])))
@@ -258,37 +265,51 @@ struct ChoresParentView: View {
         .buttonStyle(.plain)
     }
 
+    /// One chore, one coloured row: its picture, its name, the prize in gold,
+    /// how it stands today — and a tap on the row edits it.
     private func choreTile(_ chore: Chore) -> some View {
         let done = chore.approvedToday
+        let tint = ChoreArt.tint(for: chore)
         return Button { startEditing(chore) } label: {
-            VStack(spacing: 8) {
-                ChorePicture(chore: chore, side: 58)
-                    .frame(maxWidth: .infinity).frame(height: 64)
-                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.12)))
-                Text(Question.stripNiqqud(chore.title))
-                    .font(.system(size: 15.5, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                    .multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.85)
-                    .frame(minHeight: 38)
-                HStack(spacing: 6) {
-                    Text(tr("🎮 \(chore.rewardMinutes) דק׳"))
-                        .font(.system(size: 12.5, weight: .heavy, design: .rounded))
-                        .foregroundStyle(Color(hex: "2B1C04"))
-                        .padding(.horizontal, 8).padding(.vertical, 3)
-                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
-                    if chore.timesPerDay > 1 {
-                        Text(tr("עד \(chore.timesPerDay) ביום"))
-                            .font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.85))
+            HStack(spacing: 12) {
+                ChorePicture(chore: chore, side: 70)
+                    .scaleEffect(1.08)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(Question.stripNiqqud(chore.title))
+                        .font(.system(size: 17, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                        .multilineTextAlignment(.leading).lineLimit(2).minimumScaleFactor(0.8)
+                    HStack(spacing: 7) {
+                        Text(tr("🎮 \(chore.rewardMinutes) דק׳"))
+                            .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                            .foregroundStyle(Color(hex: "2B1C04"))
+                            .padding(.horizontal, 8).padding(.vertical, 3)
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
+                        if chore.timesPerDay > 1 {
+                            Text(tr("עד \(chore.timesPerDay) ביום"))
+                                .font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.9))
+                        }
                     }
+                    .lineLimit(1)
                 }
-                Text(done ? tr("✅ הושלמה להיום") : (chore.doneToday > 0 ? tr("✅ \(chore.doneToday)/\(chore.timesPerDay) היום") : tr("עוד לא היום")))
-                    .font(.system(size: 12, weight: .bold, design: .rounded))
-                    .foregroundStyle(chore.doneToday > 0 ? Color(hex: "5CFF9D") : .white.opacity(0.55))
+                Spacer(minLength: 2)
+                VStack(alignment: .trailing, spacing: 6) {
+                    Text(done ? tr("✅ הושלמה להיום") : (chore.doneToday > 0 ? tr("✅ \(chore.doneToday)/\(chore.timesPerDay) היום") : tr("עוד לא היום")))
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundStyle(chore.doneToday > 0 ? Color(hex: "B6FFD3") : .white.opacity(0.75))
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                    Image(systemName: "pencil")
+                        .font(.system(size: 13, weight: .heavy)).foregroundStyle(.white.opacity(0.85))
+                        .frame(width: 34, height: 34)
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.18)))
+                }
             }
-            .padding(10)
-            .frame(maxWidth: .infinity, minHeight: 168)
-            .glassPane(radius: 16, shadow: false)
+            .padding(.horizontal, 12).padding(.vertical, 8)
+            .frame(maxWidth: .infinity, minHeight: 86)
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(LinearGradient(colors: [tint.opacity(0.62), tint.opacity(0.28)], startPoint: .leading, endPoint: .trailing)))
             .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(done ? Color(hex: "5CFF9D").opacity(0.7) : .clear, lineWidth: 1.5))
+                .strokeBorder(done ? Color(hex: "5CFF9D").opacity(0.8) : .white.opacity(0.35), lineWidth: done ? 1.5 : 1))
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }

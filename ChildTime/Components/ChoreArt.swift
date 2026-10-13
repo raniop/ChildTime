@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 
 /// 🎨 The picture of a chore (Rani, 2026-10-13: the chores screens in pictures,
-/// not emoji). 48 drawings live in `Assets.xcassets/Chores`: the 16 built-in
+/// not emoji). 49 drawings live in `Assets.xcassets/Chores`: the 21 built-in
 /// chores have theirs, and a parent who writes a chore picks one from the
 /// picture chooser — or any emoji at all, which then shows as itself.
 enum ChoreArt {
@@ -13,7 +13,7 @@ enum ChoreArt {
     static let library: [(key: String, emoji: String)] = [
         // around the room
         ("bed", "🛏️"), ("sweep", "🧹"), ("toys", "🧸"), ("desk", "📚"), ("clothes", "👕"), ("laundry", "🧺"),
-        ("socks", "🧦"), ("shoes", "👟"), ("coat", "🧥"), ("lights", "💡"),
+        ("socks", "🧦"), ("shoes", "👟"), ("coat", "🧥"), ("closet", "🗄️"), ("lights", "💡"),
         // kitchen and table
         ("plate", "🍽️"), ("table", "🍴"), ("dishes", "🧽"), ("cooking", "🍳"), ("groceries", "🛒"),
         ("lunchbox", "🥪"), ("trash", "🗑️"), ("recycle", "♻️"),
@@ -34,8 +34,13 @@ enum ChoreArt {
     private static func plain(_ emoji: String) -> String {
         String(String.UnicodeScalarView(emoji.unicodeScalars.filter { $0.value != 0xFE0F }))
     }
+    /// Emoji that mean one of the drawings without being the one it is kept under.
+    private static let alsoMeans = ["👔": "dress", "📝": "homework"]
     private static let byEmoji: [String: String] =
         Dictionary(library.map { (plain($0.emoji), $0.key) }, uniquingKeysWith: { first, _ in first })
+            .merging(alsoMeans) { first, _ in first }
+    /// Built-in chores whose key is not the name of their drawing.
+    private static let presetDrawing = ["outfit": "dress", "leaves": "garden"]
 
     /// The drawing that stands for this emoji, if there is one.
     static func key(forEmoji emoji: String) -> String? { byEmoji[plain(emoji)] }
@@ -43,9 +48,9 @@ enum ChoreArt {
 
     static func image(for chore: Chore) -> UIImage? {
         // A built-in chore: its own drawing, by its key ("preset-bed_<child>").
-        if let key = chore.id.split(separator: "_").first, key.hasPrefix("preset-"),
-           let img = image(key: String(key.dropFirst("preset-".count))) {
-            return img
+        if let key = chore.id.split(separator: "_").first, key.hasPrefix("preset-") {
+            let name = String(key.dropFirst("preset-".count))
+            if let img = image(key: presetDrawing[name] ?? name) { return img }
         }
         return key(forEmoji: chore.emoji).flatMap(image(key:))
     }

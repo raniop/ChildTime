@@ -1901,9 +1901,10 @@ struct ParentDashboardView: View {
         return GiftMinutesSheet(profile: p,
                                 givenToday: today,
                                 waiting: snapshot?.giftMinutesShown ?? 0,
-                                capLeft: ProgressStore.minutesUntilMidnight()) { minutes in
-            sendGift(p, minutes)
-        }
+                                capLeft: ProgressStore.minutesUntilMidnight(),
+                                onSend: { minutes in sendGift(p, minutes) },
+                                // The window shows the reset's status itself: no second sheet over it.
+                                onRevoke: { lockAndRevokeGift(p, showStatus: false) })
     }
 
     private func actionsSheet(_ p: Profile) -> some View {
@@ -2864,13 +2865,13 @@ struct ParentDashboardView: View {
         return tr("המכשיר יינעל עכשיו, וכל הדקות שנתתם (💝 מתנה, ❄️ שמורות, וחלון פתוח של מתנה) יימחקו. הדקות ש\(earned) מלמידה לא נפגעות.")
     }
 
-    private func lockAndRevokeGift(_ profile: Profile) {
+    private func lockAndRevokeGift(_ profile: Profile, showStatus: Bool = true) {
         guard !DemoTour.refuse() else { return }
         Haptic.warning()
         remote.revokeChildGift(childID: profile.id)
         household.lockRemoteScreenTime(toChildID: profile.id)
         // Live status sheet: lock ack per device + the gift-wipe ack, honestly.
-        commandStatus = RemoteCommandStatusRequest(profile: profile, kind: .lock(includesGiftRevoke: true))
+        if showStatus { commandStatus = RemoteCommandStatusRequest(profile: profile, kind: .lock(includesGiftRevoke: true)) }
         refreshTrigger &+= 1
     }
 

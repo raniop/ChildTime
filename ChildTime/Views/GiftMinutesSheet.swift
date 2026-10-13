@@ -18,6 +18,10 @@ struct GiftMinutesSheet: View {
     let capLeft: Int
     /// Sends the gift; returns the status to show, or nil when nothing was sent.
     let onSend: (Int) -> RemoteCommandStatusRequest?
+    /// "נעל ואפס דקות מתנה" — the same action as under 🔒 on the child's
+    /// actions, offered here too: this is the window a parent opens to look at
+    /// the gift minutes, and where Rani went looking for it (2026-10-13).
+    var onRevoke: (() -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var remote = RemoteSyncManager.shared
@@ -30,6 +34,9 @@ struct GiftMinutesSheet: View {
     /// child's device takes the gift it grows by itself, and adding what was
     /// just sent on top of that would count the same minutes twice.
     @State private var givenAtOpen: Int?
+    @State private var confirmRevoke = false
+    /// The reset was sent from this window: its live status takes the button's place.
+    @State private var revoked = false
 
     private var name: String { Question.stripNiqqud(profile.name) }
     private var girl: Bool { profile.gender == .girl }
@@ -45,6 +52,18 @@ struct GiftMinutesSheet: View {
             .onAppear {
                 minutes = min(minutes, ceiling)
                 if givenAtOpen == nil { givenAtOpen = givenToday }
+            }
+            // Confirmed first — this one IS a consequence (the same words as
+            // on the child's actions).
+            .alert(tr("לנעול ולאפס את דקות המתנה של \(profile.name)?"), isPresented: $confirmRevoke) {
+                Button(tr("נעל ואפס"), role: .destructive) {
+                    onRevoke?()
+                    withAnimation(.easeInOut(duration: 0.25)) { revoked = true }
+                }
+                Button(tr("בטל"), role: .cancel) {}
+            } message: {
+                let earned = girl ? tr("היא הרוויחה") : tr("הוא הרוויח")
+                Text(tr("המכשיר יינעל עכשיו, וכל הדקות שנתתם (💝 מתנה, ❄️ שמורות, וחלון פתוח של מתנה) יימחקו. הדקות ש\(earned) מלמידה לא נפגעות."))
             }
     }
 
@@ -69,6 +88,22 @@ struct GiftMinutesSheet: View {
                 HStack(spacing: 10) {
                     stat((givenAtOpen ?? givenToday) + (sentMinutes ?? 0), tr("נתתם היום"))
                     stat(waiting, tr("עוד לא נוצלו"))   // "מחכות לנוני" was not clear (Rani)
+                }
+                if onRevoke != nil, sentMinutes == nil {
+                    if revoked {
+                        TimelineView(.periodic(from: .now, by: 1)) { _ in revokeLine }
+                    } else if waiting > 0 {
+                        Button { Haptic.light(); confirmRevoke = true } label: {
+                            Text("🔒 " + tr("נעל ואפס דקות מתנה"))
+                                .font(.system(size: 14.5, weight: .heavy, design: .rounded))
+                                .foregroundStyle(Color(hex: "FFD0D0"))
+                                .lineLimit(1).minimumScaleFactor(0.8)
+                                .frame(maxWidth: .infinity).frame(height: 44)
+                                .background(Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color(hex: "FF8A8A").opacity(0.6), lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
 
                 // A short screen (the closed foldable, an iPhone SE): a smaller ring, so
@@ -173,6 +208,22 @@ struct GiftMinutesSheet: View {
         } else {
             status("wifi.slash", GlassInk.warn, tr("אין חיבור אינטרנט במכשיר שלך"),
                    tr("המתנה שמורה ותישלח אוטומטית ברגע שיחזור החיבור — אין צורך ללחוץ שוב."))
+        }
+    }
+
+    /// Where the reset is right now — the same four answers as the status
+    /// window of "נעל ואפס" on the child's actions.
+    @ViewBuilder private var revokeLine: some View {
+        let revoke = remote.giftRevokeTracker[profile.id]
+        let elapsed = Date().timeIntervalSince(revoke?.sentAt ?? Date())
+        if revoke?.failed == true {
+            status("exclamationmark.triangle.fill", GlassInk.weak, tr("המחיקה לא נשלחה"), tr("משהו חסם את השליחה. נסו שוב עוד רגע."))
+        } else if revoke?.applied == true {
+            status("checkmark.circle.fill", GlassInk.good, tr("דקות המתנה נמחקו ✓"), tr("המכשיר של \(profile.name) אישר את המחיקה."))
+        } else if elapsed < Self.deviceTimeout {
+            status(nil, GlassInk.primary, tr("מוחק דקות מתנה — ממתין לאישור…"), nil)
+        } else {
+            status("clock.fill", GlassInk.warn, tr("מחיקת דקות המתנה ממתינה למכשיר"), tr("תתבצע ברגע שהמכשיר של \(profile.name) יתחבר."))
         }
     }
 
