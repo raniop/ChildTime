@@ -34,7 +34,6 @@ struct ChoresParentView: View {
     @State private var formMinutes = 10
     @State private var formTimesPerDay = 1
 
-    private static let emojiOptions = ["🧹", "🛏", "🍽", "🗑", "👕", "🐕", "🪴", "🎒", "🧸", "🛒", "🍳", "🧺"]
 
     private var myChores: [Chore] { choreStore.chores(forChild: profile.id) }
     private var pending: [Chore] { myChores.filter { $0.isPendingApproval } }
@@ -181,7 +180,7 @@ struct ChoresParentView: View {
                 .padding(.horizontal, 10).padding(.vertical, 3)
                 .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
             HStack(spacing: 12) {
-                Text(chore.emoji).font(.system(size: 40))
+                ChorePicture(chore: chore, side: 56)
                     .frame(width: 64, height: 64)
                     .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
                 VStack(alignment: .leading, spacing: 3) {
@@ -247,7 +246,7 @@ struct ChoresParentView: View {
                     .frame(height: 64)
                 Text(tr("מטלה חדשה"))
                     .font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                Text(tr("שם, אימוג׳י ודקות"))
+                Text(tr("שם, תמונה ודקות"))
                     .font(.system(size: 12.5, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.75))
             }
             .frame(maxWidth: .infinity, minHeight: 168)
@@ -263,7 +262,7 @@ struct ChoresParentView: View {
         let done = chore.approvedToday
         return Button { startEditing(chore) } label: {
             VStack(spacing: 8) {
-                Text(chore.emoji).font(.system(size: 40))
+                ChorePicture(chore: chore, side: 58)
                     .frame(maxWidth: .infinity).frame(height: 64)
                     .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.12)))
                 Text(Question.stripNiqqud(chore.title))
@@ -326,28 +325,7 @@ struct ChoresParentView: View {
                     if editing == nil || !ChoreStore.isPreset(editing!) {
                         RTLTextField(placeholder: tr("מה המטלה? (למשל: לשטוף את האוטו)"), text: $formTitle)
                             .frame(height: 24)
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 8) {
-                                // Any emoji at all (Sasha, 12.10: "לצחצח שיניים" had no
-                                // toothbrush among the twelve): this box opens the
-                                // phone's own emoji keyboard.
-                                EmojiPickField(emoji: $formEmoji, isCustom: !Self.emojiOptions.contains(formEmoji))
-                                    .frame(width: 40, height: 40)
-                                    .background(!Self.emojiOptions.contains(formEmoji) ? Color.accentColor.opacity(0.25) : Color.primary.opacity(0.08),
-                                                in: RoundedRectangle(cornerRadius: 16))
-                                ForEach(Self.emojiOptions, id: \.self) { e in
-                                    Button {
-                                        formEmoji = e
-                                    } label: {
-                                        Text(e).font(.system(size: 26))
-                                            .frame(width: 40, height: 40)
-                                            .background(formEmoji == e ? Color.accentColor.opacity(0.25) : .clear,
-                                                        in: RoundedRectangle(cornerRadius: 16))
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                        }
+                        picturePicker
                     }
                     Stepper(tr("🎮 פרס דקות משחק: \(formMinutes)"), value: $formMinutes, in: 5...120, step: 5)
                     Stepper(formTimesPerDay == 1 ? tr("🔁 פעם אחת ביום") : tr("🔁 עד \(formTimesPerDay) פעמים ביום"),
@@ -359,6 +337,54 @@ struct ChoresParentView: View {
                     }
                     .disabled((editing == nil && formTitle.trimmingCharacters(in: .whitespaces).isEmpty)
                               || formMinutes == 0)
+    }
+
+    /// 🎨 The picture of the chore (Rani, 2026-10-13): the drawings, in a grid —
+    /// and, first in it, a box that opens the phone's own emoji keyboard for
+    /// any emoji at all (Sasha, 12.10: "לצחצח שיניים" had no toothbrush).
+    private var picturePicker: some View {
+        let chosen = ChoreArt.key(forEmoji: formEmoji)
+        return VStack(alignment: .leading, spacing: 8) {
+            Text(tr("תמונה למטלה"))
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .foregroundStyle(.secondary)
+            ScrollView {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: hsc == .compact ? 5 : 8), spacing: 8) {
+                    VStack(spacing: 2) {
+                        EmojiPickField(emoji: $formEmoji, isCustom: chosen == nil)
+                            .frame(width: 44, height: 40)
+                        Text(tr("אימוג׳י"))
+                            .font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity).frame(height: 62)
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(chosen == nil ? Color.accentColor.opacity(0.28) : Color.primary.opacity(0.08)))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .strokeBorder(chosen == nil ? Color.accentColor : .clear, lineWidth: 2))
+                    ForEach(ChoreArt.library, id: \.key) { art in
+                        Button {
+                            Haptic.light()
+                            formEmoji = art.emoji
+                        } label: {
+                            Group {
+                                if let img = ChoreArt.image(key: art.key) { Image(uiImage: img).resizable().scaledToFit() }
+                                else { Text(art.emoji).font(.system(size: 30)) }
+                            }
+                            .padding(5)
+                            .frame(maxWidth: .infinity).frame(height: 62)
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(chosen == art.key ? Color.accentColor.opacity(0.28) : Color.primary.opacity(0.08)))
+                            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .strokeBorder(chosen == art.key ? Color.accentColor : .clear, lineWidth: 2))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(art.emoji)
+                    }
+                }
+                .padding(.vertical, 2)
+            }
+            .frame(height: 290)   // four rows and a peek of the fifth: there is more to scroll
+        }
     }
 
     private func startEditing(_ chore: Chore) {
