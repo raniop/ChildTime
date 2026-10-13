@@ -111,6 +111,7 @@ internal fun DemoParentScreens(screen: String, page: String?) {
         "childreport" -> com.rani.tofy.ui.child.ChildDetailScreen(noni.id, onBack = { show = "parenthome" })
         "childsettings" -> com.rani.tofy.ui.child.ChildSettingsScreen(noni.id, onBack = { show = "settings" }, onDeleted = {},
             startOnProfile = page == "profile", onConnect = {}, onLocation = {}, demoPage = page)
+        "chores" -> com.rani.tofy.ui.chores.ChoresScreen(onBack = { show = "parenthome" })   // the built-in chores, no cloud
         "settings" -> com.rani.tofy.ui.settings.SettingsScreen(onBack = { show = "parenthome" }, onOpenChild = { show = "childsettings" })
         else -> com.rani.tofy.ui.home.HomeScreen(
             state = state, onOpenChild = { show = "childreport" }, onActions = {}, onGift = { gift = true }, onChildSettings = {},

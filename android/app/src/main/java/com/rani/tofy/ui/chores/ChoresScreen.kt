@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -39,8 +41,6 @@ import com.rani.tofy.i18n.tr
 import com.rani.tofy.ui.common.*
 import com.rani.tofy.ui.theme.*
 import kotlinx.coroutines.launch
-
-private val EMOJI_OPTIONS = listOf("🧹", "🛏", "🍽", "🗑", "👕", "🐕", "🪴", "🎒", "🧸", "🛒", "🍳", "🧺")
 
 /**
  * 🧹 ChoresParentView.swift — the chores of one child, with a picker across all
@@ -200,7 +200,8 @@ private fun SectionTitle(text: String) =
 private fun PendingRow(c: Chore, approving: Boolean, onApprove: () -> Unit, onReturn: () -> Unit) {
     Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("${c.emoji} ${c.title}", Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+            ChorePicture(c, 52.dp)
+            Text(c.title, Modifier.weight(1f).padding(horizontal = 10.dp), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
             P(tr("🎮 %lld דק׳ משחק", c.rewardMinutes), 12.5f)
         }
         ProofPhoto(c)
@@ -234,23 +235,42 @@ private fun ProofPhoto(c: Chore) {
     }
 }
 
+/**
+ * One chore, one coloured row — the same picture and the same colour the child
+ * sees for it (Rani, 2026-10-13: "בשורות זה יותר טוב"). A tap edits it.
+ */
 @Composable
 private fun ChoreRow(c: Chore, onEdit: () -> Unit) {
+    val tint = ChoreArt.tint(c)
+    val colors = listOf(tint.copy(alpha = 0.28f), tint.copy(alpha = 0.62f)).let {
+        if (androidx.compose.ui.platform.LocalLayoutDirection.current == androidx.compose.ui.unit.LayoutDirection.Rtl) it else it.reversed()
+    }
+    val shape = RoundedCornerShape(16.dp)
+    val done = c.approvedToday
     Row(
-        Modifier.fillMaxWidth().glassPane(16.dp).clickable(onClick = onEdit).padding(horizontal = 14.dp, vertical = 11.dp),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
+        Modifier.fillMaxWidth().clip(shape).background(Brush.horizontalGradient(colors))
+            .border(if (done) 1.5.dp else 1.dp, if (done) Ink.live.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.35f), shape)
+            .clickable(onClick = onEdit).padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(c.emoji, fontSize = 22.sp)
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(c.title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
-            val parts = buildList {
-                add(tr("🎮 %lld דק׳", c.rewardMinutes))
-                if (c.timesPerDay > 1) add(tr("🔁 עד %lld ביום", c.timesPerDay))
-                if (c.isDaily && c.doneToday > 0) add(if (c.approvedToday) tr("✅ הושלמה להיום") else tr("✅ %lld/%lld היום", c.doneToday, c.timesPerDay))
+        ChorePicture(c, 70.dp)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(c.title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, lineHeight = 21.sp, maxLines = 2)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                Text(tr("🎮 %lld דק׳", c.rewardMinutes), Modifier.clip(shape).background(GoldBrush).padding(horizontal = 8.dp, vertical = 3.dp),
+                    color = Ink.deep, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp, maxLines = 1)
+                if (c.timesPerDay > 1) Text(tr("עד %lld ביום", c.timesPerDay), color = Color.White.copy(alpha = 0.9f),
+                    fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
             }
-            P(parts.joinToString("  "), 12f)
         }
-        Text("✎", color = Ink.tertiary, fontSize = 16.sp)
+        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(if (done) tr("✅ הושלמה להיום") else if (c.doneToday > 0) tr("✅ %lld/%lld היום", c.doneToday, c.timesPerDay) else tr("עוד לא היום"),
+                color = if (c.doneToday > 0) Color(0xFFB6FFD3) else Color.White.copy(alpha = 0.75f),
+                fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
+            Box(Modifier.size(34.dp).clip(shape).background(Color.White.copy(alpha = 0.18f)), contentAlignment = Alignment.Center) {
+                Text("✎", color = Color.White.copy(alpha = 0.85f), fontSize = 15.sp)
+            }
+        }
     }
 }
 
@@ -264,7 +284,9 @@ private fun SwipeToHide(onHide: () -> Unit, content: @Composable () -> Unit) {
     SwipeToDismissBox(
         state, enableDismissFromStartToEnd = false,
         backgroundContent = {
-            Box(Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp)).background(Color(0xFFE76F51)).padding(horizontal = 18.dp),
+            // Only while the row is being pulled: the rows are see-through now,
+            // and the red would otherwise show under every one of them.
+            if (state.dismissDirection == SwipeToDismissBoxValue.EndToStart) Box(Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp)).background(Color(0xFFE76F51)).padding(horizontal = 18.dp),
                 contentAlignment = Alignment.CenterEnd) {
                 Text(tr("הסתרה"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold)
             }
@@ -298,16 +320,7 @@ private fun ChoreForm(editing: Chore?, onSave: (title: String, emoji: String, mi
                     focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent,
                 ),
             )
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                EMOJI_OPTIONS.forEach { e ->
-                    Box(
-                        Modifier.size(42.dp).clip(RoundedCornerShape(16.dp))
-                            .background(if (emoji == e) Color.White.copy(alpha = 0.3f) else Color.Transparent)
-                            .clickable { emoji = e },
-                        contentAlignment = Alignment.Center,
-                    ) { Text(e, fontSize = 24.sp) }
-                }
-            }
+            PicturePicker(emoji) { emoji = it }
         }
         Stepper(tr("🎮 פרס דקות משחק: %lld", minutes), canDec = minutes > 5, canInc = minutes < 120,
             onDec = { minutes = maxOf(5, minutes - 5) }, onInc = { minutes = minOf(120, minutes + 5) })
@@ -319,6 +332,77 @@ private fun ChoreForm(editing: Chore?, onSave: (title: String, emoji: String, mi
             if (editing == null) { title = ""; emoji = "🧹"; minutes = 10; times = 1 }
         }
     }
+}
+
+/**
+ * 🎨 The picture of the chore (Rani, 2026-10-13): the drawings, in a grid — and,
+ * first in it, a box for ANY emoji at all, typed from the keyboard's own emoji
+ * page (the twelve fixed ones were not enough: "לצחצח שיניים" had no toothbrush).
+ */
+@Composable
+private fun PicturePicker(emoji: String, onPick: (String) -> Unit) {
+    val chosen = ChoreArt.keyFor(emoji)
+    var typing by remember { mutableStateOf(false) }
+    var typed by remember { mutableStateOf("") }
+    val shape = RoundedCornerShape(16.dp)
+    @Composable
+    fun Cell(on: Boolean, onClick: () -> Unit, content: @Composable () -> Unit) = Box(
+        Modifier.fillMaxWidth().height(62.dp).clip(shape).background(Color.White.copy(alpha = if (on) 0.3f else 0.1f))
+            .then(if (on) Modifier.border(2.dp, Color.White, shape) else Modifier).clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) { content() }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        P(tr("תמונה למטלה"), 13.5f, color = Ink.secondary, weight = FontWeight.SemiBold)
+        Column(Modifier.fillMaxWidth().height(290.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            val cells: List<Pair<String, String>?> = listOf<Pair<String, String>?>(null) + ChoreArt.library
+            cells.chunked(5).forEach { row ->
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    row.forEach { art ->
+                        Box(Modifier.weight(1f)) {
+                            if (art == null) Cell(on = chosen == null, onClick = { typing = true }) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(if (chosen == null) emoji else "＋", color = Color.White, fontSize = 22.sp)
+                                    Text(tr("אימוג׳י"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 10.sp)
+                                }
+                            } else Cell(on = chosen == art.first, onClick = { typing = false; onPick(art.second) }) {
+                                if (!ChoreDrawing(art.first, Modifier.padding(5.dp).fillMaxSize())) Text(art.second, fontSize = 28.sp)
+                            }
+                        }
+                    }
+                    repeat(5 - row.size) { Spacer(Modifier.weight(1f)) }
+                }
+            }
+        }
+        // Any emoji: the field takes whatever was typed last, if it is one.
+        if (typing) TextField(
+            typed, { v ->
+                val last = lastEmoji(v)
+                if (last != null) { onPick(last); typed = ""; typing = false } else typed = ""
+            }, Modifier.fillMaxWidth(),
+            placeholder = { Text(tr("אימוג׳י") + " 🙂", color = Ink.tertiary) },
+            singleLine = true, shape = shape,
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.White.copy(alpha = 0.12f), unfocusedContainerColor = Color.White.copy(alpha = 0.12f),
+                focusedTextColor = Color.White, unfocusedTextColor = Color.White, cursorColor = Color.White,
+                focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent,
+            ),
+        )
+    }
+}
+
+/** The last thing typed, if it is an emoji (a whole one — a flag or a family counts as one). */
+private fun lastEmoji(text: String): String? {
+    if (text.isEmpty()) return null
+    val it = java.text.BreakIterator.getCharacterInstance()
+    it.setText(text)
+    val end = it.last()
+    val start = it.previous()
+    if (start == java.text.BreakIterator.DONE) return null
+    val g = text.substring(start, end)
+    val first = g.codePointAt(0)
+    val isEmoji = first > 0x238C && !Character.isLetterOrDigit(first) && !Character.isWhitespace(first)
+    return g.takeIf { isEmoji }
 }
 
 @Composable

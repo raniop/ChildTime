@@ -55,7 +55,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.layout.offset
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import com.rani.tofy.data.Chore
+import com.rani.tofy.kid.ui.CharacterImage
+import com.rani.tofy.kid.ui.games.PreReaderSpeakButton
+import com.rani.tofy.kid.ui.play.ConfettiOverlay
+import com.rani.tofy.ui.chores.ChoreArt
+import com.rani.tofy.ui.chores.ChorePicture
+import com.rani.tofy.ui.theme.GoldBrush
 import com.rani.tofy.i18n.tr
 import com.rani.tofy.kid.ui.KidBottomCard
 import com.rani.tofy.kid.ui.KidCenterCard
@@ -72,11 +93,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * ChoresKidView: the parent defined the chores; the kid does one and taps
- * "עשיתי!" (optionally with a 📸 proof photo). The reward is always 🎮 play
- * minutes, landing only after a parent approves. No failure language anywhere:
- * a returned chore is simply available again, a send that didn't reach the
+ * ChoresKidView: the parent defined the chores; the kid does one and ticks its
+ * box (optionally with a 📸 proof photo). The reward is always 🎮 play minutes,
+ * landing only after a parent approves. No failure language anywhere: a
+ * returned chore is simply an empty box again, a send that didn't reach the
  * parent is a gentle "let's try again".
+ *
+ * The look (Rani, 2026-10-13, chosen from nine directions — "ח"): a checklist
+ * in pictures. The child's own buddy stands on top holding the day's prize,
+ * every chore is one coloured row with a drawing of it ([ChoreArt]) and one
+ * big box to tick, and a tick that reaches the parent is a small party.
  */
 @Composable
 internal fun KidChoresContent(onClose: () -> Unit) {
@@ -85,13 +111,13 @@ internal fun KidChoresContent(onClose: () -> Unit) {
     val haptics = KidHaptics(LocalView.current)
     val scope = rememberCoroutineScope()
     val childID = SocialMe.id
-    // 👦👧 Gendered accent for the approved "champion" card (Rani).
-    val accent = when (SocialMe.child?.gender) { "girl" -> Color(0xFFFF5FA2); "boy" -> Color(0xFF3A86FF); else -> Color(0xFF06D6A0) }
-
     var pending by remember { mutableStateOf<Chore?>(null) }       // reward picked → photo offer
     var sending by remember { mutableStateOf(setOf<String>()) }
     var justSent by remember { mutableStateOf(setOf<String>()) }
     var retryChore by remember { mutableStateOf<String?>(null) }
+    // 🎉 A chore has just reached the parent: confetti, the prize pops out of its row, the buddy cheers.
+    var celebrated by remember { mutableStateOf<String?>(null) }
+    var confetti by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) { store.startIfNeeded(); KidSounds.init(ctx) }
     BackHandler(onBack = onClose)
@@ -107,6 +133,9 @@ internal fun KidChoresContent(onClose: () -> Unit) {
                     justSent = justSent + chore.id   // latency bridge until the listener flips isPendingApproval
                     haptics.success(); KidSounds.play(AppSound.PORTAL_APPEAR)
                     launch { delay(4000); justSent = justSent - chore.id }
+                    // Only now — the chore really reached the parent.
+                    celebrated = chore.id; confetti += 1
+                    launch { delay(1800); if (celebrated == chore.id) celebrated = null }
                 }
                 else -> { retryChore = chore.id; haptics.light() }
             }
@@ -146,64 +175,66 @@ internal fun KidChoresContent(onClose: () -> Unit) {
 
     val mine = childID?.let { store.choresFor(it) } ?: emptyList()
     fun handled(c: Chore) = c.id in sending || c.id in justSent || c.isPendingApproval || (c.isDaily && c.approvedToday)
-    val todo = mine.filter { !handled(it) }
-    val done = mine.filter { handled(it) }
+    // One list: what can be done now on top, what was handled today under it.
+    val ordered = mine.filter { !handled(it) } + mine.filter { handled(it) }
+    /** How many times a day this chore can be done (a one-off: once). */
+    fun turns(c: Chore) = if (c.isDaily) maxOf(1, c.timesPerDay) else 1
+    /** Turns already done today — approved ones, plus the one on its way to a parent. */
+    fun turnsDone(c: Chore) = minOf(turns(c), (if (c.isDaily) c.doneToday else 0) +
+        if (c.isPendingApproval || c.id in sending || c.id in justSent) 1 else 0)
+    val preReader = (SocialMe.child?.effectiveGrade ?: 1) <= 1
 
     GlassBackdrop {
         Column(Modifier.fillMaxSize().systemBarsPadding()) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 12.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(40.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.22f)).border(1.dp, Color.White.copy(alpha = 0.32f), CircleShape)
+                Box(Modifier.size(40.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.22f))
+                    .border(1.dp, Color.White.copy(alpha = 0.32f), RoundedCornerShape(16.dp))
                     .clickable { haptics.light(); onClose() }, contentAlignment = Alignment.Center) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, tr("חזרה"), tint = Color.White, modifier = Modifier.size(20.dp))
                 }
-                Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(tr("מַטְלוֹת הַבַּיִת 🧹"), color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 24.sp)
-                    Text(tr("עוֹזְרִים בַּבַּיִת — וּבוֹחֲרִים פְּרָס!"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.5.sp)
-                }
+                Text(tr("מַטְלוֹת הַבַּיִת 🧹"), Modifier.weight(1f), color = Ink.primary, fontFamily = Rounded, fontWeight = FontWeight.Black,
+                    fontSize = 24.sp, textAlign = TextAlign.Center)
                 Spacer(Modifier.size(40.dp))
             }
             BoxWithConstraints(Modifier.fillMaxSize()) {
-                val cols = if (maxWidth >= 600.dp) 3 else 2
-                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Column(Modifier.widthIn(max = if (cols == 3) 860.dp else 560.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        // 🏆 Lifetime earnings — "how much have I made, ever".
+                val cols = if (maxWidth >= 600.dp) 2 else 1
+                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 14.dp, vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(Modifier.widthIn(max = if (cols == 2) 860.dp else 560.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         val minutes = childID?.let { store.totals(it).minutes } ?: 0
-                        if (minutes > 0) Row(Modifier.fillMaxWidth().glassPane(16.dp).background(SocialColor.starGold.copy(alpha = 0.14f)).padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Text("🏆", fontSize = 30.sp)
-                            Column(Modifier.weight(1f)) {
-                                Text(SocialMe.g(tr("סַךְ הַכֹּל הִרְוַחְתָּ מֵהַמַּטְלוֹת:"), tr("סַךְ הַכֹּל הִרְוַחַתְּ מֵהַמַּטְלוֹת:")), color = Color.White.copy(alpha = 0.85f),
-                                    fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
-                                Text(tr("🎮 %lld דַּקּוֹת מִשְׂחָק", minutes), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                        if (mine.isEmpty()) {
+                            // 🏆 Lifetime earnings — alone only while there are no chores.
+                            if (minutes > 0) Row(Modifier.fillMaxWidth().glassPane(16.dp).background(SocialColor.starGold.copy(alpha = 0.14f)).padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                Text("🏆", fontSize = 30.sp)
+                                Column(Modifier.weight(1f)) {
+                                    Text(SocialMe.g(tr("סַךְ הַכֹּל הִרְוַחְתָּ מֵהַמַּטְלוֹת:"), tr("סַךְ הַכֹּל הִרְוַחַתְּ מֵהַמַּטְלוֹת:")), color = Color.White.copy(alpha = 0.85f),
+                                        fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                                    Text(tr("🎮 %lld דַּקּוֹת מִשְׂחָק", minutes), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                                }
                             }
-                        }
-                        when {
-                            mine.isEmpty() -> Column(Modifier.fillMaxWidth().padding(top = 60.dp), horizontalAlignment = Alignment.CenterHorizontally,
+                            Column(Modifier.fillMaxWidth().padding(top = 60.dp), horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Text("🧹", fontSize = 56.sp)
                                 Text(tr("עוֹד אֵין מַטְלוֹת"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
                                 Text(tr("בַּקְּשׁוּ מֵאַבָּא אוֹ אִמָּא לְהוֹסִיף מַטְלוֹת —\nוְתוּכְלוּ לְהַרְוִיחַ דַּקּוֹת מִשְׂחָק אוֹ כֶּסֶף! 💪"), color = Color.White.copy(alpha = 0.9f),
                                     fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, textAlign = TextAlign.Center)
                             }
-                            else -> {
-                                if (todo.isNotEmpty()) Grid(todo, cols) { c -> ActiveCard(c) { haptics.success(); pending = c } }
-                                else Column(Modifier.fillMaxWidth().glassPane(16.dp).background(Color(0xFF8CFFC4).copy(alpha = 0.14f)).padding(16.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text("🎉", fontSize = 46.sp)
-                                    Text(SocialMe.g(tr("כָּל הַכָּבוֹד! סִיַּמְתָּ הַכֹּל לְהַיּוֹם"), tr("כָּל הַכָּבוֹד! סִיַּמְתְּ הַכֹּל לְהַיּוֹם")),
-                                        color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, textAlign = TextAlign.Center)
-                                }
-                                if (done.isNotEmpty()) {
-                                    Text(tr("בּוֹצְעוּ הַיּוֹם 🎉"), Modifier.fillMaxWidth().padding(top = 8.dp), color = Color.White.copy(alpha = 0.9f),
-                                        fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, textAlign = TextAlign.Center)
-                                    Grid(done, cols) { c -> DoneCard(c, c.id in sending, accent) }
-                                }
+                        } else {
+                            BuddyHero(
+                                left = mine.sumOf { maxOf(it.rewardMinutes, 0) * (turns(it) - turnsDone(it)) },
+                                total = mine.sumOf { turns(it) }, done = mine.sumOf { turnsDone(it) },
+                                lifetime = minutes, cheering = celebrated != null,
+                            )
+                            Grid(ordered, cols) { c ->
+                                ChoreRow(c, handled = handled(c), isSending = c.id in sending, celebrating = celebrated == c.id,
+                                    turns = turns(c), turnsDone = turnsDone(c), speak = preReader) { haptics.success(); pending = c }
                             }
                         }
                     }
                 }
             }
         }
+        ConfettiOverlay(confetti)
 
         // 📸 Optional proof photo — a picture beats a debate about whether the room is tidy (Rani).
         if (pending != null) KidBottomCard(onDismiss = { pending = null }) {
@@ -242,49 +273,101 @@ private fun Grid(items: List<Chore>, cols: Int, cell: @Composable (Chore) -> Uni
     }
 }
 
-/** A chore the kid can DO now: emoji, name, ONE reward line, the same-day counter, "עשיתי!". */
+/** The child's own character holds the day's prize; a segment per turn fills under it; and it is the one who cheers. */
 @Composable
-private fun ActiveCard(c: Chore, onDone: () -> Unit) {
-    Column(Modifier.fillMaxWidth().glassPane(16.dp).background(Color(0xFF48BFE3).copy(alpha = 0.12f)).padding(10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(c.emoji, fontSize = 38.sp)
-        Box(Modifier.heightIn(min = 38.dp), contentAlignment = Alignment.Center) {
-            Text(c.title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, textAlign = TextAlign.Center, maxLines = 2, lineHeight = 19.sp)
+private fun BuddyHero(left: Int, total: Int, done: Int, lifetime: Int, cheering: Boolean) {
+    val lift by animateFloatAsState(if (cheering) 1.12f else 1f, spring(dampingRatio = 0.5f), label = "buddy")
+    val ink = Ink.deep
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            CharacterImage(SocialMe.character3DID, Modifier.size(width = 92.dp, height = 112.dp).scale(lift))
+            Column(Modifier.padding(bottom = 26.dp).clip(RoundedCornerShape(16.dp)).background(Color.White).padding(horizontal = 14.dp, vertical = 11.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                if (cheering) Text(SocialMe.g(tr("כָּל הַכָּבוֹד, אַלּוּף! 🎉"), tr("כָּל הַכָּבוֹד, אַלּוּפָה! 🎉")), color = ink.copy(alpha = 0.8f),
+                    fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1)
+                else if (left > 0) Text(tr("עוֹד אֶפְשָׁר לְהַרְוִיחַ הַיּוֹם"), color = ink.copy(alpha = 0.8f),
+                    fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1)
+                if (left > 0) Text(tr("🎮 %lld דַּקּוֹת מִשְׂחָק", left), color = ink, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 22.sp, maxLines = 1)
+                else Text(SocialMe.g(tr("כָּל הַכָּבוֹד! סִיַּמְתָּ הַכֹּל לְהַיּוֹם"), tr("כָּל הַכָּבוֹד! סִיַּמְתְּ הַכֹּל לְהַיּוֹם")), color = ink,
+                    fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+            }
         }
-        Text(tr("🎮 %lld דַּקּוֹת מִשְׂחָק", maxOf(c.rewardMinutes, 0)), Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.14f))
-            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).padding(horizontal = 9.dp, vertical = 4.dp),
-            color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
-        // Reserved even when absent so every card in a row keeps the same height.
-        Text(if (c.timesPerDay > 1) tr("הַיּוֹם: %lld/%lld ✔️", c.doneToday, c.timesPerDay) else " ", Modifier.heightIn(min = 20.dp),
-            color = Color.White.copy(alpha = 0.8f), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 10.5.sp, lineHeight = 16.sp, maxLines = 1)
-        Text(tr("עָשִׂיתִי! ✅"), Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.92f)).clickable(onClick = onDone)
-            .padding(vertical = 10.dp), color = SocialColor.indigo, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp,
-            textAlign = TextAlign.Center, maxLines = 1)
+        // One segment per turn.
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+            val shown = total.coerceIn(1, 12)
+            val filled = if (total <= 12) done else (done * 12f / total).toInt()
+            repeat(shown) { i ->
+                Box(Modifier.weight(1f).height(11.dp).clip(RoundedCornerShape(5.dp))
+                    .background(if (i < filled) GoldBrush else Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), Color.White.copy(alpha = 0.25f)))))
+            }
+        }
+        if (lifetime > 0) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("🏆", fontSize = 13.sp)
+            Text(SocialMe.g(tr("סַךְ הַכֹּל הִרְוַחְתָּ מֵהַמַּטְלוֹת:"), tr("סַךְ הַכֹּל הִרְוַחַתְּ מֵהַמַּטְלוֹת:")), color = Color.White.copy(alpha = 0.88f),
+                fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp, maxLines = 1)
+            Text(tr("🎮 %lld דַּקּוֹת מִשְׂחָק", lifetime), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp, maxLines = 1)
+        }
     }
 }
 
-/** "בוצעו היום": approved → the gendered 👑 champion card; in flight → a plain status. */
+/**
+ * One chore, one row: its picture, its name, the prize in gold (or where it
+ * stands, once ticked), and ONE big box to tick.
+ */
 @Composable
-private fun DoneCard(c: Chore, isSending: Boolean, accent: Color) {
+private fun ChoreRow(c: Chore, handled: Boolean, isSending: Boolean, celebrating: Boolean, turns: Int, turnsDone: Int, speak: Boolean, onDone: () -> Unit) {
     val approved = c.isDaily && c.approvedToday
-    val waiting = !approved && !isSending
-    Column(Modifier.fillMaxWidth().glassPane(16.dp, if (approved) 0.14f else 0.09f).then(if (approved) Modifier.background(accent.copy(alpha = 0.35f)) else Modifier).padding(10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(if (approved) "👑" else c.emoji, fontSize = 30.sp)
-        Text(c.title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.sp, textAlign = TextAlign.Center, maxLines = 1)
-        when {
-            isSending -> StatusCapsule(tr("שׁוֹלְחִים… 📨"), Color.White.copy(alpha = 0.18f))
-            waiting -> StatusCapsule(tr("מְחַכִּים לְאִשּׁוּר 🕐"), Color(0xFFFFD98A).copy(alpha = 0.35f))
-            else -> Text(SocialMe.g(tr("כָּל הַכָּבוֹד, אַלּוּף! 🎉"), tr("כָּל הַכָּבוֹד, אַלּוּפָה! 🎉")), color = Color.White, fontFamily = Rounded,
-                fontWeight = FontWeight.ExtraBold, fontSize = 11.5.sp, maxLines = 1)
+    val tint = ChoreArt.tint(c)
+    val strong = tint.copy(alpha = if (handled) 0.3f else 0.72f)
+    val soft = tint.copy(alpha = if (handled) 0.14f else 0.36f)
+    // The strong end sits where the row starts — on the right in Hebrew.
+    val colors = if (LocalLayoutDirection.current == LayoutDirection.Rtl) listOf(soft, strong) else listOf(strong, soft)
+    val shape = RoundedCornerShape(16.dp)
+    val pop by animateFloatAsState(if (celebrating) 1.18f else 1f, spring(dampingRatio = 0.5f), label = "tick")
+    Box {
+        Row(Modifier.fillMaxWidth().clip(shape).background(Brush.horizontalGradient(colors)).border(1.dp, Color.White.copy(alpha = 0.4f), shape)
+            .padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box {
+                ChorePicture(c, 92.dp)
+                // 🔊 A child who does not read yet hears what the chore is (Sasha, 12.10).
+                if (speak) Box(Modifier.align(Alignment.BottomStart).offset(x = (-6).dp, y = 6.dp).clip(CircleShape).background(Ink.deep.copy(alpha = 0.55f))) {
+                    PreReaderSpeakButton(c.title, 32.dp)
+                }
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                Text(c.title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, lineHeight = 23.sp,
+                    maxLines = 2, overflow = TextOverflow.Ellipsis)
+                if (handled) Text(
+                    when {
+                        isSending -> tr("שׁוֹלְחִים… 📨")
+                        approved -> SocialMe.g(tr("כָּל הַכָּבוֹד, אַלּוּף! 🎉"), tr("כָּל הַכָּבוֹד, אַלּוּפָה! 🎉"))
+                        else -> tr("מְחַכִּים לְאִשּׁוּר 🕐")
+                    }, color = Color.White.copy(alpha = 0.92f), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 1)
+                else Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // The prize, in gold — the one thing on the row that shines.
+                    Text(tr("🎮 %lld דַּקּוֹת מִשְׂחָק", maxOf(c.rewardMinutes, 0)), Modifier.clip(shape).background(GoldBrush).padding(horizontal = 10.dp, vertical = 5.dp),
+                        color = Ink.deep, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp, maxLines = 1)
+                    // A dot per turn today, for a chore done more than once a day.
+                    if (turns > 1) Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                        repeat(turns) { i -> Box(Modifier.size(9.dp).clip(CircleShape).background(if (i < turnsDone) SocialColor.starGold else Color.White.copy(alpha = 0.4f))) }
+                    }
+                }
+            }
+            val ticked = handled && !isSending
+            Box(Modifier.size(60.dp).scale(pop).clip(shape)
+                .background(if (ticked) GoldBrush else Brush.linearGradient(listOf(Color.White.copy(alpha = 0.18f), Color.White.copy(alpha = 0.18f))))
+                .then(if (ticked) Modifier else Modifier.border(3.dp, Color.White, shape))
+                .clickable(enabled = !handled, onClickLabel = tr("עָשִׂיתִי! ✅"), onClick = onDone), contentAlignment = Alignment.Center) {
+                if (isSending) CircularProgressIndicator(Modifier.size(22.dp), color = Color.White, strokeWidth = 2.5.dp)
+                else if (handled) Text("✓", color = Ink.deep, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 30.sp)
+            }
+        }
+        // The prize pops out of the row as it goes to the parent.
+        AnimatedVisibility(celebrating, Modifier.align(Alignment.TopCenter).offset(y = (-20).dp), enter = scaleIn() + fadeIn(), exit = fadeOut()) {
+            Text(tr("🎮 %lld דַּקּוֹת מִשְׂחָק", maxOf(c.rewardMinutes, 0)), Modifier.shadow(6.dp, shape).clip(shape).background(GoldBrush).padding(horizontal = 14.dp, vertical = 7.dp),
+                color = Ink.deep, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 15.sp, maxLines = 1)
         }
     }
-}
-
-@Composable
-private fun StatusCapsule(text: String, bg: Color) {
-    Text(text, Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(bg).padding(vertical = 10.dp), color = Color.White,
-        fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.sp, textAlign = TextAlign.Center, maxLines = 1)
 }
 
 /** Decode a picked photo upright and already small (the compressor then caps it at 900 px). */

@@ -53,10 +53,12 @@ class MainActivity : ComponentActivity() {
         // 🧪 `--es demoScreen parenthome|childreport|childsettings|gift|settings` — the parent's screens
         // over a made-up family (ui/DemoFamily.kt); `--es demoPage devices|difficulty|profile|more`
         // opens a page of the child's settings, `--ei demoGiftSent 30` the gift window after sending.
-        val demoParent = demoScreen?.takeIf { it in setOf("parenthome", "childreport", "childsettings", "gift", "settings") }
-        if (demoParent != null) {
-            // `--es demoLang he|en|ru|ar` — the language for this run only (nothing is saved).
+        val demoParent = demoScreen?.takeIf { it in setOf("parenthome", "childreport", "childsettings", "gift", "settings", "chores") }
+        // `--es demoLang he|en|ru|ar` — the language for this run only (nothing is saved).
+        if (demoParent != null || demoScreen == "kidchores") {
             com.rani.tofy.i18n.AppLanguage.of(intent?.getStringExtra("demoLang"))?.let { com.rani.tofy.i18n.I18n.set(it, persist = false) }
+        }
+        if (demoParent != null) {
             com.rani.tofy.ui.DemoFamily.seed(this)
             // `--es demoBackdrop tofy` — the parent's backdrop on this emulator.
             intent?.getStringExtra("demoBackdrop")?.let { com.rani.tofy.ui.theme.BackdropStore.chooseForParent(it) }
@@ -84,10 +86,10 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val demo = demoGame?.let { g -> com.rani.tofy.kid.ui.games.MiniGameKind.entries.firstOrNull { it.name.equals(g, true) } }
                     // Be the device's own child, so the ⭐/💎 chips show the real wallet.
-                    if (demo != null || demoQuiz || demoScreen == "chooser") androidx.compose.runtime.LaunchedEffect(Unit) {
+                    if (demo != null || demoQuiz || demoScreen == "chooser" || demoScreen == "kidchores") androidx.compose.runtime.LaunchedEffect(Unit) {
                         // (The quiz demo falls back to a made-up child — nothing of it can be
                         // written: the rules know no such child or family.)
-                        (com.rani.tofy.DeviceRole.joinedChildID ?: if (demoQuiz || demoScreen == "chooser") "DEMO-QUIZ-CHILD" else null)
+                        (com.rani.tofy.DeviceRole.joinedChildID ?: if (demoQuiz || demoScreen == "chooser" || demoScreen == "kidchores") "DEMO-QUIZ-CHILD" else null)
                             ?.let { com.rani.tofy.kid.core.KidSession.bind(it, false) }
                     }
                     if (demo != null) com.rani.tofy.kid.ui.games.MiniGameScreen(demo, null) { finish() }
@@ -95,6 +97,15 @@ class MainActivity : ComponentActivity() {
                     // 🧪 `--es demoScreen chooser [--es demoGrade 0]` — a world's "how do you want to play?".
                     else if (demoScreen == "chooser") com.rani.tofy.kid.ui.games.WorldGameChooserScreen(
                         com.rani.tofy.kid.ui.play.PlayWorlds.all.first(), onPlayQuestions = {}, onExit = { finish() })
+                    // 🧪 `--es demoScreen kidchores` — the child's chores screen (the built-in chores).
+                    else if (demoScreen == "kidchores") {
+                        // The screen reads "who am I" once: wait for the made-up child to be bound.
+                        val bound by androidx.compose.runtime.produceState(false) {
+                            while (com.rani.tofy.kid.core.KidSession.boundChildID == null) kotlinx.coroutines.delay(100)
+                            value = true
+                        }
+                        if (bound) com.rani.tofy.kid.ui.social.KidChoresContent { finish() }
+                    }
                     else if (demoParent != null) com.rani.tofy.ui.DemoParentScreens(demoParent, demoPage)
                     else if (demoScreen == "familychoice") com.rani.tofy.ui.onboarding.FamilyChoiceScreen(onJoin = {})
                     else if (demoScreen == "joinfamily") com.rani.tofy.ui.onboarding.JoinFamilyScreen(onBack = {})
