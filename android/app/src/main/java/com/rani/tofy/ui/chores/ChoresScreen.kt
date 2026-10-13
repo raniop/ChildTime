@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -22,6 +21,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
@@ -31,8 +32,6 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import coil.compose.AsyncImage
 import com.rani.tofy.data.Chore
 import com.rani.tofy.data.ChoresRepository
@@ -43,11 +42,15 @@ import com.rani.tofy.ui.theme.*
 import kotlinx.coroutines.launch
 
 /**
- * 🧹 ChoresParentView.swift — the chores of one child, with a picker across all
- * the kids. The catalog is built in (every child has ~20 chores); here the
- * parent approves / returns what the kid marked done, retunes a chore's
- * minutes, hides catalog chores (swipe) or adds custom ones. No money rewards
- * (removed on iOS too).
+ * 🧹 ChoresParentView.swift — the chores of one child, with the children as
+ * faces to switch between. The catalog is built in (every child has ~20
+ * chores); here the parent approves / returns what the kid marked done, retunes
+ * a chore's minutes, hides catalog chores or adds custom ones.
+ *
+ * Laid out as on the iPhone (Rani, 2026-10-13: "באייפון זה נראה יותר טוב"):
+ * who it is about · what waits for the parent · today at a glance · "מטלה
+ * חדשה" as the FIRST row · every chore a coloured row with its picture. A
+ * chore is added, edited, hidden or deleted in ONE sheet — never by a swipe.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,11 +74,13 @@ fun ChoresScreen(onBack: () -> Unit) {
     LaunchedEffect(Unit) { ChoresRepository.focusChildID = null }
     val child = kids.firstOrNull { it.id == selectedID } ?: kids.firstOrNull()
 
+    /** The one sheet: a chore being edited, or — `adding` — a new one. */
     var editing by remember { mutableStateOf<Chore?>(null) }
+    var adding by remember { mutableStateOf(false) }
 
     GlassBackdrop {
         Column(Modifier.contentColumn().fillMaxSize().systemBarsPadding()) {
-            TopRow(if (child != null) tr("מטלות הבית · %@", child.name) else tr("מטלות הבית"), onBack)
+            TopRow(tr("מטלות הבית"), onBack)
             if (child == null) return@Column
             val mine = ChoresRepository.choresFor(child.id, all)
             val pending = mine.filter { it.isPendingApproval }
@@ -85,68 +90,73 @@ fun ChoresScreen(onBack: () -> Unit) {
 
             LazyColumn(
                 Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
+                // Who it is about — a face, not a segmented control. 🕐 = a chore of theirs waits.
                 if (kids.size > 1) item {
-                    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Up to three share the row equally (as on the iPhone); more than that scroll.
+                    val few = kids.size <= 3
+                    Row(if (few) Modifier.fillMaxWidth() else Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         kids.forEach { k ->
-                            // 🕐 marks a kid with a chore waiting for approval.
                             val waiting = ChoresRepository.choresFor(k.id, all).any { it.isPendingApproval }
                             val on = k.id == child.id
-                            Box(
-                                Modifier.clip(RoundedCornerShape(16.dp))
-                                    .background(if (on) Color.White.copy(alpha = 0.92f) else Color.White.copy(alpha = 0.16f))
-                                    .clickable { selectedID = k.id; editing = null }
-                                    .padding(horizontal = 16.dp, vertical = 9.dp),
+                            val shape = RoundedCornerShape(16.dp)
+                            Row(
+                                (if (few) Modifier.weight(1f) else Modifier).clip(shape).background(Color.White.copy(alpha = if (on) 0.22f else 0.08f))
+                                    .border(if (on) 2.dp else 1.dp, if (on) Color(0xFFFFD23F) else Color.White.copy(alpha = 0.2f), shape)
+                                    .clickable { selectedID = k.id; editing = null; adding = false }
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                             ) {
-                                Text(if (waiting) "${k.name} 🕐" else k.name, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 14.sp,
-                                    color = if (on) Ink.indigo else Color.White)
+                                ChildAvatar(k, 34.dp)
+                                Text(k.name, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, maxLines = 1)
+                                if (waiting) Text("🕐", fontSize = 14.sp)
                             }
                         }
                     }
                 }
 
-                if (pending.isNotEmpty()) {
-                    item { SectionTitle(if (pending.size == 1) tr("מחכה לאישור שלכם 🕐") else tr("מחכות לאישור שלכם 🕐")) }
-                    items(pending, key = { "p-" + it.id }) { c ->
-                        PendingRow(c, c.id in approving,
-                            onApprove = { ChoresRepository.approve(c) },
-                            onReturn = { scope.launch { ChoresRepository.returnChore(c) } })
-                    }
+                // What waits for the parent comes first, and looks like it.
+                items(pending, key = { "p-" + it.id }) { c ->
+                    PendingRow(c, c.id in approving,
+                        onApprove = { ChoresRepository.approve(c) },
+                        onReturn = { scope.launch { ChoresRepository.returnChore(c) } })
                 }
 
-                if (earned > 0) item {
-                    P(tr("סה\"כ הרוויח%@ מהמטלות: 🎮 %lld דקות משחק", if (child.isGirl) tr("ה") else "", earned), 12.5f, color = Ink.secondary)
-                }
-
-                item { SectionTitle(tr("המטלות של %@", child.name)) }
-                items(rest, key = { "r-" + it.id }) { c ->
-                    SwipeToHide(onHide = {
-                        scope.launch { if (c.isPreset) ChoresRepository.hideChore(c) else ChoresRepository.deleteChore(c) }
-                    }) { ChoreRow(c) { editing = c } }
-                }
                 item {
-                    P(tr("כל המטלות זמינות אוטומטית, ופרס דקות המשחק מוצע לפי גודל המטלה. לחיצה על מטלה — עריכת הפרס; החלקה — הסתרה."),
-                        12f, color = Ink.tertiary, modifier = Modifier.padding(horizontal = 6.dp))
-                }
-
-                if (hidden.isNotEmpty()) {
-                    item { SectionTitle(tr("מטלות שהוסתרו 🙈")) }
-                    items(hidden, key = { "h-" + it.id }) { c ->
-                        Row(Modifier.fillMaxWidth().glassPane(16.dp).padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                            P("${c.emoji} ${c.title}", 14.5f, Modifier.weight(1f), color = Ink.secondary)
-                            Text(tr("החזירו"), Modifier.clickable { scope.launch { ChoresRepository.restoreChore(c) } }.padding(6.dp),
-                                color = Ink.warn, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                        }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Stat("${mine.count { it.doneToday > 0 }}", tr("בוצעו היום"), Modifier.weight(1f))
+                        Stat("${pending.size}", tr("מחכות לאישור"), Modifier.weight(1f))
+                        Stat("$earned", tr("דק׳ מהמטלות"), Modifier.weight(1f))
                     }
                 }
 
-                item { SectionTitle(tr("מטלה חדשה ➕")) }
-                item(key = "new-${child.id}") {
-                    Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        ChoreForm(null) { title, emoji, minutes, times ->
-                            scope.launch { ChoresRepository.addChore(child.id, title, emoji, minutes, times) }
+                item {
+                    Text(tr("המטלות של %@", child.name), Modifier.padding(top = 4.dp), color = Color.White,
+                        fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                }
+                // "＋ מטלה חדשה" — the first row, so it is found without scrolling past twenty chores.
+                item(key = "add") { AddRow { editing = null; adding = true } }
+                items(rest, key = { "r-" + it.id }) { c -> ChoreRow(c) { adding = false; editing = c } }
+                item {
+                    P(tr("כל המטלות זמינות לילד אוטומטית, ופרס דקות המשחק מוצע לפי גודל המטלה. לחיצה על מטלה פותחת את העריכה שלה."),
+                        13f, color = Color.White.copy(alpha = 0.7f))
+                }
+
+                // Built-in chores the parent hid — each can come back.
+                if (hidden.isNotEmpty()) item {
+                    Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(tr("מטלות שהוסתרו"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                        hidden.forEach { c ->
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                P("${c.emoji} ${c.title}", 15f, Modifier.weight(1f), color = Color.White.copy(alpha = 0.8f), weight = FontWeight.SemiBold)
+                                Text(tr("החזירו"), Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.16f))
+                                    .clickable { scope.launch { ChoresRepository.restoreChore(c) } }.padding(horizontal = 12.dp, vertical = 6.dp),
+                                    color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+                            }
                         }
                     }
                 }
@@ -155,18 +165,38 @@ fun ChoresScreen(onBack: () -> Unit) {
         }
     }
 
-    // Editing opens in place as a sheet (iOS: nobody found the editor at the bottom).
-    editing?.let { c ->
-        ModalBottomSheet(onDismissRequest = { editing = null }, containerColor = Ink.sheet) {
-            Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp).padding(bottom = 28.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    // A chore is added and edited in place, in one sheet — and removed from inside it.
+    val open = editing
+    if ((open != null || adding) && child != null) {
+        val close = { editing = null; adding = false }
+        ModalBottomSheet(onDismissRequest = close, containerColor = Ink.sheet, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 18.dp).padding(bottom = 28.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    H(tr("עריכת מטלה"), 19, Modifier.weight(1f))
-                    Text(tr("ביטול"), Modifier.clickable { editing = null }.padding(6.dp), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold)
+                    H(if (open == null) tr("מטלה חדשה") else tr("עריכת מטלה"), 19, Modifier.weight(1f))
+                    Text(tr("ביטול"), Modifier.clickable(onClick = close).padding(6.dp), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold)
                 }
-                H("${c.emoji} ${c.title}", 17)
-                ChoreForm(c) { title, emoji, minutes, times ->
-                    scope.launch { ChoresRepository.updateChore(c, title, emoji, minutes, times) }
-                    editing = null
+                if (open != null) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    ChorePicture(open, 44.dp)
+                    H(open.title, 17)
+                }
+                ChoreForm(open) { title, emoji, minutes, times ->
+                    scope.launch {
+                        if (open == null) ChoresRepository.addChore(child.id, title, emoji, minutes, times)
+                        else ChoresRepository.updateChore(open, title, emoji, minutes, times)
+                    }
+                    close()
+                }
+                // Removing a chore lives inside the chore itself: a built-in one is hidden
+                // and can come back, a family's own one is deleted.
+                if (open != null) {
+                    Box(Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.1f))
+                        .border(1.dp, Ink.weak.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
+                        .clickable { scope.launch { if (open.isPreset) ChoresRepository.hideChore(open) else ChoresRepository.deleteChore(open) }; close() },
+                        contentAlignment = Alignment.Center) {
+                        Text(if (open.isPreset) tr("הסתרת המטלה") else tr("מחיקת המטלה"), color = Ink.weak, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
+                    }
+                    if (open.isPreset) P(tr("מטלה מוסתרת לא מופיעה אצל הילד. אפשר להחזיר אותה מתחתית המסך."), 12.5f, color = Ink.tertiary)
                 }
             }
         }
@@ -180,43 +210,77 @@ fun ChoresScreen(onBack: () -> Unit) {
     )
 }
 
+/** Today at a glance — one number and what it counts. */
 @Composable
-private fun TopRow(title: String, onBack: () -> Unit) {
-    Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-        // Auto-mirrored: points "back" in both RTL and LTR.
-        Box(Modifier.size(44.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.22f)).clickable(onClick = onBack), contentAlignment = Alignment.Center) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, tr("חזרה"), tint = Color.White)
+private fun Stat(value: String, label: String, modifier: Modifier = Modifier) {
+    Column(modifier.glassPane(16.dp).padding(vertical = 12.dp, horizontal = 4.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(value, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
+        Text(label, color = Color.White.copy(alpha = 0.78f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.sp, maxLines = 1)
+    }
+}
+
+/** "＋ מטלה חדשה" — a dashed row at the head of the list. */
+@Composable
+private fun AddRow(onClick: () -> Unit) {
+    val shape = RoundedCornerShape(16.dp)
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 86.dp).clip(shape).background(Color.White.copy(alpha = 0.07f))
+            .drawBehind {
+                drawRoundRect(Color.White.copy(alpha = 0.35f), cornerRadius = androidx.compose.ui.geometry.CornerRadius(16.dp.toPx()),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(1.5.dp.toPx(),
+                        pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 5.dp.toPx()))))
+            }
+            .clickable(onClick = onClick).padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Box(Modifier.size(70.dp), contentAlignment = Alignment.Center) { Text("＋", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 38.sp) }
+        Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text(tr("מטלה חדשה"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
+            Text(tr("שם, תמונה ודקות"), color = Color.White.copy(alpha = 0.75f), fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
         }
-        H(title, 19, Modifier.weight(1f).padding(horizontal = 10.dp), align = TextAlign.Center)
-        Spacer(Modifier.size(44.dp))
     }
 }
 
 @Composable
-private fun SectionTitle(text: String) =
-    Text(text, Modifier.padding(start = 6.dp, top = 8.dp), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 13.5.sp)
+private fun TopRow(title: String, onBack: () -> Unit) {
+    Box(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
+        H(title, 18, Modifier.align(Alignment.Center), align = TextAlign.Center)
+        Text(tr("סגור"), Modifier.align(Alignment.CenterStart).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.2f))
+            .clickable(onClick = onBack).padding(horizontal = 16.dp, vertical = 10.dp),
+            color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+    }
+}
 
+/** A chore the child marked as done: its photo if there is one, and the two answers — in a gold frame. */
 @Composable
 private fun PendingRow(c: Chore, approving: Boolean, onApprove: () -> Unit, onReturn: () -> Unit) {
-    Column(Modifier.fillMaxWidth().glassPane(16.dp).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            ChorePicture(c, 52.dp)
-            Text(c.title, Modifier.weight(1f).padding(horizontal = 10.dp), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
-            P(tr("🎮 %lld דק׳ משחק", c.rewardMinutes), 12.5f)
+    val shape = RoundedCornerShape(16.dp)
+    Column(Modifier.fillMaxWidth().glassPane(16.dp).border(2.dp, Color(0xFFFFD23F), shape).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(tr("מחכה לאישור שלכם"), Modifier.clip(shape).background(GoldBrush).padding(horizontal = 10.dp, vertical = 3.dp),
+            color = Color(0xFF2B1C04), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(Modifier.size(64.dp).clip(shape).background(Color.White.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) { ChorePicture(c, 56.dp) }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(c.title, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, lineHeight = 23.sp)
+                Text(tr("🎮 %lld דק׳ משחק", c.rewardMinutes), color = Color.White.copy(alpha = 0.85f), fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            }
         }
         ProofPhoto(c)
         RowSpaced {
             Box(
-                Modifier.weight(1f).height(46.dp).clip(RoundedCornerShape(16.dp)).background(Color(0xFF2EBD6B))
+                Modifier.weight(1f).height(46.dp).clip(shape).background(Color(0xFF1FA35C))
                     .clickable(enabled = !approving, onClick = onApprove),
                 contentAlignment = Alignment.Center,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     if (approving) CircularProgressIndicator(Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp)
-                    Text(if (approving) tr("מאשר…") else tr("בוצע — אשרו ✅"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+                    Text(if (approving) tr("מאשר…") else tr("בוצע — אשרו ✅"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
                 }
             }
-            GlassButton(tr("עוד לא הושלמה"), Modifier.weight(1f)) { if (!approving) onReturn() }
+            Box(Modifier.weight(1f).height(46.dp).clip(shape).background(Color.White.copy(alpha = 0.14f)).clickable(enabled = !approving, onClick = onReturn),
+                contentAlignment = Alignment.Center) {
+                Text(tr("עוד לא הושלמה"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+            }
         }
     }
 }
@@ -272,26 +336,6 @@ private fun ChoreRow(c: Chore, onEdit: () -> Unit) {
             }
         }
     }
-}
-
-/** iOS swipe-to-delete on the list: a catalog chore hides, a custom one is deleted. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SwipeToHide(onHide: () -> Unit, content: @Composable () -> Unit) {
-    val state = rememberSwipeToDismissBoxState(confirmValueChange = {
-        if (it == SwipeToDismissBoxValue.EndToStart) { onHide(); true } else false
-    })
-    SwipeToDismissBox(
-        state, enableDismissFromStartToEnd = false,
-        backgroundContent = {
-            // Only while the row is being pulled: the rows are see-through now,
-            // and the red would otherwise show under every one of them.
-            if (state.dismissDirection == SwipeToDismissBoxValue.EndToStart) Box(Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp)).background(Color(0xFFE76F51)).padding(horizontal = 18.dp),
-                contentAlignment = Alignment.CenterEnd) {
-                Text(tr("הסתרה"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold)
-            }
-        },
-    ) { content() }
 }
 
 /**
@@ -375,11 +419,14 @@ private fun PicturePicker(emoji: String, onPick: (String) -> Unit) {
             }
         }
         // Any emoji: the field takes whatever was typed last, if it is one.
+        val focus = remember { androidx.compose.ui.focus.FocusRequester() }
+        // The keyboard comes up by itself: the box was tapped to type.
+        LaunchedEffect(typing) { if (typing) runCatching { focus.requestFocus() } }
         if (typing) TextField(
             typed, { v ->
                 val last = lastEmoji(v)
                 if (last != null) { onPick(last); typed = ""; typing = false } else typed = ""
-            }, Modifier.fillMaxWidth(),
+            }, Modifier.fillMaxWidth().focusRequester(focus),
             placeholder = { Text(tr("אימוג׳י") + " 🙂", color = Ink.tertiary) },
             singleLine = true, shape = shape,
             colors = TextFieldDefaults.colors(
