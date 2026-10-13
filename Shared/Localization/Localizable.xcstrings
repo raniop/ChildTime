@@ -22534,6 +22534,28 @@
         }
       }
     },
+    "אימוג׳י" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إيموجي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emoji"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Эмодзи"
+          }
+        }
+      }
+    },
     "אימייל" : {
       "localizations" : {
         "ar" : {
@@ -125508,6 +125530,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Мы устранили редкую ошибку: на общем устройстве прогресс одного ребёнка мог записаться брату или сестре. Теперь это просто невозможно"
+          }
+        }
+      }
+    },
+    "תמונה למטלה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "صورة للمهمة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Picture for the chore"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Картинка для задания"
           }
         }
       }
