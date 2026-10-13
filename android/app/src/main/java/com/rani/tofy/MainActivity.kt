@@ -161,7 +161,7 @@ private fun Root() {
             // Time's questions (see `FirstRun`), before "who uses this device".
             val ctx = androidx.compose.ui.platform.LocalContext.current
             androidx.compose.runtime.remember { com.rani.tofy.kid.ui.KidBinding.init(ctx) }
-            if (com.rani.tofy.kid.core.FirstRun.isOn) { com.rani.tofy.kid.ui.FirstRunQuiz(); return }
+            if (com.rani.tofy.kid.core.FirstRun.isOn) { com.rani.tofy.kid.ui.FirstRunRoot(); return }
             if (com.rani.tofy.kid.core.FirstRun.shouldOpen(ctx)) {
                 androidx.compose.runtime.LaunchedEffect(Unit) { com.rani.tofy.kid.core.FirstRun.start(ctx) }
                 return

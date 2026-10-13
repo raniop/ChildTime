@@ -77,7 +77,10 @@ object Commands {
     /** 💝 A gift sent from the gift window: the window shows its progress itself, so no status sheet opens. */
     private val _giftStatus = MutableStateFlow<CommandStatus?>(null)
     val giftStatus: StateFlow<CommandStatus?> = _giftStatus
-    fun clearGiftStatus() { _giftStatus.value = null }
+    fun clearGiftStatus() { _giftStatus.value = null; _revokeStatus.value = null }
+    /** "נעל ואפס דקות מתנה" sent from the 💝 window itself: its status is shown there, not in the status sheet. */
+    private val _revokeStatus = MutableStateFlow<CommandStatus?>(null)
+    val revokeStatus: StateFlow<CommandStatus?> = _revokeStatus
     /** 🧪 Debug screenshots: a gift that already reached the cloud (ui/DemoFamily.kt) — nothing is written. */
     internal fun demoGiftSaved(childID: String, minutes: Int) {
         if (com.rani.tofy.BuildConfig.DEBUG) _giftStatus.value = CommandStatus(childID, CommandStatus.Kind.GIFT, nowSecs(), minutes, reachedCloud = true)
@@ -117,15 +120,16 @@ object Commands {
     }
 
     /** 🔒 Re-lock now: a stamp on every device row, then settle the lease if the device never answers. */
-    fun lock(childID: String, revokeGift: Boolean = false) {
+    fun lock(childID: String, revokeGift: Boolean = false, inGiftWindow: Boolean = false) {
         val stamp = nowSecs()
-        _status.value = CommandStatus(childID, if (revokeGift) CommandStatus.Kind.LOCK_AND_REVOKE else CommandStatus.Kind.LOCK, stamp)
+        val flow = if (inGiftWindow) _revokeStatus else _status
+        flow.value = CommandStatus(childID, if (revokeGift) CommandStatus.Kind.LOCK_AND_REVOKE else CommandStatus.Kind.LOCK, stamp)
         scope.launch {
             if (revokeGift) {
                 val f = mutableMapOf<String, Any?>("revokeGiftAt" to stamp, "pendingGiftAdjustment" to 0)
                 uid?.let { f["giftCommandBy"] = it }
                 val out = childCommand(childID, f)
-                if (out == WriteOutcome.DENIED || out == WriteOutcome.ERROR) _status.update { it?.copy(failed = true) }
+                if (out == WriteOutcome.DENIED || out == WriteOutcome.ERROR) flow.update { it?.copy(failed = true) }
             }
             val out = deviceCommand(childID, mapOf("remoteLockAt" to stamp), stamp)
             ActivityStore.record(ActivityStore.Kind.LOCK, childID, 0, stamp, out)

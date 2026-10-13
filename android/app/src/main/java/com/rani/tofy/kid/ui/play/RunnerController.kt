@@ -449,6 +449,8 @@ class RunnerController(
         }
         if (!first) return
         firstRunSpoke = true
+        // The very first right answer is a moment: confetti (Rani, 2026-10-13).
+        if (correct) confettiTrigger++
         // A right answer's own line is chosen further down the handler (some of
         // its branches leave early) — this one comes a beat later, and stays.
         if (correct) scope.launch {

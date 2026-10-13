@@ -218,7 +218,10 @@ private data class WorldEntry(val world: KidWorld, val straight: Boolean, val qu
 
 @Composable
 private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Unit) {
-    remember(cid, kidMode) { KidSession.bind(cid, kidMode); 0 }
+    // 🎬 The first run's made-up child (see `FirstRun`): the same home, but local —
+    // no sync, no lock to set up, nothing asked — and what needs a family explains itself.
+    val firstRun = com.rani.tofy.kid.core.FirstRun.isOn && cid == com.rani.tofy.kid.core.FirstRun.CHILD_ID
+    remember(cid, kidMode) { KidSession.bind(cid, kidMode, local = firstRun); 0 }
     val scope = rememberCoroutineScope()
     val state by KidSession.state.collectAsState()
     val lease by KidSession.lease.collectAsState()
@@ -227,8 +230,10 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     val conv by ConversionConfig.values.collectAsState()
     val nowMs by produceState(System.currentTimeMillis()) { while (true) { delay(1000); value = System.currentTimeMillis() } }
 
-    val child = doc?.let { Child.from(cid, it) } ?: FamilyRepository.state.value.children.firstOrNull { it.id == cid }
-    val (household, householdLoaded) = rememberHousehold(child?.householdID?.takeIf { it.isNotEmpty() })
+    val child = doc?.let { Child.from(cid, it) } ?: (if (firstRun) com.rani.tofy.kid.core.FirstRun.child() else null)
+        ?: FamilyRepository.state.value.children.firstOrNull { it.id == cid }
+    val (realHousehold, householdLoaded) = rememberHousehold(child?.householdID?.takeIf { it.isNotEmpty() })
+    val household = realHousehold ?: if (firstRun) com.rani.tofy.kid.core.FirstRun.household else null
     val lang = AppLanguage.of(child?.language) ?: I18n.language
     val childNow by rememberUpdatedState(child)
 
@@ -247,7 +252,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     var entry by remember { mutableStateOf<WorldEntry?>(null) }
     val ctx = LocalContext.current
     // 🛡 ChildLockSetup.markPending → step ④ on a child device, before its home (iOS ContentView cover).
-    var lockSetupDone by remember { mutableStateOf(kidMode || EnforcementStore.setupDone(ctx)) }
+    var lockSetupDone by remember { mutableStateOf(kidMode || firstRun || EnforcementStore.setupDone(ctx)) }
 
     fun say(line: String) {
         buddyJob?.cancel()
@@ -396,7 +401,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     val notifAsk = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { }
     LaunchedEffect(kidMode) {
-        if (kidMode || android.os.Build.VERSION.SDK_INT < 33) return@LaunchedEffect
+        if (kidMode || firstRun || android.os.Build.VERSION.SDK_INT < 33) return@LaunchedEffect
         val perm = android.Manifest.permission.POST_NOTIFICATIONS
         if (androidx.core.content.ContextCompat.checkSelfPermission(ctx, perm) == android.content.pm.PackageManager.PERMISSION_GRANTED) return@LaunchedEffect
         val prefs = ctx.getSharedPreferences("tofy.kid", android.content.Context.MODE_PRIVATE)
@@ -547,21 +552,23 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
             val peer = if (lease.isHeldElsewhere()) (lease.ownerKind ?: "other") to lease.remainingSeconds() else null
             val cap = engine.settings.dailyCap
             val cta = HomeCtaModel(
-                giftSeconds = engine.openableSeconds(true),
+                // 🎬 First run: a made-up gift of 30 minutes beside what was really earned.
+                giftSeconds = if (firstRun) com.rani.tofy.kid.core.FirstRun.GIFT_MINUTES_SHOWN * 60 else engine.openableSeconds(true),
                 opening = opening != null, openingGift = opening?.gift == true,
                 peer = peer, transferring = transferring, transferTimedOut = transferTimedOut,
-                canRedeem = engine.canRedeemNow, redeemableSeconds = engine.redeemableSecondsNow,
+                canRedeem = firstRun || engine.canRedeemNow,
+                redeemableSeconds = if (firstRun) engine.openableSeconds(false) else engine.redeemableSecondsNow,
                 maxedOut = engine.dailyScreenTimeMaxedOut, minutesPlayedToday = engine.minutesPlayedToday,
                 capMax = cap.max, pendingMinutes = engine.pendingMinutes, redeemableMinutes = engine.redeemableMinutesNow,
                 hasPlayPin = child?.hasPlayPIN == true,
                 quietLine = KidSession.quietNow()?.let { quietLine(it, isGirl) },
                 // Only where it matters: a code to manage, or minutes worth protecting.
-                showPlayPin = child?.hasPlayPIN == true || engine.pendingMinutes > 0 || engine.local.manualPausedSeconds > 0,
+                showPlayPin = firstRun || child?.hasPlayPIN == true || engine.pendingMinutes > 0 || engine.local.manualPausedSeconds > 0,
             )
             KidHome(
                 childID = cid, child = child, state = st, engine = engine, premium = premium, kidMode = kidMode,
                 tiles = tiles, cta = cta, buddyLine = buddy, suggestedWorldID = suggestedWorldID,
-                onSettings = { cover = Cover.Settings },
+                onSettings = { if (!com.rani.tofy.kid.core.FirstRun.openLanguages()) cover = Cover.Settings },   // 🎬 first run: the language
                 onKidExit = { cover = Cover.KidExit },
                 onTile = { t ->
                     when (t) {
@@ -575,10 +582,17 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 },
                 onChallenge = { cover = if (premium) Cover.Challenge else Cover.Ask(null) },
                 onLevelInfo = { cover = Cover.Level },
-                onPlayPin = { cover = if (child?.hasPlayPIN == true) Cover.PinManage else Cover.PinSet },
+                onPlayPin = {
+                    if (!com.rani.tofy.kid.core.FirstRun.explain(com.rani.tofy.kid.core.FirstRun.Key.CODE))
+                        cover = if (child?.hasPlayPIN == true) Cover.PinManage else Cover.PinSet
+                },
                 onStatInfo = { cover = Cover.Stat(it) },
-                onOpenEarned = { requestUnlock { handle(KidSession.openEarned(), false) } },
-                onOpenGift = { requestUnlock { handle(KidSession.openGift(), true) } },
+                onOpenEarned = {
+                    if (!com.rani.tofy.kid.core.FirstRun.explain(com.rani.tofy.kid.core.FirstRun.Key.MINUTES)) requestUnlock { handle(KidSession.openEarned(), false) }
+                },
+                onOpenGift = {
+                    if (!com.rani.tofy.kid.core.FirstRun.explain(com.rani.tofy.kid.core.FirstRun.Key.GIFT)) requestUnlock { handle(KidSession.openGift(), true) }
+                },
                 onTransfer = {
                     if (!transferring) scope.launch {
                         transferTimedOut = false; transferring = true
@@ -594,11 +608,11 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                     correctToday = st.snapshot.correctToday, gamesGateTarget = gamesTarget,
                 ),
                 onShop = { screen = KidScreen.Shop },
-                onFriends = { screen = KidScreen.Friends },
-                onBackdrops = { screen = KidScreen.Backdrops },
+                onFriends = { if (!com.rani.tofy.kid.core.FirstRun.refuse()) screen = KidScreen.Friends },
+                onBackdrops = { if (!com.rani.tofy.kid.core.FirstRun.refuse()) screen = KidScreen.Backdrops },
                 onAvatar = { screen = KidScreen.Characters },
                 // Everything on the home but טופי טיים, the shop and friends is Tofy+ (requirePremium → ask a parent).
-                onChores = { if (premium) screen = KidScreen.Chores else cover = Cover.Ask(null) },
+                onChores = { if (!com.rani.tofy.kid.core.FirstRun.refuse()) { if (premium) screen = KidScreen.Chores else cover = Cover.Ask(null) } },
                 onGames = {
                     when {
                         !premium -> cover = Cover.Ask(null)
@@ -615,7 +629,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
             // pop-up are covers, and a cover means the tour waits for next time.
             var kidTour by remember { mutableStateOf(false) }
             LaunchedEffect(cid, cover == null) {
-                if (kidTour || cover != null || CoachTours.isDone(CoachTours.kidHome(cid))) return@LaunchedEffect
+                if (firstRun || kidTour || cover != null || CoachTours.isDone(CoachTours.kidHome(cid))) return@LaunchedEffect
                 delay(1600)
                 if (cover == null) kidTour = true
             }
@@ -628,6 +642,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
             // watches separately): the comeback spin, then the wheel if a spin waits,
             // and one line the first time today the games open.
             LaunchedEffect(Unit) {
+                if (firstRun) return@LaunchedEffect   // nothing pops over a parent who is only looking
                 grantComebackWheelIfReturning()
                 if (st.snapshot.correctToday >= gamesTarget) {
                     val p = ctx.getSharedPreferences("tofy", android.content.Context.MODE_PRIVATE)

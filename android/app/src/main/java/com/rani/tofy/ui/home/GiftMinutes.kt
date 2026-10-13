@@ -102,10 +102,27 @@ internal fun GiftMinutesContent(child: Child, state: FamilyState, onClose: () ->
     var sent by remember { mutableStateOf(demoGiftSent) }
     var nothingLeft by remember { mutableStateOf(false) }
     val status by Commands.giftStatus.collectAsState()
+    // "נעל ואפס דקות מתנה" — the same action as under 🔒 on the child's actions,
+    // offered here too: this is the window a parent opens to look at the gift
+    // minutes, and where Rani went looking for it (2026-10-13).
+    val revoke by Commands.revokeStatus.collectAsState()
+    var confirmRevoke by remember { mutableStateOf(false) }
+    val revoked = revoke?.takeIf { it.childID == child.id }
     var now by remember { mutableDoubleStateOf(nowSecs()) }
-    LaunchedEffect(sent) { if (sent != null) while (true) { delay(1000); now = nowSecs() } }
+    LaunchedEffect(sent, revoked != null) { if (sent != null || revoked != null) while (true) { delay(1000); now = nowSecs() } }
     LaunchedEffect(Unit) { demoGiftSent?.let { minutes = it } }
 
+    // Confirmed first — this one IS a consequence (the same words as on the child's actions).
+    if (confirmRevoke) androidx.compose.material3.AlertDialog(
+        onDismissRequest = { confirmRevoke = false },
+        title = { Text(tr("לנעול ולאפס את דקות המתנה של %@?", child.name), fontFamily = Rounded) },
+        text = { Text(tr("המכשיר יינעל עכשיו, וכל הדקות שנתתם (💝 מתנה, ❄️ שמורות, וחלון פתוח של מתנה) יימחקו. הדקות ש%@ מלמידה לא נפגעות.",
+            if (child.isGirl) tr("היא הרוויחה") else tr("הוא הרוויח")), fontFamily = Rounded) },
+        confirmButton = { androidx.compose.material3.TextButton({ confirmRevoke = false; Commands.lock(child.id, revokeGift = true, inGiftWindow = true) }) {
+            Text(tr("נעל ואפס"), color = Ink.weak) } },
+        dismissButton = { androidx.compose.material3.TextButton({ confirmRevoke = false }) { Text(tr("בטל")) } },
+        containerColor = Ink.sheet,
+    )
     GlassBackdrop {
         Column(
             Modifier.fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState())
@@ -124,6 +141,24 @@ internal fun GiftMinutesContent(child: Child, state: FamilyState, onClose: () ->
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     GiftStat(givenAtOpen + (sent ?: 0), tr("נתתם היום"), Modifier.weight(1f))
                     GiftStat(progress.giftMinutes, tr("עוד לא נוצלו"), Modifier.weight(1f))   // "מחכות לנוני" was not clear (Rani)
+                }
+                if (sent == null) {
+                    if (revoked != null) {
+                        // The reset's own live status, where its button was — no second sheet.
+                        val applied = (child.raw.secs("revokeGiftAppliedAt") ?: 0.0) >= revoked.stamp
+                        when {
+                            revoked.failed -> StatusPane("⚠️", tr("המחיקה לא נשלחה"), tr("משהו חסם את השליחה. נסו שוב עוד רגע."))
+                            applied -> StatusPane("✅", tr("דקות המתנה נמחקו ✓"), tr("המכשיר של %@ אישר את המחיקה.", child.name))
+                            now - revoked.stamp < DEVICE_TIMEOUT -> StatusPane(null, tr("מוחק דקות מתנה — ממתין לאישור…"), null)
+                            else -> StatusPane("🕐", tr("מחיקת דקות המתנה ממתינה למכשיר"), tr("תתבצע ברגע שהמכשיר של %@ יתחבר.", child.name))
+                        }
+                    } else if (progress.giftMinutes > 0) {
+                        val shape = RoundedCornerShape(16.dp)
+                        Box(Modifier.fillMaxWidth().height(44.dp).clip(shape).background(Color.White.copy(alpha = 0.1f))
+                            .border(1.dp, Color(0xFFFF8A8A).copy(alpha = 0.6f), shape).clickable { confirmRevoke = true }, contentAlignment = Alignment.Center) {
+                            Text("🔒 " + tr("נעל ואפס דקות מתנה"), color = Color(0xFFFFD0D0), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.5.sp, maxLines = 1)
+                        }
+                    }
                 }
 
                 GiftRing(minutes, ceiling, locked = sent != null, Modifier.padding(vertical = 4.dp).size(250.dp)) { minutes = it }

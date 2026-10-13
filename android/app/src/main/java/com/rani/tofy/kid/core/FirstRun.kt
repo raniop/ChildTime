@@ -7,14 +7,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.google.firebase.auth.FirebaseAuth
 import com.rani.tofy.DeviceRole
+import com.rani.tofy.data.Child
+import com.rani.tofy.data.Household
+import com.rani.tofy.i18n.tr
 import com.rani.tofy.kid.ui.KidBinding
 
 /**
  * 🎬 First run (Rani, 2026-10-12 — the same as iOS `DemoTour`): a parent who has
  * just installed Tofy lands straight on Tofy Time's questions. The first right
  * answer and the first wrong one are explained by Tofy himself; after four
- * answers they are asked whether to create a child's profile — "ליצור ילד" or
- * "להמשיך לשחק" — and, if they play on, again every five.
+ * answers they are asked whether to create a family — "ליצור משפחה" or "להמשיך
+ * לשחק" — and, if they play on, again every five.
+ *
+ * 2026-10-13, as on iOS: ✕ on the quiz is not the way out — it leads to the
+ * made-up child's HOME, under a band that keeps the two ways to a real family
+ * on screen. There ⚙️ opens the language, and the minutes, the gift and the
+ * code at the bottom open nothing: a tap explains what the three are.
  *
  * Nothing of it leaves the phone, and nothing of it stays on it:
  *  1. **No account.** It starts only where no one is signed in — not even a
@@ -38,6 +46,36 @@ object FirstRun {
     /** The question itself, over the quiz. */
     var asking by mutableStateOf(false)
     var answered by mutableIntStateOf(0); private set
+    /** ✕ was pressed on the quiz: the made-up child's home is showing. */
+    var onHome by mutableStateOf(false); private set
+    /** Bumped when the language changes on the quiz: the round starts over in it. */
+    var round by mutableIntStateOf(0); private set
+
+    /** The invitation to sign up, and what brought it up. */
+    enum class Invite { BAND, CLOSED }
+    var invite by mutableStateOf<Invite?>(null)
+    /** The three things under the child's home — a tap on one explains all three. */
+    enum class Key { MINUTES, GIFT, CODE }
+    var explaining by mutableStateOf<Key?>(null)
+    var showLanguages by mutableStateOf(false)
+    /** "תרשום שם סתם 30 דקות" (Rani) — shown, never credited to anyone. */
+    const val GIFT_MINUTES_SHOWN = 30
+
+    /** The made-up child (the same one the iOS first run plays as): כיתה א׳. */
+    fun child(): Child = Child.from(CHILD_ID, mapOf("name" to tr("יואב"), "gender" to "boy", "grade" to 1, "character3DID" to "lion"))
+    /** Every world is open in the first run — there is nothing to sell before a family exists. */
+    val household: Household by lazy { Household.from("FIRST-RUN-FAMILY", mapOf("premiumUntil" to 4102444800.0)) }
+
+    fun leaveQuizToHome() { if (!isOn) return; asking = false; onHome = true }
+    /** Before something only a real family can do: opens the invitation; true = stop there. */
+    fun refuse(): Boolean { if (!isOn) return false; invite = Invite.CLOSED; return true }
+    fun explain(key: Key): Boolean { if (!isOn) return false; explaining = key; return true }
+    fun openLanguages(): Boolean { if (!isOn) return false; showLanguages = true; return true }
+    /** A new language: the quiz starts over in it, and Tofy explains again. */
+    fun languageChanged() {
+        if (!isOn || onHome) return
+        asking = false; answered = 0; explainedRight = false; explainedWrong = false; round++
+    }
     private var explainedRight = false
     private var explainedWrong = false
 
@@ -63,6 +101,7 @@ object FirstRun {
         KidSession.forget(CHILD_ID)           // a clean slate: the clock starts at 0:00
         KidSession.bind(CHILD_ID, kidMode = false, local = true)
         answered = 0; asking = false; explainedRight = false; explainedWrong = false
+        onHome = false; invite = null; explaining = null; showLanguages = false
         isOn = true
     }
 
@@ -80,7 +119,7 @@ object FirstRun {
      *  leads on to the parent's way in — through the age check, like every other. */
     fun end(ctx: Context, signUp: Boolean) {
         if (!isOn) return
-        asking = false
+        asking = false; onHome = false; invite = null; explaining = null; showLanguages = false
         KidSession.unbind()                   // a local session removes its own saved numbers
         KidSession.forget(CHILD_ID)
         prefs(ctx).edit().putBoolean(DONE, true).putBoolean(SIGN_UP_NEXT, signUp).apply()

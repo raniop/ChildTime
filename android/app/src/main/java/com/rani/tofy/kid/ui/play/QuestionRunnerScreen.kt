@@ -223,6 +223,8 @@ private fun TopRow(r: RunnerController, stars: Int, diamonds: Int, tablet: Boole
             contentAlignment = Alignment.Center) {
             Text("✕", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 13.sp)
         }
+        // 🎬 First run only: the language, beside ✕.
+        if (com.rani.tofy.kid.core.FirstRun.isOn && !com.rani.tofy.kid.core.FirstRun.onHome) com.rani.tofy.kid.ui.FirstRunLanguageChip()
         // A tablet has the room: the world's icon and name beside ✕.
         if (tablet && topic != null) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
