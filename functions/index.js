@@ -264,6 +264,14 @@ function liveMessage(event, lang) {
       const tail = mins > 0 ? ` (${mins} דק')` : "";
       return { title: "💝 המתנה לא נפתחה", body: `${name} ${g("ניסה", "ניסתה")} פעמיים לפתוח את דקות המתנה${tail} וזה לא נפתח${dev}. הדקות לא אבדו — אפשר לשלוח אותן שוב מהכרטיס של ${name} בלוח ההורים.` };
     }
+    // 🛍 The child spent diamonds in the shop (asked for by a parent whose
+    // daughter bought before anyone explained what it costs). The item's name
+    // is in the app's own activity centre; the push says that it happened, and
+    // for how much.
+    case "shopPurchase": {
+      const n = Number(event.minutes) || 0;
+      return { title: "🛍️ קנייה בחנות", body: n > 0 ? `${name} ${g("קנה", "קנתה")} בחנות הדמויות ב־${n} יהלומים 💎` : `${name} ${g("קנה", "קנתה")} בחנות הדמויות 💎` };
+    }
     case "playPINForgot": return { title: "🔒 קוד הגנת הזמן נשכח", body: `${name} ${g("שכח", "שכחה")} את קוד הגנת זמן המשחק${dev}. הקוד מופיע בכרטיס של ${name} בלוח ההורים — ואפשר גם לאפס שם, או ישירות במכשיר של הילד עם קוד ההורה.` };
     // Intentionally NO push for milestone / streak / wheelWin / discovery —
     // those flooded the parent. Only start/finish, screen-time open/close, and
@@ -316,6 +324,10 @@ function liveMessageEn(event) {
       const tail = mins > 0 ? ` (${mins} min)` : "";
       return { title: "💝 The gift wouldn't open", body: `${name} tried twice to open the gift minutes${tail} and nothing opened${dev}. The minutes are still there — you can send them again from ${whose} card in the parent dashboard.` };
     }
+    case "shopPurchase": {
+      const n = Number(event.minutes) || 0;
+      return { title: "🛍️ Bought in the shop", body: n > 0 ? `${name} spent ${n} diamonds 💎 in the character shop` : `${name} bought something in the character shop 💎` };
+    }
     case "playPINForgot": return { title: "🔒 Play time lock code forgotten", body: `${name} forgot the play time lock code${dev}. The code is on ${whose} card in the parent dashboard — you can reset it there, or right on your child's device with the parent code.` };
     default: return null;
   }
@@ -366,6 +378,10 @@ function liveMessageRu(event) {
       const mins = Number(event.minutes) || 0;
       const tail = mins > 0 ? ` (${mins} мин)` : "";
       return { title: "💝 Подарок не открылся", body: `${name} дважды ${g("пытался", "пыталась")} открыть подаренные минуты${tail}, но ничего не открылось${dev}. Минуты не пропали — их можно отправить снова в карточке ребёнка (${name}) в родительской панели.` };
+    }
+    case "shopPurchase": {
+      const n = Number(event.minutes) || 0;
+      return { title: "🛍️ Покупка в магазине", body: n > 0 ? `${name} ${g("потратил", "потратила")} ${n} алмазов 💎 в магазине персонажей` : `${name} ${g("сделал", "сделала")} покупку в магазине персонажей 💎` };
     }
     case "playPINForgot": return { title: "🔒 Код защиты игрового времени забыт", body: `${name} ${g("забыл", "забыла")} код защиты игрового времени${dev}. Код есть в карточке ребёнка (${name}) в родительской панели — там же его можно сбросить, или прямо на устройстве ребёнка с родительским кодом.` };
     default: return null;
@@ -418,6 +434,10 @@ function liveMessageAr(event) {
       const mins = Number(event.minutes) || 0;
       const tail = mins > 0 ? ` (${mins} د)` : "";
       return { title: "💝 لم تُفتح الهدية", body: `${name} ${g("حاول", "حاولت")} مرتين فتح دقائق الهدية${tail} ولم تُفتح${dev}. الدقائق لم تُفقد — يمكن إرسالها مرة أخرى من بطاقة ${name} في لوحة الوالدين.` };
+    }
+    case "shopPurchase": {
+      const n = Number(event.minutes) || 0;
+      return { title: "🛍️ شراء من المتجر", body: n > 0 ? `${name} ${g("أنفق", "أنفقت")} ${n} ألماسة 💎 في متجر الشخصيات` : `${name} ${g("اشترى", "اشترت")} من متجر الشخصيات 💎` };
     }
     case "playPINForgot": return { title: "🔒 نُسي رمز حماية وقت اللعب", body: `${name} ${g("نسي", "نسيت")} رمز حماية وقت اللعب${dev}. الرمز موجود في بطاقة الطفل (${name}) في لوحة الوالدين — ويمكن إعادة ضبطه هناك، أو مباشرة على جهاز الطفل باستخدام رمز الوالدين.` };
     default: return null;

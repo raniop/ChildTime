@@ -32,6 +32,7 @@ enum ActivityKind: String, Codable, CaseIterable {
     case milestone
     case discovery
     case wheelWin
+    case shopPurchase
     // — the child asking for something —
     case helpRequest
     case premiumRequest
@@ -83,6 +84,7 @@ enum ActivityKind: String, Codable, CaseIterable {
         case .milestone:        return "🌟"
         case .discovery:        return "🔭"
         case .wheelWin:         return "🎡"
+        case .shopPurchase:     return "🛍️"
         case .helpRequest:      return "🙋"
         case .premiumRequest:   return "⭐"
         case .packRequest:      return "🎁"
@@ -136,6 +138,16 @@ enum ActivityKind: String, Codable, CaseIterable {
         case .milestone:        return tr("הישג חדש")
         case .discovery:        return v.isEmpty ? tr("גילוי עניין בנושא חדש") : tr("גילוי עניין ב\(v)")
         case .wheelWin:         return tr("זכייה בגלגל המזל")
+        case .shopPurchase:
+            // "character:<id>" / "cosmetic:<id>" → its name in THIS app's language.
+            let parts = v.split(separator: ":", maxSplits: 1).map(String.init)
+            let name: String = {
+                guard parts.count == 2 else { return "" }
+                if parts[0] == "character" { return Question.stripNiqqud(Character3DCatalog.find(parts[1]).name) }
+                return CosmeticCatalog.item(parts[1]).map { Question.stripNiqqud($0.name) } ?? ""
+            }()
+            if name.isEmpty { return tr("קנייה בחנות") }
+            return n > 0 ? tr("קנייה בחנות: \(name) · \(n) 💎") : tr("קנייה בחנות: \(name)")
         case .helpRequest:      return tr("בקשת עזרה בשאלה")
         case .premiumRequest:   return tr("בקשה לטופי+")
         case .packRequest:      return tr("בקשה לחבילת שאלות")
@@ -184,6 +196,7 @@ enum ActivityKind: String, Codable, CaseIterable {
         case "milestone":           return .milestone
         case "streak":              return .streak
         case "wheelWin":            return .wheelWin
+        case "shopPurchase":        return .shopPurchase
         case "discovery":           return .discovery
         case "assistRequest", "parentHelp": return .helpRequest
         case "screenTimeStart":     return .screenTimeStart

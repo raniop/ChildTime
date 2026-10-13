@@ -34,6 +34,13 @@ enum AppleScreenTimeTips {
     /// the parent's own iPhone (Family Sharing — Dan, on Rani's phone), and a
     /// child whose iPhone manages itself. Labels in ” ” are Apple's own, from
     /// Rani's screenshots of a Hebrew iPhone.
+    /// The same steps for a PARENT's screen (the device controls, behind the
+    /// parent code): no niqqud. A tester saw half that screen pointed and half
+    /// not (Sasha, 12.10) — parent screens never carry niqqud.
+    static var parentSteps: [Step] {
+        steps.map { Step(id: $0.id, title: Question.stripNiqqud($0.title), detail: Question.stripNiqqud($0.detail)) }
+    }
+
     static var steps: [Step] {
         [
             Step(id: 1, title: tr("הַכִּי חָשׁוּב: קוֹד לְ”זמן מסך”"),
@@ -51,6 +58,8 @@ enum AppleScreenTimeTips {
 /// 👀 "איך זה נראה באייפון?" — opens the drawing of Apple's page.
 struct ScreenTimeShowMeButton: View {
     var pages: [ScreenTimeLookalikePage] = ScreenTimeLookalikes.setup
+    /// Behind the parent code the words carry no niqqud, like the rest of that screen.
+    var forParent = false
     @State private var showing = false
 
     var body: some View {
@@ -58,7 +67,7 @@ struct ScreenTimeShowMeButton: View {
             Haptic.light()
             showing = true
         } label: {
-            Label(tr("אֵיךְ זֶה נִרְאֶה בָּאַיְפוֹן?"), systemImage: "eye.fill")
+            Label(forParent ? Question.stripNiqqud(tr("אֵיךְ זֶה נִרְאֶה בָּאַיְפוֹן?")) : tr("אֵיךְ זֶה נִרְאֶה בָּאַיְפוֹן?"), systemImage: "eye.fill")
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)

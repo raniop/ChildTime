@@ -68,6 +68,7 @@ final class CharacterStore: ObservableObject {
         progress.spendDiamonds(character.priceDiamonds)
         progress.addOwnedCharacter(character.id)
         lastPurchased = character
+        LiveEventReporter.report(.shopPurchase, value: "character:\(character.id)", extra: ["minutes": character.priceDiamonds])
         return character
     }
 

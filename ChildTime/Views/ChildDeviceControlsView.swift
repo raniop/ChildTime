@@ -609,8 +609,8 @@ struct ChildDeviceControlsView: View {
             sectionHead(tr("זמן מסך של אפל"),
                         tr("שלושה דברים ב\"זמן מסך\" של אפל — הראשון הוא החשוב:"),
                         icon: "hourglass", tint: AppColor.companionGlow)
-            AppleScreenTimeStepsList(steps: AppleScreenTimeTips.steps)
-            ScreenTimeShowMeButton()
+            AppleScreenTimeStepsList(steps: AppleScreenTimeTips.parentSteps)
+            ScreenTimeShowMeButton(forParent: true)
             openSettingsButton
         }
     }

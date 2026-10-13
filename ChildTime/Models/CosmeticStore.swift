@@ -111,6 +111,7 @@ final class CosmeticStore: ObservableObject {
         ownedIDs.insert(item.id)
         equip(item, in: item.category, for: profileID)
         lastPurchasedItem = item
+        LiveEventReporter.report(.shopPurchase, value: "cosmetic:\(item.id)", extra: ["minutes": item.priceDiamonds])
         return item
     }
 

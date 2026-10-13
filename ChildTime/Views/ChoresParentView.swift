@@ -42,6 +42,191 @@ struct ChoresParentView: View {
     private var hidden: [Chore] { choreStore.hiddenPresets(forChild: profile.id) }
 
     var body: some View {
+        if Self.newLook { newScreen } else { classic }
+    }
+
+    // MARK: - 🧪 A new look, for approval (Rani, 2026-10-13: "מסך מטלות לא יפה")
+    //
+    // DEMO_CHORES=new. The same data and the same actions as the list below,
+    // drawn as the app's own tiles: who it is about, what waits for the parent,
+    // today at a glance, and every chore as a card that says what it pays.
+
+    private static var newLook: Bool {
+        #if DEBUG
+        return ProcessInfo.processInfo.environment["DEMO_CHORES"] == "new"
+        #else
+        return false
+        #endif
+    }
+
+    private var newScreen: some View {
+        ZStack {
+            GlassBackdrop().ignoresSafeArea()
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack {
+                        Text(tr("מטלות הבית"))
+                            .font(.system(size: 26, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                        Spacer()
+                        Text(tr("סגור"))
+                            .font(.system(size: 15, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 16).padding(.vertical, 9)
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
+                    }
+                    // Who it is about — a face, not a segmented control.
+                    if profilesStore.profiles.count > 1 {
+                        HStack(spacing: 10) {
+                            ForEach(profilesStore.profiles) { p in
+                                let on = p.id == profile.id
+                                let waiting = choreStore.chores(forChild: p.id).contains { $0.isPendingApproval }
+                                Button { selectedID = p.id } label: {
+                                    HStack(spacing: 8) {
+                                        ProfileAvatarView(profile: p, size: 34)
+                                        Text(p.name)
+                                            .font(.system(size: 16, weight: .heavy, design: .rounded))
+                                            .foregroundStyle(.white)
+                                        if waiting { Text("🕐").font(.system(size: 14)) }
+                                    }
+                                    .padding(.horizontal, 12).padding(.vertical, 8)
+                                    .frame(maxWidth: .infinity)
+                                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(on ? 0.22 : 0.08)))
+                                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                        .strokeBorder(on ? AppColor.starGold : .white.opacity(0.2), lineWidth: on ? 2 : 1))
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+                    // What waits for the parent comes first, and looks like it.
+                    ForEach(pending) { chore in newPendingCard(chore) }
+                    // Today at a glance.
+                    HStack(spacing: 10) {
+                        newStat("\(myChores.filter { $0.doneToday > 0 }.count)", tr("בוצעו היום"))
+                        newStat("\(pending.count)", tr("מחכות לאישור"))
+                        newStat("\(choreStore.totals(forChild: profile.id).minutes)", tr("דק׳ מהמטלות"))
+                    }
+                    Text(tr("המטלות של \(profile.name)"))
+                        .font(.system(size: 18, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.top, 4)
+                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                        newAddTile
+                        ForEach(rest) { chore in newChoreTile(chore) }
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            }
+        }
+        .sheet(isPresented: $showEditor, onDismiss: { clearForm() }) {
+            NavigationStack {
+                Form { if let e = editing { Section { Text("\(e.emoji) \(e.title)").font(.headline); formFields }.glassRows() } }
+                    .readableColumn(form: true).glassForm()
+            }
+        }
+    }
+
+    private func newStat(_ value: String, _ label: String) -> some View {
+        VStack(spacing: 2) {
+            Text(verbatim: value)
+                .font(.system(size: 24, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+            Text(label)
+                .font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.78))
+                .lineLimit(1).minimumScaleFactor(0.8)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .glassPane(radius: 16, shadow: false)
+    }
+
+    private func newPendingCard(_ chore: Chore) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(tr("מחכה לאישור שלכם"))
+                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                .foregroundStyle(Color(hex: "2B1C04"))
+                .padding(.horizontal, 10).padding(.vertical, 3)
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
+            HStack(spacing: 12) {
+                Text(chore.emoji).font(.system(size: 40))
+                    .frame(width: 64, height: 64)
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(Question.stripNiqqud(chore.title))
+                        .font(.system(size: 19, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    Text(tr("🎮 \(chore.rewardMinutes) דק׳ משחק"))
+                        .font(.system(size: 14, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.85))
+                }
+                Spacer(minLength: 0)
+            }
+            HStack(spacing: 10) {
+                Text(tr("בוצע — אשרו ✅"))
+                    .font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    .frame(maxWidth: .infinity).padding(.vertical, 12)
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color(hex: "1FA35C")))
+                Text(tr("עוד לא הושלמה"))
+                    .font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(.white)
+                    .frame(maxWidth: .infinity).padding(.vertical, 12)
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.14)))
+            }
+        }
+        .padding(14)
+        .glassPane(radius: 16)
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(AppColor.starGold, lineWidth: 2))
+    }
+
+    private var newAddTile: some View {
+        VStack(spacing: 8) {
+            Text("＋").font(.system(size: 44, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                .frame(height: 64)
+            Text(tr("מטלה חדשה"))
+                .font(.system(size: 16, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+            Text(tr("שם, אימוג׳י ודקות"))
+                .font(.system(size: 12.5, weight: .semibold, design: .rounded)).foregroundStyle(.white.opacity(0.75))
+        }
+        .frame(maxWidth: .infinity, minHeight: 168)
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.07)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
+            .strokeBorder(.white.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [6, 5])))
+    }
+
+    private func newChoreTile(_ chore: Chore) -> some View {
+        let done = chore.approvedToday
+        return Button { startEditing(chore) } label: {
+            VStack(spacing: 8) {
+                Text(chore.emoji).font(.system(size: 40))
+                    .frame(maxWidth: .infinity).frame(height: 64)
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.12)))
+                Text(Question.stripNiqqud(chore.title))
+                    .font(.system(size: 15.5, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                    .multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.85)
+                    .frame(minHeight: 38)
+                HStack(spacing: 6) {
+                    Text(tr("🎮 \(chore.rewardMinutes) דק׳"))
+                        .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "2B1C04"))
+                        .padding(.horizontal, 8).padding(.vertical, 3)
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
+                    if chore.timesPerDay > 1 {
+                        Text(tr("עד \(chore.timesPerDay) ביום"))
+                            .font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.85))
+                    }
+                }
+                Text(done ? tr("✅ הושלמה להיום") : (chore.doneToday > 0 ? tr("✅ \(chore.doneToday)/\(chore.timesPerDay) היום") : tr("עוד לא היום")))
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundStyle(chore.doneToday > 0 ? Color(hex: "5CFF9D") : .white.opacity(0.55))
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity, minHeight: 168)
+            .glassPane(radius: 16, shadow: false)
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(done ? Color(hex: "5CFF9D").opacity(0.7) : .clear, lineWidth: 1.5))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var classic: some View {
         NavigationStack {
             Form {
                 if profilesStore.profiles.count > 1 {

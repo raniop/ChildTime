@@ -33,6 +33,12 @@ enum LiveEventReporter {
         case levelUp            // the companion crossed into a new level
         case worldUnlocked      // a new world opened
         case personalBest       // beat their own best streak
+        // 🛍 The child spent 💎 in the shop (Sasha, 12.10: her daughter bought
+        // before anyone explained what it costs). No push — a row in the
+        // parent's activity centre: `value` = "character:<id>" / "cosmetic:<id>"
+        // (the parent's own app names it in its own language), and the price
+        // rides in `minutes`, the one number the server's record keeps.
+        case shopPurchase
     }
 
     /// When each (child, kind) was last reported — see the de-duplication in `report`.

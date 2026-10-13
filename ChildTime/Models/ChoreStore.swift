@@ -232,7 +232,15 @@ final class ChoreStore: ObservableObject {
         var out: [Chore] = []
         for preset in Self.catalog {
             let docID = "\(preset.key)_\(id.uuidString)"
-            if let doc = byID.removeValue(forKey: docID) {
+            if var doc = byID.removeValue(forKey: docID) {
+                // A built-in chore's name is the catalog's, in THIS device's
+                // language — never the copy saved with its doc. The doc carries
+                // the words of whichever device wrote it first (a child's Hebrew
+                // phone, say), and a parent whose app is in English then saw
+                // three chores in Hebrew among the English ones (Sasha, 12.10).
+                // A parent cannot rename a built-in chore, so nothing is lost.
+                doc.title = preset.title
+                doc.emoji = preset.emoji
                 if !doc.archived { out.append(doc) }   // archived = hidden by the parent
             } else {
                 out.append(Chore(id: docID, childID: id.uuidString,
