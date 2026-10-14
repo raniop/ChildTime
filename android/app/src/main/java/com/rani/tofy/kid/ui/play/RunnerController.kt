@@ -104,6 +104,18 @@ class RunnerController(
     var lastEarnedMinutes by mutableIntStateOf(0); private set
     var secondsFlash by mutableStateOf<Pair<String, Boolean>?>(null); private set
     private var secondsFlashID = 0
+    /** 🪙 The right answer's seconds on their way INTO the shelf's clock (iOS
+     *  `flySecondsToClock`, Rani 2026-10-14): pop up over the question, swoop
+     *  down along an arc, go in — and only then the clock's digits roll up. */
+    data class SecondsFlight(val id: Int, val text: String)
+    var flight by mutableStateOf<SecondsFlight?>(null); private set
+    var flightLaunched by mutableStateOf(false); private set
+    /** What the clock shows while the seconds are still on their way. */
+    var clockHeld by mutableStateOf<Int?>(null); private set
+    /** Bumped as the seconds go in: the clock gulps and a ring ripples out. */
+    var clockGulp by mutableIntStateOf(0); private set
+    /** The shelf clock is on screen and measured (else: the old flash in the chip). */
+    var clockMeasured = false
 
     // ── end of round ────────────────────────────────────────────────────────
     var startedLevel = 1; private set
@@ -380,7 +392,8 @@ class RunnerController(
         val paid = KidSession.engine()?.lastPaidSeconds ?: 0
         if (!cappedBefore && paid > 0) {
             roundSeconds += paid
-            flashSeconds(tr("+%lld שְׁנִיּוֹת", paid), positive = true)
+            if (clockMeasured) flySeconds(tr("+%lld שְׁנִיּוֹת", paid), paid)
+            else flashSeconds(tr("+%lld שְׁנִיּוֹת", paid), positive = true)
         }
         firstRunFeedback(correct = true, seconds = if (cappedBefore) 0 else paid)   // 🎬 before the branches below that leave early
         if (bonusPopupMinutes > 0) { lastEarnedMinutes = bonusPopupMinutes; earnedPopupTrigger++ }
@@ -477,6 +490,28 @@ class RunnerController(
         companion.console(listOf(tr("כִּמְעַט!"), tr("מַמָּשׁ קָרוֹב"), g(tr("בּוֹא נְנַסֶּה שׁוּב"), tr("בּוֹאִי נְנַסֶּה שׁוּב")), tr("נְנַסֶּה אֶת הַבָּאָה"),
             tr("⭐ עוֹד תְּשׁוּבָה נְכוֹנָה וְחוֹזְרִים לְהִתְקַדֵּם")).random())
         firstRunFeedback(correct = false, seconds = maxOf(0, owed))
+    }
+
+    private fun flySeconds(text: String, paid: Int) {
+        val id = ++secondsFlashID
+        val now = KidSession.engine()?.openableSeconds(false) ?: 0
+        // A flight still on its way lands now: its seconds are already in the wallet.
+        val from = maxOf(0, now - paid)
+        clockHeld = from; flightLaunched = false; flight = SecondsFlight(id, text)
+        scope.launch {
+            delay(600); if (secondsFlashID != id) return@launch
+            flightLaunched = true                        // the swoop: 700 ms
+            delay(670); if (secondsFlashID != id) return@launch
+            flight = null; flightLaunched = false
+            clockGulp++
+            haptics()?.success()
+            // The digits roll up, one small step at a time.
+            val steps = (now - from).coerceIn(1, 12)
+            for (i in 1..steps) {
+                delay(55); if (secondsFlashID != id) return@launch
+                clockHeld = if (i == steps) null else from + (now - from) * i / steps
+            }
+        }
     }
 
     private fun flashSeconds(text: String, positive: Boolean) {

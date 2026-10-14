@@ -75,6 +75,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import com.rani.tofy.i18n.tr
 import com.rani.tofy.kid.content.ContentMode
 import com.rani.tofy.kid.content.Question
@@ -187,6 +196,7 @@ private fun RunnerPlaying(r: RunnerController, onClose: () -> Unit) {
 
         StarBurstOverlay(r.burstTrigger)
         ConfettiOverlay(r.confettiTrigger)
+        FlyingSeconds(r)
         EarnedMinutesPopup(r.lastEarnedMinutes, r.earnedPopupTrigger, Modifier.align(Alignment.Center))
 
         AnimatedVisibility(r.showBonusIntro, Modifier.fillMaxSize(), enter = fadeIn(), exit = fadeOut()) { BonusIntro() }
@@ -385,23 +395,56 @@ private fun Shelf(r: RunnerController, q: Question, streak: Int, tablet: Boolean
     }
 }
 
-/** The play time to the second; a right answer turns it into "+24 שניות" for a moment. */
+/** Where the shelf clock is, and where the quiz's own box is — both in the window. */
+private var clockCenterInRoot = Offset.Zero
+
+/**
+ * The play time to the second. A right answer's seconds fly INTO it (see
+ * [FlyingSeconds]): it holds the old time until they arrive, gulps — a bump
+ * and a ring — and its digits roll up to the new time. Where it could not be
+ * measured, "+24 שניות" still flashes in it for a moment.
+ */
 @Composable
 private fun TimeChip(r: RunnerController) {
     val state by KidSession.state.collectAsState()
-    val secs = remember(state) { KidSession.engine()?.openableSeconds(false) ?: 0 }
+    val live = remember(state) { KidSession.engine()?.openableSeconds(false) ?: 0 }
+    val secs = r.clockHeld ?: live
     val flash = r.secondsFlash
+    val gulp = remember { Animatable(1f) }
+    val ring = remember { Animatable(1f) }
+    LaunchedEffect(r.clockGulp) {
+        if (r.clockGulp == 0) return@LaunchedEffect
+        launch { ring.snapTo(0f); ring.animateTo(1f, tween(550)) }
+        gulp.animateTo(1.22f, spring(dampingRatio = 0.45f, stiffness = 900f))
+        gulp.animateTo(1f, spring(dampingRatio = 0.6f, stiffness = 400f))
+    }
     AnimatedContent(flash, transitionSpec = { (scaleIn(initialScale = 0.7f) + fadeIn()) togetherWith (scaleOut(targetScale = 0.7f) + fadeOut()) }, label = "time") { f ->
         if (f != null) {
             Text(f.first, color = if (f.second) Color(0xFF053D2E) else Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, maxLines = 1,
                 modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(if (f.second) KidColor.successMint else KidColor.flameOrange)
                     .padding(horizontal = 10.dp, vertical = 5.dp))
         } else {
-            Row(Modifier.clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.16f))
-                .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).padding(horizontal = 10.dp, vertical = 5.dp),
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                Text("⏱", fontSize = 13.sp)
-                Ltr { Text("%d:%02d".format(secs / 60, secs % 60), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp) }
+            Box(contentAlignment = Alignment.Center) {
+                // The ring that ripples out as the seconds go in.
+                if (ring.value < 1f) Box(Modifier.matchParentSize().graphicsLayer {
+                    scaleX = 1f + 0.9f * ring.value; scaleY = 1f + 0.9f * ring.value; alpha = 0.95f * (1f - ring.value)
+                }.border(3.dp, KidColor.successMint, RoundedCornerShape(16.dp)))
+                Row(Modifier.graphicsLayer { scaleX = gulp.value; scaleY = gulp.value }
+                    .onGloballyPositioned { clockCenterInRoot = it.boundsInRoot().center; r.clockMeasured = true }
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(if (gulp.value > 1.02f) KidColor.successMint.copy(alpha = 0.55f) else Color.White.copy(alpha = 0.16f))
+                    .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)).padding(horizontal = 10.dp, vertical = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Text("⏱", fontSize = 13.sp)
+                    // The digits roll UP to the new time.
+                    Ltr {
+                        AnimatedContent(secs, transitionSpec = {
+                            (slideInVertically(tween(140)) { it } + fadeIn(tween(140))) togetherWith (slideOutVertically(tween(140)) { -it } + fadeOut(tween(140)))
+                        }, label = "clock") { v ->
+                            Text("%d:%02d".format(v / 60, v % 60), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
+                        }
+                    }
+                }
             }
         }
     }
@@ -477,3 +520,59 @@ private fun PortalIntro() {
         }
     }
 }
+
+// ── 🪙 the seconds flying into the clock ────────────────────────────────────
+
+/**
+ * "+24 שניות" pops up big over the question, holds a beat, swoops down along
+ * an arc (with three sparks behind it), shrinks as it goes, and vanishes INTO
+ * the shelf's clock. Drawn left-to-right: the points are the window's own.
+ */
+@Composable
+private fun FlyingSeconds(r: RunnerController) {
+    val f = r.flight ?: return
+    key(f.id) {
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            var origin by remember { mutableStateOf(Offset.Zero) }
+            val pop = remember { Animatable(0.15f) }
+            LaunchedEffect(Unit) { pop.animateTo(1f, spring(dampingRatio = 0.5f, stiffness = 320f)) }
+            val ease = CubicBezierEasing(0.45f, 0f, 0.25f, 1f)
+            val t by animateFloatAsState(if (r.flightLaunched) 1f else 0f, tween(700, easing = ease), label = "fly")
+            val sparks = (0 until 3).map { i ->
+                animateFloatAsState(if (r.flightLaunched) 1f else 0f, tween(700, delayMillis = 50 * (i + 1), easing = ease), label = "spark$i").value
+            }
+            BoxWithConstraints(Modifier.fillMaxSize().onGloballyPositioned { origin = it.boundsInRoot().topLeft }) {
+                val w = constraints.maxWidth.toFloat(); val h = constraints.maxHeight.toFloat()
+                val start = Offset(w / 2f, h * 0.40f)
+                val end = clockCenterInRoot - origin
+                val lift = with(androidx.compose.ui.platform.LocalDensity.current) { 30.dp.toPx() }
+                val control = Offset(end.x + (start.x - end.x) * 0.2f, start.y - lift)
+                fun at(t: Float): Offset {
+                    val u = 1f - t
+                    return Offset(u * u * start.x + 2 * u * t * control.x + t * t * end.x, u * u * start.y + 2 * u * t * control.y + t * t * end.y)
+                }
+                sparks.forEachIndexed { i, st ->
+                    val p = at(st)
+                    val d = (10 - i * 2).dp
+                    Box(Modifier.size(d).graphicsLayer {
+                        translationX = p.x - size.width / 2; translationY = p.y - size.height / 2
+                        alpha = if (st <= 0f || st >= 1f) 0f else kotlin.math.sin(Math.PI * st).toFloat()
+                    }.shadow(6.dp, RoundedCornerShape(50)).clip(RoundedCornerShape(50))
+                        .background(if (i == 1) Color(0xFFFFE27A) else Color.White))
+                }
+                val p = at(t)
+                Text(f.text, color = Color(0xFF053D2E), fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 28.sp, maxLines = 1,
+                    modifier = Modifier.graphicsLayer {
+                        translationX = p.x - size.width / 2; translationY = p.y - size.height / 2
+                        val s = pop.value * (1f - 0.78f * t); scaleX = s; scaleY = s
+                        alpha = if (t < 0.8f) 1f else maxOf(0f, 1f - (t - 0.8f) / 0.2f)
+                    }.shadow(14.dp, RoundedCornerShape(16.dp), ambientColor = KidColor.successMint, spotColor = KidColor.successMint)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Brush.verticalGradient(listOf(Color(0xFFB6FFD9), KidColor.successMint)))
+                        .border(2.dp, Color.White.copy(alpha = 0.85f), RoundedCornerShape(16.dp))
+                        .padding(horizontal = 20.dp, vertical = 10.dp))
+            }
+        }
+    }
+}
+
