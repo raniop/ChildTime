@@ -81,6 +81,17 @@ struct QuestionRunnerView: View {
     @State private var secondsFlashText: String? = nil
     @State private var secondsFlashPositive = true
     @State private var secondsFlashID = 0
+    /// 🪙 The right answer's seconds, flying to the clock (Rani, 2026-10-14):
+    /// "+24 שניות" pops up big over the question, then drops into the shelf's
+    /// clock — and the clock moves only when it lands.
+    @State private var flyText: String?
+    @State private var flyAtClock = false
+    @State private var flyID = 0
+    /// What the clock shows while the seconds are still on their way.
+    @State private var clockHeldSeconds: Int?
+    @State private var clockBump = false
+    /// The shelf clock's centre, in `runnerSpace`.
+    @State private var shelfClockCenter: CGPoint = .zero
 
     /// 📐 Where the answers actually END, and how tall the screen actually is —
     /// both in `runnerSpace`. Measured, because every guess we made here was
@@ -311,6 +322,28 @@ struct QuestionRunnerView: View {
             }
             .allowsHitTesting(false)
 
+            // 🪙 The seconds on their way to the shelf's clock.
+            if let text = flyText {
+                GeometryReader { g in
+                    let origin = g.frame(in: .named(Self.runnerSpace)).origin
+                    let start = CGPoint(x: g.size.width / 2, y: g.size.height * 0.42)
+                    let end = CGPoint(x: shelfClockCenter.x - origin.x, y: shelfClockCenter.y - origin.y)
+                    Text(text)
+                        .font(.system(size: 30, weight: .black, design: .rounded))
+                        .foregroundStyle(Color(hex: "053D2E"))
+                        .lineLimit(1).fixedSize()
+                        .padding(.horizontal, 20).padding(.vertical, 11)
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppColor.successMint))
+                        .glow(AppColor.successMint, radius: 14)
+                        .scaleEffect(flyAtClock ? 0.4 : 1)
+                        .opacity(flyAtClock ? 0.35 : 1)
+                        .position(flyAtClock ? end : start)
+                        .transition(.scale(scale: 0.3).combined(with: .opacity))
+                }
+                .id(flyID)
+                .allowsHitTesting(false)
+            }
+
             // Per-question seconds feedback — rises toward the timer and fades.
             if let text = secondsFlashText, !timeOnShelf {
                 Text(text)
@@ -533,7 +566,7 @@ struct QuestionRunnerView: View {
                     .fill(secondsFlashPositive ? AppColor.successMint : AppColor.flameOrange))
                 .transition(.scale.combined(with: .opacity))
         } else {
-            let secs = progress.openableSeconds(gift: false)
+            let secs = clockHeldSeconds ?? progress.openableSeconds(gift: false)
             HStack(spacing: 5) {
                 Image(systemName: "timer").font(.system(size: 13, weight: .bold))
                 Text(String(format: "%d:%02d", secs / 60, secs % 60))
@@ -545,8 +578,13 @@ struct QuestionRunnerView: View {
             .foregroundStyle(.white)
             .lineLimit(1).fixedSize()
             .padding(.horizontal, 10).frame(height: 30)
-            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(0.16)))
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(clockBump ? AppColor.successMint.opacity(0.55) : .white.opacity(0.16)))
             .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
+            .scaleEffect(clockBump ? 1.18 : 1)
+            .onGeometryChange(for: CGPoint.self) { g in
+                let f = g.frame(in: .named(Self.runnerSpace)); return CGPoint(x: f.midX, y: f.midY)
+            } action: { shelfClockCenter = $0 }
             .transition(.scale.combined(with: .opacity))
         }
     }
@@ -1913,7 +1951,11 @@ struct QuestionRunnerView: View {
         // What ACTUALLY reached the wallet: less while a miss is being paid
         // back, nothing past the cap.
         if earnsTime, !cappedBefore, progress.lastPaidSeconds > 0 {
-            flashSeconds(tr("+\(progress.lastPaidSeconds) שְׁנִיּוֹת"), positive: true)
+            if timeOnShelf, shelfClockCenter != .zero, !UIAccessibility.isReduceMotionEnabled {
+                flySecondsToClock(tr("+\(progress.lastPaidSeconds) שְׁנִיּוֹת"), paid: progress.lastPaidSeconds)
+            } else {
+                flashSeconds(tr("+\(progress.lastPaidSeconds) שְׁנִיּוֹת"), positive: true)
+            }
         }
         firstRunFeedback(correct: true, seconds: earnsTime && !cappedBefore ? progress.lastPaidSeconds : 0)
         // "+X דקות" popup — only for a real bonus (💫 question, 🌈 variety).
@@ -1985,6 +2027,35 @@ struct QuestionRunnerView: View {
     /// 8/15, wheel, discovery) — they flooded the parent. We now notify ONLY on
     /// session start + finish (and explicit help requests), so this is a no-op.
     private func reportLiveEvents(for q: Question) { }
+
+    /// 🪙 "+24 שניות" pops up big over the question, holds a beat, then drops
+    /// into the shelf's clock; the clock keeps its old number until it lands,
+    /// then counts up and gives a small bump (Rani, 2026-10-14).
+    private func flySecondsToClock(_ text: String, paid: Int) {
+        flyID += 1
+        let id = flyID
+        // A flight still on its way lands now: its seconds are already in the wallet.
+        clockHeldSeconds = max(0, progress.openableSeconds(gift: false) - paid)
+        flyAtClock = false
+        withAnimation(.spring(response: 0.38, dampingFraction: 0.6)) { flyText = text }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) {
+            guard flyID == id else { return }
+            withAnimation(.easeIn(duration: 0.5)) { flyAtClock = true }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.15) {
+            guard flyID == id else { return }
+            flyText = nil
+            flyAtClock = false
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                clockHeldSeconds = nil
+                clockBump = true
+            }
+            Haptic.light()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
+                withAnimation(.easeOut(duration: 0.3)) { clockBump = false }
+            }
+        }
+    }
 
     /// Flash a small "+24 שניות" / "−12 שניות" near the timer.
     private func flashSeconds(_ text: String, positive: Bool) {
