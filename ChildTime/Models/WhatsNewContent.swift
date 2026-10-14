@@ -55,6 +55,12 @@ enum WhatsNewContent {
     /// notes were dated — the first release, as one entry.
     static let releases: [Release] = [
 
+        // 2026.10.11 — after Apple approved 2026.10.10 (build 238) on 2026-10-14.
+        Release(build: 239, version: "2026.10.11", headline: tr("השניות עפות לשעון"), items: [
+            Item(emoji: "🪙", title: tr("השניות עפות לשעון"),
+                 line: tr("בכל תשובה נכונה השניות שהרוויחו קופצות על המסך ועפות לתוך השעון, והזמן עולה מול העיניים")),
+        ]),
+
         // 2026.10.10 — after Apple approved 2026.10.9 (build 237) on 2026-10-13:
         // the chores screens in pictures, the gift reset in the gift window,
         // the shop-purchase notice.

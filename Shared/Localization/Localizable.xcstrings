@@ -31302,6 +31302,28 @@
         }
       }
     },
+    "בכל תשובה נכונה השניות שהרוויחו קופצות על המסך ועפות לתוך השעון, והזמן עולה מול העיניים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مع كل إجابة صحيحة تقفز الثواني المكتسبة على الشاشة وتطير إلى داخل الساعة، ويرتفع الوقت أمام العينين"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "With every right answer, the seconds earned pop up on the screen and fly into the clock, and the time goes up before your eyes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "При каждом правильном ответе заработанные секунды появляются на экране и летят в часы, и время растёт прямо на глазах"
+          }
+        }
+      }
+    },
     "בכניסה יתבקש קוד ההורה — מסרו לו את הקוד שלכם בעל־פה 🔑" : {
       "localizations" : {
         "ar" : {
@@ -55184,6 +55206,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Имя ребёнка"
+          }
+        }
+      }
+    },
+    "השניות עפות לשעון" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الثواني تطير إلى الساعة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seconds fly into the clock"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Секунды летят в часы"
           }
         }
       }
