@@ -85,8 +85,11 @@ struct QuestionRunnerView: View {
     /// "+24 שניות" pops up big over the question, then drops into the shelf's
     /// clock — and the clock moves only when it lands.
     @State private var flyText: String?
+    /// The flight itself: false = popped up over the question, true = launched along the arc.
     @State private var flyAtClock = false
     @State private var flyID = 0
+    /// Bumped when the seconds go INTO the clock: a ring ripples out of it.
+    @State private var clockRingID = 0
     /// What the clock shows while the seconds are still on their way.
     @State private var clockHeldSeconds: Int?
     @State private var clockBump = false
@@ -322,24 +325,33 @@ struct QuestionRunnerView: View {
             }
             .allowsHitTesting(false)
 
-            // 🪙 The seconds on their way to the shelf's clock.
+            // 🪙 The seconds on their way INTO the shelf's clock: they pop up over
+            // the question, swoop down along an arc with a little comet tail,
+            // shrink as they go, and vanish inside the clock.
             if let text = flyText {
                 GeometryReader { g in
                     let origin = g.frame(in: .named(Self.runnerSpace)).origin
-                    let start = CGPoint(x: g.size.width / 2, y: g.size.height * 0.42)
+                    let start = CGPoint(x: g.size.width / 2, y: g.size.height * 0.40)
                     let end = CGPoint(x: shelfClockCenter.x - origin.x, y: shelfClockCenter.y - origin.y)
-                    Text(text)
-                        .font(.system(size: 30, weight: .black, design: .rounded))
-                        .foregroundStyle(Color(hex: "053D2E"))
-                        .lineLimit(1).fixedSize()
-                        .padding(.horizontal, 20).padding(.vertical, 11)
-                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppColor.successMint))
-                        .glow(AppColor.successMint, radius: 14)
-                        .scaleEffect(flyAtClock ? 0.4 : 1)
-                        .opacity(flyAtClock ? 0.35 : 1)
-                        .position(flyAtClock ? end : start)
-                        .transition(.scale(scale: 0.3).combined(with: .opacity))
+                    ZStack {
+                        // The tail: three sparks that follow a beat behind.
+                        ForEach(0..<3, id: \.self) { i in
+                            Circle()
+                                .fill(i == 1 ? Color(hex: "FFE27A") : Color.white)
+                                .frame(width: CGFloat(10 - i * 2), height: CGFloat(10 - i * 2))
+                                .shadow(color: AppColor.successMint, radius: 6)
+                                .modifier(ArcFlight(t: flyAtClock ? 1 : 0, start: start, end: end, spark: true))
+                                .animation(.timingCurve(0.45, 0, 0.25, 1, duration: 0.7).delay(0.05 * Double(i + 1)), value: flyAtClock)
+                        }
+                        SecondsBadge(text: text)
+                            .modifier(ArcFlight(t: flyAtClock ? 1 : 0, start: start, end: end, spark: false))
+                            .animation(.timingCurve(0.45, 0, 0.25, 1, duration: 0.7), value: flyAtClock)
+                            .transition(.scale(scale: 0.15).combined(with: .opacity))
+                    }
                 }
+                // Measured points are physical (left-to-right); `.position` in a
+                // right-to-left layout would mirror them — away from the clock.
+                .environment(\.layoutDirection, .leftToRight)
                 .id(flyID)
                 .allowsHitTesting(false)
             }
@@ -581,7 +593,8 @@ struct QuestionRunnerView: View {
             .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(clockBump ? AppColor.successMint.opacity(0.55) : .white.opacity(0.16)))
             .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.3), lineWidth: 1))
-            .scaleEffect(clockBump ? 1.18 : 1)
+            .overlay { ClockGulpRing(trigger: clockRingID) }
+            .scaleEffect(clockBump ? 1.22 : 1)
             .onGeometryChange(for: CGPoint.self) { g in
                 let f = g.frame(in: .named(Self.runnerSpace)); return CGPoint(x: f.midX, y: f.midY)
             } action: { shelfClockCenter = $0 }
@@ -2028,31 +2041,44 @@ struct QuestionRunnerView: View {
     /// session start + finish (and explicit help requests), so this is a no-op.
     private func reportLiveEvents(for q: Question) { }
 
-    /// 🪙 "+24 שניות" pops up big over the question, holds a beat, then drops
-    /// into the shelf's clock; the clock keeps its old number until it lands,
-    /// then counts up and gives a small bump (Rani, 2026-10-14).
+    /// 🪙 "+24 שניות" pops up big over the question, holds a beat, swoops
+    /// down INTO the shelf's clock — and only then does the clock move: it
+    /// gulps (a bump and a ring), and its digits roll up from the old time to
+    /// the new one (Rani, 2026-10-14: "שזה יורד בדיוק לתוך השעון… ומספרים
+    /// עולים יפה").
     private func flySecondsToClock(_ text: String, paid: Int) {
         flyID += 1
         let id = flyID
+        let now = progress.openableSeconds(gift: false)
         // A flight still on its way lands now: its seconds are already in the wallet.
-        clockHeldSeconds = max(0, progress.openableSeconds(gift: false) - paid)
+        let from = max(0, now - paid)
+        clockHeldSeconds = from
         flyAtClock = false
-        withAnimation(.spring(response: 0.38, dampingFraction: 0.6)) { flyText = text }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) {
+        withAnimation(.spring(response: 0.42, dampingFraction: 0.55)) { flyText = text }
+        // Pop · hold · fly (0.7s) · in.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             guard flyID == id else { return }
-            withAnimation(.easeIn(duration: 0.5)) { flyAtClock = true }
+            flyAtClock = true
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.15) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.27) {
             guard flyID == id else { return }
             flyText = nil
             flyAtClock = false
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
-                clockHeldSeconds = nil
-                clockBump = true
+            clockRingID += 1
+            Haptic.success()
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.45)) { clockBump = true }
+            // The digits roll up, one small step at a time.
+            let steps = max(1, min(12, now - from))
+            for i in 1...steps {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.055 * Double(i)) {
+                    guard flyID == id else { return }
+                    withAnimation(.snappy(duration: 0.14)) {
+                        clockHeldSeconds = i == steps ? nil : from + (now - from) * i / steps
+                    }
+                }
             }
-            Haptic.light()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
-                withAnimation(.easeOut(duration: 0.3)) { clockBump = false }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.055 * Double(steps) + 0.2) {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) { clockBump = false }
             }
         }
     }
@@ -2189,3 +2215,68 @@ private struct ShelfBuddy: View {
         .animation(.spring(response: 0.4, dampingFraction: 0.75), value: controller.bubbleText)
     }
 }
+
+// MARK: - 🪙 Seconds flying into the clock
+
+/// The badge that flies: "+24 שניות", mint and glowing.
+private struct SecondsBadge: View {
+    let text: String
+    var body: some View {
+        Text(text)
+            .font(.system(size: 30, weight: .black, design: .rounded))
+            .foregroundStyle(Color(hex: "053D2E"))
+            .lineLimit(1).fixedSize()
+            .padding(.horizontal, 20).padding(.vertical, 11)
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(LinearGradient(colors: [Color(hex: "B6FFD9"), AppColor.successMint], startPoint: .top, endPoint: .bottom)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.85), lineWidth: 2))
+            .shadow(color: AppColor.successMint.opacity(0.8), radius: 14)
+    }
+}
+
+/// One point of the swoop from the question into the clock: a curve that
+/// heads sideways toward the clock first and then drops into it; the badge
+/// shrinks on the way and disappears as it goes in. `spark` = a tail spark,
+/// seen only while in the air.
+private struct ArcFlight: ViewModifier, Animatable {
+    var t: CGFloat
+    let start: CGPoint
+    let end: CGPoint
+    let spark: Bool
+    var animatableData: CGFloat {
+        get { t }
+        set { t = newValue }
+    }
+
+    func body(content: Content) -> some View {
+        let control = CGPoint(x: end.x + (start.x - end.x) * 0.2, y: start.y - 30)
+        let u = 1 - t
+        let p = CGPoint(x: u * u * start.x + 2 * u * t * control.x + t * t * end.x,
+                        y: u * u * start.y + 2 * u * t * control.y + t * t * end.y)
+        let scale = spark ? 1 : 1 - 0.78 * t
+        let opacity: CGFloat = spark ? (t <= 0 || t >= 1 ? 0 : sin(.pi * t)) : (t < 0.8 ? 1 : max(0, 1 - (t - 0.8) / 0.2))
+        return content
+            .scaleEffect(scale)
+            .opacity(opacity)
+            .position(p)
+    }
+}
+
+/// The ripple that goes out of the clock as the seconds go in.
+private struct ClockGulpRing: View {
+    let trigger: Int
+    @State private var out = true
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 16, style: .continuous)
+            .strokeBorder(AppColor.successMint, lineWidth: 3)
+            .scaleEffect(out ? 1.9 : 1)
+            .opacity(out ? 0 : 0.95)
+            .allowsHitTesting(false)
+            .onChangeCompat(of: trigger) { _, _ in
+                out = false
+                withAnimation(.easeOut(duration: 0.55)) { out = true }
+            }
+    }
+}
+
