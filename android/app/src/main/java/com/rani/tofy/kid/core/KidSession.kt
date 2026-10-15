@@ -284,6 +284,12 @@ object KidSession : LeaseHost {
         affectsAdaptive: Boolean = true,
     ): AnswerOutcome? = edit {
         it.recordCorrect(ctx, responseMs, hadMistakeThisQuestion, hintUsed, grantsScreenTime, cycleMultiplier, affectsAdaptive)
+    }.also {
+        // 🚀 A topic opened the grade above: one row in the parent's activity centre.
+        engine?.let { e -> e.stretchToReport?.let { t ->
+            e.stretchToReport = null
+            reportEvent("gradeStretch", value = t, extra = mapOf("minutes" to e.settings.grade + 1))
+        } }
     }
 
     fun answerWrong(topic: String, hintUsed: Boolean = false, grantsScreenTime: Boolean = true, affectsAdaptive: Boolean = true): Int =

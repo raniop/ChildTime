@@ -283,7 +283,9 @@ private fun promptSize(prompt: String, passage: Boolean): Float {
 
 @Composable
 private fun QuestionHeader(r: RunnerController, q: Question) {
-    val golden = r.isSuperQuestion || r.isBonusQuestion || r.isArena
+    // 🚀 A question from the grade above wears a gold frame and a tag on its edge.
+    val golden = r.isSuperQuestion || r.isBonusQuestion || r.isArena || q.stretchGrade != null
+    Box {
     Column(
         Modifier.fillMaxWidth().glassPane(16.dp)
             .then(if (golden) Modifier.border(2.dp, KidColor.starGold.copy(alpha = 0.9f), RoundedCornerShape(16.dp)) else Modifier)
@@ -318,6 +320,14 @@ private fun QuestionHeader(r: RunnerController, q: Question) {
         FitText(sequenceAware(q.prompt, r.contentLang.rtl), promptSize(q.prompt, q.passage != null).sp, weight = FontWeight.ExtraBold, maxLines = 12, minScale = 0.4f,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp))
         Text(tr("בַּחֲרוּ תְּשׁוּבָה אַחַת"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+    }
+        q.stretchGrade?.let { g ->
+            Text("🚀 " + kidGradeName(g), Modifier.align(Alignment.TopCenter).offset(y = (-12).dp)
+                .clip(RoundedCornerShape(16.dp)).background(com.rani.tofy.ui.theme.GoldBrush)
+                .border(1.5.dp, Color.White.copy(alpha = 0.8f), RoundedCornerShape(16.dp))
+                .padding(horizontal = 11.dp, vertical = 4.dp),
+                color = Color(0xFF3A2700), fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 13.sp, maxLines = 1)
+        }
     }
 }
 

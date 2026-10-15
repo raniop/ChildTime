@@ -81,14 +81,22 @@ object ReadingContent {
  * world used to serve the same "where's the dog?" (Ben David, 2026-10-09).
  */
 object PreReaderContent {
-    fun generate(topic: Topic, rng: Random = Random.Default): Question = when {
-        topic == Topic.MATH -> mathRound(rng)
+    /**
+     * `difficulty`: the level served in this world now. Until 2026-10-15 a גן
+     * child got the same rounds at every level ("where is the circle?" even on
+     * hard — David, father of אמילי). Now: at hard only thinking questions where
+     * the world has them, and in math sums and comparisons, not counting.
+     */
+    fun generate(topic: Topic, rng: Random = Random.Default, difficulty: Difficulty = Difficulty.MEDIUM): Question = when {
+        topic == Topic.MATH -> mathRound(rng, difficulty)
         topic == Topic.HEBREW && com.rani.tofy.i18n.I18n.language == AppLanguage.HE -> lettersRound(rng)
         else -> {
             // 🧠 A world that has THINKING questions asks them most of the time
             // (see `pictureQuestion`); the "where is the…" rounds stay for variety.
-            val thinking = if (rng.nextDouble() < 0.6)
-                pictureQuestion(RemoteQuestionBank.questions(topic, com.rani.tofy.i18n.I18n.language), topic, rng) else null
+            val share = when (difficulty) { Difficulty.HARD -> 1.0; Difficulty.MEDIUM -> 0.6; Difficulty.EASY -> 0.4 }
+            val thinking = if (rng.nextDouble() < share)
+                pictureQuestion(RemoteQuestionBank.questions(topic, com.rani.tofy.i18n.I18n.language), topic, rng,
+                    preferHarder = difficulty == Difficulty.HARD) else null
             val pool = themedPool(topic)
             if (thinking != null) thinking
             else if (pool != null && rng.nextDouble() < 0.75) findOne(pool, rng, topic)
@@ -108,10 +116,13 @@ object PreReaderContent {
      * From the cloud bank — grade 0 items whose four options are pictures only —
      * so new ones arrive without a build (Sasha, 2026-10-11).
      */
-    fun pictureQuestion(bank: List<BankQuestion>, topic: Topic, rng: Random = Random.Default): Question? {
+    fun pictureQuestion(bank: List<BankQuestion>, topic: Topic, rng: Random = Random.Default, preferHarder: Boolean = false): Question? {
         val pool = bank.filter { it.inGrade(0) && isPictureOnly(it) }
         if (pool.size < MIN_PICTURE_POOL) return null      // a handful would repeat within one round
-        val b = pool[rng.nextInt(pool.size)]
+        // On hard, the batch's "medium" items when there is a real set of them.
+        val harder = pool.filter { it.difficulty != Difficulty.EASY }
+        val from = if (preferHarder && harder.size >= MIN_PICTURE_POOL) harder else pool
+        val b = from[rng.nextInt(from.size)]
         val options = (listOf(b.correctAnswer) + b.distractors.take(3)).shuffled(rng)
         val correct = options.indexOf(b.correctAnswer).takeIf { it >= 0 } ?: return null
         // The four answers are the pictures — the question stays words only, so the
@@ -140,7 +151,13 @@ object PreReaderContent {
 
     // ── 🔢 Math: count, add, take away, compare, find the digit ──
 
-    private fun mathRound(rng: Random): Question = when (rng.nextInt(9)) {
+    // Hard: adding, taking away and "where are there more" — no plain counting.
+    private fun mathRound(rng: Random, difficulty: Difficulty = Difficulty.MEDIUM): Question =
+        if (difficulty == Difficulty.HARD) when (rng.nextInt(5)) {
+            0, 1 -> pictureAdd(rng)
+            2, 3 -> pictureTakeAway(rng)
+            else -> whereMore(rng)
+        } else when (rng.nextInt(9)) {
         0, 1, 2 -> counting(rng)
         3, 4 -> pictureAdd(rng)
         5, 6 -> pictureTakeAway(rng)

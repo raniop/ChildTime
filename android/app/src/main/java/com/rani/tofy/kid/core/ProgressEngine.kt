@@ -85,6 +85,8 @@ data class KidSettings(
     val playableTopics: Set<String> = setOf("math", "hebrew", "english", "logic", "science", "reading"),
     /** PlayWindowLeaseManager.isEnabled kill switch (ON by default since build 138). */
     val leaseEnabled: Boolean = true,
+    /** Profile.effectiveGrade — ≤0 is גן; the grade-above stretch is for readers only. */
+    val grade: Int = 1,
 ) {
     data class DailyCap(val enabled: Boolean, val max: Int)
 
@@ -112,6 +114,7 @@ data class KidSettings(
                 difficultyByTopic = diff ?: emptyMap(),
                 learningLevel = LearningLevel.of(doc["learningLevel"] as? String) ?: base.learningLevel,
                 playableTopics = topics ?: base.playableTopics,
+                grade = runCatching { com.rani.tofy.data.Child.from("", doc).effectiveGrade }.getOrDefault(base.grade),
             )
         }
     }
@@ -370,6 +373,37 @@ class ProgressEngine(
         val current = s.topicAdaptiveLevel?.get(topic) ?: AdaptiveDifficultyEngine.level(base)
         val next = AdaptiveDifficultyEngine.updatedLevel(current, base, AdaptiveDifficultyEngine.Signals(correct, fast, hintUsed, abandoned))
         s.topicAdaptiveLevel = (s.topicAdaptiveLevel ?: emptyMap()) + (topic to next)
+        updateStretch(topic, correct && !abandoned, next)
+    }
+
+    /** 🚀 The topic that just opened the grade above — the runner celebrates it once, then clears it. */
+    var justStretched: String? = null
+    /** …and the same moment for the parent's activity centre (KidSession reports and clears it). */
+    var stretchToReport: String? = null
+    fun isStretched(topic: String): Boolean = (s.topicGradeStretch?.get(topic) ?: 0) > 0
+
+    /**
+     * ProgressStore.updateStretch (iOS): at the TOP level (the engine at hard) a
+     * right answer adds 1/16 and a wrong one takes 1/3 — the score climbs only
+     * while the child keeps above ~84% and reaches 1 after a few dozen answers.
+     * At 1 the topic opens the grade above; under 0.3 it closes again, quietly.
+     * Readers only, never the reading passages, never above the last grade.
+     */
+    private fun updateStretch(topic: String, correct: Boolean, level: Double) {
+        val g = settings.grade
+        if (topic == "reading" || g < 1 || g >= 8) {
+            if (s.topicGradeStretch?.containsKey(topic) == true) s.topicGradeStretch = s.topicGradeStretch!! - topic
+            return
+        }
+        var score = s.topicStretchScore?.get(topic) ?: 0.0
+        score = if (level >= 1.9) (if (correct) minOf(1.0, score + 1.0 / 16) else maxOf(0.0, score - 1.0 / 3)) else maxOf(0.0, score - 0.1)
+        s.topicStretchScore = (s.topicStretchScore ?: emptyMap()) + (topic to score)
+        if (!isStretched(topic) && score >= 1.0) {
+            s.topicGradeStretch = (s.topicGradeStretch ?: emptyMap()) + (topic to 1)
+            justStretched = topic; stretchToReport = topic
+        } else if (isStretched(topic) && score < 0.3) {
+            s.topicGradeStretch = s.topicGradeStretch!! - topic
+        }
     }
 
     private fun updateLearningSignals(topic: String, correct: Boolean, responseMs: Double, hintUsed: Boolean, affectsAdaptive: Boolean) {
@@ -1270,6 +1304,7 @@ class ProgressEngine(
             secondsCarry = s.secondsCarry ?: 0, carryIsGift = s.carryIsGift ?: false,
             carryOverMinutes = s.carryOverMinutes ?: 0, giftGivenToday = s.giftGivenToday ?: 0,
             topicAdaptiveLevel = s.topicAdaptiveLevel ?: emptyMap(),
+            topicGradeStretch = s.topicGradeStretch ?: emptyMap(), topicStretchScore = s.topicStretchScore ?: emptyMap(),
             hourlyAnswered = s.hourlyAnswered?.takeIf { it.size == 24 } ?: List(24) { 0 },
             hourlyCorrect = s.hourlyCorrect?.takeIf { it.size == 24 } ?: List(24) { 0 },
         )
@@ -1323,6 +1358,8 @@ class ProgressEngine(
         s.topicExposure = x.topicExposure
         s.topicAbandon = x.topicAbandon
         s.topicAdaptiveLevel = x.topicAdaptiveLevel ?: emptyMap()
+        s.topicGradeStretch = x.topicGradeStretch ?: emptyMap()
+        s.topicStretchScore = x.topicStretchScore ?: emptyMap()
         s.wheelProgressCount = x.wheelProgressCount
         s.recoveryPot = x.recoveryPot
         s.giftGivenToday = x.giftGivenToday ?: 0

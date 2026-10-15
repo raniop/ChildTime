@@ -138,6 +138,9 @@ data class ProgressSnapshot(
     var topicExposure: Map<String, Int> = emptyMap(),
     var topicAbandon: Map<String, Int> = emptyMap(),
     var topicAdaptiveLevel: Map<String, Double>? = null,
+    /** 🚀 ProgressSnapshot.topicGradeStretch / topicStretchScore (iOS): topics served from the grade above too. */
+    var topicGradeStretch: Map<String, Int>? = null,
+    var topicStretchScore: Map<String, Double>? = null,
     var hourlyAnswered: List<Int>? = null,
     var hourlyCorrect: List<Int>? = null,
     var wheelProgressCount: Int = 0,
@@ -221,6 +224,8 @@ data class ProgressSnapshot(
         put("topicExposure", topicExposure)
         put("topicAbandon", topicAbandon)
         put("topicAdaptiveLevel", topicAdaptiveLevel)
+        put("topicGradeStretch", topicGradeStretch)
+        put("topicStretchScore", topicStretchScore)
         put("hourlyAnswered", hourlyAnswered)
         put("hourlyCorrect", hourlyCorrect)
         put("wheelProgressCount", wheelProgressCount)
@@ -298,6 +303,8 @@ data class ProgressSnapshot(
             raw.intMap("topicExposure")?.let { s.topicExposure = it }
             raw.intMap("topicAbandon")?.let { s.topicAbandon = it }
             raw.dblMap("topicAdaptiveLevel")?.let { s.topicAdaptiveLevel = it }
+            raw.intMap("topicGradeStretch")?.let { s.topicGradeStretch = it }
+            raw.dblMap("topicStretchScore")?.let { s.topicStretchScore = it }
             raw.intList("hourlyAnswered")?.let { s.hourlyAnswered = it }
             raw.intList("hourlyCorrect")?.let { s.hourlyCorrect = it }
             raw.int("wheelProgressCount")?.let { s.wheelProgressCount = it }

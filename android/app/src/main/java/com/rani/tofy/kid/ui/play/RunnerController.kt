@@ -160,7 +160,10 @@ class RunnerController(
         // 🏆 A world's silver/gold tier asks one/two grades up (pre-readers stay put).
         (mode as? ContentMode.World)?.let { m ->
             val offset = KidSession.engine()?.tierGradeOffset(PlayWorlds.forTopic(m.topic).id) ?: 0
-            if (profile.grade >= 1 && offset > 0) profile = profile.copy(grade = minOf(CurriculumMath.TOP_GRADE, profile.grade + offset))
+            if (profile.grade >= 1 && offset > 0) {
+                profile = profile.copy(grade = minOf(CurriculumMath.TOP_GRADE, profile.grade + offset), topicGradeStretch = emptyMap())
+                tierRaised = true   // a silver/gold tier already asks a grade up: no 🚀 on top of it
+            }
         }
         session = QuestionSource.session(profile, mode)
         phase = Phase.PLAYING
@@ -186,11 +189,14 @@ class RunnerController(
         nextQuestion()
     }
 
+    private var tierRaised = false
+
     /** The adaptive levels moved after an answer — the session picks with the fresh ones. */
     private fun refreshProfile() {
         val s = KidSession.engine()?.snapshot ?: return
         profile = profile.copy(
             topicAdaptiveLevel = s.topicAdaptiveLevel ?: emptyMap(),
+            topicGradeStretch = if (tierRaised) emptyMap() else s.topicGradeStretch ?: emptyMap(),
             signals = LearningSignals(s.topicAccuracy, s.topicAnswered, s.topicAffinity, s.topicExposure, s.topicAbandon, s.topicResponseMs),
         )
         session.updateChild(profile)
@@ -361,6 +367,7 @@ class RunnerController(
             ctx, responseMs, hadMistakeThisQuestion, usedHintThisQuestion, grantsScreenTime = true,
             cycleMultiplier = if (isArena) 2.0 else 1.0, affectsAdaptive = !isArena && !isBonusQuestion,
         )
+        celebrateStretchIfNeeded()
         // The big "+N דקות" popup is for real bonuses only — the per-answer seconds rise into the timer.
         var bonusPopupMinutes = out?.varietyBonusMinutes ?: 0
         // 🌈 Topic balance: celebrate the variety bonus, or nudge (positively) to another world.
@@ -490,6 +497,23 @@ class RunnerController(
         companion.console(listOf(tr("כִּמְעַט!"), tr("מַמָּשׁ קָרוֹב"), g(tr("בּוֹא נְנַסֶּה שׁוּב"), tr("בּוֹאִי נְנַסֶּה שׁוּב")), tr("נְנַסֶּה אֶת הַבָּאָה"),
             tr("⭐ עוֹד תְּשׁוּבָה נְכוֹנָה וְחוֹזְרִים לְהִתְקַדֵּם")).random())
         firstRunFeedback(correct = false, seconds = maxOf(0, owed))
+    }
+
+    /** 🚀 A topic just opened the grade above: Tofy says so, with confetti — once (iOS celebrateStretchIfNeeded). */
+    private fun celebrateStretchIfNeeded() {
+        val e = KidSession.engine() ?: return
+        val raw = e.justStretched ?: return
+        e.justStretched = null
+        val topic = com.rani.tofy.ui.child.Topic.of(raw) ?: return
+        val grade = kidGradeName((child?.effectiveGrade ?: 1) + 1)
+        val inTopic = if (com.rani.tofy.i18n.I18n.language == com.rani.tofy.i18n.AppLanguage.HE) withBet(topic.displayName) else topic.displayName
+        val line = g(tr("וָאוּ! אַתָּה כְּבָר עוֹנֶה עַל שְׁאֵלוֹת שֶׁל %@ %@! 🚀", grade, inTopic),
+                     tr("וָאוּ! אַתְּ כְּבָר עוֹנָה עַל שְׁאֵלוֹת שֶׁל %@ %@! 🚀", grade, inTopic))
+        scope.launch {
+            delay(150)
+            companion.wow(line)
+            confettiTrigger++
+        }
     }
 
     private fun flySeconds(text: String, paid: Int) {
@@ -646,3 +670,37 @@ class RunnerController(
         KidSession.pushNow()
     }
 }
+
+/** "כִּתָּה ב׳" — the child's words, pointed (QuestionRunnerView.kidGradeName). */
+fun kidGradeName(g: Int): String {
+    val letters = listOf(tr("א׳"), tr("ב׳"), tr("ג׳"), tr("ד׳"), tr("ה׳"), tr("ו׳"), tr("ז׳"), tr("ח׳"), tr("ט׳"))
+    return tr("כִּתָּה %@", letters[g.coerceIn(1, letters.size) - 1])
+}
+
+/**
+ * "בְּ" + a pointed word, the prefix vowelled the way the word asks (iOS withBet):
+ * בִּ before a shva (בִּכְלֵי), the hataf's own vowel before a hataf (בַּהֲבָנַת),
+ * בַּ in place of the article (בַּחַגִּים), else בְּ — and the first letter's dagesh
+ * lene goes after the prefix (בִּדְגָלִים, בְּגֵאוֹגְרַפְיָה).
+ */
+fun withBet(word: String): String {
+    if (word.isEmpty() || word[0] !in '\u05D0'..'\u05EA') return "בְּ$word"
+    var i = 1
+    val marks = mutableListOf<Char>()
+    while (i < word.length && word[i] in '\u0591'..'\u05C7') { marks += word[i]; i++ }
+    fun afterShva(w: String): String {
+        if (w.isEmpty() || w[0] !in "בגדכפת") return w
+        val sb = StringBuilder(w); var j = 1
+        while (j < sb.length && sb[j] in '\u0591'..'\u05C7') { if (sb[j] == '\u05BC') { sb.deleteCharAt(j); break }; j++ }
+        return sb.toString()
+    }
+    return when {
+        word[0] == 'ה' && marks == listOf('\u05B7') -> "בַּ" + word.substring(i)
+        '\u05B0' in marks -> "בִּ" + afterShva(word)
+        '\u05B2' in marks -> "בַּ$word"
+        '\u05B1' in marks -> "בֶּ$word"
+        '\u05B3' in marks -> "בָּ$word"
+        else -> "בְּ" + afterShva(word)
+    }
+}
+

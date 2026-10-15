@@ -40,6 +40,8 @@ data class ChildContentProfile(
     val disabledPacks: Set<String> = emptySet(),
     /** ProgressSnapshot.topicAdaptiveLevel (continuous 0…2 per topic). */
     val topicAdaptiveLevel: Map<String, Double> = emptyMap(),
+    /** 🚀 ProgressSnapshot.topicGradeStretch — topics also served from the grade above. */
+    val topicGradeStretch: Map<String, Int> = emptyMap(),
     /** The Smart Feed's per-topic signals from the snapshot. */
     val signals: LearningSignals = LearningSignals(),
 ) {
@@ -50,6 +52,7 @@ data class ChildContentProfile(
     fun adaptiveLevel(t: Topic): Double = topicAdaptiveLevel[t.raw] ?: AdaptiveDifficultyEngine.level(baseDifficulty(t))
 
     val isPreReader: Boolean get() = grade < 1
+    fun isStretched(t: Topic): Boolean = (topicGradeStretch[t.raw] ?: 0) > 0
 
     /**
      * Profile.allows: a world with no content in the language is never offered;
@@ -87,6 +90,7 @@ data class ChildContentProfile(
                 packAccess = access,
                 disabledPacks = child.disabledPacks,
                 topicAdaptiveLevel = dmap("topicAdaptiveLevel"),
+                topicGradeStretch = imap("topicGradeStretch"),
                 signals = LearningSignals(
                     topicAccuracy = dmap("topicAccuracy"), topicAnswered = imap("topicAnswered"),
                     topicAffinity = dmap("topicAffinity"), topicExposure = imap("topicExposure"),
@@ -192,9 +196,14 @@ class QuestionSession internal constructor(
             }
         }
 
+        // 🚀 At the top of their own grade in this topic: about every other question
+        // comes from the grade above, at that grade's middle level (Rani, 2026-10-15).
+        val stretchTo = if (!preReader && !bonus && !arena && child.isStretched(topic) && child.grade < CurriculumMath.TOP_GRADE && rng.nextBoolean())
+            child.grade + 1 else null
         fun make(): Question = when {
             bonus || arena -> QuestionGenerator.generateBonus(topic, child.grade, ctx)
-            preReader -> PreReaderContent.generate(topic, rng)
+            preReader -> PreReaderContent.generate(topic, rng, effective)
+            stretchTo != null -> QuestionGenerator.generate(topic, Difficulty.MEDIUM, stretchTo, ctx).copy(stretchGrade = stretchTo)
             else -> QuestionGenerator.generate(topic, effective, child.grade, ctx)
         }
         var q = make()

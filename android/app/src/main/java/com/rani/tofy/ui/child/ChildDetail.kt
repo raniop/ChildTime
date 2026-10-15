@@ -58,12 +58,14 @@ internal data class SnapshotExtras(
     val adaptive: Map<String, Double>, val affinity: Map<String, Double>, val exposure: Map<String, Int>,
     /** 🏆 ProgressSnapshot.worldStage (tier × 10 + room) and the legacy worldProgress rooms. */
     val worldStage: Map<String, Int> = emptyMap(), val worldProgress: Map<String, Int> = emptyMap(),
+    /** 🚀 ProgressSnapshot.topicGradeStretch — topics also served from the grade above. */
+    val gradeStretch: Map<String, Int> = emptyMap(),
 ) {
     companion object {
         private fun nums(d: Doc, k: String) = d.map(k)?.mapNotNull { (key, v) -> (v as? Number)?.let { key to it.toDouble() } }?.toMap() ?: emptyMap()
         private fun ints(d: Doc, k: String) = nums(d, k).mapValues { it.value.toInt() }
         fun from(d: Doc) = SnapshotExtras(nums(d, "topicAdaptiveLevel"), nums(d, "topicAffinity"), ints(d, "topicExposure"),
-            ints(d, "worldStage"), ints(d, "worldProgress"))
+            ints(d, "worldStage"), ints(d, "worldProgress"), ints(d, "topicGradeStretch"))
     }
 }
 
@@ -442,8 +444,14 @@ private fun TopicRow(child: Child, s: Progress, extras: SnapshotExtras, t: Topic
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(t.topic.parentName, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, maxLines = 1)
+                // 🚀 At the top of their own grade here: questions from the grade above too.
+                if ((extras.gradeStretch[t.topic.raw] ?: 0) > 0) {
+                    Text("🚀 " + tr("שאלות של %@", com.rani.tofy.ui.home.gradeNameForParent(child.effectiveGrade + 1)), maxLines = 1,
+                        color = Color(0xFF3A2700), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 10.5.sp,
+                        modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(GoldBrush).padding(horizontal = 7.dp, vertical = 2.dp))
+                }
                 // The level the adaptive engine serves now, and where it moved from the parent's base.
-                if (hasAdaptiveSignal(s)) {
+                else if (hasAdaptiveSignal(s)) {
                     val st = adaptiveState(t.topic, child, extras.adaptive)
                     val hint = st.direction?.let { if (it == Direction.EASED) "↓ " + tr("בונה ביטחון") else "↑ " + tr("מאתגר יותר") }
                     Text(st.served.parentName + (hint?.let { " · $it" } ?: ""), maxLines = 1,

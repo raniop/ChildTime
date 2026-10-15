@@ -44,7 +44,9 @@ object ActivityStore {
         ACCOUNT_LINK("accountLink", "👨‍👩‍👧"), PARENT_GATE("parentGate", "🔑"), GIFT_NOT_OPENED("giftNotOpened", "💝"),
         PIN_RESET("pinReset", "🔢"), SUPPORT_REPLY("supportReply", "💬"), WEEKLY_REPORT("weeklyReport", "📊"),
         PASS_ENDING("passEnding", "⏳"), TOFY_MESSAGE("tofyMessage", "📬"), ALERT("alert", "⚠️"),
-        INSIGHT("insight", "💡"), WHATS_NEW("whatsNew", "✨"), PUSH("push", "🔔");
+        INSIGHT("insight", "💡"), WHATS_NEW("whatsNew", "✨"), PUSH("push", "🔔"),
+        /** 🚀 A topic opened questions from the grade above (value = topic, number = that grade). */
+        GRADE_STRETCH("gradeStretch", "🚀");
 
         /** The row's one line — parent Hebrew, no niqqud, no gendered verb (same keys as iOS). */
         fun line(number: Int?, value: String?): String {
@@ -66,6 +68,11 @@ object ActivityStore {
                 MILESTONE -> tr("הישג חדש")
                 DISCOVERY -> if (v.isEmpty()) tr("גילוי עניין בנושא חדש") else tr("גילוי עניין ב%@", v)
                 WHEEL_WIN -> tr("זכייה בגלגל המזל")
+                GRADE_STRETCH -> {
+                    val topic = com.rani.tofy.ui.child.Topic.of(v)?.displayName?.let { com.rani.tofy.ui.home.stripNiqqud(it) } ?: ""
+                    if (topic.isEmpty() || n <= 0) tr("עלייה לשאלות של הכיתה הבאה")
+                    else tr("שאלות של %@ ב%@, מעל הכיתה", com.rani.tofy.ui.home.gradeNameForParent(n), topic)
+                }
                 HELP_REQUEST -> tr("בקשת עזרה בשאלה")
                 PREMIUM_REQUEST -> tr("בקשה לטופי+")
                 PACK_REQUEST -> tr("בקשה לחבילת שאלות")
@@ -107,6 +114,7 @@ object ActivityStore {
                 "milestone" -> MILESTONE
                 "streak" -> STREAK
                 "wheelWin" -> WHEEL_WIN
+                "gradeStretch" -> GRADE_STRETCH
                 "discovery" -> DISCOVERY
                 "assistRequest", "parentHelp" -> HELP_REQUEST
                 "screenTimeStart" -> SCREEN_TIME_START

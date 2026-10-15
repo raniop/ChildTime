@@ -558,7 +558,12 @@ private fun DifficultyEditor(child: Child, s: Progress, extras: SnapshotExtras, 
                         Text("${t.emoji} ${t.parentName}", Modifier.weight(1f), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, maxLines = 1)
                         // "↑ מאתגר יותר · קשה" beside a practiced topic whose served level moved away from the choice.
                         val st = if (served && (s.topicAnswered[t.raw] ?: 0) >= 1) adaptiveState(t, child, extras.adaptive) else null
-                        st?.direction?.let { dir ->
+                        if ((extras.gradeStretch[t.raw] ?: 0) > 0) {
+                            // 🚀 Past the top of the choice: questions from the grade above.
+                            Text("🚀 " + tr("שאלות של %@", com.rani.tofy.ui.home.gradeNameForParent(child.effectiveGrade + 1)),
+                                color = Color(0xFF3A2700), fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp, maxLines = 1,
+                                modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(GoldBrush).padding(horizontal = 9.dp, vertical = 3.dp))
+                        } else st?.direction?.let { dir ->
                             Text(if (dir == Direction.RAISED) "↑ " + tr("מאתגר יותר") else "↓ " + tr("בונה ביטחון"),
                                 color = if (dir == Direction.RAISED) Ink.good else Ink.warn, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp, maxLines = 1)
                             Text(st.served.parentName, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp,

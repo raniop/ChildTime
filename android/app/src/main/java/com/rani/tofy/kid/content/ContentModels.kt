@@ -87,6 +87,8 @@ data class Question(
     val passage: String? = null,
     /** SkillCatalog tag for the parent report; null = untagged. */
     val skill: String? = null,
+    /** 🚀 Served from the grade ABOVE the child's own (they are at the top of theirs in this topic). */
+    val stretchGrade: Int? = null,
     val id: String = UUID.randomUUID().toString(),
 ) {
     val correctAnswer: String get() = options[correctIndex]
