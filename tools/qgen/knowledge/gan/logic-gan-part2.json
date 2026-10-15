@@ -1,0 +1,434 @@
+[
+  {
+    "prompt": "🧩\nאֵיזֶה מַאֲכָל לֹא שַׁיָּךְ לַקְּבוּצָה?",
+    "correctAnswer": "🥕",
+    "distractors": [
+      "🍎",
+      "🍌",
+      "🍇"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nאֵיזוֹ חַיָּה לֹא שַׁיֶּכֶת לַקְּבוּצָה?",
+    "correctAnswer": "🐄",
+    "distractors": [
+      "🐠",
+      "🐙",
+      "🐳"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nאֵיזוֹ תְּמוּנָה לֹא מַתְאִימָה לַאֲחֵרוֹת?",
+    "correctAnswer": "🐟",
+    "distractors": [
+      "🐞",
+      "🐝",
+      "🦋"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמָה לֹא שַׁיָּךְ לָאַמְבַּטְיָה?",
+    "correctAnswer": "🛏️",
+    "distractors": [
+      "🚿",
+      "🧼",
+      "🧴"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמָה מֵהֶם לֹא כְּלִי נְגִינָה?",
+    "correctAnswer": "🍎",
+    "distractors": [
+      "🎸",
+      "🥁",
+      "🎺"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמָה לֹא שַׁיָּךְ לַגֶּשֶׁם?",
+    "correctAnswer": "🕶️",
+    "distractors": [
+      "☂️",
+      "🌧️",
+      "👢"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמָה לֹא שַׁיָּךְ לַלַּיְלָה?",
+    "correctAnswer": "☀️",
+    "distractors": [
+      "🌙",
+      "⭐",
+      "🦉"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמָה לֹא נִמְצָא עַל הַפָּנִים?",
+    "correctAnswer": "🦶",
+    "distractors": [
+      "👁️",
+      "👃",
+      "👄"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nלְאֵיזוֹ חַיָּה אֵין רַגְלַיִם בִּכְלָל?",
+    "correctAnswer": "🐍",
+    "distractors": [
+      "🐢",
+      "🐸",
+      "🐈"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמִי הוֹלֵךְ עַל אַרְבַּע רַגְלַיִם?",
+    "correctAnswer": "🐈",
+    "distractors": [
+      "🐔",
+      "🦆",
+      "🦉"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמָה עָשׂוּי מִנְּיָר?",
+    "correctAnswer": "📚",
+    "distractors": [
+      "🥄",
+      "🔑",
+      "🧦"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nבְּאֵיזֶה צֶבַע הַבָּנָנָה כְּשֶׁהִיא עוֹד לֹא בְּשֵׁלָה?",
+    "correctAnswer": "🟢",
+    "distractors": [
+      "🟡",
+      "🔴",
+      "🟣"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nבְּאֵיזֶה צֶבַע הַגֶּזֶר?",
+    "correctAnswer": "🟠",
+    "distractors": [
+      "🟢",
+      "🔵",
+      "🟣"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמָה גַּם צָהֹב וְגַם פְּרִי?",
+    "correctAnswer": "🍌",
+    "distractors": [
+      "🐥",
+      "🍎",
+      "🍇"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמִי הֲכִי כָּבֵד?",
+    "correctAnswer": "🐘",
+    "distractors": [
+      "🐈",
+      "🐕",
+      "🐑"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nאֵיזֶה כְּלִי רֶכֶב הֲכִי אָרֹךְ?",
+    "correctAnswer": "🚂",
+    "distractors": [
+      "🚗",
+      "🛴",
+      "🚲"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמִי הֲכִי מְבֻגָּר?",
+    "correctAnswer": "👴",
+    "distractors": [
+      "👶",
+      "👦",
+      "👧"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמִי קָטָן מִכֶּלֶב, אֲבָל גָּדוֹל מִנְּמָלָה?",
+    "correctAnswer": "🐁",
+    "distractors": [
+      "🐘",
+      "🐎",
+      "🐄"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמָה הֲכִי מָתוֹק?",
+    "correctAnswer": "🍭",
+    "distractors": [
+      "🍋",
+      "🥒",
+      "🧅"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nכָּחֹל, יָרֹק, אָדֹם, כָּחֹל, יָרֹק — אֵיזֶה צֶבַע בָּא עַכְשָׁיו?",
+    "correctAnswer": "🔴",
+    "distractors": [
+      "🔵",
+      "🟢",
+      "🟡"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nאָדֹם, צָהֹב, יָרֹק, אָדֹם, צָהֹב, יָרֹק, אָדֹם — אֵיזֶה צֶבַע בָּא עַכְשָׁיו?",
+    "correctAnswer": "🟡",
+    "distractors": [
+      "🔴",
+      "🟢",
+      "🔵"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nכֶּלֶב, חָתוּל, כֶּלֶב, חָתוּל, כֶּלֶב — מִי בָּא עַכְשָׁיו?",
+    "correctAnswer": "🐈",
+    "distractors": [
+      "🐕",
+      "🐄",
+      "🐑"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמוּ, הַב הַב, מוּ, הַב הַב, מוּ — מִי מַשְׁמִיעַ אֶת הַקּוֹל הַבָּא?",
+    "correctAnswer": "🐕",
+    "distractors": [
+      "🐄",
+      "🐈",
+      "🐑"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמָה מְצַחְצְחִים כָּל עֶרֶב לִפְנֵי הַשֵּׁינָה?",
+    "correctAnswer": "🦷",
+    "distractors": [
+      "👂",
+      "✋",
+      "🦶"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nלוֹבְשִׁים כְּפָפָה עַל הַיָּד. עַל מָה לוֹבְשִׁים גֶּרֶב?",
+    "correctAnswer": "🦶",
+    "distractors": [
+      "✋",
+      "👂",
+      "👃"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמִי הָאִמָּא שֶׁל הַגְּדִי?",
+    "correctAnswer": "🐐",
+    "distractors": [
+      "🐑",
+      "🐄",
+      "🐎"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nבְּמָה נוֹסֵעַ הַשּׁוֹטֵר?",
+    "correctAnswer": "🚓",
+    "distractors": [
+      "🚒",
+      "🚑",
+      "🚜"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמָה הָאַרְנָב אוֹהֵב לֶאֱכֹל?",
+    "correctAnswer": "🥕",
+    "distractors": [
+      "🍖",
+      "🐟",
+      "🍭"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמָה חוֹבֶשֶׁת הַמַּלְכָּה עַל הָרֹאשׁ?",
+    "correctAnswer": "👑",
+    "distractors": [
+      "🧢",
+      "🎓",
+      "⛑️"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמָה בָּא אַחֲרֵי הַסְּתָו?",
+    "correctAnswer": "❄️",
+    "distractors": [
+      "🌸",
+      "🍂",
+      "🏖️"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמָה יֵשׁ עַל עֵץ הַתַּפּוּחַ לִפְנֵי שֶׁגְּדֵלִים עָלָיו תַּפּוּחִים?",
+    "correctAnswer": "🌸",
+    "distractors": [
+      "🍊",
+      "🍌",
+      "🍄"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמָה צָרִיךְ כְּדֵי לִכְתֹּב מִכְתָּב?",
+    "correctAnswer": "✏️",
+    "distractors": [
+      "🥄",
+      "🔨",
+      "🧦"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nבְּמָה שׁוֹטְפִים אֶת הַכֵּלִים בַּכִּיּוֹר?",
+    "correctAnswer": "🧽",
+    "distractors": [
+      "🧹",
+      "🧦",
+      "📕"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמָה עוֹשֶׂה שְׁלוּלִיּוֹת בָּרְחוֹב?",
+    "correctAnswer": "🌧️",
+    "distractors": [
+      "☀️",
+      "🌈",
+      "🌙"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nאֵיךְ נִרְאֶה פֶּרַח שֶׁלֹּא הִשְׁקוּ אוֹתוֹ הַרְבֵּה זְמַן?",
+    "correctAnswer": "🥀",
+    "distractors": [
+      "🌻",
+      "🌷",
+      "🌹"
+    ],
+    "tier": "medium",
+    "gradeLo": 0,
+    "gradeHi": 0
+  },
+  {
+    "prompt": "🧩\nמָה מַדְלִיקִים עַל עוּגַת יוֹם הֻלֶּדֶת?",
+    "correctAnswer": "🕯️",
+    "distractors": [
+      "💡",
+      "🔦",
+      "🎈"
+    ],
+    "tier": "easy",
+    "gradeLo": 0,
+    "gradeHi": 0
+  }
+]

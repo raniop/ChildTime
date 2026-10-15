@@ -58,6 +58,16 @@
     },
     {
       "topic": "logic",
+      "file": "logic-gan.json",
+      "label": "gan",
+      "count": 94,
+      "byGrade": {
+        "0": 94
+      },
+      "generatedAt": "2026-10-15T05:01:42.906Z"
+    },
+    {
+      "topic": "logic",
       "file": "logic.json",
       "label": "",
       "count": 400,
