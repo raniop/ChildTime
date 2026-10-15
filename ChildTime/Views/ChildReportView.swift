@@ -445,7 +445,15 @@ struct ChildReportView: View {
     /// "↓ בּוֹנֶה בִּטָּחוֹן" / "↑ מְאַתְגֵּר יוֹתֵר" when it moved away from the
     /// parent's base (the old card's "רמת קושי חכמה", per row).
     @ViewBuilder private func difficultyTag(_ topic: Topic) -> some View {
-        if AdaptiveTopicLevel.hasSignal(snapshot) {
+        if (snapshot.topicGradeStretch?[topic.rawValue] ?? 0) > 0 {
+            // 🚀 At the top of their own grade here: questions from the grade above too.
+            Text("🚀 " + tr("שאלות של \(Profile.gradeNameForParent(profile.effectiveGrade + 1))"))
+                .font(.system(size: 10.5, weight: .heavy, design: .rounded))
+                .foregroundStyle(Color(hex: "3A2700"))
+                .lineLimit(1).minimumScaleFactor(0.7)
+                .padding(.horizontal, 7).padding(.vertical, 2)
+                .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        } else if AdaptiveTopicLevel.hasSignal(snapshot) {
             let st = AdaptiveTopicLevel.state(for: topic, profile: profile, snapshot: snapshot)
             let hint: String? = st.direction.map { $0 == .eased ? "↓ " + tr("בונה ביטחון") : "↑ " + tr("מאתגר יותר") }
             Text(st.served.parentName + (hint.map { " · " + $0 } ?? ""))

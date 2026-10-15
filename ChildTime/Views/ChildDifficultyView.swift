@@ -122,7 +122,15 @@ struct ChildDifficultyView: View {
     /// "↑ מאתגר יותר · קשה" beside a practiced topic whose served level moved
     /// away from the parent's choice.
     @ViewBuilder private func servedChips(_ topic: Topic) -> some View {
-        if let snapshot, let profile, AdaptiveTopicLevel.hasSignal(snapshot),
+        if let snapshot, let profile, (snapshot.topicGradeStretch?[topic.rawValue] ?? 0) > 0 {
+            // 🚀 Past the top of the parent's choice: questions from the grade above.
+            Text("🚀 " + tr("שאלות של \(Profile.gradeNameForParent(profile.effectiveGrade + 1))"))
+                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .foregroundStyle(Color(hex: "3A2700"))
+                .lineLimit(1).minimumScaleFactor(0.8)
+                .padding(.horizontal, 9).padding(.vertical, 3)
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
+        } else if let snapshot, let profile, AdaptiveTopicLevel.hasSignal(snapshot),
            (snapshot.topicAnswered[topic.rawValue] ?? 0) >= 1 {
             let st = AdaptiveTopicLevel.state(for: topic, profile: profile, snapshot: snapshot)
             if let dir = st.direction {

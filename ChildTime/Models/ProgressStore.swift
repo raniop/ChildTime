@@ -73,6 +73,8 @@ final class ProgressStore: ObservableObject {
         static let topicExposure = "topicExposure"
         static let topicAbandon = "topicAbandon"
         static let topicAdaptiveLevel = "topicAdaptiveLevel"
+        static let topicGradeStretch = "topicGradeStretch"
+        static let topicStretchScore = "topicStretchScore"
         static let wheelProgressCount = "wheelProgressCount"
         static let pendingBonusWheel = "pendingBonusWheel"
         static let lastComebackWheelAt = "lastComebackWheelAt"
@@ -584,6 +586,19 @@ final class ProgressStore: ObservableObject {
     /// Maintained by `AdaptiveDifficultyEngine`; floats around the parent's
     /// per-topic base. Rides along with the answer's revision bump (like the
     /// other per-topic signals — not a version trigger of its own).
+    /// 🚀 Questions from the grade above (Rani, 2026-10-15, after אמילי sat at
+    /// "hard" with 90% for weeks: the level stopped at the top of HER grade).
+    /// 1 = on for that topic. Opened by `topicStretchScore` reaching 1 at the top
+    /// level, closed when it falls under 0.3 — see `updateStretch`.
+    @Published private(set) var topicGradeStretch: [String: Int] {
+        didSet { defaults.set(topicGradeStretch, forKey: Key.topicGradeStretch) }
+    }
+    @Published private(set) var topicStretchScore: [String: Double] {
+        didSet { defaults.set(topicStretchScore, forKey: Key.topicStretchScore) }
+    }
+    /// The topic that just opened — the quiz celebrates it once, then clears it.
+    @Published var justStretched: Topic?
+
     @Published private(set) var topicAdaptiveLevel: [String: Double] {
         didSet { defaults.set(topicAdaptiveLevel, forKey: Key.topicAdaptiveLevel) }
     }
@@ -718,6 +733,8 @@ final class ProgressStore: ObservableObject {
         self.topicExposure = (d.dictionary(forKey: Key.topicExposure) as? [String: Int]) ?? [:]
         self.topicAbandon = (d.dictionary(forKey: Key.topicAbandon) as? [String: Int]) ?? [:]
         self.topicAdaptiveLevel = (d.dictionary(forKey: Key.topicAdaptiveLevel) as? [String: Double]) ?? [:]
+        self.topicGradeStretch = (d.dictionary(forKey: Key.topicGradeStretch) as? [String: Int]) ?? [:]
+        self.topicStretchScore = (d.dictionary(forKey: Key.topicStretchScore) as? [String: Double]) ?? [:]
         self.wheelProgressCount = d.integer(forKey: Key.wheelProgressCount)
         self.pendingBonusWheel = d.bool(forKey: Key.pendingBonusWheel)
         self.lastComebackWheelAt = d.object(forKey: Key.lastComebackWheelAt) as? Date
@@ -872,8 +889,56 @@ final class ProgressStore: ObservableObject {
         let current = topicAdaptiveLevel[key] ?? AdaptiveDifficultyEngine.level(for: base)
         let signals = AdaptiveDifficultyEngine.Signals(
             correct: correct, fast: fast, hintUsed: hintUsed, abandoned: abandoned)
-        topicAdaptiveLevel[key] = AdaptiveDifficultyEngine.updatedLevel(
-            current: current, base: base, signals: signals)
+        let level = AdaptiveDifficultyEngine.updatedLevel(current: current, base: base, signals: signals)
+        topicAdaptiveLevel[key] = level
+        updateStretch(topic: topic, correct: correct && !abandoned, level: level)
+    }
+
+    /// Whether this child's topic is served from the grade above right now.
+    func isStretched(_ topic: Topic) -> Bool {
+        #if DEBUG
+        if Self.demoStretch { return true }   // DEMO_STRETCH=1 — every topic at the top: see the 🚀 tag
+        #endif
+        return (topicGradeStretch[topic.rawValue] ?? 0) > 0
+    }
+    #if DEBUG
+    static let demoStretch = ProcessInfo.processInfo.environment["DEMO_STRETCH"] != nil
+    private var demoStretchCelebrated = false
+    #endif
+
+    /// 🚀 At the TOP level (the engine at hard) a right answer adds 1/16 and a
+    /// wrong one takes 1/3 — so the score climbs only while the child keeps
+    /// above ~84%, and reaches 1 after a few dozen answers at that rate. At 1
+    /// the topic opens the grade above; under 0.3 it closes again, quietly (a
+    /// child is never told they "went down"). Below the top level it fades.
+    /// Readers only (a גן child cannot read the grade-א׳ answers yet), never the
+    /// reading passages, and never above the last grade there is.
+    private func updateStretch(topic: Topic, correct: Bool, level: Double) {
+        let key = topic.rawValue
+        guard topic != .reading, let grade = ProfileStore.shared.active?.effectiveGrade,
+              grade >= 1, grade < CurriculumMath.topGrade else {
+            if topicGradeStretch[key] != nil { topicGradeStretch[key] = nil }
+            return
+        }
+        #if DEBUG
+        // DEMO_STRETCH=1: the first right answer plays the moment a topic opens.
+        if Self.demoStretch, correct, !demoStretchCelebrated { demoStretchCelebrated = true; justStretched = topic; return }
+        #endif
+        var score = topicStretchScore[key] ?? 0
+        if level >= 1.9 {
+            score = correct ? min(1, score + 1.0 / 16) : max(0, score - 1.0 / 3)
+        } else {
+            score = max(0, score - 0.1)
+        }
+        topicStretchScore[key] = score
+        if (topicGradeStretch[key] ?? 0) == 0, score >= 1 {
+            topicGradeStretch[key] = 1
+            justStretched = topic
+            // The parent's activity centre: "שאלות של כיתה ב׳ בלוגיקה".
+            LiveEventReporter.report(.gradeStretch, value: key, topic: topic, extra: ["minutes": grade + 1])
+        } else if (topicGradeStretch[key] ?? 0) > 0, score < 0.3 {
+            topicGradeStretch[key] = nil
+        }
     }
 
     /// Overall rolling accuracy across every topic the child has touched.
@@ -2678,6 +2743,8 @@ final class ProgressStore: ObservableObject {
         s.topicExposure       = topicExposure
         s.topicAbandon        = topicAbandon
         s.topicAdaptiveLevel  = topicAdaptiveLevel
+        s.topicGradeStretch   = topicGradeStretch
+        s.topicStretchScore   = topicStretchScore
         s.wheelProgressCount  = wheelProgressCount
         s.recoveryPot         = recoveryPot
         s.parentGiftMinutes   = parentGiftMinutes
@@ -2787,6 +2854,8 @@ final class ProgressStore: ObservableObject {
         topicExposure       = s.topicExposure
         topicAbandon        = s.topicAbandon
         topicAdaptiveLevel  = s.topicAdaptiveLevel ?? [:]
+        topicGradeStretch   = s.topicGradeStretch ?? [:]
+        topicStretchScore   = s.topicStretchScore ?? [:]
         wheelProgressCount  = s.wheelProgressCount
         recoveryPot         = s.recoveryPot
         giftGivenToday      = s.giftGivenToday ?? 0

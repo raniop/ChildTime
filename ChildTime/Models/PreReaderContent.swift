@@ -12,17 +12,25 @@ import Foundation
 /// teaches the letters, and each theme world asks about its own pictures.
 enum PreReaderContent {
 
-    static func generate(topic: Topic) -> Question {
+    /// `difficulty`: the level this child is served in this world now (the
+    /// adaptive engine's pick). Until 2026-10-15 a גן child got the same rounds
+    /// at every level — a bright five-year-old "on hard" still heard "where is
+    /// the circle?" (David, father of אמילי). Now the level decides how much is
+    /// THINKING: at hard only thinking questions where the world has them, and
+    /// in math the sums and comparisons rather than plain counting.
+    static func generate(topic: Topic, difficulty: Difficulty = .medium) -> Question {
         switch topic {
         case .math:
-            return mathRound()
+            return mathRound(difficulty)
         case .hebrew where LanguageStore.shared.current == .he:
             return lettersRound()
         default:
             // 🧠 A world that has THINKING questions asks them most of the time
             // (see `pictureQuestion`); the "where is the…" rounds stay for variety.
-            if Double.random(in: 0...1) < 0.6,
-               let q = pictureQuestion(from: RemoteQuestionBank.shared.questions(for: topic), topic: topic) {
+            let thinkingShare: Double = difficulty == .hard ? 1 : difficulty == .medium ? 0.6 : 0.4
+            if Double.random(in: 0...1) < thinkingShare,
+               let q = pictureQuestion(from: RemoteQuestionBank.shared.questions(for: topic), topic: topic,
+                                       preferHarder: difficulty == .hard) {
                 return q
             }
             // A theme world asks about ITS pictures most of the time; the
@@ -42,10 +50,13 @@ enum PreReaderContent {
     /// every answer is a picture, so a child who cannot read can still reason
     /// (Sasha, 2026-10-11). They come from the cloud bank — grade 0 items whose
     /// four options are pictures only — so new ones arrive without a build.
-    static func pictureQuestion(from bank: [BankQuestion], topic: Topic) -> Question? {
+    static func pictureQuestion(from bank: [BankQuestion], topic: Topic, preferHarder: Bool = false) -> Question? {
         let pool = bank.filter { $0.grades.contains(0) && isPictureOnly($0) }
         // A handful would repeat within one round — wait until the world has a real set.
-        guard pool.count >= minPicturePool, let b = pool.randomElement() else { return nil }
+        guard pool.count >= minPicturePool else { return nil }
+        // On hard, the batch's "medium" items when there is a real set of them.
+        let harder = pool.filter { $0.difficulty != .easy }
+        guard let b = (preferHarder && harder.count >= minPicturePool ? harder : pool).randomElement() else { return nil }
         let options = ([b.correctAnswer] + b.distractors.prefix(3)).shuffled()
         guard let correct = options.firstIndex(of: b.correctAnswer) else { return nil }
         // The four answers are the pictures — the question stays words only, so
@@ -88,7 +99,15 @@ enum PreReaderContent {
 
     // MARK: - 🔢 Math: count, add, take away, compare, find the digit
 
-    private static func mathRound() -> Question {
+    private static func mathRound(_ difficulty: Difficulty = .medium) -> Question {
+        // Hard: adding, taking away and "where are there more" — no plain counting.
+        if difficulty == .hard {
+            switch Int.random(in: 0..<5) {
+            case 0, 1: return pictureAdd()
+            case 2, 3: return pictureTakeAway()
+            default:   return whereMore()
+            }
+        }
         switch Int.random(in: 0..<9) {
         case 0...2: return counting()
         case 3, 4:  return pictureAdd()

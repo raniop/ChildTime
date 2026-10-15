@@ -959,9 +959,24 @@ struct QuestionRunnerView: View {
         .padding(.horizontal, 14).padding(.top, 12).padding(.bottom, 16)
         .glassPane(radius: 16)
         .overlay {
-            if isSuperQuestion || isBonusQuestion || isBonusArena {
+            if isSuperQuestion || isBonusQuestion || isBonusArena || q.stretchGrade != nil {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .strokeBorder(AppColor.starGold.opacity(0.9), lineWidth: 2)
+            }
+        }
+        // 🚀 A question from the grade above — worn proudly on the card's edge.
+        .overlay(alignment: .top) {
+            if let g = q.stretchGrade {
+                Text("🚀 " + Self.kidGradeName(g))
+                    .font(.system(size: 13, weight: .black, design: .rounded))
+                    .foregroundStyle(Color(hex: "3A2700"))
+                    .lineLimit(1).fixedSize()
+                    .padding(.horizontal, 11).padding(.vertical, 4)
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.8), lineWidth: 1.5))
+                    .shadow(color: AppColor.starGold.opacity(0.6), radius: 6)
+                    .offset(y: -12)
+                    .accessibilityLabel(tr("שְׁאֵלָה שֶׁל \(Self.kidGradeName(g))"))
             }
         }
         // The same side margins as the answers and the shelf (Rani, 2026-10-10).
@@ -1627,11 +1642,20 @@ struct QuestionRunnerView: View {
         if case .world(let w) = mode, let g = childGrade, g >= 1 {
             childGrade = min(CurriculumMath.topGrade, g + progress.tierGradeOffset(in: w.id))
         }
+        // 🚀 At the top of their own grade in this topic: about every other
+        // question comes from the grade above (Rani, 2026-10-15).
+        var stretchedTo: Int?
+        if !preReader, !bonus, !isBonusArena, progress.isStretched(topic),
+           let g = childGrade, g == profiles.active?.effectiveGrade, g < CurriculumMath.topGrade, Bool.random() {
+            childGrade = g + 1
+            stretchedTo = g + 1
+        }
         func makeQuestion() -> Question {
             if bonus || isBonusArena { return QuestionGenerator.generateBonus(topic: topic, grade: childGrade) }
             return preReader
-                ? PreReaderContent.generate(topic: topic)
-                : QuestionGenerator.generate(topic: topic, difficulty: effective, grade: childGrade)
+                ? PreReaderContent.generate(topic: topic, difficulty: effective)
+                // A question from the grade above starts at that grade's middle, not its top.
+                : QuestionGenerator.generate(topic: topic, difficulty: stretchedTo != nil ? .medium : effective, grade: childGrade)
         }
         var q = makeQuestion()
         // Generated questions (math + every pre-reader visual) can repeat — re-roll
@@ -1650,6 +1674,7 @@ struct QuestionRunnerView: View {
             q = makeQuestion()
             hideTries += 1
         }
+        q.stretchGrade = stretchedTo
         QuestionMemory.shared.markServedThisSession(sessionKey(q))
         current = q
         questionShownAt = Date()
@@ -1971,6 +1996,7 @@ struct QuestionRunnerView: View {
             }
         }
         firstRunFeedback(correct: true, seconds: earnsTime && !cappedBefore ? progress.lastPaidSeconds : 0)
+        celebrateStretchIfNeeded()
         // "+X דקות" popup — only for a real bonus (💫 question, 🌈 variety).
         if bonusPopupMinutes > 0 {
             showEarnedMinutesPopup(minutes: bonusPopupMinutes)
@@ -2040,6 +2066,51 @@ struct QuestionRunnerView: View {
     /// 8/15, wheel, discovery) — they flooded the parent. We now notify ONLY on
     /// session start + finish (and explicit help requests), so this is a no-op.
     private func reportLiveEvents(for q: Question) { }
+
+    /// 🚀 A topic just opened questions from the grade above: Tofy says so, with
+    /// confetti — once, the moment it happens (it is a moment of pride).
+    private func celebrateStretchIfNeeded() {
+        guard let topic = progress.justStretched else { return }
+        progress.justStretched = nil
+        guard let g = profiles.active?.effectiveGrade else { return }
+        let grade = Self.kidGradeName(g + 1)
+        // Hebrew glues "בְּ" onto the topic (and the prefix's own vowel depends on
+        // the word: בִּכְלֵי רֶכֶב, בַּחַגִּים); the other languages say "in …" themselves.
+        let inTopic = LanguageStore.shared.current == .he ? Self.withBet(topic.displayName) : topic.displayName
+        let line = Gendered.g(tr("וָאוּ! אַתָּה כְּבָר עוֹנֶה עַל שְׁאֵלוֹת שֶׁל \(grade) \(inTopic)! 🚀"),
+                              tr("וָאוּ! אַתְּ כְּבָר עוֹנָה עַל שְׁאֵלוֹת שֶׁל \(grade) \(inTopic)! 🚀"))
+        // A beat later: this answer's own line is set further down the handler.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            companion.wow(line)
+            confettiTrigger += 1
+            SoundPlayer.shared.play(.levelUp)
+        }
+    }
+
+    /// "בְּ" + a pointed word, with the prefix vowelled the way the word asks:
+    /// בִּ before a shva (בִּכְלֵי), the hataf's own vowel before a hataf
+    /// (בַּהֲבָנַת), בַּ in place of the article (בַּחַגִּים), else בְּ — and the
+    /// first letter's dagesh lene goes after the prefix (בִּדְגָלִים).
+    static func withBet(_ word: String) -> String {
+        let scalars = Array(word.unicodeScalars)
+        guard let first = scalars.first, (0x05D0...0x05EA).contains(first.value) else { return "בְּ" + word }
+        var marks: [UInt32] = []
+        var i = 1
+        while i < scalars.count, (0x0591...0x05C7).contains(scalars[i].value) { marks.append(scalars[i].value); i += 1 }
+        let rest = String(String.UnicodeScalarView(scalars.dropFirst(i)))
+        if first == "ה", marks == [0x05B7] { return "בַּ" + rest }              // הַ — the article
+        if marks.contains(0x05B0) { return "בִּ" + Localization.afterShvaPrefix(word) }
+        if marks.contains(0x05B2) { return "בַּ" + word }
+        if marks.contains(0x05B1) { return "בֶּ" + word }
+        if marks.contains(0x05B3) { return "בָּ" + word }
+        return "בְּ" + Localization.afterShvaPrefix(word)
+    }
+
+    /// "כִּתָּה ב׳" — the child's words, pointed.
+    static func kidGradeName(_ g: Int) -> String {
+        let letters = [tr("א׳"), tr("ב׳"), tr("ג׳"), tr("ד׳"), tr("ה׳"), tr("ו׳"), tr("ז׳"), tr("ח׳"), tr("ט׳")]
+        return tr("כִּתָּה \(letters[max(1, min(g, letters.count)) - 1])")
+    }
 
     /// 🪙 "+24 שניות" pops up big over the question, holds a beat, swoops
     /// down INTO the shelf's clock — and only then does the clock move: it

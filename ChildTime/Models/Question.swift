@@ -18,6 +18,10 @@ struct Question: Identifiable, Equatable {
     /// `SkillCatalog`. Lets the parent report say "strong in multiplication,
     /// struggling with fractions" instead of just "math 61%". nil = untagged.
     var skill: String? = nil
+    /// 🚀 Served from the grade ABOVE the child's own, because they are at the
+    /// top of their own grade in this topic (see `ProgressStore.topicGradeStretch`).
+    /// The card wears "🚀 כִּתָּה ב׳" — a moment of pride, never a warning.
+    var stretchGrade: Int? = nil
 
     var correctAnswer: String { options[correctIndex] }
     /// The line the read-aloud / auto-read should speak.

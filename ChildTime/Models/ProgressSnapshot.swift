@@ -75,6 +75,11 @@ struct ProgressSnapshot: Codable, Equatable {
     /// child performs. Optional so snapshots written by older app versions
     /// (which lack the key) still decode cleanly — read it back as `?? [:]`.
     var topicAdaptiveLevel: [String: Double]? = nil
+    /// 🚀 Topics where the child, at the top level of their own grade, now also
+    /// gets questions from the grade above (1 = on), and the score that opens
+    /// and closes it. Optional like `topicAdaptiveLevel`: old snapshots decode.
+    var topicGradeStretch: [String: Int]? = nil
+    var topicStretchScore: [String: Double]? = nil
     var hourlyAnswered: [Int]? = nil
     var hourlyCorrect: [Int]? = nil
 
@@ -216,6 +221,7 @@ extension ProgressSnapshot {
         case returnedTodayMinutes
         case answeredToday, correctToday, carryOverMinutes, bestStreak, cycleSeconds
         case topicResponseMs, topicAffinity, topicExposure, topicAbandon, topicAdaptiveLevel
+        case topicGradeStretch, topicStretchScore
         case hourlyAnswered, hourlyCorrect
         case wheelProgressCount, recoveryPot, ownedCharacterIDs, parentGiftMinutes, giftGivenToday, giftGivenDate
         case secondsCarry, carryIsGift, purgeCacheAt
@@ -271,6 +277,8 @@ extension ProgressSnapshot {
         if let v = (try? c.decodeIfPresent([String: Int].self, forKey: .topicExposure)) ?? nil { topicExposure = v }
         if let v = (try? c.decodeIfPresent([String: Int].self, forKey: .topicAbandon)) ?? nil { topicAbandon = v }
         if let v = (try? c.decodeIfPresent([String: Double].self, forKey: .topicAdaptiveLevel)) ?? nil { topicAdaptiveLevel = v }
+        if let v = (try? c.decodeIfPresent([String: Int].self, forKey: .topicGradeStretch)) ?? nil { topicGradeStretch = v }
+        if let v = (try? c.decodeIfPresent([String: Double].self, forKey: .topicStretchScore)) ?? nil { topicStretchScore = v }
         if let v = (try? c.decodeIfPresent([Int].self, forKey: .hourlyAnswered)) ?? nil { hourlyAnswered = v }
         if let v = (try? c.decodeIfPresent([Int].self, forKey: .hourlyCorrect)) ?? nil { hourlyCorrect = v }
         if let v = (try? c.decodeIfPresent(Int.self, forKey: .wheelProgressCount)) ?? nil { wheelProgressCount = v }

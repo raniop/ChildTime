@@ -33,6 +33,8 @@ enum ActivityKind: String, Codable, CaseIterable {
     case discovery
     case wheelWin
     case shopPurchase
+    /// 🚀 A topic opened questions from the grade above.
+    case gradeStretch
     // — the child asking for something —
     case helpRequest
     case premiumRequest
@@ -85,6 +87,7 @@ enum ActivityKind: String, Codable, CaseIterable {
         case .discovery:        return "🔭"
         case .wheelWin:         return "🎡"
         case .shopPurchase:     return "🛍️"
+        case .gradeStretch:     return "🚀"
         case .helpRequest:      return "🙋"
         case .premiumRequest:   return "⭐"
         case .packRequest:      return "🎁"
@@ -148,6 +151,12 @@ enum ActivityKind: String, Codable, CaseIterable {
             }()
             if name.isEmpty { return tr("קנייה בחנות") }
             return n > 0 ? tr("קנייה בחנות: \(name) · \(n) 💎") : tr("קנייה בחנות: \(name)")
+        case .gradeStretch:
+            // value = the topic, number = the grade above: "שאלות של כיתה ב׳ בלוגיקה".
+            let topic = Topic(rawValue: v).map { Question.stripNiqqud($0.displayName) } ?? ""
+            let grade = n > 0 ? Profile.gradeNameForParent(n) : ""
+            if topic.isEmpty || grade.isEmpty { return tr("עלייה לשאלות של הכיתה הבאה") }
+            return tr("שאלות של \(grade) ב\(topic), מעל הכיתה")
         case .helpRequest:      return tr("בקשת עזרה בשאלה")
         case .premiumRequest:   return tr("בקשה לטופי+")
         case .packRequest:      return tr("בקשה לחבילת שאלות")
@@ -197,6 +206,7 @@ enum ActivityKind: String, Codable, CaseIterable {
         case "streak":              return .streak
         case "wheelWin":            return .wheelWin
         case "shopPurchase":        return .shopPurchase
+        case "gradeStretch":        return .gradeStretch
         case "discovery":           return .discovery
         case "assistRequest", "parentHelp": return .helpRequest
         case "screenTimeStart":     return .screenTimeStart

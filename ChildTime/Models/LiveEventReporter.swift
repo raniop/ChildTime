@@ -39,6 +39,9 @@ enum LiveEventReporter {
         // (the parent's own app names it in its own language), and the price
         // rides in `minutes`, the one number the server's record keeps.
         case shopPurchase
+        /// 🚀 A topic opened questions from the grade above. value = topic,
+        /// `minutes` = that grade (the one number the server's record keeps).
+        case gradeStretch
     }
 
     /// When each (child, kind) was last reported — see the de-duplication in `report`.
