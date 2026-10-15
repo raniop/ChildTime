@@ -57,20 +57,45 @@ class SelectionTest {
         val s = QuestionSource.session(child(0), ContentMode.World(Topic.MATH))
         // Count, add, take away, compare, find the digit — always read aloud,
         // and a plain row of pictures is answered by counting it.
-        repeat(60) {
-            val q = s.next().question
-            assertTrue(q.spoken != null)
-            assertTrue(q.correctIndex in q.options.indices)
-            val marked = listOf("➕", "➖", "⚖️", "👂").any { it in q.prompt }
-            if (!marked) assertEquals(q.correctAnswer.toInt(), q.prompt.split(" ").size)
-            if ("➕" in q.prompt) {
-                val (a, b) = q.prompt.split("➕").map { side -> side.trim().split(" ").size }
-                assertEquals(a + b, q.correctAnswer.toInt())
+        repeat(60) { checkPictureMath(s.next().question) }
+    }
+
+    /** Every level's mix — exercise ↔ picture joins at medium and hard (Sasha, 2026-10-15). */
+    @Test fun preReaderMathIsRightAtEveryLevel() {
+        val rng = Random(7)
+        for (d in Difficulty.entries) repeat(150) { checkPictureMath(PreReaderContent.generate(Topic.MATH, rng, d)) }
+    }
+
+    private fun checkPictureMath(q: Question) {
+        // Sums sit in a left-to-right isolate (U+2066…U+2069) and use an ASCII "+".
+        fun strip(t: String) = t.replace("\u2066", "").replace("\u2069", "")
+        fun pics(t: String) = t.trim().codePointCount(0, t.trim().length)   // "🌸🌸" → 2
+        assertTrue(q.spoken != null)
+        assertTrue(q.correctIndex in q.options.indices)
+        assertEquals(q.options.size, q.options.toSet().size)
+        val prompt = strip(q.prompt); val answer = strip(q.correctAnswer)
+        val scene = q.takeAway
+        when {
+            // 👶➖ the scene and the answer agree, and the text form says the same
+            scene != null -> {
+                assertEquals(scene.total - scene.take, answer.toInt())
+                val (a, b) = prompt.split("➖").map { side -> side.trim().split(" ").size }
+                assertEquals(a - b, answer.toInt())
             }
-            if ("➖" in q.prompt) {
-                val (a, b) = q.prompt.split("➖").map { side -> side.trim().split(" ").size }
-                assertEquals(a - b, q.correctAnswer.toInt())
+            "+" in prompt -> {
+                val sides = prompt.split("+").map { it.trim() }
+                val a = sides[0].toIntOrNull(); val b = sides[1].toIntOrNull()
+                if (a != null && b != null) {
+                    // "2 + 3" → the picture sum with 2 and 3
+                    val parts = answer.split("+")
+                    assertEquals("$prompt → $answer", listOf(a, b), parts.map { pics(it) })
+                } else if ("+" in answer) {
+                    // a picture → "a + b"
+                    val parts = answer.split("+").map { it.trim().toInt() }
+                    assertEquals("$prompt → $answer", listOf(sides[0].split(" ").size, sides[1].split(" ").size), parts)
+                } else assertEquals(sides[0].split(" ").size + sides[1].split(" ").size, answer.toInt())
             }
+            prompt !in listOf("⚖️", "👂") -> assertEquals(answer.toInt(), prompt.split(" ").size)
         }
     }
 

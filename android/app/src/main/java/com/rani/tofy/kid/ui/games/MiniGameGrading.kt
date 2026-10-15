@@ -67,9 +67,15 @@ enum class SpellScript {
 
 /** The grade band each game is worth offering in. */
 object MiniGameGradeFit {
-    /** 👶 The גן roster: the five games whose mechanic survives with NO text. */
+    /**
+     * 👶 The גן roster: the seven games whose mechanic survives with NO text —
+     * pop, sort, order, count, match, continue, collect. 🎞️ and 🍎 joined on
+     * 2026-10-15 (Sasha): a story in pictures put in order, and counting by
+     * dragging into a basket.
+     */
     val preReaderRoster: List<MiniGameKind> =
-        listOf(MiniGameKind.BALLOON, MiniGameKind.SORT, MiniGameKind.PAIRS, MiniGameKind.PATTERN, MiniGameKind.CRUSH)
+        listOf(MiniGameKind.BALLOON, MiniGameKind.SORT, MiniGameKind.SEQUENCE, MiniGameKind.BASKET,
+            MiniGameKind.PAIRS, MiniGameKind.PATTERN, MiniGameKind.CRUSH)
 
     fun roster(grade: Int): List<MiniGameKind> =
         if (MiniGameBand.of(grade) != MiniGameBand.PRE_READER) MiniGameKind.entries.filter { offered(it, grade) }
@@ -86,6 +92,10 @@ object MiniGameGradeFit {
             MiniGameKind.VAULT -> grade >= 2
             MiniGameKind.PATTERN -> if (topic == Topic.ENGLISH || topic == Topic.HEBREW) grade <= 5 else true
             MiniGameKind.GROCERY -> if (script == null || !script.isSecondLanguage) true else grade >= 3
+            // 🍎 Counting to eight into a basket: גן and א׳ only.
+            MiniGameKind.BASKET -> grade <= 1
+            // 🎞️ Putting a day back in order: real work in א׳–ב׳, a freebie from ג׳ (Sasha, 2026-10-15).
+            MiniGameKind.SEQUENCE -> grade <= 2
             MiniGameKind.PAIRS, MiniGameKind.BALLOON, MiniGameKind.CRUSH, MiniGameKind.LIGHTNING,
             MiniGameKind.SORT, MiniGameKind.BALANCE -> true
         }

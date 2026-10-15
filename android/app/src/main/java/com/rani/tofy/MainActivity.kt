@@ -55,7 +55,7 @@ class MainActivity : ComponentActivity() {
         // opens a page of the child's settings, `--ei demoGiftSent 30` the gift window after sending.
         val demoParent = demoScreen?.takeIf { it in setOf("parenthome", "childreport", "childsettings", "gift", "settings", "chores") }
         // `--es demoLang he|en|ru|ar` — the language for this run only (nothing is saved).
-        if (demoParent != null || demoScreen == "kidchores") {
+        if (demoParent != null || demoScreen == "kidchores" || demoGame != null || demoQuiz) {
             com.rani.tofy.i18n.AppLanguage.of(intent?.getStringExtra("demoLang"))?.let { com.rani.tofy.i18n.I18n.set(it, persist = false) }
         }
         if (demoParent != null) {
@@ -71,6 +71,20 @@ class MainActivity : ComponentActivity() {
         if (BuildConfig.DEBUG) com.rani.tofy.ui.common.demoPhotos = intent?.getIntExtra("demoBackdropPhotos", -1)?.takeIf { it >= 0 }
         if (BuildConfig.DEBUG) intent?.getStringExtra("demoGrade")?.toIntOrNull()?.let {
             com.rani.tofy.kid.ui.games.MiniGameLevel.debugGrade = it
+        }
+        // 🧪 `--es demoLevel easy|medium|hard` — the level 🎞️ / 🍎 deal at (iOS DEMO_LEVEL);
+        // `--es demoTopic math` — the world a `demoGame` is themed on (🔗 digit ↔ group);
+        // `--es demoGanQ takeaway|ex2pic|pic2ex` — the quiz demo as a גן child, one math kind (iOS DEMO_GANQ);
+        // `--es demoKidGrade 0` — the games see a child of that grade (a גן board without a real child).
+        val demoTopic = if (BuildConfig.DEBUG) com.rani.tofy.ui.child.Topic.entries.firstOrNull { it.raw == intent?.getStringExtra("demoTopic") } else null
+        if (BuildConfig.DEBUG) {
+            com.rani.tofy.kid.ui.games.MiniGameLevel.debugLevel = com.rani.tofy.ui.child.Difficulty.of(intent?.getStringExtra("demoLevel"))
+            com.rani.tofy.kid.content.PreReaderContent.demoKind = intent?.getStringExtra("demoGanQ")
+            intent?.getStringExtra("demoKidGrade")?.toIntOrNull()?.let { g ->
+                com.rani.tofy.kid.ui.games.GameEnv.source = object : com.rani.tofy.kid.ui.games.GameSource by com.rani.tofy.kid.ui.games.KidGameSource {
+                    override val grade: Int? get() = g
+                }
+            }
         }
         setContent {
             TofyTheme {
@@ -92,7 +106,7 @@ class MainActivity : ComponentActivity() {
                         (com.rani.tofy.DeviceRole.joinedChildID ?: if (demoQuiz || demoScreen == "chooser" || demoScreen == "kidchores") "DEMO-QUIZ-CHILD" else null)
                             ?.let { com.rani.tofy.kid.core.KidSession.bind(it, false) }
                     }
-                    if (demo != null) com.rani.tofy.kid.ui.games.MiniGameScreen(demo, null) { finish() }
+                    if (demo != null) com.rani.tofy.kid.ui.games.MiniGameScreen(demo, demoTopic) { finish() }
                     else if (demoQuiz) com.rani.tofy.kid.ui.play.QuestionRunnerScreen(com.rani.tofy.kid.content.ContentMode.SmartFeed) { finish() }
                     // 🧪 `--es demoScreen chooser [--es demoGrade 0]` — a world's "how do you want to play?".
                     else if (demoScreen == "chooser") com.rani.tofy.kid.ui.games.WorldGameChooserScreen(

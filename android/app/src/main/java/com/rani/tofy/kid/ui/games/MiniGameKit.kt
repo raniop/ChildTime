@@ -775,6 +775,8 @@ fun MiniGameScreen(kind: MiniGameKind, topic: Topic?, surprise: Boolean = false,
         MiniGameKind.VAULT -> VaultGame(topic, surprise, earn, onClose)
         MiniGameKind.GROCERY -> GroceryGame(topic, surprise, earn, onClose)
         MiniGameKind.BALANCE -> BalanceGame(topic, surprise, earn, onClose)
+        MiniGameKind.SEQUENCE -> SequenceGame(topic, surprise, earn, onClose)
+        MiniGameKind.BASKET -> BasketCountGame(topic, surprise, earn, onClose)
     }
 }
 

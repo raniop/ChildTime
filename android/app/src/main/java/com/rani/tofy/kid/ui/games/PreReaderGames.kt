@@ -4,8 +4,8 @@ import com.rani.tofy.i18n.tr
 import com.rani.tofy.ui.child.Topic
 
 // 👶 PreReaderGames.swift — גן mini-games for a child who cannot read a word.
-// Five of the twelve games survive with no text at all (pop, sort, match,
-// continue, collect); this is the content that feeds them for a pre-reader.
+// Seven of the fourteen games survive with no text at all (pop, sort, order,
+// count, match, continue, collect); this is the content that feeds them for a pre-reader.
 //   1️⃣ Pictures (and the words beside them, smaller, for a parent reading along).
 //   2️⃣ The instruction is SPOKEN (on entry and on every 🔊).
 //   3️⃣ Short, big and never on the clock — a גן round cannot be lost.
@@ -75,14 +75,18 @@ object PreReaderGames {
             "🍋" to tr("לִימוֹנִים"),
         )
 
-    /** 2…6 as a masculine Hebrew word (the synthesizer reads a bare digit in the feminine). */
+    /** 2…10 as a masculine Hebrew word (the synthesizer reads a bare digit in the feminine). */
     fun countWord(n: Int): String = when {
         n <= 1 -> tr("אֶחָד")
         n == 2 -> tr("שְׁנֵי")
         n == 3 -> tr("שְׁלוֹשָׁה")
         n == 4 -> tr("אַרְבָּעָה")
         n == 5 -> tr("חֲמִשָּׁה")
-        else -> tr("שִׁשָּׁה")
+        n == 6 -> tr("שִׁשָּׁה")
+        n == 7 -> tr("שִׁבְעָה")
+        n == 8 -> tr("שְׁמוֹנָה")
+        n == 9 -> tr("תִּשְׁעָה")
+        else -> tr("עֲשָׂרָה")
     }
 
     /** "שְׁלוֹשָׁה תַּפּוּחִים" — two and up only (Hebrew counts ONE the other way round). */
@@ -176,10 +180,30 @@ object PreReaderGames {
 
     data class PairsRound(val pairs: List<MatchPair>, val cue: PreReaderCue)
 
-    fun pairs(count: Int = PAIR_COUNT): PairsRound = PairsRound(
-        goesTogether.shuffled().take(count).map { MatchPair(it.first, it.second) },
-        PreReaderCue(spoken = tr("חַבְּרוּ כָּל תְּמוּנָה לַתְּמוּנָה שֶׁהוֹלֶכֶת אִתָּהּ!")),
-    )
+    fun pairs(count: Int = PAIR_COUNT, topic: Topic? = null): PairsRound {
+        if (topic == Topic.MATH) return numberPairs(count)
+        return PairsRound(
+            goesTogether.shuffled().take(count).map { MatchPair(it.first, it.second) },
+            PreReaderCue(spoken = tr("חַבְּרוּ כָּל תְּמוּנָה לַתְּמוּנָה שֶׁהוֹלֶכֶת אִתָּהּ!")),
+        )
+    }
+
+    /**
+     * 🔢 In the math world: a digit and the group that many — "3" with 🍎🍎🍎
+     * (Sasha, 2026-10-15). Each group is a different picture, so the child
+     * counts rather than matching by look; four and up are laid out like a die.
+     */
+    fun numberPairs(count: Int = PAIR_COUNT): PairsRound {
+        val numbers = (1..6).shuffled().take(count)
+        val items = countables.shuffled()
+        val pairs = numbers.mapIndexed { i, n ->
+            val e = items[i % items.size].first
+            // Laid out like a die from four up, so a group never wraps oddly.
+            val lines = mapOf(1 to listOf(1), 2 to listOf(2), 3 to listOf(3), 4 to listOf(2, 2), 5 to listOf(2, 1, 2), 6 to listOf(2, 2, 2))[n] ?: listOf(n)
+            MatchPair("$n", lines.joinToString("\n") { e.repeat(it) })
+        }
+        return PairsRound(pairs, PreReaderCue(spoken = tr("חַבְּרוּ כָּל מִסְפָּר לַקְּבוּצָה שֶׁיֵּשׁ בָּהּ כָּל כָּךְ!")))
+    }
 
     // MARK: - 🧠 The pattern
 

@@ -38,6 +38,8 @@ struct BasketCountView: View {
     @State private var wiggle = 0
     @State private var hint: String?
     @State private var missedThisRound = false
+    /// True while a full basket celebrates — a second ✅ must not count it twice.
+    @State private var settling = false
     @State private var cleanCount = 0
     @State private var doneCount = 0
     @State private var streak = 0
@@ -140,10 +142,10 @@ struct BasketCountView: View {
                     .onEnded { v in
                         if basketFrame.insetBy(dx: -20, dy: -20).contains(v.location) {
                             put(item)
+                            dragging = nil
                         } else {
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) { drag = .zero }
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) { drag = .zero; dragging = nil }
                         }
-                        dragging = nil
                     }
             )
             .onTapGesture { put(item) }
@@ -201,6 +203,7 @@ struct BasketCountView: View {
     }
 
     private func start() {
+        settling = false
         roundIndex = 0; doneCount = 0; cleanCount = 0; streak = 0; grant = nil
         deal()
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { phase = .playing }
@@ -221,7 +224,7 @@ struct BasketCountView: View {
     }
 
     private func put(_ item: Item) {
-        guard phase == .playing, pile.contains(item) else { return }
+        guard phase == .playing, !settling, pile.contains(item) else { return }
         Haptic.light()
         hint = nil
         withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
@@ -241,8 +244,9 @@ struct BasketCountView: View {
     }
 
     private func check() {
-        guard phase == .playing, !inBasket.isEmpty else { return }
+        guard phase == .playing, !inBasket.isEmpty, !settling else { return }
         if inBasket.count == target {
+            settling = true
             let first = !missedThisRound
             if first { cleanCount += 1; streak += 1 }
             doneCount += 1
@@ -253,6 +257,7 @@ struct BasketCountView: View {
             Haptic.success()
             SpeechReader.shared.speak(PreReaderGames.wellDone)
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
+                settling = false
                 guard phase == .playing else { return }
                 if roundIndex + 1 < Self.rounds {
                     roundIndex += 1

@@ -317,7 +317,11 @@ private fun QuestionHeader(r: RunnerController, q: Question) {
         q.spoken?.takeIf { it.isNotEmpty() }?.let {
             FitText(it, 26.sp, weight = FontWeight.ExtraBold, maxLines = 3, minScale = 0.6f, modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp))
         }
-        FitText(sequenceAware(q.prompt, r.contentLang.rtl), promptSize(q.prompt, q.passage != null).sp, weight = FontWeight.ExtraBold, maxLines = 12, minScale = 0.4f,
+        // 👶➖ A גן take-away is a scene, not the "🍎🍎🍎 ➖ 🍎" text: the taken ones fly up.
+        val scene = q.takeAway
+        if (scene != null) TakeAwayPicture(scene, if (LocalConfiguration.current.screenWidthDp >= 600) 44f else 34f,
+            Modifier.padding(horizontal = 8.dp))
+        else FitText(sequenceAware(q.prompt, r.contentLang.rtl), promptSize(q.prompt, q.passage != null).sp, weight = FontWeight.ExtraBold, maxLines = 12, minScale = 0.4f,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp))
         Text(tr("בַּחֲרוּ תְּשׁוּבָה אַחַת"), color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
     }

@@ -279,4 +279,26 @@ class MiniGameContentTest {
         }
         assertTrue(PreReaderGames.countPhrase(1, "x").startsWith(PreReaderGames.countWord(2)))
     }
+
+    /** 🔢 Math-world pairs: every digit meets a group of exactly that many. */
+    @Test fun numberPairsCountRight() {
+        repeat(100) {
+            val round = PreReaderGames.pairs(topic = Topic.MATH)
+            assertEquals(round.pairs.size, round.pairs.map { it.left }.toSet().size)
+            for (p in round.pairs) {
+                val pics = p.right.replace("\n", "")
+                assertEquals("${p.left} ↔ ${p.right}", p.left.toInt(), pics.codePointCount(0, pics.length))
+            }
+        }
+    }
+
+    /** 🎞️ Every story keeps its order: picked steps are in rank order, and the first rank survives a short round. */
+    @Test fun sequenceStoriesStayInOrder() {
+        for (story in SequenceStories.all) for (d in com.rani.tofy.ui.child.Difficulty.entries) {
+            val steps = SequenceStories.pick(story, SequenceStories.stepCount(d))
+            assertEquals(steps.map { it.rank }.sorted(), steps.map { it.rank })
+            assertEquals(minOf(SequenceStories.stepCount(d), story.steps.size), steps.size)
+            assertEquals(story.steps.minOf { it.rank }, steps.first().rank)
+        }
+    }
 }

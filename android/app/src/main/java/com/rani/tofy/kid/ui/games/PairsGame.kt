@@ -84,9 +84,10 @@ fun PairsGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, onCl
     fun deal() {
         val pairs: List<MatchPair>
         if (preReader) {
-            val round = PreReaderGames.pairs(pairCount)
+            val math = topic == Topic.MATH   // 🔢 digit ↔ group in the math world
+            val round = PreReaderGames.pairs(pairCount, if (math) Topic.MATH else null)
             cue = round.cue
-            source = MatchPairsSource.Bank(Topic.LOGIC)
+            source = MatchPairsSource.Bank(if (math) Topic.MATH else Topic.LOGIC)
             pairs = round.pairs
         } else {
             cue = null
@@ -212,7 +213,11 @@ fun PairsGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, onCl
                                             .miniGameTile(state, TileTints[(i + if (left) 0 else 2) % 4], 20.dp)
                                             .juicyClick(!isMatched) { tap(card, left) }.padding(horizontal = 10.dp, vertical = 8.dp),
                                         contentAlignment = Alignment.Center,
-                                    ) { GameText(card.text, fs.sp, weight = FontWeight.Bold, maxLines = 4, minScale = 0.55f) }
+                                    ) {
+                                        // 👶 A group laid out like a die keeps its own lines — "🐟🐟🐟" shrinks rather than wrap to 2 + 1.
+                                        val lines = if (preReader) card.text.count { it == '\n' } + 1 else 4
+                                        GameText(card.text, fs.sp, weight = FontWeight.Bold, maxLines = lines, minScale = 0.55f)
+                                    }
                                 }
                             }
                         }

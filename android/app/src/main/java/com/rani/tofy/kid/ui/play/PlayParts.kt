@@ -169,6 +169,18 @@ enum class OptionFeedback { NORMAL, CORRECT, WRONG, REVEALED, DIMMED, ELIMINATED
 
 private val optionTints = listOf(Color(0xFF8CFFC4), Color(0xFFB7ABFF), Color(0xFFFFD23F), Color(0xFF7CF3FF))
 
+/** Starts with a left-to-right isolate (U+2066) and holds an emoji — `PreReaderContent.pictureSum`. */
+private fun isPictureSum(text: String): Boolean {
+    if (!text.startsWith('\u2066')) return false
+    var i = 0
+    while (i < text.length) {
+        val c = text.codePointAt(i)
+        if (c >= 0x1F000 || c in 0x2600..0x27BF || c in 0x2B00..0x2BFF) return true
+        i += Character.charCount(c)
+    }
+    return false
+}
+
 /**
  * Glass answer: every option the same pane with its palette colour glowing
  * through; right turns mint, a miss turns warm; a hint-removed option gets a 💡
@@ -177,7 +189,12 @@ private val optionTints = listOf(Color(0xFF8CFFC4), Color(0xFFB7ABFF), Color(0xF
 @Composable
 fun OptionCard(text: String, feedback: OptionFeedback, index: Int, minHeight: Dp, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val longest = text.split(" ").maxOfOrNull { it.length } ?: text.length
-    val fontSize = when { longest >= 11 -> 19.sp; longest >= 8 -> 25.sp; text.length >= 16 -> 23.sp; else -> 30.sp }
+    val fontSize = when {
+        // 👶 A גן picture sum ("🌸🌸 + 🌸🌸🌸", wrapped in a left-to-right isolate
+        // by `PreReaderContent.ltr`) — one size down so it stays on one line.
+        isPictureSum(text) -> 21.sp
+        longest >= 11 -> 19.sp; longest >= 8 -> 25.sp; text.length >= 16 -> 23.sp; else -> 30.sp
+    }
     val shape = RoundedCornerShape(16.dp)
     val scale by animateFloatAsState(
         when (feedback) {

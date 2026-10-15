@@ -75,6 +75,9 @@ data class ReadingPassage(
     fun inGrade(g: Int) = g in gradeLo..gradeHi
 }
 
+/** 🍎🍎🍎🍎🍎, then two of them fly away — see [Question.takeAway]. */
+data class TakeAwayScene(val emoji: String, val total: Int, val take: Int)
+
 /** Question.swift — what the runner shows. `id` mirrors the iOS per-instance UUID. */
 data class Question(
     val topic: Topic,
@@ -89,6 +92,13 @@ data class Question(
     val skill: String? = null,
     /** 🚀 Served from the grade ABOVE the child's own (they are at the top of theirs in this topic). */
     val stretchGrade: Int? = null,
+    /**
+     * 👶➖ A גן take-away drawn as a scene instead of "🍎🍎🍎 ➖ 🍎": all the
+     * items appear, then the ones taken fly up and stay as faded ghosts, so the
+     * child SEES what was taken (Sasha, 2026-10-15). `prompt` stays the plain
+     * text form — it is the question's identity in reports and re-asks.
+     */
+    val takeAway: TakeAwayScene? = null,
     val id: String = UUID.randomUUID().toString(),
 ) {
     val correctAnswer: String get() = options[correctIndex]

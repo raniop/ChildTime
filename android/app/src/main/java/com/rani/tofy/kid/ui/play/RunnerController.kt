@@ -130,7 +130,9 @@ class RunnerController(
     // ── derived ─────────────────────────────────────────────────────────────
     val isArena: Boolean get() = mode is ContentMode.BonusArena
     val isFeed: Boolean get() = mode is ContentMode.SmartFeed
-    val isPreReader: Boolean get() = (child?.effectiveGrade ?: 1) < 1
+    val isPreReader: Boolean get() = (child?.effectiveGrade ?: 1) < 1 || demoGan
+    /** 🧪 Debug builds, `--es demoGanQ …`: the quiz demo plays as a גן child (PreReaderContent.demoKind). */
+    private val demoGan: Boolean get() = com.rani.tofy.BuildConfig.DEBUG && com.rani.tofy.kid.content.PreReaderContent.demoKind != null
     val isGirl: Boolean get() = child?.isGirl == true
     fun g(boy: String, girl: String) = if (isGirl) girl else boy
 
@@ -157,6 +159,7 @@ class RunnerController(
         contentLang = AppLanguage.of(c.language) ?: I18n.language
         QuestionSource.preload(contentLang)
         profile = ChildContentProfile.from(c, household, KidSession.engine()?.snapshot?.toFirestore(), I18n.language)
+        if (demoGan) profile = profile.copy(grade = 0)
         // 🏆 A world's silver/gold tier asks one/two grades up (pre-readers stay put).
         (mode as? ContentMode.World)?.let { m ->
             val offset = KidSession.engine()?.tierGradeOffset(PlayWorlds.forTopic(m.topic).id) ?: 0

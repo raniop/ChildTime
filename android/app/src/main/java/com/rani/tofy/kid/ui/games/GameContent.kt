@@ -191,6 +191,12 @@ object GameContent {
 object MiniGameLevel {
     /** 🧪 Debug builds: a grade forced from the launch intent (see MainActivity `demoGrade`). */
     var debugGrade: Int? = null
+    /** 🧪 Debug builds: `--es demoLevel easy|medium|hard` — the level 🎞️ and 🍎 deal at (iOS DEMO_LEVEL). */
+    var debugLevel: Difficulty? = null
+
+    /** The level a 🎞️ / 🍎 round is dealt at: the debug override, else [difficulty]. */
+    fun dealLevel(topic: Topic): Difficulty =
+        debugLevel?.takeIf { com.rani.tofy.BuildConfig.DEBUG } ?: difficulty(topic)
 
     /** The child's grade, one step up or down when the adaptive level has clearly moved. */
     fun grade(topic: Topic?): Int {
@@ -215,7 +221,7 @@ object MiniGameLevel {
 object WorldGameFit {
     fun games(topic: Topic?, grade: Int): List<MiniGameKind> {
         if (!MiniGameKind.availableForActiveChild) return emptyList()
-        // 👶 גן plays the same five games everywhere — their boards come from PreReaderGames.
+        // 👶 גן plays the same seven games everywhere — their boards come from PreReaderGames.
         if (PreReaderGames.isPreReader(grade)) return MiniGameGradeFit.preReaderRoster
         // 💫 The arena mixes every topic: the three games that mix too.
         if (topic == null) return listOf(MiniGameKind.LIGHTNING, MiniGameKind.PAIRS, MiniGameKind.BALLOON)
@@ -226,15 +232,15 @@ object WorldGameFit {
 
     /** Best fit first: the mechanic the world is really about leads. */
     fun order(topic: Topic): List<MiniGameKind> = when (topic) {
-        Topic.MATH -> listOf(MiniGameKind.CRUSH, MiniGameKind.BALANCE, MiniGameKind.GAME2048, MiniGameKind.VAULT, MiniGameKind.LIGHTNING,
+        Topic.MATH -> listOf(MiniGameKind.CRUSH, MiniGameKind.BASKET, MiniGameKind.BALANCE, MiniGameKind.GAME2048, MiniGameKind.VAULT, MiniGameKind.LIGHTNING,
             MiniGameKind.PAIRS, MiniGameKind.PATTERN, MiniGameKind.SORT, MiniGameKind.BALLOON, MiniGameKind.GROCERY)
         Topic.ENGLISH, Topic.HEBREW, Topic.READING -> listOf(MiniGameKind.WORD, MiniGameKind.WORD_SEARCH, MiniGameKind.SORT, MiniGameKind.PAIRS,
             MiniGameKind.BALLOON, MiniGameKind.LIGHTNING, MiniGameKind.GROCERY, MiniGameKind.PATTERN, MiniGameKind.VAULT)
         Topic.MONEY -> listOf(MiniGameKind.GROCERY, MiniGameKind.LIGHTNING, MiniGameKind.SORT, MiniGameKind.BALANCE, MiniGameKind.CRUSH,
             MiniGameKind.PAIRS, MiniGameKind.BALLOON, MiniGameKind.VAULT)
-        Topic.LOGIC, Topic.GIFTED -> listOf(MiniGameKind.PATTERN, MiniGameKind.VAULT, MiniGameKind.BALANCE, MiniGameKind.GAME2048,
+        Topic.LOGIC, Topic.GIFTED -> listOf(MiniGameKind.PATTERN, MiniGameKind.SEQUENCE, MiniGameKind.VAULT, MiniGameKind.BALANCE, MiniGameKind.GAME2048,
             MiniGameKind.CRUSH, MiniGameKind.LIGHTNING, MiniGameKind.PAIRS, MiniGameKind.SORT, MiniGameKind.BALLOON)
-        else -> listOf(MiniGameKind.SORT, MiniGameKind.PAIRS, MiniGameKind.BALLOON, MiniGameKind.LIGHTNING, MiniGameKind.WORD,
+        else -> listOf(MiniGameKind.SORT, MiniGameKind.PAIRS, MiniGameKind.BALLOON, MiniGameKind.SEQUENCE, MiniGameKind.LIGHTNING, MiniGameKind.WORD,
             MiniGameKind.WORD_SEARCH, MiniGameKind.VAULT, MiniGameKind.BALANCE)
     }
 
@@ -294,6 +300,10 @@ object WorldGameFit {
                 MiniGameKind.BALANCE -> numericWorld || (s != null && GameContent.numericItems(s, grade).size >= 8)
                 MiniGameKind.PATTERN -> topic in listOf(Topic.MATH, Topic.LOGIC, Topic.GIFTED) || s == Topic.ENGLISH || s == Topic.HEBREW
                 MiniGameKind.GROCERY -> topic in listOf(Topic.MATH, Topic.MONEY) || s == Topic.ENGLISH || s == Topic.HEBREW
+                // 🎞️ Everyday stories in pictures — no bank needed.
+                MiniGameKind.SEQUENCE -> true
+                // 🍎 Counting into a basket — the math world's.
+                MiniGameKind.BASKET -> topic == Topic.MATH
             }
         }
     }

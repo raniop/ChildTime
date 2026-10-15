@@ -28,8 +28,9 @@ class MiniGameGradingTest {
         assertEquals(MiniGameBand.UPPER, MiniGameBand.of(6)); assertEquals(MiniGameBand.TOP, MiniGameBand.of(8))
     }
 
-    @Test fun preReaderGetsExactlyTheFiveTextFreeGames() {
-        assertEquals(listOf(MiniGameKind.BALLOON, MiniGameKind.SORT, MiniGameKind.PAIRS, MiniGameKind.PATTERN, MiniGameKind.CRUSH), MiniGameGradeFit.roster(0))
+    @Test fun preReaderGetsExactlyTheSevenTextFreeGames() {
+        assertEquals(listOf(MiniGameKind.BALLOON, MiniGameKind.SORT, MiniGameKind.SEQUENCE, MiniGameKind.BASKET,
+            MiniGameKind.PAIRS, MiniGameKind.PATTERN, MiniGameKind.CRUSH), MiniGameGradeFit.roster(0))
         assertFalse(MiniGameGradeFit.offered(MiniGameKind.WORD, 0))
         assertTrue(MiniGameKind.CRUSH.hasPreReaderForm); assertFalse(MiniGameKind.VAULT.hasPreReaderForm)
     }
@@ -38,6 +39,9 @@ class MiniGameGradingTest {
         // 🔢 2048 from ג׳, 🔐 vault from ב׳.
         assertEquals((3..8).toList(), MiniGameGradeFit.grades(MiniGameKind.GAME2048))
         assertEquals((2..8).toList(), MiniGameGradeFit.grades(MiniGameKind.VAULT))
+        // 🍎 basket up to א׳, 🎞️ stories up to ב׳ (Sasha, 2026-10-15).
+        assertEquals((0..1).toList(), MiniGameGradeFit.grades(MiniGameKind.BASKET))
+        assertEquals((0..2).toList(), MiniGameGradeFit.grades(MiniGameKind.SEQUENCE))
         // 🧩 Hebrew is the mother tongue for an Israeli child: to ח׳. English (second language): ג׳–ו׳.
         assertEquals((1..8).toList(), MiniGameGradeFit.grades(MiniGameKind.WORD, SpellScript.HEBREW))
         assertEquals((3..6).toList(), MiniGameGradeFit.grades(MiniGameKind.WORD, SpellScript.ENGLISH))

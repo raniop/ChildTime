@@ -3,7 +3,7 @@ package com.rani.tofy.kid.ui.games
 import com.rani.tofy.i18n.tr
 
 /**
- * 🎮 MiniGameKind (MiniGameKit.swift) — the twelve mini-games that break up
+ * 🎮 MiniGameKind (MiniGameKit.swift) — the fourteen mini-games that break up
  * the question loop. Each opens from a world's chooser, and the runner
  * launches one as a ⚡ surprise round. `raw` = the iOS rawValue (prefs keys,
  * the surprise round's "last game").
@@ -20,7 +20,9 @@ enum class MiniGameKind(val raw: String, val emoji: String) {
     GAME2048("game2048", "🔢"),
     VAULT("vault", "🔐"),
     GROCERY("grocery", "🛒"),
-    BALANCE("balance", "⚖️");
+    BALANCE("balance", "⚖️"),
+    SEQUENCE("sequence", "🎞️"),
+    BASKET("basket", "🍎");
 
     val title: String
         get() = when (this) {
@@ -36,6 +38,8 @@ enum class MiniGameKind(val raw: String, val emoji: String) {
             VAULT -> tr("הַכַּסֶּפֶת")
             GROCERY -> tr("הַמַּכֹּלֶת")
             BALANCE -> tr("מֹאזְנַיִם")
+            SEQUENCE -> tr("מָה קֹדֶם?")
+            BASKET -> tr("שִׂימוּ בַּסַּל")
         }
 
     /** Seconds on the clock for the timed games (a surprise round is shorter). */
@@ -61,6 +65,8 @@ enum class MiniGameKind(val raw: String, val emoji: String) {
         GROCERY -> if (surprise) tr("2 קְנִיּוֹת — קוֹנִים לְפִי הָרְשִׁימָה וּמְחַשְּׁבִים עֹדֶף")
         else tr("3 קְנִיּוֹת — קוֹנִים לְפִי הָרְשִׁימָה וּמְחַשְּׁבִים עֹדֶף")
         BALANCE -> tr("5 מֹאזְנַיִם — מָה מֵבִיא אוֹתָם לְאִזּוּן?")
+        SEQUENCE -> tr("סַדְּרוּ אֶת הַתְּמוּנוֹת לְפִי הַסֵּדֶר")
+        BASKET -> tr("שִׂימוּ בַּסַּל בְּדִיּוּק כַּמָּה שֶׁצָּרִיךְ")
     }
 
     /** The short name on a world screen's game tile. */
@@ -78,6 +84,8 @@ enum class MiniGameKind(val raw: String, val emoji: String) {
             VAULT -> tr("הַכַּסֶּפֶת")
             GROCERY -> tr("הַמַּכֹּלֶת")
             BALANCE -> tr("מֹאזְנַיִם")
+            SEQUENCE -> tr("מָה קֹדֶם?")
+            BASKET -> tr("שִׂימוּ בַּסַּל")
         }
 
     /** The name on the PARENT's side (no niqqud, spelled out — never stripped). */
@@ -95,6 +103,8 @@ enum class MiniGameKind(val raw: String, val emoji: String) {
             VAULT -> tr("הכספת")
             GROCERY -> tr("המכולת")
             BALANCE -> tr("מאזניים")
+            SEQUENCE -> tr("מה קודם?")
+            BASKET -> tr("שימו בסל")
         }
 
     /** One line under the game's card in the world's chooser. */
@@ -112,6 +122,8 @@ enum class MiniGameKind(val raw: String, val emoji: String) {
             VAULT -> tr("גַּלְגַּל לְכָל תְּשׁוּבָה נְכוֹנָה")
             GROCERY -> tr("קוֹנִים, מְחַשְּׁבִים וּמְקַבְּלִים עֹדֶף")
             BALANCE -> tr("מְאַזְּנִים אֶת שְׁתֵּי הַכַּפּוֹת")
+            SEQUENCE -> tr("מָה קֹדֶם, וּמָה אַחַר כָּךְ?")
+            BASKET -> tr("סוֹפְרִים וְשָׂמִים בַּסַּל")
         }
 
     /** 👶 Does this game have a גן form (no words, spoken rule, PreReaderGames content)? */

@@ -213,7 +213,7 @@ struct SequenceGameView: View {
                 let gap: CGFloat = 10
                 // Up to three frames a row: a whole morning (six) is two rows
                 // of big pictures rather than one row of stamps.
-                let perRow = CGFloat(min(3, max(1, slotRows.first?.count ?? 1)))
+                let perRow = CGFloat(max(1, slotRows.map(\.count).max() ?? 1))   // a four-picture row is four wide
                 let side = min(isCompact ? 118 : 160, (g.size.width - 12 - gap * (perRow - 1)) / perRow)   // 12: room for the number badge
                 let cardSide = min(isCompact ? 104 : 140, (g.size.width - gap * 2) / 3)
                 VStack(spacing: isCompact ? 26 : 34) {
@@ -307,8 +307,7 @@ struct SequenceGameView: View {
                         if let i = frames.first(where: { $0.value.insetBy(dx: -6, dy: -6).contains(v.location) })?.key {
                             tryPlace(step, in: i)
                         } else {
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) { drag = .zero }
-                            dragging = nil
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) { drag = .zero; dragging = nil }
                         }
                     }
             )
@@ -350,8 +349,7 @@ struct SequenceGameView: View {
 
     private func tryPlace(_ step: SequenceStep, in i: Int) {
         guard phase == .playing, placed[i] == nil, let want = rankWanted(at: i) else {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) { drag = .zero }
-            dragging = nil
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) { drag = .zero; dragging = nil }
             return
         }
         if step.rank == want {
@@ -383,11 +381,12 @@ struct SequenceGameView: View {
             SoundPlayer.shared.play(.wrongSoft)
             Haptic.light()
             SpeechReader.shared.speak(PreReaderGames.almost)
+            // Floats back to its place rather than snapping.
             withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
                 drag = .zero
+                dragging = nil
                 glow = (i, false)
             }
-            dragging = nil
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 withAnimation(.easeOut(duration: 0.2)) { if glow?.slot == i { glow = nil } }
             }

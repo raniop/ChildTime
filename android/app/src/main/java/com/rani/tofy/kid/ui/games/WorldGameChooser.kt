@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -355,6 +356,11 @@ private fun QuizTilePreview(pictures: Boolean, modifier: Modifier) {
  */
 @Composable
 internal fun MiniGamePreview(kind: MiniGameKind, modifier: Modifier) {
+    when (kind) {
+        MiniGameKind.SEQUENCE -> { PreSequence(modifier); return }
+        MiniGameKind.BASKET -> { PreBasket(modifier); return }
+        else -> Unit
+    }
     val cells: List<String> = when (kind) {
         MiniGameKind.PAIRS -> listOf("🇫🇷", tr("פָּרִיז"), "🇯🇵", tr("טוֹקְיוֹ"))
         MiniGameKind.BALLOON -> listOf("🎈", "🎈", "🎈")
@@ -368,6 +374,7 @@ internal fun MiniGamePreview(kind: MiniGameKind, modifier: Modifier) {
         MiniGameKind.VAULT -> listOf("?", "?", "?")
         MiniGameKind.GROCERY -> listOf("🥛", "🍞", "🍎")
         MiniGameKind.BALANCE -> listOf("7 + ?", "⚖️", "10")
+        MiniGameKind.SEQUENCE, MiniGameKind.BASKET -> emptyList()   // drawn above
     }
     Box(modifier.glassInset(16.dp).padding(8.dp), contentAlignment = Alignment.Center) {
         Ltr {
@@ -378,6 +385,61 @@ internal fun MiniGamePreview(kind: MiniGameKind, modifier: Modifier) {
                         FitText(c, 16.sp, weight = FontWeight.Black, maxLines = 1, minScale = 0.4f)
                     }
                 }
+            }
+        }
+    }
+}
+
+/** 🎞️ Three numbered frames — the first two filled, the third waiting — and the picture that belongs in it. */
+@Composable
+private fun PreSequence(modifier: Modifier) {
+    val steps = listOf("seed", "sprout", "flower")
+    BoxWithConstraints(modifier.glassInset(16.dp).padding(horizontal = 6.dp, vertical = 5.dp), contentAlignment = Alignment.Center) {
+        val w = minOf(maxWidth * 0.26f, maxHeight * 0.47f)
+        val badge = w * 0.42f
+        Ltr {   // numbers run left to right
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(w * 0.1f)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(w * 0.2f)) {
+                    steps.forEachIndexed { i, key ->
+                        Box {
+                            Box(Modifier.size(w).miniGameTile(if (i < 2) TileState.CORRECT else TileState.NORMAL, KidColor.starGold, 10.dp)
+                                .padding(w * 0.08f), contentAlignment = Alignment.Center) {
+                                if (i < 2) com.rani.tofy.ui.chores.ChoreDrawing(key, Modifier.fillMaxSize())
+                            }
+                            Box(Modifier.align(Alignment.TopEnd).offset(x = badge * 0.35f, y = -badge * 0.25f).size(badge)
+                                .clip(RoundedCornerShape(16.dp)).background(GoldBrush), contentAlignment = Alignment.Center) {
+                                val fs = (badge.value * 0.62f).sp
+                                Text("${i + 1}", color = Color(0xFF3A2700), fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = fs, lineHeight = fs)
+                            }
+                        }
+                    }
+                }
+                Box(Modifier.size(w * 0.9f).miniGameTile(TileState.PICKED, hexColor("48BFE3"), 10.dp).padding(w * 0.07f), contentAlignment = Alignment.Center) {
+                    com.rani.tofy.ui.chores.ChoreDrawing(steps[2], Modifier.fillMaxSize())
+                }
+            }
+        }
+    }
+}
+
+/** 🍎 Three apples on the pile, two in the basket that wants four. */
+@Composable
+private fun PreBasket(modifier: Modifier) {
+    BoxWithConstraints(modifier.glassInset(16.dp).padding(5.dp), contentAlignment = Alignment.Center) {
+        val s = minOf(maxHeight.value, maxWidth.value * 0.6f)   // ≈ 80 on a phone's tile
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy((s * 0.04f).dp)) {
+            Text("🍎 🍎 🍎", fontSize = (s * 0.19f).sp, lineHeight = (s * 0.24f).sp)
+            Box(contentAlignment = Alignment.TopCenter) {
+                Column(Modifier.padding(top = (s * 0.1f).dp).miniGameTile(TileState.NORMAL, KidColor.successMint, 10.dp)
+                    .padding(start = (s * 0.14f).dp, end = (s * 0.14f).dp, top = (s * 0.1f).dp, bottom = (s * 0.02f).dp),
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("🍎🍎", fontSize = (s * 0.15f).sp, lineHeight = (s * 0.19f).sp)
+                    Text("🧺", fontSize = (s * 0.21f).sp, lineHeight = (s * 0.26f).sp)
+                }
+                // The number the basket wants, on its rim.
+                val fs = (s * 0.15f).sp
+                Text("4", color = Color(0xFF3A2700), fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = fs, lineHeight = fs,
+                    modifier = Modifier.clip(RoundedCornerShape(16.dp)).background(GoldBrush).padding(horizontal = (s * 0.07f).dp, vertical = 1.dp))
             }
         }
     }

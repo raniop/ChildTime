@@ -88,7 +88,7 @@ object PreReaderContent {
      * the world has them, and in math sums and comparisons, not counting.
      */
     fun generate(topic: Topic, rng: Random = Random.Default, difficulty: Difficulty = Difficulty.MEDIUM): Question = when {
-        topic == Topic.MATH -> mathRound(rng, difficulty)
+        topic == Topic.MATH || (com.rani.tofy.BuildConfig.DEBUG && demoKind != null) -> mathRound(rng, difficulty)
         topic == Topic.HEBREW && com.rani.tofy.i18n.I18n.language == AppLanguage.HE -> lettersRound(rng)
         else -> {
             // 🧠 A world that has THINKING questions asks them most of the time
@@ -151,18 +151,96 @@ object PreReaderContent {
 
     // ── 🔢 Math: count, add, take away, compare, find the digit ──
 
+    /** 🧪 Debug builds: `--es demoGanQ takeaway|ex2pic|pic2ex` — one kind, for screenshots (iOS DEMO_GANQ). */
+    var demoKind: String? = null
+
     // Hard: adding, taking away and "where are there more" — no plain counting.
-    private fun mathRound(rng: Random, difficulty: Difficulty = Difficulty.MEDIUM): Question =
-        if (difficulty == Difficulty.HARD) when (rng.nextInt(5)) {
+    // Exercise ↔ picture (Sasha, 2026-10-15) joins at medium and hard.
+    private fun mathRound(rng: Random, difficulty: Difficulty = Difficulty.MEDIUM): Question {
+        when (demoKind?.takeIf { com.rani.tofy.BuildConfig.DEBUG }) {
+            "takeaway" -> return pictureTakeAway(rng)
+            "ex2pic" -> return exerciseToPicture(rng)
+            "pic2ex" -> return pictureToExercise(rng)
+        }
+        if (difficulty == Difficulty.HARD) return when (rng.nextInt(7)) {
             0, 1 -> pictureAdd(rng)
             2, 3 -> pictureTakeAway(rng)
-            else -> whereMore(rng)
-        } else when (rng.nextInt(9)) {
-        0, 1, 2 -> counting(rng)
-        3, 4 -> pictureAdd(rng)
-        5, 6 -> pictureTakeAway(rng)
-        7 -> whereMore(rng)
-        else -> digitByEar(rng)
+            4 -> whereMore(rng)
+            5 -> exerciseToPicture(rng)
+            else -> pictureToExercise(rng)
+        }
+        if (difficulty == Difficulty.MEDIUM) return when (rng.nextInt(10)) {
+            0, 1 -> counting(rng)
+            2, 3 -> pictureAdd(rng)
+            4, 5 -> pictureTakeAway(rng)
+            6 -> whereMore(rng)
+            7 -> digitByEar(rng)
+            8 -> exerciseToPicture(rng)
+            else -> pictureToExercise(rng)
+        }
+        return when (rng.nextInt(9)) {
+            0, 1, 2 -> counting(rng)
+            3, 4 -> pictureAdd(rng)
+            5, 6 -> pictureTakeAway(rng)
+            7 -> whereMore(rng)
+            else -> digitByEar(rng)
+        }
+    }
+
+    /**
+     * Numbers and sums always run left to right, even on a Hebrew screen
+     * (Rani, 2026-10-15): a left-to-right isolate keeps "2 + 3" from being
+     * drawn "3 + 2" inside a right-to-left line. `OptionCard` also reads the
+     * isolate as "a picture sum" and sets it a size smaller.
+     */
+    fun ltr(s: String): String = "\u2066" + s + "\u2069"
+
+    /**
+     * Three other sums a picture could be mistaken for — never the same two
+     * numbers in the other order (2 + 3 and 3 + 2 are both right). Totals up
+     * to five, so a picture sum fits on one answer card.
+     */
+    private fun otherSums(a: Int, b: Int, rng: Random): List<Pair<Int, Int>> {
+        val all = mutableListOf<Pair<Int, Int>>()
+        for (x in 1..3) for (y in 1..3) if (x + y <= 5 && !((x == a && y == b) || (x == b && y == a))) all += x to y
+        val picked = mutableListOf<Pair<Int, Int>>()
+        for (p in all.shuffled(rng)) {
+            if (picked.any { (it.first == p.first && it.second == p.second) || (it.first == p.second && it.second == p.first) }) continue
+            picked += p
+            if (picked.size == 3) break
+        }
+        return picked
+    }
+
+    /** A small sum, both parts 1…3 and the total at most five. */
+    private fun smallSum(rng: Random): Pair<Int, Int> {
+        val a = rng.nextInt(1, 4)
+        return a to rng.nextInt(1, minOf(3, 5 - a) + 1)
+    }
+
+    /** "🌸🌸 + 🌸🌸🌸" — tight, so it stays on one line of an answer card. */
+    private fun pictureSum(emoji: String, a: Int, b: Int) = ltr(emoji.repeat(a) + " + " + emoji.repeat(b))
+
+    /** "2 + 3" — which picture is this sum? */
+    private fun exerciseToPicture(rng: Random): Question {
+        val (emoji, _) = countables.random(rng)
+        val (a, b) = smallSum(rng)
+        val sums = (listOf(a to b) + otherSums(a, b, rng)).shuffled(rng)
+        val options = sums.map { pictureSum(emoji, it.first, it.second) }
+        val correct = sums.indexOfFirst { it.first == a && it.second == b }.coerceAtLeast(0)
+        return Question(Topic.MATH, ltr("$a + $b"), options, correct,
+            spoken = tr("אֵיזוֹ תְּמוּנָה מַתְאִימָה לַתַּרְגִּיל?"), skill = "addSub")
+    }
+
+    /** 🍎🍎 + 🍎🍎🍎 — which sum is this picture? */
+    private fun pictureToExercise(rng: Random): Question {
+        val (emoji, _) = countables.random(rng)
+        val (a, b) = smallSum(rng)
+        val sums = (listOf(a to b) + otherSums(a, b, rng)).shuffled(rng)
+        val options = sums.map { ltr("${it.first} + ${it.second}") }
+        val correct = sums.indexOfFirst { it.first == a && it.second == b }.coerceAtLeast(0)
+        return Question(Topic.MATH, ltr("${row(emoji, a)}  +  ${row(emoji, b)}"), options, correct,
+            spoken = tr("אֵיזֶה תַּרְגִּיל מַתְאִים לַתְּמוּנָה?"), skill = "addSub")
     }
 
     private val countables: List<Pair<String, String>>
@@ -189,17 +267,20 @@ object PreReaderContent {
         return Question(Topic.MATH, row(emoji, n), options, correct, spoken = tr("כַּמָּה %@?", plural))
     }
 
-    /** 🍎🍎 ➕ 🍎 — "how many altogether?" (totals up to 7). */
+    /** 🍎🍎 + 🍎 — "how many altogether?" (totals up to 7). An ASCII "+": the ➕ emoji renders dark. */
     private fun pictureAdd(rng: Random): Question {
         val (emoji, plural) = countables.random(rng)
         val a = rng.nextInt(1, 5)
         val b = rng.nextInt(1, minOf(4, 7 - a) + 1)
         val (options, correct) = numberOptions(a + b, maxOf(1, a + b - 3)..(a + b + 3), rng)
-        return Question(Topic.MATH, "${row(emoji, a)}  ➕  ${row(emoji, b)}", options, correct,
+        return Question(Topic.MATH, ltr("${row(emoji, a)}  +  ${row(emoji, b)}"), options, correct,
             spoken = tr("כַּמָּה %@ יֵשׁ בְּיַחַד?", plural), skill = "addSub")
     }
 
-    /** 🍎🍎🍎 ➖ 🍎 — "how many are left?" */
+    /**
+     * 🍎🍎🍎 ➖ 🍎 — "how many are left?" Drawn as a scene (`takeAway`): the
+     * taken ones fly up and stay faded.
+     */
     private fun pictureTakeAway(rng: Random): Question {
         val (emoji, plural) = countables.random(rng)
         val total = rng.nextInt(3, 8)
@@ -207,7 +288,7 @@ object PreReaderContent {
         val left = total - take
         val (options, correct) = numberOptions(left, 0..(left + 3), rng)
         return Question(Topic.MATH, "${row(emoji, total)}  ➖  ${row(emoji, take)}", options, correct,
-            spoken = tr("כַּמָּה %@ נִשְׁאֲרוּ?", plural), skill = "addSub")
+            spoken = tr("כַּמָּה %@ נִשְׁאֲרוּ?", plural), skill = "addSub", takeAway = TakeAwayScene(emoji, total, take))
     }
 
     /** Four groups — "where are there MORE apples?" */
