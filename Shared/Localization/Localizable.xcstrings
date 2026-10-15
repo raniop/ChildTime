@@ -56735,6 +56735,50 @@
         }
       }
     },
+    "וָאוּ! אַתְּ כְּבָר עוֹנָה עַל שְׁאֵלוֹת שֶׁל %@ בְּ%@! 🚀" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "واو! أنتِ تجيبين الآن على أسئلة %1$@ في %2$@! 🚀"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wow! You're already answering %1$@ questions in %2$@! 🚀"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ух ты! Ты уже отвечаешь на вопросы уровня «%1$@» в теме «%2$@»! 🚀"
+          }
+        }
+      }
+    },
+    "וָאוּ! אַתָּה כְּבָר עוֹנֶה עַל שְׁאֵלוֹת שֶׁל %@ בְּ%@! 🚀" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "واو! أنت تجيب الآن على أسئلة %1$@ في %2$@! 🚀"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wow! You're already answering %1$@ questions in %2$@! 🚀"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ух ты! Ты уже отвечаешь на вопросы уровня «%1$@» в теме «%2$@»! 🚀"
+          }
+        }
+      }
+    },
     "וָואו, נִצַּחְתָּ! 🤩" : {
       "localizations" : {
         "ar" : {
@@ -106187,6 +106231,28 @@
         }
       }
     },
+    "עלייה לשאלות של הכיתה הבאה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الانتقال إلى أسئلة الصف التالي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moving up to next grade's questions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переход к вопросам следующего класса"
+          }
+        }
+      }
+    },
     "עליית רמה" : {
       "localizations" : {
         "ar" : {
@@ -118288,6 +118354,28 @@
         }
       }
     },
+    "שְׁאֵלָה שֶׁל %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سؤال من %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A %@ question"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вопрос уровня «%@»"
+          }
+        }
+      }
+    },
     "שְׁאֵלוֹן חָדָשׁ · תּוֹסֶפֶת · נִפְתָּח מִכָּאן, בַּטֶּלֶפוֹן שֶׁלָּכֶם" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -122041,6 +122129,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вопросы, которые Tofy подбирает ребёнку из всех миров, по его уровню."
+          }
+        }
+      }
+    },
+    "שאלות של %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أسئلة %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ questions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вопросы уровня «%@»"
+          }
+        }
+      }
+    },
+    "שאלות של %@ ב%@, מעל הכיתה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أسئلة %1$@ في %2$@، فوق مستوى الصف"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ questions in %2$@, above their grade"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вопросы уровня «%1$@» в теме «%2$@», выше своего класса"
           }
         }
       }
