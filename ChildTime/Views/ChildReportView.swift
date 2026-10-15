@@ -444,8 +444,17 @@ struct ChildReportView: View {
     /// The level the adaptive engine serves in this topic now ("קַל"), plus
     /// "↓ בּוֹנֶה בִּטָּחוֹן" / "↑ מְאַתְגֵּר יוֹתֵר" when it moved away from the
     /// parent's base (the old card's "רמת קושי חכמה", per row).
+    /// DEMO_STRETCH=1 — the report shows the 🚀 tag on logic (screenshots only).
+    private static var demoStretchTopic: Topic? {
+        #if DEBUG
+        return ProgressStore.demoStretch ? .logic : nil
+        #else
+        return nil
+        #endif
+    }
+
     @ViewBuilder private func difficultyTag(_ topic: Topic) -> some View {
-        if (snapshot.topicGradeStretch?[topic.rawValue] ?? 0) > 0 {
+        if (snapshot.topicGradeStretch?[topic.rawValue] ?? 0) > 0 || Self.demoStretchTopic == topic {
             // 🚀 At the top of their own grade here: questions from the grade above too.
             Text("🚀 " + tr("שאלות של \(Profile.gradeNameForParent(profile.effectiveGrade + 1))"))
                 .font(.system(size: 10.5, weight: .heavy, design: .rounded))
