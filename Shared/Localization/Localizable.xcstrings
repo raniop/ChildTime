@@ -11473,6 +11473,28 @@
         }
       }
     },
+    "%lld סִפּוּרִים בַּסֵּדֶר הַנָּכוֹן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld قصص بالترتيب الصحيح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld stories in the right order"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Историй по порядку: %lld"
+          }
+        }
+      }
+    },
     "%lld עולמות · %lld שאלות · %lld%% הצלחה — אפשר להשאיר הכל פתוח" : {
       "localizations" : {
         "ar" : {
@@ -16901,6 +16923,28 @@
         }
       }
     },
+    "אֲרוּחָה! מָה עוֹשִׂים קֹדֶם, וּמָה אַחַר כָּךְ?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت الطعام! ماذا نفعل أولًا، وماذا بعد ذلك؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mealtime! What do we do first, and what comes next?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обед! Что мы делаем сначала, а что потом?"
+          }
+        }
+      }
+    },
     "אֲתָרִים מְפֻרְסָמִים בָּעוֹלָם" : {
       "localizations" : {
         "ar" : {
@@ -21278,6 +21322,50 @@
         }
       }
     },
+    "אוֹכְלִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نأكل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eat"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Едим"
+          }
+        }
+      }
+    },
+    "אוֹכְלִים אֲרוּחַת בֹּקֶר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نتناول الفطور"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eat breakfast"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завтракаем"
+          }
+        }
+      }
+    },
     "אוֹכֵל בָּשָׂר" : {
       "localizations" : {
         "ar" : {
@@ -21538,6 +21626,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "мотоцикл"
+          }
+        }
+      }
+    },
+    "אוֹפִים בַּתַּנּוּר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نخبزها في الفرن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bake it in the oven"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Печём в духовке"
+          }
+        }
+      }
+    },
+    "אוֹפִים עוּגָה! מָה עוֹשִׂים קֹדֶם, וּמָה אַחַר כָּךְ?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نخبز كعكة! ماذا نفعل أولًا، وماذا بعد ذلك؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baking a cake! What do we do first, and what comes next?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Печём торт! Что мы делаем сначала, а что потом?"
           }
         }
       }
@@ -28696,6 +28828,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Добро пожаловать! 👋"
+          }
+        }
+      }
+    },
+    "בֹּקֶר טוֹב! מָה עוֹשִׂים קֹדֶם, וּמָה אַחַר כָּךְ?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "صباح الخير! ماذا نفعل أولًا، وماذا بعد ذلك؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Good morning! What do we do first, and what comes next?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доброе утро! Что мы делаем сначала, а что потом?"
           }
         }
       }
@@ -58486,6 +58640,28 @@
         }
       }
     },
+    "זוֹרְקִים אֶת הַשְּׁאֵרִיּוֹת לַפַּח" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نرمي البقايا في سلة المهملات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Throw the leftovers in the bin"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрасываем остатки в мусор"
+          }
+        }
+      }
+    },
     "זוּגִי" : {
       "localizations" : {
         "ar" : {
@@ -67423,6 +67599,28 @@
         }
       }
     },
+    "יוֹצֵא נֶבֶט קָטָן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تخرج نبتة صغيرة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A little sprout comes up"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Появляется маленький росток"
+          }
+        }
+      }
+    },
     "יואב" : {
       "localizations" : {
         "ar" : {
@@ -68568,6 +68766,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "10-й"
+          }
+        }
+      }
+    },
+    "כְּבִיסָה! מָה עוֹשִׂים קֹדֶם, וּמָה אַחַר כָּךְ?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الغسيل! ماذا نفعل أولًا، وماذا بعد ذلك؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laundry! What do we do first, and what comes next?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стирка! Что мы делаем сначала, а что потом?"
           }
         }
       }
@@ -81067,6 +81287,28 @@
         }
       }
     },
+    "לוֹבְשִׁים פִּיגָ'מָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نلبس البيجامة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put on pyjamas"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Надеваем пижаму"
+          }
+        }
+      }
+    },
     "לוֹגִיקָה" : {
       "localizations" : {
         "ar" : {
@@ -81327,6 +81569,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Лондон"
+          }
+        }
+      }
+    },
+    "לוֹקְחִים תִּיק וְהוֹלְכִים לַגַּן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نأخذ الحقيبة ونذهب إلى الروضة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take our bag and go to kindergarten"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Берём рюкзак и идём в садик"
           }
         }
       }
@@ -83276,6 +83540,28 @@
         }
       }
     },
+    "מְבַשְּׁלִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نطبخ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cook"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готовим"
+          }
+        }
+      }
+    },
     "מְגַמַּת לְמִידָה" : {
       "localizations" : {
         "ar" : {
@@ -83848,6 +84134,50 @@
         }
       }
     },
+    "מְכַבְּסִים בַּמְּכוֹנָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نغسلها في الغسالة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wash them in the machine"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стираем в машинке"
+          }
+        }
+      }
+    },
+    "מְכַבִּים אֶת הָאוֹר וְהוֹלְכִים לִישֹׁן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نطفئ الضوء ونذهب إلى النوم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn off the light and go to sleep"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выключаем свет и ложимся спать"
+          }
+        }
+      }
+    },
     "מְכוֹנִיּוֹת" : {
       "localizations" : {
         "ar" : {
@@ -84002,6 +84332,28 @@
         }
       }
     },
+    "מְסַדְּרִים אֶת הַמִּטָּה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نرتّب السرير"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make the bed"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заправляем кровать"
+          }
+        }
+      }
+    },
     "מְסַדְּרִים חֶדֶר" : {
       "localizations" : {
         "ar" : {
@@ -84042,6 +84394,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "зимнее пальто"
+          }
+        }
+      }
+    },
+    "מְעַרְבְּבִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نخلط"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mix"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перемешиваем"
           }
         }
       }
@@ -84179,6 +84553,28 @@
         }
       }
     },
+    "מְצַחְצְחִים שִׁנַּיִם" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ننظّف أسناننا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brush our teeth"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чистим зубы"
+          }
+        }
+      }
+    },
     "מְצָאתֶם אֶת כָּל הַמִּלִּים!" : {
       "localizations" : {
         "ar" : {
@@ -84219,6 +84615,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отлично справляется с задачами на мышление и решение задач."
+          }
+        }
+      }
+    },
+    "מְקַפְּלִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نطويها"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fold them"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Складываем"
           }
         }
       }
@@ -85870,6 +86288,50 @@
         }
       }
     },
+    "מִתְלַבְּשִׁים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نلبس ملابسنا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get dressed"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Одеваемся"
+          }
+        }
+      }
+    },
+    "מִתְעוֹרְרִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نستيقظ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wake up"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Просыпаемся"
+          }
+        }
+      }
+    },
     "מִתְפַּתֵּחַ" : {
       "localizations" : {
         "ar" : {
@@ -85954,6 +86416,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Новый уровень! 🚀"
+          }
+        }
+      }
+    },
+    "מִתְרַחֲצִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نستحم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take a bath"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Купаемся"
           }
         }
       }
@@ -86552,6 +87036,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сапоги"
+          }
+        }
+      }
+    },
+    "מַדְלִיקִים נֵרוֹת וְחוֹגְגִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نشعل الشموع ونحتفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light the candles and celebrate"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зажигаем свечи и празднуем"
           }
         }
       }
@@ -87546,6 +88052,28 @@
         }
       }
     },
+    "מַשְׁקִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نسقيها"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water them"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поливаем"
+          }
+        }
+      }
+    },
     "מַשְׂכֹּרֶת" : {
       "localizations" : {
         "ar" : {
@@ -88140,6 +88668,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Что открыто, что заблокировано"
+          }
+        }
+      }
+    },
+    "מָה קֹדֶם, וּמָה אַחַר כָּךְ?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ماذا أولًا، وماذا بعد ذلك؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What comes first, and what comes next?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что сначала, а что потом?"
+          }
+        }
+      }
+    },
+    "מָה קֹדֶם?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ماذا أولًا؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What comes first?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что сначала?"
           }
         }
       }
@@ -89695,6 +90267,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Что открыто и что заблокировано — в одном месте"
+          }
+        }
+      }
+    },
+    "מה קודם?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ماذا أولًا؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What comes first?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что сначала?"
           }
         }
       }
@@ -99705,6 +100299,50 @@
         }
       }
     },
+    "סַדְּרוּ אֶת הַתְּמוּנוֹת לְפִי הַסֵּדֶר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رتّبوا الصور بالترتيب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put the pictures in order"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разложите картинки по порядку"
+          }
+        }
+      }
+    },
+    "סַדְּרוּ אֶת הַתְּמוּנוֹת לְפִי הַסֵּדֶר: מָה קֹדֶם, וּמָה אַחַר כָּךְ?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رتّبوا الصور بالترتيب: ماذا أولًا، وماذا بعد ذلك؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put the pictures in order: what comes first, and what comes next?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разложите картинки по порядку: что сначала, а что потом?"
+          }
+        }
+      }
+    },
     "סַדֵּר אֶת הַדְּבָרִים לְפִי הַזְּמַן — מָה הָיָה רִאשׁוֹן וּמָה אַחֲרָיו." : {
       "localizations" : {
         "ar" : {
@@ -101748,6 +102386,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "дерево"
+          }
+        }
+      }
+    },
+    "עֶרֶב! מָה עוֹשִׂים קֹדֶם, וּמָה אַחַר כָּךְ?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المساء! ماذا نفعل أولًا، وماذا بعد ذلك؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Evening! What do we do first, and what comes next?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вечер! Что мы делаем сначала, а что потом?"
           }
         }
       }
@@ -104695,6 +105355,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Останавливает игровое время и сохраняет остаток"
+          }
+        }
+      }
+    },
+    "עוֹרְכִים אֶת הַשֻּׁלְחָן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نجهّز المائدة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set the table"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Накрываем на стол"
           }
         }
       }
@@ -109140,6 +109822,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Португалия"
+          }
+        }
+      }
+    },
+    "פּוֹרֵחַ פֶּרַח" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تتفتح زهرة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A flower blooms"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Расцветает цветок"
           }
         }
       }
@@ -114199,6 +114903,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Читаем каждое слово, находим его на полке — и на кассу"
+          }
+        }
+      }
+    },
+    "קוֹרְאִים סִפּוּר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نقرأ قصة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Read a story"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Читаем сказку"
           }
         }
       }
@@ -121369,6 +122095,50 @@
         }
       }
     },
+    "שָׂמִים בְּגָדִים בַּסַּל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نضع الملابس في السلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put clothes in the basket"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кладём одежду в корзину"
+          }
+        }
+      }
+    },
+    "שָׂמִים זְרָעִים בָּאֲדָמָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نضع البذور في التراب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put seeds in the soil"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кладём семена в землю"
+          }
+        }
+      }
+    },
     "שָׂפַת הָאַפְּלִיקַצְיָה אֵצֶל הַיֶּלֶד" : {
       "localizations" : {
         "ar" : {
@@ -121453,6 +122223,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Язык на его устройстве"
+          }
+        }
+      }
+    },
+    "שׁוֹטְפִים אֶת הַכֵּלִים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نغسل الصحون"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wash the dishes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Моем посуду"
           }
         }
       }
@@ -121629,6 +122421,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Квадратные корни"
+          }
+        }
+      }
+    },
+    "שׁוֹתְלִים פֶּרַח! מָה קוֹרֶה קֹדֶם, וּמָה אַחַר כָּךְ?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نزرع زهرة! ماذا يحدث أولًا، وماذا بعد ذلك؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planting a flower! What happens first, and what comes next?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сажаем цветок! Что происходит сначала, а что потом?"
           }
         }
       }
@@ -125723,6 +126537,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Большое спасибо!"
+          }
+        }
+      }
+    },
+    "תּוֹלִים לְיִבּוּשׁ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ننشرها لتجفّ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hang them up to dry"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вешаем сушиться"
           }
         }
       }
