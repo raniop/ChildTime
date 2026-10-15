@@ -17608,6 +17608,50 @@
         }
       }
     },
+    "אֵיזֶה תַּרְגִּיל מַתְאִים לַתְּמוּנָה?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أيّ تمرين يناسب الصورة؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which sum matches the picture?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Какой пример подходит к картинке?"
+          }
+        }
+      }
+    },
+    "אֵיזוֹ תְּמוּנָה מַתְאִימָה לַתַּרְגִּיל?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أيّ صورة تناسب التمرين؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which picture matches the sum?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Какая картинка подходит к примеру?"
+          }
+        }
+      }
+    },
     "אֵיזוֹ תְּמוּנָה מַתְחִילָה בָּאוֹת %@?" : {
       "localizations" : {
         "ar" : {
@@ -60999,6 +61043,28 @@
         }
       }
     },
+    "חַבְּרוּ כָּל מִסְפָּר לַקְּבוּצָה שֶׁיֵּשׁ בָּהּ כָּל כָּךְ!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "صِلوا كل رقم بالمجموعة التي فيها هذا العدد!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Match each number to the group with that many!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Соедините каждое число с группой, где столько же!"
+          }
+        }
+      }
+    },
     "חַבְּרוּ כָּל תְּמוּנָה לַתְּמוּנָה שֶׁהוֹלֶכֶת אִתָּהּ!" : {
       "localizations" : {
         "ar" : {
@@ -69764,6 +69830,28 @@
         }
       }
     },
+    "כִּמְעַט! יֵשׁ קְצָת יוֹתֵר מִדַּי — הוֹצִיאוּ מֵהַסַּל." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تقريبًا! هناك أكثر من اللازم — أخرجوا من السلة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Almost! That's a few too many — take some out."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Почти! Немного многовато — достаньте из корзинки."
+          }
+        }
+      }
+    },
     "כִּמְעַט! נְנַסֶּה שׁוּב 💪" : {
       "localizations" : {
         "ar" : {
@@ -69826,6 +69914,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Почти! Попробуй ещё раз 💪"
+          }
+        }
+      }
+    },
+    "כִּמְעַט! צָרִיךְ עוֹד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تقريبًا! نحتاج المزيد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Almost! You need more."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Почти! Нужно ещё."
           }
         }
       }
@@ -85297,6 +85407,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Слова, фразы и разговор на английском"
+          }
+        }
+      }
+    },
+    "מִלֵּאתֶם %lld סַלִּים" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ملأتم %lld سلال"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You filled %lld baskets"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Корзинок заполнено: %lld"
           }
         }
       }
@@ -101018,6 +101150,28 @@
         }
       }
     },
+    "סוֹפְרִים וְשָׂמִים בַּסַּל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نعدّ ونضع في السلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Count and put them in the basket"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Считаем и кладём в корзинку"
+          }
+        }
+      }
+    },
     "סוֹרְקִים אֶת הַקּוֹד שֶׁמּוֹפִיעַ בַּטֶּלֶפוֹן שֶׁל הַהוֹרֶה" : {
       "localizations" : {
         "ar" : {
@@ -102231,6 +102385,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Редактировать профиль"
+          }
+        }
+      }
+    },
+    "עֲשָׂרָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عشرة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ten"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "десять"
           }
         }
       }
@@ -119764,6 +119940,28 @@
         }
       }
     },
+    "שְׁמוֹנָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ثمانية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "eight"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "восемь"
+          }
+        }
+      }
+    },
     "שְׁמוֹנָה כּוֹכְבֵי הַלֶּכֶת וְהַסֵּדֶר שֶׁלָּהֶם" : {
       "localizations" : {
         "ar" : {
@@ -120156,6 +120354,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Семь нот, ритм и темп"
+          }
+        }
+      }
+    },
+    "שִׁבְעָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سبعة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "seven"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "семь"
           }
         }
       }
@@ -120793,6 +121013,28 @@
         }
       }
     },
+    "שִׂימוּ %@ בַּסַּל!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ضعوا %@ في السلة!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put %@ in the basket!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Положите в корзинку: %@!"
+          }
+        }
+      }
+    },
     "שִׂימוּ אֶת הַחַיּוֹת בַּסַּל שֶׁיֵּשׁ עָלָיו כֶּלֶב וְחָתוּל, וְאֶת הָאֹכֶל בַּסַּל שֶׁיֵּשׁ עָלָיו תַּפּוּחַ וּבַנָּנָה." : {
       "localizations" : {
         "ar" : {
@@ -120899,6 +121141,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "То, что летает по воздуху, — в корзину с облаком, а то, что ездит по дороге, — в корзину с машиной."
+          }
+        }
+      }
+    },
+    "שִׂימוּ בַּסַּל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ضعوا في السلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fill the basket"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В корзинку!"
+          }
+        }
+      }
+    },
+    "שִׂימוּ בַּסַּל בְּדִיּוּק כַּמָּה שֶׁצָּרִיךְ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ضعوا في السلة العدد المطلوب بالضبط"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put exactly the right number in the basket"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Положите в корзинку ровно столько, сколько нужно"
+          }
+        }
+      }
+    },
+    "שִׂימוּ בַּסַּל בְּדִיּוּק כַּמָּה שֶׁצָּרִיךְ, וְלַחֲצוּ ✅" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ضعوا في السلة العدد المطلوب بالضبط، ثم اضغطوا ✅"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put exactly the right number in the basket, then tap ✅"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Положите в корзинку ровно столько, сколько нужно, и нажмите ✅"
           }
         }
       }
@@ -123608,6 +123916,28 @@
         }
       }
     },
+    "שימו בסל" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ضعوا في السلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fill the basket"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В корзинку"
+          }
+        }
+      }
+    },
     "שימו שיר ובקשו מ%@ לזהות כלי נגינה או למחוא כפיים בקצב." : {
       "localizations" : {
         "ar" : {
@@ -125877,6 +126207,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "захочет"
+          }
+        }
+      }
+    },
+    "תִּשְׁעָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تسعة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nine"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "девять"
           }
         }
       }
