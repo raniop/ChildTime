@@ -1,5 +1,12 @@
 import Foundation
 
+/// 🍎🍎🍎🍎🍎, then two of them fly away — see `Question.takeAway`.
+struct TakeAwayScene: Equatable {
+    let emoji: String
+    let total: Int
+    let take: Int
+}
+
 struct Question: Identifiable, Equatable {
     let id = UUID()
     let topic: Topic
@@ -22,6 +29,11 @@ struct Question: Identifiable, Equatable {
     /// top of their own grade in this topic (see `ProgressStore.topicGradeStretch`).
     /// The card wears "🚀 כִּתָּה ב׳" — a moment of pride, never a warning.
     var stretchGrade: Int? = nil
+    /// 👶➖ A גן take-away drawn as a scene instead of "🍎🍎🍎 ➖ 🍎": all the
+    /// items appear, then the ones taken fly up and stay as faded ghosts, so the
+    /// child SEES what was taken (Sasha, 2026-10-15). `prompt` stays the plain
+    /// text form — it is the question's identity in reports and re-asks.
+    var takeAway: TakeAwayScene? = nil
 
     var correctAnswer: String { options[correctIndex] }
     /// The line the read-aloud / auto-read should speak.

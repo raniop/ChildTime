@@ -274,9 +274,10 @@ struct PairsGameView: View {
 
     private func deal() {
         if preReader {
-            let round = PreReaderGames.pairs(count: pairCount)
+            let math = topic == .math   // 🔢 digit ↔ group in the math world
+            let round = PreReaderGames.pairs(count: pairCount, topic: math ? .math : nil)
             cue = round.cue
-            source = .bank(.logic)
+            source = .bank(math ? .math : .logic)
             lefts = round.pairs.enumerated().map { Card(pair: $0.offset, text: $0.element.left) }.shuffled()
             rights = round.pairs.enumerated().map { Card(pair: $0.offset, text: $0.element.right) }.shuffled()
             matched = []; missed = []; pickedLeft = nil; pickedRight = nil

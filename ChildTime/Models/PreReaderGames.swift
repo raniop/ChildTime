@@ -123,7 +123,7 @@ enum PreReaderGames {
         ("🍋", tr("לִימוֹנִים"))
     ] }
 
-    /// 2…6 as a masculine Hebrew word, because the synthesizer reads a bare
+    /// 2…10 as a masculine Hebrew word, because the synthesizer reads a bare
     /// digit in the feminine ("שָׁלוֹשׁ תַּפּוּחִים").
     static func countWord(_ n: Int) -> String {
         switch n {
@@ -132,7 +132,11 @@ enum PreReaderGames {
         case 3:    return tr("שְׁלוֹשָׁה")
         case 4:    return tr("אַרְבָּעָה")
         case 5:    return tr("חֲמִשָּׁה")
-        default:   return tr("שִׁשָּׁה")
+        case 6:    return tr("שִׁשָּׁה")
+        case 7:    return tr("שִׁבְעָה")
+        case 8:    return tr("שְׁמוֹנָה")
+        case 9:    return tr("תִּשְׁעָה")
+        default:   return tr("עֲשָׂרָה")
         }
     }
 
@@ -280,10 +284,27 @@ enum PreReaderGames {
         ("🌙", "⭐"), ("☀️", "🕶️"), ("🐦", "🪶"), ("🌾", "🍞")
     ]
 
-    static func pairs(count: Int = pairCount) -> (pairs: [MatchPair], cue: PreReaderCue) {
+    static func pairs(count: Int = pairCount, topic: Topic? = nil) -> (pairs: [MatchPair], cue: PreReaderCue) {
+        if topic == .math { return numberPairs(count: count) }
         let picked = goesTogether.shuffled().prefix(count)
         return (picked.map { MatchPair(left: $0.0, right: $0.1) },
                 PreReaderCue(spoken: tr("חַבְּרוּ כָּל תְּמוּנָה לַתְּמוּנָה שֶׁהוֹלֶכֶת אִתָּהּ!")))
+    }
+
+    /// 🔢 In the math world: a digit and the group that many — "3" with
+    /// 🍎🍎🍎 (Sasha, 2026-10-15). Each group is a different picture, so the
+    /// child counts rather than matching by look; four and up are laid out like a die.
+    static func numberPairs(count: Int = pairCount) -> (pairs: [MatchPair], cue: PreReaderCue) {
+        let numbers = Array((1...6).shuffled().prefix(count))
+        let items = countables.shuffled()
+        let pairs = numbers.enumerated().map { i, n -> MatchPair in
+            let e = items[i % items.count].emoji
+            // Laid out like a die from four up, so a group never wraps oddly.
+            let lines: [Int] = [1: [1], 2: [2], 3: [3], 4: [2, 2], 5: [2, 1, 2], 6: [2, 2, 2]][n] ?? [n]
+            let group = lines.map { String(repeating: e, count: $0) }.joined(separator: "\n")
+            return MatchPair(left: "\(n)", right: group)
+        }
+        return (pairs, PreReaderCue(spoken: tr("חַבְּרוּ כָּל מִסְפָּר לַקְּבוּצָה שֶׁיֵּשׁ בָּהּ כָּל כָּךְ!")))
     }
 
     // MARK: - 🧠 The pattern

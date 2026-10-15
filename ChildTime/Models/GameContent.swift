@@ -263,7 +263,7 @@ enum WorldGameFit {
     static func order(for topic: Topic) -> [MiniGameKind] {
         switch topic {
         case .math:
-            return [.crush, .balance, .game2048, .vault, .lightning, .pairs, .pattern, .sort, .balloon, .grocery]
+            return [.crush, .basket, .balance, .game2048, .vault, .lightning, .pairs, .pattern, .sort, .balloon, .grocery]
         case .english, .hebrew, .reading:
             return [.word, .wordSearch, .sort, .pairs, .balloon, .lightning, .grocery, .pattern, .vault]
         case .money:
@@ -361,6 +361,9 @@ enum WorldGameFit {
             case .sequence:
                 // 🎞️ Everyday stories in pictures — no bank needed.
                 return true
+            case .basket:
+                // 🍎 Counting into a basket — the math world's.
+                return topic == .math
             }
         }
     }

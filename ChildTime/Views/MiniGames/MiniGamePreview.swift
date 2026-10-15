@@ -81,6 +81,7 @@ struct MiniGamePreview: View {
             case .pattern: return CGSize(width: 0.81, height: 0.34)
             case .crush:   return CGSize(width: 0.66, height: 0.39)
             case .sequence: return CGSize(width: 0.80, height: 0.42)
+            case .basket:  return CGSize(width: 0.62, height: 0.45)
             default: break
             }
         }
@@ -98,6 +99,7 @@ struct MiniGamePreview: View {
         case .grocery:    return CGSize(width: 0.66, height: 0.41)
         case .balance:    return CGSize(width: 0.86, height: 0.45)
         case .sequence:   return CGSize(width: 0.80, height: 0.42)
+        case .basket:     return CGSize(width: 0.62, height: 0.45)
         }
     }
 
@@ -121,6 +123,7 @@ struct MiniGamePreview: View {
         case .pattern: prePattern(s)
         case .crush:   preCount(s)
         case .sequence: preSequence(s)
+        case .basket:  preBasket(s)
         default:       readerContent(s)
         }
     }
@@ -218,6 +221,26 @@ struct MiniGamePreview: View {
         }
     }
 
+    /// 🍎 Three apples on the pile, two in the basket that wants four.
+    private func preBasket(_ s: CGFloat) -> some View {
+        VStack(spacing: s * 0.04) {
+            Text("🍎 🍎 🍎").font(.system(size: s * 0.085))
+            VStack(spacing: 2) {
+                Text("🍎🍎").font(.system(size: s * 0.07))
+                Text("🧺").font(.system(size: s * 0.1))
+            }
+            .frame(width: s * 0.42, height: s * 0.24)
+            .miniGameTile(.normal, tint: Self.mint, radius: 12)
+            .overlay(alignment: .top) {
+                Text("4").font(.system(size: s * 0.06, weight: .black, design: .rounded))
+                    .foregroundStyle(Color(hex: "3A2700"))
+                    .padding(.horizontal, s * 0.025)
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
+                    .offset(y: -s * 0.03)
+            }
+        }
+    }
+
     /// 🧠 🔴 🔵 🔴 🔵 ❓ and three pictures to choose from.
     private func prePattern(_ s: CGFloat) -> some View {
         let seq = ["🔴", "🔵", "🔴", "🔵", "?"]
@@ -283,6 +306,7 @@ struct MiniGamePreview: View {
         case .grocery:    grocery(s)
         case .balance:    balance(s)
         case .sequence:   preSequence(s)
+        case .basket:     preBasket(s)
         }
     }
 

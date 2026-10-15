@@ -86,19 +86,20 @@ extension SpellScript {
 /// is beyond the child; above the ceiling the board is a gift, not a game.
 enum MiniGameGradeFit {
 
-    /// 👶 The גן roster: the six games whose mechanic survives with NO text
-    /// at all — pop, sort, order, match, continue, collect. In this band they are
+    /// 👶 The גן roster: the seven games whose mechanic survives with NO text
+    /// at all — pop, sort, order, count, match, continue, collect. In this band they are
     /// dealt from `PreReaderGames` instead of the question banks: pictures,
     /// colours, shapes and quantities only, the instruction spoken rather
     /// than printed, bigger targets, fewer items and no clock.
     ///
-    /// 🎞️ joined on 2026-10-15 (Sasha): a story in pictures, put in order.
+    /// 🎞️ and 🍎 joined on 2026-10-15 (Sasha): a story in pictures put in
+    /// order, and counting by dragging into a basket.
     ///
     /// The other seven stay shut for גן, and not for want of effort: 🧩 and 🔤
     /// ARE reading, ⚡ is a written statement, 🔢 and 🔐 are numerals and
     /// deduction, 🛒 is prices in ₪ and ⚖️ is an equation. A picture-only
     /// version of any of them would be a different game wearing its name.
-    static let preReaderRoster: [MiniGameKind] = [.balloon, .sort, .sequence, .pairs, .pattern, .crush]
+    static let preReaderRoster: [MiniGameKind] = [.balloon, .sort, .sequence, .basket, .pairs, .pattern, .crush]
 
     /// Every game offered at this grade, best fit first (the chooser's order
     /// for a reader comes from `WorldGameFit.order`; גן has one fixed roster
@@ -115,7 +116,7 @@ enum MiniGameGradeFit {
     static func offered(_ kind: MiniGameKind, grade: Int, script: SpellScript? = nil,
                         topic: Topic? = nil) -> Bool {
         let band = MiniGameBand.of(grade)
-        // 👶 גן: only the six that can be played without reading a word.
+        // 👶 גן: only the seven that can be played without reading a word.
         guard band > .preReader else { return preReaderRoster.contains(kind) }
         switch kind {
         case .word:
@@ -154,6 +155,9 @@ enum MiniGameGradeFit {
             // emoji, so in a second language it waits for ג׳ like 🧩 and 🔤.
             guard let script, script.isSecondLanguage else { return true }
             return grade >= 3
+        case .basket:
+            // 🍎 Counting to eight into a basket: גן and א׳ only.
+            return grade <= 1
         case .sequence:
             // 🎞️ Putting a day back in order: real work in א׳–ב׳, a
             // freebie from ג׳ (Sasha, 2026-10-15).

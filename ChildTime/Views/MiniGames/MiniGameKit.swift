@@ -21,6 +21,7 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
     case grocery     // 🛒 הַמַּכֹּלֶת
     case balance     // ⚖️ מֹאזְנַיִם
     case sequence    // 🎞️ מָה קֹדֶם?
+    case basket      // 🍎 שִׂימוּ בַּסַּל
 
     var id: String { rawValue }
 
@@ -39,6 +40,7 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
         case .grocery:    return "🛒"
         case .balance:    return "⚖️"
         case .sequence:   return "🎞️"
+        case .basket:     return "🍎"
         }
     }
 
@@ -57,6 +59,7 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
         case .grocery:    return tr("הַמַּכֹּלֶת")
         case .balance:    return tr("מֹאזְנַיִם")
         case .sequence:   return tr("מָה קֹדֶם?")
+        case .basket:     return tr("שִׂימוּ בַּסַּל")
         }
     }
 
@@ -87,6 +90,7 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
                                           : tr("3 קְנִיּוֹת — קוֹנִים לְפִי הָרְשִׁימָה וּמְחַשְּׁבִים עֹדֶף")
         case .balance:    return tr("5 מֹאזְנַיִם — מָה מֵבִיא אוֹתָם לְאִזּוּן?")
         case .sequence:   return tr("סַדְּרוּ אֶת הַתְּמוּנוֹת לְפִי הַסֵּדֶר")
+        case .basket:     return tr("שִׂימוּ בַּסַּל בְּדִיּוּק כַּמָּה שֶׁצָּרִיךְ")
         }
     }
 
@@ -106,6 +110,7 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
         case .grocery:    return tr("הַמַּכֹּלֶת")
         case .balance:    return tr("מֹאזְנַיִם")
         case .sequence:   return tr("מָה קֹדֶם?")
+        case .basket:     return tr("שִׂימוּ בַּסַּל")
         }
     }
 
@@ -128,6 +133,7 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
         case .grocery:    return tr("המכולת")
         case .balance:    return tr("מאזניים")
         case .sequence:   return tr("מה קודם?")
+        case .basket:     return tr("שימו בסל")
         }
     }
 
@@ -147,6 +153,7 @@ enum MiniGameKind: String, Identifiable, CaseIterable {
         case .grocery:    return tr("קוֹנִים, מְחַשְּׁבִים וּמְקַבְּלִים עֹדֶף")
         case .balance:    return tr("מְאַזְּנִים אֶת שְׁתֵּי הַכַּפּוֹת")
         case .sequence:   return tr("מָה קֹדֶם, וּמָה אַחַר כָּךְ?")
+        case .basket:     return tr("סוֹפְרִים וְשָׂמִים בַּסַּל")
         }
     }
 
@@ -191,6 +198,7 @@ struct MiniGameScreen: View {
             case .grocery:    GroceryGameView(topic: topic, surprise: surprise, earn: earn, onClose: onClose)
             case .balance:    BalanceGameView(topic: topic, surprise: surprise, earn: earn, onClose: onClose)
             case .sequence:   SequenceGameView(topic: topic, surprise: surprise, earn: earn, onClose: onClose)
+            case .basket:     BasketCountView(topic: topic, surprise: surprise, earn: earn, onClose: onClose)
             }
         }
         .overlay {
@@ -1086,6 +1094,7 @@ struct MiniGameDemoHost: View {
         case "lightninggame": return .lightning
         case "sortgame":      return .sort
         case "sequencegame":  return .sequence
+        case "basketgame":    return .basket
         case "patterngame":   return .pattern
         case "game2048":      return .game2048
         case "vaultgame":     return .vault

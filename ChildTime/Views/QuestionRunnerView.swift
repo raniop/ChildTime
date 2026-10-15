@@ -942,15 +942,20 @@ struct QuestionRunnerView: View {
                     .padding(.horizontal, AppSpacing.lg)
             }
 
-            Text(Question.displayPrompt(q.prompt, rightToLeft: LanguageStore.shared.current.isRightToLeft))
-                // Under a passage the text is the star — the question steps down a size.
-                .font(.system(size: min(questionFontSize(for: q.prompt), q.passage != nil ? (isCompact ? 22 : 28) : (isCompact ? (display.isShort ? 25 : 30) : 38)) * (display.isShort ? 0.86 : 1), weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.4)
-                .fixedSize(horizontal: false, vertical: true)   // never truncate the question
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, AppSpacing.sm)
+            if let scene = q.takeAway {
+                TakeAwayPicture(scene: scene, fontSize: isCompact ? (display.isShort ? 30 : 34) : 44)
+                    .padding(.horizontal, AppSpacing.sm)
+            } else {
+                Text(Question.displayPrompt(q.prompt, rightToLeft: LanguageStore.shared.current.isRightToLeft))
+                    // Under a passage the text is the star — the question steps down a size.
+                    .font(.system(size: min(questionFontSize(for: q.prompt), q.passage != nil ? (isCompact ? 22 : 28) : (isCompact ? (display.isShort ? 25 : 30) : 38)) * (display.isShort ? 0.86 : 1), weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .minimumScaleFactor(0.4)
+                    .fixedSize(horizontal: false, vertical: true)   // never truncate the question
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, AppSpacing.sm)
+            }
 
             Text(tr("בַּחֲרוּ תְּשׁוּבָה אַחַת"))
                 .font(.system(size: 13, weight: .semibold, design: .rounded))

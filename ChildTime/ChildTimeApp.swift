@@ -483,7 +483,7 @@ struct ChildTimeApp: App {
             MiniGameDemoHost(screen: name)
         // …and the second six — DEMO_SCREEN=sortgame | patterngame | game2048 | vaultgame |
         // grocerygame | balancegame [DEMO_WORLD=…] [DEMO_GRADE=…] [DEMO_EARN=1 → earns like the chooser]
-        case "sortgame", "patterngame", "game2048", "vaultgame", "grocerygame", "balancegame", "sequencegame":
+        case "sortgame", "patterngame", "game2048", "vaultgame", "grocerygame", "balancegame", "sequencegame", "basketgame":
             MiniGameDemoHost(screen: name)
         // 🎮 A world's "how do you want to play?" — DEMO_SCREEN=gamechooser (math) |
         // gamechooser_english [DEMO_WORLD=space] [DEMO_GRADE=3]

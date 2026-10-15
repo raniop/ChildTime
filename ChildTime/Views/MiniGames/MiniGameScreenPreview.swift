@@ -88,6 +88,7 @@ struct MiniGameScreenPreview: View {
         case .grocery:    GroceryGameView(topic: topic, onClose: {})
         case .balance:    BalanceGameView(topic: topic, onClose: {})
         case .sequence:   SequenceGameView(topic: topic, onClose: {})
+        case .basket:     BasketCountView(topic: topic, onClose: {})
         }
     }
 }

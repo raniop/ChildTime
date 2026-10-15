@@ -30,6 +30,9 @@ struct OptionCard: View {
     /// Big by default; shrinks for a long answer / long word so it never breaks
     /// mid-word across lines.
     private var fontSize: CGFloat {
+        // 👶 A גן picture sum ("🌸🌸 + 🌸🌸🌸", wrapped in a left-to-right
+        // isolate by `PreReaderContent.ltr`) — one size down so it stays on one line.
+        if text.hasPrefix("\u{2066}"), text.unicodeScalars.contains(where: \.properties.isEmojiPresentation) { return isCompact ? 21 : 30 }
         let longest = text.split(separator: " ").map(\.count).max() ?? text.count
         if longest >= 11      { return isCompact ? 19 : 26 }
         else if longest >= 8  { return isCompact ? 25 : 33 }

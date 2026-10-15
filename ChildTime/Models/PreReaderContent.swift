@@ -101,11 +101,32 @@ enum PreReaderContent {
 
     private static func mathRound(_ difficulty: Difficulty = .medium) -> Question {
         // Hard: adding, taking away and "where are there more" — no plain counting.
+        // DEMO_GANQ=takeaway | ex2pic | pic2ex | pairs — one kind, for screenshots.
+        switch ProcessInfo.processInfo.environment["DEMO_GANQ"] {
+        case "takeaway": return pictureTakeAway()
+        case "ex2pic":   return exerciseToPicture()
+        case "pic2ex":   return pictureToExercise()
+        default: break
+        }
+        // Exercise ↔ picture (Sasha, 2026-10-15) joins at medium and hard.
         if difficulty == .hard {
-            switch Int.random(in: 0..<5) {
+            switch Int.random(in: 0..<7) {
             case 0, 1: return pictureAdd()
             case 2, 3: return pictureTakeAway()
-            default:   return whereMore()
+            case 4:    return whereMore()
+            case 5:    return exerciseToPicture()
+            default:   return pictureToExercise()
+            }
+        }
+        if difficulty == .medium {
+            switch Int.random(in: 0..<10) {
+            case 0, 1: return counting()
+            case 2, 3: return pictureAdd()
+            case 4, 5: return pictureTakeAway()
+            case 6:    return whereMore()
+            case 7:    return digitByEar()
+            case 8:    return exerciseToPicture()
+            default:   return pictureToExercise()
             }
         }
         switch Int.random(in: 0..<9) {
@@ -115,6 +136,63 @@ enum PreReaderContent {
         case 7:     return whereMore()
         default:    return digitByEar()
         }
+    }
+
+    /// Numbers and sums always run left to right, even on a Hebrew screen
+    /// (Rani, 2026-10-15): a left-to-right isolate keeps "2 + 3" from being
+    /// drawn "3 + 2" inside a right-to-left line. `OptionCard` also reads the
+    /// isolate as "a picture sum" and sets it a size smaller.
+    static func ltr(_ s: String) -> String { "\u{2066}" + s + "\u{2069}" }
+
+    /// Three other sums a picture could be mistaken for — never the same two
+    /// numbers in the other order (2 + 3 and 3 + 2 are both right). Totals up
+    /// to five, so a picture sum fits on one answer card.
+    private static func otherSums(than a: Int, _ b: Int) -> [(Int, Int)] {
+        var all: [(Int, Int)] = []
+        for x in 1...3 { for y in 1...3 where x + y <= 5 && !((x == a && y == b) || (x == b && y == a)) { all.append((x, y)) } }
+        var picked: [(Int, Int)] = []
+        for p in all.shuffled() where !picked.contains(where: { ($0.0 == p.0 && $0.1 == p.1) || ($0.0 == p.1 && $0.1 == p.0) }) {
+            picked.append(p)
+            if picked.count == 3 { break }
+        }
+        return picked
+    }
+
+    /// A small sum, both parts 1…3 and the total at most five.
+    private static func smallSum() -> (Int, Int) {
+        let a = Int.random(in: 1...3)
+        return (a, Int.random(in: 1...min(3, 5 - a)))
+    }
+
+    /// "🌸🌸 + 🌸🌸🌸" — tight, so it stays on one line of an answer card.
+    private static func pictureSum(_ emoji: String, _ a: Int, _ b: Int) -> String {
+        ltr(String(repeating: emoji, count: a) + " + " + String(repeating: emoji, count: b))
+    }
+
+    /// "2 + 3" — which picture is this sum?
+    private static func exerciseToPicture() -> Question {
+        let item = countables.randomElement()!
+        let (a, b) = smallSum()
+        let sums = ([(a, b)] + otherSums(than: a, b)).shuffled()
+        let options = sums.map { pictureSum(item.emoji, $0.0, $0.1) }
+        let correct = sums.firstIndex { $0.0 == a && $0.1 == b } ?? 0
+        var q = Question(topic: .math, prompt: ltr("\(a) + \(b)"), options: options,
+                         correctIndex: correct, spoken: tr("אֵיזוֹ תְּמוּנָה מַתְאִימָה לַתַּרְגִּיל?"))
+        q.skill = "addSub"
+        return q
+    }
+
+    /// 🍎🍎 + 🍎🍎🍎 — which sum is this picture?
+    private static func pictureToExercise() -> Question {
+        let item = countables.randomElement()!
+        let (a, b) = smallSum()
+        let sums = ([(a, b)] + otherSums(than: a, b)).shuffled()
+        let options = sums.map { ltr("\($0.0) + \($0.1)") }
+        let correct = sums.firstIndex { $0.0 == a && $0.1 == b } ?? 0
+        var q = Question(topic: .math, prompt: ltr("\(row(item.emoji, a))  +  \(row(item.emoji, b))"), options: options,
+                         correctIndex: correct, spoken: tr("אֵיזֶה תַּרְגִּיל מַתְאִים לַתְּמוּנָה?"))
+        q.skill = "addSub"
+        return q
     }
 
     private static var countables: [(emoji: String, plural: String)] { [
@@ -143,19 +221,20 @@ enum PreReaderContent {
                         correctIndex: o.correct, spoken: tr("כַּמָּה \(item.plural)?"))
     }
 
-    /// 🍎🍎 ➕ 🍎 — "how many altogether?" (totals up to 7, still countable).
+    /// 🍎🍎 + 🍎 — "how many altogether?" (totals up to 7, still countable).
     private static func pictureAdd() -> Question {
         let item = countables.randomElement()!
         let a = Int.random(in: 1...4)
         let b = Int.random(in: 1...min(4, 7 - a))
         let o = numberOptions(a + b, range: max(1, a + b - 3)...(a + b + 3))
-        var q = Question(topic: .math, prompt: "\(row(item.emoji, a))  ➕  \(row(item.emoji, b))", options: o.options,
+        var q = Question(topic: .math, prompt: ltr("\(row(item.emoji, a))  +  \(row(item.emoji, b))"), options: o.options,
                          correctIndex: o.correct, spoken: tr("כַּמָּה \(item.plural) יֵשׁ בְּיַחַד?"))
         q.skill = "addSub"
         return q
     }
 
-    /// 🍎🍎🍎 ➖ 🍎 — "how many are left?"
+    /// 🍎🍎🍎 ➖ 🍎 — "how many are left?" Drawn as a scene (`takeAway`): the
+    /// taken ones fly up and stay faded.
     private static func pictureTakeAway() -> Question {
         let item = countables.randomElement()!
         let total = Int.random(in: 3...7)
@@ -165,6 +244,7 @@ enum PreReaderContent {
         var q = Question(topic: .math, prompt: "\(row(item.emoji, total))  ➖  \(row(item.emoji, take))", options: o.options,
                          correctIndex: o.correct, spoken: tr("כַּמָּה \(item.plural) נִשְׁאֲרוּ?"))
         q.skill = "addSub"
+        q.takeAway = TakeAwayScene(emoji: item.emoji, total: total, take: take)
         return q
     }
 
