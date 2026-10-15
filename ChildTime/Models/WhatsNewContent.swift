@@ -56,7 +56,13 @@ enum WhatsNewContent {
     static let releases: [Release] = [
 
         // 2026.10.11 — after Apple approved 2026.10.10 (build 238) on 2026-10-14.
-        Release(build: 239, version: "2026.10.11", headline: tr("השניות עפות לשעון"), items: [
+        // (build 240, 2026-10-15: + questions from the next grade, and a hard
+        // level that is really hard in גן — after David, father of אמילי.)
+        Release(build: 240, version: "2026.10.11", headline: tr("השניות עפות לשעון, ושאלות של הכיתה הבאה"), items: [
+            Item(emoji: "🚀", title: tr("שאלות של הכיתה הבאה"),
+                 line: tr("ילדים שכבר שולטים ברמה הקשה בנושא מקבלים גם שאלות של הכיתה הבאה, עם תווית 🚀 על השאלה. בדוח שלכם רואים את זה ליד הנושא")),
+            Item(emoji: "🧠", title: tr("בגן: רמה קשה באמת"),
+                 line: tr("ברמה קשה ילדי הגן מקבלים רק שאלות חשיבה, בלי ״איפה העיגול״, ובעולם הלוגיקה נוספו להם 94 שאלות חשיבה חדשות")),
             Item(emoji: "🪙", title: tr("השניות עפות לשעון"),
                  line: tr("בכל תשובה נכונה השניות שהרוויחו קופצות על המסך ועפות לתוך השעון, והזמן עולה מול העיניים")),
         ]),

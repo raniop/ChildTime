@@ -29604,6 +29604,28 @@
         }
       }
     },
+    "בגן: רמה קשה באמת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الروضة: مستوى صعب حقًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kindergarten: a hard level that is really hard"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Детский сад: сложный уровень — по-настоящему сложный"
+          }
+        }
+      }
+    },
     "בדקו את חבור האינטרנט ונסו שוב." : {
       "localizations" : {
         "ar" : {
@@ -32555,6 +32577,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Бассейн"
+          }
+        }
+      }
+    },
+    "ברמה קשה ילדי הגן מקבלים רק שאלות חשיבה, בלי ״איפה העיגול״, ובעולם הלוגיקה נוספו להם 94 שאלות חשיבה חדשות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في المستوى الصعب يحصل أطفال الروضة على أسئلة تفكير فقط، من دون «أين الدائرة»، وفي عالم المنطق أُضيفت لهم 94 سؤال تفكير جديدًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At the hard level, kindergarten children get only thinking questions, no more “where is the circle”, and the Logic world has 94 new thinking questions for them"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На сложном уровне дети в детском саду получают только вопросы на мышление, без «где кружок», а в мире логики для них появилось 94 новых вопроса на мышление"
           }
         }
       }
@@ -55232,6 +55276,28 @@
         }
       }
     },
+    "השניות עפות לשעון, ושאלות של הכיתה הבאה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الثواني تطير إلى الساعة، وأسئلة الصف التالي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seconds fly into the clock, and next-grade questions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Секунды летят в часы, и вопросы следующего класса"
+          }
+        }
+      }
+    },
     "השפה משנה גם את השאלות, לא רק את הטקסטים. אם תשנו אותה במכשיר של הילד עצמו — הבחירה האחרונה קובעת." : {
       "localizations" : {
         "ar" : {
@@ -68083,6 +68149,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Активные дети"
+          }
+        }
+      }
+    },
+    "ילדים שכבר שולטים ברמה הקשה בנושא מקבלים גם שאלות של הכיתה הבאה, עם תווית 🚀 על השאלה. בדוח שלכם רואים את זה ליד הנושא" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأطفال الذين أتقنوا المستوى الصعب في موضوع ما يحصلون أيضًا على أسئلة من الصف التالي، مع شارة 🚀 على السؤال. ترون ذلك بجانب الموضوع في تقريركم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Children who have mastered the hard level in a topic also get questions from the next grade, with a 🚀 tag on the question. You see it next to the topic in your report"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дети, которые уже освоили сложный уровень в теме, получают и вопросы следующего класса — с меткой 🚀 на вопросе. В вашем отчёте это видно рядом с темой"
           }
         }
       }
@@ -122173,6 +122261,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вопросы уровня «%1$@» в теме «%2$@», выше своего класса"
+          }
+        }
+      }
+    },
+    "שאלות של הכיתה הבאה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أسئلة الصف التالي"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next-grade questions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вопросы следующего класса"
           }
         }
       }
