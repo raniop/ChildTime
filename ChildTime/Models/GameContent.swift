@@ -269,9 +269,9 @@ enum WorldGameFit {
         case .money:
             return [.grocery, .lightning, .sort, .balance, .crush, .pairs, .balloon, .vault]
         case .logic, .gifted:
-            return [.pattern, .vault, .balance, .game2048, .crush, .lightning, .pairs, .sort, .balloon]
+            return [.pattern, .sequence, .vault, .balance, .game2048, .crush, .lightning, .pairs, .sort, .balloon]
         default:
-            return [.sort, .pairs, .balloon, .lightning, .word, .wordSearch, .vault, .balance]
+            return [.sort, .pairs, .balloon, .sequence, .lightning, .word, .wordSearch, .vault, .balance]
         }
     }
 
@@ -358,6 +358,9 @@ enum WorldGameFit {
                 return [.math, .logic, .gifted].contains(topic) || source == .english || source == .hebrew
             case .grocery:
                 return [.math, .money].contains(topic) || source == .english || source == .hebrew
+            case .sequence:
+                // 🎞️ Everyday stories in pictures — no bank needed.
+                return true
             }
         }
     }

@@ -87,6 +87,7 @@ struct MiniGameScreenPreview: View {
         case .vault:      VaultGameView(topic: topic, onClose: {})
         case .grocery:    GroceryGameView(topic: topic, onClose: {})
         case .balance:    BalanceGameView(topic: topic, onClose: {})
+        case .sequence:   SequenceGameView(topic: topic, onClose: {})
         }
     }
 }

@@ -80,6 +80,7 @@ struct MiniGamePreview: View {
             case .sort:    return CGSize(width: 0.66, height: 0.43)
             case .pattern: return CGSize(width: 0.81, height: 0.34)
             case .crush:   return CGSize(width: 0.66, height: 0.39)
+            case .sequence: return CGSize(width: 0.80, height: 0.42)
             default: break
             }
         }
@@ -96,6 +97,7 @@ struct MiniGamePreview: View {
         case .vault:      return CGSize(width: 0.72, height: 0.42)
         case .grocery:    return CGSize(width: 0.66, height: 0.41)
         case .balance:    return CGSize(width: 0.86, height: 0.45)
+        case .sequence:   return CGSize(width: 0.80, height: 0.42)
         }
     }
 
@@ -118,6 +120,7 @@ struct MiniGamePreview: View {
         case .sort:    preSort(s)
         case .pattern: prePattern(s)
         case .crush:   preCount(s)
+        case .sequence: preSequence(s)
         default:       readerContent(s)
         }
     }
@@ -177,6 +180,40 @@ struct MiniGamePreview: View {
                             .strokeBorder(.white.opacity(0.6), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
                             .padding(3))
                 }
+            }
+        }
+    }
+
+    /// 🎞️ Three numbered frames — the first two filled, the third waiting —
+    /// and the picture that belongs in it.
+    private func preSequence(_ s: CGFloat) -> some View {
+        let steps = ["seed", "sprout", "flower"]
+        let w = s * 0.2
+        return VStack(spacing: s * 0.05) {
+            HStack(spacing: s * 0.03) {
+                ForEach(steps.indices, id: \.self) { i in
+                    ZStack(alignment: .topTrailing) {
+                        Group {
+                            if i < 2, let img = ChoreArt.image(key: steps[i]) {
+                                Image(uiImage: img).resizable().scaledToFit().padding(w * 0.08)
+                            } else { Color.clear }
+                        }
+                        .frame(width: w, height: w)
+                        .miniGameTile(i < 2 ? .correct : .normal, tint: AppColor.starGold, radius: 12)
+                        Text("\(i + 1)")
+                            .font(.system(size: w * 0.18, weight: .black, design: .rounded))
+                            .foregroundStyle(Color(hex: "3A2700"))
+                            .frame(width: w * 0.3, height: w * 0.3)
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppGradient.gold))
+                            .offset(x: 4, y: -5)
+                    }
+                }
+            }
+            .environment(\.layoutDirection, .leftToRight)   // numbers run left to right
+            if let img = ChoreArt.image(key: steps[2]) {
+                Image(uiImage: img).resizable().scaledToFit().padding(w * 0.08)
+                    .frame(width: w * 1.05, height: w * 1.05)
+                    .miniGameTile(.picked, tint: Self.blue, radius: 12)
             }
         }
     }
@@ -245,6 +282,7 @@ struct MiniGamePreview: View {
         case .vault:      vault(s)
         case .grocery:    grocery(s)
         case .balance:    balance(s)
+        case .sequence:   preSequence(s)
         }
     }
 
