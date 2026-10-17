@@ -374,6 +374,13 @@ final class QuestionMemory {
         QuestionMemorySync.coverage(topic: topic.rawValue, seen: seenCount(of: pool, for: topic), pool: pool.count)
     }
 
+    /// Whether `pool` still holds a question this child was never asked.
+    func hasUnseen(_ pool: [BankQuestion], for topic: Topic) -> Bool {
+        ensureLoaded()
+        let memory = seen[topic.rawValue] ?? [:]
+        return pool.contains { memory[Self.fingerprint(promptKey($0))] == nil && !sessionServed.contains(promptKey($0)) }
+    }
+
     /// Wipe memory for a specific profile (used by remote-reset).
     func clear(for profileID: UUID? = nil) {
         seen = [:]

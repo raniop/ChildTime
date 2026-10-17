@@ -1683,7 +1683,8 @@ struct QuestionRunnerView: View {
             q = makeQuestion()
             hideTries += 1
         }
-        q.stretchGrade = stretchedTo
+        // 🚀 Also when the child's own grade ran out of questions in this world.
+        if stretchedTo != nil { q.stretchGrade = stretchedTo }
         QuestionMemory.shared.markServedThisSession(sessionKey(q))
         current = q
         questionShownAt = Date()

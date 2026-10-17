@@ -105,6 +105,26 @@ final class QuestionRotationTests: XCTestCase {
         XCTAssertEqual(q?.prompt, pool[9].prompt, "the only question the other device didn't ask")
     }
 
+    /// Rani, 2026-10-17: "אם הילד סיים את כל השאלות תקפיץ כיתה". A grade used
+    /// up in a world moves on to the grade above (🚀) — no question repeats.
+    @MainActor func testUsedUpGradeClimbsInsteadOfRepeating() {
+        QuestionMemory.shared.clear()
+        QuestionMemory.shared.beginSession()
+        let ownPool = QuestionGenerator.effectivePool(topic: .science, grade: 1)
+        guard ownPool.count >= 10 else { return }
+        var asked = Set<String>()
+        var climbedTo: Int?
+        for _ in 0..<(ownPool.count * 2 + 40) {
+            let q = QuestionGenerator.generate(topic: .science, difficulty: .medium, grade: 1)
+            let key = "\(q.prompt)|\(q.correctAnswer)"
+            XCTAssertFalse(asked.contains(key), "a question came back: \(q.prompt.prefix(40))")
+            asked.insert(key)
+            if let g = q.stretchGrade { climbedTo = g; break }
+            if asked.count % 15 == 0 { QuestionMemory.shared.beginSession() }   // a new round
+        }
+        XCTAssertEqual(climbedTo, 2, "after every א׳ science question, the next comes from ב׳")
+    }
+
     /// The fingerprint Android computes too — pinned so the two never drift.
     func testFingerprintIsStable() {
         XCTAssertEqual(QuestionMemory.fingerprint("abc"), "ba7816bf8f01")

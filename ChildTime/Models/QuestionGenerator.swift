@@ -258,15 +258,30 @@ struct QuestionGenerator {
             }
             bank = gradePool(bank, grade: g, distance: windowDistance)
             bank += stretchItems(topic: topic, difficulty: difficulty, grade: g, pool: bank)
+            // 🚀 Every question of this grade already asked? Never repeat one
+            // (Rani, 2026-10-17: "אם הילד סיים את כל השאלות תקפיץ כיתה") — go up
+            // a grade, and another, while the world has unseen questions there.
+            if !bank.isEmpty, !QuestionMemory.shared.hasUnseen(bank, for: topic) {
+                for next in (g + 1)...max(g + 1, CurriculumMath.topGrade) where next <= CurriculumMath.topGrade {
+                    let above = effectivePool(topic: topic, grade: next)
+                    guard QuestionMemory.shared.hasUnseen(above, for: topic) else { continue }
+                    if var q = question(from: above, topic: topic, difficulty: difficulty) {
+                        q.stretchGrade = next
+                        return q
+                    }
+                }
+            }
         }
-        guard let item = QuestionMemory.shared.pickFresh(bank, for: topic, target: difficulty) else {
-            return Question(
-                topic: topic,
-                prompt: tr("אוֹפְּס... אֵין שְׁאֵלוֹת לַנּוֹשֵׂא הַזֶּה עֲדַיִן"),
-                options: [tr("בְּסֵדֶר"), tr("הַמְשֵׁךְ"), tr("תּוֹדָה"), tr("חֲזוֹר")],
-                correctIndex: 0
-            )
-        }
+        return question(from: bank, topic: topic, difficulty: difficulty) ?? Question(
+            topic: topic,
+            prompt: tr("אוֹפְּס... אֵין שְׁאֵלוֹת לַנּוֹשֵׂא הַזֶּה עֲדַיִן"),
+            options: [tr("בְּסֵדֶר"), tr("הַמְשֵׁךְ"), tr("תּוֹדָה"), tr("חֲזוֹר")],
+            correctIndex: 0
+        )
+    }
+
+    private static func question(from bank: [BankQuestion], topic: Topic, difficulty: Difficulty) -> Question? {
+        guard let item = QuestionMemory.shared.pickFresh(bank, for: topic, target: difficulty) else { return nil }
         let allOptions = ([item.correctAnswer] + item.distractors).shuffled()
         let correctIndex = allOptions.firstIndex(of: item.correctAnswer) ?? 0
         return Question(

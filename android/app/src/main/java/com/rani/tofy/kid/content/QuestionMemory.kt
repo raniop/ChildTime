@@ -121,6 +121,14 @@ class QuestionMemory(
         return pool.count { fingerprint(it.key) in memory }
     }
 
+    /** Whether `pool` still holds a question this child was never asked (nor shown this session). */
+    @Synchronized
+    fun hasUnseen(pool: List<BankQuestion>, topic: Topic): Boolean {
+        ensureLoaded()
+        val memory = seen[topic.raw] ?: emptyMap<String, Double>()
+        return pool.any { it.key !in sessionServed && fingerprint(it.key) !in memory }
+    }
+
     /** When this question was last asked (seconds since 1970), or null — tests / diagnostics. */
     @Synchronized
     fun askedAt(q: BankQuestion, topic: Topic): Double? { ensureLoaded(); return seen[topic.raw]?.get(fingerprint(q.key)) }

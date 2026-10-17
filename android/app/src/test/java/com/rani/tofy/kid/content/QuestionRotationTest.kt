@@ -70,6 +70,29 @@ class QuestionRotationTest {
         assertEquals("the only question the other device didn't ask", pool[9].prompt, q?.prompt)
     }
 
+    /**
+     * Rani, 2026-10-17: "אם הילד סיים את כל השאלות תקפיץ כיתה". A grade used
+     * up in a world moves on to the grade above (🚀) — no question repeats.
+     */
+    @Test fun usedUpGradeClimbsInsteadOfRepeating() {
+        val m = QuestionMemory(MemoryContentPrefs(), "kid")
+        val ctx = ContentContext(AppLanguage.HE, m, Random(5))
+        m.beginSession()
+        val ownPool = QuestionGenerator.effectivePool(Topic.SCIENCE, 1, AppLanguage.HE)
+        assertTrue("א׳ science should be deep enough", ownPool.size >= 10)
+        val asked = HashSet<String>()
+        var climbedTo: Int? = null
+        for (i in 0 until ownPool.size * 2 + 40) {
+            val q = QuestionGenerator.generate(Topic.SCIENCE, Difficulty.MEDIUM, 1, ctx)
+            val key = "${q.prompt}|${q.correctAnswer}"
+            assertTrue("a question came back: ${q.prompt.take(40)}", asked.add(key))
+            q.stretchGrade?.let { climbedTo = it }
+            if (climbedTo != null) break
+            if (asked.size % 15 == 0) m.beginSession()   // a new round
+        }
+        assertEquals("after every א׳ science question, the next comes from ב׳", 2, climbedTo)
+    }
+
     /** The later time wins when the two devices disagree. */
     @Test fun mergeKeepsTheLaterTime() {
         val pool = sciencePool(1)

@@ -150,12 +150,26 @@ object QuestionGenerator {
             // 🎓 Serve ONLY the grade's window; sparse grades borrow the CLOSEST grades.
             bank = gradePool(bank, grade, ctx.rng)
             bank = bank + stretchItems(topic, difficulty, grade, bank, ctx.lang)
+            // 🚀 Every question of this grade already asked? Never repeat one
+            // (Rani, 2026-10-17: "אם הילד סיים את כל השאלות תקפיץ כיתה") — go up
+            // a grade, and another, while the world has unseen questions there.
+            // Not from גן: grade-1 questions need reading.
+            if (grade >= 1 && bank.isNotEmpty() && !ctx.memory.hasUnseen(bank, topic)) {
+                for (next in (grade + 1)..CurriculumMath.TOP_GRADE) {
+                    val above = effectivePool(topic, next, ctx.lang, ctx.rng)
+                    if (!ctx.memory.hasUnseen(above, topic)) continue
+                    question(above, topic, difficulty, ctx)?.let { return it.copy(stretchGrade = next) }
+                }
+            }
         }
-        val item = ctx.memory.pickFresh(bank, topic, difficulty, ctx.rng)
-            ?: return Question(topic, tr("אוֹפְּס... אֵין שְׁאֵלוֹת לַנּוֹשֵׂא הַזֶּה עֲדַיִן"),
+        // Nothing unseen anywhere: the one asked longest ago.
+        return question(bank, topic, difficulty, ctx)
+            ?: Question(topic, tr("אוֹפְּס... אֵין שְׁאֵלוֹת לַנּוֹשֵׂא הַזֶּה עֲדַיִן"),
                 listOf(tr("בְּסֵדֶר"), tr("הַמְשֵׁךְ"), tr("תּוֹדָה"), tr("חֲזוֹר")), 0)
-        return item.toQuestion(topic, ctx.rng)
     }
+
+    private fun question(bank: List<BankQuestion>, topic: Topic, difficulty: Difficulty, ctx: ContentContext): Question? =
+        ctx.memory.pickFresh(bank, topic, difficulty, ctx.rng)?.toQuestion(topic, ctx.rng)
 }
 
 /** A bank item as a runner question: answer + distractors, shuffled. */
