@@ -162,13 +162,11 @@ class SelectionTest {
         val rng = Random(11)
         val seen = (1..40).map { m.pickFresh(pool, Topic.LOGIC, Difficulty.MEDIUM, rng)!!.key }
         assertEquals(40, seen.toSet().size)
-        // The cross-session window holds 85% of the pool.
-        assertEquals(QuestionMemory.windowFor(40), m.recentKeys(Topic.LOGIC).size)
-        assertEquals(34, QuestionMemory.windowFor(40))
-        assertEquals(5, QuestionMemory.windowFor(3))
+        // Every one is remembered across sessions — not just a recent window.
+        assertEquals(40, m.seenCount(pool, Topic.LOGIC))
     }
 
-    @Test fun recencyWindowSurvivesANewSessionAndAnotherInstance() {
+    @Test fun memorySurvivesANewSessionAndAnotherInstance() {
         val prefs = MemoryContentPrefs()
         val pool = (1..20).map { item(it) }
         val first = QuestionMemory(prefs, "p1")
@@ -179,7 +177,7 @@ class SelectionTest {
         val next = (1..10).map { again.pickFresh(pool, Topic.SCIENCE, rng)!!.key }.toSet()
         assertTrue("fresh items first after relaunch", next.intersect(served).isEmpty())
         // Another profile has its own memory.
-        assertTrue(QuestionMemory(prefs, "p2").recentKeys(Topic.SCIENCE).isEmpty())
+        assertEquals(0, QuestionMemory(prefs, "p2").seenCount(pool, Topic.SCIENCE))
     }
 
     @Test fun tierPreferenceFallsBackToNeighbours() {

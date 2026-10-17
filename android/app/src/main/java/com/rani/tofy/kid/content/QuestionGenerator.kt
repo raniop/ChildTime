@@ -105,7 +105,8 @@ object QuestionGenerator {
 
     /**
      * How many items a grade needs before the rotation stops feeling like a loop
-     * (QuestionMemory remembers 85%, so a 12-item pool repeats after 10).
+     * (QuestionMemory asks a whole pool before anything returns, so a 12-item
+     * pool comes round again after 12).
      */
     const val MIN_GRADE_POOL = 30
 

@@ -1657,8 +1657,12 @@ struct QuestionRunnerView: View {
         }
         func makeQuestion() -> Question {
             if bonus || isBonusArena { return QuestionGenerator.generateBonus(topic: topic, grade: childGrade) }
+            // 👶 A parent who chose "קשה" gets thinking questions only — the
+            // engine's occasional easier roll must not bring back "אֵיפֹה
+            // הַצָּהֹב?" (Sasha, 2026-10-17).
+            let ganLevel: Difficulty = profiles.active?.difficulty(for: topic) == .hard ? .hard : effective
             return preReader
-                ? PreReaderContent.generate(topic: topic, difficulty: effective)
+                ? PreReaderContent.generate(topic: topic, difficulty: ganLevel)
                 // A question from the grade above starts at that grade's middle, not its top.
                 : QuestionGenerator.generate(topic: topic, difficulty: stretchedTo != nil ? .medium : effective, grade: childGrade)
         }

@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rani.tofy.i18n.tr
 import com.rani.tofy.kid.content.PreReaderContent
+import com.rani.tofy.kid.content.QuestionSource
 import com.rani.tofy.kid.content.Question
 import com.rani.tofy.kid.content.CurriculumMath
 import com.rani.tofy.kid.core.WorldStage
@@ -102,7 +103,7 @@ internal fun BossBattle(world: PlayWorld, onClose: () -> Unit) {
         val grade = GameEnv.source.grade
         question = when {
             // Pre-readers (גן) get the text-free visual path, exactly like the runner.
-            (grade ?: 1) < 1 -> PreReaderContent.generate(world.topic)
+            (grade ?: 1) < 1 -> PreReaderContent.generate(world.topic, memory = QuestionSource.memory(GameEnv.childKey))
             // 💫 Arena boss: extra-hard bonus questions across ALL playable topics.
             world.isBonus -> GameQuestions.generateBonus(GameQuestions.playableTopics().randomOrNull() ?: Topic.LOGIC, grade)
             else -> {

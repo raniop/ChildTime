@@ -171,6 +171,8 @@ object KidSession : LeaseHost {
         if (!local) {
             leases.startIfNeeded(childID)
             sync.start(childID)
+            // 🔁 What this child was asked on their other devices (QuestionMemorySync).
+            com.rani.tofy.kid.content.QuestionSource.memory(childID).pull()
         }
         ticker = scope.launch { while (true) { delay(1000); tick() } }
         onForeground()

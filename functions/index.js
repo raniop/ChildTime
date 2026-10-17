@@ -2773,6 +2773,30 @@ async function computeAdminStats() {
     });
   }
 
+  // ⏳ Children close to the end of a world's questions — from there the
+  // app starts bringing back the ones asked longest ago, so the world needs
+  // more questions. Each child device keeps `coverage` in
+  // children/{id}/memory/questions (Rani, 2026-10-17).
+  const childInfo = {};
+  childrenSnap.docs.forEach((c) => { const d = c.data(); childInfo[c.id] = { name: d.name || "—", grade: d.grade }; });
+  const questionsRunningOut = [];
+  const memSnap = await db.collectionGroup("memory").get().catch(() => ({ docs: [] }));
+  memSnap.docs.forEach((m) => {
+    if (m.id !== "questions") return;
+    const childID = m.ref.parent.parent ? m.ref.parent.parent.id : null;
+    if (!childID || !childInfo[childID]) return;
+    const cov = (m.data() || {}).coverage || {};
+    for (const [topic, c] of Object.entries(cov)) {
+      const seen = Number(c && c.seen) || 0, pool = Number(c && c.pool) || 0;
+      if (pool < 8 || seen / pool < 0.8) continue;
+      questionsRunningOut.push({
+        child: childInfo[childID].name, grade: childInfo[childID].grade,
+        topic: TOPIC_LABEL[topic] || topic, seen, pool, at: Number(c.at) || 0,
+      });
+    }
+  });
+  questionsRunningOut.sort((a, b) => (b.seen / b.pool) - (a.seen / a.pool) || b.at - a.at);
+
   const summary = {
     updatedAt: new Date().toLocaleString("he-IL", { timeZone: "Asia/Jerusalem" }),
     updatedAtUnix: now,
@@ -2787,7 +2811,8 @@ async function computeAdminStats() {
       questionsPerDay, questionsPerSession, totalQuestions,
       sessionsToday: ends1.length, sessions7d: ends7.length,
     },
-    learning: { accuracy, avgResponseSec, topicsPopular, topicsStrong, topicsWeak },
+    learning: { accuracy, avgResponseSec, topicsPopular, topicsStrong, topicsWeak,
+      questionsRunningOut: questionsRunningOut.slice(0, 40) },
     economy: {
       minutesEarned: { today: earned1, week: earned7, month: earned30 },
       minutesUsed7: used7, minutesUnused7: Math.max(0, earned7 - used7),

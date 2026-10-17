@@ -66,6 +66,50 @@ final class QuestionRotationTests: XCTestCase {
         }
     }
 
+    /// Rani, 2026-10-17: "שאלות שנשאלו לא יחזרו". Every question of a world is
+    /// asked once before ANY comes back, across many sessions — and then the
+    /// one asked longest ago is first to return.
+    func testWholeWorldBeforeAnyRepeat() {
+        guard let bank = QuestionBanks.bank(for: .science), bank.count >= 20 else { return }
+        let pool = Array(bank.prefix(30))
+        QuestionMemory.shared.clear()
+        var order: [String] = []
+        for session in 0..<6 {
+            QuestionMemory.shared.beginSession()
+            for _ in 0..<5 {
+                guard let q = QuestionMemory.shared.pickFresh(pool, for: .science, target: .medium) else { continue }
+                let key = "\(q.prompt)|\(q.correctAnswer)"
+                XCTAssertFalse(order.contains(key), "session \(session): a question came back before the world was used up")
+                order.append(key)
+            }
+        }
+        XCTAssertEqual(order.count, pool.count)
+        // The world is used up: the next one is the FIRST asked.
+        Thread.sleep(forTimeInterval: 0.01)
+        QuestionMemory.shared.beginSession()
+        let next = QuestionMemory.shared.pickFresh(pool, for: .science, target: .medium)
+        XCTAssertEqual(next.map { "\($0.prompt)|\($0.correctAnswer)" }, order.first)
+    }
+
+    /// What the child's other device asked counts as asked here too.
+    @MainActor func testAnotherDevicesQuestionsAreNotAskedAgain() {
+        guard let bank = QuestionBanks.bank(for: .science), bank.count >= 10 else { return }
+        let pool = Array(bank.prefix(10))
+        QuestionMemory.shared.clear()
+        let pid = ProfileStore.shared.activeID?.uuidString ?? "default"
+        let elsewhere = pool.prefix(9).map { QuestionMemory.fingerprint("\($0.prompt)|\($0.correctAnswer)") }
+        QuestionMemory.shared.merge(remote: ["science": Dictionary(uniqueKeysWithValues: elsewhere.map { ($0, Date().timeIntervalSince1970) })],
+                                    forProfile: pid)
+        QuestionMemory.shared.beginSession()
+        let q = QuestionMemory.shared.pickFresh(pool, for: .science, target: .medium)
+        XCTAssertEqual(q?.prompt, pool[9].prompt, "the only question the other device didn't ask")
+    }
+
+    /// The fingerprint Android computes too — pinned so the two never drift.
+    func testFingerprintIsStable() {
+        XCTAssertEqual(QuestionMemory.fingerprint("abc"), "ba7816bf8f01")
+    }
+
     /// A grade-filtered pool must still be deep enough to rotate. A pool that
     /// collapses to a handful of items is why a child sees the same questions
     /// however good the picker is.

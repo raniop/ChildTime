@@ -56,7 +56,10 @@ enum PreReaderContent {
         guard pool.count >= minPicturePool else { return nil }
         // On hard, the batch's "medium" items when there is a real set of them.
         let harder = pool.filter { $0.difficulty != .easy }
-        guard let b = (preferHarder && harder.count >= minPicturePool ? harder : pool).randomElement() else { return nil }
+        // Never one the child was already asked, until the world is used up
+        // (then the one asked longest ago) — `QuestionMemory`.
+        guard let b = QuestionMemory.shared.pickFresh(preferHarder && harder.count >= minPicturePool ? harder : pool,
+                                                      for: topic) else { return nil }
         let options = ([b.correctAnswer] + b.distractors.prefix(3)).shuffled()
         guard let correct = options.firstIndex(of: b.correctAnswer) else { return nil }
         // The four answers are the pictures — the question stays words only, so

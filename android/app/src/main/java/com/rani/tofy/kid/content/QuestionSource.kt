@@ -200,9 +200,12 @@ class QuestionSession internal constructor(
         // comes from the grade above, at that grade's middle level (Rani, 2026-10-15).
         val stretchTo = if (!preReader && !bonus && !arena && child.isStretched(topic) && child.grade < CurriculumMath.TOP_GRADE && rng.nextBoolean())
             child.grade + 1 else null
+        // 👶 A parent who chose "קשה" gets thinking questions only — the engine's
+        // occasional easier roll must not bring back "אֵיפֹה הַצָּהֹב?" (Sasha, 2026-10-17).
+        val ganLevel = if (base == Difficulty.HARD) Difficulty.HARD else effective
         fun make(): Question = when {
             bonus || arena -> QuestionGenerator.generateBonus(topic, child.grade, ctx)
-            preReader -> PreReaderContent.generate(topic, rng, effective)
+            preReader -> PreReaderContent.generate(topic, rng, ganLevel, memory)
             stretchTo != null -> QuestionGenerator.generate(topic, Difficulty.MEDIUM, stretchTo, ctx).copy(stretchGrade = stretchTo)
             else -> QuestionGenerator.generate(topic, effective, child.grade, ctx)
         }
@@ -252,10 +255,13 @@ object QuestionSource {
     @Volatile private var prefs: ContentPrefs = MemoryContentPrefs()
     private val memories = ConcurrentHashMap<String, QuestionMemory>()
     @Volatile var rng: Random = Random.Default
+    /** Where the memory is shared with the child's other devices — none in tests. */
+    @Volatile private var cloud: QuestionMemoryCloud? = null
 
     fun init(context: Context) {
         ContentAssets.install(context)
         prefs = SharedContentPrefs(context)
+        cloud = QuestionMemorySync
         memories.clear()
         RemoteQuestionBank.init(context)
         QuestionReporter.init(prefs)
@@ -267,6 +273,7 @@ object QuestionSource {
         ContentAssets.install(loader)
         this.prefs = prefs
         this.rng = rng
+        cloud = null
         memories.clear()
         QuestionReporter.init(prefs)
     }
@@ -285,8 +292,11 @@ object QuestionSource {
         Unit
     }
 
-    /** The per-profile anti-repeat memory (persisted under the iOS key "questionMemory.<id>"). */
-    fun memory(profileId: String): QuestionMemory = memories.getOrPut(profileId) { QuestionMemory(prefs, profileId) }
+    /**
+     * The per-profile anti-repeat memory (persisted under the iOS key
+     * "questionMemory2.<id>", shared through `children/{id}/memory/questions`).
+     */
+    fun memory(profileId: String): QuestionMemory = memories.getOrPut(profileId) { QuestionMemory(prefs, profileId, cloud) }
 
     /** Start a session (clears the in-session no-repeat ledger, like QuestionMemory.beginSession). */
     fun session(child: ChildContentProfile, mode: ContentMode): QuestionSession =

@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 /// A single hand-curated multiple-choice question used by topics where we
 /// don't generate questions algorithmically (English, Logic, Science,
@@ -265,13 +266,17 @@ enum QuestionBanks {
 
 // MARK: - Anti-repeat memory
 
-/// Keeps the most-recently-served questions per topic so the runner
-/// doesn't repeat items inside a session OR across the next few
-/// sessions. Window slides at ~85% of the pool — when the pool refreshes
-/// the kid won't see the same question for a long time.
+/// Remembers, per child and per topic, WHEN each question was last asked, so
+/// a question never comes back until the child has been through every other
+/// one in that world (Rani, 2026-10-17: "שאלות שנשאלו לא יחזרו"). Unseen
+/// questions always come first; only when a world is used up does the one
+/// asked LONGEST ago return — never a random repeat.
 ///
-/// Persisted to UserDefaults (per profile when a profile is active) so
-/// closing and reopening the app doesn't erase the memory.
+/// Each question is kept as a short fingerprint of its prompt + answer
+/// (`fingerprint`), and the memory is shared by all of the child's devices
+/// through `children/{id}/memory/questions` (`QuestionMemorySync`), so what
+/// was asked on the iPad isn't asked again on the phone. Android computes the
+/// same fingerprint.
 final class QuestionMemory {
     static let shared = QuestionMemory()
     // Init is intentionally empty so we never reach back into
@@ -280,23 +285,27 @@ final class QuestionMemory {
     private init() {}
 
     private let defaults = UserDefaults.standard
-    private var recent: [Topic: [String]] = [:]
+    /// topic → fingerprint → when it was last asked (seconds since 1970).
+    private var seen: [String: [String: Double]] = [:]
     private var hasLoaded = false
+    /// A world never holds more than this many remembered questions.
+    private let maxPerTopic = 4000
     /// Prompts already shown in the CURRENT session — never repeated within a
     /// session (the only allowed repeat is a deliberate re-ask of a wrong one,
     /// handled by the runner). Reset at session start.
     private var sessionServed: Set<String> = []
 
-    func beginSession() { sessionServed = [] }
+    func beginSession() {
+        sessionServed = []
+        QuestionMemorySync.pull()
+    }
     func markServedThisSession(_ prompt: String) { sessionServed.insert(prompt) }
     func wasServedThisSession(_ prompt: String) -> Bool { sessionServed.contains(prompt) }
     /// Allow a wrong question to come back (the runner re-asks it).
     func allowReask(_ prompt: String) { sessionServed.remove(prompt) }
 
-    private var storageKey: String {
-        let pid = ProfileStore.shared.activeID?.uuidString ?? "default"
-        return "questionMemory.\(pid)"
-    }
+    private var profileKey: String { ProfileStore.shared.activeID?.uuidString ?? "default" }
+    private var storageKey: String { "questionMemory2.\(profileKey)" }
 
     private func ensureLoaded() {
         guard !hasLoaded else { return }
@@ -304,110 +313,170 @@ final class QuestionMemory {
         hasLoaded = true
     }
 
-    /// Difficulty-aware variant: prefers fresh questions at `target` difficulty,
-    /// falling back to adjacent tiers (then any tier) when that tier is exhausted
-    /// for now. Keeps the same anti-repeat guarantees as `pickFresh`.
+    /// Difficulty-aware pick: an UNSEEN question first — at `target`, then its
+    /// neighbours, then any tier — and only when the whole world has been
+    /// asked, the one asked longest ago.
     func pickFresh(_ pool: [BankQuestion], for topic: Topic, target: Difficulty) -> BankQuestion? {
-        // Tier preference: the requested level first, then its neighbours, then
-        // whatever's left — so a thin tier never starves the child of questions.
+        defer { report(pool, for: topic) }
         let order: [Difficulty]
         switch target {
         case .easy:   order = [.easy, .medium, .hard]
         case .medium: order = [.medium, .easy, .hard]
         case .hard:   order = [.hard, .medium, .easy]
         }
-        // Anchor the recency window to the WHOLE topic pool, not the per-tier
-        // slice. Otherwise we'd only remember ~85% of a single tier (~39 items),
-        // so off-tier questions and the dominant tier alike got forgotten — and
-        // repeated — far too soon. The full-pool window keeps a long, topic-wide
-        // memory so the child cycles through much more before anything returns.
-        let fullWindow = max(5, (pool.count * 85) / 100)
+        ensureLoaded()
         for tier in order {
             let slice = pool.filter { $0.difficulty == tier }
-            // Strict (no session repeats) so an exhausted tier yields to the next.
-            if let chosen = pickFresh(slice, for: topic, allowSessionRepeat: false,
-                                      windowOverride: fullWindow) { return chosen }
+            if let chosen = pickUnseen(slice, for: topic) { return chosen }
         }
-        // Every tier was fully served this session — allow a lenient repeat.
-        return pickFresh(pool, for: topic, windowOverride: fullWindow)
+        return pickFresh(pool, for: topic)
     }
 
-    /// Pick a random question from `pool` that hasn't been served recently.
-    /// Falls back to a true random when every question is in the recent
-    /// window (only possible for very small pools). `windowOverride` lets the
-    /// tier-aware caller size the recency window by the whole topic pool.
-    func pickFresh(_ pool: [BankQuestion], for topic: Topic, allowSessionRepeat: Bool = true,
-                   windowOverride: Int? = nil) -> BankQuestion? {
+    /// An unseen question from `pool` if there is one, otherwise the one asked
+    /// longest ago (still never one already shown this session, unless the
+    /// whole pool was).
+    func pickFresh(_ pool: [BankQuestion], for topic: Topic) -> BankQuestion? {
+        defer { report(pool, for: topic) }
         ensureLoaded()
         guard !pool.isEmpty else { return nil }
-        // 85% — leaves a small pool of "fresh" candidates and keeps a long
-        // tail of "already seen recently" out of rotation. With ~80 English
-        // questions the kid will go through ~68 before any can repeat.
-        let windowSize = windowOverride ?? max(5, (pool.count * 85) / 100)
-        let recentList = recent[topic] ?? []
-        // Never repeat within the session; also avoid the cross-session window.
-        let fresh = pool.filter { !recentList.contains(promptKey($0)) && !sessionServed.contains(promptKey($0)) }
-        // Fallback chain: still avoid session repeats, only allow a true repeat
-        // if the whole (small) pool was already used this session.
+        if let chosen = pickUnseen(pool, for: topic) { return chosen }
+        let memory = seen[topic.rawValue] ?? [:]
         let notInSession = pool.filter { !sessionServed.contains(promptKey($0)) }
-        let candidates: [BankQuestion]
-        if !fresh.isEmpty { candidates = fresh }
-        else if !notInSession.isEmpty { candidates = notInSession }
-        else if allowSessionRepeat { candidates = pool }
-        else { return nil }   // caller (tier picker) will try another tier instead of repeating
-        let chosen = candidates.randomElement()
-        if let chosen {
-            remember(promptKey(chosen), in: topic, windowSize: windowSize)
-            sessionServed.insert(promptKey(chosen))
-        }
+        let candidates = notInSession.isEmpty ? pool : notInSession
+        let oldest = candidates.map { memory[Self.fingerprint(promptKey($0))] ?? 0 }.min() ?? 0
+        let chosen = candidates.filter { (memory[Self.fingerprint(promptKey($0))] ?? 0) == oldest }.randomElement()
+        if let chosen { remember(chosen, in: topic) }
         return chosen
+    }
+
+    private func pickUnseen(_ pool: [BankQuestion], for topic: Topic) -> BankQuestion? {
+        let memory = seen[topic.rawValue] ?? [:]
+        let unseen = pool.filter {
+            !sessionServed.contains(promptKey($0)) && memory[Self.fingerprint(promptKey($0))] == nil
+        }
+        guard let chosen = unseen.randomElement() else { return nil }
+        remember(chosen, in: topic)
+        return chosen
+    }
+
+    /// How many of `pool` this child has already been asked — for the
+    /// "running out of questions" alert.
+    func seenCount(of pool: [BankQuestion], for topic: Topic) -> Int {
+        ensureLoaded()
+        let memory = seen[topic.rawValue] ?? [:]
+        return pool.filter { memory[Self.fingerprint(promptKey($0))] != nil }.count
+    }
+
+    /// 📊 How much of this world the child has used up — the founder dashboard
+    /// warns before a child runs out (kept with the memory in the cloud).
+    private func report(_ pool: [BankQuestion], for topic: Topic) {
+        guard !pool.isEmpty else { return }
+        QuestionMemorySync.coverage(topic: topic.rawValue, seen: seenCount(of: pool, for: topic), pool: pool.count)
     }
 
     /// Wipe memory for a specific profile (used by remote-reset).
     func clear(for profileID: UUID? = nil) {
-        recent = [:]
-        let key = profileID.map { "questionMemory.\($0.uuidString)" } ?? storageKey
-        defaults.removeObject(forKey: key)
+        seen = [:]
+        let pid = profileID?.uuidString ?? profileKey
+        defaults.removeObject(forKey: "questionMemory2.\(pid)")
+        defaults.removeObject(forKey: "questionMemory.\(pid)")
     }
 
     /// Pull state for the freshly-active profile.
     func reloadForActiveProfile() {
         load()
         hasLoaded = true
+        QuestionMemorySync.pull()
     }
 
     // Key by prompt + answer so questions that SHARE a prompt (e.g. several
     // "מי לא שייך?") are treated as distinct and aren't collapsed by the dedup.
     private func promptKey(_ q: BankQuestion) -> String { "\(q.prompt)|\(q.correctAnswer)" }
 
-    private func remember(_ key: String, in topic: Topic, windowSize: Int) {
-        var list = recent[topic] ?? []
-        list.append(key)
-        if list.count > windowSize { list.removeFirst(list.count - windowSize) }
-        recent[topic] = list
+    /// The first 12 hex digits of SHA-256 over the UTF-8 of "prompt|answer" —
+    /// short enough to keep thousands per child, and the same on Android.
+    static func fingerprint(_ key: String) -> String {
+        if let hit = fingerprints.withLock({ $0[key] }) { return hit }
+        let fp = String(SHA256.hash(data: Data(key.utf8)).map { String(format: "%02x", $0) }.joined().prefix(12))
+        fingerprints.withLock { $0[key] = fp }
+        return fp
+    }
+    /// Every pick looks at the whole pool — hash each question once per launch.
+    private static let fingerprints = LockedBox<[String: String]>([:])
+
+    private func remember(_ q: BankQuestion, in topic: Topic) {
+        let key = promptKey(q)
+        sessionServed.insert(key)
+        let fp = Self.fingerprint(key)
+        let now = Date().timeIntervalSince1970
+        var memory = seen[topic.rawValue] ?? [:]
+        memory[fp] = now
+        if memory.count > maxPerTopic {
+            for (k, _) in memory.sorted(by: { $0.value < $1.value }).prefix(memory.count - maxPerTopic) {
+                memory.removeValue(forKey: k)
+            }
+        }
+        seen[topic.rawValue] = memory
         save()
+        QuestionMemorySync.push(topic: topic.rawValue, fingerprint: fp, at: now)
+    }
+
+    /// Folds in what the child's other devices asked: the later time wins.
+    func merge(remote: [String: [String: Double]], forProfile pid: String) {
+        guard pid == profileKey else { return }
+        ensureLoaded()
+        var changed = false
+        for (topic, entries) in remote {
+            var memory = seen[topic] ?? [:]
+            for (fp, at) in entries where at > (memory[fp] ?? 0) {
+                memory[fp] = at
+                changed = true
+            }
+            if memory.count > maxPerTopic {
+                for (k, _) in memory.sorted(by: { $0.value < $1.value }).prefix(memory.count - maxPerTopic) {
+                    memory.removeValue(forKey: k)
+                }
+            }
+            seen[topic] = memory
+        }
+        if changed { save() }
     }
 
     // MARK: - Persistence (per profile)
 
     private func load() {
-        guard let data = defaults.data(forKey: storageKey),
-              let decoded = try? JSONDecoder().decode([String: [String]].self, from: data) else {
-            recent = [:]
+        if let data = defaults.data(forKey: storageKey),
+           let decoded = try? JSONDecoder().decode([String: [String: Double]].self, from: data) {
+            seen = decoded
             return
         }
-        var rebuilt: [Topic: [String]] = [:]
-        for (rawTopic, list) in decoded {
-            if let t = Topic(rawValue: rawTopic) { rebuilt[t] = list }
+        seen = [:]
+        // The old memory (a list of recent prompts per topic, oldest first)
+        // becomes timestamps in the same order, so nothing seen is forgotten.
+        if let data = defaults.data(forKey: "questionMemory.\(profileKey)"),
+           let old = try? JSONDecoder().decode([String: [String]].self, from: data) {
+            let now = Date().timeIntervalSince1970
+            for (topic, list) in old {
+                var memory: [String: Double] = [:]
+                for (i, key) in list.enumerated() {
+                    memory[Self.fingerprint(key)] = now - Double(list.count - i)
+                }
+                seen[topic] = memory
+            }
+            save()
         }
-        recent = rebuilt
     }
 
     private func save() {
-        let encodable = recent.reduce(into: [String: [String]]()) { dict, pair in
-            dict[pair.key.rawValue] = pair.value
-        }
-        guard let data = try? JSONEncoder().encode(encodable) else { return }
+        guard let data = try? JSONEncoder().encode(seen) else { return }
         defaults.set(data, forKey: storageKey)
     }
+}
+
+/// A value behind a lock — for the fingerprint cache, read from any thread.
+final class LockedBox<T>: @unchecked Sendable {
+    private var value: T
+    private let lock = NSLock()
+    init(_ value: T) { self.value = value }
+    func withLock<R>(_ body: (inout T) -> R) -> R { lock.lock(); defer { lock.unlock() }; return body(&value) }
 }

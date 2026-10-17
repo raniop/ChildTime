@@ -179,6 +179,10 @@
           <div id="strongWeak"></div>
         </div>
       </div>
+      <div class="card" style="margin-top:14px">
+        <h3>⏳ שאלות שנגמרות</h3><p class="hint">ילדים שכבר נשאלו 80% ומעלה מהשאלות בעולם. מכאן השאלות מתחילות לחזור (הוותיקות קודם), אז כדאי לכתוב לעולם הזה עוד.</p>
+        <table id="runOutTable"><thead><tr><th>ילד</th><th>עולם</th><th>נשאלו</th></tr></thead><tbody></tbody></table>
+      </div>
     </div>
 
     <!-- LAYER 4: ECONOMY -->
@@ -298,6 +302,12 @@ function render(state){
   document.getElementById("strongWeak").innerHTML =
     `<div style="font-size:12px;font-weight:800;opacity:.7;margin:4px 0">💪 הכי חזקים</div>${list(sw?.topicsStrong,"up")}`+
     `<div style="font-size:12px;font-weight:800;opacity:.7;margin:12px 0 4px">🎯 דורשים חיזוק</div>${list(sw?.topicsWeak,"down")}`;
+
+  const ro=d.learning?.questionsRunningOut||[];
+  const gradeName=g=> g===0?"גן":(g>0?["","א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ז׳","ח׳"][g]||"":"");
+  document.querySelector("#runOutTable tbody").innerHTML = ro.length
+    ? ro.map(r=>`<tr><td>${r.child}${gradeName(r.grade)?` <span style="opacity:.6;font-size:12px">${gradeName(r.grade)}</span>`:""}</td><td>${r.topic}</td><td style="min-width:140px"><div class="bar"><i style="width:${Math.min(100,Math.round(r.seen/r.pool*100))}%"></i></div><span style="font-size:12px;opacity:.75">${fmt(r.seen)} מתוך ${fmt(r.pool)}</span></td></tr>`).join("")
+    : `<tr><td colspan="3"><div class="empty">${d.learning && "questionsRunningOut" in d.learning ? "אף ילד עוד לא קרוב לסוף השאלות 🎉" : "ממתין לעדכון השרת"}</div></td></tr>`;
 
   // ECONOMY
   const ec=d.economy||{}; const em=ec.minutesEarned||{}; const xp=ec.xp||{};
