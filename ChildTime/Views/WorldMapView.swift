@@ -68,6 +68,12 @@ struct WorldMapView: View {
     /// Limited-time event SPLASH (💎×2 etc.) — a full pop-up like the lucky
     /// wheel, once a day; the kid closes it or jumps straight in.
     @State private var showEventSplash = false
+    /// The event splash is on its way (scheduled, not shown yet) — the wheel
+    /// waits for it. Both used to be scheduled 0.1 s apart, and iOS, which
+    /// shows one cover at a time, swapped them back and forth: wheel, event,
+    /// wheel, event (Rani, 2026-10-18). Now one at a time, each one's close
+    /// calls the next.
+    @State private var eventSplashQueued = false
     /// Drives the daily-challenge card's living flame/gift pulse.
     @State private var challengePulse = false
     @State private var showingShop = false
@@ -1060,7 +1066,7 @@ struct WorldMapView: View {
                 .environmentObject(progress)
                 .environment(\.layoutDirection, .app)
         }
-        .fullScreenCover(isPresented: $showingWheel) {
+        .fullScreenCover(isPresented: $showingWheel, onDismiss: { maybeShowEventSplash() }) {
             LuckyWheelView { showingWheel = false }
         }
         .fullScreenCover(isPresented: $showingBackdrops) {
@@ -1098,7 +1104,9 @@ struct WorldMapView: View {
                 .environment(\.layoutDirection, .app)
             }
         }
-        .fullScreenCover(isPresented: $showEventSplash) {
+        .fullScreenCover(isPresented: $showEventSplash, onDismiss: {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { maybeAutoPresentWheel() }
+        }) {
             // The daily event as a real MOMENT (Rani): full pop-up like the
             // lucky wheel — big emoji, one "let's go", easy close.
             if let event = GameEvent.current() {
@@ -2924,9 +2932,12 @@ struct WorldMapView: View {
         let day = Calendar.current.component(.year, from: Date()) * 1000
             + (Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0)
         let key = "eventSplash.lastShownDay"
-        guard UserDefaults.standard.integer(forKey: key) != day else { return }
+        guard UserDefaults.standard.integer(forKey: key) != day, !eventSplashQueued, !showEventSplash else { return }
+        eventSplashQueued = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-            guard !AppInfo.isDemoRun, !storyPending, !showEventSplash else { return }
+            eventSplashQueued = false
+            // The wheel is up — this comes when it closes (its onDismiss).
+            guard !AppInfo.isDemoRun, !storyPending, !showEventSplash, !showingWheel else { return }
             UserDefaults.standard.set(day, forKey: key)
             showEventSplash = true
         }
@@ -2953,9 +2964,12 @@ struct WorldMapView: View {
     /// (after `questionsPerWheel` answers), then resets the counter so it
     /// won't pop again until the next batch. Replaces the old top-bar button.
     private func maybeAutoPresentWheel() {
-        guard progress.freeWheelAvailable, !showingWheel, !showingSmartFeed, !storyPending else { return }
-        progress.resetWheelProgress()
+        // The event of the day goes first; the wheel follows when it closes.
+        guard progress.freeWheelAvailable, !showingWheel, !showingSmartFeed, !storyPending,
+              !showEventSplash, !eventSplashQueued else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            guard !showingWheel, !showEventSplash, !eventSplashQueued, progress.freeWheelAvailable else { return }
+            progress.resetWheelProgress()
             showingWheel = true
         }
     }
