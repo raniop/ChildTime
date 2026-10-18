@@ -6531,6 +6531,55 @@ exports.adminPublishAppUpdate = onCall({ timeoutSeconds: 30, memory: "256MiB" },
   return { ok: true, config: appUpdateView(after.data()) };
 });
 
+// 🤖 The same publish, by itself (Rani, 2026-10-18: "צריך שזה יקרה אוטומטית").
+// Every hour: which Tofy version is live on the App Store, and its build in
+// docs/admin/releases.json (written with every "מה חדש"). A newer build than
+// config/appUpdate holds → publish it, so parents still on an older build see
+// "יש גרסה חדשה של טופי". Only the newest build and its notes change: the
+// blocking minimum, Android and the kill switch stay exactly as the founder
+// left them, and it never pushes (announce: false) — the in-app notice only.
+const IOS_APP_ID = "6773805449";
+async function syncAppUpdateFromStore() {
+  const t = Date.now();
+  const [lookup, releases] = await Promise.all([
+    fetch(`https://itunes.apple.com/lookup?id=${IOS_APP_ID}&country=il&t=${t}`).then((r) => r.json()),
+    fetch(`https://tofyapp.com/admin/releases.json?t=${t}`).then((r) => r.json()),
+  ]);
+  const live = lookup && lookup.results && lookup.results[0] && lookup.results[0].version;
+  if (!live || !Array.isArray(releases)) return { skipped: "no store data" };
+  const same = releases.filter((r) => r.version === live);
+  if (!same.length) return { skipped: `${live} is not in releases.json` };
+  const build = Math.max(...same.map((r) => buildNum(r.build)));
+  const ref = appUpdateRef();
+  const snap = await ref.get();
+  const cur = appUpdateView(snap.exists ? snap.data() : {});
+  if (cur.latestBuild >= build) return { upToDate: true, live, build };
+  // The version's own "מה חדש" headlines (newest build first), three a language.
+  const newest = same.find((r) => buildNum(r.build) === build) || same[0];
+  const notesByLang = {};
+  for (const l of LANGS) {
+    notesByLang[l] = ((newest.notes || {})[l] || []).slice(0, APP_UPDATE_NOTE_LINES)
+      .map((x) => String(x).slice(0, APP_UPDATE_NOTE_CHARS));
+  }
+  const clean = cleanAppUpdate({
+    latestBuild: build, version: live,
+    latestAndroidBuild: cur.latestAndroidBuild, androidVersion: cur.androidVersion,
+    minBuild: cur.minBuild, minAndroidBuild: cur.minAndroidBuild,
+    enabled: cur.enabled, announce: false, legacyNotes: false, notesByLang,
+  }, snap.exists ? snap.data() : {});
+  await ref.set({ ...clean, updatedAt: Date.now(), updatedBy: "auto:appstore" }, { merge: true });
+  console.log("[syncAppUpdateFromStore] published", live, build, "was", cur.latestBuild);
+  return { published: true, live, build, was: cur.latestBuild };
+}
+
+exports.syncAppUpdateFromStore = onSchedule(
+  { schedule: "every 60 minutes", timeZone: "Asia/Jerusalem", timeoutSeconds: 60, memory: "256MiB" },
+  async () => {
+    try { console.log("[syncAppUpdateFromStore]", JSON.stringify(await syncAppUpdateFromStore())); }
+    catch (e) { console.error("[syncAppUpdateFromStore] failed", e && e.message); }
+  }
+);
+
 // ============================================================================
 // 📍 Location, places and 🔔 beep (2026-10-07).
 //
