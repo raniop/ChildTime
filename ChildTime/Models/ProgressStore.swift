@@ -2016,8 +2016,23 @@ final class ProgressStore: ObservableObject {
     /// we never open less than that; the kid accumulates to 15 first.
     var minimumUnlockMinutes: Int { 15 }
 
+    /// The smallest window that may open right now: `minimumUnlockMinutes` —
+    /// except the daily cap's last few minutes, which open as they are (from 5).
+    /// Played 78 of a 90-minute cap left 12 that could never open, so the child
+    /// read "שיחקת 78 מתוך 90" on a device that stayed locked (Sasha, 2026-10-18).
+    /// In the background iOS may re-lock such a window up to 15 minutes after it
+    /// opened (its schedule minimum); in Tofy the timer closes it on time.
+    var minimumOpenSecondsNow: Int {
+        let cap = dailyCap
+        if cap.enabled {
+            let room = max(0, cap.max - minutesUnlockedTodayResolved)
+            if room >= 5, room < minimumUnlockMinutes { return room * 60 }
+        }
+        return minimumUnlockMinutes * 60
+    }
+
     /// True when there are enough redeemable minutes to open a window we can enforce.
-    var canRedeemNow: Bool { redeemableMinutesNow >= minimumUnlockMinutes }
+    var canRedeemNow: Bool { redeemableMinutesNow * 60 >= minimumOpenSecondsNow }
 
     /// True when the kid has wallet minutes they CAN'T open today only because
     /// today's screen-time cap is already used up (the rest waits for tomorrow) —

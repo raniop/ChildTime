@@ -160,6 +160,10 @@ struct QuestionRunnerView: View {
     /// Whether the child leaned on a hint for the current question — fed to the
     /// adaptive engine (a hinted win shouldn't push difficulty up like a clean one).
     @State private var usedHintThisQuestion: Bool = false
+    /// 💡 Hints used this round — at most `maxHintsPerRound` (David, 2026-10-18:
+    /// "אמילי מנצלת את זה לרעה במקום לחשוב").
+    @State private var hintsUsedInSession = 0
+    static let maxHintsPerRound = 3
     /// Last difficulty BAND (rounded adaptive level) served per topic, so we can
     /// celebrate stepping up / soften stepping down — only on a real band change,
     /// never on the per-question 70/20/10 sampling noise.
@@ -430,11 +434,11 @@ struct QuestionRunnerView: View {
                         showParentAssist = true
                     }
                 }
-                if !showFeedback {
+                if !showFeedback, !isPreReader {   // 👶 no hints in גן — the answers are pictures
                     SideRailButton(emoji: "💡", label: tr("רֶמֶז")) { useHint(q: q) }
                         .opacity(canUseHint(q) ? 1 : 0.45)
                         .disabled(!canUseHint(q))
-                    SideRailLabel(text: hintCost == 0 ? tr("(חִנָּם)") : tr("(\(hintCost) שְׁנִיּוֹת)"))
+                    SideRailLabel(text: hintCaption)
                 }
             }
             SideRailDivider()
@@ -1080,7 +1084,7 @@ struct QuestionRunnerView: View {
                 let wandShowing = consecutiveWrong >= 2 && !showFeedback
                 if wandShowing {
                     HStack(spacing: AppSpacing.sm) {
-                        hintButton(for: q)
+                        if !isPreReader { hintButton(for: q) }
                         magicWandButton
                     }
                     .frame(maxWidth: .infinity)
@@ -1143,7 +1147,7 @@ struct QuestionRunnerView: View {
                         if !buddyHasFreeStrip {
                             InlineBuddy(controller: companion, profile: profiles.active, width: 44)
                         }
-                        if !showFeedback, !wandShowing {
+                        if !showFeedback, !wandShowing, !isPreReader {
                             hintButton(for: q)
                         }
                     }
@@ -1222,11 +1226,19 @@ struct QuestionRunnerView: View {
     private var hintCost: Int { helperLevel == .explain ? 0 : progress.hintCostSeconds }
 
     private func canUseHint(_ q: Question) -> Bool {
-        guard !showFeedback else { return false }
+        guard !showFeedback, !isPreReader, hintsLeft > 0 else { return false }
         // Need at least one wrong option still un-eliminated.
         return q.options.indices.contains(where: { idx in
             idx != q.correctIndex && (feedbackForIndex[idx] ?? .normal) == .normal
         })
+    }
+
+    private var hintsLeft: Int { max(0, Self.maxHintsPerRound - hintsUsedInSession) }
+
+    /// "(12 שְׁנִיּוֹת · עוֹד 2)" — the price and how many are left this round.
+    private var hintCaption: String {
+        guard hintsLeft > 0 else { return tr("(נִגְמְרוּ לַסִּבּוּב)") }
+        return hintCost == 0 ? tr("(חִנָּם · עוֹד \(hintsLeft))") : tr("(\(hintCost) שְׁנִיּוֹת · עוֹד \(hintsLeft))")
     }
 
     @ViewBuilder
@@ -1244,7 +1256,7 @@ struct QuestionRunnerView: View {
              + Text(tr("רֶמֶז"))
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundColor(Color(hex: "3A2A00"))
-             + Text("  " + (hintCost == 0 ? tr("(חִנָּם)") : tr("(\(hintCost) שְׁנִיּוֹת)")))
+             + Text("  " + hintCaption)
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .foregroundColor(Color(hex: "3A2A00").opacity(0.7)))
             .lineLimit(1)
@@ -1453,6 +1465,7 @@ struct QuestionRunnerView: View {
         capMessageShown = false
         questionIndex = 0
         correctInSession = 0
+        hintsUsedInSession = 0
         earnedThisSession = 0
         consecutiveWrong = 0
         topicHistory = []
@@ -1898,6 +1911,7 @@ struct QuestionRunnerView: View {
         // The cost comes off the cycle progress, exactly like a mistake — so a
         // hint can never leave a child with fewer minutes than they had.
         progress.chargeHint()
+        hintsUsedInSession += 1
         usedHintThisQuestion = true   // adaptive engine: a hinted win counts as "shaky"
 
         // Pick a random wrong option that hasn't been eliminated yet.

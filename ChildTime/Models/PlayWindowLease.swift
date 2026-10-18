@@ -352,7 +352,7 @@ final class PlayWindowLeaseManager: ObservableObject {
         // Captured BEFORE the transaction — the block may re-run.
         let local = ProgressStore.shared.captureSnapshot()
         let baseSeq = ProgressStore.shared.localEditSeq
-        let minSeconds = ProgressStore.shared.minimumUnlockMinutes * 60
+        let minSeconds = ProgressStore.shared.minimumOpenSecondsNow   // the cap's last few minutes open too
         let wRef = windowRef(cid), sRef = stateRef(cid)
         let kindRaw = kind.rawValue
         let ownerKind = DeviceIdentity.kind, ownerName = DeviceIdentity.friendlyName

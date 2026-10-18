@@ -45,7 +45,9 @@ final class QuietHoursManager: ObservableObject {
 
     /// This device's hours: the active child's, on a child device only.
     var hours: QuietHours {
-        guard ParentSettings.shared.deviceRole == .child || AppInfo.isDemoRun,
+        // A parent's phone handed to the child ("תנו ל… לשחק כאן") keeps the
+        // child's bedtime too.
+        guard ParentSettings.shared.deviceRole == .child || KidModeManager.shared.active || AppInfo.isDemoRun,
               let q = ProfileStore.shared.active?.quietHours else { return QuietHours() }
         return q
     }
