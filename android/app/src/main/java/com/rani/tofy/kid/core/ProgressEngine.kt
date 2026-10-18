@@ -1079,7 +1079,24 @@ class ProgressEngine(
             return minOf(wallet, maxOf(0, cap.max - minutesUnlockedTodayResolved))
         }
 
-    val canRedeemNow: Boolean get() = redeemableMinutesNow >= MINIMUM_UNLOCK_MINUTES
+    /**
+     * The smallest window that may open right now: [MINIMUM_UNLOCK_MINUTES] —
+     * except the daily cap's last few minutes, which open as they are (from 5).
+     * Played 78 of a 90-minute cap left 12 that could never open, so the child
+     * read "שיחקת 78 מתוך 90" on a device that stayed locked (Sasha, 2026-10-18;
+     * iOS ProgressStore.minimumOpenSecondsNow).
+     */
+    val minimumOpenSecondsNow: Int
+        get() {
+            val cap = settings.dailyCap
+            if (cap.enabled) {
+                val room = maxOf(0, cap.max - minutesUnlockedTodayResolved)
+                if (room >= MINIMUM_CAP_TAIL_MINUTES && room < MINIMUM_UNLOCK_MINUTES) return room * 60
+            }
+            return MINIMUM_UNLOCK_MINUTES * 60
+        }
+
+    val canRedeemNow: Boolean get() = redeemableMinutesNow * 60 >= minimumOpenSecondsNow
     val dailyScreenTimeMaxedOut: Boolean
         get() = settings.dailyCap.enabled && !canRedeemNow && s.pendingMinutes > redeemableMinutesNow
 
@@ -1449,6 +1466,8 @@ class ProgressEngine(
         const val DAILY_CHALLENGE_TARGET = 10
         /** Smallest earned window — always 15 (iOS can't re-lock shorter reliably; kept for parity). */
         const val MINIMUM_UNLOCK_MINUTES = 15
+        /** The cap's last minutes open from this much up (see minimumOpenSecondsNow). */
+        const val MINIMUM_CAP_TAIL_MINUTES = 5
 
         /** Same day → unchanged; next day → +1; a gap (or first play) → 1. */
         fun nextDayStreak(current: Int, last: Double?, nowApple: Double, zone: ZoneId): Int {

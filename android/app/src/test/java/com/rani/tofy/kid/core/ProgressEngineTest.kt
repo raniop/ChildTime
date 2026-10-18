@@ -330,6 +330,40 @@ class ProgressEngineTest {
         assertFalse(DayMath.isFutureDay(s.dailyEarnedDate, AppleTime.fromUnix(clock.unix), clock.zone))
     }
 
+    // ── ⏱ the cap's last few minutes (minimumOpenSecondsNow, 2026-10-18) ──
+    /** A child who already played [played] of today's [cap] and has 30 more minutes earned. */
+    private fun playedOfCap(played: Int, cap: Int): ProgressEngine {
+        val p = engine(KidSettings(leaseEnabled = false, childDailyCapMinutes = cap))
+        p.creditEarned(played * 60)
+        assertEquals(played, p.consumeMinutesForUnlock(cloudFresh = true))
+        p.creditEarned(30 * 60)
+        return p
+    }
+
+    @Test fun theCapsLastTwelveMinutesOpen() {
+        val p = playedOfCap(78, 90)
+        assertEquals(12 * 60, p.minimumOpenSecondsNow)
+        assertTrue(p.canRedeemNow)
+        assertFalse(p.dailyScreenTimeMaxedOut)
+        assertEquals(12, p.redeemableMinutesNow)
+    }
+
+    @Test fun threeMinutesLeftWaitForTomorrow() {
+        val p = playedOfCap(87, 90)
+        assertEquals(15 * 60, p.minimumOpenSecondsNow)
+        assertFalse(p.canRedeemNow)
+        assertTrue(p.dailyScreenTimeMaxedOut)
+    }
+
+    @Test fun withoutACapTheMinimumIsFifteen() {
+        val p = engine(noCap)
+        p.creditEarned(14 * 60)
+        assertEquals(15 * 60, p.minimumOpenSecondsNow)
+        assertFalse(p.canRedeemNow)
+        p.creditEarned(60)
+        assertTrue(p.canRedeemNow)
+    }
+
     // ── ⏱ windows ──────────────────────────────────────────────────────────
     @Test fun offlineOpenIsBoundedAndStopBanksTheExactLeftover() {
         val p = engine(KidSettings(leaseEnabled = false, childDailyCapMinutes = 90))

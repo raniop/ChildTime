@@ -84,6 +84,8 @@ class RunnerController(
     private var lastBonusIndex = -100
     private var hadMistakeThisQuestion = false
     private var usedHintThisQuestion = false
+    /** 💡 Hints this round — at most [HintBudget.MAX_PER_ROUND] (David, 2026-10-18: "אמילי מנצלת את זה לרעה במקום לחשוב"). */
+    private val hints = HintBudget()
     private var questionShownAt = 0L
     private var capMessageShown = false
     /** Missed questions, back no earlier than `readyAt` (never as the very next one). */
@@ -181,6 +183,7 @@ class RunnerController(
         (mode as? ContentMode.World)?.let { m -> KidSession.edit { it.markVisited(PlayWorlds.forTopic(m.topic).id) } }
         KidSession.boundChildID?.let { LearningHistoryRecorder.recordSessionStart(it) }
         questionIndex = 0; correctInSession = 0; consecutiveWrong = 0; roundSeconds = 0
+        hints.reset()
         capMessageShown = false
         reAskQueue.clear()
         surprisesThisSession = 0
@@ -549,8 +552,12 @@ class RunnerController(
     }
 
     // ── 💡 hint · 🪄 wand · 🚩 report ────────────────────────────────────────
+    /** How many hints are left this round (the pill's "עוֹד 2"). */
+    val hintsLeft: Int get() = hints.left
+
+    /** 👶 Never for a pre-reader (the answers are pictures), and none once the round's are used. */
     fun canUseHint(q: Question): Boolean =
-        !showFeedback && q.options.indices.any { it != q.correctIndex && (feedback[it] ?: OptionFeedback.NORMAL) == OptionFeedback.NORMAL }
+        !showFeedback && !isPreReader && hints.left > 0 && q.options.indices.any { it != q.correctIndex && (feedback[it] ?: OptionFeedback.NORMAL) == OptionFeedback.NORMAL }
 
     /**
      * A hint costs what a mistake costs (half a step off the cycle, never a banked
@@ -558,7 +565,7 @@ class RunnerController(
      */
     fun useHint(forSerial: Int) {
         val q = current ?: return
-        if (forSerial != serial || !canUseHint(q)) return
+        if (forSerial != serial || !canUseHint(q) || !hints.tryUse()) return
         if (hintCost > 0) KidSession.edit { it.chargeHint() }   // owed by the next right answer
         usedHintThisQuestion = true
         val candidates = q.options.indices.filter { it != q.correctIndex && (feedback[it] ?: OptionFeedback.NORMAL) == OptionFeedback.NORMAL }
@@ -707,3 +714,18 @@ fun withBet(word: String): String {
     }
 }
 
+/**
+ * 💡 The round's hint allowance (QuestionRunnerView.hintsUsedInSession /
+ * maxHintsPerRound): three per round, back to full when a round starts.
+ * Snapshot state, so the pill's "עוֹד N" follows it.
+ */
+class HintBudget(val max: Int = MAX_PER_ROUND) {
+    var used by mutableIntStateOf(0); private set
+    val left: Int get() = maxOf(0, max - used)
+
+    /** Takes one if any is left; false = none left this round. */
+    fun tryUse(): Boolean { if (left <= 0) return false; used++; return true }
+    fun reset() { used = 0 }
+
+    companion object { const val MAX_PER_ROUND = 3 }
+}

@@ -156,6 +156,7 @@ interface LeaseHost {
     fun captureSnapshot(): ProgressSnapshot
     val localEditSeq: Int
     val localRevision: Int
+    /** The smallest window that may open now — 15 min, or the daily cap's last 5–14 (ProgressEngine.minimumOpenSecondsNow). */
     val minimumUnlockSeconds: Int
     val isUnlocked: Boolean
     val activeLeaseID: String?
@@ -279,7 +280,7 @@ class PlayWindowLeaseManager(
         // Captured BEFORE the transaction — the block may re-run.
         val local = host.captureSnapshot()
         val baseSeq = host.localEditSeq
-        val minSeconds = host.minimumUnlockSeconds
+        val minSeconds = host.minimumUnlockSeconds   // the cap's last few minutes open too
         val wRef = windowRef(childID); val sRef = stateRef(childID)
         val ownerKind = host.ownerKind; val ownerName = host.ownerName
         val myID = me

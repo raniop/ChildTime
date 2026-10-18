@@ -518,9 +518,14 @@ object KidSession : LeaseHost {
     }
 
     // ── 🏫🌙 school time + bedtime ─────────────────────────────────────────
-    /** This child's quiet hours (children/{id}.quietHours). A parent's phone in Kid Mode has none. */
+    /**
+     * This child's quiet hours (children/{id}.quietHours) — on the child's own
+     * device AND on a parent's phone handed to the child (Kid Mode, "תנו ל… לשחק
+     * כאן"; iOS QuietHoursManager.hours, 2026-10-18). Never in the first run's
+     * made-up child: that session is local and nobody's bedtime applies.
+     */
     val quietHours: QuietHours
-        get() = if (kidMode) QuietHours() else QuietHours.from(lastChildDoc?.map("quietHours")) ?: QuietHours()
+        get() = if (localOnly) QuietHours() else QuietHours.from(lastChildDoc?.map("quietHours")) ?: QuietHours()
 
     fun quietNow(): QuietOccurrence? = quietHours.activeAt(AndroidKidClock.nowUnix())
 
@@ -687,7 +692,8 @@ object KidSession : LeaseHost {
     override fun captureSnapshot(): ProgressSnapshot = engine?.capture() ?: ProgressSnapshot.blank()
     override val localEditSeq: Int get() = engine?.localEditSeq ?: 0
     override val localRevision: Int get() = engine?.snapshot?.revision ?: 0
-    override val minimumUnlockSeconds: Int get() = ProgressEngine.MINIMUM_UNLOCK_MINUTES * 60
+    // The cap's last few minutes open too (ProgressEngine.minimumOpenSecondsNow).
+    override val minimumUnlockSeconds: Int get() = engine?.minimumOpenSecondsNow ?: ProgressEngine.MINIMUM_UNLOCK_MINUTES * 60
     override val isUnlocked: Boolean get() = engine?.isUnlocked ?: false
     override val activeLeaseID: String? get() = engine?.local?.activeLeaseID
     override val unlockSecondsRemaining: Int get() = engine?.unlockSecondsRemaining ?: 0

@@ -377,7 +377,7 @@ private fun Shelf(r: RunnerController, q: Question, streak: Int, tablet: Boolean
             val wandShowing = r.consecutiveWrong >= 2 && !r.showFeedback
             if (wandShowing) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
-                    HintPill(r, q, Modifier.weight(1f, fill = false))
+                    if (!r.isPreReader) HintPill(r, q, Modifier.weight(1f, fill = false))   // 👶 no hints in גן
                     Pill("🪄 " + r.g(tr("הַחְלֵף שְׁאֵלָה"), tr("הַחְלִיפִי שְׁאֵלָה")), enabled = true, modifier = Modifier.weight(1f, fill = false)) { r.magicWand() }
                 }
             }
@@ -392,7 +392,7 @@ private fun Shelf(r: RunnerController, q: Question, streak: Int, tablet: Boolean
                     ) { onAssist() }
                 }
                 Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End), verticalAlignment = Alignment.CenterVertically) {
-                    if (!r.showFeedback && !wandShowing) HintPill(r, q, Modifier.weight(1f, fill = false))
+                    if (!r.showFeedback && !wandShowing && !r.isPreReader) HintPill(r, q, Modifier.weight(1f, fill = false))
                 }
             }
         }
@@ -489,7 +489,14 @@ private fun HintPill(r: RunnerController, q: Question, modifier: Modifier = Modi
     val enabled = r.canUseHint(q)
     val cost = r.hintCost
     val serial = r.serial
-    Pill("💡 " + tr("רֶמֶז") + "  " + (if (cost == 0) tr("(חִנָּם)") else tr("(%lld שְׁנִיּוֹת)", cost)), enabled = enabled, gold = true, modifier = modifier) { r.useHint(serial) }
+    // "(12 שְׁנִיּוֹת · עוֹד 2)" — the price and how many are left this round.
+    val left = r.hintsLeft
+    val caption = when {
+        left <= 0 -> tr("(נִגְמְרוּ לַסִּבּוּב)")
+        cost == 0 -> tr("(חִנָּם · עוֹד %lld)", left)
+        else -> tr("(%lld שְׁנִיּוֹת · עוֹד %lld)", cost, left)
+    }
+    Pill("💡 " + tr("רֶמֶז") + "  " + caption, enabled = enabled, gold = true, modifier = modifier) { r.useHint(serial) }
 }
 
 @Composable
