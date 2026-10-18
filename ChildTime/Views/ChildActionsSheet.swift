@@ -18,6 +18,7 @@ struct ChildActionsSheet: View {
         case connectDevice
         case screenTime
         case chores
+        case flight
         case settings
     }
 
@@ -139,9 +140,17 @@ struct ChildActionsSheet: View {
                 run(.chores)
             }
             divider
+            row("✈️", tr("מצב טיסה"), flightSummary) { run(.flight) }
+            divider
             row("⚙️", tr("כל ההגדרות של \(name)"), tr("זמן, למידה, שפה ומכשיר")) { run(.settings) }
         }
         .glassPane(radius: 16)
+    }
+
+    /// "עובד עד יום שישי 23.10" / "קוד שפותח את המכשיר כשאתם רחוקים".
+    private var flightSummary: String {
+        if let m = profile.flightMode, m.isActive { return tr("פעיל · הקוד \(m.code) עובד עד \(FlightModeSheet.dateLine(m.untilDate))") }
+        return girl ? tr("טסים? קוד שפותח לה את המכשיר עד שתחזרו") : tr("טסים? קוד שפותח לו את המכשיר עד שתחזרו")
     }
 
     private var divider: some View {

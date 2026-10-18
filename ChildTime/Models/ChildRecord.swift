@@ -158,6 +158,9 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     /// 🏫🌙 School time + bedtime (see `QuietHours`). Written whole once set, so
     /// switching a window OFF travels as `enabled: false`, not as a missing key.
     var quietHours: QuietHours?
+    /// ✈️ Read only — `init(profile:)` leaves it nil so a roster upload never
+    /// writes it; `FlightModeStore.save` is its one writer.
+    var flightMode: FlightMode?
 
     init(profile: Profile, householdID: String) {
         self.id = profile.id.uuidString
@@ -235,6 +238,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         p.gradeSetByChild = gradeSetByChild ?? false
         p.onlyRegularQuestions = onlyRegularQuestions ?? false
         p.quietHours = quietHours
+        p.flightMode = flightMode
         p.characterUpdatedAt = characterUpdatedAt
         p.backdropID = backdropID
         p.backdropUpdatedAt = backdropUpdatedAt

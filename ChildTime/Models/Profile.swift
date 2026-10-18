@@ -153,6 +153,9 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// 🏫🌙 School time and bedtime for THIS child (see `QuietHours`). Set from
     /// the parent's device, synced via `ChildRecord`; nil = never set.
     var quietHours: QuietHours?
+    /// ✈️ The parents are away: a code the child opens their device with (see
+    /// `FlightMode`). Arrives from the cloud only; nil = never set.
+    var flightMode: FlightMode?
 
     init(
         id: UUID = UUID(),
@@ -226,6 +229,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         case ownedPacks, packExpiry, disabledPacks
         case onlyRegularQuestions
         case quietHours
+        case flightMode
         case backdropID, backdropUpdatedAt
     }
 
@@ -282,6 +286,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.disabledPacks = Set((try? c.decodeIfPresent([String].self, forKey: .disabledPacks)) ?? nil ?? [])
         self.onlyRegularQuestions = (try? c.decodeIfPresent(Bool.self, forKey: .onlyRegularQuestions)) ?? nil ?? false
         self.quietHours = (try? c.decodeIfPresent(QuietHours.self, forKey: .quietHours)) ?? nil
+        self.flightMode = (try? c.decodeIfPresent(FlightMode.self, forKey: .flightMode)) ?? nil
     }
 
     /// The worlds a demo run is pinned to, or nil in the real app. Read ONCE:

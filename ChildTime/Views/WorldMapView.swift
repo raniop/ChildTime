@@ -49,6 +49,8 @@ struct WorldMapView: View {
     /// Which home-card explainer is open (daily challenge / topic-of-the-day).
     private enum InfoSheet: Int, Identifiable { case dailyChallenge, event; var id: Int { rawValue } }
     @State private var showingParentGate = false
+    /// ✈️ The flight-code sheet (see `FlightCodeSheet`).
+    @State private var flightSheet: FlightMode?
     @State private var showingDemo = false
     /// 🎒 September 1st "you moved up a grade!" party (once per school year).
     @State private var showSchoolYearParty = false
@@ -927,6 +929,13 @@ struct WorldMapView: View {
             }
         }
         .animation(.spring(response: 0.5, dampingFraction: 0.7), value: challengeCelebration)
+        .sheet(item: $flightSheet) { mode in
+            FlightCodeSheet(mode: mode, quietHours: profiles.active?.quietHours) { minutes in
+                // After the sheet has gone, so the window opens over the map.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { openWithFlightCode(minutes: minutes) }
+            }
+            .presentationDetents([.large])
+        }
         .sheet(isPresented: $showingParentGate) {
             // On the child device the gate opens ONLY the device-local parent
             // controls (app-lock + manual unlock) — everything else is on the
@@ -2249,6 +2258,10 @@ struct WorldMapView: View {
             if DemoTour.isOn || ((giftOpenableSeconds > 0 || progress.hasPausedManualTime) && !progress.isUnlocked) {
                 giftKey
             }
+            // ✈️ The parents are away and left a code (see `FlightMode`).
+            if !DemoTour.isOn, !progress.isUnlocked, let f = profiles.active?.flightMode, f.isActive {
+                flightKey(f)
+            }
             if DemoTour.isOn { demoTourMinutesKey } else { minutesKey }
             if let p = profiles.active,
                DemoTour.isOn || p.hasPlayPIN || progress.pendingMinutes > 0 || progress.hasPausedManualTime {
@@ -2269,6 +2282,62 @@ struct WorldMapView: View {
             .frame(maxWidth: .infinity, minHeight: isShort ? 52 : 58)
             .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.25), lineWidth: 1))
+    }
+
+    /// ✈️ "קוֹד טִיסָה · פִּתְחוּ!" — the code the parents left before flying.
+    private func flightKey(_ mode: FlightMode) -> some View {
+        Button {
+            Haptic.light()
+            // 🏫🌙 Not in school time or bedtime — say so before asking for the code.
+            if let line = QuietHoursManager.shared.blockedMessage() { companion.console(line); return }
+            flightSheet = mode
+        } label: {
+            VStack(spacing: 3) {
+                Text("✈️").font(.system(size: 18))
+                Text(tr("קוֹד טִיסָה · פִּתְחוּ!")).font(.system(size: 11, weight: .heavy, design: .rounded)).opacity(0.95)
+            }
+            .foregroundStyle(.white)
+            .lineLimit(1).minimumScaleFactor(0.7)
+            .frame(maxWidth: .infinity, minHeight: isShort ? 52 : 58)
+            .background(LinearGradient(colors: [Color(hex: "3BA8FF"), Color(hex: "6C5CFF")], startPoint: .top, endPoint: .bottom),
+                        in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.55), lineWidth: 1.2))
+        }
+        .buttonStyle(.juicy)
+        .frame(maxWidth: .infinity)
+        .accessibilityLabel(tr("קוֹד טִיסָה"))
+    }
+
+    /// ✈️ Open for the minutes the child chose with the flight code. Minted like
+    /// a parent's own open (`.grant` lease — never taken from the child's
+    /// minutes), but as kind "flight" so 🌙 bedtime still closes it.
+    private func openWithFlightCode(minutes: Int) {
+        guard !progress.isUnlocked, !quietBlocksOpening(), let cid = profiles.activeID else { return }
+        guard !isOpening else { return }
+        progress.beginOpeningWindow(gift: false)
+        Task { @MainActor in
+            var leaseID: String? = nil
+            if PlayWindowLeaseManager.isEnabled {
+                let outcome = await PlayWindowLeaseManager.shared.claim(
+                    childID: cid, kind: .grant, requestedSeconds: minutes * 60)
+                switch outcome {
+                case .granted(let id, _, let wallet):
+                    leaseID = id
+                    if let wallet { progress.applyClaimedWallet(wallet) }
+                case .heldElsewhere:
+                    Haptic.warning()
+                    progress.endOpeningWindow(message: Gendered.g(tr("הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮"), tr("הַזְּמַן שֶׁלָּךְ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮")))
+                    return
+                case .insufficient, .offline:
+                    break   // offline: the window opens here and is adopted later
+                }
+            }
+            shields.unlock(minutes: minutes)
+            progress.startUnlock(minutes: minutes, manual: true, leaseID: leaseID, leaseKind: "flight")
+            LiveEventReporter.report(.screenTimeStart, extra: ["minutes": minutes, "flight": true])
+            progress.endOpeningWindow()
+            Haptic.success()
+        }
     }
 
     /// 💝 "10 דק׳ · מתנה · פתחו!" — opens the parents' gift (and any frozen leftover).

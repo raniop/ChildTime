@@ -292,7 +292,9 @@ final class PlayWindowLeaseManager: ObservableObject {
         guard progress.isUnlocked, progress.activeLeaseID == nil else { return }
         let left = progress.unlockSecondsRemaining
         guard left > 30 else { return }   // about to end anyway — not worth a write
-        let kind = PlayWindowLease.Kind(rawValue: progress.unlockKind) ?? .earned
+        // ✈️ A flight-code window is minted like a parent's grant — never
+        // debited from the child's earned minutes.
+        let kind = PlayWindowLease.Kind(rawValue: progress.unlockKind == "flight" ? "grant" : progress.unlockKind) ?? .earned
         guard !reconciling else { return }
         reconciling = true
         Task { @MainActor in

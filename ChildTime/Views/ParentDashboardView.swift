@@ -59,6 +59,7 @@ struct ParentDashboardView: View {
     /// ⏱ The child's daily screen-time limit, straight from the actions menu —
     /// it was three taps deep in the child's settings (Rani: hard to find).
     @State private var screenTimeChild: Profile? = nil
+    @State private var flightChild: Profile? = nil
     /// ⚡ The short actions window (replaced the 14-item menu, 2026-10-08).
     @State private var actionsChild: Profile? = nil
     /// ✏️ The pencil by the name edits the child — name, photo, grade.
@@ -768,6 +769,12 @@ struct ParentDashboardView: View {
                 .environmentObject(profiles)
                 .environment(\.layoutDirection, .app)
                 .familyConnectionAlert()
+            }
+            .sheet(item: $flightChild) { p in
+                FlightModeSheet(profile: p)
+                    .environmentObject(profiles)
+                    .presentationDetents([.large])
+                    .familyConnectionAlert()
             }
             .sheet(item: $screenTimeChild) { p in
                 ChildScreenTimeView(profileID: p.id)
@@ -1934,6 +1941,7 @@ struct ParentDashboardView: View {
                 case .location: locationChild = p.id.uuidString; showingLocation = true
                 case .connectDevice: qrCode = nil; qrChild = p
                 case .screenTime: screenTimeChild = p
+                case .flight: flightChild = p
                 case .chores: choresProfile = p
                 case .settings: homeSettingsChild = p
                 }

@@ -492,6 +492,23 @@ struct ChildTimeApp: App {
                                  : (ProcessInfo.processInfo.environment["DEMO_WORLD"].flatMap(Topic.init(rawValue:)) ?? .math))
         case "surpriseround":                               // DEMO_SCREEN=surpriseround [DEMO_WORLD=soccer] [DEMO_GAME=balloon] — ⚡ the interstitial → the game
             MiniGameDemoHost(screen: name)
+        // ✈️ DEMO_SCREEN=flightparent [DEMO_FLIGHT_ON=1] — the parent's window;
+        // flightkid [DEMO_FLIGHT_STEP=2] — the child's code / how-long screens.
+        case "flightparent":
+            if var p = ProfileStore.shared.active ?? ProfileStore.shared.profiles.first {
+                let _ = {
+                    if ProcessInfo.processInfo.environment["DEMO_FLIGHT_ON"] == "1" {
+                        p.flightMode = FlightMode(code: "4821", until: Date().addingTimeInterval(5 * 86400).timeIntervalSince1970,
+                                                  setAt: Date().timeIntervalSince1970)
+                        ProfileStore.shared.update(p)
+                    }
+                }()
+                FlightModeSheet(profile: p).environmentObject(ProfileStore.shared)
+            }
+        case "flightkid":
+            FlightCodeSheet(mode: FlightMode(code: "4821", until: Date().addingTimeInterval(5 * 86400).timeIntervalSince1970,
+                                             setAt: Date().timeIntervalSince1970),
+                            quietHours: QuietHours(bedtime: QuietWindow(enabled: true, days: Array(1...7), start: 20 * 60 + 30, end: 7 * 60))) { _ in }
         case "wheel":    LuckyWheelView(onClose: {})
         #if DEBUG
         case "quizdesign":                                  // DEMO_SCREEN=quizdesign DEMO_DESIGN=1…4 — page redesign mockups
@@ -716,6 +733,14 @@ struct ChildTimeApp: App {
             }
         case "kidhome":                                     // DEMO_SCREEN=kidhome — the child's home
             WorldMapView()   // (+ DEMO_GIFT_MINUTES=30 to show the 💝 button)
+                .onAppear {
+                    // ✈️ DEMO_FLIGHT_ON=1 — the parents left a flight code (4821).
+                    if ProcessInfo.processInfo.environment["DEMO_FLIGHT_ON"] == "1", var p = ProfileStore.shared.active {
+                        p.flightMode = FlightMode(code: "4821", until: Date().addingTimeInterval(5 * 86400).timeIntervalSince1970,
+                                                  setAt: Date().timeIntervalSince1970)
+                        ProfileStore.shared.update(p)
+                    }
+                }
                 .onAppear {
                     // 📏 DEMO_DEFAULTS_PING=standard|group: write an UNRELATED key every 2s —
                     // does the home redraw for it? ([Body] Home in the log)

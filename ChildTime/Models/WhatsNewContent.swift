@@ -55,6 +55,19 @@ enum WhatsNewContent {
     /// notes were dated — the first release, as one entry.
     static let releases: [Release] = [
 
+        // 2026.10.18 — flight mode (Rani, 2026-10-16), questions never repeat
+        // (2026-10-17), and Sasha's games: the sequence game and גן math.
+        Release(build: 241, version: "2026.10.18", headline: tr("מצב טיסה, ושאלות שלא חוזרות"), items: [
+            Item(emoji: "✈️", title: tr("מצב טיסה"),
+                 line: tr("טסים? בחלון הפעולות של הילד יוצרים קוד, והילד פותח איתו את המכשיר לבד, לכמה זמן שירצה, עד שתחזרו. עובד גם בלי אינטרנט, ושעת השינה ממשיכה לעבוד")),
+            Item(emoji: "🔁", title: tr("שאלה לא חוזרת"),
+                 line: tr("שאלה שהילד כבר נשאל לא חוזרת, גם באייפד וגם בטלפון. כשנגמרות השאלות של הכיתה שלו בעולם, הוא עובר לשאלות של הכיתה הבאה 🚀")),
+            Item(emoji: "🎞️", title: tr("משחק חדש: מה קודם?"),
+                 line: tr("מסדרים לפי הסדר תמונות של סיפור מהחיים: בוקר, ארוחה, שתילה, כביסה ועוד. בלי לקרוא, לגן ועד כיתה ב׳")),
+            Item(emoji: "🍎", title: tr("חשבון בגן, בתמונות"),
+                 line: tr("משחק חדש, ״שימו בסל״: גוררים בדיוק כמה שצריך. ועוד: חיסור שרואים בעיניים, תרגיל מול תמונה, ומספר מול קבוצה במשחק הזוגות")),
+        ]),
+
         // 2026.10.11 — after Apple approved 2026.10.10 (build 238) on 2026-10-14.
         // (build 240, 2026-10-15: + questions from the next grade, and a hard
         // level that is really hard in גן — after David, father of אמילי.)
