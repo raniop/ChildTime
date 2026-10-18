@@ -53,13 +53,16 @@ class MainActivity : ComponentActivity() {
         // 🧪 `--es demoScreen parenthome|childreport|childsettings|gift|settings` — the parent's screens
         // over a made-up family (ui/DemoFamily.kt); `--es demoPage devices|difficulty|profile|more`
         // opens a page of the child's settings, `--ei demoGiftSent 30` the gift window after sending.
-        val demoParent = demoScreen?.takeIf { it in setOf("parenthome", "childreport", "childsettings", "gift", "settings", "chores") }
+        // ✈️ `--es demoScreen flightparent [--ez demoFlightOn true]` — the parent's flight window
+        // before / with a code; `flightkid [--ez demoFlightStep2 true]` — the child's code pad / how long;
+        // `kidhome` — a made-up child's home (local only, nothing synced) whose parents left a code.
+        val demoParent = demoScreen?.takeIf { it in setOf("parenthome", "childreport", "childsettings", "gift", "settings", "chores", "flightparent") }
         // `--es demoLang he|en|ru|ar` — the language for this run only (nothing is saved).
-        if (demoParent != null || demoScreen == "kidchores" || demoGame != null || demoQuiz) {
+        if (demoParent != null || demoScreen == "kidchores" || demoScreen == "flightkid" || demoScreen == "kidhome" || demoGame != null || demoQuiz) {
             com.rani.tofy.i18n.AppLanguage.of(intent?.getStringExtra("demoLang"))?.let { com.rani.tofy.i18n.I18n.set(it, persist = false) }
         }
         if (demoParent != null) {
-            com.rani.tofy.ui.DemoFamily.seed(this)
+            com.rani.tofy.ui.DemoFamily.seed(this, flight = intent?.getBooleanExtra("demoFlightOn", false) == true)
             // `--es demoBackdrop tofy` — the parent's backdrop on this emulator.
             intent?.getStringExtra("demoBackdrop")?.let { com.rani.tofy.ui.theme.BackdropStore.chooseForParent(it) }
             intent?.getIntExtra("demoGiftSent", -1)?.takeIf { it > 0 }?.let {
@@ -67,6 +70,8 @@ class MainActivity : ComponentActivity() {
                 com.rani.tofy.data.Commands.demoGiftSaved(com.rani.tofy.ui.DemoFamily.NONI, it)
             }
         }
+        if (demoScreen == "flightkid") com.rani.tofy.kid.ui.demoFlightStep2 = intent?.getBooleanExtra("demoFlightStep2", false) == true
+        if (demoScreen == "kidhome") com.rani.tofy.kid.ui.demoFlightKidHome(this)
         val demoPage = if (BuildConfig.DEBUG) intent?.getStringExtra("demoPage") else null
         if (BuildConfig.DEBUG) com.rani.tofy.ui.common.demoPhotos = intent?.getIntExtra("demoBackdropPhotos", -1)?.takeIf { it >= 0 }
         if (BuildConfig.DEBUG) intent?.getStringExtra("demoGrade")?.toIntOrNull()?.let {
@@ -121,6 +126,10 @@ class MainActivity : ComponentActivity() {
                         if (bound) com.rani.tofy.kid.ui.social.KidChoresContent { finish() }
                     }
                     else if (demoParent != null) com.rani.tofy.ui.DemoParentScreens(demoParent, demoPage)
+                    else if (demoScreen == "flightkid") com.rani.tofy.kid.ui.FlightCodeScreen(
+                        com.rani.tofy.data.FlightMode("4821", com.rani.tofy.data.nowSecs() + 5 * 86400, com.rani.tofy.data.nowSecs()),
+                        com.rani.tofy.data.QuietHours(bedtime = com.rani.tofy.data.QuietHours.BEDTIME_DEFAULT), onOpen = {}, onClose = { finish() })
+                    else if (demoScreen == "kidhome") com.rani.tofy.kid.ui.KidRoot(com.rani.tofy.kid.ui.DEMO_FLIGHT_CHILD, kidMode = false, onExitKidMode = {})
                     else if (demoScreen == "familychoice") com.rani.tofy.ui.onboarding.FamilyChoiceScreen(onJoin = {})
                     else if (demoScreen == "joinfamily") com.rani.tofy.ui.onboarding.JoinFamilyScreen(onBack = {})
                     // 🧪 `--es demoScreen backdrops` — the parent's backdrop picker.

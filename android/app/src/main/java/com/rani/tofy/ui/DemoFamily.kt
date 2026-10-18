@@ -33,7 +33,8 @@ internal object DemoFamily {
     const val NONI = "DEMO-CHILD-NONI"
     const val DAN = "DEMO-CHILD-DAN"
 
-    fun seed(ctx: Context) {
+    /** [flight]: Noni's parents left a flight code (4821, back in five days). */
+    fun seed(ctx: Context, flight: Boolean = false) {
         // The home must show itself, not its first-run tour or the notifications ask.
         ctx.getSharedPreferences("tofy", Context.MODE_PRIVATE).edit()
             .putBoolean("notif.autoAsked", true).putInt("whatsNew.seenCode", Int.MAX_VALUE).apply()
@@ -49,7 +50,7 @@ internal object DemoFamily {
             "grade" to 6, "gradeSchoolYear" to com.rani.tofy.data.schoolYear(), "dailyCapMinutes" to 60, "language" to "he",
             "difficultyByTopic" to mapOf("math" to "medium", "english" to "medium", "hebrew" to "medium", "science" to "medium"),
             "playPIN" to "2468", "createdAt" to now - 90 * 86400, "learningLevel" to "proficient",
-        ))
+        ) + (if (flight) mapOf("flightMode" to com.rani.tofy.data.FlightMode("4821", now + 5 * 86400, now).toMap()) else emptyMap()))
         val dan = Child.from(DAN, mapOf(
             "householdID" to "DEMO-FAMILY", "name" to "דן", "age" to 8, "gender" to "boy", "avatarPresetID" to "fox",
             "grade" to 3, "gradeSchoolYear" to com.rani.tofy.data.schoolYear(), "language" to "he", "createdAt" to now - 80 * 86400,
@@ -113,6 +114,7 @@ internal fun DemoParentScreens(screen: String, page: String?) {
             startOnProfile = page == "profile", onConnect = {}, onLocation = {}, demoPage = page)
         "chores" -> com.rani.tofy.ui.chores.ChoresScreen(onBack = { show = "parenthome" })   // the built-in chores, no cloud
         "settings" -> com.rani.tofy.ui.settings.SettingsScreen(onBack = { show = "parenthome" }, onOpenChild = { show = "childsettings" })
+        "flightparent" -> com.rani.tofy.ui.home.FlightModeWindow(noni.id) {}
         else -> com.rani.tofy.ui.home.HomeScreen(
             state = state, onOpenChild = { show = "childreport" }, onActions = {}, onGift = { gift = true }, onChildSettings = {},
             onAddChild = {}, onChores = {}, onSettings = { show = "settings" }, onBell = {}, onConnectDevice = {}, sheetOpen = gift,

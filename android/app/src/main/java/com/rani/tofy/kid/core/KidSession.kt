@@ -3,6 +3,8 @@ package com.rani.tofy.kid.core
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.firebase.firestore.FirebaseFirestore
+import com.rani.tofy.data.FlightCodeGuard
+import com.rani.tofy.data.FlightMode
 import com.rani.tofy.data.QuietHours
 import com.rani.tofy.data.QuietOccurrence
 import com.rani.tofy.data.map
@@ -140,6 +142,17 @@ object KidSession : LeaseHost {
         initialized = true
         KidIdentity.init(context)
         prefs = context.applicationContext.getSharedPreferences("tofy.kid.state", Context.MODE_PRIVATE)
+        // ✈️ The wrong-tries count lives on the device (iOS UserDefaults flightCodeTries / flightCodeWaitUntil).
+        val guardPrefs = context.applicationContext.getSharedPreferences("tofy.kid", Context.MODE_PRIVATE)
+        FlightCodeGuard.store = object : FlightCodeGuard.Store {
+            override var tries: Int
+                get() = guardPrefs.getInt("flightCodeTries", 0)
+                set(v) { guardPrefs.edit().putInt("flightCodeTries", v).apply() }
+            override var waitUntil: Double
+                // Whole unix seconds — a Float can't hold them to the second.
+                get() = guardPrefs.getLong("flightCodeWaitUntil", 0L).toDouble()
+                set(v) { guardPrefs.edit().putLong("flightCodeWaitUntil", kotlin.math.ceil(v).toLong()).apply() }
+        }
         sync = KidSync(this, scope)
         leases = PlayWindowLeaseManager(FirebaseFirestore.getInstance(), this, scope) { engine?.settings?.leaseEnabled ?: true }
     }
@@ -511,6 +524,46 @@ object KidSession : LeaseHost {
 
     fun quietNow(): QuietOccurrence? = quietHours.activeAt(AndroidKidClock.nowUnix())
 
+    // ── ✈️ flight mode ──────────────────────────────────────────────────────
+    /** The code the parents left before flying (children/{id}.flightMode), while it still works. */
+    val flightMode: FlightMode?
+        get() = FlightMode.from(lastChildDoc?.map("flightMode"))?.takeIf { it.isActive(AndroidKidClock.nowUnix()) }
+
+    /**
+     * Open for the minutes the child chose with the flight code (WorldMapView
+     * .openWithFlightCode). Minted like a parent's own open (a GRANT lease —
+     * never taken from the child's minutes), but as kind "flight" so 🏫🌙
+     * school time and bedtime still close it. Another device playing → the
+     * usual "open elsewhere"; offline → it opens here and is adopted later.
+     */
+    suspend fun openWithFlightCode(minutes: Int): OpenResult {
+        quietNow()?.let { return OpenResult.Quiet(it) }
+        val e = engine ?: return OpenResult.NothingToOpen
+        val cid = childID ?: return OpenResult.NothingToOpen
+        if (e.isUnlocked) return OpenResult.AlreadyOpen
+        if (flightMode == null || minutes <= 0) return OpenResult.NothingToOpen
+        if (_opening.value != null) return OpenResult.Busy
+        var leaseID: String? = null
+        var wallet: ClaimedWallet? = null
+        if (e.settings.leaseEnabled && !localOnly) {
+            beginOpening(false)
+            val out = leases.claim(cid, PlayWindowLease.Kind.GRANT, minutes * 60)
+            endOpening()
+            when (out) {
+                is ClaimOutcome.Granted -> { leaseID = out.leaseID; wallet = out.wallet }
+                is ClaimOutcome.HeldElsewhere -> return OpenResult.HeldElsewhere(out.ownerKind, out.secondsLeft)
+                ClaimOutcome.Insufficient, ClaimOutcome.Offline -> Unit   // offline: opens here, adopted later
+            }
+        }
+        if (childID != cid) return OpenResult.Failed()
+        edit {
+            wallet?.let { w -> it.applyClaimedWallet(w) }
+            it.startUnlock(minutes, manual = true, leaseID = leaseID, leaseKind = "flight")
+        }
+        sync.reportEvent("screenTimeStart", extra = mapOf("minutes" to minutes, "flight" to true))
+        return OpenResult.Opened(minutes * 60, false)
+    }
+
     private fun closeForQuiet(cutUnix: Double) {
         val cid = childID ?: return
         val out = edit { it.closeForQuietTime(cutUnix) } ?: return
@@ -545,6 +598,13 @@ object KidSession : LeaseHost {
         lastChildDoc = d
         engine?.settings = KidSettings.fromChildDoc(d, baseSettings)
         publish()
+    }
+
+    /** 🧪 Debug screenshots only: a LOCAL child's doc, as if it had arrived (nothing is listened to or written). */
+    internal fun demoChildDoc(d: Map<String, Any?>) {
+        if (!com.rani.tofy.BuildConfig.DEBUG || !localOnly) return
+        sync.demoDoc(d)
+        onChildDoc(d)
     }
 
     internal fun mergeRemote(cid: String, snap: ProgressSnapshot): Boolean =

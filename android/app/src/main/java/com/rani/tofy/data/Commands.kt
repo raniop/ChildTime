@@ -86,11 +86,21 @@ object Commands {
         if (com.rani.tofy.BuildConfig.DEBUG) _giftStatus.value = CommandStatus(childID, CommandStatus.Kind.GIFT, nowSecs(), minutes, reachedCloud = true)
     }
 
-    private suspend fun childCommand(childID: String, fields: Map<String, Any?>): WriteOutcome {
+    private suspend fun childCommand(childID: String, fields: Map<String, Any?>, timeoutMs: Long = 3000): WriteOutcome {
         val ref = db.collection("children").document(childID)
-        var out = confirmedMerge(ref, fields)
-        if (out == WriteOutcome.DENIED) { FamilyRepository.reassertMembership(); out = confirmedMerge(ref, fields) }
+        var out = confirmedMerge(ref, fields, timeoutMs)
+        if (out == WriteOutcome.DENIED) { FamilyRepository.reassertMembership(); out = confirmedMerge(ref, fields, timeoutMs) }
         return out
+    }
+
+    /**
+     * ✈️ FlightModeStore.save: set (or end, with null) a child's flight mode —
+     * its OWN field on children/{id}, so no other write can carry an old copy
+     * back. OK / QUEUED both reach the child (the listener shows it here at once).
+     */
+    suspend fun setFlightMode(childID: String, mode: FlightMode?): WriteOutcome {
+        val value = mode ?: FlightMode.off()
+        return childCommand(childID, mapOf("flightMode" to value.toMap()), timeoutMs = 6000)
     }
 
     /** Minutes left until midnight — the per-give cap (ProgressStore.minutesUntilMidnight). */

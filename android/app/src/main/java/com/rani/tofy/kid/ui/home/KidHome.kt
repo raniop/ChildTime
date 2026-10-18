@@ -111,6 +111,8 @@ data class HomeCtaModel(
     /** 🔒 the child's own code for their minutes (iOS "קוד סודי לדקות שלי"). */
     val hasPlayPin: Boolean = false,
     val showPlayPin: Boolean = false,
+    /** ✈️ The parents are away and left a flight code (FlightMode.kt) — the key that asks for it. */
+    val flight: Boolean = false,
 )
 
 /** The round-button / twin-card / games-tile / buddy entries of the home (WorldMapView). */
@@ -150,6 +152,7 @@ internal fun KidHome(
     onOpenEarned: () -> Unit,
     onOpenGift: () -> Unit,
     onTransfer: () -> Unit,
+    onOpenFlight: () -> Unit = {},
     extras: HomeExtras = HomeExtras(),
     onShop: () -> Unit = {},
     onFriends: () -> Unit = {},
@@ -306,7 +309,7 @@ internal fun KidHome(
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 BuddyBubble(buddyLine, Modifier.fillMaxWidth())
-                BottomCtas(cta, onOpenEarned, onOpenGift, onTransfer)
+                BottomCtas(cta, onOpenEarned, onOpenGift, onTransfer, onOpenFlight)
                 if (cta.showPlayPin) PlayPinChip(cta.hasPlayPin, onPlayPin)
             }
 
@@ -656,13 +659,17 @@ private fun FeatureTile(
 // ── the bottom CTAs ─────────────────────────────────────────────────────────
 
 @Composable
-private fun ColumnScope.BottomCtas(c: HomeCtaModel, onOpenEarned: () -> Unit, onOpenGift: () -> Unit, onTransfer: () -> Unit) {
+private fun ColumnScope.BottomCtas(c: HomeCtaModel, onOpenEarned: () -> Unit, onOpenGift: () -> Unit, onTransfer: () -> Unit, onOpenFlight: () -> Unit) {
     // 💝 ONE button for everything the PARENTS gave — never blurred with earned minutes.
     if (c.giftSeconds > 0 && c.peer == null) {
         if (c.opening && c.openingGift) KidCta(SocialMe.g(tr("פּוֹתְחִים לְךָ… ✨"), tr("פּוֹתְחִים לָךְ… ✨")), Color(0xFFFF5FA8), Color(0xFFFFA53A), busy = true) {}
         else KidCta(tr("מַתָּנָה מֵהַהוֹרִים · ") + minutesText(c.giftSeconds),
             Color(0xFFFF5FA8), Color(0xFFFFA53A), emoji = "💝", enabled = !c.opening, size = 19, onClick = onOpenGift)
     }
+    // ✈️ "קוֹד טִיסָה · פִּתְחוּ!" — the code the parents left before flying; the sky-blue twin of 💝.
+    // (While it opens, KidExperience shows the "preparing" window over the home.)
+    if (c.flight && c.peer == null) KidCta(tr("קוֹד טִיסָה · פִּתְחוּ!"), Color(0xFF3BA8FF), Color(0xFF6C5CFF),
+        emoji = "✈️", enabled = !c.opening, size = 19, onClick = onOpenFlight)
     val peer = c.peer
     when {
         peer != null -> {

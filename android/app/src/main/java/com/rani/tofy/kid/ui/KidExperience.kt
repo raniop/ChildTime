@@ -93,6 +93,26 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/** 🧪 Debug screenshots only: the made-up child of `--es demoScreen kidhome`. */
+internal const val DEMO_FLIGHT_CHILD = "DEMO-FLIGHT-CHILD"
+private var demoKidHome = false
+
+/**
+ * 🧪 `--es demoScreen kidhome`: a made-up child's home, LOCAL only (no
+ * listeners, no uploads, no device row, no lease), whose parents left a flight
+ * code — so the ✈️ key shows. The lock setup and the tours are skipped.
+ */
+internal fun demoFlightKidHome(ctx: Context) {
+    if (!com.rani.tofy.BuildConfig.DEBUG) return
+    demoKidHome = true
+    KidBoot.init(ctx)
+    CoachTours.markDone(CoachTours.kidHome(DEMO_FLIGHT_CHILD))
+    KidSession.bind(DEMO_FLIGHT_CHILD, kidMode = false, local = true)
+    val now = System.currentTimeMillis() / 1000.0
+    KidSession.demoChildDoc(mapOf("name" to "נוני", "gender" to "girl", "grade" to 3, "language" to "he",
+        "flightMode" to com.rani.tofy.data.FlightMode("4821", now + 5 * 86400, now).toMap()))
+}
+
 /** One-time wiring of the kid layers (idempotent; Application.onCreate would do too). */
 internal object KidBoot {
     private var done = false
@@ -191,6 +211,8 @@ private sealed class Cover {
     data class Stat(val kind: StatInfoKind) : Cover()
     /** 🔄 "There is a newer Tofy" — told, and pointed at a grown-up. */
     data object Update : Cover()
+    /** ✈️ The parents' flight code: the code pad, then how long (FlightCodeScreen). */
+    data object Flight : Cover()
 }
 
 /** The full-screen kid destinations WorldMapView presents as fullScreenCovers. */
@@ -221,7 +243,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     // 🎬 The first run's made-up child (see `FirstRun`): the same home, but local —
     // no sync, no lock to set up, nothing asked — and what needs a family explains itself.
     val firstRun = com.rani.tofy.kid.core.FirstRun.isOn && cid == com.rani.tofy.kid.core.FirstRun.CHILD_ID
-    remember(cid, kidMode) { KidSession.bind(cid, kidMode, local = firstRun); 0 }
+    remember(cid, kidMode) { KidSession.bind(cid, kidMode, local = firstRun || (demoKidHome && cid == DEMO_FLIGHT_CHILD)); 0 }
     val scope = rememberCoroutineScope()
     val state by KidSession.state.collectAsState()
     val lease by KidSession.lease.collectAsState()
@@ -252,7 +274,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     var entry by remember { mutableStateOf<WorldEntry?>(null) }
     val ctx = LocalContext.current
     // 🛡 ChildLockSetup.markPending → step ④ on a child device, before its home (iOS ContentView cover).
-    var lockSetupDone by remember { mutableStateOf(kidMode || firstRun || EnforcementStore.setupDone(ctx)) }
+    var lockSetupDone by remember { mutableStateOf(kidMode || firstRun || demoKidHome || EnforcementStore.setupDone(ctx)) }
 
     fun say(line: String) {
         buddyJob?.cancel()
@@ -401,7 +423,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     val notifAsk = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { }
     LaunchedEffect(kidMode) {
-        if (kidMode || firstRun || android.os.Build.VERSION.SDK_INT < 33) return@LaunchedEffect
+        if (kidMode || firstRun || demoKidHome || android.os.Build.VERSION.SDK_INT < 33) return@LaunchedEffect
         val perm = android.Manifest.permission.POST_NOTIFICATIONS
         if (androidx.core.content.ContextCompat.checkSelfPermission(ctx, perm) == android.content.pm.PackageManager.PERMISSION_GRANTED) return@LaunchedEffect
         val prefs = ctx.getSharedPreferences("tofy.kid", android.content.Context.MODE_PRIVATE)
@@ -502,6 +524,21 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 scope.launch { JoinRepository.childWrite(cid, child?.householdID, mapOf("playPIN" to "")) }
                 say(tr("הַקּוֹד הוּסַר 🔓"))
             }, onCancel = { cover = null }, onForgot = { cover = Cover.PinForgot })
+        cover == Cover.Flight -> {
+            val f = KidSession.flightMode
+            // The day the parents are back came while the pad was open: the code is over.
+            if (f == null) LaunchedEffect(Unit) { cover = null }
+            else FlightCodeScreen(f, KidSession.quietHours, onOpen = { minutes ->
+                cover = null
+                scope.launch {
+                    when (val r = KidSession.openWithFlightCode(minutes)) {
+                        is OpenResult.Quiet -> say(quietLine(r.occurrence, isGirl))
+                        is OpenResult.HeldElsewhere -> say((if (isGirl) tr("הַזְּמַן שֶׁלָּךְ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮") else tr("הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮")))
+                        else -> Unit
+                    }
+                }
+            }, onClose = { cover = null })
+        }
         cover == Cover.PinForgot -> KidPinForgot(child?.name.orEmpty(), household?.parentPinHash, householdLoaded,
             onParentReset = {
                 cover = null
@@ -564,6 +601,8 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 quietLine = KidSession.quietNow()?.let { quietLine(it, isGirl) },
                 // Only where it matters: a code to manage, or minutes worth protecting.
                 showPlayPin = firstRun || child?.hasPlayPIN == true || engine.pendingMinutes > 0 || engine.local.manualPausedSeconds > 0,
+                // ✈️ The parents are away and left a code (nowMs: it stops by itself on the day they're back).
+                flight = nowMs > 0 && !firstRun && KidSession.flightMode != null,
             )
             KidHome(
                 childID = cid, child = child, state = st, engine = engine, premium = premium, kidMode = kidMode,
@@ -592,6 +631,11 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 },
                 onOpenGift = {
                     if (!com.rani.tofy.kid.core.FirstRun.explain(com.rani.tofy.kid.core.FirstRun.Key.GIFT)) requestUnlock { handle(KidSession.openGift(), true) }
+                },
+                onOpenFlight = {
+                    // 🏫🌙 Not in school time or bedtime — say so before asking for the code.
+                    val q = KidSession.quietNow()
+                    if (q != null) say(quietLine(q, isGirl)) else if (opening == null) cover = Cover.Flight
                 },
                 onTransfer = {
                     if (!transferring) scope.launch {

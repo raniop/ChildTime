@@ -61,7 +61,15 @@ data class PlayWindowLease(
     /** Which pocket funded the window — decides where a refund goes. */
     enum class Kind(val raw: String) {
         EARNED("earned"), GIFT("gift"), GRANT("grant");
-        companion object { fun of(raw: String?): Kind? = entries.firstOrNull { it.raw == raw } }
+        companion object {
+            fun of(raw: String?): Kind? = entries.firstOrNull { it.raw == raw }
+            /**
+             * The lease for a window already open on this device (its local
+             * unlockKind). ✈️ A flight-code window is minted like a parent's grant —
+             * never debited from the child's earned minutes.
+             */
+            fun ofLocal(unlockKind: String?): Kind = of(if (unlockKind == "flight") GRANT.raw else unlockKind) ?: EARNED
+        }
     }
 
     fun isMine(me: String = KidIdentity.installID): Boolean = ownerDeviceID == me
@@ -238,7 +246,7 @@ class PlayWindowLeaseManager(
         if (!host.isUnlocked || host.activeLeaseID != null) return
         val left = host.unlockSecondsRemaining
         if (left <= 30 || reconciling) return
-        val kind = PlayWindowLease.Kind.of(host.unlockKind) ?: PlayWindowLease.Kind.EARNED
+        val kind = PlayWindowLease.Kind.ofLocal(host.unlockKind)
         reconciling = true
         scope.launch {
             try {

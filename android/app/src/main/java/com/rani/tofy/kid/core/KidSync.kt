@@ -157,6 +157,9 @@ class KidSync internal constructor(
         uploadSoon()
     }
 
+    /** 🧪 KidSession.demoChildDoc: show a made-up child doc (debug, local sessions only). */
+    internal fun demoDoc(d: Map<String, Any?>) { _childDoc.value = d }
+
     fun stop() {
         regs.forEach { it.remove() }; regs.clear()
         ownDeviceReg?.remove(); ownDeviceReg = null

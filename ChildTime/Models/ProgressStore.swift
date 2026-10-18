@@ -2424,7 +2424,10 @@ final class ProgressStore: ObservableObject {
         // remote lock, Kid Mode exit, profile switch), so this is the single place
         // the cloud lease is released.
         let leaseID = activeLeaseID
-        let remaining = refundableUnlockSeconds
+        // ✈️ A flight-code window gives nothing back: its leftover was never the
+        // child's — it must not turn into gift minutes after the parents land.
+        let flight = unlockKind == "flight"
+        let remaining = flight ? 0 : refundableUnlockSeconds
         let cutAt = quietCutAt
         let childID = ProfileStore.shared.activeID
         let wasManual = unlockIsManual
@@ -2469,6 +2472,8 @@ final class ProgressStore: ObservableObject {
                     }
                 }
             }
+        } else if flight {
+            endUnlock()
         } else if wasManual {
             pauseManualUnlock()
         } else {

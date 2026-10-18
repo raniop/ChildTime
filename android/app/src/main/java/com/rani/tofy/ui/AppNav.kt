@@ -48,6 +48,7 @@ fun AppNav() {
     var actionsFor by remember { mutableStateOf<Child?>(null) }
     var connectFor by remember { mutableStateOf<String?>(null) }
     var giftFor by remember { mutableStateOf<String?>(null) }
+    var flightFor by remember { mutableStateOf<String?>(null) }
     val status by Commands.status.collectAsState()
 
     NavHost(nav, startDestination = "home") {
@@ -66,7 +67,7 @@ fun AppNav() {
                 onConnectDevice = { connectFor = it.id },
                 onLocation = { c -> nav.navigate(if (c == null) "location" else "location?child=${c.id}") },
                 bellBadge = unreadActivityCount(),
-                sheetOpen = actionsFor != null || connectFor != null || giftFor != null || status != null,
+                sheetOpen = actionsFor != null || connectFor != null || giftFor != null || flightFor != null || status != null,
                 banners = { HomeBanners(state, onChores = { nav.navigate("chores") },
                     onPaywall = { nav.navigate("paywall") }, onPack = { pack, cid -> nav.navigate("pack/$pack/$cid") }) },
             )
@@ -108,9 +109,12 @@ fun AppNav() {
             onConnect = { actionsFor = null; connectFor = c.id },
             onSettings = { actionsFor = null; nav.navigate("childSettings/${c.id}") },
             onScreenTime = { actionsFor = null; nav.navigate("childScreenTime/${c.id}") },
-            onLocation = { actionsFor = null; nav.navigate("location?child=${c.id}") })
+            onLocation = { actionsFor = null; nav.navigate("location?child=${c.id}") },
+            onFlight = { actionsFor = null; flightFor = c.id })
     }
     connectFor?.let { ConnectDeviceSheet(it, onDismiss = { connectFor = null }) }
+    // ✈️ Flight mode: the date the parents are back, and the child's code.
+    flightFor?.let { id -> com.rani.tofy.ui.home.FlightModeWindow(id) { flightFor = null } }
     // 💝 The gift window (the live child, so "reached the device" shows as it happens).
     giftFor?.let { id ->
         val c = state.children.firstOrNull { it.id == id }

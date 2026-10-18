@@ -34,7 +34,8 @@ import com.rani.tofy.ui.theme.*
 @Composable
 fun ActionsSheet(child: Child, state: FamilyState, onDismiss: () -> Unit, onChores: () -> Unit, onConnect: () -> Unit, onSettings: () -> Unit,
     onScreenTime: () -> Unit = {},
-                 onLocation: () -> Unit = {}) {
+                 onLocation: () -> Unit = {},
+                 onFlight: () -> Unit = {}) {
     var expanded by remember { mutableStateOf<String?>(null) }   // "lock"
     var confirmRevoke by remember { mutableStateOf(false) }
     val hasDevice = state.hasDevice(child)
@@ -74,6 +75,8 @@ fun ActionsSheet(child: Child, state: FamilyState, onDismiss: () -> Unit, onChor
             Column(Modifier.fillMaxWidth().glassPane(16.dp, shadow = false)) {
                 ActionRow("⏳", tr("זמן מסך יומי"), if (capOn) tr("עד %lld דקות ביום", capMin) else tr("בלי הגבלה יומית"), onClick = onScreenTime)
                 ActionRow("🧹", tr("מטלות הבית"), tr("משימות ופרסים בבית"), onClick = onChores)
+                // ✈️ The parents are flying: a code that opens the child's device (FlightModeWindow).
+                ActionRow("✈️", tr("מצב טיסה"), flightSummary(child), onClick = onFlight)
                 ActionRow("⚙️", tr("כל ההגדרות של %@", name), tr("זמן, למידה, שפה ומכשיר"), last = true, onClick = onSettings)
             }
         }

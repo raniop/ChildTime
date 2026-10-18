@@ -176,7 +176,7 @@ data class LocalPlayState(
     var unlockGrantedSeconds: Int = 0,
     var unlockStartedAt: Double? = null,
     var unlockStartedUptime: Double = 0.0,
-    /** "earned" / "gift" / "grant". */
+    /** "earned" / "gift" / "grant" / "flight" (✈️ a flight-code window: a grant that bedtime still closes). */
     var unlockKind: String = "earned",
     var activeLeaseID: String? = null,
     /** Legacy frozen parent time — always 0 in the current design (kept for frozenSeconds). */
@@ -1229,7 +1229,10 @@ class ProgressEngine(
     fun stopAndSaveCurrentUnlock(): StopOutcome = op {
         if (!isUnlocked && !(quietRefund != null && l.unlockEndsAt != null)) return@op StopOutcome(0)
         val leaseID = l.activeLeaseID
-        val remaining = refundableUnlockSeconds
+        // ✈️ A flight-code window gives nothing back: its leftover was never the
+        // child's — it must not turn into gift minutes after the parents land.
+        val flight = l.unlockKind == "flight"
+        val remaining = if (flight) 0 else refundableUnlockSeconds
         val wasManual = l.unlockIsManual
         when {
             settings.leaseEnabled && leaseID != null -> {
@@ -1237,6 +1240,7 @@ class ProgressEngine(
                 beginInFlightRefund(remaining, wasManual)
                 StopOutcome(remaining / 60, leaseID, remaining, wasManual)
             }
+            flight -> { endUnlockRaw(); StopOutcome(0) }
             wasManual -> { pauseManualUnlock(); StopOutcome(0) }
             else -> StopOutcome(endUnlockAndReturnRemainingMinutesRaw())
         }

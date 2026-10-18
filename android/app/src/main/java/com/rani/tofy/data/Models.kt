@@ -65,6 +65,12 @@ data class Child(
     val onlyRegularQuestions: Boolean,
     /** 🏫🌙 School time + bedtime (QuietHours.kt); null = never set. */
     val quietHours: QuietHours?,
+    /**
+     * ✈️ The parents are away: a code the child opens their device with
+     * (FlightMode.kt). READ only — its one writer is Commands.setFlightMode, and
+     * no other child write carries it. null = never set.
+     */
+    val flightMode: FlightMode? = null,
     val packs: List<String>,
     val createdAt: Double,
     val raw: Doc,
@@ -102,6 +108,7 @@ data class Child(
             playPIN = d.str("playPIN"),
             onlyRegularQuestions = d.bool("onlyRegularQuestions") ?: false,
             quietHours = QuietHours.from(d.map("quietHours")),
+            flightMode = FlightMode.from(d.map("flightMode")),
             packs = d.strList("packs") ?: emptyList(),
             createdAt = d.secs("createdAt") ?: 0.0,
             raw = d,
