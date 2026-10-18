@@ -55,9 +55,10 @@ enum WhatsNewContent {
     /// notes were dated — the first release, as one entry.
     static let releases: [Release] = [
 
-        // 2026.10.18 — flight mode (Rani, 2026-10-16), questions never repeat
+        // 2026.10.18 (build 242; 241 crashed on the kid home on a real iPhone —
+        // type depth, see WorldMapView.body) — flight mode (Rani, 2026-10-16), questions never repeat
         // (2026-10-17), and Sasha's games: the sequence game and גן math.
-        Release(build: 241, version: "2026.10.18", headline: tr("מצב טיסה, ושאלות שלא חוזרות"), items: [
+        Release(build: 242, version: "2026.10.18", headline: tr("מצב טיסה, ושאלות שלא חוזרות"), items: [
             Item(emoji: "✈️", title: tr("מצב טיסה"),
                  line: tr("טסים? בחלון הפעולות של הילד יוצרים קוד, והילד פותח איתו את המכשיר לבד, לכמה זמן שירצה, עד שתחזרו. עובד גם בלי אינטרנט, ושעת השינה ממשיכה לעבוד")),
             Item(emoji: "🔁", title: tr("שאלה לא חוזרת"),

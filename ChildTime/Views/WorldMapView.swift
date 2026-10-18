@@ -754,6 +754,10 @@ struct WorldMapView: View {
         .onChangeCompat(of: progress.openWindowMessage) { _, _ in
             speakOpenWindowMessageIfNeeded()
         }
+        // ⚠️ Type depth: this body is long enough that its generic type overflowed
+        // the 1 MB main-thread stack on a real device (build 241, Kid Mode). Erase
+        // every few dozen modifiers — the simulator never shows it.
+        .eraseToAnyView()
         .onAppear { celebrateChallengeIfReady() }
         .onAppear {
             lastSeenStars = progress.stars
@@ -848,6 +852,10 @@ struct WorldMapView: View {
         // straight into its questions when the parent switched games off for
         // this child, or when there is nothing else to choose. The tile above
         // already did the pack / ask-a-parent gating before setting this.
+        // ⚠️ Type depth: this body is long enough that its generic type overflowed
+        // the 1 MB main-thread stack on a real device (build 241, Kid Mode). Erase
+        // every few dozen modifiers — the simulator never shows it.
+        .eraseToAnyView()
         .fullScreenCover(item: $selectedWorld) { world in
             WorldEntryView(world: world)
         }
@@ -929,6 +937,10 @@ struct WorldMapView: View {
             }
         }
         .animation(.spring(response: 0.5, dampingFraction: 0.7), value: challengeCelebration)
+        // ⚠️ Type depth: this body is long enough that its generic type overflowed
+        // the 1 MB main-thread stack on a real device (build 241, Kid Mode). Erase
+        // every few dozen modifiers — the simulator never shows it.
+        .eraseToAnyView()
         .sheet(item: $flightSheet) { mode in
             FlightCodeSheet(mode: mode, quietHours: profiles.active?.quietHours) { minutes in
                 // After the sheet has gone, so the window opens over the map.
@@ -2272,6 +2284,7 @@ struct WorldMapView: View {
         .background(Color(hex: "2A1E5C").opacity(0.6), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .glassPane(radius: 16, strength: 0.18)
         .frame(maxWidth: 480)
+        .eraseToAnyView()   // keeps the home's type shallow (see the note in `body`)
     }
 
     private func keyBox<C: View>(@ViewBuilder _ content: () -> C) -> some View {
