@@ -15079,6 +15079,28 @@
         }
       }
     },
+    "15 דַּקּוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 دقيقة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 минут"
+          }
+        }
+      }
+    },
     "15 כּוֹכָבִים" : {
       "localizations" : {
         "ar" : {
@@ -44438,6 +44460,28 @@
         }
       }
     },
+    "הַקְלִידוּ אֶת קוֹד הַטִּיסָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اكتبوا رمز السفر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type the flight code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите код полёта"
+          }
+        }
+      }
+    },
     "הַקְרָאָה" : {
 
     },
@@ -44635,6 +44679,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Код удалён 🔓"
+          }
+        }
+      }
+    },
+    "הַקּוֹד לֹא נָכוֹן. נְנַסֶּה שׁוּב 🙂" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرمز غير صحيح. لنحاول مرة أخرى 🙂"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That's not the code. Let's try again 🙂"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код не подошёл. Попробуем ещё раз 🙂"
           }
         }
       }
@@ -54787,6 +54853,28 @@
         }
       }
     },
+    "הקוד של %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رمز %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код для %@"
+          }
+        }
+      }
+    },
     "הקוד שסרקתם לא נמצא או פג תוקף. בקשו קוד חדש ונסו שוב." : {
       "localizations" : {
         "ar" : {
@@ -61397,6 +61485,28 @@
         }
       }
     },
+    "חַכּוּ רֶגַע וּנְנַסֶּה שׁוּב ⏳ %lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انتظروا قليلًا وحاولوا مجددًا ⏳ %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wait a moment and try again ⏳ %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подождите немного и попробуйте снова ⏳ %lld"
+          }
+        }
+      }
+    },
     "חַלּוֹן" : {
       "localizations" : {
         "ar" : {
@@ -62719,6 +62829,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сильные стороны и сложности"
+          }
+        }
+      }
+    },
+    "חוזרים ב־" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "العودة في"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back on"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Возвращаемся"
           }
         }
       }
@@ -65406,6 +65538,94 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Телефон, потерявший связь с семьёй, сам пробует снова и ясно сообщает об этом, а не показывает старые данные как актуальные"
+          }
+        }
+      }
+    },
+    "טסים? %@ יקבל קוד שפותח את המכשיר שלו לבד, לכמה זמן שיבחר, עד שתחזרו. גם בלי אינטרנט. שעת השינה ממשיכה לעבוד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مسافرون؟ سيحصل %@ على رمز يفتح به جهازه بنفسه للمدة التي يختارها حتى عودتكم. يعمل حتى دون إنترنت. وقت النوم يبقى ساريًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flying? %@ gets a code that opens his device by himself, for as long as he chooses, until you're back. Works offline too. Bedtime still applies."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Улетаете? %@ получит код, которым сам откроет своё устройство на сколько захочет, пока вы не вернётесь. Работает и без интернета. Время сна по-прежнему действует."
+          }
+        }
+      }
+    },
+    "טסים? %@ תקבל קוד שפותח את המכשיר שלה לבד, לכמה זמן שתבחר, עד שתחזרו. גם בלי אינטרנט. שעת השינה ממשיכה לעבוד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مسافرون؟ ستحصل %@ على رمز تفتح به جهازها بنفسها للمدة التي تختارها حتى عودتكم. يعمل حتى دون إنترنت. وقت النوم يبقى ساريًا."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flying? %@ gets a code that opens her device by herself, for as long as she chooses, until you're back. Works offline too. Bedtime still applies."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Улетаете? %@ получит код, которым сама откроет своё устройство на сколько захочет, пока вы не вернётесь. Работает и без интернета. Время сна по-прежнему действует."
+          }
+        }
+      }
+    },
+    "טסים? קוד שפותח לה את המכשיר עד שתחזרו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مسافرون؟ رمز يفتح لها الجهاز حتى عودتكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flying? A code that opens her device until you're back"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Улетаете? Код, который откроет ей устройство до вашего возвращения"
+          }
+        }
+      }
+    },
+    "טסים? קוד שפותח לו את המכשיר עד שתחזרו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مسافرون؟ رمز يفتح له الجهاز حتى عودتكم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flying? A code that opens his device until you're back"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Улетаете? Код, который откроет ему устройство до вашего возвращения"
           }
         }
       }
@@ -68677,6 +68897,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Новый ребёнок · последний шаг"
+          }
+        }
+      }
+    },
+    "יצירת קוד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إنشاء رمز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create a code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создать код"
           }
         }
       }
@@ -77484,6 +77726,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выключите — затем удалите Tofy как обычно"
+          }
+        }
+      }
+    },
+    "לְכַמָּה זְמַן לִפְתֹּחַ?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لأي مدة نفتح؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How long should it open?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На сколько открыть?"
           }
         }
       }
@@ -93514,6 +93778,50 @@
         }
       }
     },
+    "מצב טיסה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وضع السفر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flight mode"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Режим полёта"
+          }
+        }
+      }
+    },
+    "מצב טיסה הסתיים. הקוד כבר לא עובד." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انتهى وضع السفر. الرمز لم يعد يعمل."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flight mode is off. The code no longer works."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Режим полёта выключен. Код больше не действует."
+          }
+        }
+      }
+    },
     "מצב ילד" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -101348,6 +101656,28 @@
         }
       }
     },
+    "סיום מצב טיסה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إنهاء وضع السفر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End flight mode"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выключить режим полёта"
+          }
+        }
+      }
+    },
     "סיימנו" : {
       "localizations" : {
         "ar" : {
@@ -102654,6 +102984,28 @@
         }
       }
     },
+    "עַד שְׁעַת הַשֵּׁנָה 🌙" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حتى وقت النوم 🌙"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Until bedtime 🌙"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "До времени сна 🌙"
+          }
+        }
+      }
+    },
     "עַדְכְּנוּ עַכְשָׁיו" : {
       "localizations" : {
         "ar" : {
@@ -103290,6 +103642,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "До %lld минут в день"
+          }
+        }
+      }
+    },
+    "עד אז הקוד עובד. אחר כך הוא מפסיק לבד וטופי חוזר לחוקים הרגילים." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يعمل الرمز حتى ذلك الحين. بعدها يتوقف تلقائيًا ويعود توفي إلى القواعد المعتادة."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The code works until then. After that it stops by itself and Tofy goes back to the usual rules."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "До этого времени код работает. Потом он сам перестанет работать, и Тофи вернётся к обычным правилам."
           }
         }
       }
@@ -105663,6 +106037,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Работает и без интернета"
+          }
+        }
+      }
+    },
+    "עובד עד %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يعمل حتى %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Works until %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Действует до %@"
           }
         }
       }
@@ -110618,6 +111014,28 @@
         }
       }
     },
+    "פעיל · הקוד %@ עובד עד %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مفعّل · الرمز %@ يعمل حتى %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On · code %@ works until %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включён · код %@ действует до %@"
+          }
+        }
+      }
+    },
     "פעיל עד %@" : {
       "localizations" : {
         "ar" : {
@@ -114815,6 +115233,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Родительский код"
+          }
+        }
+      }
+    },
+    "קוֹד טִיסָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رمز السفر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flight code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код полёта"
+          }
+        }
+      }
+    },
+    "קוֹד טִיסָה · פִּתְחוּ!" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رمز السفر · افتحوا!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flight code · open!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Код полёта · открыть!"
           }
         }
       }
@@ -122205,6 +122667,28 @@
         }
       }
     },
+    "שָׁלוֹשׁ שָׁעוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ثلاث ساعات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Three hours"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Три часа"
+          }
+        }
+      }
+    },
     "שָׁמַרְתְּ עַל הָרֶצֶף! 🔥" : {
       "localizations" : {
         "ar" : {
@@ -124048,6 +124532,28 @@
         }
       }
     },
+    "שינוי תאריך החזרה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تغيير تاريخ العودة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change the return date"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменить дату возвращения"
+          }
+        }
+      }
+    },
     "שיפר" : {
       "localizations" : {
         "ar" : {
@@ -124712,6 +125218,28 @@
         }
       }
     },
+    "שליחת הקוד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إرسال الرمز"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send the code"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отправить код"
+          }
+        }
+      }
+    },
     "שליחת טופי לטלפון של %@" : {
       "localizations" : {
         "ar" : {
@@ -125082,6 +125610,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сохранить"
+          }
+        }
+      }
+    },
+    "שמירת התאריך" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حفظ التاريخ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save the date"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранить дату"
           }
         }
       }
@@ -128545,6 +129095,28 @@
         }
       }
     },
+    "⏳ אין כרגע אינטרנט. יישלח ברגע שיחזור." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏳ لا يوجد إنترنت الآن. سيُرسل فور عودته."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏳ No internet right now. It will be sent as soon as it's back."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏳ Сейчас нет интернета. Отправим, как только он появится."
+          }
+        }
+      }
+    },
     "⏳ עוֹד רֶגַע תּוּכְלִי לְבַקֵּשׁ שׁוּב — נַסִּי לְבַד בֵּינְתַיִם" : {
       "localizations" : {
         "ar" : {
@@ -128839,6 +129411,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "⚠️ Важно: выберите, какие приложения останутся открытыми, — и обязательно включите Tofy (а также нужные приложения вроде телефона). Пока вы не выбрали, не блокируется ничего, чтобы устройство не оказалось заперто по ошибке."
+          }
+        }
+      }
+    },
+    "⚠️ לא נשמר. נסו שוב." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ لم يُحفظ. حاولوا مرة أخرى."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ Not saved. Please try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ Не сохранено. Попробуйте ещё раз."
           }
         }
       }
@@ -129374,6 +129968,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "✅ Отправлено! Неверный ответ убран с экрана"
+          }
+        }
+      }
+    },
+    "✅ נשמר. הקוד יגיע למכשיר של %@." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ تم الحفظ. سيصل الرمز إلى جهاز %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ Saved. The code will reach %@'s device."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ Сохранено. Код дойдёт до устройства %@."
+          }
+        }
+      }
+    },
+    "✈️ הקוד של %@ בטופי: %@\nפותח את המכשיר עד %@." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✈️ رمز توفي لـ%@: %@\nيفتح الجهاز حتى %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✈️ %@'s Tofy code: %@\nOpens the device until %@."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✈️ Код Тофи для %@: %@\nОткрывает устройство до %@."
           }
         }
       }
