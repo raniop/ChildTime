@@ -13173,6 +13173,28 @@
         }
       }
     },
+    "(%lld שְׁנִיּוֹת · עוֹד %lld)" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(%lld ثانية · بقي %lld)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(%lld seconds · %lld left)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(%lld сек. · осталось %lld)"
+          }
+        }
+      }
+    },
     "(%lld שְׁנִיּוֹת)" : {
       "localizations" : {
         "ar" : {
@@ -13284,6 +13306,28 @@
         }
       }
     },
+    "(חִנָּם · עוֹד %lld)" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(مجانًا · بقي %lld)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(free · %lld left)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(бесплатно · осталось %lld)"
+          }
+        }
+      }
+    },
     "(חִנָּם)" : {
       "localizations" : {
         "ar" : {
@@ -13302,6 +13346,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "(бесплатно)"
+          }
+        }
+      }
+    },
+    "(נִגְמְרוּ לַסִּבּוּב)" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(نفدت في هذه الجولة)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(none left this round)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(в этом раунде закончились)"
           }
         }
       }
