@@ -30553,6 +30553,50 @@
         }
       }
     },
+    "בזמן בית ספר הילד יכול רק לסמן מטלות. מי שרוצה, פותח את טופי במתג בהגדרות של זמן בית הספר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في وقت المدرسة يمكن للطفل تحديد المهام فقط. يمكنكم فتح توفي بمفتاح في إعدادات وقت المدرسة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "During school time your child can only tick chores. You can open Tofy with a switch in the school-time settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Во время школы ребёнок может только отмечать задания по дому. Тофи можно открыть переключателем в настройках времени школы"
+          }
+        }
+      }
+    },
+    "בזמן בית ספר ובשעת שינה, כל לחיצה מסבירה לילד למה זה סגור, ולילדי גן טופי גם מקריא בקול" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في وقت المدرسة ووقت النوم، كل نقرة تشرح للطفل سبب الإغلاق، ويقرأ توفي ذلك بصوت عالٍ لأطفال الروضة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At school time and bedtime, every tap tells your child why it's closed, and Tofy reads it aloud for kindergarteners"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Во время школы и сна каждое нажатие объясняет ребёнку, почему закрыто, а малышам из садика Тофи читает это вслух"
+          }
+        }
+      }
+    },
     "בזמן בית ספר טופי סגור. אפשר רק לסמן מטלות." : {
       "localizations" : {
         "ar" : {
@@ -53838,6 +53882,28 @@
         }
       }
     },
+    "הסבר בכל לחיצה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شرح عند كل نقرة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An explanation on every tap"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Объяснение при каждом нажатии"
+          }
+        }
+      }
+    },
     "הסבר צעד אחר צעד, עם ציור של מסכי האייפון, איך מגדירים קוד לזמן מסך ואיך מוחקים את טופי" : {
       "localizations" : {
         "ar" : {
@@ -65492,6 +65558,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tofy остаётся открытым — отвечайте и зарабатывайте время"
+          }
+        }
+      }
+    },
+    "טופי סגור בזמן בית ספר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "توفي مغلق في وقت المدرسة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tofy closed during school time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тофи закрыт во время школы"
           }
         }
       }
