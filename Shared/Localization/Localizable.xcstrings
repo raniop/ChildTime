@@ -6885,6 +6885,28 @@
         }
       }
     },
+    "%@, לַיְלָה טוֹב 🌙" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@، تصبح على خير 🌙"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Good night, %@ 🌙"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, спокойной ночи 🌙"
+          }
+        }
+      }
+    },
     "%@, מַסְפִּיק לְהַיּוֹם" : {
       "localizations" : {
         "ar" : {
@@ -6903,6 +6925,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@, на сегодня хватит"
+          }
+        }
+      }
+    },
+    "%@, עַכְשָׁיו זְמַן בֵּית סֵפֶר 🏫" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@، الآن وقت المدرسة 🏫"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, it's school time now 🏫"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, сейчас время школы 🏫"
           }
         }
       }
@@ -39713,6 +39757,28 @@
         }
       }
     },
+    "הַדַּקּוֹת שֶׁלְּךָ מְחַכּוֹת לְךָ בְּ-%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دقائقك تنتظرك عند %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your minutes are waiting for you at %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Твои минуты ждут тебя в %@"
+          }
+        }
+      }
+    },
     "הַדַּקּוֹת שֶׁלִּי מוּגָנוֹת בְּקוֹד" : {
       "localizations" : {
         "ar" : {
@@ -39753,6 +39819,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Мои минуты 🔒"
+          }
+        }
+      }
+    },
+    "הַדַּקּוֹת שֶׁלָּךְ מְחַכּוֹת לָךְ בְּ-%@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دقائقكِ تنتظركِ عند %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your minutes are waiting for you at %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Твои минуты ждут тебя в %@"
           }
         }
       }
@@ -79171,6 +79259,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ночь"
+          }
+        }
+      }
+    },
+    "לַיְלָה טוֹב 🌙" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تصبح على خير 🌙"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Good night 🌙"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спокойной ночи 🌙"
           }
         }
       }
@@ -133759,6 +133869,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🏫 Ноа"
+          }
+        }
+      }
+    },
+    "🏫 עַכְשָׁיו זְמַן בֵּית סֵפֶר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 الآن وقت المدرسة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 It's school time now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 Сейчас время школы"
           }
         }
       }
