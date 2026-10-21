@@ -63884,6 +63884,28 @@
         }
       }
     },
+    "חשבון בגן, בתמונות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حساب الروضة بالصور"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kindergarten math, in pictures"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Математика для садика — в картинках"
+          }
+        }
+      }
+    },
     "חשבון בתמונות עם חיבור וחיסור, אותיות ואות ראשונה, ולכל עולם תמונות משלו — הכול מוקרא בקול" : {
       "localizations" : {
         "ar" : {
@@ -65648,6 +65670,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Улетаете? %@ получит код, которым сама откроет своё устройство на сколько захочет, пока вы не вернётесь. Работает и без интернета. Время сна по-прежнему действует."
+          }
+        }
+      }
+    },
+    "טסים? בחלון הפעולות של הילד יוצרים קוד, והילד פותח איתו את המכשיר לבד, לכמה זמן שירצה, עד שתחזרו. עובד גם בלי אינטרנט, ושעת השינה ממשיכה לעבוד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مسافرون؟ أنشئوا رمزًا في نافذة إجراءات الطفل، وسيفتح به جهازه بنفسه للمدة التي يريدها حتى عودتكم. يعمل حتى دون إنترنت، ووقت النوم يبقى ساريًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flying? Create a code in your child's actions window, and they open their device with it by themselves, for as long as they like, until you're back. Works offline too, and bedtime still applies"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Улетаете? Создайте код в окне действий ребёнка — и он сам откроет им своё устройство на сколько захочет, пока вы не вернётесь. Работает и без интернета, а время сна по-прежнему действует"
           }
         }
       }
@@ -93204,6 +93248,28 @@
         }
       }
     },
+    "מסדרים לפי הסדר תמונות של סיפור מהחיים: בוקר, ארוחה, שתילה, כביסה ועוד. בלי לקרוא, לגן ועד כיתה ב׳" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نرتّب صور قصة من الحياة اليومية: الصباح، وجبة، الزراعة، الغسيل وغيرها. دون قراءة، من الروضة حتى الصف الثاني"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put the pictures of an everyday story in order: morning, a meal, planting, laundry and more. No reading needed, for kindergarten through 2nd grade"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Раскладываем по порядку картинки истории из жизни: утро, обед, посадка цветка, стирка и другие. Читать не нужно — для садика и 1–2 классов"
+          }
+        }
+      }
+    },
     "מסובבים באצבע" : {
       "localizations" : {
         "ar" : {
@@ -93888,6 +93954,28 @@
         }
       }
     },
+    "מצב טיסה, ושאלות שלא חוזרות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وضع السفر، وأسئلة لا تتكرر"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flight mode, and questions that never repeat"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Режим полёта и вопросы без повторов"
+          }
+        }
+      }
+    },
     "מצב ילד" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -94351,6 +94439,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Игра на память с картинками"
+          }
+        }
+      }
+    },
+    "משחק חדש, ״שימו בסל״: גוררים בדיוק כמה שצריך. ועוד: חיסור שרואים בעיניים, תרגיל מול תמונה, ומספר מול קבוצה במשחק הזוגות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لعبة جديدة «ضعوا في السلة»: اسحبوا العدد المطلوب بالضبط. وأيضًا: طرح تراه العين، وتمرين مقابل صورة، ورقم مقابل مجموعة في لعبة الأزواج"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new game, \"Fill the basket\": drag in exactly the right number. Plus subtraction you can see, a sum matched to a picture, and a number matched to a group in the pairs game"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новая игра «В корзинку»: перетащите ровно столько, сколько нужно. А ещё — вычитание, которое видно глазами, пример и картинка, и число и группа в игре «Пары»"
+          }
+        }
+      }
+    },
+    "משחק חדש: מה קודם?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لعبة جديدة: ماذا أولًا؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New game: What comes first?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новая игра: что сначала?"
           }
         }
       }
@@ -123415,6 +123547,28 @@
         }
       }
     },
+    "שאלה לא חוזרת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا تكرار للأسئلة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No repeated questions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вопросы не повторяются"
+          }
+        }
+      }
+    },
     "שאלה רגילה" : {
       "localizations" : {
         "ar" : {
@@ -123433,6 +123587,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Обычный вопрос"
+          }
+        }
+      }
+    },
+    "שאלה שהילד כבר נשאל לא חוזרת, גם באייפד וגם בטלפון. כשנגמרות השאלות של הכיתה שלו בעולם, הוא עובר לשאלות של הכיתה הבאה 🚀" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "السؤال الذي سُئل له الطفل لا يعود، لا على iPad ولا على الهاتف. وعندما تنتهي أسئلة صفّه في عالم ما، ينتقل إلى أسئلة الصف التالي 🚀"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A question your child was already asked doesn't come back, on the iPad or the phone. When a world runs out of questions for their grade, they move on to the next grade's questions 🚀"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вопрос, который ребёнку уже задавали, не повторяется — ни на iPad, ни на телефоне. Когда вопросы его класса в мире заканчиваются, он переходит к вопросам следующего класса 🚀"
           }
         }
       }
