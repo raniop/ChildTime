@@ -751,12 +751,16 @@ private fun daysText(days: List<Int>): String {
     return d.joinToString(", ") { dayLetter(it) }
 }
 
-/** The settings row: "א׳–ו׳ · 08:00–13:30" / "כבוי" / "חופש — מושהה". */
+/** The settings row: "א׳–ו׳ · מ־08:00 עד 13:30" / "כבוי" / "חופש — מושהה". */
 internal fun quietSummary(q: QuietHours?, kind: QuietKind): String {
     val w = if (kind == QuietKind.SCHOOL) q?.school else q?.bedtime
     if (w == null || !w.enabled || w.days.isEmpty()) return tr("כבוי")
     if (kind == QuietKind.SCHOOL && q?.schoolPaused == true) return tr("חופש — מושהה")
-    return "${daysText(w.days)} · ⁦${QuietHours.clock(w.start)}–${QuietHours.clock(w.end)}⁩"
+    // In words, not a dash: "19:30–06:30" read right-to-left by a Hebrew reader
+    // came out "from 06:30" (Sasha, 2026-10-21). Each time stays a left-to-right island.
+    val from = "\u2066${QuietHours.clock(w.start)}\u2069"
+    val to = "\u2066${QuietHours.clock(w.end)}\u2069"
+    return "${daysText(w.days)} · " + tr("מ־%@ עד %@", from, to)
 }
 
 @Composable
@@ -774,14 +778,16 @@ private fun QuietEditor(child: Child, kind: QuietKind, onBack: () -> Unit, write
     val todayKey = QuietHours.dayKey(java.time.LocalDate.now())
     var offToday by remember { mutableStateOf(storedQ?.schoolOffDay == todayKey) }
     var paused by remember { mutableStateOf(storedQ?.schoolPaused == true) }
+    var allowsTofy by remember { mutableStateOf(storedQ?.schoolAllowsTofy == true) }
 
     // Saved when the page closes — one write per edit session (iOS onDisappear).
     val save = {
         val w = QuietWindow(enabled, days.sorted(), start, end, if (school && shortFriday) fridayEnd else null)
         val base = storedQ ?: QuietHours()
-        val q = if (school) base.copy(school = w, schoolOffDay = if (offToday) todayKey else null, schoolPaused = if (paused) true else null)
+        val q = if (school) base.copy(school = w, schoolOffDay = if (offToday) todayKey else null, schoolPaused = if (paused) true else null,
+                    schoolAllowsTofy = allowsTofy)
                 else base.copy(bedtime = w)
-        val untouched = storedQ == null && q.isEmpty && !offToday && !paused
+        val untouched = storedQ == null && q.isEmpty && !offToday && !paused && !allowsTofy
         if (!untouched && q != storedQ) write(mapOf("quietHours" to q.toMap()))
     }
     SideEffect { registerSave(save) }
@@ -816,6 +822,11 @@ private fun QuietEditor(child: Child, kind: QuietKind, onBack: () -> Unit, write
                 }
             }
             if (school) {
+                // 🏫 Tofy itself in school time — closed unless the parent allows it (only chores stay open).
+                SettingsSection(null, if (allowsTofy) tr("בזמן בית ספר אפשר לענות על שאלות ולשחק בטופי, ולצבור דקות לאחר כך. רק לפתוח דקות אי אפשר.")
+                                      else tr("בזמן בית ספר טופי סגור. אפשר רק לסמן מטלות.")) {
+                    ToggleRow("", tr("לאפשר את טופי בזמן בית ספר"), null, allowsTofy) { allowsTofy = it }
+                }
                 SettingsSection(tr("חגים וחופשות"), tr("\"היום אין לימודים\" חל רק על היום. מחר זמן בית הספר חוזר כרגיל.")) {
                     ToggleRow("", tr("היום אין לימודים"), null, offToday) { offToday = it }
                     RowDivider()

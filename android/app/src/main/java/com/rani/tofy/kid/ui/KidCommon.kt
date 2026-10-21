@@ -125,12 +125,13 @@ fun KidCta(
     }
 }
 
-/** WorldMapView.bottomHint — a pill so the CTA spot is never silently blank. */
+/** WorldMapView.bottomHint — a pill so the CTA spot is never silently blank. [onClick]: it explains itself when tapped. */
 @Composable
-fun BottomHint(text: String) {
+fun BottomHint(text: String, onClick: (() -> Unit)? = null) {
     Box(
         Modifier.fillMaxWidth().widthIn(max = 480.dp).clip(RoundedCornerShape(16.dp))
             .background(Ink.deep.copy(alpha = 0.55f)).glassPane(16.dp, 0.16f)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 18.dp, vertical = 12.dp),
         contentAlignment = Alignment.Center,
     ) {

@@ -1,6 +1,7 @@
 package com.rani.tofy.data
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -95,5 +96,26 @@ class QuietHoursTest {
         assertEquals(0, both.secondsUntilQuiet(at(6, 23, 0)))          // already bedtime
         assertEquals(60 * 60, both.secondsUntilQuiet(at(6, 7, 0)))     // school at 08:00
         assertNull(QuietHours().secondsUntilQuiet(at(6, 12, 0)))       // nothing set
+    }
+
+    // ── 🏫 schoolAllowsTofy (2026-10-21) ────────────────────────────────────
+    @Test fun schoolAllowsTofyRoundTrips() {
+        for (v in listOf(true, false)) {
+            val q = both.copy(schoolAllowsTofy = v)
+            val m = q.toMap()
+            assertEquals(v, m["schoolAllowsTofy"])                    // always written, false too
+            assertEquals(v, QuietHours.from(m)?.schoolAllowsTofy)
+        }
+        // Never set → still written, as false (a merge must be able to turn it off).
+        assertEquals(false, both.toMap()["schoolAllowsTofy"])
+        assertNull(QuietHours.from(mapOf("bedtime" to QuietHours.BEDTIME_DEFAULT.toMap()))?.schoolAllowsTofy)
+    }
+
+    @Test fun schoolClosesTofyUnlessAllowed() {
+        assertTrue(both.schoolClosesTofy(at(6, 10, 0)))                                       // nil → closed
+        assertTrue(both.copy(schoolAllowsTofy = false).schoolClosesTofy(at(6, 10, 0)))
+        assertFalse(both.copy(schoolAllowsTofy = true).schoolClosesTofy(at(6, 10, 0)))
+        assertFalse(both.schoolClosesTofy(at(6, 23, 0)))                                      // bedtime never does
+        assertFalse(both.schoolClosesTofy(at(6, 15, 0)))                                      // after school
     }
 }

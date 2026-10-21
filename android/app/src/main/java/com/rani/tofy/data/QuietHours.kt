@@ -19,7 +19,7 @@ import java.util.Locale
  * Firestore shape (children/{id}.quietHours), written by both apps:
  *   { school:  { enabled, days:[1..7 Sun=1], start, end, fridayEnd? },
  *     bedtime: { enabled, days, start, end },
- *     schoolOffDay: "yyyy-MM-dd"?, schoolPaused: true? }
+ *     schoolOffDay: "yyyy-MM-dd"?, schoolPaused: true?, schoolAllowsTofy: Bool? }
  * Minutes after local midnight; end ≤ start = ends the next day.
  */
 data class QuietWindow(
@@ -67,6 +67,12 @@ data class QuietHours(
     val schoolOffDay: String? = null,
     /** Vacation: every school window off until the parent turns it back on. */
     val schoolPaused: Boolean? = null,
+    /**
+     * 🏫 May the child play in Tofy itself during school time? null / false =
+     * no — only chores stay open (Sasha, 2026-10-21: "משחקי הטופי עדיין
+     * פתוחים"). Bedtime is unaffected. Always written (true or false).
+     */
+    val schoolAllowsTofy: Boolean? = null,
 ) {
     val isEmpty: Boolean get() = school?.enabled != true && bedtime?.enabled != true
 
@@ -77,7 +83,15 @@ data class QuietHours(
         // and iOS writes the same values.
         put("schoolOffDay", schoolOffDay ?: "")
         put("schoolPaused", schoolPaused == true)
+        // Never left missing either: a merge must be able to turn it back off.
+        put("schoolAllowsTofy", schoolAllowsTofy == true)
     }
+
+    /** 🏫 School time with Tofy itself closed (the parent's switch, off by default): only chores stay open. */
+    fun schoolClosesTofy(now: ZonedDateTime): Boolean = active(now)?.kind == QuietKind.SCHOOL && schoolAllowsTofy != true
+
+    fun schoolClosesTofyAt(unix: Double, zone: ZoneId = ZoneId.systemDefault()): Boolean =
+        schoolClosesTofy(ZonedDateTime.ofInstant(Instant.ofEpochMilli((unix * 1000).toLong()), zone))
 
     /** Occurrences that START on a day from [fromDay] to [toDay] around [now]'s day, in start order. */
     fun occurrences(now: ZonedDateTime, fromDay: Long = -1, toDay: Long = 8): List<QuietOccurrence> {
@@ -146,6 +160,7 @@ data class QuietHours(
                 bedtime = QuietWindow.from(d.map("bedtime")),
                 schoolOffDay = d.str("schoolOffDay"),
                 schoolPaused = d.bool("schoolPaused"),
+                schoolAllowsTofy = d.bool("schoolAllowsTofy"),
             )
         }
 

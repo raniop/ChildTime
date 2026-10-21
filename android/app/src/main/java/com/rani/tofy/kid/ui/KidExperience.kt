@@ -282,6 +282,22 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
         buddyJob = scope.launch { delay(3800); buddy = null }
     }
 
+    /** 🏫🌙 Why it's closed, on EVERY tap (Sasha, 2026-10-21: "אחרי זה ההסבר מפסיק להופיע") — and read aloud to a גן child. */
+    fun explainQuiet(line: String) {
+        say(line)
+        if ((childNow?.effectiveGrade ?: 1) < 1) {
+            com.rani.tofy.kid.ui.play.KidSpeech.init(ctx)
+            com.rani.tofy.kid.ui.play.KidSpeech.speak(line, lang)
+        }
+    }
+
+    /** 🏫 School time with Tofy closed: worlds, Tofy Time and games wait, chores don't. True (and explained) = don't open. */
+    fun schoolBlocksPlay(): Boolean {
+        val o = KidSession.schoolClosingTofy() ?: return false
+        explainQuiet(schoolClosedLine(o))
+        return true
+    }
+
     // ── lifecycle: foreground/background reports + the content preload ─────
     val owner = LocalLifecycleOwner.current
     DisposableEffect(owner) {
@@ -304,6 +320,14 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
         onDispose { owner.lifecycle.removeObserver(obs) }
     }
     LaunchedEffect(lang) { runCatching { QuestionSource.preload(lang) } }
+
+    // 🏫 School time (Tofy closed) began while playing: back to the home (chores stay open).
+    val schoolClosed = nowMs > 0 && KidSession.schoolClosingTofy() != null
+    LaunchedEffect(schoolClosed) {
+        if (!schoolClosed) return@LaunchedEffect
+        playing = null; entry = null
+        if (screen == KidScreen.Games) screen = null
+    }
 
     // Profile.playableTopics for the grid — off the main thread (it reads the banks).
     val snapDoc = state?.snapshot
@@ -475,7 +499,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     fun handle(r: OpenResult, gift: Boolean) {
         when (r) {
             is OpenResult.Opened, OpenResult.AlreadyOpen, OpenResult.Busy -> Unit
-            is OpenResult.Quiet -> say(quietLine(r.occurrence, isGirl))
+            is OpenResult.Quiet -> explainQuiet(quietLine(r.occurrence, isGirl))
             is OpenResult.HeldElsewhere -> say((if (isGirl) tr("הַזְּמַן שֶׁלָּךְ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮") else tr("הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮")))
             OpenResult.Insufficient -> say((if (isGirl) tr("עוֹד קְצָת דַּקּוֹת וְנִפְתַּח לָךְ! 💪") else tr("עוֹד קְצָת דַּקּוֹת וְנִפְתַּח לְךָ! 💪")))
             is OpenResult.Failed -> say(when {
@@ -491,7 +515,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     fun requestUnlock(action: suspend () -> Unit) {
         if (opening != null) return
         // 🏫🌙 Before the code sheet — asking for the code only to say "not now" would be unkind.
-        KidSession.quietNow()?.let { say(quietLine(it, isGirl)); return }
+        KidSession.quietNow()?.let { explainQuiet(quietLine(it, isGirl)); return }
         if (child?.hasPlayPIN == true) { pendingOpen = action; cover = Cover.PlayPin }
         else scope.launch { action() }
     }
@@ -532,7 +556,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 cover = null
                 scope.launch {
                     when (val r = KidSession.openWithFlightCode(minutes)) {
-                        is OpenResult.Quiet -> say(quietLine(r.occurrence, isGirl))
+                        is OpenResult.Quiet -> explainQuiet(quietLine(r.occurrence, isGirl))
                         is OpenResult.HeldElsewhere -> say((if (isGirl) tr("הַזְּמַן שֶׁלָּךְ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮") else tr("הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮")))
                         else -> Unit
                     }
@@ -610,7 +634,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 onSettings = { if (!com.rani.tofy.kid.core.FirstRun.openLanguages()) cover = Cover.Settings },   // 🎬 first run: the language
                 onKidExit = { cover = Cover.KidExit },
                 onTile = { t ->
-                    when (t) {
+                    if (!schoolBlocksPlay()) when (t) {
                         HomeTile.TofyTime -> playing = ContentMode.SmartFeed
                         is HomeTile.WorldTile -> when {
                             !t.open -> cover = Cover.Ask(t.world)   // the kid screen never sells — ask a parent
@@ -632,10 +656,12 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 onOpenGift = {
                     if (!com.rani.tofy.kid.core.FirstRun.explain(com.rani.tofy.kid.core.FirstRun.Key.GIFT)) requestUnlock { handle(KidSession.openGift(), true) }
                 },
+                // 🏫🌙 The quiet line where the minutes key was: a tap explains it, every time.
+                onQuietTap = { KidSession.quietNow()?.let { explainQuiet(quietLine(it, isGirl)) } },
                 onOpenFlight = {
                     // 🏫🌙 Not in school time or bedtime — say so before asking for the code.
                     val q = KidSession.quietNow()
-                    if (q != null) say(quietLine(q, isGirl)) else if (opening == null) cover = Cover.Flight
+                    if (q != null) explainQuiet(quietLine(q, isGirl)) else if (opening == null) cover = Cover.Flight
                 },
                 onTransfer = {
                     if (!transferring) scope.launch {
@@ -658,7 +684,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 // Everything on the home but טופי טיים, the shop and friends is Tofy+ (requirePremium → ask a parent).
                 onChores = { if (!com.rani.tofy.kid.core.FirstRun.refuse()) { if (premium) screen = KidScreen.Chores else cover = Cover.Ask(null) } },
                 onGames = {
-                    when {
+                    if (!schoolBlocksPlay()) when {
                         !premium -> cover = Cover.Ask(null)
                         st.snapshot.correctToday >= gamesTarget -> screen = KidScreen.Games
                         else -> say(tr("עוֹד %lld תְּשׁוּבוֹת נְכוֹנוֹת וְהַמִּשְׂחָקִים נִפְתָּחִים! 🎮", gamesTarget - st.snapshot.correctToday))
@@ -746,7 +772,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                             val grant = KidSession.edit { it.claimDailyChallenge() }
                             val total = (grant?.addedToday ?: 0) + (grant?.bankedForTomorrow ?: 0)
                             say(tr("🎉 כָּל הַכָּבוֹד! +%lld 💎", prize) + if (total > 0) tr(" וְ-%lld דַּקּוֹת", total) else "")
-                        } else playing = ContentMode.SmartFeed
+                        } else if (!schoolBlocksPlay()) playing = ContentMode.SmartFeed
                     }, onClose = { cover = null })
                 }
                 Cover.Level -> {
@@ -770,6 +796,10 @@ private fun ParentGateThen(pinHash: String?, householdLoaded: Boolean, onClose: 
     if (authorized) content()
     else ParentGate(pinHash, householdLoaded, onAuthorized = { authorized = true }, onClose = onClose)
 }
+
+/** 🏫 iOS QuietHoursManager.schoolClosedMessage — Tofy closed in school time; chores stay open. */
+internal fun schoolClosedLine(o: com.rani.tofy.data.QuietOccurrence): String =
+    tr("🏫 עַכְשָׁיו זְמַן בֵּית סֵפֶר — נְשַׂחֵק בְּ-%@. מְטָלוֹת אֶפְשָׁר לְסַמֵּן גַּם עַכְשָׁיו 🧹", com.rani.tofy.data.QuietHours.clock(o.end))
 
 /** 🏫🌙 iOS QuietHoursManager.blockedMessage — the minutes are safe, and the line says when they come back. */
 internal fun quietLine(o: com.rani.tofy.data.QuietOccurrence, isGirl: Boolean): String {

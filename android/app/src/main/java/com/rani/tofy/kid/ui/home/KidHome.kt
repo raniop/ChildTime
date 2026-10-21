@@ -153,6 +153,7 @@ internal fun KidHome(
     onOpenGift: () -> Unit,
     onTransfer: () -> Unit,
     onOpenFlight: () -> Unit = {},
+    onQuietTap: () -> Unit = {},
     extras: HomeExtras = HomeExtras(),
     onShop: () -> Unit = {},
     onFriends: () -> Unit = {},
@@ -309,7 +310,7 @@ internal fun KidHome(
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 BuddyBubble(buddyLine, Modifier.fillMaxWidth())
-                BottomCtas(cta, onOpenEarned, onOpenGift, onTransfer, onOpenFlight)
+                BottomCtas(cta, onOpenEarned, onOpenGift, onTransfer, onOpenFlight, onQuietTap)
                 if (cta.showPlayPin) PlayPinChip(cta.hasPlayPin, onPlayPin)
             }
 
@@ -659,7 +660,7 @@ private fun FeatureTile(
 // ── the bottom CTAs ─────────────────────────────────────────────────────────
 
 @Composable
-private fun ColumnScope.BottomCtas(c: HomeCtaModel, onOpenEarned: () -> Unit, onOpenGift: () -> Unit, onTransfer: () -> Unit, onOpenFlight: () -> Unit) {
+private fun ColumnScope.BottomCtas(c: HomeCtaModel, onOpenEarned: () -> Unit, onOpenGift: () -> Unit, onTransfer: () -> Unit, onOpenFlight: () -> Unit, onQuietTap: () -> Unit) {
     // 💝 ONE button for everything the PARENTS gave — never blurred with earned minutes.
     if (c.giftSeconds > 0 && c.peer == null) {
         if (c.opening && c.openingGift) KidCta(SocialMe.g(tr("פּוֹתְחִים לְךָ… ✨"), tr("פּוֹתְחִים לָךְ… ✨")), Color(0xFFFF5FA8), Color(0xFFFFA53A), busy = true) {}
@@ -681,7 +682,7 @@ private fun ColumnScope.BottomCtas(c: HomeCtaModel, onOpenEarned: () -> Unit, on
             if (c.transferring) KidCta(tr("מַעֲבִירִים לְכָאן… ✨"), Color(0xFF5B6CFF), Color(0xFF9B5DE5), busy = true, size = 19) {}
             else KidCta(tr("נַעֲלוּ %@ וּפִתְחוּ כָּאן", where), Color(0xFF5B6CFF), Color(0xFF9B5DE5), emoji = "🔁", size = 19, onClick = onTransfer)
         }
-        c.quietLine != null -> BottomHint(c.quietLine)
+        c.quietLine != null -> BottomHint(c.quietLine, onClick = onQuietTap)   // a tap says why, every time
         c.canRedeem -> {
             if (c.opening && !c.openingGift) KidCta(SocialMe.g(tr("פּוֹתְחִים לְךָ… ✨"), tr("פּוֹתְחִים לָךְ… ✨")), Color(0xFF5E60CE), Color(0xFF3E8BF0), busy = true) {}
             else KidCta(

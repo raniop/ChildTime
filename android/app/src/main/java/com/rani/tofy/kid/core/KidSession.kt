@@ -530,6 +530,12 @@ object KidSession : LeaseHost {
 
     fun quietNow(): QuietOccurrence? = quietHours.activeAt(AndroidKidClock.nowUnix())
 
+    /** 🏫 The school time that closes Tofy itself right now (the parent didn't allow it), or null — bedtime never does. */
+    fun schoolClosingTofy(): QuietOccurrence? {
+        val q = quietHours
+        return quietNow()?.takeIf { q.schoolClosesTofyAt(AndroidKidClock.nowUnix()) }
+    }
+
     // ── ✈️ flight mode ──────────────────────────────────────────────────────
     /** The code the parents left before flying (children/{id}.flightMode), while it still works. */
     val flightMode: FlightMode?
