@@ -33021,6 +33021,28 @@
         }
       }
     },
+    "בשעת שינה ובזמן בית ספר, מסך הנעילה אומר לילד מתי הדקות שלו חוזרות, במקום להציע לפתוח אותן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في وقت النوم ووقت المدرسة، تخبر شاشة القفل الطفل متى تعود دقائقه بدلًا من أن تعرض فتحها"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At bedtime and school time, the lock screen tells your child when their minutes come back, instead of offering to open them"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Во время сна и школы экран блокировки говорит ребёнку, когда вернутся его минуты, а не предлагает их открыть"
+          }
+        }
+      }
+    },
     "בתום הניסיון: %@ / שנה · מתחדש אוטומטית — ניתן לבטל בכל עת ב-Google Play" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -52371,6 +52393,28 @@
         }
       }
     },
+    "המסך הזה מופיע עכשיו במלואו גם באנגלית, ברוסית ובערבית" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذه الشاشة تظهر الآن كاملة بالإنجليزية والروسية والعربية أيضًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This screen now appears in full in English, Russian and Arabic too"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этот экран теперь полностью на английском, русском и арабском"
+          }
+        }
+      }
+    },
     "המסלולים לא נטענו" : {
       "localizations" : {
         "ar" : {
@@ -59784,6 +59828,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "время, которое она заработала"
+          }
+        }
+      }
+    },
+    "זמן שנפתח לפני שעת השינה נפתח רק עד אליה, והשאר נשאר בארנק. אפשר לפתוח עד הדקה האחרונה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوقت الذي يُفتح قبل وقت النوم يستمر حتى وقت النوم فقط، والباقي يبقى في المحفظة. يمكن الفتح حتى آخر دقيقة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time opened before bedtime only runs until bedtime, and the rest stays in the wallet. It can be opened right up to the last minute"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Время, открытое перед сном, длится только до времени сна, а остаток остаётся в кошельке. Открыть можно до последней минуты"
           }
         }
       }
@@ -93600,6 +93666,28 @@
         }
       }
     },
+    "מסך לילה טוב" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شاشة «تصبح على خير»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A good-night screen"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экран «Спокойной ночи»"
+          }
+        }
+      }
+    },
     "מסך מטלות חדש וצבעוני" : {
       "localizations" : {
         "ar" : {
@@ -126252,6 +126340,28 @@
         }
       }
     },
+    "שעת השינה נועלת בזמן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت النوم يُقفل في موعده"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedtime locks on time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Время сна закрывает вовремя"
+          }
+        }
+      }
+    },
     "שעת השינה נמשכת עד הבוקר שאחרי." : {
       "localizations" : {
         "ar" : {
@@ -126380,6 +126490,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Время сна включено"
+          }
+        }
+      }
+    },
+    "שעת שינה שנועלת בזמן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وقت نوم يُقفل في موعده"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedtime that locks on time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Время сна, которое закрывает вовремя"
           }
         }
       }
@@ -128805,6 +128937,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Более точное «с»"
+          }
+        }
+      }
+    },
+    "״מה חדש״ בכל השפות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«ما الجديد» بكل اللغات"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\"What's new\" in every language"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Что нового» на всех языках"
           }
         }
       }
