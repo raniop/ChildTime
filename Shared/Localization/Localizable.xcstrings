@@ -30531,6 +30531,50 @@
         }
       }
     },
+    "בזמן בית ספר אפשר לענות על שאלות ולשחק בטופי, ולצבור דקות לאחר כך. רק לפתוח דקות אי אפשר." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في وقت المدرسة يمكن الإجابة عن الأسئلة واللعب في توفي وجمع الدقائق لوقت لاحق. فقط فتح الدقائق غير ممكن."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "During school time your child can answer questions and play in Tofy, saving minutes for later. Only opening minutes is blocked."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Во время школы можно отвечать на вопросы и играть в Тофи, копя минуты на потом. Нельзя только открывать минуты."
+          }
+        }
+      }
+    },
+    "בזמן בית ספר טופי סגור. אפשר רק לסמן מטלות." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في وقت المدرسة يكون توفي مغلقًا. يمكن فقط تحديد المهام."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "During school time Tofy is closed. Only chores can be ticked."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Во время школы Тофи закрыт. Можно только отмечать задания по дому."
+          }
+        }
+      }
+    },
     "בחוף או באקווריום, בקשו מ%@ להסביר איך דג נושם מתחת למים." : {
       "localizations" : {
         "ar" : {
@@ -81086,6 +81130,28 @@
         }
       }
     },
+    "לאפשר את טופי בזמן בית ספר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "السماح بتوفي في وقت المدرسة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow Tofy during school time"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешить Тофи во время школы"
+          }
+        }
+      }
+    },
     "לאפשר מחיקת אפליקציות (5 דק')" : {
       "localizations" : {
         "ar" : {
@@ -90041,6 +90107,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "У вас установлена: %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "מ־%@ עד %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "من %@ إلى %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ to %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "с %@ до %@"
           }
         }
       }
@@ -134089,6 +134177,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🏫 Сейчас школьное время — твои минуты ждут тебя в %@"
+          }
+        }
+      }
+    },
+    "🏫 עַכְשָׁיו זְמַן בֵּית סֵפֶר — נְשַׂחֵק בְּ-%@. מְטָלוֹת אֶפְשָׁר לְסַמֵּן גַּם עַכְשָׁיו 🧹" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 الآن وقت المدرسة — سنلعب عند %@. يمكن تحديد المهام حتى الآن 🧹"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 It's school time now — we'll play at %@. Chores can be ticked even now 🧹"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 Сейчас время школы — поиграем в %@. Задания по дому можно отмечать и сейчас 🧹"
           }
         }
       }
