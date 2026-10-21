@@ -396,7 +396,8 @@ object KidSession : LeaseHost {
         val e = engine ?: return OpenResult.NothingToOpen
         val cid = childID ?: return OpenResult.NothingToOpen
         if (e.isUnlocked) return OpenResult.AlreadyOpen
-        val want = e.openableSeconds(true)
+        // 🌙 Never past bedtime / school time: the rest of the gift stays in the 💝 pocket.
+        val want = minOf(e.openableSeconds(true), e.secondsUntilQuietNow ?: Int.MAX_VALUE)
         if (!e.settings.leaseEnabled || want <= 0) return legacyOpenGift()
         if (_opening.value != null) return OpenResult.Busy
         beginOpening(true)
@@ -425,7 +426,7 @@ object KidSession : LeaseHost {
         quietNow()?.let { return OpenResult.Quiet(it) }
         val e = engine ?: return OpenResult.NothingToOpen
         if (e.isUnlocked) return OpenResult.AlreadyOpen
-        val gift = edit { it.consumeParentGiftForUnlock() } ?: 0
+        val gift = edit { it.consumeParentGiftForUnlock(it.secondsUntilQuietNow ?: Int.MAX_VALUE) } ?: 0
         if (gift <= 0) return giftOpenFailed("walletDisagreement")
         edit { it.startUnlock(gift, manual = true, leaseKind = "gift") }
         giftOpenFailureStreak = 0
@@ -541,12 +542,14 @@ object KidSession : LeaseHost {
      * school time and bedtime still close it. Another device playing → the
      * usual "open elsewhere"; offline → it opens here and is adopted later.
      */
-    suspend fun openWithFlightCode(minutes: Int): OpenResult {
+    suspend fun openWithFlightCode(chosen: Int): OpenResult {
         quietNow()?.let { return OpenResult.Quiet(it) }
         val e = engine ?: return OpenResult.NothingToOpen
+        // 🌙 Never past bedtime / school time, whatever was picked.
+        val minutes = maxOf(1, minOf(chosen, (e.secondsUntilQuietNow ?: Int.MAX_VALUE) / 60))
         val cid = childID ?: return OpenResult.NothingToOpen
         if (e.isUnlocked) return OpenResult.AlreadyOpen
-        if (flightMode == null || minutes <= 0) return OpenResult.NothingToOpen
+        if (flightMode == null || chosen <= 0) return OpenResult.NothingToOpen
         if (_opening.value != null) return OpenResult.Busy
         var leaseID: String? = null
         var wallet: ClaimedWallet? = null
@@ -602,6 +605,7 @@ object KidSession : LeaseHost {
         if (!kidMode) com.rani.tofy.kid.location.KidLocation.bind(childID, d["householdID"] as? String)
         lastChildDoc = d
         engine?.settings = KidSettings.fromChildDoc(d, baseSettings)
+        engine?.quietHours = quietHours   // 🌙 a window never opens past the next quiet time
         publish()
     }
 

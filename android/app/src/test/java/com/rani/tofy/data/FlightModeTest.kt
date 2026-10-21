@@ -87,6 +87,17 @@ class FlightModeTest {
         assertNull(FlightMode.minutesUntilBedtime(at(17, 0), weekendsOff))
     }
 
+    @Test fun noChoiceRunsPastBedtimeOrSchool() {
+        // 20:00, bedtime at 20:30: half an hour at most, "until bedtime" included.
+        val evening = FlightMode.choices(until(at(20, 0), 5 * 24 * 60), at(20, 0), bedtime)
+        assertTrue(evening.all { it.minutes <= 30 })
+        assertEquals(listOf(15, 30, 30), evening.map { it.minutes }); assertTrue(evening.last().bedtime)
+        // 07:20, school at 08:00: never past 40 minutes, and no "until bedtime".
+        val both = QuietHours(school = QuietHours.SCHOOL_DEFAULT, bedtime = QuietHours.BEDTIME_DEFAULT)
+        val morning = FlightMode.choices(until(at(7, 20), 5 * 24 * 60), at(7, 20), both)
+        assertEquals(listOf(15, 30), morning.map { it.minutes })
+    }
+
     @Test fun anOfflineFlightWindowIsAdoptedAsAGrant() {
         assertEquals(PlayWindowLease.Kind.GRANT, PlayWindowLease.Kind.ofLocal("flight"))
         assertEquals(PlayWindowLease.Kind.GIFT, PlayWindowLease.Kind.ofLocal("gift"))

@@ -1062,10 +1062,23 @@ class ProgressEngine(
         return settled + if (ss.inFlightRefundIsGift == gift) ss.inFlightRefundSeconds else 0
     }
 
-    /** The earned pocket the button may open RIGHT NOW, to the second (wallet ∧ today's room). */
+    /** 🌙 This child's school time / bedtime — KidSession keeps it current (empty = none, e.g. the first run). */
+    var quietHours: com.rani.tofy.data.QuietHours = com.rani.tofy.data.QuietHours()
+
+    /**
+     * 🌙 Seconds until the next school time / bedtime, or null when none is set.
+     * A window never runs into it: opened at 19:20 with bedtime at 19:30, it
+     * opens for 10 minutes and the rest stays in the wallet — so the window's own
+     * end locks at 19:30, not only the quiet-time check (Sasha, 2026-10-21:
+     * "השעה 19:35, אמילי הייתה אמורה להיחסם והיא לא"; iOS ProgressStore.secondsUntilQuietNow).
+     */
+    val secondsUntilQuietNow: Int? get() = quietHours.secondsUntilQuiet(clock.nowUnix(), clock.zone)
+
+    /** The earned pocket the button may open RIGHT NOW, to the second (wallet ∧ today's room ∧ until bedtime). */
     val redeemableSecondsNow: Int
         get() {
-            val wallet = openableSeconds(false)
+            var wallet = openableSeconds(false)
+            secondsUntilQuietNow?.let { wallet = minOf(wallet, it) }
             val cap = settings.dailyCap
             if (!cap.enabled) return wallet
             return minOf(wallet, maxOf(0, cap.max - minutesUnlockedTodayResolved) * 60)
@@ -1073,7 +1086,8 @@ class ProgressEngine(
 
     val redeemableMinutesNow: Int
         get() {
-            val wallet = earnedSecondsAvailable / 60
+            var wallet = earnedSecondsAvailable / 60
+            secondsUntilQuietNow?.let { wallet = minOf(wallet, it / 60) }   // 🌙 never past bedtime
             val cap = settings.dailyCap
             if (!cap.enabled) return wallet
             return minOf(wallet, maxOf(0, cap.max - minutesUnlockedTodayResolved))
@@ -1088,12 +1102,17 @@ class ProgressEngine(
      */
     val minimumOpenSecondsNow: Int
         get() {
+            var smallest = MINIMUM_UNLOCK_MINUTES * 60
             val cap = settings.dailyCap
             if (cap.enabled) {
                 val room = maxOf(0, cap.max - minutesUnlockedTodayResolved)
-                if (room >= MINIMUM_CAP_TAIL_MINUTES && room < MINIMUM_UNLOCK_MINUTES) return room * 60
+                if (room >= MINIMUM_CAP_TAIL_MINUTES && room < MINIMUM_UNLOCK_MINUTES) smallest = minOf(smallest, room * 60)
             }
-            return MINIMUM_UNLOCK_MINUTES * 60
+            // 🌙 …and the minutes left before bedtime / school time (from 5), the same way.
+            secondsUntilQuietNow?.let { q ->
+                if (q >= MINIMUM_CAP_TAIL_MINUTES * 60 && q < MINIMUM_UNLOCK_MINUTES * 60) smallest = minOf(smallest, (q / 60) * 60)
+            }
+            return smallest
         }
 
     val canRedeemNow: Boolean get() = redeemableMinutesNow * 60 >= minimumOpenSecondsNow
@@ -1118,9 +1137,12 @@ class ProgressEngine(
         amount
     }
 
-    /** 💝 Open the whole gift pocket — counters decide, a sub-minute pocket still opens (≥1). */
-    fun consumeParentGiftForUnlock(): Int = op {
-        val seconds = giftSecondsAvailable
+    /**
+     * 💝 Open the whole gift pocket — counters decide, a sub-minute pocket still
+     * opens (≥1). [maxSeconds]: never past bedtime; the rest stays in the pocket.
+     */
+    fun consumeParentGiftForUnlock(maxSeconds: Int = Int.MAX_VALUE): Int = op {
+        val seconds = minOf(giftSecondsAvailable, maxSeconds)
         if (seconds <= 0) return@op 0
         debitGiftRaw(seconds)
         maxOf(1, seconds / 60)
@@ -1466,7 +1488,7 @@ class ProgressEngine(
         const val DAILY_CHALLENGE_TARGET = 10
         /** Smallest earned window — always 15 (iOS can't re-lock shorter reliably; kept for parity). */
         const val MINIMUM_UNLOCK_MINUTES = 15
-        /** The cap's last minutes open from this much up (see minimumOpenSecondsNow). */
+        /** The cap's last minutes — and the last before bedtime — open from this much up (see minimumOpenSecondsNow). */
         const val MINIMUM_CAP_TAIL_MINUTES = 5
 
         /** Same day → unchanged; next day → +1; a gap (or first play) → 1. */

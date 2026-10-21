@@ -120,6 +120,19 @@ data class QuietHours(
     fun nextStart(now: ZonedDateTime): ZonedDateTime? =
         occurrences(now, 0, 8).firstOrNull { it.start.isAfter(now) }?.start
 
+    /**
+     * The most seconds a play window opened at [now] may last: until the next
+     * quiet time starts (iOS QuietHours.secondsUntilQuiet). 0 while quiet; null
+     * when nothing is coming.
+     */
+    fun secondsUntilQuiet(now: ZonedDateTime): Int? {
+        if (active(now) != null) return 0
+        return nextStart(now)?.let { maxOf(0, (it.toEpochSecond() - now.toEpochSecond()).toInt()) }
+    }
+
+    fun secondsUntilQuiet(unix: Double, zone: ZoneId = ZoneId.systemDefault()): Int? =
+        secondsUntilQuiet(ZonedDateTime.ofInstant(Instant.ofEpochMilli((unix * 1000).toLong()), zone))
+
     companion object {
         /** Sunday–Friday 08:00–13:30, Friday until 12:00. */
         val SCHOOL_DEFAULT = QuietWindow(true, listOf(1, 2, 3, 4, 5, 6), 8 * 60, 13 * 60 + 30, 12 * 60)

@@ -364,6 +364,48 @@ class ProgressEngineTest {
         assertTrue(p.canRedeemNow)
     }
 
+    // ── 🌙 never past bedtime (secondsUntilQuietNow, 2026-10-21) ──────────
+    /** No cap, 40 minutes earned, and bedtime [inMinutes] from the clock's 10:00. */
+    private fun bedtimeIn(inMinutes: Int?): ProgressEngine {
+        val p = engine(noCap)
+        p.creditEarned(40 * 60)
+        if (inMinutes != null) p.quietHours = com.rani.tofy.data.QuietHours(
+            bedtime = com.rani.tofy.data.QuietWindow(true, (1..7).toList(), 10 * 60 + inMinutes, 11 * 60))
+        return p
+    }
+
+    @Test fun tenMinutesBeforeBedtimeOpenTen() {
+        val p = bedtimeIn(10)
+        assertEquals(600, p.secondsUntilQuietNow)
+        assertEquals(600, p.redeemableSecondsNow)
+        assertEquals(10, p.redeemableMinutesNow)
+        assertEquals(600, p.minimumOpenSecondsNow)
+        assertTrue(p.canRedeemNow)
+        assertEquals(40 * 60, p.earnedSecondsAvailable)          // the rest stays in the wallet
+    }
+
+    @Test fun threeMinutesBeforeBedtimeNothingOpens() {
+        val p = bedtimeIn(3)
+        assertEquals(3, p.redeemableMinutesNow)
+        assertEquals(15 * 60, p.minimumOpenSecondsNow)
+        assertFalse(p.canRedeemNow)
+    }
+
+    @Test fun withoutQuietHoursNothingChanges() {
+        val p = bedtimeIn(null)
+        assertNull(p.secondsUntilQuietNow)
+        assertEquals(40 * 60, p.redeemableSecondsNow)
+        assertEquals(15 * 60, p.minimumOpenSecondsNow)
+        assertTrue(p.canRedeemNow)
+    }
+
+    @Test fun anOfflineGiftStopsAtBedtimeToo() {
+        val p = bedtimeIn(10)
+        p.creditGift(30 * 60)
+        assertEquals(10, p.consumeParentGiftForUnlock(p.secondsUntilQuietNow ?: Int.MAX_VALUE))
+        assertEquals(20 * 60, p.giftSecondsAvailable)            // the rest stays in the 💝 pocket
+    }
+
     // ── ⏱ windows ──────────────────────────────────────────────────────────
     @Test fun offlineOpenIsBoundedAndStopBanksTheExactLeftover() {
         val p = engine(KidSettings(leaseEnabled = false, childDailyCapMinutes = 90))

@@ -56,11 +56,14 @@ data class FlightMode(
         /**
          * The child's choices (FlightCodeSheet.choices): 15 · 30 · an hour · two
          * hours · three hours, plus "until bedtime" when one is set for tonight.
-         * Never past the moment the parents are back.
+         * Never past the moment the parents are back, nor past the next school
+         * time / bedtime.
          */
         fun choices(mode: FlightMode, now: ZonedDateTime, quiet: QuietHours?): List<FlightChoice> {
             val nowUnix = now.toEpochSecond().toDouble()
-            val left = maxOf(1, ((mode.until - nowUnix) / 60).toInt())
+            // Never past the parents' return, nor past bedtime / school time.
+            var left = maxOf(1, ((mode.until - nowUnix) / 60).toInt())
+            quiet?.secondsUntilQuiet(now)?.let { left = maxOf(1, minOf(left, it / 60)) }
             val list = listOf(15, 30, 60, 120, 180).filter { it <= left }.map { FlightChoice(it) }.toMutableList()
             minutesUntilBedtime(now, quiet)?.let { m -> if (m >= 20 && m <= left) list += FlightChoice(m, bedtime = true) }
             if (list.isEmpty()) list += FlightChoice(left, leftOnly = true)

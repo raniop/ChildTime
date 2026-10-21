@@ -89,4 +89,11 @@ class QuietHoursTest {
         assertEquals(3, QuietHours.appleWeekday(LocalDate.of(2026, 10, 6)))   // Tuesday
         assertEquals(7, QuietHours.appleWeekday(LocalDate.of(2026, 10, 10)))  // Saturday
     }
+
+    @Test fun secondsUntilTheNextQuietTime() {
+        assertEquals(10 * 60, both.secondsUntilQuiet(at(6, 20, 20)))   // bedtime at 20:30
+        assertEquals(0, both.secondsUntilQuiet(at(6, 23, 0)))          // already bedtime
+        assertEquals(60 * 60, both.secondsUntilQuiet(at(6, 7, 0)))     // school at 08:00
+        assertNull(QuietHours().secondsUntilQuiet(at(6, 12, 0)))       // nothing set
+    }
 }

@@ -2332,8 +2332,10 @@ struct WorldMapView: View {
     /// ✈️ Open for the minutes the child chose with the flight code. Minted like
     /// a parent's own open (`.grant` lease — never taken from the child's
     /// minutes), but as kind "flight" so 🌙 bedtime still closes it.
-    private func openWithFlightCode(minutes: Int) {
+    private func openWithFlightCode(minutes chosen: Int) {
         guard !progress.isUnlocked, !quietBlocksOpening(), let cid = profiles.activeID else { return }
+        // 🌙 Never past bedtime / school time, whatever was picked.
+        let minutes = max(1, min(chosen, (progress.secondsUntilQuietNow ?? .max) / 60))
         guard !isOpening else { return }
         progress.beginOpeningWindow(gift: false)
         Task { @MainActor in
@@ -3137,7 +3139,8 @@ struct WorldMapView: View {
         // Seconds included. Asking for `minutes * 60` stranded the carry: a window
         // locked at 29:40 re-opened at 29:00 and those 40 seconds could never be
         // spent — they just accumulated out of reach.
-        let want = progress.openableSeconds(gift: true)
+        // 🌙 Never past bedtime: the rest of the gift stays in the 💝 pocket.
+        let want = min(progress.openableSeconds(gift: true), progress.secondsUntilQuietNow ?? .max)
         guard !isOpening else { return }
         progress.beginOpeningWindow(gift: true)
         Task { @MainActor in

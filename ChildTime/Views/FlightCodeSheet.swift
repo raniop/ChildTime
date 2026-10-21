@@ -150,7 +150,9 @@ struct FlightCodeSheet: View {
     /// 15 · 30 · an hour · two hours · three hours, plus "until bedtime" when
     /// one is set for tonight. Never past the day the parents are back.
     private var choices: [Choice] {
-        let left = max(1, Int((mode.until - Date().timeIntervalSince1970) / 60))
+        // Never past the parents' return, nor past bedtime / school time.
+        var left = max(1, Int((mode.until - Date().timeIntervalSince1970) / 60))
+        if let quiet = quietHours?.secondsUntilQuiet(from: Date()) { left = max(1, min(left, quiet / 60)) }
         var list: [Choice] = [
             Choice(minutes: 15, label: tr("15 דַּקּוֹת")),
             Choice(minutes: 30, label: tr("חֲצִי שָׁעָה")),

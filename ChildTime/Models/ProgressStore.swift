@@ -1977,11 +1977,22 @@ final class ProgressStore: ObservableObject {
     /// rounded "16 דקות" — two pockets, two truths, and the leftover seconds were
     /// never openable at all. Both now read from here and spend every second.
     var redeemableSecondsNow: Int {
-        let wallet = openableSeconds(gift: false)
+        var wallet = openableSeconds(gift: false)
+        if let quiet = secondsUntilQuietNow { wallet = min(wallet, quiet) }
         let cap = dailyCap
         guard cap.enabled else { return wallet }
         let roomToday = max(0, cap.max - minutesUnlockedTodayResolved)
         return min(wallet, roomToday * 60)
+    }
+
+    /// 🌙 Seconds until the next school time / bedtime on this device, or nil
+    /// when none is set. A window never runs into it: opened at 19:20 with
+    /// bedtime at 19:30, it opens for 10 minutes and the rest stays in the
+    /// wallet — so the window's own end locks at 19:30 too, not only the
+    /// bedtime wake-up iOS may deliver late (Sasha, 2026-10-21: "השעה 19:35,
+    /// אמילי הייתה אמורה להיחסם והיא לא").
+    var secondsUntilQuietNow: Int? {
+        QuietHoursManager.shared.hours.secondsUntilQuiet(from: Date())
     }
 
     var redeemableMinutesNow: Int {
@@ -1992,7 +2003,8 @@ final class ProgressStore: ObservableObject {
         // לשחק" the key read "0 דק'" for a few seconds until it landed (Rani).
         // The gift key already counted it; now both do. (The lease claim that
         // opens the window is checked on the server, so nothing is overspent.)
-        let wallet = openableSeconds(gift: false) / 60
+        var wallet = openableSeconds(gift: false) / 60
+        if let quiet = secondsUntilQuietNow { wallet = min(wallet, quiet / 60) }   // 🌙 never past bedtime
         let cap = dailyCap
         guard cap.enabled else { return wallet }
         let roomToday = max(0, cap.max - minutesUnlockedTodayResolved)
@@ -2023,12 +2035,17 @@ final class ProgressStore: ObservableObject {
     /// In the background iOS may re-lock such a window up to 15 minutes after it
     /// opened (its schedule minimum); in Tofy the timer closes it on time.
     var minimumOpenSecondsNow: Int {
+        var smallest = minimumUnlockMinutes * 60
         let cap = dailyCap
         if cap.enabled {
             let room = max(0, cap.max - minutesUnlockedTodayResolved)
-            if room >= 5, room < minimumUnlockMinutes { return room * 60 }
+            if room >= 5, room < minimumUnlockMinutes { smallest = min(smallest, room * 60) }
         }
-        return minimumUnlockMinutes * 60
+        // 🌙 …and the minutes left before bedtime (from 5), the same way.
+        if let quiet = secondsUntilQuietNow, quiet >= 5 * 60, quiet < minimumUnlockMinutes * 60 {
+            smallest = min(smallest, (quiet / 60) * 60)
+        }
+        return smallest
     }
 
     /// True when there are enough redeemable minutes to open a window we can enforce.
