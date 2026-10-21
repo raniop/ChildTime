@@ -39691,6 +39691,28 @@
         }
       }
     },
+    "הַדַּקּוֹת שְׁמוּרוֹת" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدقائق محفوظة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your minutes are saved"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Минуты сохранены"
+          }
+        }
+      }
+    },
     "הַדַּקּוֹת שֶׁלִּי מוּגָנוֹת בְּקוֹד" : {
       "localizations" : {
         "ar" : {
@@ -131651,6 +131673,28 @@
         }
       }
     },
+    "🌙 בְּעוֹד %lld דַּקּ׳ שְׁעַת שֵׁינָה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 وقت النوم بعد %lld د"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 Bedtime in %lld min"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🌙 Через %lld мин. — время сна"
+          }
+        }
+      }
+    },
     "🌙 עַכְשָׁיו שְׁעַת שֵׁינָה — הַדַּקּוֹת שֶׁלְּךָ מְחַכּוֹת לְךָ בְּ-%@" : {
       "localizations" : {
         "ar" : {
@@ -133561,6 +133605,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🏠 Дан"
+          }
+        }
+      }
+    },
+    "🏫 בְּעוֹד %lld דַּקּ׳ זְמַן בֵּית סֵפֶר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 وقت المدرسة بعد %lld د"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 School time in %lld min"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🏫 Через %lld мин. — школа"
           }
         }
       }
