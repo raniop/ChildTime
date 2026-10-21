@@ -14,6 +14,7 @@ struct QuietHoursEditorView: View {
     @State private var offToday = false
     @State private var paused = false
     @State private var shortFriday = true
+    @State private var allowsTofy = false
     @State private var loaded = false
 
     private var profile: Profile? { profiles.profiles.first { $0.id == profileID } }
@@ -71,6 +72,16 @@ struct QuietHoursEditorView: View {
                     .glassRows()
 
                     if isSchool {
+                        Section {
+                            Toggle(tr("לאפשר את טופי בזמן בית ספר"), isOn: $allowsTofy)
+                                .tint(AppColor.successMint)
+                        } footer: {
+                            Text(allowsTofy
+                                 ? tr("בזמן בית ספר אפשר לענות על שאלות ולשחק בטופי, ולצבור דקות לאחר כך. רק לפתוח דקות אי אפשר.")
+                                 : tr("בזמן בית ספר טופי סגור. אפשר רק לסמן מטלות."))
+                        }
+                        .glassRows()
+
                         Section {
                             Toggle(tr("היום אין לימודים"), isOn: $offToday)
                                 .tint(AppColor.successMint)
@@ -155,6 +166,7 @@ struct QuietHoursEditorView: View {
         shortFriday = w.fridayEnd != nil && w.fridayEnd != w.end
         offToday = q.schoolOffDay == QuietHours.dayKey(Date())
         paused = q.schoolPaused == true
+        allowsTofy = q.schoolAllowsTofy == true
     }
 
     /// False only when the family isn't loaded and the edit was refused — "סיום"
@@ -172,12 +184,13 @@ struct QuietHoursEditorView: View {
             q.school = w
             q.schoolOffDay = offToday ? QuietHours.dayKey(Date()) : ""
             q.schoolPaused = paused
+            q.schoolAllowsTofy = allowsTofy
         } else {
             w.fridayEnd = w.end
             q.bedtime = w
         }
         // Never written before and still off → leave the profile untouched.
-        if fresh.quietHours == nil, q.isEmpty, !offToday, !paused { return true }
+        if fresh.quietHours == nil, q.isEmpty, !offToday, !paused, !allowsTofy { return true }
         guard q != fresh.quietHours else { return true }
         fresh.quietHours = q
         return profiles.parentEdit(fresh)
@@ -215,6 +228,10 @@ enum QuietHoursText {
         let w = kind == .school ? q?.school : q?.bedtime
         guard let w, w.enabled, !w.days.isEmpty else { return tr("כבוי") }
         if kind == .school, q?.schoolPaused == true { return tr("חופש — מושהה") }
-        return "\(days(w.days)) · \u{2066}\(clock(w.start))–\(clock(w.end))\u{2069}"
+        // In words, not a dash: "19:30–06:30" read right-to-left by a Hebrew
+        // reader came out "from 06:30" (Sasha, 2026-10-21). Each time stays a
+        // left-to-right island.
+        let from = "\u{2066}\(clock(w.start))\u{2069}", to = "\u{2066}\(clock(w.end))\u{2069}"
+        return "\(days(w.days)) · " + tr("מ־\(from) עד \(to)")
     }
 }

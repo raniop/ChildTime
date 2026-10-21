@@ -489,6 +489,7 @@ struct WorldMapView: View {
                                         // No companion line here — we leave this screen
                                         // immediately, so a bubble would only flash & clip.
                                         Haptic.light()
+                                        if schoolBlocksPlay() { return }
                                         showingSmartFeed = true
                                     }
                                     .frame(maxWidth: .infinity)
@@ -533,6 +534,7 @@ struct WorldMapView: View {
                                         suggested: world.id == suggestedWorldID,
                                         girl: girl
                                     ) {
+                                        if schoolBlocksPlay() { return }
                                         if let pack, let cid = profiles.activeID {
                                             PackKidState.markOpened(pack.id, childID: cid)
                                             selectedWorld = world
@@ -578,6 +580,7 @@ struct WorldMapView: View {
                                     : Double(min(progress.correctToday, gamesGateTarget)) / Double(max(1, gamesGateTarget))
                             ) {
                                 Haptic.light()
+                                if schoolBlocksPlay() { return }
                                 requirePremium {
                                     if gamesUnlockedToday {
                                         showingGames = true
@@ -760,6 +763,11 @@ struct WorldMapView: View {
         .onChangeCompat(of: progress.openWindowMessage) { _, _ in
             speakOpenWindowMessageIfNeeded()
         }
+        // 🏫 School time (Tofy closed) began while playing: back to the map.
+        .onChangeCompat(of: quiet.schoolClosesTofy) { _, closed in
+            guard closed else { return }
+            selectedWorld = nil; showingSmartFeed = false; showingGames = false
+        }
         // ⚠️ Type depth: this body is long enough that its generic type overflowed
         // the 1 MB main-thread stack on a real device (build 241, Kid Mode). Erase
         // every few dozen modifiers — the simulator never shows it.
@@ -879,7 +887,7 @@ struct WorldMapView: View {
                     PackKidState.markOpened(pack.id, childID: cid)
                 }
                 packReveal = nil
-                if let world = Worlds.all.first(where: { $0.topic == pack.topic }) {
+                if let world = Worlds.all.first(where: { $0.topic == pack.topic }), !quiet.schoolClosesTofy {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { selectedWorld = world }
                 }
             }, onSkip: {
@@ -1118,7 +1126,9 @@ struct WorldMapView: View {
                     ctaTitle: tr("יַאלְלָה, בּוֹאוּ נֶאֱסֹף! 🚀"),
                     onCTA: {
                         showEventSplash = false
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { showingSmartFeed = true }
+                        if !schoolBlocksPlay() {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { showingSmartFeed = true }
+                        }
                     },
                     onClose: { showEventSplash = false }
                 )
@@ -1566,6 +1576,7 @@ struct WorldMapView: View {
     /// Close any open explainer, then jump into the Smart Feed to play/earn.
     private func enterSmartFeedFromInfo() {
         infoSheet = nil
+        if schoolBlocksPlay() { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { showingSmartFeed = true }
     }
 
@@ -2310,7 +2321,7 @@ struct WorldMapView: View {
         Button {
             Haptic.light()
             // 🏫🌙 Not in school time or bedtime — say so before asking for the code.
-            if let line = QuietHoursManager.shared.blockedMessage() { companion.console(line); return }
+            if let line = QuietHoursManager.shared.blockedMessage() { explainQuiet(line); return }
             flightSheet = mode
         } label: {
             VStack(spacing: 3) {
@@ -2429,15 +2440,16 @@ struct WorldMapView: View {
     private var minutesKey: some View {
         let have = progress.redeemableMinutesNow, from = progress.minimumUnlockMinutes
         if let occ = quiet.current {
-            // 🏫🌙 the minutes wait until the quiet hours end
-            keyBox {
+            // 🏫🌙 the minutes wait until the quiet hours end — a tap says why, every time
+            Button { explainQuiet(quiet.blockedMessage()) } label: { keyBox {
                 VStack(spacing: 3) {
                     Text(occ.kind == .school ? tr("🏫 זְמַן בֵּית סֵפֶר") : tr("🌙 שְׁעַת שֵׁינָה"))
                         .font(.system(size: 15, weight: .black, design: .rounded))
                     Text(tr("הַדַּקּוֹת מְחַכּוֹת עַד \(QuietHoursManager.clock(occ.end))"))
                         .font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.secondary)
                 }
-            }
+            } }
+            .buttonStyle(.plain)
             .frame(minWidth: isCompact || display.hasBarStrip ? 0 : 150)
             .accessibilityLabel(quiet.blockedMessage() ?? "")
         } else if let soon = progress.quietTooCloseMinutes, !progress.canRedeemNow, demoPlaySeconds == nil {
@@ -2573,8 +2585,7 @@ struct WorldMapView: View {
         // 🏫🌙 Before the code sheet — asking for the code only to say "not now"
         // would be a small cruelty.
         if let line = QuietHoursManager.shared.blockedMessage() {
-            Haptic.light()
-            companion.console(line)
+            explainQuiet(line)
             return
         }
         Haptic.light()                            // the tap answers immediately
@@ -3013,6 +3024,23 @@ struct WorldMapView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             showingAppLockSetup = true
         }
+    }
+
+    /// 🏫🌙 Why it's closed, every time it's tapped (Sasha, 2026-10-21: "אחרי
+    /// זה ההסבר מפסיק להופיע") — and read aloud to a child who can't read yet.
+    private func explainQuiet(_ line: String?) {
+        guard let line else { return }
+        Haptic.light()
+        companion.console(line)
+        if PreReaderGames.activeChildIsPreReader { SpeechReader.shared.speak(line) }
+    }
+
+    /// 🏫 School time with Tofy closed: worlds and games wait, chores don't.
+    /// True (and explained) when the tap must not open anything.
+    private func schoolBlocksPlay() -> Bool {
+        guard quiet.schoolClosesTofy else { return false }
+        explainQuiet(quiet.schoolClosedMessage())
+        return true
     }
 
     /// 🏫🌙 Inside school time / bedtime no minutes open (the parent's own open

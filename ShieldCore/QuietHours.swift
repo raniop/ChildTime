@@ -45,6 +45,11 @@ struct QuietHours: Codable, Hashable, Sendable {
     var schoolOffDay: String?
     /// Vacation: every school window is off until the parent turns it back on.
     var schoolPaused: Bool?
+    /// 🏫 May the child play in Tofy itself during school time? nil / false =
+    /// no — only chores stay open (Sasha, 2026-10-21: "משחקי הטופי עדיין
+    /// פתוחים"). Always written by the editor (true or false), never left
+    /// missing, so turning it off reaches a merge write too.
+    var schoolAllowsTofy: Bool?
 
     init(school: QuietWindow? = nil, bedtime: QuietWindow? = nil,
          schoolOffDay: String? = nil, schoolPaused: Bool? = nil) {

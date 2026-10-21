@@ -135,6 +135,19 @@ final class QuietHoursManager: ObservableObject {
         hours.occurrences(around: now, fromDay: 0, toDay: 8).first { $0.start > now }
     }
 
+    /// 🏫 School time with Tofy itself closed (the parent's switch, off by
+    /// default): only chores stay open.
+    var schoolClosesTofy: Bool {
+        guard current?.kind == .school else { return false }
+        return hours.schoolAllowsTofy != true
+    }
+
+    /// The child's line when they tap a world / game in school time.
+    func schoolClosedMessage() -> String {
+        let at = current.map { Self.clock($0.end) } ?? ""
+        return tr("🏫 עַכְשָׁיו זְמַן בֵּית סֵפֶר — נְשַׂחֵק בְּ-\(at). מְטָלוֹת אֶפְשָׁר לְסַמֵּן גַּם עַכְשָׁיו 🧹")
+    }
+
     /// "13:30" — the device's own 24-hour clock.
     static func clock(_ date: Date) -> String {
         let f = DateFormatter()
