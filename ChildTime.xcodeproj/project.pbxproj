@@ -36,6 +36,7 @@
 		C0DE5H1E1DC0RE0000000013 /* QuietHours.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000011 /* QuietHours.swift */; };
 		C0DE5H1E1DC0RE0000000014 /* QuietHours.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000011 /* QuietHours.swift */; };
 		C0DE5H1E1DC0RE0000000015 /* QuietHours.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000011 /* QuietHours.swift */; };
+		C0DE5H1E1DC0RE0000000016 /* QuietHours.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE5H1E1DC0RE0000000011 /* QuietHours.swift */; };
 		E20C1E12CDDF39D6B9F10786 /* ShieldConfigurationExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F3B5ED0AA76C9A122C43D7 /* ShieldConfigurationExtension.swift */; };
 /* End PBXBuildFile section */
 
@@ -820,6 +821,7 @@
 			files = (
 				E20C1E12CDDF39D6B9F10786 /* ShieldConfigurationExtension.swift in Sources */,
 				A74D4CE2F1968CEB7E0F1C2C /* ShieldState.swift in Sources */,
+				C0DE5H1E1DC0RE0000000016 /* QuietHours.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

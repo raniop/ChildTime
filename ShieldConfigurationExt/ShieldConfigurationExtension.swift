@@ -33,6 +33,30 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         let icon = UIImage(named: "ShieldLion")
         let name = s.childName.trimmingCharacters(in: .whitespaces)
 
+        // 🌙🏫 Inside bedtime / school time nothing opens — so never "בּוֹאוּ
+        // נִפְתַּח אוֹתָן" (Rani, 2026-10-21, on the shield at 09:48 in bedtime).
+        let quietDefaults = UserDefaults(suiteName: ShieldState.suite) ?? .standard
+        if let occ = QuietHoursStore.load(quietDefaults).active(at: Date()) {
+            let f = DateFormatter()
+            f.locale = Locale(identifier: "en_GB")
+            f.dateFormat = "HH:mm"
+            let at = f.string(from: occ.end)
+            let bed = occ.kind == .bedtime
+            return ShieldConfiguration(
+                backgroundBlurStyle: .systemThinMaterialDark,
+                backgroundColor: Self.night,
+                icon: icon,
+                title: .init(text: bed ? (name.isEmpty ? tr("לַיְלָה טוֹב 🌙") : tr("\(name), לַיְלָה טוֹב 🌙"))
+                                       : (name.isEmpty ? tr("🏫 עַכְשָׁיו זְמַן בֵּית סֵפֶר") : tr("\(name), עַכְשָׁיו זְמַן בֵּית סֵפֶר 🏫")),
+                             color: .white),
+                subtitle: .init(text: s.girl ? tr("הַדַּקּוֹת שֶׁלָּךְ מְחַכּוֹת לָךְ בְּ-\(at)")
+                                             : tr("הַדַּקּוֹת שֶׁלְּךָ מְחַכּוֹת לְךָ בְּ-\(at)"),
+                                color: UIColor.white.withAlphaComponent(0.85)),
+                primaryButtonLabel: .init(text: tr("הֵבַנְתִּי"), color: Self.night),
+                primaryButtonBackgroundColor: .white
+            )
+        }
+
         switch s.mode {
         // ONE button, always. Apple lets a shield button do exactly one thing —
         // dismiss — so a second one that also dismisses is noise (Rani), and a
