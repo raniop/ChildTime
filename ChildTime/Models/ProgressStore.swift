@@ -2041,8 +2041,9 @@ final class ProgressStore: ObservableObject {
             let room = max(0, cap.max - minutesUnlockedTodayResolved)
             if room >= 5, room < minimumUnlockMinutes { smallest = min(smallest, room * 60) }
         }
-        // 🌙 …and the minutes left before bedtime (from 5), the same way.
-        if let quiet = secondsUntilQuietNow, quiet >= 5 * 60, quiet < minimumUnlockMinutes * 60 {
+        // 🌙 …and whatever is left before bedtime, down to one minute — "תמיד
+        // צריך לאפשר עד הזמן שהוגדר" (Rani, 2026-10-21).
+        if let quiet = secondsUntilQuietNow, quiet >= 60, quiet < minimumUnlockMinutes * 60 {
             smallest = min(smallest, (quiet / 60) * 60)
         }
         return smallest
@@ -2060,7 +2061,19 @@ final class ProgressStore: ObservableObject {
     var minutesPlayedToday: Int { minutesUnlockedTodayResolved }
 
     var dailyScreenTimeMaxedOut: Bool {
-        dailyCap.enabled && !canRedeemNow && pendingMinutes > redeemableMinutesNow
+        // The CAP is what stops it — not an upcoming bedtime, which also caps
+        // `redeemableMinutesNow` (Rani, 2026-10-21: bedtime 3 minutes away read
+        // "64 שמורות למחר · שיחקת 0 מתוך 90").
+        guard dailyCap.enabled else { return false }
+        let room = max(0, dailyCap.max - minutesUnlockedTodayResolved)
+        return room < 5 && openableSeconds(gift: false) / 60 > room
+    }
+
+    /// 🌙 Under a minute before school time / bedtime — too close to open
+    /// anything; the minutes key says so instead of "למחר".
+    var quietTooCloseMinutes: Int? {
+        guard let s = secondsUntilQuietNow, s > 0, s < 60 else { return nil }
+        return max(1, (s + 59) / 60)
     }
 
     /// Seconds this pocket can open RIGHT NOW — the whole minutes plus the odd

@@ -2440,6 +2440,17 @@ struct WorldMapView: View {
             }
             .frame(minWidth: isCompact || display.hasBarStrip ? 0 : 150)
             .accessibilityLabel(quiet.blockedMessage() ?? "")
+        } else if let soon = progress.quietTooCloseMinutes, !progress.canRedeemNow, demoPlaySeconds == nil {
+            // 🌙 Too close to bedtime to open anything — say that, not "למחר".
+            keyBox {
+                VStack(spacing: 3) {
+                    Text(quiet.upcoming()?.kind == .school ? tr("🏫 בְּעוֹד \(soon) דַּקּ׳ זְמַן בֵּית סֵפֶר") : tr("🌙 בְּעוֹד \(soon) דַּקּ׳ שְׁעַת שֵׁינָה"))
+                        .font(.system(size: 15, weight: .black, design: .rounded))
+                    Text(tr("הַדַּקּוֹת שְׁמוּרוֹת"))
+                        .font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.secondary)
+                }
+            }
+            .frame(minWidth: isCompact || display.hasBarStrip ? 0 : 150)
         } else if progress.canRedeemNow || demoPlaySeconds != nil {
             Button {
                 requestUnlock { redeemMinutes() }

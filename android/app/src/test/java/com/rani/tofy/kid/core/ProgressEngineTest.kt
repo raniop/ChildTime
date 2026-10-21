@@ -384,11 +384,12 @@ class ProgressEngineTest {
         assertEquals(40 * 60, p.earnedSecondsAvailable)          // the rest stays in the wallet
     }
 
-    @Test fun threeMinutesBeforeBedtimeNothingOpens() {
+    /** "תמיד צריך לאפשר עד הזמן שהוגדר" (Rani, 2026-10-21) — even three minutes open. */
+    @Test fun threeMinutesBeforeBedtimeOpenThree() {
         val p = bedtimeIn(3)
         assertEquals(3, p.redeemableMinutesNow)
-        assertEquals(15 * 60, p.minimumOpenSecondsNow)
-        assertFalse(p.canRedeemNow)
+        assertEquals(3 * 60, p.minimumOpenSecondsNow)
+        assertTrue(p.canRedeemNow)
     }
 
     @Test fun withoutQuietHoursNothingChanges() {

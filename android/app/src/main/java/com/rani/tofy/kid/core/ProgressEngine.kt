@@ -1110,7 +1110,8 @@ class ProgressEngine(
             }
             // 🌙 …and the minutes left before bedtime / school time (from 5), the same way.
             secondsUntilQuietNow?.let { q ->
-                if (q >= MINIMUM_CAP_TAIL_MINUTES * 60 && q < MINIMUM_UNLOCK_MINUTES * 60) smallest = minOf(smallest, (q / 60) * 60)
+                // 🌙 Down to one minute before bedtime — "תמיד צריך לאפשר עד הזמן שהוגדר" (Rani, 2026-10-21).
+                if (q >= 60 && q < MINIMUM_UNLOCK_MINUTES * 60) smallest = minOf(smallest, (q / 60) * 60)
             }
             return smallest
         }

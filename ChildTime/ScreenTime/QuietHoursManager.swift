@@ -130,6 +130,11 @@ final class QuietHoursManager: ObservableObject {
         }
     }
 
+    /// The next school time / bedtime that hasn't started yet.
+    func upcoming(now: Date = Date()) -> QuietHours.Occurrence? {
+        hours.occurrences(around: now, fromDay: 0, toDay: 8).first { $0.start > now }
+    }
+
     /// "13:30" — the device's own 24-hour clock.
     static func clock(_ date: Date) -> String {
         let f = DateFormatter()
