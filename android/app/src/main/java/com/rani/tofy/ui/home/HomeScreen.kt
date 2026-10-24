@@ -231,6 +231,12 @@ private fun ChildCard(
                     Box(Modifier.size(8.dp).clip(CircleShape).background(if (live != null || inApp) Ink.live else Color.White.copy(alpha = 0.35f)))
                     P(statusText, 12.5f, weight = FontWeight.SemiBold, maxLines = 1)
                 }
+                // 🎮 Right under "where she is today" (Rani, 2026-10-24) — a lone line under
+                // the tiles read as one more stat. A line each: side by side they got cut.
+                walletLines(s, girl).forEach {
+                    com.rani.tofy.kid.ui.play.FitText(it, 12.5.sp, color = Ink.secondary, weight = FontWeight.SemiBold, maxLines = 1,
+                        minScale = 0.75f, align = androidx.compose.ui.text.style.TextAlign.Start)
+                }
             }
             }
             Text("$pct%", color = pctColor, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 22.sp)
@@ -247,9 +253,6 @@ private fun ChildCard(
                 Stat(Modifier.weight(1f), "${s.answeredToday}", tr("שאלות היום"))
                 Stat(Modifier.weight(1f), "${s.correctToday}", tr("נכונות"))
             }
-            // 🎮 What the child can still open — earned and gift — said in a sentence
-            // (Sasha, 2026-10-23: "לא מצאתי בשום מקום מלבד האייפד כמה זמן יש לה סה״כ").
-            walletLine(s, girl)?.let { P(it, 14f, weight = FontWeight.SemiBold, maxLines = 1) }
         } else {
             P(tr("%@ · אין עדיין מכשיר מחובר.", gradeName(child.effectiveGrade)), 13f)
         }
@@ -280,16 +283,18 @@ private fun ChildCard(
     }
 }
 
-/** "🎮 25 דקות מחכות לה · 💝 10 דקות מתנה" — each part only when it is > 0; null when both are 0. */
-internal fun walletLine(s: Progress, girl: Boolean): String? {
-    val earned = s.earnedSecondsAvailable / 60
-    val gift = s.giftMinutes
-    val parts = listOfNotNull(
-        earned.takeIf { it > 0 }?.let { if (girl) tr("🎮 %lld דקות מחכות לה", it) else tr("🎮 %lld דקות מחכות לו", it) },
-        gift.takeIf { it > 0 }?.let { tr("💝 %lld דקות מתנה", it) },
-    )
-    return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
-}
+/**
+ * 🎮 What the child can still open — earned and gift (Sasha, 2026-10-23: "לא מצאתי
+ * בשום מקום מלבד האייפד כמה זמן יש לה סה״כ"). "מחכות לה" was unclear (Rani,
+ * 2026-10-24): "🎮 12 דקות שהרוויחה ועוד לא פתחה" / "💝 10 דקות מתנה" — each
+ * only when it is > 0.
+ */
+internal fun walletLines(s: Progress, girl: Boolean): List<String> = listOfNotNull(
+    (s.earnedSecondsAvailable / 60).takeIf { it > 0 }?.let {
+        if (girl) tr("🎮 %lld דקות שהרוויחה ועוד לא פתחה", it) else tr("🎮 %lld דקות שהרוויח ועוד לא פתח", it)
+    },
+    s.giftMinutes.takeIf { it > 0 }?.let { tr("💝 %lld דקות מתנה", it) },
+)
 
 /** 💝 The gift button: the one warm tile on the card (iOS gridCardGift). */
 @Composable

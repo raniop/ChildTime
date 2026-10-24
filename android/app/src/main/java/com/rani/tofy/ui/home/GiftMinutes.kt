@@ -81,6 +81,23 @@ fun GiftMinutesWindow(child: Child, state: FamilyState, onDismiss: () -> Unit) {
     }
 }
 
+/**
+ * 🎮 "לדנה יש עכשיו 45 דק׳ לשחק" · "20 שהרוויחה מלמידה · 25 מתנה" — all the time
+ * the child has right now; this window is where a parent looks for it (Rani,
+ * 2026-10-24; iOS GiftMinutesSheet.haveLine).
+ */
+@Composable
+private fun HaveLine(name: String, girl: Boolean, earned: Int, gift: Int) {
+    val fromLearning = if (girl) tr("%lld שהרוויחה מלמידה", earned) else tr("%lld שהרוויח מלמידה", earned)
+    Column(Modifier.fillMaxWidth().glassPane(16.dp, 0.2f).padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(tr("🎮 ל%@ יש עכשיו %lld דק׳ לשחק", name, earned + gift), color = Ink.primary, fontFamily = Rounded,
+            fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, textAlign = TextAlign.Center)
+        Text(tr("%@ · %lld מתנה", fromLearning, gift), color = Ink.secondary, fontFamily = Rounded,
+            fontWeight = FontWeight.SemiBold, fontSize = 13.sp, textAlign = TextAlign.Center)
+    }
+}
+
 /** One full turn of the ring. More than that is a second gift. */
 internal const val GIFT_RING_MINUTES = 120
 
@@ -138,6 +155,7 @@ internal fun GiftMinutesContent(child: Child, state: FamilyState, onClose: () ->
                     color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 15.sp, lineHeight = 21.sp, textAlign = TextAlign.Center,
                 )
 
+                HaveLine(name, child.isGirl, progress.earnedSecondsAvailable / 60, progress.giftMinutes)
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     GiftStat(givenAtOpen + (sent ?: 0), tr("נתתם היום"), Modifier.weight(1f))
                     GiftStat(progress.giftMinutes, tr("עוד לא נוצלו"), Modifier.weight(1f))   // "מחכות לנוני" was not clear (Rani)
