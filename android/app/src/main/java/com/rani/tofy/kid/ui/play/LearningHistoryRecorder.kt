@@ -83,6 +83,10 @@ object LearningHistoryRecorder {
             .collection("dailyStats").document(stat.date).set(stat.toFirestore(), SetOptions.merge())
     }
 
+    /** 🏆 This device's own days of [childID] for the weekly contest (never pulled over from the cloud). */
+    fun contestDays(childID: String): List<com.rani.tofy.data.ContestDay> =
+        load(childID).values.map { com.rani.tofy.data.ContestDay(it.date, it.questionsAnswered, it.correct) }
+
     /** Today's screen time actually used (opened − returned), set absolutely. */
     fun setMinutesUsed(childID: String, minutes: Int) = mutateToday(childID) { it.minutesUsed = maxOf(0, minutes) }
 

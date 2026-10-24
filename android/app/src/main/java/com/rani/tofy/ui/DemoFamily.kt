@@ -115,6 +115,8 @@ internal fun DemoParentScreens(screen: String, page: String?) {
         "chores" -> com.rani.tofy.ui.chores.ChoresScreen(onBack = { show = "parenthome" })   // the built-in chores, no cloud
         "settings" -> com.rani.tofy.ui.settings.SettingsScreen(onBack = { show = "parenthome" }, onOpenChild = { show = "childsettings" })
         "flightparent" -> com.rani.tofy.ui.home.FlightModeWindow(noni.id) {}
+        // 🏆 `--es demoScreen contest` — the weekly contest's full screen, parent side.
+        "contest" -> com.rani.tofy.ui.contest.FamilyContestScreen(parent = true, family = state.orderedChildren) { show = "parenthome" }
         else -> com.rani.tofy.ui.home.HomeScreen(
             state = state, onOpenChild = { show = "childreport" }, onActions = {}, onGift = { gift = true }, onChildSettings = {},
             onAddChild = {}, onChores = {}, onSettings = { show = "settings" }, onBell = {}, onConnectDevice = {}, sheetOpen = gift,

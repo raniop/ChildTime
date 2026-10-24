@@ -70,6 +70,7 @@ fun HomeScreen(
     val connectFirst = state.orderedChildren.firstOrNull { !state.hasDevice(it) }
     var tour by remember { mutableStateOf(false) }
     var whatsNew by remember { mutableStateOf(false) }
+    var contestOpen by remember { mutableStateOf(false) }
     // 🔔 Parents NEED push (ParentDashboardView: ask automatically, but only
     // once there's a child to hear about and onboarding is over). Android 13+
     // asks once per install; a decline leaves the banner as the manual path.
@@ -119,6 +120,8 @@ fun HomeScreen(
                         }
                     }
                 }
+                // 🏆 The weekly family contest, above the children.
+                item { com.rani.tofy.ui.contest.FamilyContestParentCard(state.orderedChildren) { contestOpen = true } }
                 items(state.orderedChildren, key = { it.id }) { child ->
                     // `tick` is passed, not used as a key(): re-keying tore the card
                     // down every second, dropping its tour marks — the spotlight
@@ -142,6 +145,10 @@ fun HomeScreen(
             }
         }
         if (whatsNew && !sheetOpen) com.rani.tofy.ui.settings.WhatsNewSheet { whatsNew = false }
+        if (contestOpen) androidx.compose.ui.window.Dialog({ contestOpen = false },
+            androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
+            com.rani.tofy.ui.contest.FamilyContestScreen(parent = true, family = state.orderedChildren) { contestOpen = false }
+        }
         CoachTour(
             steps = parentTourSteps(stripNiqqud(firstChild?.name.orEmpty())),
             active = tour,

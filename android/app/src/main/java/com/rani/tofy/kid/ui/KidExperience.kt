@@ -229,6 +229,8 @@ private sealed class KidScreen {
     data object Backdrops : KidScreen()
     /** The guard's manage screen, from the parent-gated ⚙️. */
     data object AppLock : KidScreen()
+    /** 🏆 The weekly family contest. */
+    data object Contest : KidScreen()
 }
 
 /**
@@ -336,6 +338,12 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
         playable = withContext(Dispatchers.Default) {
             runCatching { ChildContentProfile.from(c, household, snapDoc?.toFirestore(), lang).playableTopics() }.getOrDefault(emptySet())
         }
+    }
+
+    // 🏆 The family the weekly contest is played in (a child device reads the household's children once).
+    val contestFamily by produceState(emptyList<Child>(), child?.id, child?.householdID) {
+        val c = child
+        value = if (c == null || firstRun) emptyList() else runCatching { com.rani.tofy.data.FamilyContestStore.familyOf(c) }.getOrDefault(listOf(c))
     }
 
     // ── KidEvents ───────────────────────────────────────────────────────────
@@ -489,6 +497,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
             KidScreen.Wheel -> WheelScreen(close)
             KidScreen.Chest -> DailyChestScreen(close)
             KidScreen.AppLock -> ChildLockSetupScreen(onDone = { close(); EnforcementStatus.refresh(ctx) }, fromOnboarding = false)
+            KidScreen.Contest -> com.rani.tofy.ui.contest.FamilyContestScreen(parent = false, family = contestFamily, onClose = close)
         }
         return
     }
@@ -705,6 +714,9 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 },
                 onChest = { screen = KidScreen.Chest },
                 inviteBanner = { LiveInviteBanner { id -> screen = KidScreen.LiveQuiz(id) } },
+                contestCard = {
+                    if (!firstRun) com.rani.tofy.ui.contest.FamilyContestKidCard(contestFamily, st.snapshot.correctToday) { screen = KidScreen.Contest }
+                },
             )
 
             // 🧭 WorldMapView.maybeStartKidTour: once per child on this device,

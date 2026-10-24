@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
         // ✈️ `--es demoScreen flightparent [--ez demoFlightOn true]` — the parent's flight window
         // before / with a code; `flightkid [--ez demoFlightStep2 true]` — the child's code pad / how long;
         // `kidhome` — a made-up child's home (local only, nothing synced) whose parents left a code.
-        val demoParent = demoScreen?.takeIf { it in setOf("parenthome", "childreport", "childsettings", "gift", "settings", "chores", "flightparent") }
+        val demoParent = demoScreen?.takeIf { it in setOf("parenthome", "childreport", "childsettings", "gift", "settings", "chores", "flightparent", "contest") }
         // `--es demoLang he|en|ru|ar` — the language for this run only (nothing is saved).
         if (demoParent != null || demoScreen == "kidchores" || demoScreen == "flightkid" || demoScreen == "kidhome" || demoGame != null || demoQuiz) {
             com.rani.tofy.i18n.AppLanguage.of(intent?.getStringExtra("demoLang"))?.let { com.rani.tofy.i18n.I18n.set(it, persist = false) }

@@ -166,6 +166,8 @@ internal fun KidHome(
     onChest: () -> Unit = {},
     /** The top banner: a friend invited me to a live game. */
     inviteBanner: @Composable () -> Unit = {},
+    /** 🏆 The weekly family contest's card — above the worlds (iOS: before heroTitle). */
+    contestCard: @Composable () -> Unit = {},
     /**
      * 🏆 THE one never-visited world Tofy recommends (WorldRouter.suggestedNewWorld,
      * decided once when the home appears) — gold dashed rim, "עוֹד לֹא בִּקַּרְתָּ"
@@ -200,6 +202,7 @@ internal fun KidHome(
                 }
                 // Like iOS: the exit bar sits UNDER the header pane, right above the worlds.
                 if (kidMode) item(span = { GridItemSpan(maxLineSpan) }) { KidExitBar(onKidExit) }
+                item(span = { GridItemSpan(maxLineSpan) }) { contestCard() }
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     // 🧭 The worlds' stop: on a phone the first world sits under the
                     // floating minutes panel, so the tour points at the line that heads
