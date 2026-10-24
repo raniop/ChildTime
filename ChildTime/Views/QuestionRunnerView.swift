@@ -2210,6 +2210,12 @@ struct QuestionRunnerView: View {
     /// (The sound and haptic already played in `pickOption`.)
     private func handleWrong(q: Question) {
         consecutiveWrong += 1
+        // ❌ The first miss of each question goes to the parents' report —
+        // which question, what was chosen, what was right (Sasha, 2026-10-24).
+        if !hadMistakeThisQuestion, let i = selectedIndex, q.options.indices.contains(i),
+           !isBonusArena, !DemoTour.isOn {
+            MistakeLog.record(q, chosen: q.options[i])
+        }
         hadMistakeThisQuestion = true
         // No automatic help sheet any more: a wrong answer moves on after a
         // second, so a sheet opened here landed on the NEXT question. The 🙋

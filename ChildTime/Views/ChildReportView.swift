@@ -36,6 +36,10 @@ struct ChildReportView: View {
     @State private var insightOpen = false
     /// The topics list shows the top three; the rest opens on "הצג הכול".
     @State private var allTopics = false
+    /// ❌ The child's recent wrong answers per topic (Sasha, 2026-10-24) —
+    /// opened from the open topic or from a "כדאי לתרגל" item.
+    @State private var mistakes: [String: [Mistake]] = [:]
+    @State private var mistakesTopic: Topic? = nil
     @Environment(\.requestReview) private var requestReview
 
     private var engine: InsightsEngine {
@@ -65,11 +69,16 @@ struct ChildReportView: View {
             worldsCard.id("worlds")
         }
         .environment(\.layoutDirection, .app)
+        .sheet(item: $mistakesTopic) { t in
+            MistakesSheet(topic: t, mistakes: mistakes[t.rawValue] ?? [], name: profile.name, isGirl: isGirl)
+                .presentationDetents([.medium, .large])
+        }
         .task(id: profile.id) {
             // The parent's phone never recorded this child's play — pull the
             // history down so week/month and the trends are real, not empty.
             isRefreshing = true
             await historyStore.fetchRemoteHistory(for: profile.id)
+            mistakes = await MistakeLog.fetch(childID: profile.id)
             isRefreshing = false
             // A report full of real learning is the moment to ask the parent
             // for a rating (parent device only — this view is parent-side).
@@ -348,6 +357,7 @@ struct ChildReportView: View {
                                     .padding(.leading, 44).padding(.top, 6)
                                 }
                             }
+                            mistakesButton(t.topic)
                         }
                         if t.id != shown.last?.id { Divider().overlay(Color.white.opacity(0.16)).padding(.vertical, 8) }
                     }
@@ -603,25 +613,59 @@ struct ChildReportView: View {
                 }
                 card(tr("🎯 כדאי לתרגל")) {
                     if todo.isEmpty { empty(tr("שום דבר בולט 👏")) }
-                    else { list(todo) }
+                    else { list(todo.map { ($0.name, $0.detail) }, topics: todo.map(\.topic)) }
                 }
             }
         }
     }
 
-    private func list(_ items: [(name: String, detail: String)]) -> some View {
+    /// With `topics`, each item opens that topic's wrong answers.
+    private func list(_ items: [(name: String, detail: String)], topics: [Topic]? = nil) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             ForEach(items.indices, id: \.self) { i in
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(items[i].name).font(.system(size: 13, weight: .heavy, design: .rounded))
-                    Text(items[i].detail).font(.system(size: 11.5, weight: .medium, design: .rounded))
-                        .foregroundStyle(GlassInk.secondary).monospacedDigit()
+                let row = HStack(spacing: 4) {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(items[i].name).font(.system(size: 13, weight: .heavy, design: .rounded))
+                        Text(items[i].detail).font(.system(size: 11.5, weight: .medium, design: .rounded))
+                            .foregroundStyle(GlassInk.secondary).monospacedDigit()
+                    }
+                    Spacer(minLength: 0)
+                    if topics != nil {
+                        Image(systemName: "chevron.forward")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(GlassInk.secondary)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, 6).padding(.horizontal, 9)
                 .glassInset(radius: 16)
+                if let topics, topics.indices.contains(i) {
+                    Button { Haptic.light(); mistakesTopic = topics[i] } label: { row.contentShape(Rectangle()) }
+                        .buttonStyle(.plain)
+                } else {
+                    row
+                }
             }
         }
+    }
+
+    /// "❌ השאלות שטעתה בהן (7) ›" under an open topic.
+    private func mistakesButton(_ topic: Topic) -> some View {
+        let n = mistakes[topic.rawValue]?.count ?? 0
+        return Button { Haptic.light(); mistakesTopic = topic } label: {
+            HStack {
+                Text(tr("❌ השאלות \(g(tr("שטעה"), tr("שטעתה"))) בהן"))
+                Spacer()
+                if n > 0 { Text("\(n)").fontWeight(.heavy).monospacedDigit() }
+                Image(systemName: "chevron.forward").font(.system(size: 11, weight: .bold))
+            }
+            .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+            .padding(.vertical, 8).padding(.horizontal, 10)
+            .glassInset(radius: 16)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .padding(.leading, 44).padding(.top, 6)
     }
 
     // MARK: - Building blocks
@@ -658,6 +702,65 @@ struct ChildReportView: View {
         if m < 60 { return tr("לפני \(max(1, m)) דק׳") }
         if m < 60 * 24 { return tr("לפני \(m / 60) שע׳") }
         return tr("לפני \(m / (60 * 24)) ימים")
+    }
+}
+
+// MARK: - Wrong answers
+
+/// ❌ The last questions the child got wrong in one topic: the question, what
+/// they chose, what was right. So the parent knows WHAT to practise, not only
+/// how much (Sasha, 2026-10-24).
+struct MistakesSheet: View {
+    let topic: Topic
+    let mistakes: [Mistake]
+    let name: String
+    let isGirl: Bool
+    @Environment(\.dismiss) private var dismiss
+
+    private func g(_ m: String, _ f: String) -> String { isGirl ? f : m }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text(tr("❌ \(topic.parentName)"))
+                        .font(.system(size: 20, weight: .heavy, design: .rounded))
+                    Spacer()
+                    Button(tr("סיום")) { dismiss() }
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                }
+                .clearOfBar()
+                Text(mistakes.isEmpty
+                     ? tr("עוד אין כאן שאלות. מעכשיו כל שאלה \(g(tr("שטעה"), tr("שטעתה"))) בה תופיע כאן.")
+                     : tr("השאלות האחרונות \(g(tr("ש\(name) טעה"), tr("ש\(name) טעתה"))) בהן. כדאי לעבור עליהן יחד."))
+                    .font(.system(size: 13.5, weight: .medium, design: .rounded))
+                    .foregroundStyle(GlassInk.secondary)
+                ForEach(mistakes) { m in
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(m.q)
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .fixedSize(horizontal: false, vertical: true)
+                        HStack(spacing: 10) {
+                            Text(tr("\(g(tr("ענה"), tr("ענתה"))): \(m.a)"))
+                                .foregroundStyle(GlassInk.weak)
+                            Text(tr("נכון: \(m.c)"))
+                                .foregroundStyle(GlassInk.good)
+                            Spacer(minLength: 0)
+                            Text(Date(timeIntervalSince1970: m.at), format: .dateTime.day().month(.defaultDigits))
+                                .foregroundStyle(GlassInk.secondary).monospacedDigit()
+                        }
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .glassInset(radius: 16)
+                }
+            }
+            .padding(18)
+            .foregroundStyle(GlassInk.primary)
+        }
+        .background(GlassBackdrop().ignoresSafeArea())
+        .environment(\.layoutDirection, .app)
     }
 }
 

@@ -522,6 +522,14 @@ struct ChildTimeApp: App {
                 .environmentObject(ParentSettings.shared)
                 .environmentObject(ProgressStore.shared)
                 .environmentObject(ShieldManager.shared)
+        case "mistakes":                                // DEMO_SCREEN=mistakes — ❌ the parent's wrong-answers sheet
+            let now = Date().timeIntervalSince1970
+            MistakesSheet(topic: .math, mistakes: [
+                Mistake(q: "7 × 8 = ?", a: "54", c: "56", at: now - 3_600),
+                Mistake(q: "בכיתה 24 ילדים. חצי מהם בנות. כמה בנים?", a: "14", c: "12", at: now - 7_200),
+                Mistake(q: "63 − 27 = ?", a: "44", c: "36", at: now - 90_000),
+                Mistake(q: "9 × 6 = ?", a: "56", c: "54", at: now - 180_000),
+            ], name: "נועה", isGirl: true)
         case "dashboard": ParentDashboardView(isRoot: true)
         // DEMO_SCREEN=childreport [DEMO_REPORT_PERIOD=week] [DEMO_REPORT_SCROLL=topics|worlds]
         case "childreport": ParentDashboardView(isRoot: true, demoOpenFirstChild: true)

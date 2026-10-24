@@ -226,18 +226,18 @@ extension InsightsEngine {
 
     /// Specific things worth practising — a skill where one exists, else the
     /// topic. Weakest first, capped so the list is a nudge and not a verdict.
-    func toPractice(_ period: ReportPeriod) -> [(name: String, detail: String)] {
-        var out: [(String, String, Double)] = []
+    func toPractice(_ period: ReportPeriod) -> [(name: String, detail: String, topic: Topic)] {
+        var out: [(String, String, Double, Topic)] = []
         for t in topicReports(period) where t.answered >= 6 {
             let skills = skillReports(t.topic, period)
             for s in skills.prefix(3) where s.answered >= 4 && s.accuracy < 0.7 {
-                out.append((Question.stripNiqqud(s.name), tr("\(pct(s.accuracy)) ב\(t.topic.parentName)"), s.accuracy))
+                out.append((Question.stripNiqqud(s.name), tr("\(pct(s.accuracy)) ב\(t.topic.parentName)"), s.accuracy, t.topic))
             }
             if skills.isEmpty, t.accuracy < 0.7 {
-                out.append((t.topic.parentName, tr("\(pct(t.accuracy)) · \(t.wrong) טעויות"), t.accuracy))
+                out.append((t.topic.parentName, tr("\(pct(t.accuracy)) · \(t.wrong) טעויות"), t.accuracy, t.topic))
             }
         }
-        return out.sorted { $0.2 < $1.2 }.prefix(4).map { ($0.0, $0.1) }
+        return out.sorted { $0.2 < $1.2 }.prefix(4).map { ($0.0, $0.1, $0.3) }
     }
 
     // MARK: - Series for the charts
