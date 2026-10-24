@@ -385,7 +385,13 @@ fun SequenceGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, o
                         onDragEnd = {
                             val finger = fingerStart + drag.value
                             val pad = with(density) { 6.dp.toPx() }
+                            // Forgiving: the frame under the finger, or the nearest EMPTY one
+                            // within a picture's width — a near miss still lands (Sasha, 2026-10-23).
                             val hit = frames.entries.firstOrNull { it.value.inflate(pad).contains(finger) }?.key
+                                ?: frames.entries.filter { placed[it.key] == null }
+                                    .map { Triple(it.key, (it.value.center - finger).getDistance(), it.value.width) }
+                                    .filter { it.second < it.third }
+                                    .minByOrNull { it.second }?.first
                             if (hit != null) tryPlace(step, hit)
                             else floatHome(step)
                         },
@@ -426,15 +432,16 @@ fun SequenceGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?, o
                     // As many as the widest row holds: three, or four for a four-picture story
                     // (sized for three, a fourth frame ran off the screen).
                     val perRow = maxOf(1, slotRows.maxOf { it.size })
-                    var side = minOf(if (m.compact) 118.dp else 160.dp, (maxWidth - 12.dp - gap * (perRow - 1)) / perRow)   // 12: room for the number badge
-                    var cardSide = minOf(if (m.compact) 104.dp else 140.dp, (maxWidth - gap * 2) / 3)
-                    // …and a whole story must fit the height too: shrink both together when it would not.
-                    val poolRows = (steps.size + 2) / 3
-                    val need = side * slotRows.size + (gap + 6.dp) * (slotRows.size - 1) + rowGap + cardSide * poolRows + gap * (poolRows - 1) + 8.dp
-                    if (need > maxHeight && need > 0.dp) {
-                        val k = maxHeight / need
-                        side *= k; cardSide *= k
-                    }
+                    // 📐 Sized to the HEIGHT too: on a tablet held sideways a five-step story
+                    // pushed the last pictures off the bottom, half-cut and hard to drag
+                    // (Sasha, 2026-10-23; iOS SequenceGameView). The rows are counted from
+                    // the whole story, so nothing jumps as pictures are placed.
+                    val frameRows = maxOf(1, slotRows.size)
+                    val cardRows = (maxOf(1, steps.size) + 2) / 3
+                    val fixed = rowGap + (gap + 6.dp) * (frameRows - 1) + gap * (cardRows - 1) + 16.dp
+                    val byHeight = maxOf(44.dp, (maxHeight - fixed) / (frameRows + 0.88f * cardRows))
+                    val side = minOf(if (m.compact) 118.dp else 160.dp, (maxWidth - 12.dp - gap * (perRow - 1)) / perRow, byHeight)   // 12: room for the number badge
+                    val cardSide = minOf(if (m.compact) 104.dp else 140.dp, (maxWidth - gap * 2) / 3, side * 0.88f)
                     // Laid out left-to-right so a drag follows the finger, and so the
                     // numbered frames read 1 → 2 → 3 from the left (see `slotRows`).
                     Ltr {

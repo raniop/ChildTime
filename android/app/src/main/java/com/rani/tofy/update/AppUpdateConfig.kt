@@ -119,7 +119,7 @@ object AppUpdateConfig {
 
     private fun publish(v: Values) {
         _values.value = v
-        _state.value = AppUpdateLogic.state(v, BuildConfig.VERSION_CODE)
+        _state.value = AppUpdateLogic.state(v, BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME)
     }
 
     private fun decodeList(s: String): List<String> = runCatching {
@@ -144,9 +144,14 @@ object AppUpdateLogic {
         return if (isEmoji) head to line.substring(space + 1) else "" to line
     }
 
-    fun state(v: AppUpdateConfig.Values, installed: Int): AppUpdateConfig.State {
+    /** [installedName]: this copy's versionName — the same name as the store's means nothing newer to get. */
+    fun state(v: AppUpdateConfig.Values, installed: Int, installedName: String = ""): AppUpdateConfig.State {
         if (!v.enabled) return AppUpdateConfig.State.None
         if (v.minBuild > 0 && installed < v.minBuild) return AppUpdateConfig.State.Required(v.minBuild)
+        // Same version name as the store's → nothing newer, whatever the build number
+        // says (2026-10-24: the config ran ahead of the store under the same name, and
+        // every phone on the store's build nagged; iOS AppUpdateConfig).
+        if (v.versionName.isNotEmpty() && v.versionName == installedName) return AppUpdateConfig.State.None
         if (v.latestBuild > installed && v.dismissedBuild < v.latestBuild) return AppUpdateConfig.State.Recommended(v.latestBuild)
         return AppUpdateConfig.State.None
     }

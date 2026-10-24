@@ -1507,6 +1507,17 @@ struct ParentDashboardView: View {
                     overviewStat(value: "\(s.correctToday)", suffix: nil, label: tr("נכונות"), progress: nil)
                 }
                 .fixedSize(horizontal: false, vertical: true)   // all three tiles as tall as the one with the bar (Rani)
+                // 🎮 What the child can still open — earned and gift — said in a
+                // sentence (Sasha, 2026-10-23: "לא מצאתי בשום מקום מלבד האייפד
+                // כמה זמן יש לה סה״כ שהיא יכולה לבזבז").
+                walletLine(s, girl: girl)
+                if profile.parentLock?.on == true {
+                    Text(tr("🔒 נעול עד שתשחררו · ⚡ פעולות ← שחרור הנעילה"))
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "FFD27A"))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .lineLimit(1).minimumScaleFactor(0.8)
+                }
             }
             if hasDevice {
                 // The buttons sit on the tiles' grid (Rani): 📊 מידע נוסף · ⚡ פעולות ·
@@ -1831,6 +1842,20 @@ struct ParentDashboardView: View {
         }
     }
 
+    @ViewBuilder
+    private func walletLine(_ s: ProgressSnapshot, girl: Bool) -> some View {
+        let earned = s.walletMinutesShown, gift = s.giftMinutesShown
+        if earned > 0 || gift > 0 {
+            let main = earned > 0 ? (girl ? tr("🎮 \(earned) דקות מחכות לה") : tr("🎮 \(earned) דקות מחכות לו")) : ""
+            let extra = gift > 0 ? tr("💝 \(gift) דקות מתנה") : ""
+            Text([main, extra].filter { !$0.isEmpty }.joined(separator: " · "))
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .foregroundStyle(GlassInk.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .lineLimit(1).minimumScaleFactor(0.8)
+        }
+    }
+
     private func overviewStat(value: String, suffix: String?, label: String, progress: Double?) -> some View {
         VStack(spacing: 3) {
             HStack(alignment: .firstTextBaseline, spacing: 0) {
@@ -1937,6 +1962,7 @@ struct ParentDashboardView: View {
                 switch action {
                 case .gift(let m): remoteOpen(p, m)
                 case .lock: remoteLock(p)
+                case .release: releaseLock(p)
                 case .lockAndRevokeGift: revokeGiftProfile = p
                 case .location: locationChild = p.id.uuidString; showingLocation = true
                 case .connectDevice: qrCode = nil; qrChild = p
@@ -2816,6 +2842,13 @@ struct ParentDashboardView: View {
     /// even be holding. Capped per day: you can't give more than there is left
     /// until midnight (a 20:00 gift tops out at 240 min total for today).
     /// Unused gift carries over — the cap is on GIVING, not on holding.
+    /// 🔓 Release "נעל עד שאשחרר" — the child may open their minutes again.
+    private func releaseLock(_ profile: Profile) {
+        guard !DemoTour.refuse() else { return }
+        Haptic.success()
+        Task { await ParentLockStore.set(false, for: profile.id) }
+    }
+
     private func remoteOpen(_ profile: Profile, _ minutes: Int) {
         if let status = sendGift(profile, minutes) { commandStatus = status }
     }
@@ -2859,6 +2892,9 @@ struct ParentDashboardView: View {
         guard !DemoTour.refuse() else { return }
         Haptic.warning()
         household.lockRemoteScreenTime(toChildID: profile.id)
+        // 🔒 …and it STAYS locked until released (the child used to open again
+        // with their own minutes a few minutes later).
+        Task { await ParentLockStore.set(true, for: profile.id) }
         // Live status sheet instead of an optimistic alert: shows the real
         // send → cloud → device-ack chain, and admits honestly when a hop stalls.
         commandStatus = RemoteCommandStatusRequest(profile: profile, kind: .lock(includesGiftRevoke: false))

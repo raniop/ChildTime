@@ -2321,6 +2321,7 @@ struct WorldMapView: View {
         Button {
             Haptic.light()
             // 🏫🌙 Not in school time or bedtime — say so before asking for the code.
+            if parentLocked { explainQuiet(parentLockLine); return }
             if let line = QuietHoursManager.shared.blockedMessage() { explainQuiet(line); return }
             flightSheet = mode
         } label: {
@@ -2439,7 +2440,19 @@ struct WorldMapView: View {
     @ViewBuilder
     private var minutesKey: some View {
         let have = progress.redeemableMinutesNow, from = progress.minimumUnlockMinutes
-        if let occ = quiet.current {
+        if parentLocked {
+            // 🔒 locked by a parent until they release it
+            Button { explainQuiet(parentLockLine) } label: { keyBox {
+                VStack(spacing: 3) {
+                    Text(tr("🔒 נָעוּל לְעַכְשָׁיו"))
+                        .font(.system(size: 15, weight: .black, design: .rounded))
+                    Text(tr("הַדַּקּוֹת שְׁמוּרוֹת"))
+                        .font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundStyle(GlassInk.secondary)
+                }
+            } }
+            .buttonStyle(.plain)
+            .frame(minWidth: isCompact || display.hasBarStrip ? 0 : 150)
+        } else if let occ = quiet.current {
             // 🏫🌙 the minutes wait until the quiet hours end — a tap says why, every time
             Button { explainQuiet(quiet.blockedMessage()) } label: { keyBox {
                 VStack(spacing: 3) {
@@ -2584,6 +2597,7 @@ struct WorldMapView: View {
         guard !isOpening else { return }          // a claim is already in flight
         // 🏫🌙 Before the code sheet — asking for the code only to say "not now"
         // would be a small cruelty.
+        if parentLocked { explainQuiet(parentLockLine); return }
         if let line = QuietHoursManager.shared.blockedMessage() {
             explainQuiet(line)
             return
@@ -3035,6 +3049,13 @@ struct WorldMapView: View {
         if PreReaderGames.activeChildIsPreReader { SpeechReader.shared.speak(line) }
     }
 
+    /// 🔒 A parent's "נעל עד שאשחרר" — nothing opens until they release it.
+    private var parentLocked: Bool { profiles.active?.parentLock?.on == true }
+    private var parentLockLine: String {
+        Gendered.g(tr("🔒 אַבָּא וְאִמָּא נָעֲלוּ לְעַכְשָׁיו. הַדַּקּוֹת שֶׁלְּךָ שְׁמוּרוֹת לְךָ"),
+                   tr("🔒 אַבָּא וְאִמָּא נָעֲלוּ לְעַכְשָׁיו. הַדַּקּוֹת שֶׁלָּךְ שְׁמוּרוֹת לָךְ"))
+    }
+
     /// 🏫 School time with Tofy closed: worlds and games wait, chores don't.
     /// True (and explained) when the tap must not open anything.
     private func schoolBlocksPlay() -> Bool {
@@ -3046,6 +3067,7 @@ struct WorldMapView: View {
     /// 🏫🌙 Inside school time / bedtime no minutes open (the parent's own open
     /// still can). Say when they come back, warmly, and stay on the map.
     private func quietBlocksOpening() -> Bool {
+        if parentLocked { explainQuiet(parentLockLine); return true }
         guard let line = QuietHoursManager.shared.blockedMessage() else { return false }
         Haptic.light()
         progress.openWindowMessage = line

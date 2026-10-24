@@ -71,6 +71,8 @@ data class Child(
      * no other child write carries it. null = never set.
      */
     val flightMode: FlightMode? = null,
+    /** 🔒 Locked by a parent until they release it (ParentLock.kt). READ only here, like [flightMode]. */
+    val parentLock: ParentLock? = null,
     val packs: List<String>,
     val createdAt: Double,
     val raw: Doc,
@@ -109,6 +111,7 @@ data class Child(
             onlyRegularQuestions = d.bool("onlyRegularQuestions") ?: false,
             quietHours = QuietHours.from(d.map("quietHours")),
             flightMode = FlightMode.from(d.map("flightMode")),
+            parentLock = ParentLock.from(d.map("parentLock")),
             packs = d.strList("packs") ?: emptyList(),
             createdAt = d.secs("createdAt") ?: 0.0,
             raw = d,

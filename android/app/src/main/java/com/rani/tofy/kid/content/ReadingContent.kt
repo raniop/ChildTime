@@ -100,6 +100,9 @@ object PreReaderContent {
                     preferHarder = difficulty == Difficulty.HARD, memory = memory) else null
             val pool = themedPool(topic)
             if (thinking != null) thinking
+            // 🧠 Above the easy level, never "אֵיפֹה הָאָדֹם?" — a thinking round instead
+            // (Ben David, 2026-10-23: "איפה האדום איפה הכתום 🥺").
+            else if (difficulty != Difficulty.EASY) (if (rng.nextBoolean()) oddOneOut(topic, rng) else nextInPattern(topic, rng))
             else if (pool != null && rng.nextDouble() < 0.75) findOne(pool, rng, topic)
             else when (rng.nextInt(3)) {
                 0 -> findOne(animals, rng)
@@ -429,6 +432,39 @@ object PreReaderContent {
     }
 
     /** Hear "where's the dog?" → tap the matching emoji. The prompt is shown AND read aloud. */
+    // ── 🧠 Thinking without a bank: the odd one out, what comes next ──────────
+
+    /** Groups that never overlap, so the odd one is never arguable. */
+    private val oddGroups = listOf(
+        listOf("🐶", "🐱", "🐰", "🐸", "🐮", "🐷", "🦁", "🐘", "🐧", "🦊", "🐵", "🐯"),   // animals
+        listOf("🍎", "🍌", "🍉", "🍇", "🍓", "🍐", "🍒", "🍍"),                           // fruit
+        listOf("🚗", "🚌", "🚂", "✈️", "🚲", "🚀", "⛵", "🚒"),                           // vehicles
+        listOf("👕", "👖", "👗", "🧦", "🧢", "👟", "🧤", "🧣"),                           // clothes
+    )
+
+    /** "מָה לֹא שַׁיָּךְ לַקְּבוּצָה?" — three of a kind and one from another. */
+    internal fun oddOneOut(topic: Topic, rng: Random = Random.Default): Question {
+        val kinds = oddGroups.shuffled(rng)
+        val three = kinds[0].shuffled(rng).take(3)
+        val odd = kinds[1].random(rng)
+        val options = (three + odd).shuffled(rng)
+        return Question(topic, "🧩", options, options.indexOf(odd).coerceAtLeast(0), spoken = tr("מָה לֹא שַׁיָּךְ לַקְּבוּצָה?"))
+    }
+
+    /**
+     * "🔴 🔵 🔴 🔵 ❓ — מָה בָּא אַחֲרֵי?" An AB or ABC pattern; the answer is the
+     * next one, the other options come from the same set.
+     */
+    internal fun nextInPattern(topic: Topic, rng: Random = Random.Default): Question {
+        val set = com.rani.tofy.kid.ui.games.PreReaderGames.patternSets.random(rng).shuffled(rng)
+        val unit = set.take(if (rng.nextBoolean()) 2 else 3)
+        val shown = (0 until (if (unit.size == 2) 4 else 5)).map { unit[it % unit.size] }
+        val answer = unit[shown.size % unit.size]
+        val options = set.take(4).toMutableList().also { if (answer !in it) it[0] = answer }.shuffled(rng)
+        return Question(topic, (shown + "❓").joinToString(" "), options, options.indexOf(answer).coerceAtLeast(0),
+            spoken = tr("מָה בָּא אַחֲרֵי?"))
+    }
+
     private fun findOne(pool: List<Pair<String, String>>, rng: Random, topic: Topic = Topic.LOGIC): Question {
         val picks = pool.shuffled(rng).take(4)
         val target = picks.random(rng)

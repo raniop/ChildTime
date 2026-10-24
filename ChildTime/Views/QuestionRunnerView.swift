@@ -1673,7 +1673,9 @@ struct QuestionRunnerView: View {
             // 👶 A parent who chose "קשה" gets thinking questions only — the
             // engine's occasional easier roll must not bring back "אֵיפֹה
             // הַצָּהֹב?" (Sasha, 2026-10-17).
-            let ganLevel: Difficulty = profiles.active?.difficulty(for: topic) == .hard ? .hard : effective
+            // (גן follows the parent's own level, not the engine's sampled one —
+            // its occasional easier roll is what kept "אֵיפֹה הָאָדֹם?" coming.)
+            let ganLevel: Difficulty = profiles.active?.difficulty(for: topic) ?? effective
             return preReader
                 ? PreReaderContent.generate(topic: topic, difficulty: ganLevel)
                 // A question from the grade above starts at that grade's middle, not its top.

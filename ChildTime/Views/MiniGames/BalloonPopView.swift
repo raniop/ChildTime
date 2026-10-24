@@ -346,7 +346,7 @@ struct BalloonPopView: View {
 
     /// 👶 One גן round's rule and balloons, from `PreReaderGames`.
     private func dealPreReader() {
-        let round = PreReaderGames.balloons()
+        let round = PreReaderGames.balloons(difficulty: ProfileStore.shared.active?.difficulty(for: topic ?? .logic) ?? .easy)
         questions = []
         qIndex = 0; qMissed = false; qQueue = []; sinceCorrect = 0; qShownAt = Date()
         set = round.set

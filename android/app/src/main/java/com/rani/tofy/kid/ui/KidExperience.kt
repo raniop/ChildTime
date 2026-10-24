@@ -494,12 +494,17 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     }
     val unlocked = nowMs > 0 && engine.isUnlocked   // nowMs: re-read the window every second
     val isGirl = child?.isGirl == true
+    // 🔒 A parent's "נעל עד שאשחרר" — nothing opens until they release it; every tap says so.
+    val parentLocked = KidSession.parentLocked
+    val parentLockLine = if (isGirl) tr("🔒 אַבָּא וְאִמָּא נָעֲלוּ לְעַכְשָׁיו. הַדַּקּוֹת שֶׁלָּךְ שְׁמוּרוֹת לָךְ")
+        else tr("🔒 אַבָּא וְאִמָּא נָעֲלוּ לְעַכְשָׁיו. הַדַּקּוֹת שֶׁלְּךָ שְׁמוּרוֹת לְךָ")
 
     // Open helpers (WorldMapView.redeemMinutes / redeemGift) — every OpenResult said kindly.
     fun handle(r: OpenResult, gift: Boolean) {
         when (r) {
             is OpenResult.Opened, OpenResult.AlreadyOpen, OpenResult.Busy -> Unit
             is OpenResult.Quiet -> explainQuiet(quietLine(r.occurrence, isGirl))
+            OpenResult.Locked -> explainQuiet(parentLockLine)
             is OpenResult.HeldElsewhere -> say((if (isGirl) tr("הַזְּמַן שֶׁלָּךְ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮") else tr("הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮")))
             OpenResult.Insufficient -> say((if (isGirl) tr("עוֹד קְצָת דַּקּוֹת וְנִפְתַּח לָךְ! 💪") else tr("עוֹד קְצָת דַּקּוֹת וְנִפְתַּח לְךָ! 💪")))
             is OpenResult.Failed -> say(when {
@@ -515,6 +520,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
     fun requestUnlock(action: suspend () -> Unit) {
         if (opening != null) return
         // 🏫🌙 Before the code sheet — asking for the code only to say "not now" would be unkind.
+        if (parentLocked) { explainQuiet(parentLockLine); return }
         KidSession.quietNow()?.let { explainQuiet(quietLine(it, isGirl)); return }
         if (child?.hasPlayPIN == true) { pendingOpen = action; cover = Cover.PlayPin }
         else scope.launch { action() }
@@ -557,6 +563,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 scope.launch {
                     when (val r = KidSession.openWithFlightCode(minutes)) {
                         is OpenResult.Quiet -> explainQuiet(quietLine(r.occurrence, isGirl))
+                        OpenResult.Locked -> explainQuiet(parentLockLine)
                         is OpenResult.HeldElsewhere -> say((if (isGirl) tr("הַזְּמַן שֶׁלָּךְ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮") else tr("הַזְּמַן שֶׁלְּךָ פָּתוּחַ עַכְשָׁיו בְּמַכְשִׁיר אַחֵר 🎮")))
                         else -> Unit
                     }
@@ -623,6 +630,7 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                 capMax = cap.max, pendingMinutes = engine.pendingMinutes, redeemableMinutes = engine.redeemableMinutesNow,
                 hasPlayPin = child?.hasPlayPIN == true,
                 quietLine = KidSession.quietNow()?.let { quietLine(it, isGirl) },
+                locked = parentLocked,
                 // Only where it matters: a code to manage, or minutes worth protecting.
                 showPlayPin = firstRun || child?.hasPlayPIN == true || engine.pendingMinutes > 0 || engine.local.manualPausedSeconds > 0,
                 // ✈️ The parents are away and left a code (nowMs: it stops by itself on the day they're back).
@@ -657,14 +665,19 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                     if (!com.rani.tofy.kid.core.FirstRun.explain(com.rani.tofy.kid.core.FirstRun.Key.GIFT)) requestUnlock { handle(KidSession.openGift(), true) }
                 },
                 // 🏫🌙 The quiet line where the minutes key was: a tap explains it, every time.
-                onQuietTap = { KidSession.quietNow()?.let { explainQuiet(quietLine(it, isGirl)) } },
+                onQuietTap = {
+                    if (parentLocked) explainQuiet(parentLockLine)
+                    else KidSession.quietNow()?.let { explainQuiet(quietLine(it, isGirl)) }
+                },
                 onOpenFlight = {
                     // 🏫🌙 Not in school time or bedtime — say so before asking for the code.
                     val q = KidSession.quietNow()
-                    if (q != null) explainQuiet(quietLine(q, isGirl)) else if (opening == null) cover = Cover.Flight
+                    if (parentLocked) explainQuiet(parentLockLine)
+                    else if (q != null) explainQuiet(quietLine(q, isGirl)) else if (opening == null) cover = Cover.Flight
                 },
                 onTransfer = {
-                    if (!transferring) scope.launch {
+                    if (parentLocked) explainQuiet(parentLockLine)
+                    else if (!transferring) scope.launch {
                         transferTimedOut = false; transferring = true
                         val r = KidSession.transferHere()
                         transferring = false
@@ -759,6 +772,13 @@ private fun KidExperience(cid: String, kidMode: Boolean, onExitKidMode: () -> Un
                         },
                         onClose = { cover = null },
                         onAppLock = if (kidMode) null else ({ cover = null; screen = KidScreen.AppLock }),
+                        // 🔓 Its own confirmed write, from the kid side (JoinRepository.childWrite heals membership).
+                        onReleaseLock = {
+                            scope.launch {
+                                JoinRepository.childWrite(cid, child?.householdID,
+                                    mapOf("parentLock" to com.rani.tofy.data.ParentLock(false, System.currentTimeMillis() / 1000.0).toMap()))
+                            }
+                        },
                     )
                 }
                 is Cover.Ask -> AskParent(child, cid, child?.householdID, c.world) { cover = null }

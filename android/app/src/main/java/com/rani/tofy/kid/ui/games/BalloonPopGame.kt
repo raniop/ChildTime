@@ -108,7 +108,8 @@ fun BalloonPopGame(topic: Topic?, surprise: Boolean, earn: MiniGameEarnSession?,
     val remaining = maxOf(0.0, roundSeconds - (now - startedAt))
 
     fun dealPreReader() {
-        val round = PreReaderGames.balloons()
+        // 🧠 Above the parent's "easy" for this world, counting only.
+        val round = PreReaderGames.balloons(GameEnv.source.difficulty(topic ?: Topic.LOGIC))
         questions = emptyList(); qIndex = 0; qMissed = false; qQueue.clear(); sinceCorrect = 0; qShownAt = nowSecs()
         set = round.set; cue = round.cue; preDealt = true
     }

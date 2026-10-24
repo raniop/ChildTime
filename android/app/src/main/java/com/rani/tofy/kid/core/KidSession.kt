@@ -96,6 +96,8 @@ sealed class OpenResult {
     data object Busy : OpenResult()
     /** 🏫🌙 Inside school time / bedtime: "…הַדַּקּוֹת שֶׁלְּךָ מְחַכּוֹת לְךָ בְּ-13:30". */
     data class Quiet(val occurrence: QuietOccurrence) : OpenResult()
+    /** 🔒 A parent's "נעל עד שאשחרר": nothing opens until they release it. */
+    data object Locked : OpenResult()
 }
 
 data class Opening(val gift: Boolean)
@@ -347,6 +349,7 @@ object KidSession : LeaseHost {
 
     /** Open earned minutes: the claim commits (debit + lease) BEFORE the window opens. */
     suspend fun openEarned(): OpenResult {
+        if (parentLocked) return OpenResult.Locked
         quietNow()?.let { return OpenResult.Quiet(it) }
         val e = engine ?: return OpenResult.NothingToOpen
         val cid = childID ?: return OpenResult.NothingToOpen
@@ -378,6 +381,7 @@ object KidSession : LeaseHost {
 
     /** Bounded local window (one minimum window when the cloud isn't fresh). */
     private fun legacyOpenEarned(): OpenResult {
+        if (parentLocked) return OpenResult.Locked
         quietNow()?.let { return OpenResult.Quiet(it) }
         val e = engine ?: return OpenResult.NothingToOpen
         if (e.isUnlocked) return OpenResult.AlreadyOpen
@@ -392,6 +396,7 @@ object KidSession : LeaseHost {
 
     /** 💝 Open the whole gift pocket as one fixed manual window (outside the daily cap). */
     suspend fun openGift(): OpenResult {
+        if (parentLocked) return OpenResult.Locked
         quietNow()?.let { return OpenResult.Quiet(it) }
         val e = engine ?: return OpenResult.NothingToOpen
         val cid = childID ?: return OpenResult.NothingToOpen
@@ -423,6 +428,7 @@ object KidSession : LeaseHost {
     }
 
     private fun legacyOpenGift(): OpenResult {
+        if (parentLocked) return OpenResult.Locked
         quietNow()?.let { return OpenResult.Quiet(it) }
         val e = engine ?: return OpenResult.NothingToOpen
         if (e.isUnlocked) return OpenResult.AlreadyOpen
@@ -451,6 +457,7 @@ object KidSession : LeaseHost {
 
     /** "נעלו שם ופתחו כאן" — ask the owning device to let go, wait for idle, claim here. */
     suspend fun transferHere(): OpenResult {
+        if (parentLocked) return OpenResult.Locked
         quietNow()?.let { return OpenResult.Quiet(it) }
         val e = engine ?: return OpenResult.NothingToOpen
         val cid = childID ?: return OpenResult.NothingToOpen
@@ -536,6 +543,11 @@ object KidSession : LeaseHost {
         return quietNow()?.takeIf { q.schoolClosesTofyAt(AndroidKidClock.nowUnix()) }
     }
 
+    // ── 🔒 locked until a parent releases it ───────────────────────────────
+    /** children/{id}.parentLock is on (ParentLock.kt) — never in the first run's made-up child. */
+    val parentLocked: Boolean
+        get() = !localOnly && com.rani.tofy.data.ParentLock.from(lastChildDoc?.map("parentLock"))?.on == true
+
     // ── ✈️ flight mode ──────────────────────────────────────────────────────
     /** The code the parents left before flying (children/{id}.flightMode), while it still works. */
     val flightMode: FlightMode?
@@ -549,6 +561,7 @@ object KidSession : LeaseHost {
      * usual "open elsewhere"; offline → it opens here and is adopted later.
      */
     suspend fun openWithFlightCode(chosen: Int): OpenResult {
+        if (parentLocked) return OpenResult.Locked
         quietNow()?.let { return OpenResult.Quiet(it) }
         val e = engine ?: return OpenResult.NothingToOpen
         // 🌙 Never past bedtime / school time, whatever was picked.

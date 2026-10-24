@@ -33,6 +33,11 @@ enum PreReaderContent {
                                        preferHarder: difficulty == .hard) {
                 return q
             }
+            // 🧠 Above the easy level, never "אֵיפֹה הָאָדֹם?" — a thinking round
+            // instead (Ben David, 2026-10-23: "איפה האדום איפה הכתום 🥺").
+            if difficulty != .easy {
+                return Bool.random() ? oddOneOut(topic: topic) : nextInPattern(topic: topic)
+            }
             // A theme world asks about ITS pictures most of the time; the
             // animals / shapes / colours rounds keep some variety.
             if let pool = themedPool(for: topic), Double.random(in: 0...1) < 0.75 {
@@ -368,6 +373,42 @@ enum PreReaderContent {
                          spoken: tr("אֵיפֹה הָאוֹת \(target.name)?"))
         q.skill = "letters"
         return q
+    }
+
+    // MARK: - 🧠 Thinking without a bank: the odd one out, what comes next
+
+    /// Groups that never overlap, so the odd one is never arguable.
+    private static let oddGroups: [[String]] = [
+        ["🐶", "🐱", "🐰", "🐸", "🐮", "🐷", "🦁", "🐘", "🐧", "🦊", "🐵", "🐯"],   // animals
+        ["🍎", "🍌", "🍉", "🍇", "🍓", "🍐", "🍒", "🍍"],                           // fruit
+        ["🚗", "🚌", "🚂", "✈️", "🚲", "🚀", "⛵", "🚒"],                           // vehicles
+        ["👕", "👖", "👗", "🧦", "🧢", "👟", "🧤", "🧣"],                           // clothes
+    ]
+
+    /// "מָה לֹא שַׁיָּךְ לַקְּבוּצָה?" — three of a kind and one from another.
+    private static func oddOneOut(topic: Topic) -> Question {
+        let kinds = oddGroups.shuffled()
+        let three = Array(kinds[0].shuffled().prefix(3))
+        let odd = kinds[1].randomElement()!
+        let options = (three + [odd]).shuffled()
+        return Question(topic: topic, prompt: "🧩", options: options,
+                        correctIndex: options.firstIndex(of: odd) ?? 0,
+                        spoken: tr("מָה לֹא שַׁיָּךְ לַקְּבוּצָה?"))
+    }
+
+    /// "🔴 🔵 🔴 🔵 ❓ — מָה בָּא אַחֲרֵי?" An AB or ABC pattern; the answer is
+    /// the next one, the other options come from the same set.
+    private static func nextInPattern(topic: Topic) -> Question {
+        let set = PreReaderGames.patternSets.randomElement()!.shuffled()
+        let unit = Array(set.prefix(Bool.random() ? 2 : 3))
+        let shown = (0..<(unit.count == 2 ? 4 : 5)).map { unit[$0 % unit.count] }
+        let answer = unit[shown.count % unit.count]
+        var options = Array(Set(set.prefix(4))).shuffled()
+        if !options.contains(answer) { options[0] = answer }
+        options = Array(options.prefix(4)).shuffled()
+        return Question(topic: topic, prompt: (shown + ["❓"]).joined(separator: " "), options: options,
+                        correctIndex: options.firstIndex(of: answer) ?? 0,
+                        spoken: tr("מָה בָּא אַחֲרֵי?"))
     }
 
     // MARK: - Find the picture: hear "where's the dog?" → tap the matching emoji.

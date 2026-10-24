@@ -64,6 +64,19 @@ struct PreReaderContentTests {
         }
     }
 
+    /// Ben David, 2026-10-23: "איפה האדום איפה הכתום". Above easy a גן world
+    /// never asks "where is…" — with or without a thinking bank.
+    @Test func noFindingAboveEasy() {
+        for topic in [Topic.science, .history, .english, .soccer, .logic] {
+            for d in [Difficulty.medium, .hard] {
+                for _ in 0..<60 {
+                    let q = PreReaderContent.generate(topic: topic, difficulty: d)
+                    #expect(!(q.spoken ?? "").contains("אֵיפֹה"), "\(topic) \(d): \(q.spoken ?? "")")
+                }
+            }
+        }
+    }
+
     @Test func lettersNeverOfferSoundAlikes() {
         let groups: [Set<String>] = [["א", "ע"], ["ט", "ת"], ["כ", "ק", "ח"], ["ס", "ש"], ["ב", "ו"]]
         for _ in 0..<300 {
@@ -79,7 +92,7 @@ struct PreReaderContentTests {
 
     @Test func themeWorldsAskAboutTheirOwnPictures() {
         let sea: Set<String> = ["🐙", "🐬", "🦈", "🐢", "🦀", "🐳", "🐠", "🐚"]
-        let seaRounds = (0..<200).map { _ in PreReaderContent.generate(topic: .sea) }
+        let seaRounds = (0..<200).map { _ in PreReaderContent.generate(topic: .sea, difficulty: .easy) }   // "find…" rounds live at easy only now
         #expect(seaRounds.filter { Set($0.options).isSubset(of: sea) }.count > 100)
     }
 }

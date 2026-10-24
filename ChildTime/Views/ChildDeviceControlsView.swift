@@ -61,6 +61,7 @@ struct ChildDeviceControlsView: View {
                     header
                     if kidMode.active { exitKidModeButton }
                     statusBanner
+                    parentLockCard
                     screenTimeCard
                     quickOpenCard
                     appsCard
@@ -255,6 +256,35 @@ struct ChildDeviceControlsView: View {
     }
 
     // MARK: - Status banner (one clear place for the current lock state)
+
+    /// 🔒 "נעל עד שאשחרר" — released here with the parent code, when the
+    /// parent is standing beside the child (Rani, 2026-10-24).
+    @ViewBuilder private var parentLockCard: some View {
+        if let p = profiles.active, p.parentLock?.on == true {
+            VStack(spacing: 10) {
+                Text(tr("🔒 נעלתם עד שתשחררו"))
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Text(tr("הדקות של הילד שמורות. אחרי השחרור אפשר לפתוח אותן כרגיל."))
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                Button {
+                    Haptic.success()
+                    Task { await ParentLockStore.set(false, for: p.id) }
+                } label: {
+                    Text(tr("🔓 שחרור הנעילה"))
+                        .font(.system(size: 17, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color(hex: "3A2700"))
+                        .frame(maxWidth: .infinity).frame(height: 50)
+                        .background(AppGradient.gold, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(16)
+            .glassPane(radius: 16)
+        }
+    }
 
     @ViewBuilder private var statusBanner: some View {
         if isUnlocked {

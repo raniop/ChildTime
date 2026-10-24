@@ -98,6 +98,22 @@ object Commands {
      * its OWN field on children/{id}, so no other write can carry an old copy
      * back. OK / QUEUED both reach the child (the listener shows it here at once).
      */
+    /**
+     * 🔒 ParentLockStore.set: lock until released (true) or release (false) —
+     * its OWN field on children/{id}, confirmed like every parent→child command.
+     */
+    suspend fun setParentLock(childID: String, on: Boolean): WriteOutcome =
+        childCommand(childID, mapOf("parentLock" to ParentLock(on, nowSecs()).toMap()), timeoutMs = 6000)
+
+    /** "נעל עד שאשחרר": the existing re-lock of the open window, AND it stays locked until released. */
+    fun lockUntilReleased(childID: String) {
+        lock(childID)
+        scope.launch { setParentLock(childID, true) }
+    }
+
+    /** "🔓 שחרור הנעילה" — the child may open their minutes again. */
+    fun releaseLock(childID: String) { scope.launch { setParentLock(childID, false) } }
+
     suspend fun setFlightMode(childID: String, mode: FlightMode?): WriteOutcome {
         val value = mode ?: FlightMode.off()
         return childCommand(childID, mapOf("flightMode" to value.toMap()), timeoutMs = 6000)

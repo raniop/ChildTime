@@ -200,9 +200,10 @@ class QuestionSession internal constructor(
         // comes from the grade above, at that grade's middle level (Rani, 2026-10-15).
         val stretchTo = if (!preReader && !bonus && !arena && child.isStretched(topic) && child.grade < CurriculumMath.TOP_GRADE && rng.nextBoolean())
             child.grade + 1 else null
-        // 👶 A parent who chose "קשה" gets thinking questions only — the engine's
-        // occasional easier roll must not bring back "אֵיפֹה הַצָּהֹב?" (Sasha, 2026-10-17).
-        val ganLevel = if (base == Difficulty.HARD) Difficulty.HARD else effective
+        // 👶 גן follows the PARENT's own level, not the engine's sampled one — its
+        // occasional easier roll is what kept "אֵיפֹה הָאָדֹם?" coming (Sasha,
+        // 2026-10-17; Ben David, 2026-10-23).
+        val ganLevel = base
         fun make(): Question = when {
             bonus || arena -> QuestionGenerator.generateBonus(topic, child.grade, ctx)
             preReader -> PreReaderContent.generate(topic, rng, ganLevel, memory)

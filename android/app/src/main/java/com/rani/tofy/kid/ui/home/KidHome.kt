@@ -111,6 +111,8 @@ data class HomeCtaModel(
     /** 🔒 the child's own code for their minutes (iOS "קוד סודי לדקות שלי"). */
     val hasPlayPin: Boolean = false,
     val showPlayPin: Boolean = false,
+    /** 🔒 A parent's "נעל עד שאשחרר": the minutes key says so (and explains on every tap). */
+    val locked: Boolean = false,
     /** ✈️ The parents are away and left a flight code (FlightMode.kt) — the key that asks for it. */
     val flight: Boolean = false,
 )
@@ -682,6 +684,7 @@ private fun ColumnScope.BottomCtas(c: HomeCtaModel, onOpenEarned: () -> Unit, on
             if (c.transferring) KidCta(tr("מַעֲבִירִים לְכָאן… ✨"), Color(0xFF5B6CFF), Color(0xFF9B5DE5), busy = true, size = 19) {}
             else KidCta(tr("נַעֲלוּ %@ וּפִתְחוּ כָּאן", where), Color(0xFF5B6CFF), Color(0xFF9B5DE5), emoji = "🔁", size = 19, onClick = onTransfer)
         }
+        c.locked -> BottomHint(tr("🔒 נָעוּל לְעַכְשָׁיו") + " · " + tr("הַדַּקּוֹת שְׁמוּרוֹת"), onClick = onQuietTap)   // 🔒 until a parent releases it
         c.quietLine != null -> BottomHint(c.quietLine, onClick = onQuietTap)   // a tap says why, every time
         c.canRedeem -> {
             if (c.opening && !c.openingGift) KidCta(SocialMe.g(tr("פּוֹתְחִים לְךָ… ✨"), tr("פּוֹתְחִים לָךְ… ✨")), Color(0xFF5E60CE), Color(0xFF3E8BF0), busy = true) {}

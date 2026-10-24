@@ -85,6 +85,10 @@ final class AppUpdateConfig: ObservableObject {
         guard enabled, !AppInfo.isDemoRun else { return .none }
         let mine = Self.installedBuild
         if minBuild > 0, mine < minBuild { return .required(build: minBuild) }
+        // Same version name as the store's → nothing newer to get, whatever the
+        // build number says (2026-10-24: config said 244 while the store sold
+        // 243 under the same 2026.10.21, and every 243 phone nagged).
+        if !versionName.isEmpty, versionName == AppInfo.version { return .none }
         if latestBuild > mine, dismissedBuild < latestBuild { return .recommended(build: latestBuild) }
         return .none
     }

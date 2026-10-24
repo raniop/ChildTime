@@ -161,6 +161,8 @@ struct ChildRecord: Codable, Identifiable, Equatable {
     /// ✈️ Read only — `init(profile:)` leaves it nil so a roster upload never
     /// writes it; `FlightModeStore.save` is its one writer.
     var flightMode: FlightMode?
+    /// 🔒 Read only, like `flightMode` — `ParentLockStore.set` is its one writer.
+    var parentLock: ParentLock?
 
     init(profile: Profile, householdID: String) {
         self.id = profile.id.uuidString
@@ -239,6 +241,7 @@ struct ChildRecord: Codable, Identifiable, Equatable {
         p.onlyRegularQuestions = onlyRegularQuestions ?? false
         p.quietHours = quietHours
         p.flightMode = flightMode
+        p.parentLock = parentLock
         p.characterUpdatedAt = characterUpdatedAt
         p.backdropID = backdropID
         p.backdropUpdatedAt = backdropUpdatedAt

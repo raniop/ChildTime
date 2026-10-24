@@ -96,8 +96,13 @@ object PreReaderGames {
 
     data class BalloonRound(val set: BalloonSet, val cue: PreReaderCue)
 
-    /** 🎈 Three text-free rounds: one object · one colour · a quantity. */
-    fun balloons(): BalloonRound = when ((0..2).random()) {
+    /**
+     * 🎈 Three text-free rounds: one object · one colour · a quantity. Above easy
+     * ([difficulty] = the parent's level for the world), counting only — "pop the
+     * red ones" is finding, not thinking (Ben David, 2026-10-23).
+     */
+    fun balloons(difficulty: com.rani.tofy.ui.child.Difficulty = com.rani.tofy.ui.child.Difficulty.EASY): BalloonRound =
+        if (difficulty != com.rani.tofy.ui.child.Difficulty.EASY) balloonCount() else when ((0..2).random()) {
         0 -> balloonColour()
         1 -> balloonCount()
         else -> balloonPicture()

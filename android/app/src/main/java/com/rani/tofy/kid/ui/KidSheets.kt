@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -206,6 +207,8 @@ internal fun KidDeviceControls(
     onLockNow: () -> Unit, onExitKidMode: () -> Unit, onDisconnect: () -> Unit, onClose: () -> Unit,
     /** 🛡 The app lock's manage screen (child devices only — Kid Mode pins the screen instead). */
     onAppLock: (() -> Unit)? = null,
+    /** 🔓 Release "נעל עד שאשחרר" here, with the parent standing beside the child. */
+    onReleaseLock: () -> Unit = {},
 ) {
     BackHandler(onBack = onClose)
     var confirm by remember { mutableStateOf(false) }
@@ -245,6 +248,17 @@ internal fun KidDeviceControls(
                         .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(16.dp)).clickable(onClick = onLockNow)
                         .padding(horizontal = 14.dp, vertical = 8.dp),
                         color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+                }
+
+                // 🔒 "נעל עד שאשחרר" — released here with the parent code (Rani, 2026-10-24).
+                if (child?.parentLock?.on == true) Column(
+                    Modifier.fillMaxWidth().glassPane(16.dp).padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Text(tr("🔒 נעלתם עד שתשחררו"), color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                    Text(tr("הדקות של הילד שמורות. אחרי השחרור אפשר לפתוח אותן כרגיל."), color = Color.White.copy(alpha = 0.8f),
+                        fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 14.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                    com.rani.tofy.ui.common.GoldButton(tr("🔓 שחרור הנעילה"), Modifier.height(50.dp), onClick = onReleaseLock)
                 }
 
                 // ⏱ The child's daily limit, right here on the child's device (Rani).

@@ -13,6 +13,7 @@ struct ChildActionsSheet: View {
     enum Action {
         case gift(minutes: Int)
         case lock
+        case release
         case lockAndRevokeGift
         case location
         case connectDevice
@@ -108,7 +109,11 @@ struct ChildActionsSheet: View {
         switch t {
         case .lock:
             VStack(spacing: 8) {
-                chip(tr("נעל עכשיו")) { run(.lock) }
+                if profile.parentLock?.on == true {
+                    chip(tr("🔓 שחרור הנעילה")) { run(.release) }
+                } else {
+                    chip(tr("נעל עד שאשחרר")) { run(.lock) }
+                }
                 chip(tr("נעל ואפס דקות מתנה"), destructive: true) { run(.lockAndRevokeGift) }
             }
             .transition(.opacity.combined(with: .move(edge: .top)))

@@ -156,6 +156,8 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
     /// ✈️ The parents are away: a code the child opens their device with (see
     /// `FlightMode`). Arrives from the cloud only; nil = never set.
     var flightMode: FlightMode?
+    /// 🔒 Locked by a parent until they release it (see `ParentLock`).
+    var parentLock: ParentLock?
 
     init(
         id: UUID = UUID(),
@@ -230,6 +232,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         case onlyRegularQuestions
         case quietHours
         case flightMode
+        case parentLock
         case backdropID, backdropUpdatedAt
     }
 
@@ -287,6 +290,7 @@ struct Profile: Identifiable, Codable, Equatable, Hashable {
         self.onlyRegularQuestions = (try? c.decodeIfPresent(Bool.self, forKey: .onlyRegularQuestions)) ?? nil ?? false
         self.quietHours = (try? c.decodeIfPresent(QuietHours.self, forKey: .quietHours)) ?? nil
         self.flightMode = (try? c.decodeIfPresent(FlightMode.self, forKey: .flightMode)) ?? nil
+        self.parentLock = (try? c.decodeIfPresent(ParentLock.self, forKey: .parentLock)) ?? nil
     }
 
     /// The worlds a demo run is pinned to, or nil in the real app. Read ONCE:

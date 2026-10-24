@@ -247,8 +247,16 @@ private fun ChildCard(
                 Stat(Modifier.weight(1f), "${s.answeredToday}", tr("שאלות היום"))
                 Stat(Modifier.weight(1f), "${s.correctToday}", tr("נכונות"))
             }
+            // 🎮 What the child can still open — earned and gift — said in a sentence
+            // (Sasha, 2026-10-23: "לא מצאתי בשום מקום מלבד האייפד כמה זמן יש לה סה״כ").
+            walletLine(s, girl)?.let { P(it, 14f, weight = FontWeight.SemiBold, maxLines = 1) }
         } else {
             P(tr("%@ · אין עדיין מכשיר מחובר.", gradeName(child.effectiveGrade)), 13f)
+        }
+        // 🔒 "נעל עד שאשחרר" is on — and where to release it.
+        if (child.parentLock?.on == true) {
+            Text(tr("🔒 נעול עד שתשחררו · ⚡ פעולות ← שחרור הנעילה"), color = Color(0xFFFFD27A), fontFamily = Rounded,
+                fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, maxLines = 1)
         }
         // The buttons sit on the tiles' grid, three equal columns (Rani). With a
         // device: 📊 · ⚡ · 💝 — the gift is one tap from the home, not inside
@@ -270,6 +278,17 @@ private fun ChildCard(
         // 🧒 Kid Mode: this phone becomes the child's for a while (screen-pinned).
         WhiteButton(tr("תנו ל%@ לשחק כאן 🧒", child.name), Modifier.fillMaxWidth().coachMark("p.playHere", marked)) { com.rani.tofy.DeviceRole.startKidMode(child.id) }
     }
+}
+
+/** "🎮 25 דקות מחכות לה · 💝 10 דקות מתנה" — each part only when it is > 0; null when both are 0. */
+internal fun walletLine(s: Progress, girl: Boolean): String? {
+    val earned = s.earnedSecondsAvailable / 60
+    val gift = s.giftMinutes
+    val parts = listOfNotNull(
+        earned.takeIf { it > 0 }?.let { if (girl) tr("🎮 %lld דקות מחכות לה", it) else tr("🎮 %lld דקות מחכות לו", it) },
+        gift.takeIf { it > 0 }?.let { tr("💝 %lld דקות מתנה", it) },
+    )
+    return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
 }
 
 /** 💝 The gift button: the one warm tile on the card (iOS gridCardGift). */

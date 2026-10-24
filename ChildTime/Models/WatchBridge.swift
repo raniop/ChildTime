@@ -119,6 +119,7 @@ final class WatchBridge: NSObject, WCSessionDelegate {
         case "lock":
             let actionID = beginTracking(childID: cid, kind: "lock", minutes: 0)
             HouseholdManager.shared.lockRemoteScreenTime(toChildID: id, fromWatch: true)
+            Task { await ParentLockStore.set(true, for: id) }   // 🔒 until released
             return ["ok": true, "actionID": actionID]
         case "beep":
             let fix = LocationSharing.shared.shownFix(cid)

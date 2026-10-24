@@ -157,7 +157,10 @@ enum PreReaderGames {
     ///   🐶      one object  — pop every balloon with the dog on it
     ///   🔴      one colour  — pop every red balloon (the balloon IS the answer)
     ///   🍎🍎🍎  a quantity  — pop the balloon carrying exactly three apples
-    static func balloons() -> (set: BalloonSet, cue: PreReaderCue) {
+    static func balloons(difficulty: Difficulty = .easy) -> (set: BalloonSet, cue: PreReaderCue) {
+        // 🧠 Above easy, counting only — "pop the red ones" is finding, not
+        // thinking (Ben David, 2026-10-23).
+        if difficulty != .easy { return balloonCount() }
         switch Int.random(in: 0...2) {
         case 0:  return balloonColour()
         case 1:  return balloonCount()

@@ -22,6 +22,14 @@ class AppUpdateLogicTest {
         assertEquals(State.None, AppUpdateLogic.state(Values(latestBuild = 2001), mine))
     }
 
+    @Test fun sameVersionNameNeverNags() {
+        // The config's build ran ahead of the store under the same name: no notice.
+        assertEquals(State.None, AppUpdateLogic.state(Values(latestBuild = 2440, versionName = "2026.10.21"), 2430, "2026.10.21"))
+        // A different name still offers it; below the minimum is still required.
+        assertEquals(State.Recommended(2440), AppUpdateLogic.state(Values(latestBuild = 2440, versionName = "2026.10.24"), 2430, "2026.10.21"))
+        assertEquals(State.Required(2440), AppUpdateLogic.state(Values(minBuild = 2440, versionName = "2026.10.21"), 2430, "2026.10.21"))
+    }
+
     @Test fun laterIsRememberedPerBuild() {
         // "Later" on 2010 silences 2010 …
         assertEquals(State.None, AppUpdateLogic.state(Values(latestBuild = 2010, dismissedBuild = 2010), mine))

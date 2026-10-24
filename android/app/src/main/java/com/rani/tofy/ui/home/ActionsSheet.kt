@@ -65,7 +65,9 @@ fun ActionsSheet(child: Child, state: FamilyState, onDismiss: () -> Unit, onChor
                 }
                 when (expanded) {
                     "lock" -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Chip(tr("נעל עכשיו"), Modifier.fillMaxWidth()) { Commands.lock(child.id); onDismiss() }
+                        // 🔒 It stays locked until released (the child used to open again with their own minutes).
+                        if (child.parentLock?.on == true) Chip(tr("🔓 שחרור הנעילה"), Modifier.fillMaxWidth()) { Commands.releaseLock(child.id); onDismiss() }
+                        else Chip(tr("נעל עד שאשחרר"), Modifier.fillMaxWidth()) { Commands.lockUntilReleased(child.id); onDismiss() }
                         Chip(tr("נעל ואפס דקות מתנה"), Modifier.fillMaxWidth(), destructive = true) { confirmRevoke = true }
                     }
                 }
