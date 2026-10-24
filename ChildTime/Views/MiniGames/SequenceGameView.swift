@@ -208,15 +208,24 @@ struct SequenceGameView: View {
             Text(PreReaderChrome.streak(streak))
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(AppColor.starGold)
-            Spacer(minLength: 0)
             GeometryReader { g in
                 let gap: CGFloat = 10
                 // Up to three frames a row: a whole morning (six) is two rows
                 // of big pictures rather than one row of stamps.
                 let perRow = CGFloat(max(1, slotRows.map(\.count).max() ?? 1))   // a four-picture row is four wide
-                let side = min(isCompact ? 118 : 160, (g.size.width - 12 - gap * (perRow - 1)) / perRow)   // 12: room for the number badge
-                let cardSide = min(isCompact ? 104 : 140, (g.size.width - gap * 2) / 3)
-                VStack(spacing: isCompact ? 26 : 34) {
+                // 📐 Sized to the HEIGHT too: on an iPad held sideways a five-step
+                // story pushed the last pictures off the bottom, half-cut and
+                // hard to drag (Sasha, 2026-10-23). The rows are counted from the
+                // whole story, so nothing jumps as pictures are placed.
+                let steps = max(1, current?.steps.count ?? 1)
+                let frameRows = CGFloat(max(1, slotRows.count))
+                let cardRows = CGFloat((steps + 2) / 3)
+                let section: CGFloat = isCompact ? 26 : 34
+                let fixed = section + (frameRows - 1) * (gap + 6) + (cardRows - 1) * gap + 16
+                let byHeight = max(44, (g.size.height - fixed) / (frameRows + 0.88 * cardRows))
+                let side = min(isCompact ? 118 : 160, (g.size.width - 12 - gap * (perRow - 1)) / perRow, byHeight)   // 12: room for the number badge
+                let cardSide = min(isCompact ? 104 : 140, (g.size.width - gap * 2) / 3, side * 0.88)
+                VStack(spacing: section) {
                     // The frames, in reading order.
                     VStack(spacing: gap + 6) {
                         ForEach(slotRows.indices, id: \.self) { r in
@@ -234,8 +243,7 @@ struct SequenceGameView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .frame(height: isCompact ? 470 : 620)
-            Spacer(minLength: 0)
+            .frame(maxHeight: isCompact ? 470 : 620)
         }
         .frame(maxWidth: isCompact ? 560 : 760)
         .padding(.horizontal, AppSpacing.md)
@@ -304,7 +312,13 @@ struct SequenceGameView: View {
                         drag = v.translation
                     }
                     .onEnded { v in
-                        if let i = frames.first(where: { $0.value.insetBy(dx: -6, dy: -6).contains(v.location) })?.key {
+                        // Forgiving: the frame under the finger, or the nearest one
+                        // within a picture's width — a near miss still lands.
+                        if let i = frames.first(where: { $0.value.insetBy(dx: -6, dy: -6).contains(v.location) })?.key
+                            ?? frames.filter({ placed[$0.key] == nil })
+                                .map({ (key: $0.key, d: hypot($0.value.midX - v.location.x, $0.value.midY - v.location.y), w: $0.value.width) })
+                                .filter({ $0.d < $0.w })
+                                .min(by: { $0.d < $1.d })?.key {
                             tryPlace(step, in: i)
                         } else {
                             withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) { drag = .zero; dragging = nil }
