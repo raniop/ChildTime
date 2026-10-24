@@ -58,7 +58,7 @@ enum WhatsNewContent {
         // 2026.10.24 — Tofy closed during school time, an explanation on every
         // tap (Sasha, 2026-10-21). Its own version: 243 went live as 2026.10.21
         // before this build could replace it in review.
-        Release(build: 246, version: "2026.10.24", headline: tr("נעל עד שאשחרר"), items: [
+        Release(build: 247, version: "2026.10.24", headline: tr("נעל עד שאשחרר"), items: [
             Item(emoji: "🔒", title: tr("נעל עד שאשחרר"),
                  line: tr("נעילה מהטלפון נשארת עד שאתם משחררים, מחלון הפעולות או עם קוד הורה במכשיר של הילד. הדקות של הילד נשמרות")),
             Item(emoji: "❌", title: tr("השאלות שהילד טעה בהן"),
