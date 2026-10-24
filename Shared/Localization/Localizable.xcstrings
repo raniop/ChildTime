@@ -30000,6 +30000,28 @@
         }
       }
     },
+    "בדוח של הילד, בכל נושא וב״כדאי לתרגל״, רואים את השאלה, מה הילד ענה ומה הייתה התשובה הנכונה. כך יודעים מה לתרגל יחד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في تقرير طفلك، تحت كل موضوع وفي «يستحق التدريب»، ترون السؤال وما أجاب به طفلك وما كانت الإجابة الصحيحة. هكذا تعرفون ما الذي تتدربون عليه معًا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In your child's report, under each topic and in “Worth practicing”, you see the question, what your child answered and what the right answer was. So you know what to practice together"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В отчёте ребёнка, в каждой теме и в «Стоит потренировать», видно вопрос, ответ ребёнка и правильный ответ. Так понятно, что тренировать вместе"
+          }
+        }
+      }
+    },
     "בדקו את חבור האינטרנט ונסו שוב." : {
       "localizations" : {
         "ar" : {
@@ -55712,6 +55734,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вопросы по школьной программе, а уровень Tofy подбирает сам. 1 сентября класс повышается автоматически."
+          }
+        }
+      }
+    },
+    "השאלות שהילד טעה בהן" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأسئلة التي أخطأ فيها طفلك"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The questions your child got wrong"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вопросы, в которых ребёнок ошибся"
           }
         }
       }
