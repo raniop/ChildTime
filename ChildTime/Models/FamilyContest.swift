@@ -278,9 +278,10 @@ final class FamilyContestStore: ObservableObject {
         defer { refreshing = false }
         lastRefresh = Date()
         let bound = ProgressVault.shared.boundProfileID
-        // The siblings' history (never the bound child's — the local copy is
-        // the live one and a pull would overwrite today's answers).
-        for p in ProfileStore.shared.profiles where p.id != bound {
+        // Everyone's history from the cloud — except the child who plays HERE:
+        // their local copy is the live one and a pull would overwrite today's
+        // answers. On a parent phone nobody plays, so all of them.
+        for p in ProfileStore.shared.profiles where p.id != bound || !(bound.map(Self.playsHere) ?? false) {
             await LearningHistoryStore.shared.fetchRemoteHistory(for: p.id)
         }
         let kids = participants()

@@ -14,7 +14,8 @@ struct FamilyContestKidCard: View {
     @State private var open = false
 
     var body: some View {
-        Group {
+        // A VStack, not a Group: an empty Group is no view, and its .task never ran.
+        VStack(spacing: 0) {
             if store.isActive, let me = store.me {
                 Button { Haptic.light(); open = true } label: { card(me) }
                     .buttonStyle(.plain)
@@ -72,7 +73,7 @@ struct FamilyContestParentCard: View {
     @State private var open = false
 
     var body: some View {
-        Group {
+        VStack(spacing: 0) {
             if store.isActive {
                 Button { Haptic.light(); open = true } label: { card }
                     .buttonStyle(.plain)
