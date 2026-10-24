@@ -133271,6 +133271,50 @@
         }
       }
     },
+    "🎮 %lld דקות מחכות לה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 %lld دقيقة بانتظارها"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 %lld minutes waiting for her"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 Её ждут минут: %lld"
+          }
+        }
+      }
+    },
+    "🎮 %lld דקות מחכות לו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 %lld دقيقة بانتظاره"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 %lld minutes waiting for him"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 Его ждут минут: %lld"
+          }
+        }
+      }
+    },
     "🎮 %lld דק׳" : {
       "localizations" : {
         "ar" : {
@@ -135022,6 +135066,28 @@
     },
     "💝" : {
 
+    },
+    "💝 %lld דקות מתנה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💝 %lld دقيقة هدية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💝 %lld gift minutes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💝 Подарочных минут: %lld"
+          }
+        }
+      }
     },
     "💝 +10 מתנה" : {
       "extractionState" : "stale",
