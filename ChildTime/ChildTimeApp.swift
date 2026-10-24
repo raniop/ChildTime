@@ -886,6 +886,10 @@ struct ChildTimeApp: App {
                                ? Profile(name: tr("יואב"), gender: .boy, age: .grade1, grade: 1)
                                : Profile(name: tr("דנה"), gender: .girl, age: .grade1, grade: 3),
                                onOwnDevice: {}, onPlaysHere: {})
+        #if DEBUG
+        case "familyweek": FamilyWeekMockup()           // DEMO_SCREEN=familyweek — 🏆 mockup: the jar + the champion race
+        case "familyweekend": FamilyWeekEndMockup()     // DEMO_SCREEN=familyweekend — 🎉 mockup: Saturday night
+        #endif
         case "giftsheet":                                   // DEMO_SCREEN=giftsheet — the 💝 window, with minutes waiting
             GiftMinutesSheet(profile: ProfileStore.shared.active ?? Profile(name: tr("נועה"), gender: .girl),
                              givenToday: 30, waiting: 25, earned: 20, capLeft: 600, onSend: { _ in nil }, onRevoke: {})

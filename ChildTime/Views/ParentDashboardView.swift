@@ -475,6 +475,8 @@ struct ParentDashboardView: View {
                                         .transition(.opacity.combined(with: .scale(scale: 0.97)))
                                 }
                             }
+                            // 🏆 The weekly family contest — one card above the children.
+                            AnyView(FamilyContestParentCard())
                             AnyView(childrenGrid)
 
                             // 📍 Once, for families from before location: what it

@@ -458,6 +458,8 @@ struct WorldMapView: View {
                         // top masthead and preferred it back here). No extra top
                         // padding — the gap above טופי should match the gap
                         // between the subtitle and the cards below.
+                        // 🏆 The weekly family contest — the live jar, above the worlds.
+                        AnyView(FamilyContestKidCard())
                         heroTitle
                             // 🧭 The worlds' stop: on a phone the first world sits
                             // under the floating minutes panel, so the tour points
