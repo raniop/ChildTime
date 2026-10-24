@@ -3484,6 +3484,28 @@
         }
       }
     },
+    "%@ · %lld מתנה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld هدية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld gift"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld в подарок"
+          }
+        }
+      }
+    },
     "%@ · %lld שְׁאֵלוֹת" : {
       "localizations" : {
         "ar" : {
@@ -12564,6 +12586,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld вопр. %@"
+          }
+        }
+      }
+    },
+    "%lld שהרוויח מלמידה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ربحها من التعلّم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld he earned by learning"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld заработал учёбой"
+          }
+        }
+      }
+    },
+    "%lld שהרוויחה מלמידה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ربحتها من التعلّم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld she earned by learning"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld заработала учёбой"
           }
         }
       }
@@ -134248,6 +134314,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🎮 Экранное время включено · %@"
+          }
+        }
+      }
+    },
+    "🎮 ל%@ יש עכשיו %lld דק׳ לשחק" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 لدى %1$@ الآن %2$lld دقيقة للعب"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 %1$@ has %2$lld min to play right now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 У %1$@ сейчас %2$lld мин для игры"
           }
         }
       }
