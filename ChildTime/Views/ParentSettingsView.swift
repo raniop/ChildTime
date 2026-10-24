@@ -18,6 +18,10 @@ struct ParentSettingsView: View {
     /// removal and the pairing code). It slides IN, inside this window — the row
     /// used to close the window and open another (Rani, 2026-10-11: "זה נורא").
     var childSettings: ((Profile) -> AnyView)? = nil
+    /// 🔎 Opened from the home's search: slide straight into this page (the
+    /// menu stays underneath, one back-arrow away).
+    var openPage: ParentSettingsPage? = nil
+    @State private var pushOpenPage = false
 
     @State private var showAppPicker = false
     @State private var pickerSelection = SelectionStorage.empty()
@@ -79,6 +83,26 @@ struct ParentSettingsView: View {
         #else
         settingsMenu
         #endif
+    }
+
+    /// The same pages the menu's rows slide in — for the search to open directly.
+    @ViewBuilder private func page(_ p: ParentSettingsPage) -> some View {
+        switch p {
+        case .family: subScreen(tr("המשפחה")) { familySection; timeZoneSection; childOrderSection; syncSection }
+        case .rules: subScreen(tr("כללי המשחק")) { rewardSection; penaltySection; smartFeedSection }
+        case .notifications: subScreen(tr("התראות")) { notificationsSection; insightNotificationsSection }
+        case .pin: subScreen(tr("קוד הורה")) { pinSection }
+        case .look: lookAndLanguagePage
+        case .device:
+            subScreen(settings.deviceRole == .parent ? tr("הטלפון הזה") : tr("אפליקציות ונעילה")) {
+                if settings.deviceRole == .parent { thisDeviceOnlyNote }
+                if settings.deviceRole != .parent || shields.isAuthorized { authorizationSection }
+                appsSection; soundsSection; deviceSection
+            }
+        case .about:
+            subScreen(tr("אודות ופרטיות")) { versionSection; privacySection }
+                .sheet(isPresented: $showWhatsNew) { WhatsNewHistoryView(onDone: { showWhatsNew = false }) }
+        }
     }
 
     private var settingsMenu: some View {
@@ -175,6 +199,16 @@ struct ParentSettingsView: View {
             .environment(\.colorScheme, .dark)
             .navigationTitle(tr("הגדרות"))
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(isPresented: $pushOpenPage) {
+                if let openPage { page(openPage) }
+            }
+            .task {
+                // After the window has finished sliding up — a push requested while
+                // the sheet is still presenting is dropped.
+                guard openPage != nil, !pushOpenPage else { return }
+                try? await Task.sleep(nanoseconds: 450_000_000)
+                pushOpenPage = true
+            }
             .settingsBand()
             .toolbar {
                 // 🎚 The one way out lives in the rail on a foldable.

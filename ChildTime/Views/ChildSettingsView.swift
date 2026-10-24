@@ -74,6 +74,9 @@ struct ChildSettingsView: View {
     var pairingSheet: ((Profile) -> AnyView)? = nil
     /// 📍 The map slides in here too.
     var showsLocation = false
+    /// 🔎 Opened from the home's search: slide straight into this page.
+    var openPage: ChildSettingsPage? = nil
+    @State private var pushOpenPage = false
     @Environment(\.closeSettings) private var closeSettings
     /// "סיום" closes the whole settings window, from any depth.
     private func close() { if embedded, let closeSettings { closeSettings() } else { dismiss() } }
@@ -96,9 +99,9 @@ struct ChildSettingsView: View {
             Group {
                 if let p = profile {
                     #if DEBUG
-                    if let page = demoPage(p) { sheets(page) } else { sheets(form(p)) }
+                    if let page = demoPage(p) { sheets(page) } else { sheets(form(p)).navigationDestination(isPresented: $pushOpenPage) { openedPage(p) } }
                     #else
-                    sheets(form(p))
+                    sheets(form(p)).navigationDestination(isPresented: $pushOpenPage) { openedPage(p) }
                     #endif
                 } else {
                     Color.clear.background(GlassBackdrop())
@@ -118,6 +121,13 @@ struct ChildSettingsView: View {
                 }
             }
         }
+        .task {
+            // After the window has finished sliding up — a push requested while
+            // the sheet is still presenting is dropped.
+            guard openPage != nil, !pushOpenPage else { return }
+            try? await Task.sleep(nanoseconds: 450_000_000)
+            pushOpenPage = true
+        }
         .railDismiss(unless: embedded, tr("סיום"), systemImage: "checkmark") { dismiss() }
         // Every page pushed from here closes the same window with its "סיום".
         .environment(\.closeSettings, closeSettings ?? { dismiss() })
@@ -126,6 +136,22 @@ struct ChildSettingsView: View {
         // SHEETS below carry their own: an alert can't show under a sheet.)
         .familyConnectionAlert()
         .environment(\.layoutDirection, .app)
+    }
+
+    /// The inner page the search asked for, the same one its row slides in.
+    @ViewBuilder private func openedPage(_ p: Profile) -> some View {
+        switch openPage {
+        case .screentime?: ChildScreenTimeView(profileID: p.id, embedded: true).environmentObject(profiles).environmentObject(settings)
+        case .school?: QuietHoursEditorView(profileID: profileID, kind: .school, embedded: true).environmentObject(profiles)
+        case .bedtime?: QuietHoursEditorView(profileID: profileID, kind: .bedtime, embedded: true).environmentObject(profiles)
+        case .difficulty?: ChildDifficultyView(profileID: p.id, snapshot: snapshot, embedded: true).environmentObject(profiles)
+        case .worlds?: ChildWorldsView(profileID: p.id, embedded: true).environmentObject(profiles)
+        case .language?: ChildLanguageView(profileID: p.id, embedded: true).environmentObject(profiles)
+        case .devices?: devicesPage(p)
+        case .map?: ParentLocationView(focusChildID: p.id.uuidString, embedded: true).environmentObject(profiles).environment(\.layoutDirection, .app)
+        case .more?: morePage(p)
+        case nil: EmptyView()
+        }
     }
 
     #if DEBUG

@@ -128,6 +128,13 @@ struct ParentDashboardView: View {
     @State private var qrChild: Profile? = nil
     /// 💝 The gift window, opened from a child's card.
     @State private var giftChild: Profile? = nil
+    /// 🔎 Where the home's search asked the settings windows to open.
+    @State private var settingsOpenPage: ParentSettingsPage? = nil
+    @State private var childOpenPage: ChildSettingsPage? = nil
+    /// The child whose settings the search opened — the card's own `settingsChild`
+    /// sheet lives on the child's page, not on the home.
+    @State private var searchChildSettings: Profile? = nil
+    @State private var showingContest = false
     /// The same pairing sheet, opened OVER a child's settings window.
     @State private var qrInSettings: Profile? = nil
     @State private var qrCode: String? = nil
@@ -393,6 +400,35 @@ struct ParentDashboardView: View {
 
     /// 🔔 A tapped feed row. The sheet has already dismissed itself; give UIKit
     /// a beat before presenting the next one, or the second sheet is swallowed.
+    /// 🔎 A search result → its page, the same way a tap there would get it.
+    private func openSearch(_ target: ParentSearchTarget) {
+        let child: (UUID) -> Profile? = { id in profiles.profiles.first { $0.id == id } }
+        switch target {
+        case .settings(let page):
+            // The sheet's content is built from the body BEFORE this change, so
+            // open it on the next turn, once `settingsOpenPage` is in the body.
+            settingsOpenPage = page
+            DispatchQueue.main.async { showingSettings = true }
+        case .childPage(let page, let id):
+            guard let p = child(id) else { return }
+            childOpenPage = page
+            DispatchQueue.main.async { searchChildSettings = p }
+        case .gift(let id): giftChild = child(id)
+        case .actions(let id):
+            guard !DemoTour.refuse() else { return }
+            actionsChild = child(id)
+        case .report(let id): selectChild(id)
+        case .kidMode(let id): kidModeStart = child(id)
+        case .chores: openChores()
+        case .location: showingLocation = true
+        case .contest: showingContest = true
+        case .addChild: if !household.refuseIfDisconnected() { showingCreateChild = true }
+        case .activity: showingActivity = true
+        case .support: openSupportChat()
+        case .whatsNew: showWhatsNew = true
+        }
+    }
+
     private func openActivity(_ route: ActivityRoute, _ who: Profile?) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             switch route {
@@ -447,6 +483,8 @@ struct ParentDashboardView: View {
                                 // Its top rows sit beside the foldable's clock —
                                 // they stop short of it; the cards run full width.
                                 AnyView(homeHeader).clearOfBar()
+                                // 🔎 "מה תרצו לעשות?" — free words to the right page (Rani, 2026-10-24).
+                                AnyView(ParentSearchBar(children: rows.map(\.profile)) { openSearch($0) }).clearOfBar()
                                 // ⚙️ / ＋ / 🧹 moved into the rail on the Duo.
                                 if !useRail { homeActionsRow.clearOfBar() }
                                 // 🚀 "עוד קצת וסיימנו" — only while a child's setup
@@ -611,11 +649,21 @@ struct ParentDashboardView: View {
             .navigationDestination(for: UUID.self) { id in
                 childDetailScreen(for: id)
             }
-            .sheet(isPresented: $showingSettings) {
+            .sheet(item: $searchChildSettings, onDismiss: { childOpenPage = nil }) { p in
+                childSettingsPage(p, embedded: false, openPage: childOpenPage, afterDelete: { searchChildSettings = nil })
+            }
+            .sheet(isPresented: $showingContest) {
+                FamilyContestView(parent: true).presentationDragIndicator(.visible)
+            }
+            // 🔎 Read here so the body depends on them: a value read only inside a
+            // sheet's closure isn't tracked, and the window opened with the old one.
+            .onChangeCompat(of: settingsOpenPage) { _, _ in }
+            .onChangeCompat(of: childOpenPage) { _, _ in }
+            .sheet(isPresented: $showingSettings, onDismiss: { settingsOpenPage = nil }) {
                 // A child's row in ⚙️ slides that child's settings IN, inside the same window.
                 ParentSettingsView(childSettings: { p in
                     AnyView(childSettingsPage(p, embedded: true, afterDelete: { showingSettings = false }))
-                })
+                }, openPage: settingsOpenPage)
                     .environment(\.layoutDirection, .app)
             }
             // 🔔 The activity centre. The sheet closes itself first and hands the
@@ -961,11 +1009,13 @@ struct ParentDashboardView: View {
         // 🎬 No reminders about the demo tour's made-up children — they would
         // fire days later, on a phone that by then belongs to a real family.
         guard !DemoTour.isOn else { return }
-        InsightNotificationScheduler.reschedule(
-            rows: rows,
-            enabledTopics: settings.enabledTopics,
-            frequency: settings.parentInsightFrequency
-        )
+        // Off the main thread: the notification centre's removal is a synchronous
+        // call to a system service, and when that service stalls it froze the whole
+        // home on a black screen (seen on the simulator, 2026-10-24).
+        let rows = rows, topics = settings.enabledTopics, frequency = settings.parentInsightFrequency
+        DispatchQueue.global(qos: .utility).async {
+            InsightNotificationScheduler.reschedule(rows: rows, enabledTopics: topics, frequency: frequency)
+        }
     }
     private var emptyState: some View {
         VStack(spacing: AppSpacing.lg) {
@@ -1185,7 +1235,8 @@ struct ParentDashboardView: View {
     /// A child's settings — one page, whether it slides in inside the ⚙️ window
     /// or opens from the child's own screen. The map, the devices and every
     /// editor are pushed INSIDE it; the pairing code opens over it.
-    private func childSettingsPage(_ p: Profile, embedded: Bool, afterDelete: @escaping () -> Void) -> some View {
+    private func childSettingsPage(_ p: Profile, embedded: Bool, openPage: ChildSettingsPage? = nil,
+                                   afterDelete: @escaping () -> Void) -> some View {
         ChildSettingsView(profileID: p.id,
                           snapshot: rows.first(where: { $0.profile.id == p.id })?.snapshot ?? ProgressSnapshot(),
                           embedded: embedded,
@@ -1197,7 +1248,8 @@ struct ParentDashboardView: View {
                           onConnectDevice: { qrCode = nil; childDeviceLinked = false },
                           pairing: $qrInSettings,
                           pairingSheet: { AnyView(childQRSheet(for: $0)) },
-                          showsLocation: true)
+                          showsLocation: true,
+                          openPage: openPage)
             .environmentObject(profiles)
             .environmentObject(settings)
     }
