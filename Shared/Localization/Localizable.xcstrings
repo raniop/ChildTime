@@ -48310,6 +48310,28 @@
         }
       }
     },
+    "הדקות של הילד שמורות. אחרי השחרור אפשר לפתוח אותן כרגיל." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دقائق الطفل محفوظة. بعد فك القفل يمكن فتحها كالمعتاد."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your child's minutes are saved. After you release the lock they can be opened as usual."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Минуты ребёнка сохранены. После снятия блокировки их можно открыть как обычно."
+          }
+        }
+      }
+    },
     "הדרכה על המסך" : {
       "localizations" : {
         "ar" : {
@@ -99329,6 +99351,28 @@
         }
       }
     },
+    "נעל עד שאשחרר" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اقفل حتى أفتح"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock until I release"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заблокировать, пока не сниму"
+          }
+        }
+      }
+    },
     "נעל עכשיו" : {
       "localizations" : {
         "ar" : {
@@ -137313,6 +137357,72 @@
     "🔒" : {
 
     },
+    "🔒 אַבָּא וְאִמָּא נָעֲלוּ לְעַכְשָׁיו. הַדַּקּוֹת שֶׁלְּךָ שְׁמוּרוֹת לְךָ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔒 أغلق أمي وأبي الآن. دقائقك محفوظة لك"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔒 Mom and Dad locked it for now. Your minutes are saved for you"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔒 Мама и папа пока заблокировали. Твои минуты сохранены"
+          }
+        }
+      }
+    },
+    "🔒 אַבָּא וְאִמָּא נָעֲלוּ לְעַכְשָׁיו. הַדַּקּוֹת שֶׁלָּךְ שְׁמוּרוֹת לָךְ" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔒 أغلق أمي وأبي الآن. دقائقكِ محفوظة لكِ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔒 Mom and Dad locked it for now. Your minutes are saved for you"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔒 Мама и папа пока заблокировали. Твои минуты сохранены"
+          }
+        }
+      }
+    },
+    "🔒 נָעוּל לְעַכְשָׁיו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔒 مقفل الآن"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔒 Locked for now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔒 Пока заблокировано"
+          }
+        }
+      }
+    },
     "🔒 נוֹעֲלִים %@… רֶגַע אֶחָד ⏳" : {
       "localizations" : {
         "ar" : {
@@ -137331,6 +137441,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🔒 Блокируем %@… одну секунду ⏳"
+          }
+        }
+      }
+    },
+    "🔒 נעול עד שתשחררו · ⚡ פעולות ← שחרור הנעילה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔒 مقفل حتى تفتحوا · ⚡ الإجراءات ← فك القفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔒 Locked until you release · ⚡ Actions → Release the lock"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔒 Заблокировано, пока не снимете · ⚡ Действия → Снять блокировку"
           }
         }
       }
@@ -137379,8 +137511,52 @@
         }
       }
     },
+    "🔒 נעלתם עד שתשחררו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔒 أقفلتم حتى تفتحوا"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔒 You locked it until you release it"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔒 Заблокировано, пока вы не снимете"
+          }
+        }
+      }
+    },
     "🔓" : {
 
+    },
+    "🔓 שחרור הנעילה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔓 فك القفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔓 Release the lock"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔓 Снять блокировку"
+          }
+        }
+      }
     },
     "🔔" : {
 
