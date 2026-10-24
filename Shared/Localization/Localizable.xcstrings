@@ -89221,6 +89221,28 @@
         }
       }
     },
+    "מָה בָּא אַחֲרֵי?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ماذا يأتي بعد ذلك؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What comes next?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что дальше?"
+          }
+        }
+      }
+    },
     "מָה גָּדוֹל יוֹתֵר: %@ אוֹ %@?" : {
       "localizations" : {
         "ar" : {
@@ -89328,6 +89350,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Что нового в этой версии ✨"
+          }
+        }
+      }
+    },
+    "מָה לֹא שַׁיָּךְ לַקְּבוּצָה?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما الذي لا ينتمي إلى المجموعة؟"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What doesn't belong in the group?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что здесь лишнее?"
           }
         }
       }
