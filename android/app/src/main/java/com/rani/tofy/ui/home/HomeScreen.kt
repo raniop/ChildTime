@@ -286,14 +286,13 @@ private fun ChildCard(
 /**
  * 🎮 What the child can still open — earned and gift (Sasha, 2026-10-23: "לא מצאתי
  * בשום מקום מלבד האייפד כמה זמן יש לה סה״כ"). "מחכות לה" was unclear (Rani,
- * 2026-10-24): "🎮 12 דקות שהרוויחה ועוד לא פתחה" / "💝 10 דקות מתנה" — each
- * only when it is > 0.
+ * 2026-10-24) — the short form, a line each: "🎮 12 דק׳ מלמידה" / "💝 10 דק׳
+ * מתנה", each only when it is > 0. [girl] is kept for the call sites; the
+ * short lines need no gender.
  */
-internal fun walletLines(s: Progress, girl: Boolean): List<String> = listOfNotNull(
-    (s.earnedSecondsAvailable / 60).takeIf { it > 0 }?.let {
-        if (girl) tr("🎮 %lld דקות שהרוויחה ועוד לא פתחה", it) else tr("🎮 %lld דקות שהרוויח ועוד לא פתח", it)
-    },
-    s.giftMinutes.takeIf { it > 0 }?.let { tr("💝 %lld דקות מתנה", it) },
+internal fun walletLines(s: Progress, @Suppress("UNUSED_PARAMETER") girl: Boolean): List<String> = listOfNotNull(
+    (s.earnedSecondsAvailable / 60).takeIf { it > 0 }?.let { tr("🎮 %lld דק׳ מלמידה", it) },
+    s.giftMinutes.takeIf { it > 0 }?.let { tr("💝 %lld דק׳ מתנה", it) },
 )
 
 /** 💝 The gift button: the one warm tile on the card (iOS gridCardGift). */
