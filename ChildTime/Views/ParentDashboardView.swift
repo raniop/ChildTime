@@ -1850,8 +1850,9 @@ struct ParentDashboardView: View {
         if earned > 0 || gift > 0 {
             // A line each: side by side they ran past the narrow column (the % sits beside it).
             VStack(alignment: .leading, spacing: 2) {
-                if earned > 0 { Text(girl ? tr("🎮 \(earned) דקות שהרוויחה ועוד לא פתחה") : tr("🎮 \(earned) דקות שהרוויח ועוד לא פתח")) }
-                if gift > 0 { Text(tr("💝 \(gift) דקות מתנה")) }
+                // "12 דק׳ מלמידה" (Rani, 2026-10-24) — short, and says where they came from.
+                if earned > 0 { Text(tr("🎮 \(earned) דק׳ מלמידה")) }
+                if gift > 0 { Text(tr("💝 \(gift) דק׳ מתנה")) }
             }
             .font(.system(size: 12.5, weight: .semibold, design: .rounded))
             .foregroundStyle(GlassInk.secondary).monospacedDigit()
