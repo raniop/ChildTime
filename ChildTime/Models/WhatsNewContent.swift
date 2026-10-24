@@ -58,7 +58,13 @@ enum WhatsNewContent {
         // 2026.10.24 — Tofy closed during school time, an explanation on every
         // tap (Sasha, 2026-10-21). Its own version: 243 went live as 2026.10.21
         // before this build could replace it in review.
-        Release(build: 245, version: "2026.10.24", headline: tr("טופי סגור בזמן בית ספר"), items: [
+        Release(build: 245, version: "2026.10.24", headline: tr("נעל עד שאשחרר"), items: [
+            Item(emoji: "🔒", title: tr("נעל עד שאשחרר"),
+                 line: tr("נעילה מהטלפון נשארת עד שאתם משחררים, מחלון הפעולות או עם קוד הורה במכשיר של הילד. הדקות של הילד נשמרות")),
+            Item(emoji: "🎮", title: tr("כמה דקות מחכות לילד"),
+                 line: tr("בכרטיס של כל ילד רואים כמה דקות מחכות לו לפתיחה, וכמה דקות מתנה יש לו")),
+            Item(emoji: "🧠", title: tr("בגן: חשיבה במקום ״איפה ה…״"),
+                 line: tr("מהרמה הבינונית ומעלה, במקום ״איפה האדום?״ הילד מקבל ״מה לא שייך?״ ו״מה בא אחרי?״")),
             Item(emoji: "🏫", title: tr("טופי סגור בזמן בית ספר"),
                  line: tr("בזמן בית ספר הילד יכול רק לסמן מטלות. מי שרוצה, פותח את טופי במתג בהגדרות של זמן בית הספר")),
             Item(emoji: "🔊", title: tr("הסבר בכל לחיצה"),

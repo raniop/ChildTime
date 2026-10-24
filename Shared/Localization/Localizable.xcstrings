@@ -29934,6 +29934,28 @@
         }
       }
     },
+    "בגן: חשיבה במקום ״איפה ה…״" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الروضة: تفكير بدل «أين…»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kindergarten: thinking instead of \"where is…\""
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Садик: думать вместо «где…»"
+          }
+        }
+      }
+    },
     "בגן: רמה קשה באמת" : {
       "localizations" : {
         "ar" : {
@@ -31960,6 +31982,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "В карточке каждого ребёнка теперь видно, где он сейчас, со значком этого места"
+          }
+        }
+      }
+    },
+    "בכרטיס של כל ילד רואים כמה דקות מחכות לו לפתיחה, וכמה דקות מתנה יש לו" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تُظهر بطاقة كل طفل عدد الدقائق التي تنتظر الفتح وعدد دقائق الهدية لديه"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each child's card shows how many minutes are waiting to be opened, and how many gift minutes they have"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На карточке каждого ребёнка видно, сколько минут ждут открытия и сколько у него подарочных минут"
           }
         }
       }
@@ -76445,6 +76489,28 @@
         }
       }
     },
+    "כמה דקות מחכות לילד" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كم دقيقة تنتظر الطفل"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How many minutes are waiting"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сколько минут ждёт ребёнка"
+          }
+        }
+      }
+    },
     "כמה הרוויח היום, מתוך המקסימום ליום. את המקסימום אתם קובעים לכל ילד." : {
       "localizations" : {
         "ar" : {
@@ -91305,6 +91371,28 @@
         }
       }
     },
+    "מהרמה הבינונית ומעלה, במקום ״איפה האדום?״ הילד מקבל ״מה לא שייך?״ ו״מה בא אחרי?״" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "من المستوى المتوسط فما فوق، بدل «أين الأحمر؟» يحصل الطفل على «ما الذي لا ينتمي؟» و«ماذا يأتي بعد ذلك؟»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From the medium level up, instead of \"Where is red?\" your child gets \"What doesn't belong?\" and \"What comes next?\""
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начиная со среднего уровня вместо «Где красный?» ребёнок получает «Что лишнее?» и «Что дальше?»"
+          }
+        }
+      }
+    },
     "מוֹסְקְבָה" : {
       "localizations" : {
         "ar" : {
@@ -99147,6 +99235,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Блокировка"
+          }
+        }
+      }
+    },
+    "נעילה מהטלפון נשארת עד שאתם משחררים, מחלון הפעולות או עם קוד הורה במכשיר של הילד. הדקות של הילד נשמרות" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "القفل من هاتفكم يبقى الآن حتى تفكّوه، من نافذة الإجراءات أو برمز الوالدين على جهاز الطفل. دقائق الطفل تبقى محفوظة"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A lock from your phone now stays until you release it, from the actions window or with the parent code on your child's device. Your child's minutes are kept"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Блокировка с телефона теперь действует, пока вы её не снимете — в окне действий или кодом родителя на устройстве ребёнка. Минуты ребёнка сохраняются"
           }
         }
       }
