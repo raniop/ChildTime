@@ -134036,6 +134036,28 @@
         }
       }
     },
+    "🎮 %lld דק׳ מלמידה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 %lld دقيقة من التعلّم"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 %lld min from learning"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 %lld мин за учёбу"
+          }
+        }
+      }
+    },
     "🎮 %lld דק׳ משחק" : {
       "localizations" : {
         "ar" : {
@@ -135723,6 +135745,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "💝 Подарочных минут: %lld"
+          }
+        }
+      }
+    },
+    "💝 %lld דק׳ מתנה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💝 %lld دقيقة هدية"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💝 %lld min gift"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💝 %lld мин в подарок"
           }
         }
       }
