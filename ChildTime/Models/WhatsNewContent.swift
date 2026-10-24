@@ -55,17 +55,23 @@ enum WhatsNewContent {
     /// notes were dated — the first release, as one entry.
     static let releases: [Release] = [
 
-        // 2026.10.21 — bedtime that locks on time (Sasha: "השעה 19:35, אמילי
-        // הייתה אמורה להיחסם"), the good-night shield, What's New in every language.
-        Release(build: 244, version: "2026.10.21", headline: tr("שעת שינה שנועלת בזמן"), items: [
-            Item(emoji: "🌙", title: tr("שעת השינה נועלת בזמן"),
-                 line: tr("זמן שנפתח לפני שעת השינה נפתח רק עד אליה, והשאר נשאר בארנק. אפשר לפתוח עד הדקה האחרונה")),
-            Item(emoji: "💤", title: tr("מסך לילה טוב"),
-                 line: tr("בשעת שינה ובזמן בית ספר, מסך הנעילה אומר לילד מתי הדקות שלו חוזרות, במקום להציע לפתוח אותן")),
+        // 2026.10.24 — Tofy closed during school time, an explanation on every
+        // tap (Sasha, 2026-10-21). Its own version: 243 went live as 2026.10.21
+        // before this build could replace it in review.
+        Release(build: 245, version: "2026.10.24", headline: tr("טופי סגור בזמן בית ספר"), items: [
             Item(emoji: "🏫", title: tr("טופי סגור בזמן בית ספר"),
                  line: tr("בזמן בית ספר הילד יכול רק לסמן מטלות. מי שרוצה, פותח את טופי במתג בהגדרות של זמן בית הספר")),
             Item(emoji: "🔊", title: tr("הסבר בכל לחיצה"),
                  line: tr("בזמן בית ספר ובשעת שינה, כל לחיצה מסבירה לילד למה זה סגור, ולילדי גן טופי גם מקריא בקול")),
+        ]),
+
+        // 2026.10.21 (build 243) — bedtime that locks on time (Sasha: "השעה 19:35,
+        // אמילי הייתה אמורה להיחסם"), the good-night shield, What's New in every language.
+        Release(build: 243, version: "2026.10.21", headline: tr("שעת שינה שנועלת בזמן"), items: [
+            Item(emoji: "🌙", title: tr("שעת השינה נועלת בזמן"),
+                 line: tr("זמן שנפתח לפני שעת השינה נפתח רק עד אליה, והשאר נשאר בארנק. אפשר לפתוח עד הדקה האחרונה")),
+            Item(emoji: "💤", title: tr("מסך לילה טוב"),
+                 line: tr("בשעת שינה ובזמן בית ספר, מסך הנעילה אומר לילד מתי הדקות שלו חוזרות, במקום להציע לפתוח אותן")),
             Item(emoji: "🌐", title: tr("״מה חדש״ בכל השפות"),
                  line: tr("המסך הזה מופיע עכשיו במלואו גם באנגלית, ברוסית ובערבית")),
         ]),
