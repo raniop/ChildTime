@@ -14,6 +14,10 @@ struct GiftMinutesSheet: View {
     /// Minutes the parents gave today, and gift minutes still waiting unopened.
     let givenToday: Int
     let waiting: Int
+    /// 🎮 Minutes the child EARNED and hasn't opened yet — with `waiting`, all
+    /// the time the child has right now (Rani, 2026-10-24: the place a parent
+    /// looks for "how much does she have" is this window).
+    var earned: Int = 0
     /// The most one gift may hold right now (the minutes left until midnight).
     let capLeft: Int
     /// Sends the gift; returns the status to show, or nil when nothing was sent.
@@ -85,6 +89,7 @@ struct GiftMinutesSheet: View {
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
 
+                haveLine
                 HStack(spacing: 10) {
                     stat((givenAtOpen ?? givenToday) + (sentMinutes ?? 0), tr("נתתם היום"))
                     stat(waiting, tr("עוד לא נוצלו"))   // "מחכות לנוני" was not clear (Rani)
@@ -254,6 +259,23 @@ struct GiftMinutesSheet: View {
         .padding(.horizontal, 14).padding(.vertical, 12)
         .frame(maxWidth: .infinity, minHeight: 58, alignment: .leading)
         .glassPane(radius: 16, strength: 0.16, shadow: false)
+    }
+
+    /// "🎮 לדנה יש עכשיו 45 דק׳ לשחק" · "20 שהרוויחה מלמידה · 25 מתנה".
+    private var haveLine: some View {
+        let total = earned + waiting
+        let fromLearning = girl ? tr("\(earned) שהרוויחה מלמידה") : tr("\(earned) שהרוויח מלמידה")
+        return VStack(spacing: 2) {
+            Text(tr("🎮 ל\(name) יש עכשיו \(total) דק׳ לשחק"))
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+            Text(tr("\(fromLearning) · \(waiting) מתנה"))
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .foregroundStyle(GlassInk.secondary)
+        }
+        .monospacedDigit()
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10).padding(.horizontal, 12)
+        .glassPane(radius: 16, strength: 0.2, shadow: false)
     }
 
     private func stat(_ value: Int, _ label: String) -> some View {

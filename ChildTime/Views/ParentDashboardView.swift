@@ -1933,6 +1933,7 @@ struct ParentDashboardView: View {
         return GiftMinutesSheet(profile: p,
                                 givenToday: today,
                                 waiting: snapshot?.giftMinutesShown ?? 0,
+                                earned: snapshot?.walletMinutesShown ?? 0,
                                 capLeft: ProgressStore.minutesUntilMidnight(),
                                 onSend: { minutes in sendGift(p, minutes) },
                                 // The window shows the reset's status itself: no second sheet over it.

@@ -888,7 +888,7 @@ struct ChildTimeApp: App {
                                onOwnDevice: {}, onPlaysHere: {})
         case "giftsheet":                                   // DEMO_SCREEN=giftsheet — the 💝 window, with minutes waiting
             GiftMinutesSheet(profile: ProfileStore.shared.active ?? Profile(name: tr("נועה"), gender: .girl),
-                             givenToday: 30, waiting: 25, capLeft: 600, onSend: { _ in nil }, onRevoke: {})
+                             givenToday: 30, waiting: 25, earned: 20, capLeft: 600, onSend: { _ in nil }, onRevoke: {})
         case "giftwelcome": GiftWelcomeView(until: Date().addingTimeInterval(30 * 86_400 - 60)) {}   // DEMO_SCREEN=giftwelcome
         case "joinguard":                                  // parent-scans-child-code block dialog
             JoinConfirmView().environmentObject(ParentSettings.shared)
