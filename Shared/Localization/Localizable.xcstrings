@@ -133887,6 +133887,50 @@
         }
       }
     },
+    "🎮 %lld דקות שהרוויח ועוד לא פתח" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 %lld دقيقة ربحها ولم يفتحها بعد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 %lld min he earned and hasn't opened yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 %lld мин заработал и ещё не открыл"
+          }
+        }
+      }
+    },
+    "🎮 %lld דקות שהרוויחה ועוד לא פתחה" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 %lld دقيقة ربحتها ولم تفتحها بعد"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 %lld min she earned and hasn't opened yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎮 %lld мин заработала и ещё не открыла"
+          }
+        }
+      }
+    },
     "🎮 %lld דק׳" : {
       "localizations" : {
         "ar" : {
