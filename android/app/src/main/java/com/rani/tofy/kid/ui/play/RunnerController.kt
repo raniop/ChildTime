@@ -341,14 +341,14 @@ class RunnerController(
         } else if (isBonusQuestion) {
             // 💫 The rare event is its own challenge — keep trying THIS question.
             feedback[idx] = OptionFeedback.WRONG
-            handleWrong(q)
+            handleWrong(q, idx)
             val s = serial
             scope.launch { delay(700); if (s == serial) feedback[idx] = OptionFeedback.DIMMED }
         } else {
             // Flash, then MOVE ON — the miss returns fresh a few questions later.
             // The correct answer is NOT revealed.
             feedback[idx] = OptionFeedback.WRONG
-            handleWrong(q)
+            handleWrong(q, idx)
             if (reAskQueue.none { it.first.prompt == q.prompt }) reAskQueue += q to (questionIndex + reAskSpacing)
             // 🎬 …unless Tofy has just explained the first miss of a first run.
             if (!firstRunSpoke) companion.cheer(tr("נַחְזֹר לָזוֹ עוֹד מְעַט 💪"))
@@ -487,10 +487,18 @@ class RunnerController(
                                else tr("טעיתם, לא נורא. הזמן שנצבר לא יורד."))
     }
 
-    private fun handleWrong(q: Question) {
+    private fun handleWrong(q: Question, chosen: Int) {
         KidSounds.play(AppSound.WRONG_SOFT)
         haptics()?.warning()
         consecutiveWrong++
+        // ❌ Which question, what was chosen, what was right — the FIRST wrong try
+        // only; never the 💫 arena or the first run's made-up child (Sasha, 2026-10-24).
+        if (!hadMistakeThisQuestion && chosen in q.options.indices && !isArena && !KidSession.localOnly) {
+            KidSession.boundChildID?.let { cid ->
+                com.rani.tofy.data.MistakeLog.record(cid, q.topic.raw, com.rani.tofy.data.MistakeLog.questionText(q.spoken, q.prompt),
+                    q.options[chosen], q.correctAnswer)
+            }
+        }
         hadMistakeThisQuestion = true
         // Neither the arena nor a 💫 bonus question (hard by design) may lower the adaptive level.
         val owed = KidSession.answerWrong(q.topic.raw, usedHintThisQuestion, grantsScreenTime = true,

@@ -67,7 +67,8 @@ data class SkillReport(val key: String, val answered: Int, val correct: Int) {
 
 data class TopicDelta(val topic: Topic, val deltaPoints: Double)
 data class DailyInsight(val emoji: String, val title: String, val body: String, val recommendation: String?)
-data class Named(val name: String, val detail: String)
+/** [topic]: a "כדאי לתרגל" item opens that topic's wrong answers (MistakesSheet). */
+data class Named(val name: String, val detail: String, val topic: Topic? = null)
 
 data class PeriodSummary(
     val questions: Int = 0, val correct: Int = 0, val minutesEarned: Int = 0, val minutesUsed: Int = 0,
@@ -202,8 +203,8 @@ class ReportEngine(history: List<DailyStat>) {
         val out = mutableListOf<Pair<Named, Double>>()
         for (t in topicReports(p).filter { it.answered >= 6 }) {
             val skills = skillReports(t.topic, p)
-            for (s in skills.take(3)) if (s.answered >= 4 && s.accuracy < 0.7) out += Named(s.name, tr("%@ ב%@", pct(s.accuracy), t.topic.parentName)) to s.accuracy
-            if (skills.isEmpty() && t.accuracy < 0.7) out += Named(t.topic.parentName, tr("%@ · %lld טעויות", pct(t.accuracy), t.wrong)) to t.accuracy
+            for (s in skills.take(3)) if (s.answered >= 4 && s.accuracy < 0.7) out += Named(s.name, tr("%@ ב%@", pct(s.accuracy), t.topic.parentName), t.topic) to s.accuracy
+            if (skills.isEmpty() && t.accuracy < 0.7) out += Named(t.topic.parentName, tr("%@ · %lld טעויות", pct(t.accuracy), t.wrong), t.topic) to t.accuracy
         }
         return out.sortedBy { it.second }.take(4).map { it.first }
     }

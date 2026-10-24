@@ -35,6 +35,7 @@ class TofyApp : Application() {
         // Kid side: content assets/cache + the progress session (both idempotent).
         com.rani.tofy.kid.content.QuestionSource.init(this)
         com.rani.tofy.kid.core.KidSession.init(this)
+        com.rani.tofy.data.MistakeLog.init(this)   // ❌ the questions the child got wrong
         com.rani.tofy.kid.location.KidLocation.init(this)
     }
 

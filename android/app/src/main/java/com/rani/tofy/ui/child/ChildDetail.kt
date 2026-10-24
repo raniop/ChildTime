@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -88,8 +89,17 @@ internal fun ChildDetailContent(childID: String, onBack: () -> Unit) {
     var tick by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) { while (true) { delay(1000); tick++ } }
+    // ❌ The child's recent wrong answers per topic (Sasha, 2026-10-24) — opened
+    // from the open topic or from a "כדאי לתרגל" item.
+    var mistakes by remember(childID) { mutableStateOf<Map<String, List<com.rani.tofy.data.Mistake>>>(emptyMap()) }
+    var mistakesTopic by remember { mutableStateOf<Topic?>(null) }
     // The parent's phone never recorded this child's play — pull the history down.
-    LaunchedEffect(childID) { refreshing = true; ChildReportRepository.refreshHistory(childID); refreshing = false }
+    LaunchedEffect(childID) {
+        refreshing = true
+        ChildReportRepository.refreshHistory(childID)
+        mistakes = com.rani.tofy.data.MistakeLog.fetch(childID)
+        refreshing = false
+    }
 
     GlassBackdrop {
         if (child == null) {
@@ -104,7 +114,13 @@ internal fun ChildDetailContent(childID: String, onBack: () -> Unit) {
 
         LazyColumn(Modifier.contentColumn().fillMaxSize().systemBarsPadding(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             item { PageBar("", onBack) }
-            item { ChildReport(child, progress, extras, engine, live, devices, refreshing, onLock = { Commands.lock(childID) }) }
+            item {
+                ChildReport(child, progress, extras, engine, live, devices, refreshing, onLock = { Commands.lock(childID) },
+                    mistakes = mistakes, onMistakes = { mistakesTopic = it })
+            }
+        }
+        mistakesTopic?.let { t ->
+            MistakesSheet(t, mistakes[t.raw] ?: emptyList(), child.name, child.isGirl) { mistakesTopic = null }
         }
     }
 }
@@ -113,6 +129,7 @@ internal fun ChildDetailContent(childID: String, onBack: () -> Unit) {
 private fun ChildReport(
     child: Child, s: Progress, extras: SnapshotExtras, engine: ReportEngine, live: LiveWindow?, devices: List<ChildDevice>,
     refreshing: Boolean, onLock: () -> Unit,
+    mistakes: Map<String, List<com.rani.tofy.data.Mistake>> = emptyMap(), onMistakes: (Topic) -> Unit = {},
 ) {
     val girl = child.isGirl
     fun g(m: String, f: String) = if (girl) f else m
@@ -187,7 +204,7 @@ private fun ChildReport(
         // she doing · is she improving · what she masters and what to practise ·
         // the trend · screen time · the worlds.
         // MARK: topics
-        TopicsCard(child, s, extras, engine, period, expanded, autoCollapsed) { t, open ->
+        TopicsCard(child, s, extras, engine, period, expanded, autoCollapsed, mistakes, onMistakes) { t, open ->
             if (open) { expanded = null; autoCollapsed = true } else expanded = t
         }
 
@@ -218,7 +235,8 @@ private fun ChildReport(
                     if (done.isEmpty()) EmptyLine(tr("עוד לא — בקרוב 😊")) else NamedList(done)
                 }
                 ReportCard(tr("🎯 כדאי לתרגל"), Modifier.weight(1f).fillMaxHeight()) {
-                    if (todo.isEmpty()) EmptyLine(tr("שום דבר בולט 👏")) else NamedList(todo)
+                    // Each item opens that topic's wrong answers.
+                    if (todo.isEmpty()) EmptyLine(tr("שום דבר בולט 👏")) else NamedList(todo, onOpen = onMistakes)
                 }
             }
         }
@@ -332,7 +350,9 @@ private fun InsightCard(i: DailyInsight?, period: ReportPeriod, emptyLine: Strin
 @Composable
 private fun TopicsCard(
     child: Child, s: Progress, extras: SnapshotExtras, engine: ReportEngine, period: ReportPeriod,
-    expanded: Topic?, autoCollapsed: Boolean, onToggle: (Topic, Boolean) -> Unit,
+    expanded: Topic?, autoCollapsed: Boolean,
+    mistakes: Map<String, List<com.rani.tofy.data.Mistake>>, onMistakes: (Topic) -> Unit,
+    onToggle: (Topic, Boolean) -> Unit,
 ) {
     val topics = engine.topicReports(period)
     ReportCard(tr("ביצועים לימודיים"), detail = tr("לפי נושא, %@", period.title.lowercase())) {
@@ -355,6 +375,7 @@ private fun TopicsCard(
                         Text(pct(sk.accuracy), color = if (sk.accuracy >= 0.65) Ink.good else Ink.weak, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp)
                     }
                 }
+                MistakesButton(child, mistakes[t.topic.raw]?.size ?: 0) { onMistakes(t.topic) }
             }
             if (idx != shown.lastIndex) RowDivider()
         }
@@ -500,12 +521,85 @@ private fun Legend(items: List<Pair<String, Color>>) {
 }
 
 @Composable
-private fun NamedList(items: List<Named>) {
+private fun NamedList(items: List<Named>, onOpen: ((Topic) -> Unit)? = null) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         items.forEach {
-            Column(Modifier.fillMaxWidth().glassInset(16.dp).padding(horizontal = 9.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                Text(it.name, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
-                Text(it.detail, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 11.5.sp)
+            // With [onOpen], an item with a topic opens that topic's wrong answers (›).
+            val open = it.topic?.takeIf { onOpen != null }
+            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).glassInset(16.dp)
+                .then(if (open != null) Modifier.clickable { onOpen?.invoke(open) } else Modifier)
+                .padding(horizontal = 9.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                    Text(it.name, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+                    Text(it.detail, color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 11.5.sp)
+                }
+                if (open != null) Chevron()
+            }
+        }
+    }
+}
+
+/** "‹" in RTL / "›" in LTR — the way forward. */
+@Composable
+private fun Chevron() {
+    val rtl = androidx.compose.ui.platform.LocalLayoutDirection.current == androidx.compose.ui.unit.LayoutDirection.Rtl
+    Text(if (rtl) "‹" else "›", color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Black, fontSize = 16.sp)
+}
+
+/** "❌ השאלות שטעתה בהן  7 ‹" under an open topic. */
+@Composable
+private fun MistakesButton(child: Child, count: Int, onClick: () -> Unit) {
+    Row(Modifier.fillMaxWidth().padding(start = 44.dp, top = 6.dp).clip(RoundedCornerShape(16.dp)).glassInset(16.dp)
+        .clickable(onClick = onClick).padding(horizontal = 10.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(tr("❌ השאלות %@ בהן", if (child.isGirl) tr("שטעתה") else tr("שטעה")), Modifier.weight(1f), color = Color.White,
+            fontFamily = Rounded, fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp, maxLines = 1)
+        if (count > 0) Text("$count", color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 12.5.sp)
+        Chevron()
+    }
+}
+
+/**
+ * ❌ The last questions the child got wrong in one topic (iOS MistakesSheet): the
+ * question, what they chose, what was right — so the parent knows WHAT to
+ * practise, not only how much (Sasha, 2026-10-24).
+ */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun MistakesSheet(topic: Topic, mistakes: List<com.rani.tofy.data.Mistake>, name: String, isGirl: Boolean, onDismiss: () -> Unit) {
+    fun g(m: String, f: String) = if (isGirl) f else m
+    val sheet = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val close: () -> Unit = { scope.launch { sheet.hide() }.invokeOnCompletion { onDismiss() } }
+    androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheet, containerColor = Ink.sheet,
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)) {
+        LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(start = 18.dp, end = 18.dp, bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            item {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(tr("❌ %@", topic.parentName), Modifier.weight(1f), color = Color.White, fontFamily = Rounded,
+                        fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+                    Text(tr("סיום"), Modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = close).padding(horizontal = 10.dp, vertical = 6.dp),
+                        color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                }
+            }
+            item {
+                Text(if (mistakes.isEmpty()) tr("עוד אין כאן שאלות. מעכשיו כל שאלה %@ בה תופיע כאן.", g(tr("שטעה"), tr("שטעתה")))
+                     else tr("השאלות האחרונות %@ בהן. כדאי לעבור עליהן יחד.", g(tr("ש%@ טעה", name), tr("ש%@ טעתה", name))),
+                    color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.Medium, fontSize = 13.5.sp, lineHeight = 19.sp)
+            }
+            items(mistakes, key = { "${it.at}|${it.q}" }) { m ->
+                Column(Modifier.fillMaxWidth().glassInset(16.dp).padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(m.q, color = Color.White, fontFamily = Rounded, fontWeight = FontWeight.Bold, fontSize = 15.sp, lineHeight = 20.sp)
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(tr("%@: %@", g(tr("ענה"), tr("ענתה")), m.a), color = Ink.weak, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+                        Text(tr("נכון: %@", m.c), Modifier.weight(1f), color = Ink.good, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+                        val day = java.util.Calendar.getInstance().apply { timeInMillis = (m.at * 1000).toLong() }
+                        // d/M reads left to right, like every number.
+                        Text("\u2066${day.get(java.util.Calendar.DAY_OF_MONTH)}/${day.get(java.util.Calendar.MONTH) + 1}\u2069",
+                            color = Ink.secondary, fontFamily = Rounded, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+                    }
+                }
             }
         }
     }
