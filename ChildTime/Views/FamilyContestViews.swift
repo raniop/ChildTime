@@ -58,6 +58,7 @@ struct FamilyContestKidCard: View {
         }
         .foregroundStyle(GlassInk.primary)
         .padding(14)
+        .environment(\.layoutDirection, .app)   // the homes don't always set it (Rani: "לא מיושר תקין לימין")
         .glassPane(radius: 16)
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
             .strokeBorder(store.celebration != nil ? AppColor.starGold : .clear, lineWidth: 2))
@@ -132,6 +133,7 @@ struct FamilyContestParentCard: View {
         }
         .foregroundStyle(GlassInk.primary)
         .padding(14)
+        .environment(\.layoutDirection, .app)   // the parent home left it LTR on the Duo
         .glassPane(radius: 16)
         .contentShape(Rectangle())
     }
