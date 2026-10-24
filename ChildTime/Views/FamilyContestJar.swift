@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreMotion
+import UIKit
 import Combine
 
 /// 🫙 A LIVE jar (Rani, 2026-10-24: "חייבים לעשות אותה חיה עם כאילו מים זזים
@@ -39,7 +40,7 @@ struct FamilyJar: View {
 
         let level = h * (1 - min(fill, 1) * Self.headroom)   // the surface at the jar's middle
         let slope = tan(slosh.angle)
-        let amp = 2.2 + 7 * slosh.energy
+        let amp = 1.6 + 6 * slosh.energy
         func surface(_ x: CGFloat, _ shift: Double) -> CGFloat {
             level - CGFloat(slope) * (x - w / 2)
                 + CGFloat(amp * sin(Double(x) / Double(w) * 2 * .pi * 1.3 + slosh.phase + shift))
@@ -117,6 +118,7 @@ final class JarSlosh: ObservableObject {
     private(set) var phase = 0.0
     private(set) var time = 0.0
     private var velocity = 0.0
+    private var filtered = 0.0
     private let motion = CMMotionManager()
     private var timer: Timer?
 
@@ -142,20 +144,45 @@ final class JarSlosh: ObservableObject {
         var target: Double
         var shake = 0.0
         if let m = motion.deviceMotion {
-            // Device rolled clockwise by θ → the world's level reads as θ on screen.
-            target = atan2(m.gravity.x, -m.gravity.y)
+            // Sideways tilt only, in the SCREEN's frame (Rani, 2026-10-24: "לא לפי
+            // גירוסקופ"): atan2(x, -y) went wild with the phone flat on a table, where
+            // both are just noise. asin of the sideways component is the roll, and
+            // stays calm flat. Landscape and the open Duo turn the screen's x axis.
+            let g = m.gravity
+            let sideways: Double
+            switch Self.orientation {
+            case .landscapeRight: sideways = -g.y
+            case .landscapeLeft: sideways = g.y
+            case .portraitUpsideDown: sideways = -g.x
+            default: sideways = g.x
+            }
+            target = asin(max(-1, min(1, sideways)))
+            // A hand's tremor is not a shake: only a real jolt raises waves.
             let a = m.userAcceleration
-            shake = min(1, sqrt(a.x * a.x + a.y * a.y + a.z * a.z) * 1.5)
+            shake = min(1, max(0, sqrt(a.x * a.x + a.y * a.y + a.z * a.z) - 0.12) * 2.5)
         } else {
-            target = 0.3 * sin(time * 1.1) + 0.12 * sin(time * 2.7)   // simulator: a gentle sway
+            target = 0.3 * sin(time * 1.1) + 0.12 * sin(time * 2.7)   // no sensor: a gentle sway
         }
-        target = max(-0.55, min(0.55, target))
-        // Underdamped spring: it overshoots the level a little, then settles.
-        velocity += ((target - angle) * 55 - velocity * 3.2) * dt
-        let next = angle + velocity * dt
-        energy = max(energy * 0.97, min(1, abs(velocity) * 0.35 + shake))
-        phase += dt * (2.0 + energy * 7)
-        angle = next
+        target = max(-0.5, min(0.5, target))
+        // Sensor noise smoothed out before the spring sees it.
+        filtered += (target - filtered) * 0.15
+        // Underdamped spring: overshoots the level a little, then settles — like water.
+        velocity += ((filtered - angle) * 38 - velocity * 4.4) * dt
+        angle += velocity * dt
+        energy = max(energy * 0.955, min(1, abs(velocity) * 0.22 + shake))
+        phase += dt * (1.5 + energy * 5)
+    }
+
+    /// The screen's orientation, read once a second (cheap enough at 60 Hz otherwise).
+    private static var cachedOrientation: UIInterfaceOrientation = .portrait
+    private static var orientationReadAt = Date.distantPast
+    private static var orientation: UIInterfaceOrientation {
+        if Date().timeIntervalSince(orientationReadAt) > 1 {
+            orientationReadAt = Date()
+            cachedOrientation = UIApplication.shared.connectedScenes
+                .compactMap { ($0 as? UIWindowScene)?.effectiveGeometry.interfaceOrientation }.first ?? .portrait
+        }
+        return cachedOrientation
     }
 }
 

@@ -273,7 +273,10 @@ final class FamilyContestStore: ObservableObject {
     /// often: it runs at most once a minute unless `force`.
     func refresh(force: Bool = false) async {
         guard !DemoTour.isOn, !refreshing else { return }
-        guard force || Date().timeIntervalSince(lastRefresh) > 60 else { recompute(); return }
+        // What this phone already knows goes up at once — the card used to wait
+        // ~8 s for every child's history and the transactions (Rani, 2026-10-24).
+        recompute()
+        guard force || Date().timeIntervalSince(lastRefresh) > 60 else { return }
         refreshing = true
         defer { refreshing = false }
         lastRefresh = Date()
@@ -286,6 +289,7 @@ final class FamilyContestStore: ObservableObject {
         }
         let kids = participants()
         for p in kids { records[p.id] = await loadAndRoll(p) }
+        saveGoals()
         recompute()
         // Prizes only where the child really plays: their own device, or Kid
         // Mode. A parent phone's copy of a child can be stale, and a credit on
@@ -303,7 +307,8 @@ final class FamilyContestStore: ObservableObject {
         let key = FamilyContest.weekKey()
         rows = kids.map { p in
             let h = LearningHistoryStore.shared.history(for: p.id)
-            let goal = records[p.id].flatMap { $0.current.week == key ? $0.current.goal : nil } ?? FamilyContest.goal(from: h)
+            let goal = records[p.id].flatMap { $0.current.week == key ? $0.current.goal : nil }
+                ?? cachedGoal(p.id, week: key) ?? FamilyContest.goal(from: h)
             return Row(profile: p, standing: .init(childID: p.id, goal: goal, done: FamilyContest.correct(h, weekFrom: start)))
         }
         .sorted { $0.standing.fraction > $1.standing.fraction }
@@ -311,6 +316,23 @@ final class FamilyContestStore: ObservableObject {
         lastWeekDone = Dictionary(uniqueKeysWithValues: kids.map {
             ($0.id, FamilyContest.correct(LearningHistoryStore.shared.history(for: $0.id), weekFrom: prevStart))
         })
+    }
+
+    // MARK: The goals, remembered between launches
+
+    private static let goalsKey = "familyContest.goals"
+
+    private func cachedGoal(_ id: UUID, week: String) -> Int? {
+        guard let d = UserDefaults.standard.dictionary(forKey: Self.goalsKey),
+              d["week"] as? String == week else { return nil }
+        return (d[id.uuidString] as? NSNumber)?.intValue
+    }
+
+    private func saveGoals() {
+        let key = FamilyContest.weekKey()
+        var d: [String: Any] = ["week": key]
+        for (id, r) in records where r.current.week == key { d[id.uuidString] = r.current.goal }
+        UserDefaults.standard.set(d, forKey: Self.goalsKey)
     }
 
     // MARK: Cloud
