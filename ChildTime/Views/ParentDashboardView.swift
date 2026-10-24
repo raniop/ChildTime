@@ -1449,6 +1449,9 @@ struct ParentDashboardView: View {
                             .foregroundStyle(GlassInk.secondary).monospacedDigit()
                             .lineLimit(1).minimumScaleFactor(0.8)
                     }
+                    // 🎮 Right under "where she is today" (Rani, 2026-10-24) — it
+                    // was a lone line under the tiles that read as one more stat.
+                    walletLine(s, girl: girl)
                 }
                 Spacer(minLength: 4)
                 Text("\(pct ?? 0)%")   // Rani: a zero is a zero, never a dash
@@ -1507,10 +1510,6 @@ struct ParentDashboardView: View {
                     overviewStat(value: "\(s.correctToday)", suffix: nil, label: tr("נכונות"), progress: nil)
                 }
                 .fixedSize(horizontal: false, vertical: true)   // all three tiles as tall as the one with the bar (Rani)
-                // 🎮 What the child can still open — earned and gift — said in a
-                // sentence (Sasha, 2026-10-23: "לא מצאתי בשום מקום מלבד האייפד
-                // כמה זמן יש לה סה״כ שהיא יכולה לבזבז").
-                walletLine(s, girl: girl)
                 if profile.parentLock?.on == true {
                     Text(tr("🔒 נעול עד שתשחררו · ⚡ פעולות ← שחרור הנעילה"))
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
@@ -1842,17 +1841,21 @@ struct ParentDashboardView: View {
         }
     }
 
+    /// 🎮 What the child can still open — earned and gift — said in a sentence
+    /// (Sasha, 2026-10-23: "לא מצאתי בשום מקום מלבד האייפד כמה זמן יש לה סה״כ
+    /// שהיא יכולה לבזבז"). "מחכות לה" was unclear (Rani, 2026-10-24).
     @ViewBuilder
     private func walletLine(_ s: ProgressSnapshot, girl: Bool) -> some View {
         let earned = s.walletMinutesShown, gift = s.giftMinutesShown
         if earned > 0 || gift > 0 {
-            let main = earned > 0 ? (girl ? tr("🎮 \(earned) דקות מחכות לה") : tr("🎮 \(earned) דקות מחכות לו")) : ""
-            let extra = gift > 0 ? tr("💝 \(gift) דקות מתנה") : ""
-            Text([main, extra].filter { !$0.isEmpty }.joined(separator: " · "))
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .foregroundStyle(GlassInk.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .lineLimit(1).minimumScaleFactor(0.8)
+            // A line each: side by side they ran past the narrow column (the % sits beside it).
+            VStack(alignment: .leading, spacing: 2) {
+                if earned > 0 { Text(girl ? tr("🎮 \(earned) דקות שהרוויחה ועוד לא פתחה") : tr("🎮 \(earned) דקות שהרוויח ועוד לא פתח")) }
+                if gift > 0 { Text(tr("💝 \(gift) דקות מתנה")) }
+            }
+            .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+            .foregroundStyle(GlassInk.secondary).monospacedDigit()
+            .lineLimit(1).minimumScaleFactor(0.75)
         }
     }
 
